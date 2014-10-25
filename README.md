@@ -3,7 +3,7 @@ jas
 
 Janes Asmussen Szarmach
 
-Initial repository for the work done by 
+Shared repository for the following masterminds:
  - Paul Janes
  - Christian Asmussen
  - Waldemar Szarmach
