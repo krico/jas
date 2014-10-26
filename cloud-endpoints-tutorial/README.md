@@ -1,7 +1,7 @@
 cloud-endpoints-tutorial
 ========================
 
-krico: This was already generated.....
+krico: This was already generated.....  [explore here](https://krico-test-endpoints.appspot.com/_ah/api/explorer)
 
 A skeleton application for Google Cloud Endpoints in Java.
 
