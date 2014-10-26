@@ -5,8 +5,8 @@
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <groupId>to.cwa</groupId>
-    <artifactId>krico-test</artifactId>
+    <groupId>ch.findmyslot.tutorial.appengine</groupId>
+    <artifactId>app-engine-tutorial</artifactId>
 
     <properties>
         <appengine.app.version>1</appengine.app.version>

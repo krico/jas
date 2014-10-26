@@ -1,4 +1,4 @@
-package to.cwa.krico_test;
+package ch.findmyslot.tutorial.appengine;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;

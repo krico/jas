@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <servlet>
         <servlet-name>guestbook</servlet-name>
-        <servlet-class>to.cwa.krico_test.GuestbookServlet</servlet-class>
+        <servlet-class>ch.findmyslot.tutorial.appengine.GuestbookServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>sign</servlet-name>
-        <servlet-class>to.cwa.krico_test.SignGuestbookServlet</servlet-class>
+        <servlet-class>ch.findmyslot.tutorial.appengine.SignGuestbookServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>sign</servlet-name>

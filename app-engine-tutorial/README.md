@@ -1,5 +1,5 @@
-krico-test
-==========
+app-engine-tutorial
+===================
 
 Right now this app is the result of following the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction).
 
