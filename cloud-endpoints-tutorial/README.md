@@ -1,5 +1,7 @@
-endpoints-skeleton
-==================
+cloud-endpoints-tutorial
+========================
+
+krico: This was already generated.....
 
 A skeleton application for Google Cloud Endpoints in Java.
 
