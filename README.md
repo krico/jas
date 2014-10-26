@@ -4,7 +4,7 @@ jas
 Janes Asmussen Szarmach
 
 So I followed the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction) and checked in 
-the [krico-test](krico-test/), a module that results of following that tutorial step by step.
+the [app-engine-tutorial](app-engine-tutorial/), a module that results of following that tutorial step by step.
 
 The app is [in production here](https://krico-test.appspot.com).
 
