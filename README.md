@@ -6,7 +6,7 @@ Janes Asmussen Szarmach
 Getting Started
 ===============
 
-1. Setup git!
+1. [Setup git](https://help.github.com/articles/set-up-git/)!
   * I suggest using ssh so [setup ssh keys](https://help.github.com/articles/generating-ssh-keys/).
   * Or get the GitHub native app for [mac](https://mac.github.com/) or [windows](https://windows.github.com/)
   but this will not integrate with your IDE...
