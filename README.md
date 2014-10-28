@@ -3,16 +3,27 @@ jas
 
 Janes Asmussen Szarmach
 
+Getting Started
+===============
+
+1. Setup git!
+  * I suggest using ssh so [setup ssh keys](https://help.github.com/articles/generating-ssh-keys/).
+  * Or get the GitHub native app for [mac](https://mac.github.com/) or [windows](https://windows.github.com/)
+  but this will not integrate with your IDE...
+2. Checkout the project
+  * `git clone git@github.com:krico/jas.git`
+3. Import the project in IntelliJ (**todo**: document eclipse)
+  * Open IntelliJ
+  * Select import
+  * navigate to "./jas"
+  * double click on pom.xml
+  * That's it!
+
+
+Change log
+==========
+
 - I followed the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction) and checked in the [app-engine-tutorial](app-engine-tutorial/), the resulting module of following that tutorial step by step. The app is [in production here](https://krico-test.appspot.com).
 - I followed the [cloud endpoints tutorial](https://cloud.google.com/appengine/docs/java/endpoints/getstarted/backend/) and checked in the [cloud-endpoints-tutorial](cloud-endpoints-tutorial/), the resulting module of following that tutorial step by step.
-
-The idea is that we can track the evolution of that app later.
-
-For each of "task" a branch was created and then merged (via pull request), and I mentioned the issues #1, #2, #3, #4, etc on the commits to see if it would link things...
-
-For now this readme is a log of what's happening for:
- - Paul Janes
- - Christian Asmussen
- - Waldemar Szarmach
-
+- I added a parent pom.xml so that you can import the entire project at once...
 
