@@ -1,0 +1,9 @@
+body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.jumbotron {
+    text-align: center;
+    border-bottom: 1px solid #e5e5e5;
+}
