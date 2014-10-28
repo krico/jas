@@ -17,7 +17,7 @@ Getting Started
   * Select import
   * navigate to "./jas"
   * double click on pom.xml
-  * That's it!
+  * That's it! You should see something like this ![](https://github.com/krico/jas/images/multi-module.png)
 
 
 Change log
