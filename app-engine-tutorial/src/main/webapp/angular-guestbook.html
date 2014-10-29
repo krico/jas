@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" ng-app="guestBookApp">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>App Engine Tutorial with AngularJS</title>
+    <link rel="stylesheet" href="artifacts/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="artifacts/stylesheets/angular-guestbook.css">
+    <script src="artifacts/bower_components/jquery/dist/jquery.js"></script>
+    <script src="artifacts/bower_components/angular/angular.js"></script>
+    <script src="artifacts/bower_components/angular-animate/angular-animate.js"></script>
+    <script src="artifacts/js/controllers.js"></script>
+</head>
+<body ng-controller="GuestBookCtrl">
+
+<div class="container">
+
+
+    <div class="row">
+        <h4 class="col-md-offset-1">
+            <del>Hello! <a>Sign in</a> to include your name with greetings you post.</del>
+        </h4>
+        <h6 class="col-md-offset-1">Checkout <a href="guestbook.jsp">the original version</a></h6>
+    </div>
+    <div class="row">
+        <h2 class="col-md-offset-1">Messages in Guestbook '{{guestBook}}'</h2>
+    </div>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-8">
+            <form class="form-horizontal" role="form" ng-submit="submit()">
+                <div class="form-group">
+                    <textarea class="form-control" ng-model="greeting" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default">Post greeting</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-offset-1">
+            Search: <input ng-model="query">
+            Sort by:
+            <select ng-model="orderProp">
+                <option selected value="-date">Date (DESC)</option>
+                <option selected value="date">Date (ASC)</option>
+                <option value="user">User (ASC)</option>
+                <option value="-user">User (DESC)</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-8">
+            <blockquote class="greeting" ng-repeat="greeting in greetings | filter:query | orderBy:orderProp">
+                <p class="text-info">{{greeting.content}}</p>
+                <footer><cite title="{{greeting.user}}">{{greeting.user}}</cite> on {{greeting.date}}</footer>
+            </blockquote>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+<!-- /.container -->
+</body>
+</html>

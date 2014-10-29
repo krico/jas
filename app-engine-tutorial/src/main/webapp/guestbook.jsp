@@ -14,7 +14,7 @@
 
 <html>
 <head>
-    <link type="text/css" rel="stylesheet" href="/artifacts/stylesheets/main.css"/>
+    <link type="text/css" rel="stylesheet" href="artifacts/stylesheets/main.css"/>
 </head>
 
 <body>

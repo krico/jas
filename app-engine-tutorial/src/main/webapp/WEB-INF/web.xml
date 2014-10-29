@@ -6,9 +6,17 @@
         <servlet-class>ch.findmyslot.tutorial.appengine.GuestbookServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>list-greetings</servlet-name>
+        <servlet-class>ch.findmyslot.tutorial.appengine.ListGreetingsServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>sign</servlet-name>
         <servlet-class>ch.findmyslot.tutorial.appengine.SignGuestbookServlet</servlet-class>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>list-greetings</servlet-name>
+        <url-pattern>/list-greetings</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>sign</servlet-name>
         <url-pattern>/sign</url-pattern>
@@ -18,6 +26,6 @@
         <url-pattern>/guestbook</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
-        <welcome-file>guestbook.jsp</welcome-file>
+        <welcome-file>angular-guestbook.html</welcome-file>
     </welcome-file-list>
 </web-app>

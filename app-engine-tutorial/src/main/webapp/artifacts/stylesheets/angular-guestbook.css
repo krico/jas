@@ -1,0 +1,43 @@
+body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.jumbotron {
+    text-align: center;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.greeting.ng-enter,
+.greeting.ng-leave,
+.greeting.ng-move {
+    -webkit-transition: 0.5s linear all;
+    -moz-transition: 0.5s linear all;
+    -o-transition: 0.5s linear all;
+    transition: 0.5s linear all;
+}
+
+.greeting.ng-enter,
+.greeting.ng-move {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.greeting.ng-move.ng-move-active,
+.greeting.ng-enter.ng-enter-active {
+    opacity: 1;
+    height: 120px;
+}
+
+.greeting.ng-leave {
+    opacity: 1;
+    overflow: hidden;
+}
+
+.greeting.ng-leave.ng-leave-active {
+    opacity: 0;
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
