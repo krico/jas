@@ -1,6 +1,7 @@
 What changed
 ============
 
+ - 2014-10-29: Added google-oauth-client as dependency
  - 2014-10-29: `bower install angular-animate -S`
  - 2014-10-29: Added google gson+guava+commons-lang3+commons-io as dependencies
  - 2014-10-28: Installed angularjs with bower and others

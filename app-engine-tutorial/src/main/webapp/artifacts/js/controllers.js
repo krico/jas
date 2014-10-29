@@ -24,3 +24,16 @@ guestBookApp.controller('GuestBookCtrl', function ($scope, $http) {
         }
     }
 );
+var openIdApp = angular.module('openIdApp', []);
+
+openIdApp.controller('OpenIdCtrl', function ($scope, $http) {
+        //$http.get('openid').success(function (data) {
+        //    $scope.clientId = data.clientId;
+        //    $scope.state = data.state;
+        //    $scope.applicationName = data.applicationName;
+        //});
+        $scope.login = function () {
+
+        }
+    }
+);
