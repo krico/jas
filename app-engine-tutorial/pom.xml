@@ -62,6 +62,16 @@
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-servlet</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-appengine</artifactId>
             <version>1.19.0</version>
         </dependency>
