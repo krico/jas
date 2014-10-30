@@ -27,9 +27,9 @@ public class OpenIDServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Data data = new Data();
-        data.clientId = Constants.OpenID.ClientID;
+        data.clientId = Constants.OpenID.Credentials.ClientID;
         data.state = new BigInteger(130, new SecureRandom()).toString(32);
-        data.applicationName = Constants.OpenID.ApplicationName;
+        data.applicationName = Constants.OpenID.Credentials.ApplicationName;
 
         HttpSession session = req.getSession(true);
         String state = (String) session.getAttribute(Constants.Session.OpenIDState);

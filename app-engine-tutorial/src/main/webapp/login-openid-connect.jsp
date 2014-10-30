@@ -25,7 +25,7 @@
 
     GenericUrl redirectUrl = new GenericUrl(request.getRequestURL().toString());
     redirectUrl.setRawPath("/login-openid-connect-callback.jsp");
-    String clientRequestUrl = new AuthorizationCodeRequestUrl(Constants.AuthorizationEndpoint.Google, Constants.OpenID.ClientID)
+    String clientRequestUrl = new AuthorizationCodeRequestUrl(Constants.Endpoint.Authorization.Google, Constants.OpenID.Credentials.ClientID)
             .setState(state)
             .setRedirectUri(redirectUrl.build())
             .setScopes(Collections.singleton("openid"))
