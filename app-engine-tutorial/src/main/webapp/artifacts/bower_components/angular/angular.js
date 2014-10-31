@@ -6166,7 +6166,7 @@ function $TemplateCacheProvider() {
  * you are simply using {@link ngTransclude} to inject the transclusion into your directive.
  *
  *
- * #### Transclusion Scopes
+ * #### Transclusion Scope
  *
  * When you call a transclude function it returns a DOM fragment that is pre-bound to a **transclusion
  * scope**. This scope is special, in that it is a child of the directive's scope (and so gets destroyed
@@ -20593,7 +20593,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
  *
  * For best practices on using `ngModel`, see:
  *
- *  - [https://github.com/angular/angular.js/wiki/Understanding-Scopes]
+ *  - [https://github.com/angular/angular.js/wiki/Understanding-Scope]
  *
  * For basic examples, how to use `ngModel`, see:
  *
@@ -22957,7 +22957,7 @@ forEach(
  * Note that when an element is removed using `ngIf` its scope is destroyed and a new scope
  * is created when the element is restored.  The scope created within `ngIf` inherits from
  * its parent scope using
- * [prototypal inheritance](https://github.com/angular/angular.js/wiki/Understanding-Scopes#javascript-prototypal-inheritance).
+ * [prototypal inheritance](https://github.com/angular/angular.js/wiki/Understanding-Scope#javascript-prototypal-inheritance).
  * An important implication of this is if `ngModel` is used within `ngIf` to bind to
  * a javascript primitive defined in the parent scope. In this case any modifications made to the
  * variable within the child scope will override (hide) the value in the parent scope.
