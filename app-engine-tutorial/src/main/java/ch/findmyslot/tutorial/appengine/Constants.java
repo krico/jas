@@ -5,6 +5,10 @@ package ch.findmyslot.tutorial.appengine;
  */
 public interface Constants {
     interface OpenID {
+        interface Scope {
+            String OpenID = "openid";
+            String Email = "email";
+        }
 
         interface Credentials {
             String ClientID = "618453286115-fmc476v3m0ca3pk9q5edmug1qkkf0q70.apps.googleusercontent.com";
@@ -16,12 +20,12 @@ public interface Constants {
         example:
         https://accounts.google.com/o/oauth2/auth?client_id=618453286115-fmc476v3m0ca3pk9q5edmug1qkkf0q70.apps.googleusercontent.com&response_type=code&scope=openid%20email&redirect_uri=https://krico-test.appspot.com/openid-callback&state=test
         */
-        interface Fields {
+        interface Field {
             String ClientId = "client_id";
             String ClientSecret = "client_secret";
             String AuthorizationEndpoint = "authorization_endpoint";
             String TokenEndpoint = "token_endpoint";
-
+            String Email = "email";
         }
     }
 
@@ -34,6 +38,10 @@ public interface Constants {
 
         interface Token {
             String Google = "https://accounts.google.com/o/oauth2/token";
+        }
+
+        interface Issuer {
+            String Google = "accounts.google.com";
         }
     }
 

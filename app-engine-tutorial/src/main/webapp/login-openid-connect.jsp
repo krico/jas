@@ -1,10 +1,9 @@
-<%@ page import="com.google.api.client.http.GenericUrl" %>
-<%@ page import="com.google.api.client.auth.oauth2.BrowserClientRequestUrl" %>
 <%@ page import="ch.findmyslot.tutorial.appengine.Constants" %>
 <%@ page import="com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl" %>
-<%@ page import="java.util.Collections" %>
+<%@ page import="com.google.api.client.http.GenericUrl" %>
 <%@ page import="java.math.BigInteger" %>
 <%@ page import="java.security.SecureRandom" %>
+<%@ page import="java.util.Arrays" %>
 <%--
   From this file you initiate your authentication request
   User: krico
@@ -25,10 +24,11 @@
 
     GenericUrl redirectUrl = new GenericUrl(request.getRequestURL().toString());
     redirectUrl.setRawPath("/login-openid-connect-callback.jsp");
-    String clientRequestUrl = new AuthorizationCodeRequestUrl(Constants.Endpoint.Authorization.Google, Constants.OpenID.Credentials.ClientID)
+    String clientRequestUrl = new AuthorizationCodeRequestUrl(Constants.Endpoint.Authorization.Google,
+            Constants.OpenID.Credentials.ClientID)
             .setState(state)
             .setRedirectUri(redirectUrl.build())
-            .setScopes(Collections.singleton("openid"))
+            .setScopes(Arrays.asList(Constants.OpenID.Scope.OpenID, Constants.OpenID.Scope.Email))
             .build();
 %>
 <a href="<%= clientRequestUrl %>">Login using Google with OpenID Connect</a><br/>
