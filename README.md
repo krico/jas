@@ -17,13 +17,13 @@ Getting Started
   * Select import
   * navigate to "./jas"
   * double click on pom.xml
-  * That's it! You should see something like this ![multi module example](https://github.com/krico/jas/blob/multi-module/images/multi-module.png)
+  * That's it! You should see something like this ![multi module example](https://github.com/krico/jas/blob/master/images/multi-module.png)
 
 
 Change log
 ==========
 
-- I followed the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction) and checked in the [app-engine-tutorial](app-engine-tutorial/), the resulting module of following that tutorial step by step. The app is [in production here](https://krico-test.appspot.com).
-- I followed the [cloud endpoints tutorial](https://cloud.google.com/appengine/docs/java/endpoints/getstarted/backend/) and checked in the [cloud-endpoints-tutorial](cloud-endpoints-tutorial/), the resulting module of following that tutorial step by step.
+- I followed the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction) and checked in the [app-engine-tutorial](sandbox/app-engine-tutorial/), the resulting module of following that tutorial step by step. The app is [in production here](https://krico-test.appspot.com).
+- I followed the [cloud endpoints tutorial](https://cloud.google.com/appengine/docs/java/endpoints/getstarted/backend/) and checked in the [cloud-endpoints-tutorial](sandbox/cloud-endpoints-tutorial/), the resulting module of following that tutorial step by step.
 - I added a parent pom.xml so that you can import the entire project at once...
 

@@ -12,8 +12,8 @@
     <name>JASify</name>
 
     <modules>
-        <module>app-engine-tutorial</module>
-        <module>cloud-endpoints-tutorial</module>
+        <module>sandbox/app-engine-tutorial</module>
+        <module>sandbox/cloud-endpoints-tutorial</module>
     </modules>
 
     <dependencies/>
