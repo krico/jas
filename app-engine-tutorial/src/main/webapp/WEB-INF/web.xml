@@ -3,23 +3,23 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <servlet>
         <servlet-name>guestbook</servlet-name>
-        <servlet-class>ch.findmyslot.tutorial.appengine.GuestbookServlet</servlet-class>
+        <servlet-class>com.jasify.sandbox.appengine.GuestbookServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>list-greetings</servlet-name>
-        <servlet-class>ch.findmyslot.tutorial.appengine.ListGreetingsServlet</servlet-class>
+        <servlet-class>com.jasify.sandbox.appengine.ListGreetingsServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>sign</servlet-name>
-        <servlet-class>ch.findmyslot.tutorial.appengine.SignGuestbookServlet</servlet-class>
+        <servlet-class>com.jasify.sandbox.appengine.SignGuestbookServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>openid</servlet-name>
-        <servlet-class>ch.findmyslot.tutorial.appengine.OpenIDServlet</servlet-class>
+        <servlet-class>com.jasify.sandbox.appengine.OpenIDServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>openid-callback</servlet-name>
-        <servlet-class>ch.findmyslot.tutorial.appengine.OpenIDCallbackServlet</servlet-class>
+        <servlet-class>com.jasify.sandbox.appengine.OpenIDCallbackServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>openid-callback</servlet-name>

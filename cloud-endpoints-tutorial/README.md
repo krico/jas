@@ -17,12 +17,12 @@ A skeleton application for Google Cloud Endpoints in Java.
    ID you have registered in the App Engine admin console and would
    like to use to host your instance of this sample.
 
-1. Add your API method to `src/main/java/ch/findmyslot/tutorial/endpoints/YourFirstAPI.java`.
+1. Add your API method to `src/main/java/com/jasify/sandbox/endpoints/YourFirstAPI.java`.
 
 1. Optional step: These sub steps are not required but you need this
    if you want to have auth protected methods.
 
-    1. Update the values in `src/main/java/ch/findmyslot/tutorial/endpoints/Constants.java`
+    1. Update the values in `src/main/java/com/jasify/sandbox/endpoints/Constants.java`
        to reflect the respective client IDs you have registered in the
        [APIs Console][6]. 
 

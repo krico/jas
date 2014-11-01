@@ -1,4 +1,4 @@
-package ch.findmyslot.tutorial.appengine;
+package com.jasify.sandbox.appengine;
 
 /**
  * Created by krico on 29/10/14.

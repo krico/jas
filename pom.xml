@@ -2,16 +2,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  
-  <groupId>to.cwa.jas</groupId>
-  <artifactId>jas-root</artifactId>
-  <packaging>pom</packaging>
-  <version>1.0</version>
-  <name>JAS Parent project</name>
-  
-  <modules>
-    <module>app-engine-tutorial</module>
-    <module>cloud-endpoints-tutorial</module>
-  </modules>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.jasify</groupId>
+    <artifactId>jasify</artifactId>
+    <version>1.0</version>
+
+    <packaging>pom</packaging>
+    <name>JASify</name>
+
+    <modules>
+        <module>app-engine-tutorial</module>
+        <module>cloud-endpoints-tutorial</module>
+    </modules>
+
+    <dependencies/>
 </project>

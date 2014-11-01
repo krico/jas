@@ -1,4 +1,4 @@
-package ch.findmyslot.tutorial.endpoints;
+package com.jasify.sandbox.endpoints;
 
 /**
  * Created by krico on 26.10.14.

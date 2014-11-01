@@ -1,6 +1,7 @@
 What changed
 ============
 
+ - 2014-11-01: Happy 1st of *M*ovember!  Rebranded to com.jasify...
  - 2014-10-30: Enabled sessions in appengine-web.xml
  - 2014-10-29: Added google-oauth-client as dependency
  - 2014-10-29: `bower install angular-animate -S`

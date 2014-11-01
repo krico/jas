@@ -1,4 +1,4 @@
-package ch.findmyslot.tutorial.appengine;
+package com.jasify.sandbox.appengine;
 
 import java.util.ArrayList;
 import java.util.List;

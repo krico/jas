@@ -4,14 +4,14 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>to.cwa.jas</groupId>
-        <artifactId>jas-root</artifactId>
+        <groupId>com.jasify</groupId>
+        <artifactId>jasify</artifactId>
         <version>1.0</version>
     </parent>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <groupId>to.cwa.jas.tutorial</groupId>
+    <groupId>com.jasify.sandbox</groupId>
     <artifactId>app-engine-tutorial</artifactId>
 
     <properties>

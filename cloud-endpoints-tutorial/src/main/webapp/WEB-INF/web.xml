@@ -4,7 +4,7 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>ch.findmyslot.tutorial.endpoints.YourFirstAPI</param-value>
+            <param-value>com.jasify.sandbox.endpoints.YourFirstAPI</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

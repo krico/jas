@@ -1,4 +1,4 @@
-package ch.findmyslot.tutorial.endpoints;
+package com.jasify.sandbox.endpoints;
 
 /**
  * Contains the client IDs and scopes for allowed clients consuming your API.
