@@ -9,11 +9,12 @@
     <version>1.0</version>
 
     <packaging>pom</packaging>
-    <name>JASify</name>
+    <name>Jasify</name>
 
     <modules>
-        <module>sandbox/app-engine-tutorial</module>
-        <module>sandbox/cloud-endpoints-tutorial</module>
+        <module>sandbox/sandbox-appengine</module>
+        <module>sandbox/sandbox-endpoints</module>
+        <module>schedule/schedule-appengine</module>
     </modules>
 
     <dependencies/>
