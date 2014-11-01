@@ -14,6 +14,7 @@
 
     <groupId>com.jasify.sandbox</groupId>
     <artifactId>sandbox-endpoints</artifactId>
+    <description>Sandbox for Google Cloud Endpoints</description>
 
     <properties>
         <appengine.app.version>1</appengine.app.version>

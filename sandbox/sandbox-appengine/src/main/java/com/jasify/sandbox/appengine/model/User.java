@@ -1,4 +1,4 @@
-package com.jasify.sandbox.appegine.model;
+package com.jasify.sandbox.appengine.model;
 
 import com.google.appengine.api.datastore.Key;
 import org.slim3.datastore.Attribute;

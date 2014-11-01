@@ -1,0 +1,19 @@
+{
+  "name": "schedule-appengine",
+  "version": "1.0-SNAPSHOT",
+  "homepage": "https://github.com/krico/jas/schedule/schedule-appengine",
+  "authors": [
+    "Christian Asmussen <github@cwa.to>"
+  ],
+  "main": "src/main/webapp/index.html",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+  }
+}

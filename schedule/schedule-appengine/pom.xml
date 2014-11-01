@@ -12,9 +12,9 @@
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <groupId>com.jasify.sandbox</groupId>
-    <artifactId>sandbox-appengine</artifactId>
-    <description>Sandbox for Google App Engine</description>
+    <groupId>com.jasify.schedule</groupId>
+    <artifactId>schedule-appengine</artifactId>
+    <description>The Jasify Schedule frontend</description>
 
     <properties>
         <appengine.app.version>1</appengine.app.version>
@@ -37,6 +37,8 @@
 
     <dependencies>
         <!-- Compile/runtime dependencies -->
+
+        <!-- BEGIN: appengine stuff -->
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
@@ -53,11 +55,9 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.3</version>
-        </dependency>
+        <!-- END: appengine stuff -->
+
+        <!-- BEGIN: frameworks we can't live without :-) -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -73,6 +73,9 @@
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
+        <!-- END: frameworks we can't live without :-) -->
+
+        <!-- BEGIN: google appengine frameworks, originally for oauth, but probably much more -->
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-gson</artifactId>
@@ -103,7 +106,9 @@
             <artifactId>google-oauth-client-appengine</artifactId>
             <version>1.19.0</version>
         </dependency>
+        <!-- END: google appengine frameworks, originally for oauth, but probably much more -->
 
+        <!-- BEGIN: Slim3 used for Datastore (see: https://github.com/krico/jas/issues/15) -->
         <dependency>
             <groupId>org.slim3</groupId>
             <artifactId>slim3</artifactId>
@@ -121,6 +126,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- END: Slim3 used for Datastore (see: https://github.com/krico/jas/issues/15) -->
 
         <!-- Test Dependencies -->
         <dependency>
@@ -155,6 +161,12 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+            NOTE: To generate the Meta classes we use apt to run slim3-gen.
+            To get this to be generated run
+            mvn apt:process
+            I don't want to add this to the build cycle as we shouldn't be changing our model too much.
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
