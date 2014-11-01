@@ -23,7 +23,7 @@ Getting Started
 Change log
 ==========
 
-- I followed the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction) and checked in the [app-engine-tutorial](sandbox/app-engine-tutorial/), the resulting module of following that tutorial step by step. The app is [in production here](https://krico-test.appspot.com).
-- I followed the [cloud endpoints tutorial](https://cloud.google.com/appengine/docs/java/endpoints/getstarted/backend/) and checked in the [cloud-endpoints-tutorial](sandbox/cloud-endpoints-tutorial/), the resulting module of following that tutorial step by step.
+- I followed the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction) and checked in the [app-engine-tutorial](sandbox/sandbox-appengine/), the resulting module of following that tutorial step by step. The app is [in production here](https://krico-test.appspot.com).
+- I followed the [cloud endpoints tutorial](https://cloud.google.com/appengine/docs/java/endpoints/getstarted/backend/) and checked in the [cloud-endpoints-tutorial](sandbox/sandbox-endpoints/), the resulting module of following that tutorial step by step.
 - I added a parent pom.xml so that you can import the entire project at once...
 

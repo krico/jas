@@ -13,7 +13,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <groupId>com.jasify.sandbox</groupId>
-    <artifactId>cloud-endpoints-tutorial</artifactId>
+    <artifactId>sandbox-endpoints</artifactId>
 
     <properties>
         <appengine.app.version>1</appengine.app.version>
