@@ -1,4 +1,4 @@
-<%@ page import="ch.findmyslot.tutorial.appengine.Constants" %>
+<%@ page import="com.jasify.sandbox.appengine.Constants" %>
 <%@ page import="com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl" %>
 <%@ page import="com.google.api.client.http.GenericUrl" %>
 <%@ page import="java.math.BigInteger" %>

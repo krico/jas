@@ -1,4 +1,4 @@
-package ch.findmyslot.tutorial.appengine;
+package com.jasify.sandbox.appengine;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;

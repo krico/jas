@@ -1,4 +1,4 @@
-package ch.findmyslot.tutorial.appengine;
+package com.jasify.sandbox.appengine;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
