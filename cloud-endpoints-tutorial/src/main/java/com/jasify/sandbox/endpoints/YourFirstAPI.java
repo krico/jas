@@ -1,4 +1,4 @@
-package ch.findmyslot.tutorial.endpoints;
+package com.jasify.sandbox.endpoints;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
