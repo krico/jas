@@ -2,6 +2,8 @@
 
 *The Jasify Schedule frontend.*
 
+Checkout the [Jasify Schedule Web App](http://jasify-schedule.appspot.com/) in production!
+
 ## Development
 
 Before your first commit, read this :-)
