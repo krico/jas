@@ -6,6 +6,7 @@ Features:
 
 Changes:
 
+  - installed angular-route: `bower install angular-route -S`
   - created login.html
   - changed appengine:devserver to listen on 0.0.0.0 (pom.xml) so I can test templates from the phone.  To get the same
   in IntelliJ add `-a 0.0.0.0` as a server parameter.
