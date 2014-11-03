@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="jasifyScheduleApp">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,8 +9,14 @@
     <link rel="icon" href="favicon.ico">
 
     <title>Jasify Schedule</title>
+    <script src="bc/angular/angular.js"></script>
+    <script src="bc/angular-route/angular-route.js"></script>
+    <script src="bc/angular-bootstrap/ui-bootstrap.js"></script>
+    <script src="js/application.js"></script>
+    <script src="js/controllers.js"></script>
 
     <link href="bc/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/application.css" rel="stylesheet">
     <!--[if lt IE 9]>
     <script src="bc/html5shiv/dist/html5shiv.min.js"></script>
     <script src="bc/respond/dest/respond.min.js"></script>
@@ -20,7 +26,7 @@
 <body>
 
 <!-- Static navbar -->
-<nav class="navbar navbar-default navbar-static-top" role="navigation">
+<nav class="navbar navbar-default navbar-static-top" role="navigation" ng-controller="NavbarCtrl">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
@@ -34,24 +40,24 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
+                <li ng-class="{ active: isActive('/home')}"><a href="#/home">Home</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">sign up</a></li>
-                <li><a href="#">log in</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">help <span class="caret"></span></a>
+                <li ng-class="{ active: isActive('/signUp')}"><a href="#/signUp">sign up</a></li>
+                <li ng-class="{ active: isActive('/login')}"><a href="#/login">log in</a></li>
+                <li ng-class="{ active: isActive('/help')}" class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">help <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <li class="dropdown-header">Members</li>
-                        <li><a href="#">How to find a class</a></li>
-                        <li><a href="#">How to book a class</a></li>
+                        <li><a href="#/help">How to find a class</a></li>
+                        <li><a href="#/help">How to book a class</a></li>
                         <li class="divider"></li>
                         <li class="dropdown-header">Providers</li>
-                        <li><a href="#">How to offer a class</a></li>
-                        <li><a href="#">How to cancel a class</a></li>
+                        <li><a href="#/help">How to offer a class</a></li>
+                        <li><a href="#/help">How to cancel a class</a></li>
                     </ul>
                 </li>
-                <li><a href="#">contact us</a></li>
+                <li ng-class="{ active: isActive('/contactUs')}"><a href="#/contactUs">contact us</a></li>
             </ul>
         </div>
         <!--/.nav-collapse -->
@@ -59,22 +65,7 @@
 </nav>
 
 
-<div class="container">
-
-    <!-- Main component for a primary marketing message or call to action -->
-    <div class="jumbotron">
-        <h1>Main Template</h1>
-
-        <p>This is the main template for the Jasify Schedule App</p>
-
-        <p>We will route <i>partial templates</i> with angular inside it.</p>
-
-        <p>
-            <a class="btn btn-lg btn-primary" href="#signup" role="button">Sign up &raquo;</a>
-        </p>
-    </div>
-
-</div>
+<div class="container" ng-view=""></div>
 <!-- /container -->
 
 

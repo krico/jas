@@ -1,7 +1,12 @@
 body {
-    padding-top: 40px;
-    padding-bottom: 40px;
-    background-color: #eee;
+}
+/* This is for angular-bootstrap to recognize links */
+.nav, .pagination, .carousel, .panel-title a {
+    cursor: pointer;
+}
+
+.navbar-static-top {
+    margin-bottom: 19px;
 }
 
 .form-signin {
