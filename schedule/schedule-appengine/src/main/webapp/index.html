@@ -11,11 +11,14 @@
     <title>Jasify Schedule</title>
     <script src="bc/angular/angular.js"></script>
     <script src="bc/angular-route/angular-route.js"></script>
-    <script src="bc/angular-bootstrap/ui-bootstrap.js"></script>
+    <script src="bc/angular-animate/angular-animate.min.js"></script>
+    <script src="bc/angular-strap/dist/angular-strap.min.js"></script>
+    <script src="bc/angular-strap/dist/angular-strap.tpl.min.js"></script>
     <script src="js/application.js"></script>
     <script src="js/controllers.js"></script>
 
     <link href="bc/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bc/angular-motion/dist/angular-motion.min.css" rel="stylesheet">
     <link href="css/application.css" rel="stylesheet">
     <!--[if lt IE 9]>
     <script src="bc/html5shiv/dist/html5shiv.min.js"></script>
@@ -27,7 +30,7 @@
 
 <!-- Static navbar -->
 <nav class="navbar navbar-default navbar-static-top" role="navigation" ng-controller="NavbarCtrl">
-    <div class="container">
+    <div class="container" bs-navbar>
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
                     aria-expanded="false" aria-controls="navbar">
@@ -40,24 +43,13 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li ng-class="{ active: isActive('/home')}"><a href="#/home">Home</a></li>
+                <li data-match-route="/home"><a href="#/home">Home</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li ng-class="{ active: isActive('/signUp')}"><a href="#/signUp">sign up</a></li>
-                <li ng-class="{ active: isActive('/login')}"><a href="#/login">log in</a></li>
-                <li ng-class="{ active: isActive('/help')}" class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown">help <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li class="dropdown-header">Members</li>
-                        <li><a href="#/help">How to find a class</a></li>
-                        <li><a href="#/help">How to book a class</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header">Providers</li>
-                        <li><a href="#/help">How to offer a class</a></li>
-                        <li><a href="#/help">How to cancel a class</a></li>
-                    </ul>
-                </li>
-                <li ng-class="{ active: isActive('/contactUs')}"><a href="#/contactUs">contact us</a></li>
+                <li data-match-route="/signUp"><a href="#/signUp">sign up</a></li>
+                <li data-match-route="/login"><a href="#/login">log in</a></li>
+                <li data-match-route="/help" class="dropdown"><a href="#/help">help</a></li>
+                <li data-match-route="/contactUs"><a href="#/contactUs">contact us</a></li>
             </ul>
         </div>
         <!--/.nav-collapse -->
@@ -69,8 +61,8 @@
 <!-- /container -->
 
 
-<script src="bc/jquery/dist/jquery.min.js"></script>
-<script src="bc/bootstrap/dist/js/bootstrap.min.js"></script>
+<!--<script src="bc/jquery/dist/jquery.min.js"></script>-->
+<!--<script src="bc/bootstrap/dist/js/bootstrap.min.js"></script>-->
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="js/ie10-viewport-bug-workaround.js"></script>
 </body>

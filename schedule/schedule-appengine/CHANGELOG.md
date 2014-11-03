@@ -6,7 +6,7 @@ Features:
 
 Changes:
 
-  - installed angular-bootstrap: `bower install angular-bootstrap -S`
+  - installed angular-strap: `bower install angular-strap -S` which brought in angular-motion and angular-animate
   - installed angular-route: `bower install angular-route -S`
   - created login.html
   - changed appengine:devserver to listen on 0.0.0.0 (pom.xml) so I can test templates from the phone.  To get the same

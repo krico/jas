@@ -3,7 +3,7 @@
  */
 var jasifyScheduleApp = angular.module('jasifyScheduleApp', [
     'ngRoute',
-    'ui.bootstrap',
+    'ngAnimate', 'mgcrea.ngStrap',
     'jasifyScheduleControllers'
 ]);
 
