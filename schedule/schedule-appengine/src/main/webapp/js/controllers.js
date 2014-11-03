@@ -9,6 +9,10 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
 
 jasifyScheduleControllers.controller('SignUpCtrl', ['$scope',
     function ($scope) {
+        $scope.popover = {
+            "title": "Coming soon...",
+            "content": "To a theater near you!"
+        };
     }]);
 
 jasifyScheduleControllers.controller('LoginCtrl', ['$scope',
