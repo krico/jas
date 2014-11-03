@@ -30,18 +30,18 @@
 
 <!-- Static navbar -->
 <nav class="navbar navbar-default navbar-static-top" role="navigation" ng-controller="NavbarCtrl">
-    <div class="container" bs-navbar>
+    <div class="container" data-start-collapsed="true" bs-navbar bs-collapse>
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
+                    aria-expanded="false" aria-controls="navbar" bs-collapse-toggle>
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Jasify Schedule</a>
+            <a class="navbar-brand" href="#/home">Jasify Schedule</a>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
+        <div id="navbar" class="navbar-collapse collapse" bs-collapse-target>
             <ul class="nav navbar-nav">
                 <li data-match-route="/home"><a href="#/home">Home</a></li>
             </ul>
@@ -61,8 +61,12 @@
 <!-- /container -->
 
 
-<script src="bc/jquery/dist/jquery.min.js"></script>
-<script src="bc/bootstrap/dist/js/bootstrap.min.js"></script>
+<!--
+NOTE[krico]: Using angular and jquery is overkill.  Unfortunately the boostrap javascript requires jquery.
+             So for now, we will have to do a few tricks to avoid using bootstrap.js
+-->
+<!--<script src="bc/jquery/dist/jquery.min.js"></script>-->
+<!--<script src="bc/bootstrap/dist/js/bootstrap.min.js"></script>-->
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="js/ie10-viewport-bug-workaround.js"></script>
 </body>
