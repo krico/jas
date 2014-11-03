@@ -43,13 +43,13 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse" bs-collapse-target>
             <ul class="nav navbar-nav">
-                <li data-match-route="/home"><a href="#/home">Home</a></li>
+                <li data-match-route="/home"><a bs-collapse-toggle href="#/home">home</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li data-match-route="/signUp"><a href="#/signUp">sign up</a></li>
-                <li data-match-route="/login"><a href="#/login">log in</a></li>
-                <li data-match-route="/help" class="dropdown"><a href="#/help">help</a></li>
-                <li data-match-route="/contactUs"><a href="#/contactUs">contact us</a></li>
+                <li data-match-route="/signUp"><a bs-collapse-toggle href="#/signUp">sign up</a></li>
+                <li data-match-route="/login"><a bs-collapse-toggle href="#/login">log in</a></li>
+                <li data-match-route="/help" class="dropdown"><a bs-collapse-toggle href="#/help">help</a></li>
+                <li data-match-route="/contactUs"><a bs-collapse-toggle href="#/contactUs">contact us</a></li>
             </ul>
         </div>
         <!--/.nav-collapse -->
@@ -59,7 +59,6 @@
 
 <div class="container" ng-view=""></div>
 <!-- /container -->
-
 
 <!--
 NOTE[krico]: Using angular and jquery is overkill.  Unfortunately the boostrap javascript requires jquery.
