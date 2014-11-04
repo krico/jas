@@ -6,10 +6,18 @@
             </p>
         </div>
         <div>
-            <div class="form-group">
+            <div class="form-group has-feedback" ng-class="state.username.group">
                 <label class="sr-only" for="name">Name (your public display name)</label>
-                <input id="name" type="text" class="form-control input-sm" placeholder="Name (your public display name)" required
-                       autofocus>
+                <input id="name" type="text" class="form-control input-sm"
+                       placeholder="Name (your public display name)"
+                       ng-model="username" ng-model-options="{debounce:500}" ng-change="checkUsername()"
+                       ng-keydown="state.username.spin=true"
+                       required>
+                <span class="glyphicon form-control-feedback"
+                      ng-class="state.username.glyph"></span>
+                <span class="form-control-feedback"
+                      ng-hide="state.username.spin"
+                      us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}"></span>
             </div>
             <div class="form-group">
                 <label class="sr-only" for="email">Email</label>
@@ -21,7 +29,8 @@
             </div>
             <div class="form-group">
                 <label class="sr-only" for="confirm">Confirm password</label>
-                <input id="confirm" type="password" class="form-control input-sm" placeholder="Confirm password" required>
+                <input id="confirm" type="password" class="form-control input-sm" placeholder="Confirm password"
+                       required>
             </div>
         </div>
         <div>

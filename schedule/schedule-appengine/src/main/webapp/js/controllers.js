@@ -9,10 +9,24 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
 
 jasifyScheduleControllers.controller('SignUpCtrl', ['$scope',
     function ($scope) {
+
+        $scope.state = {
+            'username': {
+                'group': '',
+                'glyph': '',
+                'spin': true
+            }
+        };
+
+        $scope.checkUsername = function () {
+            $scope.state.username.spin = false;
+        };
+
         $scope.popover = {
             "title": "Coming soon...",
             "content": "To a theater near you!"
         };
+
     }]);
 
 jasifyScheduleControllers.controller('LoginCtrl', ['$scope',

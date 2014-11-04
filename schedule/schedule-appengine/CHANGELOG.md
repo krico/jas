@@ -6,6 +6,8 @@ Features:
 
 Changes:
 
+  - installed angular-spinner: `bower install angular-spinner -S` so we can show a spinner while loading stuff, spin.js was brought in
+  - installed angular-mocks: `bower install angular-mocks -S` to allow us to mock the backend
   - installed angular-strap: `bower install angular-strap -S` which brought in angular-motion and angular-animate
   - installed angular-route: `bower install angular-route -S`
   - created login.html
