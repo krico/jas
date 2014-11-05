@@ -3,50 +3,39 @@
  */
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', ['mgcrea.ngStrap']);
 
+jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location',
+    function ($scope, $location) {
+        $scope.isActive = function (viewLocation) {
+            return viewLocation === $location.path();
+        };
+    }]);
+
 jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
     function ($scope) {
     }]);
 
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http',
-    function ($scope, $http) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', 'User',
+    function ($scope, $http, User) {
+        $scope.usernameCheck = {};
 
-        $scope.usernameGroup = undefined;
-        $scope.usernameGlyph =undefined;
-        $scope.usernameHideSpin =undefined;
-
-        $scope.resetUsername = function () {
-            $scope.usernameGlyph = 'form-control-feedback';
-            $scope.usernameGroup = 'has-feedback';
-            $scope.usernameHideSpin = true;
-        };
-        $scope.resetUsername();
-
-        $scope.acceptUsername = function () {
-            $scope.usernameGlyph = 'glyphicon-ok form-control-feedback';
-            $scope.usernameGroup = 'has-success has-feedback';
-            $scope.usernameHideSpin = true;
-        };
-
-        $scope.rejectUsername = function () {
-            $scope.usernameGlyph = 'glyphicon-remove form-control-feedback';
-            $scope.usernameGroup = 'has-error has-feedback';
-            $scope.usernameHideSpin = true;
-        };
+        $scope.spinnerHidden = true;
 
         $scope.checkUsername = function () {
-            $scope.resetUsername();
-            $scope.usernameHideSpin = false;
-            $http.post('/username/valid', {username: $scope.username}).
-                success(function (data, status, headers, config) {
-                    var ret = angular.fromJson(data);
-                    if (ret.status == 0)
-                        $scope.acceptUsername();
-                    else
-                        $scope.rejectUsername();//TODO: show the message
-                }).
-                error(function (data, status, headers, config) {
-                    $scope.rejectUsername();
-                });
+            if ($scope.username) {
+                $scope.spinnerHidden = false;
+                $scope.usernameCheck = User.checkUsername($scope.username,
+                    //success
+                    function (value, responseHeaders) {
+                    },
+                    //error
+                    function (httpResponse) {
+                        //simulate a nok
+                        $scope.usernameCheck = {nok: true, nokText: 'Communication error'};
+                    });
+            } else {
+                $scope.spinnerHidden = true;
+                $scope.usernameCheck = {};
+            }
         };
 
         $scope.popover = {

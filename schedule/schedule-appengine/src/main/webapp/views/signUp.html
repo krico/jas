@@ -6,16 +6,18 @@
             </p>
         </div>
         <div>
-            <div class="form-group control-group" ng-class="usernameGroup">
+            <div class="form-group control-group has-feedback"
+                 ng-class="{'has-success':usernameCheck.ok, 'has-error': usernameCheck.nok}">
                 <label class="sr-only" for="username">Name (your public display name)</label>
                 <input id="username" name="username" type="text" class="form-control input-sm"
                        placeholder="Name (your public display name)"
                        ng-model="username" ng-model-options="{debounce:500}" ng-change="checkUsername()"
                        required>
-                <span class="glyphicon"
-                      ng-class="usernameGlyph"></span>
+                <span class="help-block">{{usernameCheck.nokText}}</span>
+                <span class="glyphicon form-control-feedback"
+                      ng-class="{'glyphicon-ok':usernameCheck.ok, 'glyphicon-remove': usernameCheck.nok}"></span>
                 <span class="form-control-feedback"
-                      ng-hide="usernameHideSpin"
+                      ng-hide="spinnerHidden || usernameCheck.ok || usernameCheck.nok"
                       us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}"></span>
             </div>
             <div class="form-group">

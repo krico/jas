@@ -1,13 +1,12 @@
 /**
  * Created by krico on 02/11/14.
  */
-var jasifyScheduleApp = angular.module('jasifyScheduleApp', [
-    'ngRoute',
-    'ngAnimate', 'mgcrea.ngStrap',
-    'angularSpinner',
-    'jasifyScheduleControllers'
-]);
+var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngAnimate', 'mgcrea.ngStrap',
+    'angularSpinner', 'jasifyScheduleControllers']);
 
+/**
+ * Routes for all navbar links
+ */
 jasifyScheduleApp.config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
@@ -36,9 +35,13 @@ jasifyScheduleApp.config(['$routeProvider',
             });
     }]);
 
-jasifyScheduleApp.controller('NavbarCtrl', ['$scope', '$location',
-    function ($scope, $location) {
-        $scope.isActive = function (viewLocation) {
-            return viewLocation === $location.path();
-        };
-    }]);
+/**
+ * User factory
+ */
+jasifyScheduleApp.factory('User', ['$resource', function ($resource) {
+    return $resource('/user/:id', {id: '@id'},
+        {
+            /* User.checkUsername([params], postData, [success], [error]) */
+            'checkUsername': {method: 'POST', url: '/username'}
+        });
+}]);

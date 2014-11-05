@@ -41,17 +41,40 @@
 
         /**
          * This is our backend replacement for backend-less dev :-)
+         * I wonder how long we will be able to keep this up...
          *
          * @param $httpBackend
          * @constructor
          */
         function BackendMock($httpBackend) {
-            $httpBackend.whenPOST(/^\/username\/valid$/).respond(function (method, url, data) {
-                var req = angular.fromJson(data);
-                if (req.username == 'used')
-                    return [200, angular.toJson({status: -1, reason: 'Username already exists'}), {}];
+            /* The backend-less database */
+            var database = {
+                users: {
+                    /* userId : {userData} */
+                    '100': {
+                        username: 'krico',
+                        password: 'krico'
+                    }
+                }
+            };
 
-                return [200, angular.toJson({status: 0}), {}];
+            $httpBackend.whenPOST(/^\/username$/).respond(function (method, url, data) {
+                var username = data;
+                console.log('Checking for username: ' + username);
+                var users = database.users;
+                for (var id in users) {
+                    var user = users[id];
+                    console.log('id:' + id + ' u:' + user + ' u.n:' + user.username);
+                    if (user.username == username) {
+                        console.log('User exists :)');
+                        //User exists
+                        return [200, angular.toJson({
+                            nok: true,
+                            nokText: 'Username not available'
+                        }), {}];
+                    }
+                }
+                return [200, angular.toJson({ok: true}), {}];
             });
             //Pass through so that gets to our partials work
             $httpBackend.whenGET(/^(\/)?views\/.*\.html$/).passThrough();
