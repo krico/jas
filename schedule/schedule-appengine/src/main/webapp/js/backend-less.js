@@ -29,7 +29,13 @@
          * @constructor
          */
         function BackendMock($httpBackend) {
+            $httpBackend.whenPOST(/^\/username\/valid$/).respond(function (method, url, data) {
+                var req = angular.fromJson(data);
+                if (req.username == 'used')
+                    return [200, angular.toJson({status: -1, reason: 'Username already exists'}), {}];
 
+                return [200, angular.toJson({status: 0}), {}];
+            });
             //Pass through so that gets to our partials work
             $httpBackend.whenGET(/^(\/)?views\/.*\.html$/).passThrough();
         }

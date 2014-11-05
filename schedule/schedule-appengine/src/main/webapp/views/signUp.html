@@ -1,4 +1,4 @@
-<form role="form">
+<form role="form" name="signUp">
     <div class="col-md-3 ">
         <div>
             <p>
@@ -6,17 +6,16 @@
             </p>
         </div>
         <div>
-            <div class="form-group has-feedback" ng-class="state.username.group">
-                <label class="sr-only" for="name">Name (your public display name)</label>
-                <input id="name" type="text" class="form-control input-sm"
+            <div class="form-group" ng-class="usernameGroup">
+                <label class="sr-only" for="username">Name (your public display name)</label>
+                <input id="username" name="username" type="text" class="form-control input-sm"
                        placeholder="Name (your public display name)"
                        ng-model="username" ng-model-options="{debounce:500}" ng-change="checkUsername()"
-                       ng-keydown="state.username.spin=true"
                        required>
-                <span class="glyphicon form-control-feedback"
-                      ng-class="state.username.glyph"></span>
+                <span class="glyphicon"
+                      ng-class="usernameGlyph"></span>
                 <span class="form-control-feedback"
-                      ng-hide="state.username.spin"
+                      ng-hide="usernameHideSpin"
                       us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}"></span>
             </div>
             <div class="form-group">

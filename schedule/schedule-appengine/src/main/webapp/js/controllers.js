@@ -7,19 +7,46 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
     function ($scope) {
     }]);
 
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope',
-    function ($scope) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http',
+    function ($scope, $http) {
 
-        $scope.state = {
-            'username': {
-                'group': '',
-                'glyph': '',
-                'spin': true
-            }
+        $scope.usernameGroup = undefined;
+        $scope.usernameGlyph =undefined;
+        $scope.usernameHideSpin =undefined;
+
+        $scope.resetUsername = function () {
+            $scope.usernameGroup = 'has-feedback';
+            $scope.usernameGlyph = 'form-control-feedback';
+            $scope.usernameHideSpin = true;
+        };
+        $scope.resetUsername();
+
+        $scope.acceptUsername = function () {
+            $scope.usernameGroup = 'has-success has-feedback';
+            $scope.usernameGlyph = 'glyphicon-ok form-control-feedback';
+            $scope.usernameHideSpin = true;
+        };
+
+        $scope.rejectUsername = function () {
+            $scope.usernameGroup = 'has-error has-feedback';
+            $scope.usernameGlyph = 'glyphicon-remove form-control-feedback';
+            $scope.usernameHideSpin = true;
         };
 
         $scope.checkUsername = function () {
-            $scope.state.username.spin = false;
+            $scope.resetUsername();
+            $scope.usernameHideSpin = false;
+            $http.post('/username/valid', {username: $scope.username}).
+                success(function (data, status, headers, config) {
+                    var ret = angular.fromJson(data);
+                    if (ret.status == 0)
+                        $scope.acceptUsername();
+                    else
+                        $scope.rejectUsername();//TODO: show the message
+                }).
+                error(function (data, status, headers, config) {
+                    $scope.rejectUsername();
+                });
         };
 
         $scope.popover = {
