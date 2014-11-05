@@ -15,21 +15,21 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http',
         $scope.usernameHideSpin =undefined;
 
         $scope.resetUsername = function () {
-            $scope.usernameGroup = 'has-feedback';
             $scope.usernameGlyph = 'form-control-feedback';
+            $scope.usernameGroup = 'has-feedback';
             $scope.usernameHideSpin = true;
         };
         $scope.resetUsername();
 
         $scope.acceptUsername = function () {
-            $scope.usernameGroup = 'has-success has-feedback';
             $scope.usernameGlyph = 'glyphicon-ok form-control-feedback';
+            $scope.usernameGroup = 'has-success has-feedback';
             $scope.usernameHideSpin = true;
         };
 
         $scope.rejectUsername = function () {
-            $scope.usernameGroup = 'has-error has-feedback';
             $scope.usernameGlyph = 'glyphicon-remove form-control-feedback';
+            $scope.usernameGroup = 'has-error has-feedback';
             $scope.usernameHideSpin = true;
         };
 
