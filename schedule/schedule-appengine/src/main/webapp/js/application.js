@@ -45,3 +45,33 @@ jasifyScheduleApp.factory('User', ['$resource', function ($resource) {
             'checkUsername': {method: 'POST', url: '/username'}
         });
 }]);
+
+jasifyScheduleApp.directive('strongPassword', function () {
+    return {
+        require: 'ngModel',
+        link: function (scope, elm, attrs, ctrl) {
+            ctrl.$validators.strongPassword = function (modelValue, viewValue) {
+                if (ctrl.$isEmpty(modelValue)) {
+                    return false;
+                }
+
+                if (modelValue.length >= 4) {
+                    return true;
+                }
+                return false;
+            };
+        }
+    };
+});
+
+jasifyScheduleApp.directive('confirmField', function () {
+    return {
+        require: 'ngModel',
+        link: function (scope, elm, attrs, ctrl) {
+            ctrl.$validators.confirmField = function (modelValue, viewValue) {
+                var compareTo = scope.$eval(attrs.confirmField);
+                return modelValue == compareTo.$modelValue;
+            };
+        }
+    };
+});

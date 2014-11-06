@@ -60,13 +60,10 @@
 
             $httpBackend.whenPOST(/^\/username$/).respond(function (method, url, data) {
                 var username = data;
-                console.log('Checking for username: ' + username);
                 var users = database.users;
                 for (var id in users) {
                     var user = users[id];
-                    console.log('id:' + id + ' u:' + user + ' u.n:' + user.username);
                     if (user.username == username) {
-                        console.log('User exists :)');
                         //User exists
                         return [200, angular.toJson({
                             nok: true,

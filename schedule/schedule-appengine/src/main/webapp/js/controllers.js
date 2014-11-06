@@ -16,14 +16,25 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
 
 jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', 'User',
     function ($scope, $http, User) {
+
         $scope.usernameCheck = {};
 
         $scope.spinnerHidden = true;
 
+        $scope.hasError = function (fieldName) {
+            var f = $scope.signUpForm[fieldName];
+            return f.$dirty && f.$invalid;
+        };
+
+        $scope.hasSuccess = function (fieldName) {
+            var f = $scope.signUpForm[fieldName];
+            return f.$dirty && f.$valid;
+        };
+
         $scope.checkUsername = function () {
-            if ($scope.username) {
+            if ($scope.user.name) {
                 $scope.spinnerHidden = false;
-                $scope.usernameCheck = User.checkUsername($scope.username,
+                $scope.usernameCheck = User.checkUsername($scope.user.name,
                     //success
                     function (value, responseHeaders) {
                     },
@@ -38,11 +49,9 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', 'User',
             }
         };
 
-        $scope.popover = {
-            "title": "Coming soon...",
-            "content": "To a theater near you!"
+        $scope.createUser = function () {
+            console.log("create: " + angular.toJson($scope.user));
         };
-
     }]);
 
 jasifyScheduleControllers.controller('LoginCtrl', ['$scope',
