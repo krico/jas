@@ -2,6 +2,15 @@
 
 Features:
 
+  - SignUp view, our first view!  To get it going we had to setup
+    - routing + navbar
+    - backend-less support (index.html?nobackend)
+    - form validation + ngModel
+    - bootstrap form validation states
+    - User service based on angular-resource
+    - Angular directives with custom validators
+    - angular-strap (better connection bootstrap : angular)
+    - spinner.js to show a spinner as we check the username
   - mvn appengine:devserver works!
 
 Changes:
