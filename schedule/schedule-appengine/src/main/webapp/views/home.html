@@ -1,8 +1,13 @@
-<div class="jumbotron">
-    <h1>home</h1>
+<div class="jumbotron" ng-hide="user">
+    <h1>Jasify!</h1>
 
-    <p>Main page of the site</p>
+    <p></p>
+
     <p>
-        <a class="btn btn-lg btn-primary" href="#/signUp" role="button">Sign up &raquo;</a>
+        <a class="btn btn-lg btn-primary" href="#/signUp" role="button">Sign up &raquo;</a> or <a href="#/login">log
+        in</a>
     </p>
+</div>
+<div ng-show="user">
+    <h3><span class="label label-default"><span class="glyphicon glyphicon-home"></span> {{user.name}}'s</span></h3>
 </div>

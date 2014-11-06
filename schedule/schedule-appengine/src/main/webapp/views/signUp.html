@@ -1,7 +1,5 @@
 <form role="form" novalidate name="signUpForm" ng-submit="createUser()">
-    <div class="col-md-3" ng-hide="newUser.id || !newUser.name"><span us-spinner=""></span></div>
-    <div class="col-md-3" ng-hide="!newUser.id"><h1>User created! ID {{newUser.id}}</h1></span></div>
-    <div class="col-md-3" ng-hide="newUser.name">
+    <div class="col-md-3">
         <div>
             <p>
                 <span class="h4">sign up</span>
@@ -69,11 +67,12 @@
             </div>
         </div>
         <div>
-            <button type="submit" ng-disabled="signUpForm.$invalid || !usernameCheck.ok"
+            <button type="submit" ng-disabled="signUpForm.$invalid || !usernameCheck.ok || newUser.name"
                     class="btn btn-sm btn-default btn-primary">
                 sign up
             </button>
+            <span ng-hide="newUser.id || !newUser.name" us-spinner=""></span>
         </div>
-        <span>{{newUser}}</span>
+        <div id="alert-container"></div>
     </div>
 </form>

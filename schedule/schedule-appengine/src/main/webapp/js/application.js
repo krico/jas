@@ -22,6 +22,14 @@ jasifyScheduleApp.config(['$routeProvider',
                 templateUrl: 'views/login.html',
                 controller: 'LoginCtrl'
             }).
+            when('/logout', {
+                templateUrl: 'views/logout.html',
+                controller: 'LogoutCtrl'
+            }).
+            when('/profile', {
+                templateUrl: 'views/profile.html',
+                controller: 'ProfileCtrl'
+            }).
             when('/help', {
                 templateUrl: 'views/help.html',
                 controller: 'HelpCtrl'
@@ -36,14 +44,43 @@ jasifyScheduleApp.config(['$routeProvider',
     }]);
 
 /**
- * User factory
+ * Auth service
+ */
+jasifyScheduleApp.factory('Auth', ['$log',
+    function ($log) {
+        var currentUser;
+        return {
+            isLoggedIn: function () {
+                if (currentUser) {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            logout: function () {
+                $log.info("Log out!");
+                currentUser = null;
+            },
+            setCurrentUser: function (u) {
+                $log.info('Auth.currentUser=' + u)
+                currentUser = u;
+            },
+            getCurrentUser: function () {
+                return currentUser;
+            }
+
+        };
+    }]);
+
+/**
+ * User service
  */
 jasifyScheduleApp.factory('User', ['$resource', function ($resource) {
     return $resource('/user/:id', {id: '@id'},
         {
             /* User.checkUsername([params], postData, [success], [error]) */
             'checkUsername': {method: 'POST', url: '/username'},
-            'create': {method: 'PUT', url: '/user/new'}
+            'create': {method: 'PUT', url: '/user/new'},
         });
 }]);
 

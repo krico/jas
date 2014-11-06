@@ -82,10 +82,9 @@
              * User RESTful CRUD operations
              */
             $httpBackend.whenPOST(/^\/user(\/.*)?$/).respond(function (method, url, data) {
-                console.log("POST " + url);
+                console.log("POST " + url + " DATA: " + data);
 
-                if (url =~ /^\/user(\/)?$/) {
-                    console.log("POST " + url + " CREATE");
+                if (url = ~/^\/user(\/)?$/) {
                     var user = angular.fromJson(data);
                     var users = database.users;
                     var max = 0;
