@@ -1,0 +1,10 @@
+body {
+}
+/* This is for angular-bootstrap to recognize links */
+.nav, .pagination, .carousel, .panel-title a {
+    cursor: pointer;
+}
+
+.navbar-static-top {
+    margin-bottom: 19px;
+}
