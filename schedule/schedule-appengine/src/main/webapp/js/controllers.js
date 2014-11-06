@@ -21,6 +21,8 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', 'User',
 
         $scope.spinnerHidden = true;
 
+        $scope.newUser = {}; //TODO: remove
+
         $scope.hasError = function (fieldName) {
             var f = $scope.signUpForm[fieldName];
             return f.$dirty && f.$invalid;
@@ -51,6 +53,14 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', 'User',
 
         $scope.createUser = function () {
             console.log("create: " + angular.toJson($scope.user));
+            $scope.newUser = User.save($scope.user,                     //success
+                function (value, responseHeaders) {
+                },
+                //error
+                function (httpResponse) {
+                    //simulate a nok
+                    $scope.usernameCheck = {nok: true, nokText: 'Communication error'};
+                });
         };
     }]);
 

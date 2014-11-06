@@ -51,19 +51,23 @@
             var database = {
                 users: {
                     /* userId : {userData} */
-                    '100': {
-                        username: 'krico',
+                    100: {
+                        id: 100,
+                        name: 'krico',
                         password: 'krico'
                     }
                 }
             };
 
+            /**
+             * Username check
+             */
             $httpBackend.whenPOST(/^\/username$/).respond(function (method, url, data) {
-                var username = data;
+                var name = data;
                 var users = database.users;
                 for (var id in users) {
                     var user = users[id];
-                    if (user.username == username) {
+                    if (user.name == name) {
                         //User exists
                         return [200, angular.toJson({
                             nok: true,
@@ -72,6 +76,39 @@
                     }
                 }
                 return [200, angular.toJson({ok: true}), {}];
+            });
+
+            /**
+             * User RESTful CRUD operations
+             */
+            $httpBackend.whenPOST(/^\/user(\/.*)?$/).respond(function (method, url, data) {
+                console.log("POST " + url);
+
+                if (url =~ /^\/user(\/)?$/) {
+                    console.log("POST " + url + " CREATE");
+                    var user = angular.fromJson(data);
+                    var users = database.users;
+                    var max = 0;
+                    for (var id in users) {
+                        var u = users[id];
+                        if (u.id > max) max = u.id;
+                        if (user.name == u.name) {
+                            //todo: whats status case for error?
+                            return [404, angular.toJson({
+                                nok: true,
+                                nokText: 'Username not available'
+                            }), {}];
+                        }
+                    }
+                    user['id'] = max + 10;
+                    users[user.id] = user;
+                    return [200, angular.toJson(user), {}];
+                }
+                //TODO: what's status code for not found or no such method
+                return [404, angular.toJson({
+                    nok: true,
+                    nokText: 'Username not available'
+                }), {}];
             });
             //Pass through so that gets to our partials work
             $httpBackend.whenGET(/^(\/)?views\/.*\.html$/).passThrough();

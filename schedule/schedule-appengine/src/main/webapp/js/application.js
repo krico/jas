@@ -42,7 +42,8 @@ jasifyScheduleApp.factory('User', ['$resource', function ($resource) {
     return $resource('/user/:id', {id: '@id'},
         {
             /* User.checkUsername([params], postData, [success], [error]) */
-            'checkUsername': {method: 'POST', url: '/username'}
+            'checkUsername': {method: 'POST', url: '/username'},
+            'create': {method: 'PUT', url: '/user/new'}
         });
 }]);
 
