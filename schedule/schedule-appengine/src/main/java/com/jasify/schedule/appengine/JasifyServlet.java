@@ -8,6 +8,7 @@ import java.io.IOException;
 
 /**
  * Created by krico on 01/11/14.
+ * This file is going to go anyway
  */
 public class JasifyServlet extends HttpServlet {
 
