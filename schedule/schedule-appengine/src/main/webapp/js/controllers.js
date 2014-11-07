@@ -21,8 +21,8 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
         $scope.user = Auth.getCurrentUser();
     }]);
 
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert', '$location', 'User', 'Auth',
-    function ($scope, $http, $alert, $location, User, Auth) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert', '$location', 'Util', 'User', 'Auth',
+    function ($scope, $http, $alert, $location, Util, User, Auth) {
 
         $scope.usernameCheck = {};
 
@@ -31,13 +31,11 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
         $scope.newUser = {}; //TODO: remove
 
         $scope.hasError = function (fieldName) {
-            var f = $scope.signUpForm[fieldName];
-            return f.$dirty && f.$invalid;
+            return Util.formFieldError($scope.signUpForm, fieldName);
         };
 
         $scope.hasSuccess = function (fieldName) {
-            var f = $scope.signUpForm[fieldName];
-            return f.$dirty && f.$valid;
+            return Util.formFieldSuccess($scope.signUpForm, fieldName);
         };
 
         $scope.checkUsername = function () {
@@ -88,8 +86,16 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
         };
     }]);
 
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope',
-    function ($scope) {
+jasifyScheduleControllers.controller('LoginCtrl', ['$scope', 'Util',
+    function ($scope, Util) {
+        $scope.hasError = function (fieldName) {
+            return Util.formFieldError($scope.loginForm, fieldName);
+        };
+
+        $scope.hasSuccess = function (fieldName) {
+            return Util.formFieldSuccess($scope.loginForm, fieldName);
+        };
+
         $scope.user = {};
         $scope.credentials = {};
         $scope.login = function () {
