@@ -11,3 +11,6 @@ Notes for developers working on schedule-appengine...
  * [Angular Forms](https://docs.angularjs.org/guide/forms)
  * [HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)
  * [Angular locale support](https://docs.angularjs.org/guide/i18n)
+ * [AppEngine java stuff](https://cloud.google.com/appengine/docs/java/)
+ * [Slim3](https://sites.google.com/site/slim3appengine/) our data store framework
+ * [Unit Testing Google Cloud](https://cloud.google.com/appengine/docs/java/tools/localunittesting) unit tests for AppEngine
