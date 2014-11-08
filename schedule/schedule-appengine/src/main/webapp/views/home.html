@@ -1,8 +1,23 @@
-<div class="jumbotron">
-    <h1>home</h1>
+<div class="jumbotron" ng-hide="user">
+    <h1>Jasify!</h1>
 
-    <p>Main page of the site</p>
+    <p></p>
+
     <p>
-        <a class="btn btn-lg btn-primary" href="#/signUp" role="button">Sign up &raquo;</a>
+        <a class="btn btn-lg btn-primary" href="#/signUp" role="button">Sign up &raquo;</a> or <a href="#/login">log
+        in</a>
     </p>
+</div>
+<div ng-show="user">
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading"><span class="glyphicon glyphicon-home"></span> {{user.name}}</div>
+        <div class="panel-body">
+            <div class="well" ng-show="user.about">{{user.about}}</div>
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe class="embed-responsive-item" src="//www.youtube.com/embed/vx5n21zHPm8?rel=0"
+                        allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
 </div>

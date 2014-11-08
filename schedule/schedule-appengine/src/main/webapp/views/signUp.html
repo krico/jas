@@ -1,5 +1,5 @@
 <form role="form" novalidate name="signUpForm" ng-submit="createUser()">
-    <div class="col-md-3 ">
+    <div class="col-md-3">
         <div>
             <p>
                 <span class="h4">sign up</span>
@@ -7,18 +7,22 @@
         </div>
         <div>
             <div class="form-group has-feedback"
-                 ng-class="{'has-success':usernameCheck.ok, 'has-error': usernameCheck.nok}">
+                 ng-class="{'has-success':usernameCheck.ok && hasSuccess('username'), 'has-error': usernameCheck.nok || hasError('username')}">
                 <label class="sr-only" for="username">Name (your public display name)</label>
-                <input id="username" type="text" class="form-control input-sm"
-                       placeholder="Name (your public display name)"
-                       ng-model="user.name" ng-model-options="{debounce:500}" ng-change="checkUsername()"
-                       required minlength="3" maxlength="128">
-                <span class="help-block">{{usernameCheck.nokText}}</span>
+                <input id="username" type="text" class="form-control input-sm" name="username"
+                       placeholder="Name (your public display name)" ng-model="user.name"
+                       ng-model-options="{debounce:500}" ng-change="checkUsername()" required pattern="^..."
+                       maxlength="128">
+                <span class="help-block small">{{usernameCheck.nokText}}</span>
                 <span class="glyphicon form-control-feedback"
-                      ng-class="{'glyphicon-ok':usernameCheck.ok, 'glyphicon-remove': usernameCheck.nok}"></span>
+                      ng-class="{'glyphicon-ok':usernameCheck.ok && hasSuccess('username'), 'glyphicon-remove': usernameCheck.nok || hasError('username')}"></span>
                 <span class="form-control-feedback"
                       ng-hide="spinnerHidden || usernameCheck.ok || usernameCheck.nok"
                       us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}"></span>
+                <div ng-show="hasError('username')">
+                    <span class="help-block small" ng-show="signUpForm.username.$error.required">Name is required.</span>
+                    <span class="help-block small" ng-show="signUpForm.username.$error.pattern">Name is too short.</span>
+                </div>
             </div>
             <div class="form-group has-feedback"
                  ng-class="{'has-error': hasError('email'), 'has-success': hasSuccess('email')}">
@@ -30,8 +34,8 @@
                       ng-class="{'glyphicon-ok':hasSuccess('email'), 'glyphicon-remove': hasError('email')}"></span>
 
                 <div ng-show="hasError('email')">
-                    <span class="help-block" ng-show="signUpForm.email.$error.required">Tell us your email.</span>
-                    <span class="help-block" ng-show="signUpForm.email.$error.email">This is not a valid email.</span>
+                    <span class="help-block small" ng-show="signUpForm.email.$error.required">Email is required.</span>
+                    <span class="help-block small" ng-show="signUpForm.email.$error.email">Email not valid.</span>
                 </div>
             </div>
             <div class="form-group has-feedback"
@@ -43,10 +47,10 @@
                       ng-class="{'glyphicon-ok':hasSuccess('password'), 'glyphicon-remove': hasError('password')}"></span>
 
                 <div ng-show="hasError('password')">
-                    <span class="help-block"
-                          ng-show="signUpForm.password.$error.required">Please choose a password.</span>
-                    <span class="help-block"
-                          ng-show="signUpForm.password.$error.strongPassword">Password must be at least 4 characters long.</span>
+                    <span class="help-block small"
+                          ng-show="signUpForm.password.$error.required">Password required.</span>
+                    <span class="help-block small"
+                          ng-show="signUpForm.password.$error.strongPassword">Password too short.</span>
                 </div>
             </div>
             <div class="form-group has-feedback"
@@ -59,18 +63,20 @@
                       ng-class="{'glyphicon-ok':hasSuccess('confirm'), 'glyphicon-remove': hasError('confirm')}"></span>
 
                 <div ng-show="hasError('confirm')">
-                    <span class="help-block"
-                          ng-show="signUpForm.confirm.$error.required">Please confirm your password.</span>
-                    <span class="help-block"
-                          ng-show="signUpForm.confirm.$error.confirmField">The confirmation and the password must match.</span>
+                    <span class="help-block small"
+                          ng-show="signUpForm.confirm.$error.required">Confirm your password.</span>
+                    <span class="help-block small"
+                          ng-show="signUpForm.confirm.$error.confirmField">Passwords do not match.</span>
                 </div>
             </div>
         </div>
         <div>
-            <button type="submit" ng-disabled="signUpForm.$invalid || !usernameCheck.ok"
+            <button type="submit" ng-disabled="signUpForm.$invalid || !usernameCheck.ok || newUser.name"
                     class="btn btn-sm btn-default btn-primary">
                 sign up
             </button>
+            <span ng-hide="newUser.id || !newUser.name" us-spinner=""></span>
         </div>
+        <div id="alert-container"></div>
     </div>
 </form>
