@@ -1,8 +1,8 @@
-package com.jasify.schedule.appengine.users;
+package com.jasify.schedule.appengine.model.users;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.jasify.schedule.appengine.model.ModelTestHelper;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -12,9 +12,15 @@ import org.slim3.datastore.Datastore;
 public class UserServiceTest {
     private static final Logger log = LoggerFactory.getLogger(UserServiceTest.class);
 
-    private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-
     @Before
+    public void initializeDatastore() {
+        ModelTestHelper.initializeDatastore();
+    }
+
+    @After
+    public void cleanupDatastore() {
+        ModelTestHelper.cleanupDatastore();
+    }
 
     @Test
     public void testFoo() {

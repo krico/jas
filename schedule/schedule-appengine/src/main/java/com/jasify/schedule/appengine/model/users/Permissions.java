@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.users;
+package com.jasify.schedule.appengine.model.users;
 
 import com.google.appengine.api.datastore.Category;
 
