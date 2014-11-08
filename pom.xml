@@ -6,10 +6,28 @@
 
     <groupId>com.jasify</groupId>
     <artifactId>jasify</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
 
     <packaging>pom</packaging>
     <name>Jasify</name>
+
+    <properties>
+        <jasify.appengine.sdk.version>1.9.15</jasify.appengine.sdk.version>
+    </properties>
+
+    <repositories>
+        <!-- For slim3 -->
+        <repository>
+            <id>maven.seasar.org</id>
+            <name>The Seasar Foundation Maven2 Repository</name>
+            <url>https://www.seasar.org/maven/maven2</url>
+        </repository>
+    </repositories>
+
+    <prerequisites>
+        <maven>3.1.0</maven>
+    </prerequisites>
+
 
     <modules>
         <module>sandbox/sandbox-appengine</module>
@@ -18,4 +36,32 @@
     </modules>
 
     <dependencies/>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>display-dependency-updates</goal>
+                            <goal>display-plugin-updates</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>3.1</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
