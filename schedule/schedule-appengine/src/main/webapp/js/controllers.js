@@ -60,15 +60,24 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
             $scope.newUser = User.save($scope.user,
                 //success
                 function (value, responseHeaders) {
-                    Auth.setCurrentUser($scope.newUser);
                     $alert({
                         title: 'Registration succeeded!',
-                        content: 'You were successfully registered.',
+                        content: 'You were successfully registered. Your browser should be redirected shortly.',
                         container: '#alert-container',
                         type: 'success',
                         show: true
                     });
-                    $location.path('/home');
+                    //Simulate a login
+                    Auth.login($scope.user.name, $scope.user.password, function (message) {
+                        $alert({
+                            title: 'Login failed!',
+                            content: "Funny, even though we just registered you, your login failed...",
+                            container: '#alert-container',
+                            type: 'danger',
+                            show: true
+                        });
+                        $scope.newUser = {};
+                    });
                 },
                 //error
                 function (httpResponse) {
@@ -77,17 +86,22 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
                     $scope.newUser = {};
                     $alert({
                         title: 'Registration failed!',
-                        content: 'Registration failed, please try again.',
+                        content: "Registration failed, we don't really know why. Please change some fields and try again.",
                         container: '#alert-container',
-                        type: 'error',
+                        type: 'danger',
                         show: true
                     });
                 });
         };
     }]);
 
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope', 'Util',
-    function ($scope, Util) {
+jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$alert', 'Util', 'Auth', 'Modal',
+    function ($scope, $alert, Util, Auth, Modal) {
+
+        $scope.user = {};
+
+        $scope.credentials = {};
+
         $scope.hasError = function (fieldName) {
             return Util.formFieldError($scope.loginForm, fieldName);
         };
@@ -96,11 +110,19 @@ jasifyScheduleControllers.controller('LoginCtrl', ['$scope', 'Util',
             return Util.formFieldSuccess($scope.loginForm, fieldName);
         };
 
-        $scope.user = {};
-        $scope.credentials = {};
         $scope.login = function () {
-            $scope.user = User.login($scope.credentials);
-        }
+            Auth.login($scope.credentials.name, $scope.credentials.password, function (reason) {
+                $alert({
+                    title: 'Login failed!',
+                    content: reason,
+                    container: '#alert-container',
+                    type: 'warning',
+                    show: true
+                });
+
+            });
+        };
+
     }]);
 
 jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', 'Auth',
@@ -108,9 +130,25 @@ jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', 'Auth',
         Auth.logout();
     }]);
 
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Auth',
-    function ($scope, Auth) {
-        $scope.user = Auth.getCurrentUser();
+jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$alert', 'Auth', 'User',
+    function ($scope, $alert, Auth, User) {
+        $scope.user = {};
+        $scope.save = function () {
+            $scope.user.$save().then(function () {
+                $alert({
+                    title: 'Profile updated!',
+                    container: '#alert-container',
+                    type: 'success',
+                    show: true
+                });
+                //TODO: We probably need to check for failures
+                Auth.setCurrentUser($scope.user);
+            });
+        };
+        $scope.reset = function () {
+            $scope.user = User.get({id: Auth.getCurrentUser().id});
+        };
+        $scope.reset();
     }]);
 
 jasifyScheduleControllers.controller('HelpCtrl', ['$scope',

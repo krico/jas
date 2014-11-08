@@ -11,8 +11,15 @@
                  ng-class="{'has-warning': hasError('name'), 'has-success': hasSuccess('name')}">
                 <label class="sr-only" for="name">Name (your login)</label>
                 <input id="name" name="name" ng-model="credentials.name" type="text" class="form-control input-sm"
-                       placeholder="Name (your public display name)"
-                       pattern="^..." required>
+                       placeholder="Name"
+                       pattern="^..." required autofocus>
+                <span class="glyphicon form-control-feedback"
+                      ng-class="{'glyphicon-ok':hasSuccess('name'), 'glyphicon-warning-sign': hasError('name')}"></span>
+
+                <div ng-show="hasError('name')">
+                    <span class="help-block small" ng-show="loginForm.name.$error.required">Name is required.</span>
+                    <span class="help-block small" ng-show="loginForm.name.$error.pattern">Name too short.</span>
+                </div>
             </div>
             <div class="form-group has-feedback"
                  ng-class="{'has-warning': hasError('password'), 'has-success': hasSuccess('password')}">
@@ -21,13 +28,23 @@
                        class="form-control input-sm"
                        placeholder="Password"
                        pattern="^...." required>
+                <span class="glyphicon form-control-feedback"
+                      ng-class="{'glyphicon-ok':hasSuccess('password'), 'glyphicon-warning-sign': hasError('password')}"></span>
+
+                <div ng-show="hasError('password')">
+                    <span class="help-block small"
+                          ng-show="loginForm.password.$error.required">Passowrd is required.</span>
+                    <span class="help-block small"
+                          ng-show="loginForm.password.$error.pattern">Passowrd too short.</span>
+                </div>
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-sm btn-default btn-primary" ng-disabled="loginForm.$clean
+            <button type="submit" class="btn btn-sm btn-default btn-primary" ng-disabled="loginForm.$clean
              || loginForm.$invalid">
                 login
             </button>
         </div>
+        <div id="alert-container"></div>
     </div>
 </form>

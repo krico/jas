@@ -1,0 +1,16 @@
+<div class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" ng-show="title">
+                <button type="button" class="close" ng-click="$hide()">&times;</button>
+                <h4 class="modal-title text-danger"><span class="glyphicon glyphicon-remove"></span> {{title}}</h4>
+            </div>
+            <div class="modal-body text-danger" ng-show="content">
+                <p>{{content}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-danger" ng-click="$hide()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

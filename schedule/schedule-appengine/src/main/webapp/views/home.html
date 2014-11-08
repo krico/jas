@@ -9,5 +9,15 @@
     </p>
 </div>
 <div ng-show="user">
-    <h3><span class="label label-default"><span class="glyphicon glyphicon-home"></span> {{user.name}}'s</span></h3>
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading"><span class="glyphicon glyphicon-home"></span> {{user.name}}</div>
+        <div class="panel-body">
+            <div class="well" ng-show="user.about">{{user.about}}</div>
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe class="embed-responsive-item" src="//www.youtube.com/embed/vx5n21zHPm8?rel=0"
+                        allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
 </div>

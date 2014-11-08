@@ -2,7 +2,7 @@
 
 Features:
 
-  - SignUp view, our first view!  To get it going we had to setup
+  - SignUp view (backend-less), our first view!  To get it going we had to setup
     - routing + navbar
     - backend-less support (index.html?nobackend)
     - form validation + ngModel
@@ -11,10 +11,22 @@ Features:
     - Angular directives with custom validators
     - angular-strap (better connection bootstrap : angular)
     - spinner.js to show a spinner as we check the username
+  - Navbar (detect login/logout and change)
+  - Login view (backend-less)
+  - Profile view (backend-less)
+  - Logout (backend-less)
   - mvn appengine:devserver works!
 
 Changes:
 
+  - application.js contains core functionality, namely
+    - jasifyScheduleApp - the main application
+    - routing configuration
+    - Service definitions (Modal - to display modal dialogs, Auth - for authentication/authorization ,
+      Util - the name says it all, User - CRUD operations on user)
+    - directives (strongPassword, confirmField)
+  - controllers.js contains all controllers (one per view + one for the navbar)
+  - backend-less.js has the necessary code to mock our backend and to allow development of the frontend independently.
   - installed angular-resource: `bower install angular-resource -S` to provide higher level access to $http
   - installed angular-spinner: `bower install angular-spinner -S` so we can show a spinner while loading stuff, spin.js was brought in
   - installed angular-mocks: `bower install angular-mocks -S` to allow us to mock the backend
