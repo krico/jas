@@ -6,10 +6,11 @@
 
     <groupId>com.jasify</groupId>
     <artifactId>jasify</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
 
     <packaging>pom</packaging>
     <name>Jasify</name>
+
     <properties>
         <jasify.appengine.sdk.version>1.9.14</jasify.appengine.sdk.version>
     </properties>
