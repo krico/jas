@@ -51,6 +51,11 @@ public final class UserServiceFactory {
             }
             tx.commit();
         }
+
+        @Override
+        public User getUser(long id) {
+            return Datastore.getOrNull(User.class, Datastore.createKey(User.class, id));
+        }
     }
 
 }

@@ -10,4 +10,6 @@ public interface UserService {
     User newUser();
 
     void create(User user, String password) throws UsernameExistsException;
+
+    User getUser(long id);
 }
