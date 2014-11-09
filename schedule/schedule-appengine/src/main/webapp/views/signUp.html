@@ -46,7 +46,7 @@
                     <span class="help-block"
                           ng-show="signUpForm.password.$error.required">Please choose a password.</span>
                     <span class="help-block"
-                          ng-show="signUpForm.password.$error.strongPassword">Password must be at least 4 characters long.</span>
+                          ng-show="signUpForm.password.$error.strongPassword">The password must be at least 8 characters with at least one upper-case, one lower-case, and one number.</span>
                 </div>
             </div>
             <div class="form-group has-feedback"
@@ -55,6 +55,7 @@
                 <input id="confirm" type="password" name="confirm" ng-model="user.confirmPassword"
                        class="form-control input-sm" placeholder="Confirm password" required
                        confirm-field="signUpForm.password">
+
                 <span class="glyphicon form-control-feedback"
                       ng-class="{'glyphicon-ok':hasSuccess('confirm'), 'glyphicon-remove': hasError('confirm')}"></span>
 

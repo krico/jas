@@ -52,13 +52,18 @@ jasifyScheduleApp.directive('strongPassword', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.strongPassword = function (modelValue, viewValue) {
                 if (ctrl.$isEmpty(modelValue)) {
-                    return false;
+                    return false; // No password
                 }
 
-                if (modelValue.length >= 4) {
-                    return true;
-                }
-                return false;
+                var pwdValidLength = (modelValue && modelValue.length >= 8 ? true : false);
+                var pwdHasUpperLetter = (modelValue && /[A-Z]/.test(modelValue)) ? true : false;
+                var pwdHasLowerLetter = (modelValue && /[a-z]/.test(modelValue)) ? true : false;
+                var pwdHasNumber = (modelValue && /\d/.test(modelValue)) ? true : false;
+
+                var status = pwdValidLength && pwdHasUpperLetter && pwdHasLowerLetter && pwdHasNumber;
+                ctrl.$setValidity('pwd', status);
+
+                return status;
             };
         }
     };

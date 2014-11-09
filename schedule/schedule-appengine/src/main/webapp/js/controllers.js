@@ -14,8 +14,8 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
     function ($scope) {
     }]);
 
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', 'User',
-    function ($scope, $http, User) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$tooltip', 'User',
+    function ($scope, $http, $tooltip, User) {
 
         $scope.usernameCheck = {};
 
