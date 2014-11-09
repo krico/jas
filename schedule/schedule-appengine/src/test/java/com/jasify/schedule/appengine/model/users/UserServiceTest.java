@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelTestHelper;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.apache.commons.lang3.RandomUtils;
@@ -127,6 +128,8 @@ public class UserServiceTest {
     public void testSaveUser() throws Exception {
         testCreateUser();
         User user = service.get(createdUsers.get(0).getId().getId());
+        String expectedCase = "KriCo";
+        user.setNameWithCase(expectedCase);
         Text expectedAbout = new Text("About me");
         user.setAbout(expectedAbout);
         Email expectedEmail = new Email("test@test.com");
@@ -137,12 +140,30 @@ public class UserServiceTest {
         assertNotNull(updated);
         assertEquals(expectedAbout, updated.getAbout());
         assertEquals(expectedEmail, updated.getEmail());
+        assertEquals(expectedCase, updated.getNameWithCase());
         assertEquals(1, updated.getPermissions().size());
         assertTrue(updated.hasPermission(Permissions.USER));
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void testSaveNonExistentUserThrows() throws Exception {
+    public void testSaveEntityNotFound() throws Exception {
         service.save(service.newUser());
+    }
+
+    @Test(expected = FieldValueException.class)
+    public void testSaveFieldValueExceptionWithChangeName() throws Exception {
+        User user = service.newUser();
+        user.setName("TesT");
+        service.create(user, "password");
+        user.setName("TesT1");
+        service.save(user);
+    }
+    @Test(expected = FieldValueException.class)
+    public void testSaveFieldValueExceptionWithChangeNameWithCase() throws Exception {
+        User user = service.newUser();
+        user.setName("TesT");
+        service.create(user, "password");
+        user.setNameWithCase("test1");
+        service.save(user);
     }
 }

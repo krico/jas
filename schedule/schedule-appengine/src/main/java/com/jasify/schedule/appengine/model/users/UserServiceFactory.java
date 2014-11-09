@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.util.DigestUtil;
@@ -27,11 +28,7 @@ public final class UserServiceFactory {
         private final UserMeta userMeta;
 
         private DefaultUserService() {
-            try {
-                uniqueName = new UniqueConstraint(UserMeta.get(), "name");
-            } catch (UniqueConstraintException e) {
-                throw new IllegalStateException("Cannot create unique constraint for 'name'", e);
-            }
+            uniqueName = UniqueConstraint.create(UserMeta.get(), "name");
             userMeta = UserMeta.get();
         }
 
@@ -60,12 +57,19 @@ public final class UserServiceFactory {
         }
 
         @Override
-        public void save(User user) throws UsernameExistsException, EntityNotFoundException {
+        public void save(User user) throws EntityNotFoundException, FieldValueException {
             Transaction tx = Datastore.beginTransaction();
             User db = Datastore.getOrNull(tx, userMeta, user.getId());
             if (db == null) {
                 tx.rollback();
                 throw new EntityNotFoundException();
+            }
+
+            if (!StringUtils.equals(db.getName(), user.getName())) {
+                throw new FieldValueException("Cannot change 'name' with save();");
+            }
+            if (!StringUtils.equalsIgnoreCase(db.getName(), user.getNameWithCase())) {
+                throw new FieldValueException("Cannot change 'name' casing with save();");
             }
             db.setAbout(user.getAbout());
             db.setPermissions(user.getPermissions());

@@ -27,11 +27,19 @@ public class UniqueConstraint {
     private final String uniquePropertyName;
     private final String uniqueKind;
 
-    public UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName) throws UniqueConstraintException {
+    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName) throws UniqueConstraintException {
         this.datastore = DatastoreServiceFactory.getDatastoreService();
         this.meta = meta;
         this.uniquePropertyName = uniquePropertyName;
         this.uniqueKind = determineKind();
+    }
+
+    public static UniqueConstraint create(ModelMeta<?> meta, String uniquePropertyName) throws RuntimeException {
+        try {
+            return new UniqueConstraint(meta, uniquePropertyName);
+        } catch (UniqueConstraintException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getUniqueKind() {

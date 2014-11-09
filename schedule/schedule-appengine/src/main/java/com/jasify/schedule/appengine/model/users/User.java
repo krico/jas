@@ -110,9 +110,6 @@ public class User {
     }
 
     public boolean addPermission(Category newPermission) {
-        if (permissions == null) {
-            permissions = new HashSet<>(1);
-        }
         return permissions.add(newPermission);
     }
 

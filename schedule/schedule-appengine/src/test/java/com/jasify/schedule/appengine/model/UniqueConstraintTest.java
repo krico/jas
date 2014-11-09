@@ -47,6 +47,17 @@ public class UniqueConstraintTest {
         new UniqueConstraint(UserMeta.get(), "name");
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testCreateThrowsUniqueConstraintException() throws Exception {
+        User u = new User();
+        u.setName("user");
+        User u2 = new User();
+        u2.setName("user");
+        Datastore.put(u);
+        Datastore.put(u2);
+        UniqueConstraint.create(UserMeta.get(), "name");
+    }
+
     @Test
     public void testReserve() throws Exception {
         UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
