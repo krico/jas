@@ -26,6 +26,9 @@ public class User {
 
     private String name;
 
+    /* If the user wants his username like BigTom we keep it here with the case */
+    private String nameWithCase;
+
     private Email email;
 
     private Text about;
@@ -64,6 +67,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNameWithCase() {
+        return nameWithCase;
+    }
+
+    public void setNameWithCase(String nameWithCase) {
+        this.nameWithCase = nameWithCase;
     }
 
     public Email getEmail() {
@@ -123,6 +134,7 @@ public class User {
         if (id != null ? !id.equals(user.id) : user.id != null) return false;
         if (modified != null ? !modified.equals(user.modified) : user.modified != null) return false;
         if (name != null ? !name.equals(user.name) : user.name != null) return false;
+        if (nameWithCase != null ? !nameWithCase.equals(user.nameWithCase) : user.nameWithCase != null) return false;
         if (password != null ? !password.equals(user.password) : user.password != null) return false;
         if (permissions != null ? !permissions.equals(user.permissions) : user.permissions != null) return false;
 

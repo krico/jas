@@ -22,7 +22,6 @@ public class DigestUtilTest {
         String password = "password";
         byte[] encrypted = DigestUtil.encrypt(password);
 
-        System.out.println("E: " + ArrayUtils.toString(encrypted));
         assertNotNull(encrypted);
         assertTrue(encrypted.length > 32);
         assertNotSame(password, new String(encrypted));

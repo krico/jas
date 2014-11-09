@@ -51,6 +51,14 @@ public class UniqueConstraintTest {
     public void testReserve() throws Exception {
         UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
         uc.reserve("krico");
+        uc.release("krico");
+        uc.reserve("krico");
+    }
+
+    @Test
+    public void testRelease() throws Exception {
+        UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
+        uc.reserve("krico");
     }
 
     @Test(expected = UniqueConstraintException.class)

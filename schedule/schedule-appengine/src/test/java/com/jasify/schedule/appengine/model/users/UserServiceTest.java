@@ -1,6 +1,9 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.ShortBlob;
+import com.google.appengine.api.datastore.Text;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.ModelTestHelper;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.apache.commons.lang3.RandomUtils;
@@ -72,17 +75,27 @@ public class UserServiceTest {
         service.create(user2, "password2");
     }
 
+    @Test(expected = UsernameExistsException.class)
+    public void testCreateUserWithSameNameAndDifferentCaseThrows() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("krico");
+        service.create(user1, "password1");
+        User user2 = service.newUser();
+        user2.setName("kriCo");
+        service.create(user2, "password2");
+    }
+
     @Test
     public void testGet() throws Exception {
         testCreateUser();
         HashSet<Long> usedIds = new HashSet<>();
         User expected1 = createdUsers.get(0);
         long id1 = expected1.getId().getId();
-        User user1 = service.getUser(id1);
+        User user1 = service.get(id1);
         assertEquals("\nE:" + expected1.debugString() + "\nV:" + user1.debugString(), expected1, user1);
         User expected2 = createdUsers.get(1);
         long id2 = expected2.getId().getId();
-        User user2 = service.getUser(id2);
+        User user2 = service.get(id2);
         assertEquals(expected2, user2);
         usedIds.add(id1);
         usedIds.add(id2);
@@ -92,7 +105,44 @@ public class UserServiceTest {
             do {
                 id = RandomUtils.nextLong(0, 2000000);
             } while (usedIds.contains(id));
-            assertNull(service.getUser(id));
+            assertNull(service.get(id));
         }
+    }
+
+    @Test
+    public void testFindUserByName() throws Exception {
+        testCreateUser();
+        User user = createdUsers.get(0);
+        User krico = service.findByName(user.getName().toUpperCase());
+        assertNotNull("Upper case", krico);
+        assertEquals(user, krico);
+        krico = service.findByName(user.getName().toLowerCase());
+        assertNotNull(krico);
+        assertEquals(user, krico);
+
+        assertNull(service.findByName("sasquatch"));
+    }
+
+    @Test
+    public void testSaveUser() throws Exception {
+        testCreateUser();
+        User user = service.get(createdUsers.get(0).getId().getId());
+        Text expectedAbout = new Text("About me");
+        user.setAbout(expectedAbout);
+        Email expectedEmail = new Email("test@test.com");
+        user.setEmail(expectedEmail);
+        user.addPermission(Permissions.USER);
+        service.save(user);
+        User updated = service.get(user.getId().getId());
+        assertNotNull(updated);
+        assertEquals(expectedAbout, updated.getAbout());
+        assertEquals(expectedEmail, updated.getEmail());
+        assertEquals(1, updated.getPermissions().size());
+        assertTrue(updated.hasPermission(Permissions.USER));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testSaveNonExistentUserThrows() throws Exception {
+        service.save(service.newUser());
     }
 }

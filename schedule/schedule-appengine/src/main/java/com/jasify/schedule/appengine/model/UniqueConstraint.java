@@ -54,11 +54,8 @@ public class UniqueConstraint {
         Transaction txn = datastore.beginTransaction();
         Key indexKey = applicationData.createPropertyKey(getEntityKindPropertyName());
         indexProperty = Datastore.getOrNull(txn, ApplicationProperty.class, indexKey);
-        if (indexProperty != null) {
-            log.warn("We weren't expecting property: {}", indexProperty);
-            txn.rollback();
-            return indexProperty.getValue();
-        }
+
+        assert indexProperty == null;
 
         indexProperty = new ApplicationProperty();
         indexProperty.setKey(indexKey);
@@ -75,13 +72,13 @@ public class UniqueConstraint {
         countProperty.setValue(++count);
 
         indexProperty.setValue(String.format(Constants.UNIQUE_CONSTRAINT_PREFIX + "%03d", count));
-        Datastore.put(countProperty);
-        Datastore.put(applicationData.getApplication());
+        Datastore.put(txn, countProperty);
+        Datastore.put(txn, applicationData.getApplication());
         UniqueConstraintException uce = null;
         try {
             createIndex(indexProperty.<String>getValue());
 
-            Datastore.put(indexProperty); //only put if createIndex works
+            Datastore.put(txn, indexProperty); //only put if createIndex works
         } catch (UniqueConstraintException e) {
             uce = e;
             log.warn("The existing data for {}.{} is non-unique. We failed to create index {}", meta.getKind(), uniquePropertyName, indexProperty.getValue());
@@ -114,7 +111,7 @@ public class UniqueConstraint {
                 tx.rollback();
                 throw new UniqueConstraintException(meta, uniquePropertyName, uniqueProperty);
             }
-            Datastore.put(e);
+            Datastore.put(tx, e);
             tx.commit();
             ++count;
         }
@@ -135,12 +132,22 @@ public class UniqueConstraint {
     public void reserve(String uniqueValue) throws UniqueConstraintException {
         Transaction tx = Datastore.beginTransaction();
         Key key = Datastore.createKey(uniqueKind, uniqueValue);
-        Entity entity = Datastore.getOrNull(key);
+        Entity entity = Datastore.getOrNull(tx, key);
         if (entity != null) {
             tx.rollback();
             throw new UniqueConstraintException(meta, uniquePropertyName, uniqueValue);
         }
-        Datastore.put(new Entity(uniqueKind, uniqueValue));
+        Datastore.put(tx, new Entity(uniqueKind, uniqueValue));
+        tx.commit();
+    }
+
+    public void release(String uniqueValue) {
+        Transaction tx = Datastore.beginTransaction();
+        Key key = Datastore.createKey(uniqueKind, uniqueValue);
+        Entity entity = Datastore.getOrNull(tx, key);
+        if (entity != null) {
+            Datastore.delete(tx, key);
+        }
         tx.commit();
     }
 }

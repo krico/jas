@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+
 /**
  * Created by krico on 08/11/14.
  */
@@ -11,5 +13,9 @@ public interface UserService {
 
     void create(User user, String password) throws UsernameExistsException;
 
-    User getUser(long id);
+    void save(User user) throws UsernameExistsException, EntityNotFoundException;
+
+    User get(long id);
+
+    User findByName(String name);
 }
