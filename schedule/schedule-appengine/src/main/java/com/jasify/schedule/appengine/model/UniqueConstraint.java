@@ -131,4 +131,16 @@ public class UniqueConstraint {
         }
         log.info("Successfully deleted all({}) entries index {} for {}.{}", count, kind, meta.getKind(), uniquePropertyName);
     }
+
+    public void reserve(String uniqueValue) throws UniqueConstraintException {
+        Transaction tx = Datastore.beginTransaction();
+        Key key = Datastore.createKey(uniqueKind, uniqueValue);
+        Entity entity = Datastore.getOrNull(key);
+        if (entity != null) {
+            tx.rollback();
+            throw new UniqueConstraintException(meta, uniquePropertyName, uniqueValue);
+        }
+        Datastore.put(new Entity(uniqueKind, uniqueValue));
+        tx.commit();
+    }
 }

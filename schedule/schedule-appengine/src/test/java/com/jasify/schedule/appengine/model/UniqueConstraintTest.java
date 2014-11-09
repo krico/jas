@@ -26,7 +26,6 @@ public class UniqueConstraintTest {
 
     @Test
     public void testConstructorHasRightPrefixAndIsPersistent() throws Exception {
-
         UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
         assertNotNull(uc.getUniqueKind());
         assertTrue(uc.getUniqueKind().startsWith(Constants.UNIQUE_CONSTRAINT_PREFIX));
@@ -48,5 +47,17 @@ public class UniqueConstraintTest {
         new UniqueConstraint(UserMeta.get(), "name");
     }
 
+    @Test
+    public void testReserve() throws Exception {
+        UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
+        uc.reserve("krico");
+    }
+
+    @Test(expected = UniqueConstraintException.class)
+    public void testReserveThrows() throws Exception {
+        UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
+        uc.reserve("krico");
+        uc.reserve("krico");
+    }
 
 }
