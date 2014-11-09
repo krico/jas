@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model;
 
 import com.jasify.schedule.appengine.Constants;
+import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
@@ -15,13 +16,12 @@ public class UniqueConstraintTest {
 
     @Before
     public void initializeDatastore() {
-        ModelTestHelper.initializeDatastore();
-        ApplicationData.instance().reload();
+        TestHelper.initializeJasify();
     }
 
     @After
     public void cleanupDatastore() {
-        ModelTestHelper.cleanupDatastore();
+        TestHelper.cleanupDatastore();
     }
 
     @Test

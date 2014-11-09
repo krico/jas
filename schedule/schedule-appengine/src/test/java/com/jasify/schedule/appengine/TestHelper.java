@@ -1,5 +1,10 @@
 package com.jasify.schedule.appengine;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -10,6 +15,9 @@ import static junit.framework.TestCase.*;
  * Created by krico on 09/11/14.
  */
 public final class TestHelper {
+    private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    private static final LocalServiceTestHelper memcacheHelper = new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
+
     private TestHelper() {
     }
 
@@ -30,5 +38,26 @@ public final class TestHelper {
                 fail(name + " must have only static methods:" + method);
             }
         }
+    }
+
+    public static void initializeJasify() {
+        initializeDatastore();
+        ApplicationData.instance().reload();
+    }
+
+    public static void initializeDatastore() {
+        datastoreHelper.setUp();
+    }
+
+    public static void cleanupDatastore() {
+        datastoreHelper.tearDown();
+    }
+
+    public static void initializeMemcache() {
+        memcacheHelper.setUp();
+    }
+
+    public static void cleanupMemcache() {
+        memcacheHelper.tearDown();
     }
 }

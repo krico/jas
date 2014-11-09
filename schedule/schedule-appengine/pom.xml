@@ -146,6 +146,12 @@
             <version>${jasify.appengine.sdk.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>httpunit</groupId>
+            <artifactId>httpunit</artifactId>
+            <version>1.7</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

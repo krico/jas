@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.model.users;
 
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.ModelTestHelper;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.junit.After;
 import org.junit.Before;
@@ -12,13 +11,12 @@ import static junit.framework.TestCase.assertNotNull;
 public class UserServiceFactoryTest {
     @Before
     public void initializeDatastore() {
-        ModelTestHelper.initializeDatastore();
-        ApplicationData.instance().reload();
+        TestHelper.initializeJasify();
     }
 
     @After
     public void cleanupDatastore() {
-        ModelTestHelper.cleanupDatastore();
+        TestHelper.cleanupDatastore();
     }
 
     @Test

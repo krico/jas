@@ -3,9 +3,9 @@ package com.jasify.schedule.appengine.model.users;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
+import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.ModelTestHelper;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.After;
@@ -27,15 +27,14 @@ public class UserServiceTest {
 
     @Before
     public void initializeDatastore() {
-        ModelTestHelper.initializeDatastore();
+        TestHelper.initializeJasify();
         service = UserServiceFactory.getUserService();
-        ApplicationData.instance().reload();
     }
 
     @After
     public void cleanupDatastore() {
         service = null;
-        ModelTestHelper.cleanupDatastore();
+        TestHelper.cleanupDatastore();
     }
 
     @Test

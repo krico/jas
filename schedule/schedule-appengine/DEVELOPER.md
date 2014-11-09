@@ -14,3 +14,4 @@ Notes for developers working on schedule-appengine...
  * [AppEngine java stuff](https://cloud.google.com/appengine/docs/java/)
  * [Slim3](https://sites.google.com/site/slim3appengine/) our data store framework
  * [Unit Testing Google Cloud](https://cloud.google.com/appengine/docs/java/tools/localunittesting) unit tests for AppEngine
+ * [ServletUnit](http://httpunit.sourceforge.net/doc/servletunit-intro.html) part of HttpUnit to unit test servlets

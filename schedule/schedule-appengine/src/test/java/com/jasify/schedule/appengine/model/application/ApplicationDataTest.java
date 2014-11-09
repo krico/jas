@@ -3,7 +3,7 @@ package com.jasify.schedule.appengine.model.application;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
-import com.jasify.schedule.appengine.model.ModelTestHelper;
+import com.jasify.schedule.appengine.TestHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,12 +21,12 @@ public class ApplicationDataTest {
 
     @Before
     public void initializeDatastore() {
-        ModelTestHelper.initializeDatastore();
+        TestHelper.initializeDatastore();
     }
 
     @After
     public void cleanupDatastore() {
-        ModelTestHelper.cleanupDatastore();
+        TestHelper.cleanupDatastore();
     }
 
     @Test
@@ -39,7 +39,7 @@ public class ApplicationDataTest {
 
     @Test
     public void testGetSetProperties() {
-        ApplicationData instance = ApplicationData.instance();
+        ApplicationData instance = ApplicationData.instance().reload();
         List<String> list = new ArrayList<>();
         list.add("One");
         list.add("Two");
