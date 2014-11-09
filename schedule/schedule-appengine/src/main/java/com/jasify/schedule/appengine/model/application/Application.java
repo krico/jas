@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.slim3.datastore.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -54,6 +55,10 @@ public class Application {
         this.modified = modified;
     }
 
+    Key createPropertyKey(String keyName) {
+        return Datastore.createKey(name, ApplicationProperty.class, keyName);
+    }
+
     TreeMap<String, Object> getProperties() {
         return properties;
     }
@@ -62,10 +67,13 @@ public class Application {
         this.properties = properties;
     }
 
-    void loadProperties(Transaction tx) {
+    List<ApplicationProperty> listProperties(Transaction tx) {
+        return Datastore.query(tx, ApplicationPropertyMeta.get(), getName()).asList();
+    }
+
+    void reloadProperties(Transaction tx) {
         TreeMap<String, Object> properties = new TreeMap<>();
-        ApplicationPropertyMeta meta = ApplicationPropertyMeta.get();
-        for (ApplicationProperty p : Datastore.query(tx, meta, getName()).asIterable()) {
+        for (ApplicationProperty p : listProperties(tx)) {
             log.debug("Loaded: {}", p);
             String key = p.getKey().getName();
             Object value = p.getValue();

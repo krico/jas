@@ -21,32 +21,40 @@ public final class ApplicationData {
         application = loadApplication();
     }
 
+    public static ApplicationData instance() {
+        return Singleton.INSTANCE; //initialize lazily
+    }
+
     public <T> void setProperty(String keyName, T value) {
         log.debug("Setting AppProp[{}]", keyName);
         Transaction tx = Datastore.beginTransaction();
-        Key key = Datastore.createKey(application.getName(), ApplicationProperty.class, keyName);
-        ApplicationProperty property;
-        try {
-            property = Datastore.getOrNull(tx, ApplicationProperty.class, key);
-            if (property == null) {
-                log.debug("New AppProp[{}] = [{}]", keyName, value);
-                property = new ApplicationProperty();
-                property.setKey(key);
-                property.setValue(value);
-            } else {
-                log.debug("Upd AppProp[{}] = [{}] -> [{}]", keyName, property.getValue(), value);
-                property.setValue(value);
-            }
-            Datastore.put(property);
-            Datastore.put(application);
-            log.debug("Wrote: {}", property);
-        } finally {
-            tx.commit();
+        Key key = createPropertyKey(keyName);
+        ApplicationProperty property = Datastore.getOrNull(tx, ApplicationProperty.class, key);
+        if (property == null) {
+            log.debug("New AppProp[{}] = [{}]", keyName, value);
+            property = new ApplicationProperty();
+            property.setKey(key);
+            property.setValue(value);
+        } else {
+            log.debug("Upd AppProp[{}] = [{}] -> [{}]", keyName, property.getValue(), value);
+            property.setValue(value);
         }
+        Datastore.put(property);
+        Datastore.put(application);
+        log.debug("Wrote: {}", property);
+        tx.commit();
         //Poor man's concurrency
         TreeMap<String, Object> replace = new TreeMap<>(application.getProperties());
         replace.put(keyName, property.getValue());
         application.setProperties(replace);
+    }
+
+    public Key createPropertyKey(String keyName) {
+        return application.createPropertyKey(keyName);
+    }
+
+    public Application getApplication() {
+        return application;
     }
 
     @SuppressWarnings("unchecked")
@@ -65,31 +73,27 @@ public final class ApplicationData {
                 application = new Application();
                 application.setName(name);
                 Datastore.put(tx, application);
-                log.info("Created: " + application);
+                log.info("Created: {}", application);
             } else {
-                log.info("Loaded: " + application);
+                log.info("Loaded: {}" + application);
             }
-            application.loadProperties(tx);
+            application.reloadProperties(tx);
             return application;
         } finally {
             tx.commit();
         }
     }
 
-    void reload() {
+    public ApplicationData reload() {
         log.info("Reloading application");
         Transaction tx = Datastore.beginTransaction();
         try {
-            application.loadProperties(tx);
+            application.reloadProperties(tx);
         } finally {
             tx.commit();
         }
-        log.info("Reloaded: " + application);
-    }
-
-
-    public static ApplicationData instance() {
-        return Singleton.INSTANCE; //initialize lazily
+        log.info("Reloaded: {}", application);
+        return this;
     }
 
     private static class Singleton {

@@ -9,6 +9,7 @@ import org.slim3.datastore.Model;
 import org.slim3.datastore.ModificationDate;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by krico on 09/11/14.
@@ -23,29 +24,48 @@ public class ApplicationProperty {
 
     @Attribute(listener = ModificationDate.class)
     private Date modified;
+    private TypeEnum type;
+    private String stringValue;
+    private Boolean booleanValue;
+    private Long longValue;
+    private Text textValue;
+    private Blob blobValue;
+    private List<String> listValue;
 
-    public static enum TypeEnum {
-        String, Boolean, Long, Text, Blob
+    public <T> T getValue() {
+        if (type == null) return null;
+        Object ret = null;
+        switch (type) {
+            case String:
+                ret = stringValue;
+                break;
+            case Boolean:
+                ret = booleanValue;
+                break;
+            case Long:
+                ret = longValue;
+                break;
+            case Text:
+                ret = textValue;
+                break;
+            case Blob:
+                ret = blobValue;
+                break;
+            case List:
+                ret = listValue;
+                break;
+        }
+        return (T) ret;
     }
 
-    private TypeEnum type;
-
-    private String stringValue;
-
-    private Boolean booleanValue;
-
-    private Long longValue;
-
-    private Text textValue;
-
-    private Blob blobValue;
-
+    @SuppressWarnings("unchecked")
     public <T> void setValue(T value) {
         stringValue = null;
         booleanValue = null;
         longValue = null;
         textValue = null;
         blobValue = null;
+        listValue = null;
         type = null;
         if (value instanceof String) {
             type = TypeEnum.String;
@@ -62,25 +82,10 @@ public class ApplicationProperty {
         } else if (value instanceof Blob) {
             type = TypeEnum.Blob;
             blobValue = (Blob) value;
+        } else if (value instanceof List) {
+            type = TypeEnum.List;
+            listValue = (List<String>) value;
         }
-    }
-
-    public Object getValue() {
-        if (type == null) return null;
-
-        switch (type) {
-            case String:
-                return stringValue;
-            case Boolean:
-                return booleanValue;
-            case Long:
-                return longValue;
-            case Text:
-                return textValue;
-            case Blob:
-                return blobValue;
-        }
-        return null;
     }
 
     public Key getKey() {
@@ -155,6 +160,14 @@ public class ApplicationProperty {
         this.blobValue = blobValue;
     }
 
+    public List<String> getListValue() {
+        return listValue;
+    }
+
+    public void setListValue(List<String> listValue) {
+        this.listValue = listValue;
+    }
+
     @Override
     public String toString() {
         return "ApplicationProperty{" +
@@ -164,5 +177,9 @@ public class ApplicationProperty {
                 ", type=" + type +
                 ", value=" + getValue() +
                 '}';
+    }
+
+    public static enum TypeEnum {
+        String, Boolean, Long, Text, Blob, List
     }
 }
