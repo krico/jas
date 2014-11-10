@@ -5,6 +5,7 @@ import com.jasify.schedule.appengine.model.users.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -17,10 +18,22 @@ import javax.servlet.http.HttpSessionBindingListener;
 public class UserSession implements HttpSessionBindingListener {
     static final String SESSION_KEY = "jus" /* jasify user session s*/;
     private static final Logger log = LoggerFactory.getLogger(UserSession.class);
+    private static final ThreadLocal<UserSession> CURRENT = new ThreadLocal<>();
     private final Key userId;
 
     public UserSession(User user) {
         this.userId = user.getId();
+    }
+
+    public static void setCurrent(ServletRequest req) {
+        UserSession current = null;
+        if (req instanceof HttpServletRequest)
+            current = get((HttpServletRequest) req);
+        CURRENT.set(current);
+    }
+
+    public static void clearCurrent() {
+        CURRENT.set(null);
     }
 
     public static UserSession get(HttpServletRequest req) {

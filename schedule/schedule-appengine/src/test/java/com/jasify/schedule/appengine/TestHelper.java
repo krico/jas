@@ -4,7 +4,9 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.meterware.servletunit.ServletRunner;
 
+import javax.servlet.http.HttpServlet;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -12,11 +14,13 @@ import java.lang.reflect.Modifier;
 import static junit.framework.TestCase.*;
 
 /**
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
 public final class TestHelper {
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     private static final LocalServiceTestHelper memcacheHelper = new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
+    private static ServletRunner servletRunner;
 
     private TestHelper() {
     }
@@ -45,6 +49,31 @@ public final class TestHelper {
         ApplicationData.instance().reload();
     }
 
+    public static ServletInfo si(String name, Class<? extends HttpServlet> servletClass) {
+        return new ServletInfo(name, servletClass);
+    }
+
+    public static void initializeServletRunner(String name, Class<? extends HttpServlet> klass) {
+        initializeServletRunner(si(name, klass));
+    }
+
+    public static void initializeServletRunner(ServletInfo... servlets) {
+        TestHelper.initializeJasify();
+        servletRunner = new ServletRunner();
+        for (ServletInfo servlet : servlets) {
+            servletRunner.registerServlet(servlet.name, servlet.klass.getName());
+        }
+    }
+
+    public static void cleanupServletRunner() {
+        servletRunner = null;
+        cleanupDatastore();
+    }
+
+    public static ServletRunner servletRunner() {
+        return servletRunner;
+    }
+
     public static void initializeDatastore() {
         datastoreHelper.setUp();
     }
@@ -59,5 +88,15 @@ public final class TestHelper {
 
     public static void cleanupMemcache() {
         memcacheHelper.tearDown();
+    }
+
+    public static class ServletInfo {
+        private final String name;
+        private final Class<? extends HttpServlet> klass;
+
+        private ServletInfo(String name, Class<? extends HttpServlet> klass) {
+            this.name = name;
+            this.klass = klass;
+        }
     }
 }

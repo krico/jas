@@ -10,14 +10,12 @@ public class UserServletTest {
 
     @Before
     public void servletRunner() {
-        TestHelper.initializeJasify();
-        servletRunner = new ServletRunner();
-        servletRunner.registerServlet("user", UserServlet.class.getName());
+        TestHelper.initializeServletRunner("user", UserServlet.class);
     }
 
     @After
     public void stopDatastore() {
-        TestHelper.cleanupDatastore();
+        TestHelper.cleanupServletRunner();
     }
 
 

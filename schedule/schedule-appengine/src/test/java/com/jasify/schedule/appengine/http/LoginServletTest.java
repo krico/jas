@@ -10,7 +10,6 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.meterware.servletunit.ServletRunner;
 import com.meterware.servletunit.ServletUnitClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,28 +17,28 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.jasify.schedule.appengine.TestHelper.si;
 import static junit.framework.TestCase.*;
 
 public class LoginServletTest {
-    private ServletRunner servletRunner;
 
     @Before
-    public void servletRunner() {
-        TestHelper.initializeJasify();
-        servletRunner = new ServletRunner();
-        servletRunner.registerServlet("login", LoginServlet.class.getName());
-        servletRunner.registerServlet("isLoggedIn", IsLoggedInServlet.class.getName());
-        servletRunner.registerServlet("logout", LogoutServlet.class.getName());
+    public void startServletRunner() {
+        TestHelper.initializeServletRunner(
+                si("login", LoginServlet.class),
+                si("logout", LogoutServlet.class),
+                si("isLoggedIn", IsLoggedInServlet.class)
+        );
     }
 
     @After
-    public void stopDatastore() {
-        TestHelper.cleanupDatastore();
+    public void stopServletRunner() {
+        TestHelper.cleanupServletRunner();
     }
 
     @Test
     public void testEmptyLoginFails() throws Exception {
-        ServletUnitClient client = servletRunner.newClient();
+        ServletUnitClient client = TestHelper.servletRunner().newClient();
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/login");
         WebResponse response = client.getResponse(request);
         assertNotNull("No response received", response);
@@ -55,7 +54,7 @@ public class LoginServletTest {
 
     @Test
     public void testBadCredentialsLoginFails() throws Exception {
-        ServletUnitClient client = servletRunner.newClient();
+        ServletUnitClient client = TestHelper.servletRunner().newClient();
         JsonLoginRequest req = new JsonLoginRequest("jas", "password");
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/login", IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
         WebResponse response = client.getResponse(request);
@@ -98,7 +97,7 @@ public class LoginServletTest {
         user.setName("jas");
         UserServiceFactory.getUserService().create(user, "password");
 
-        ServletUnitClient client = servletRunner.newClient();
+        ServletUnitClient client = TestHelper.servletRunner().newClient();
         JsonLoginRequest req = new JsonLoginRequest("jas", "password");
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/login", IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
         WebResponse response = client.getResponse(request);

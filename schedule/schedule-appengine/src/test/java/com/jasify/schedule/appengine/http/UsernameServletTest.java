@@ -6,7 +6,6 @@ import com.jasify.schedule.appengine.util.JSON;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.meterware.servletunit.ServletRunner;
 import com.meterware.servletunit.ServletUnitClient;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -17,23 +16,19 @@ import static junit.framework.TestCase.*;
 
 public class UsernameServletTest {
 
-    private ServletRunner servletRunner;
-
     @Before
     public void servletRunner() {
-        TestHelper.initializeJasify();
-        servletRunner = new ServletRunner();
-        servletRunner.registerServlet("username", UsernameServlet.class.getName());
+        TestHelper.initializeServletRunner("username", UsernameServlet.class);
     }
 
     @After
     public void stopDatastore() {
-        TestHelper.cleanupDatastore();
+        TestHelper.cleanupServletRunner();
     }
 
     @Test
     public void testPostEmpty() throws Exception {
-        ServletUnitClient client = servletRunner.newClient();
+        ServletUnitClient client = TestHelper.servletRunner().newClient();
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/username");
         WebResponse response = client.getResponse(request);
         assertNotNull("No response received", response);
@@ -49,7 +44,7 @@ public class UsernameServletTest {
 
     @Test
     public void testPostWithValidUsername() throws Exception {
-        ServletUnitClient client = servletRunner.newClient();
+        ServletUnitClient client = TestHelper.servletRunner().newClient();
 
         PostMethodWebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/username", IOUtils.toInputStream("krico"), JSON.CONTENT_TYPE);
 

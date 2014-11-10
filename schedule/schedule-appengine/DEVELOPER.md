@@ -2,6 +2,12 @@
 
 Notes for developers working on schedule-appengine...
 
+## Model (Slim3)
+
+ * If you get problems missing classes named *Meta (e.g. UserMeta) you need to run `mvn apt:process`
+ * If you change any class annotated with @Model (usually under com.jasify.schedule.appengine.model.users) you **MUST**
+ run `mvn apt:process`
+
 ## Links
 
  * [angular-spinner](https://github.com/urish/angular-spinner) and [spin.js](http://fgnass.github.io/spin.js/#!)
