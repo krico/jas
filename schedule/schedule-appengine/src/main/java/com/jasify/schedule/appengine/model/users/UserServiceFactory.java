@@ -88,6 +88,11 @@ public final class UserServiceFactory {
         public User findByName(String name) {
             return Datastore.query(User.class).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asSingle();
         }
+
+        @Override
+        public boolean exists(String name) {
+            return !Datastore.query(User.class).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asKeyList().isEmpty();
+        }
     }
 
 }

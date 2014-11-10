@@ -31,7 +31,6 @@ public class UsernameServlet extends HttpServlet {
         } else {
             resp.getWriter().append(new JsonResponse(StringUtils.join(reasons, reasons, '\n')).toJson());
         }
-        resp.getWriter().append(validate(username).toJson());
     }
 
     @Nonnull
