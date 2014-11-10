@@ -11,7 +11,7 @@ public class UserServletTest {
 
     @Before
     public void servletRunner() {
-        TestHelper.initializeServletRunner("user", UserServlet.class);
+        TestHelper.initializeServletRunner();
     }
 
     @After

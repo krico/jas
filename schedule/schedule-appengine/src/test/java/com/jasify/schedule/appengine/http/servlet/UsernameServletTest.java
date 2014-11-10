@@ -19,7 +19,7 @@ public class UsernameServletTest {
 
     @Before
     public void servletRunner() {
-        TestHelper.initializeServletRunner("username", UsernameServlet.class);
+        TestHelper.initializeServletRunner();
     }
 
     @After

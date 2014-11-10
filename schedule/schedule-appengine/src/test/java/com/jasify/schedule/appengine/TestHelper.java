@@ -5,8 +5,9 @@ import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestCo
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.meterware.servletunit.ServletRunner;
+import junit.framework.AssertionFailedError;
 
-import javax.servlet.http.HttpServlet;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -49,19 +50,28 @@ public final class TestHelper {
         ApplicationData.instance().reload();
     }
 
-    public static ServletInfo si(String name, Class<? extends HttpServlet> servletClass) {
-        return new ServletInfo(name, servletClass);
+    public static File baseDir() {
+        File file = new File(".");
+        do {
+            if (new File(file, "pom.xml").exists() &&
+                    new File(file, "README.md").exists() &&
+                    new File(file, "DEVELOPER.md").exists()) {
+                return file;
+            }
+        } while ((file = file.getParentFile()) != null);
+        throw new AssertionFailedError("Could not find BASE_DIR from " + new File(".").getAbsolutePath());
     }
 
-    public static void initializeServletRunner(String name, Class<? extends HttpServlet> klass) {
-        initializeServletRunner(si(name, klass));
+    public static File relPath(String path) {
+        return new File(baseDir(), path);
     }
 
-    public static void initializeServletRunner(ServletInfo... servlets) {
+    public static void initializeServletRunner() {
         TestHelper.initializeJasify();
-        servletRunner = new ServletRunner();
-        for (ServletInfo servlet : servlets) {
-            servletRunner.registerServlet(servlet.name, servlet.klass.getName());
+        try {
+            servletRunner = new ServletRunner(relPath("src/main/webapp/WEB-INF/web.xml"));
+        } catch (Exception e) {
+            throw new AssertionFailedError("Failed to create servletRunner: " + e);
         }
     }
 
@@ -88,15 +98,5 @@ public final class TestHelper {
 
     public static void cleanupMemcache() {
         memcacheHelper.tearDown();
-    }
-
-    public static class ServletInfo {
-        private final String name;
-        private final Class<? extends HttpServlet> klass;
-
-        private ServletInfo(String name, Class<? extends HttpServlet> klass) {
-            this.name = name;
-            this.klass = klass;
-        }
     }
 }

@@ -21,7 +21,7 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(JSON.CONTENT_TYPE);
-        UserSession userSession = UserSession.get(req);
+        UserSession userSession = UserSession.getCurrentSession();
         if (userSession == null) {
             resp.getWriter().append(NOK.toJson());
         } else {

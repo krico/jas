@@ -25,6 +25,10 @@ public class UserSession implements HttpSessionBindingListener {
         this.userId = user.getId();
     }
 
+    public static UserSession getCurrentSession() {
+        return CURRENT.get();
+    }
+
     public static void setCurrent(ServletRequest req) {
         UserSession current = null;
         if (req instanceof HttpServletRequest)

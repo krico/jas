@@ -22,8 +22,7 @@ public class IsLoggedInServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(JSON.CONTENT_TYPE);
-        UserSession userSession = UserSession.get(req);
-        if (userSession == null) {
+        if (UserSession.getCurrentSession() == null) {
             resp.getWriter().append(NOK.toJson());
         } else {
             resp.getWriter().append(OK.toJson());

@@ -3,9 +3,6 @@ package com.jasify.schedule.appengine.http.servlet;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
-import com.jasify.schedule.appengine.http.servlet.IsLoggedInServlet;
-import com.jasify.schedule.appengine.http.servlet.LoginServlet;
-import com.jasify.schedule.appengine.http.servlet.LogoutServlet;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.JSON;
@@ -20,18 +17,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.jasify.schedule.appengine.TestHelper.si;
 import static junit.framework.TestCase.*;
 
 public class LoginServletTest {
 
     @Before
     public void startServletRunner() {
-        TestHelper.initializeServletRunner(
-                si("login", LoginServlet.class),
-                si("logout", LogoutServlet.class),
-                si("isLoggedIn", IsLoggedInServlet.class)
-        );
+        TestHelper.initializeServletRunner();
     }
 
     @After
