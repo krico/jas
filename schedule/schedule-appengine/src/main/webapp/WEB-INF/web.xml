@@ -3,23 +3,23 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <servlet>
         <servlet-name>username</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.UsernameServlet</servlet-class>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.UsernameServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>login</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.LoginServlet</servlet-class>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.LoginServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>isLoggedIn</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.IsLoggedInServlet</servlet-class>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.IsLoggedInServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>logout</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.LogoutServlet</servlet-class>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.LogoutServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>user</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.UserServlet</servlet-class>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.UserServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>username</servlet-name>

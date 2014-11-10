@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.http;
+package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.util.JSON;

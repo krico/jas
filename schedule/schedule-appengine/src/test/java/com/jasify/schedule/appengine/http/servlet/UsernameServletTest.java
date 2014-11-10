@@ -1,7 +1,8 @@
-package com.jasify.schedule.appengine.http;
+package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
+import com.jasify.schedule.appengine.http.servlet.UsernameServlet;
 import com.jasify.schedule.appengine.util.JSON;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;

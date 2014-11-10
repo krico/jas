@@ -1,6 +1,7 @@
-package com.jasify.schedule.appengine.http;
+package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.http.servlet.UserServlet;
 import com.meterware.servletunit.ServletRunner;
 import org.junit.After;
 import org.junit.Before;

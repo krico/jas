@@ -1,5 +1,6 @@
-package com.jasify.schedule.appengine.http;
+package com.jasify.schedule.appengine.http.servlet;
 
+import com.jasify.schedule.appengine.http.UserSession;
 import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.model.users.LoginFailedException;

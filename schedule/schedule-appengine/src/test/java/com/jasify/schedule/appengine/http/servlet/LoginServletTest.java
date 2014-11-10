@@ -1,8 +1,11 @@
-package com.jasify.schedule.appengine.http;
+package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
+import com.jasify.schedule.appengine.http.servlet.IsLoggedInServlet;
+import com.jasify.schedule.appengine.http.servlet.LoginServlet;
+import com.jasify.schedule.appengine.http.servlet.LogoutServlet;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.JSON;
