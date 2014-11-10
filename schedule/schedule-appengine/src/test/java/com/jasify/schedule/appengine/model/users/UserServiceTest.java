@@ -6,7 +6,6 @@ import com.google.appengine.api.datastore.Text;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -121,6 +120,8 @@ public class UserServiceTest {
         assertEquals(user, krico);
 
         assertNull(service.findByName("sasquatch"));
+        assertNull(service.findByName(null));
+        assertNull(service.findByName(""));
     }
 
     @Test
@@ -157,6 +158,7 @@ public class UserServiceTest {
         user.setName("TesT1");
         service.save(user);
     }
+
     @Test(expected = FieldValueException.class)
     public void testSaveFieldValueExceptionWithChangeNameWithCase() throws Exception {
         User user = service.newUser();
@@ -164,5 +166,53 @@ public class UserServiceTest {
         service.create(user, "password");
         user.setNameWithCase("test1");
         service.save(user);
+    }
+
+    @Test
+    public void testUserLogin() throws Exception {
+        User user = service.newUser();
+        user.setName("TesT");
+        service.create(user, "password");
+        User login1 = service.login(user.getName(), "password");
+        assertNotNull(login1);
+        assertEquals(user.getName(), login1.getName());
+        User login2 = service.login(user.getName().toUpperCase(), "password");
+        assertNotNull(login2);
+        assertEquals(user.getName(), login2.getName());
+        User login3 = service.login(user.getName().toLowerCase(), "password");
+        assertNotNull(login3);
+        assertEquals(user.getName(), login3.getName());
+
+    }
+
+    @Test(expected = LoginFailedException.class)
+    public void testUserLoginWrongPasswordFails() throws Exception {
+        User user = service.newUser();
+        user.setName("TesT");
+        service.create(user, "password");
+        service.login(user.getName(), "passwordX");
+    }
+
+    @Test(expected = LoginFailedException.class)
+    public void testUserLoginNonExistentFails() throws Exception {
+        User user = service.newUser();
+        user.setName("TesT");
+        service.create(user, "password");
+        service.login(user.getName() + "x", "password");
+    }
+
+    @Test(expected = LoginFailedException.class)
+    public void testUserLoginEmptyNameFails() throws Exception {
+        service.login("", "password");
+    }
+
+    @Test(expected = LoginFailedException.class)
+    public void testUserLoginEmptyPasswordFails() throws Exception {
+        service.login("", "");
+    }
+
+    @Test(expected = LoginFailedException.class)
+    public void testUserLoginNullFails() throws Exception {
+        service.login(null, null);
     }
 }

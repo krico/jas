@@ -3,8 +3,11 @@ package com.jasify.schedule.appengine.model.users;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 
+import javax.annotation.Nonnull;
+
 /**
- * Created by krico on 08/11/14.
+ * @author krico
+ * @since 08/11/14.
  */
 public interface UserService {
     /**
@@ -21,4 +24,7 @@ public interface UserService {
     User findByName(String name);
 
     boolean exists(String name);
+
+    @Nonnull
+    User login(String name, String password) throws LoginFailedException;
 }

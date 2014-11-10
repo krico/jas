@@ -16,8 +16,8 @@ import java.util.Objects;
  * Created by krico on 09/11/14.
  */
 public final class DigestUtil {
-    private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA1";
     private static final Logger log = LoggerFactory.getLogger(DigestUtil.class);
+    private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA1";
     private static final int SALT_LENGTH = 8;
     /* The bigger this is, the longer it takes for it to be hacked (and checked) */
     private static final int ITERATIONS = 16192;

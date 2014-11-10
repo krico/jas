@@ -9,12 +9,18 @@ import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
+
+import javax.annotation.Nonnull;
 
 /**
  * Created by krico on 08/11/14.
  */
 public final class UserServiceFactory {
+    private static final Logger log = LoggerFactory.getLogger(UserServiceFactory.class);
+
     private UserServiceFactory() {
     }
 
@@ -86,12 +92,32 @@ public final class UserServiceFactory {
 
         @Override
         public User findByName(String name) {
+            if (StringUtils.isBlank(name)) {
+                return null;
+            }
             return Datastore.query(User.class).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asSingle();
         }
 
         @Override
         public boolean exists(String name) {
             return !Datastore.query(User.class).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asKeyList().isEmpty();
+        }
+
+        @Nonnull
+        @Override
+        public User login(String name, String password) throws LoginFailedException {
+            //TODO: add login/logout history under user entity
+            User user = findByName(name);
+            if (user == null) {
+                log.debug("user={} not found.", name);
+                throw new LoginFailedException();
+            }
+            if (DigestUtil.verify(user.getPassword().getBytes(), password)) {
+                log.info("user={} logged in.", name);
+                return user;
+            }
+            log.info("user={} login failed!", name);
+            throw new LoginFailedException();
         }
     }
 

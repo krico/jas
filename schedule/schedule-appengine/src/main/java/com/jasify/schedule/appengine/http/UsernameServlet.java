@@ -22,6 +22,7 @@ public class UsernameServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //TODO: we should prevent username probing...  Make the checks slower after X attempts for example
         resp.setContentType(JSON.CONTENT_TYPE);
         String username = IOUtils.toString(req.getInputStream());
         List<String> reasons = UsernameValidator.INSTANCE.validate(username);

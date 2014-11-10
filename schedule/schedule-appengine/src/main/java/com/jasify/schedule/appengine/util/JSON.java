@@ -3,6 +3,8 @@ package com.jasify.schedule.appengine.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.Reader;
+
 /**
  * Created by krico on 09/11/14.
  */
@@ -24,5 +26,9 @@ public final class JSON {
 
     public static <T> T fromJson(String data, Class<T> klass) {
         return GSON.get().fromJson(data, klass);
+    }
+
+    public static <T> T fromJson(Reader reader, Class<T> klass) {
+        return GSON.get().fromJson(reader, klass);
     }
 }
