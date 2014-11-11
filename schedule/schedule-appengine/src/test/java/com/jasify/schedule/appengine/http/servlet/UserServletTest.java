@@ -83,6 +83,15 @@ public class UserServletTest {
     }
 
     @Test
+    public void testGetBadPath() throws Exception {
+        ServletUnitClient client = TestHelper.login("jas", "password");
+        WebRequest request = new GetMethodWebRequest("http://schedule.jasify.com/user/wrong");
+        InvocationContext ic = client.newInvocation(request);
+        ic.service();
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, ic.getServletResponse().getResponseCode());
+    }
+
+    @Test
     public void testGetCurrent() throws Exception {
         ServletUnitClient client = TestHelper.login("jas", "password");
         WebRequest request = new GetMethodWebRequest("http://schedule.jasify.com/user/current");

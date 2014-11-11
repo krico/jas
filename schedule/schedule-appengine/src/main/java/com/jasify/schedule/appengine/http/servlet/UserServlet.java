@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.http.servlet;
 
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.http.json.JsonUser;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
@@ -48,15 +49,8 @@ public class UserServlet extends HttpServlet {
             String matched = matcher.group(1);
             long userId = "current".equals(matched) ? currentUser.getUserId() : Long.parseLong(matched);
             if (userId == currentUser.getUserId()) { //TODO: isSysAdmin should be allowed
-                User user = UserServiceFactory.getUserService().get(userId);
-                if (user != null) {
-
-                    new JsonUser(user).toJson(resp.getWriter());
-
-                } else {
-                    log.warn("Weird GET access to {} by user {} but user NOT FOUND", currentUser);
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                }
+                User user = Preconditions.checkNotNull(UserServiceFactory.getUserService().get(userId), "Logged in user was deleted?");
+                new JsonUser(user).toJson(resp.getWriter());
             } else {
 
                 log.info("Unauthorized GET access to {} by user {}", currentUser);

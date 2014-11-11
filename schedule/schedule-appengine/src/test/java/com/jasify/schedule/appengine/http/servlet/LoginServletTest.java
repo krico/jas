@@ -104,7 +104,7 @@ public class LoginServletTest {
         assertNotNull(jr2);
         assertTrue(jr2.isOk());
 
-        WebRequest logoutRequest = new GetMethodWebRequest("http://schedule.jasify.com/logout");
+        WebRequest logoutRequest = new PostMethodWebRequest("http://schedule.jasify.com/logout"); /* try a post logout */
         WebResponse logoutResponse = client.getResponse(logoutRequest);
         assertNotNull("No response received", logoutResponse);
         assertEquals("content type", JSON.CONTENT_TYPE, logoutResponse.getContentType());
