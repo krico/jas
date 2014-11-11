@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Date;
 
 import static junit.framework.TestCase.*;
 
@@ -95,6 +96,7 @@ public final class TestHelper {
         assertNotNull("Must call initializeServletRunner", servletRunner);
         return servletRunner;
     }
+
     public static ServletUnitClient login(String name, String password) throws IOException, SAXException {
         ServletUnitClient client = servletRunner().newClient();
         JsonLoginRequest req = new JsonLoginRequest(name, password);
@@ -127,5 +129,15 @@ public final class TestHelper {
 
     public static void cleanupMemcache() {
         memcacheHelper.tearDown();
+    }
+
+    public static void assertEqualsNoMillis(Date d1, Date d2) {
+        if (d1 == null || d2 == null) {
+            assertEquals("both must be null", d1, d2);
+        } else {
+            long l1 = d1.getTime() / 1000L;
+            long l2 = d2.getTime() / 1000L;
+            assertEquals(new Date(l1 * 1000L), new Date(l2 * 1000L));
+        }
     }
 }

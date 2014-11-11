@@ -51,7 +51,7 @@ public final class DigestUtil {
             buffer.get(ret);
             return ret;
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException("This should not happen!  SHA-384 not found?", e);
+            throw new RuntimeException("This should not happen!  " + SECRET_KEY_ALGORITHM + " not found?", e);
         }
     }
 

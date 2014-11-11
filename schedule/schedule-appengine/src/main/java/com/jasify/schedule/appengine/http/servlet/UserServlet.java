@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class UserServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(UserServlet.class);
 
-    private static final Pattern PATH_INFO_PATTERN = Pattern.compile("^(?:/)([0-9]+)$");
+    private static final Pattern PATH_INFO_PATTERN = Pattern.compile("^(?:/)([0-9]+|current)$");
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -45,7 +45,8 @@ public class UserServlet extends HttpServlet {
         Matcher matcher = PATH_INFO_PATTERN.matcher(pathInfo);
         if (matcher.matches()) {
 
-            long userId = Long.parseLong(matcher.group(1));
+            String matched = matcher.group(1);
+            long userId = "current".equals(matched) ? currentUser.getUserId() : Long.parseLong(matched);
             if (userId == currentUser.getUserId()) { //TODO: isSysAdmin should be allowed
                 User user = UserServiceFactory.getUserService().get(userId);
                 if (user != null) {
