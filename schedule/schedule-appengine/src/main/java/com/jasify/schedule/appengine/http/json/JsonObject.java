@@ -3,9 +3,11 @@ package com.jasify.schedule.appengine.http.json;
 import com.jasify.schedule.appengine.util.JSON;
 
 import java.io.Reader;
+import java.io.Writer;
 
 /**
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
 public class JsonObject {
 
@@ -17,12 +19,16 @@ public class JsonObject {
         return JSON.fromJson(reader, JsonObject.class);
     }
 
-    @Override
-    public String toString() {
-        return toJson();
+    public void toJson(Writer writer) {
+        JSON.toJson(writer, this);
     }
 
     public String toJson() {
         return JSON.toJson(this);
+    }
+
+    @Override
+    public String toString() {
+        return toJson();
     }
 }

@@ -35,21 +35,21 @@ public class LoginServlet extends HttpServlet {
 
         if (jr == null) {
 
-            resp.getWriter().append(FAIL.toJson());
+            FAIL.toJson(resp.getWriter());
 
         } else {
 
             try {
 
                 User user = UserServiceFactory.getUserService().login(jr.getName(), jr.getPassword());
-                resp.getWriter().append(OK.toJson());
                 new UserSession(user).put(req);
+                OK.toJson(resp.getWriter());
                 log.info("[{}] user={} logged in!", req.getRemoteAddr(), user.getName());
 
             } catch (LoginFailedException e) {
 
                 log.info("[{}] user={} login failed!", req.getRemoteAddr(), jr.getName());
-                resp.getWriter().append(FAIL.toJson());
+                FAIL.toJson(resp.getWriter());
 
             }
 

@@ -6,7 +6,6 @@ import com.jasify.schedule.appengine.validators.UsernameValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,9 +15,13 @@ import java.util.List;
 
 /**
  * Servlet to verify that a username is valid and available
- * Created by krico on 09/11/14.
+ *
+ * @author krico
+ * @since 09/11/14.
  */
 public class UsernameServlet extends HttpServlet {
+
+    private final JsonResponse OK = new JsonResponse(true);
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -26,23 +29,10 @@ public class UsernameServlet extends HttpServlet {
         resp.setContentType(JSON.CONTENT_TYPE);
         String username = IOUtils.toString(req.getInputStream());
         List<String> reasons = UsernameValidator.INSTANCE.validate(username);
-        JsonResponse jr;
         if (reasons.isEmpty()) {
-            resp.getWriter().append(new JsonResponse(true).toJson());
+            OK.toJson(resp.getWriter());
         } else {
-            resp.getWriter().append(new JsonResponse(StringUtils.join(reasons, reasons, '\n')).toJson());
+            new JsonResponse(StringUtils.join(reasons, reasons, '\n')).toJson(resp.getWriter());
         }
-    }
-
-    @Nonnull
-    private JsonResponse validate(String username) {
-        if (StringUtils.isEmpty(username)) {
-            return new JsonResponse("Username cannot be empty.");
-        }
-
-        if (username.length() < 3) {
-            return new JsonResponse("Username cannot be empty.");
-        }
-        return new JsonResponse(true);
     }
 }

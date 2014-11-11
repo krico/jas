@@ -23,10 +23,14 @@ public class LogoutServlet extends HttpServlet {
         resp.setContentType(JSON.CONTENT_TYPE);
         UserSession userSession = UserSession.getCurrentSession();
         if (userSession == null) {
-            resp.getWriter().append(NOK.toJson());
+
+            NOK.toJson(resp.getWriter());
+
         } else {
+
             userSession.delete(req);
-            resp.getWriter().append(OK.toJson());
+            OK.toJson(resp.getWriter());
+
         }
 
     }
