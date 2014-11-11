@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.http;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.User;
@@ -13,12 +12,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
+import java.io.Serializable;
 
 /**
  * @author krico
  * @since 10/11/14.
  */
-public class HttpUserSession implements UserSession, HttpSessionBindingListener {
+public class HttpUserSession implements UserSession, HttpSessionBindingListener, Serializable {
     static final String SESSION_KEY = "jus" /* jasify user session s*/;
     private static final Logger log = LoggerFactory.getLogger(HttpUserSession.class);
     private final Key userId;
