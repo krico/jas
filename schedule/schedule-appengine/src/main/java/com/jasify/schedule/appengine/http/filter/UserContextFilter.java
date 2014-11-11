@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.http.filter;
 
-import com.jasify.schedule.appengine.http.UserSession;
+import com.jasify.schedule.appengine.http.HttpUserSession;
+import com.jasify.schedule.appengine.model.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,8 @@ import java.io.IOException;
  * @author krico
  * @since 10/11/14.
  */
-public class UserSessionFilter implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(UserSessionFilter.class);
+public class UserContextFilter implements Filter {
+    private static final Logger log = LoggerFactory.getLogger(UserContextFilter.class);
     private String filterName;
 
     @Override
@@ -23,11 +24,11 @@ public class UserSessionFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        UserSession.setCurrent(request);
+        UserContext.setContext(HttpUserSession.get(request), request, response);
         try {
             chain.doFilter(request, response);
         } finally {
-            UserSession.clearCurrent();
+            UserContext.clearContext();
         }
     }
 

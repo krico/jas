@@ -1,7 +1,8 @@
 package com.jasify.schedule.appengine.http.servlet;
 
-import com.jasify.schedule.appengine.http.UserSession;
+import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
+import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.util.JSON;
 
 import javax.servlet.ServletException;
@@ -22,7 +23,7 @@ public class IsLoggedInServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(JSON.CONTENT_TYPE);
-        if (UserSession.getCurrentSession() == null) {
+        if (UserContext.getCurrentUser() == null) {
             resp.getWriter().append(NOK.toJson());
         } else {
             resp.getWriter().append(OK.toJson());
