@@ -65,6 +65,7 @@ jasifyScheduleApp.factory('Modal', ['$log', '$modal', '$rootScope',
                 error.modal.show();
             }
         };
+        $log.debug("new Modal");
         return Modal;
     }]);
 /**
@@ -84,6 +85,7 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal'
             logout: function () {
                 $log.info("Log out!");
                 currentUser = null;
+                $http.get('/logout');
             },
 
             /**
@@ -156,6 +158,17 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal'
             }
 
         };
+        User.current(
+            //success
+            function (u, responseHeaders) {
+                Auth.setCurrentUser(u);
+            },
+            //error
+            function (httpResponse) {
+                $log.debug('Not logged in');//todo: remove
+            });
+
+        $log.debug("new Auth");
         return Auth;
     }]);
 
@@ -165,6 +178,8 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal'
  */
 jasifyScheduleApp.factory('Util', ['$log',
     function ($log) {
+        $log.debug("new Util");
+
         return {
             formFieldError: function (form, fieldName) {
                 var f = form[fieldName];
@@ -182,7 +197,8 @@ jasifyScheduleApp.factory('Util', ['$log',
 /**
  * User service
  */
-jasifyScheduleApp.factory('User', ['$resource', function ($resource) {
+jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {
+    $log.debug("new User");
     return $resource('/user/:id', {id: '@id'},
         {
             /* User.checkUsername([params], postData, [success], [error]) */
