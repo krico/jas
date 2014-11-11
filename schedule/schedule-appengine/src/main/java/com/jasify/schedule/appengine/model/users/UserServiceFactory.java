@@ -46,7 +46,7 @@ public final class UserServiceFactory {
         }
 
         @Override
-        public void create(User user, String password) throws UsernameExistsException {
+        public User create(User user, String password) throws UsernameExistsException {
             String withCase = user.getName();
             user.setNameWithCase(withCase);
             user.setName(StringUtils.lowerCase(withCase));
@@ -60,6 +60,7 @@ public final class UserServiceFactory {
                 throw new UsernameExistsException(e.getMessage());
             }
             tx.commit();
+            return user;
         }
 
         @Override

@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.http.json;
 
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.JSON;
+import com.jasify.schedule.appengine.util.TypeUtil;
 
 import java.io.Reader;
 import java.util.Date;
@@ -26,10 +27,14 @@ public class JsonUser extends JsonObject {
         created = user.getCreated();
         modified = user.getModified();
         name = user.getNameWithCase(); /* This is what the user wants to see */
-        email = user.getEmail() == null ? null : user.getEmail().getEmail();
-        about = user.getAbout() == null ? null : user.getAbout().getValue();
+        email = TypeUtil.toString(user.getEmail());
+        about = TypeUtil.toString(user.getAbout());
     }
 
+
+    public static JsonUser parse(String data) {
+        return JSON.fromJson(data, JsonUser.class);
+    }
 
     public static JsonUser parse(Reader reader) {
         return JSON.fromJson(reader, JsonUser.class);

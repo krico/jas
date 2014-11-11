@@ -15,7 +15,7 @@ public interface UserService {
      */
     User newUser();
 
-    void create(User user, String password) throws UsernameExistsException;
+    User create(User user, String password) throws UsernameExistsException;
 
     void save(User user) throws EntityNotFoundException, FieldValueException;
 

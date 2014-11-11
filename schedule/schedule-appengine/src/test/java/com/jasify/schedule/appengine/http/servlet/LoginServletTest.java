@@ -92,25 +92,13 @@ public class LoginServletTest {
         user.setName("jas");
         UserServiceFactory.getUserService().create(user, "password");
 
-        ServletUnitClient client = TestHelper.servletRunner().newClient();
-        JsonLoginRequest req = new JsonLoginRequest("jas", "password");
-        WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/login", IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        WebResponse response = client.getResponse(request);
-        assertNotNull("No response received", response);
-        assertEquals("content type", JSON.CONTENT_TYPE, response.getContentType());
-        String text = response.getText();
-        assertNotNull(text);
-        JsonResponse jr = JsonResponse.parse(text);
-        assertNotNull(jr);
-        assertFalse(jr.isNok());
-        assertTrue(jr.isOk());
-        assertTrue(StringUtils.isBlank(jr.getNokText()));
+        ServletUnitClient client = TestHelper.login("jas", "password");
 
         WebRequest isLoggedInRequest = new GetMethodWebRequest("http://schedule.jasify.com/isLoggedIn");
         WebResponse isLoggedInResponse = client.getResponse(isLoggedInRequest);
         assertNotNull("No response received", isLoggedInResponse);
         assertEquals("content type", JSON.CONTENT_TYPE, isLoggedInResponse.getContentType());
-        String isLoggedInText = response.getText();
+        String isLoggedInText = isLoggedInResponse.getText();
         assertNotNull(isLoggedInText);
         JsonResponse jr2 = JsonResponse.parse(isLoggedInText);
         assertNotNull(jr2);
@@ -120,7 +108,7 @@ public class LoginServletTest {
         WebResponse logoutResponse = client.getResponse(logoutRequest);
         assertNotNull("No response received", logoutResponse);
         assertEquals("content type", JSON.CONTENT_TYPE, logoutResponse.getContentType());
-        String logoutText = response.getText();
+        String logoutText = logoutResponse.getText();
         assertNotNull(logoutText);
         JsonResponse jr3 = JsonResponse.parse(logoutText);
         assertNotNull(jr3);

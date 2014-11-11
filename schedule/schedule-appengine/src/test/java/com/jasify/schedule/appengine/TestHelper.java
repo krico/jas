@@ -3,11 +3,22 @@ package com.jasify.schedule.appengine;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
+import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.jasify.schedule.appengine.util.JSON;
+import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.WebRequest;
+import com.meterware.httpunit.WebResponse;
 import com.meterware.servletunit.ServletRunner;
+import com.meterware.servletunit.ServletUnitClient;
 import junit.framework.AssertionFailedError;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -81,7 +92,25 @@ public final class TestHelper {
     }
 
     public static ServletRunner servletRunner() {
+        assertNotNull("Must call initializeServletRunner", servletRunner);
         return servletRunner;
+    }
+    public static ServletUnitClient login(String name, String password) throws IOException, SAXException {
+        ServletUnitClient client = servletRunner().newClient();
+        JsonLoginRequest req = new JsonLoginRequest(name, password);
+        WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/login", IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+        WebResponse response = client.getResponse(request);
+        assertNotNull("No response received", response);
+        assertEquals("content type", JSON.CONTENT_TYPE, response.getContentType());
+        String text = response.getText();
+        assertNotNull(text);
+        JsonResponse jr = JsonResponse.parse(text);
+        assertNotNull(jr);
+        assertFalse(jr.isNok());
+        assertTrue(jr.isOk());
+        assertTrue(StringUtils.isBlank(jr.getNokText()));
+
+        return client;
     }
 
     public static void initializeDatastore() {
