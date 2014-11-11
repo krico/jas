@@ -51,20 +51,21 @@ public final class UserServiceFactory {
             user.setNameWithCase(withCase);
             user.setName(StringUtils.lowerCase(withCase));
             user.setPassword(new ShortBlob(DigestUtil.encrypt(password)));
-            Transaction tx = Datastore.beginTransaction();
-            Datastore.put(tx, user);
+
             try {
                 uniqueName.reserve(user.getName());
             } catch (UniqueConstraintException e) {
-                tx.rollback();
                 throw new UsernameExistsException(e.getMessage());
             }
+
+            Transaction tx = Datastore.beginTransaction();
+            Datastore.put(tx, user);
             tx.commit();
             return user;
         }
 
         @Override
-        public void save(User user) throws EntityNotFoundException, FieldValueException {
+        public User save(User user) throws EntityNotFoundException, FieldValueException {
             Transaction tx = Datastore.beginTransaction();
             User db = Datastore.getOrNull(tx, userMeta, user.getId());
             if (db == null) {
@@ -84,6 +85,7 @@ public final class UserServiceFactory {
             db.setNameWithCase(user.getNameWithCase());
             Datastore.put(tx, db);
             tx.commit();
+            return user;
         }
 
         @Override

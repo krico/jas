@@ -92,7 +92,7 @@
             var user = angular.fromJson(data);
 
             if (user.name == 'badsignup') {
-                return [200 /* bad request */, angular.toJson({
+                return [400 /* bad request */, angular.toJson({
                     nok: true,
                     nokText: 'Sign up failed :-('
                 }), {}];

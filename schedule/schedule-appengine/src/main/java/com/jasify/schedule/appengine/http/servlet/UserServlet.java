@@ -1,10 +1,14 @@
 package com.jasify.schedule.appengine.http.servlet;
 
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.http.json.JsonSignUpUser;
 import com.jasify.schedule.appengine.http.json.JsonUser;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -38,9 +42,11 @@ public class UserServlet extends HttpServlet {
         UserSession currentUser = UserContext.getCurrentUser();
 
         if (currentUser == null) {
+
             log.info("Unauthorized GET access to {}", pathInfo);
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
+
         }
 
         Matcher matcher = PATH_INFO_PATTERN.matcher(pathInfo);
@@ -49,8 +55,10 @@ public class UserServlet extends HttpServlet {
             String matched = matcher.group(1);
             long userId = "current".equals(matched) ? currentUser.getUserId() : Long.parseLong(matched);
             if (userId == currentUser.getUserId()) { //TODO: isSysAdmin should be allowed
+
                 User user = Preconditions.checkNotNull(UserServiceFactory.getUserService().get(userId), "Logged in user was deleted?");
                 new JsonUser(user).toJson(resp.getWriter());
+
             } else {
 
                 log.info("Unauthorized GET access to {} by user {}", currentUser);
@@ -64,5 +72,89 @@ public class UserServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType(JSON.CONTENT_TYPE);
+
+        String pathInfo = StringUtils.trimToEmpty(req.getPathInfo());
+        if (pathInfo.isEmpty()) {
+            doPostCreate(req, resp);
+        } else {
+            doPostUpdate(req, resp);
+        }
+    }
+
+    private void doPostCreate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        try {
+            JsonSignUpUser signUp = JsonSignUpUser.parse(req.getReader());
+            String pw = Preconditions.checkNotNull(StringUtils.trimToNull(signUp.getPassword()), "NULL password");
+            if (!pw.equals(signUp.getConfirmPassword()))
+                throw new IllegalArgumentException("password and confirm do not match");
+
+            UserService userService = UserServiceFactory.getUserService();
+
+            User newUser = signUp.writeTo(userService.newUser());
+            newUser.setName(signUp.getName());
+
+            new JsonUser(userService.create(newUser, signUp.getPassword())).toJson(resp.getWriter());
+
+        } catch (Exception e) {
+            log.warn("Failed to create user", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
+
+    private void doPostUpdate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String pathInfo = StringUtils.trimToEmpty(req.getPathInfo());
+
+        UserSession currentUser = UserContext.getCurrentUser();
+
+        if (currentUser == null) {
+
+            log.info("Unauthorized POST access to {}", pathInfo);
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+
+        }
+
+        Matcher matcher = PATH_INFO_PATTERN.matcher(pathInfo);
+        if (matcher.matches()) {
+
+            String matched = matcher.group(1);
+            long userId = "current".equals(matched) ? currentUser.getUserId() : Long.parseLong(matched);
+            if (userId == currentUser.getUserId()) { //TODO: isSysAdmin should be allowed
+
+                UserService userService = UserServiceFactory.getUserService();
+                User user = Preconditions.checkNotNull(userService.get(userId), "Logged in user was deleted?");
+                JsonUser js = JsonUser.parse(req.getReader());
+                js.writeTo(user);
+                try {
+
+                    new JsonUser(userService.save(user)).toJson(resp.getWriter());
+
+                } catch (EntityNotFoundException | FieldValueException e) {
+
+                    log.warn("Failed to save user", e);
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+
+                }
+
+            } else {
+
+                log.info("Unauthorized GET access to {} by user {}", currentUser);
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+
+            }
+
+        } else {
+
+            log.info("Invalid GET pathInfo: {}", pathInfo);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+
+        }
+
     }
 }

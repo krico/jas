@@ -31,13 +31,20 @@ public class JsonUser extends JsonObject {
         about = TypeUtil.toString(user.getAbout());
     }
 
-
     public static JsonUser parse(String data) {
         return JSON.fromJson(data, JsonUser.class);
     }
 
     public static JsonUser parse(Reader reader) {
         return JSON.fromJson(reader, JsonUser.class);
+    }
+
+    public User writeTo(User user) {
+        /* we don't set id, created, modified */
+        user.setNameWithCase(name);
+        user.setEmail(TypeUtil.toEmail(email));
+        user.setAbout(TypeUtil.toText(about));
+        return user;
     }
 
     public long getId() {

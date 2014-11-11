@@ -3,7 +3,6 @@ package com.jasify.schedule.appengine.model;
 import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
-import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
@@ -77,6 +76,23 @@ public class UniqueConstraintTest {
         UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
         uc.reserve("krico");
         uc.reserve("krico");
+    }
+
+    @Test(expected = UniqueConstraintException.class)
+    public void testReserveNullThrows() throws Exception {
+        UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
+        uc.reserve(null);
+    }
+
+    @Test
+    public void testReserveNullNoBreak() throws Exception {
+        UniqueConstraint uc = new UniqueConstraint(UserMeta.get(), "name");
+        try {
+            uc.reserve(null);
+        } catch (UniqueConstraintException e) {
+            //ok
+        }
+        uc.reserve("newName");
     }
 
 }

@@ -17,7 +17,7 @@ public interface UserService {
 
     User create(User user, String password) throws UsernameExistsException;
 
-    void save(User user) throws EntityNotFoundException, FieldValueException;
+    User save(User user) throws EntityNotFoundException, FieldValueException;
 
     User get(long id);
 

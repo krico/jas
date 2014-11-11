@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.*;
 import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.application.ApplicationProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -138,15 +139,22 @@ public class UniqueConstraint {
     }
 
     public void reserve(String uniqueValue) throws UniqueConstraintException {
+        if (StringUtils.isBlank(uniqueValue))
+            throw new UniqueConstraintException("NULL uniqueValue not allowed");
+
         Transaction tx = Datastore.beginTransaction();
-        Key key = Datastore.createKey(uniqueKind, uniqueValue);
-        Entity entity = Datastore.getOrNull(tx, key);
-        if (entity != null) {
-            tx.rollback();
-            throw new UniqueConstraintException(meta, uniquePropertyName, uniqueValue);
+        try {
+            Key key = Datastore.createKey(uniqueKind, uniqueValue);
+            Entity entity = Datastore.getOrNull(tx, key);
+            if (entity != null) {
+                tx.rollback();
+                throw new UniqueConstraintException(meta, uniquePropertyName, uniqueValue);
+            }
+            Datastore.put(tx, new Entity(uniqueKind, uniqueValue));
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
         }
-        Datastore.put(tx, new Entity(uniqueKind, uniqueValue));
-        tx.commit();
     }
 
     public void release(String uniqueValue) {
