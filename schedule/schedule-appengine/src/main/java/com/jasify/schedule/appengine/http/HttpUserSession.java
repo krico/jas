@@ -58,14 +58,24 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener 
         UserContext.setCurrentUser(null);
     }
 
+    public void delete(HttpServletRequest req) {
+        if (req != null) {
+            req.getSession().removeAttribute(SESSION_KEY);
+        }
+    }
+
     @Override
     public void invalidate() {
         delete(UserContext.<HttpServletRequest>getCurrentRequest());
     }
 
-    public void delete(HttpServletRequest req) {
-        if (req != null) {
-            req.getSession().removeAttribute(SESSION_KEY);
-        }
+    @Override
+    public long getUserId() {
+        return userId.getId();
+    }
+
+    @Override
+    public String toString() {
+        return userId.toString();
     }
 }
