@@ -167,25 +167,46 @@
             var ret = [];
             var total = 0;
 
-            /* /users/page/1/size/10/sort/DESC */
-            var m = /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(DESC|ASC)(\?.*)$/.exec(url);
+            /* /users/page/1/size/10/sort/DESC?field=email&query=user */
+            var m = /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(DESC|ASC)\?(.*)$/.exec(url);
             if (m != null) {
                 var page = parseInt(m[1]);
                 var size = parseInt(m[2]);
                 var sort = m[3];
-                var q = m[4];
+                var q = decodeURIComponent(m[4]);
+
+                m = /field=([^&]+)/.exec(q);
+                var field = m == null ? 'name' : m[1];
+                m = /query=([^&]+)/.exec(q);
+                var query = m == null ? '.' : m[1];
 
                 var start = (page - 1 ) * size;
                 var end = start + size;
 
-                console.log("P: " + page + " S: " + size + " S: " + sort + " start: " + start + "  end: " + end);
+                try {
+                    var regex = new RegExp(query);
+                } catch (e) {
+                    return [505, 'E: ' + e, {}];
+                }
+                regex = new RegExp(query);
+                var select = function (u) {
+                    if (field == 'email') {
+                        return u.email && u.email.match(regex);
+                    } else if (field == 'name') {
+                        return u.name && u.name.match(regex);
+                    }
+                    return false;
+                };
 
                 angular.forEach(database.users, function (u, id) {
-                    if (total >= start && total < end) {
-                        ret.push(u);
-                    }
+                    if (select(u)) {
 
-                    ++total;
+                        if (total >= start && total < end) {
+                            ret.push(u);
+                        }
+
+                        ++total;
+                    }
                 });
 
 
@@ -198,6 +219,7 @@
 
 
             }
+
             return [200, angular.toJson(ret), {'X-Total': total}];
         });
 

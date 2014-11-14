@@ -5,8 +5,8 @@
  */
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers');
 
-jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', 'User',
-    function ($scope, User) {
+jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', 'User', 'Modal',
+    function ($scope, User, Modal) {
         $scope.sort = 'DESC';
         $scope.page = 1;
         $scope._perPage = 10;
@@ -16,18 +16,39 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', 'User',
         $scope.users = [];
         $scope.searchBy = 'name';
         $scope.query = '';
+        $scope.regex = false;
 
         $scope.pageChanged = function () {
+            var q;
+
+            if ($scope.regex) {
+                q = $scope.query;
+            } else {
+                q = RegExp.quote($scope.query);
+            }
+
             $scope.users = User.query({
                     page: $scope.page,
                     size: $scope._perPage,
                     sort: $scope.sort,
                     field: $scope.searchBy,
-                    query: $scope.query
+                    query: q
                 },
                 function (data, h) {
-                    $scope.total = h('X-Total');
+                    var t = h('X-Total');
+                    if (t != $scope.total)
+                        $scope.total = t;
+                },
+                function (response) {
+                    $scope.total = 0;
+                    Modal.showError("Server error", "The server responded with an error...")
                 });
+        };
+
+        $scope.typeChanged = function () {
+            if ($scope.query) {
+                $scope.queryChanged();
+            }
         };
 
         $scope.queryChanged = function () {

@@ -1,6 +1,16 @@
 /**
  * Created by krico on 02/11/14.
  */
+
+/**
+ * A function for quoting regular expressions
+ * @param str the regex
+ * @returns {string} the quoted regex
+ */
+RegExp.quote = function (str) {
+    return (str + '').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+};
+
 var jasifyScheduleApp = angular.module('jasifyScheduleApp',
     ['ngRoute', 'ngResource', 'ngAnimate', 'ui.bootstrap', 'mgcrea.ngStrap',
         'angularSpinner', 'jasifyScheduleControllers']);

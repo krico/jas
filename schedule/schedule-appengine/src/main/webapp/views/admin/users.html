@@ -4,7 +4,8 @@
             <div class="form-group"><span class="form-control-static">search: </span></div>
             <div class="form-group">
                 <label class="sr-only" for="searchBy">search by:</label>
-                <select id="searchBy" class="form-control input-sm" name="searchBy" ng-model="searchBy">
+                <select id="searchBy" class="form-control input-sm" name="searchBy" ng-model="searchBy"
+                        ng-change="typeChanged()">
                     <option>name</option>
                     <option>email</option>
                 </select>
@@ -12,7 +13,12 @@
             <div class="form-group">
                 <label class="sr-only" for="query">query</label>
                 <input id="query" type="text" class="form-control input-sm" placeholder="query"
-                       ng-model="query" name="query" ng-model-options="{debounce:500}" ng-change="pageChanged()">
+                       ng-model="query" name="query" ng-model-options="{debounce:500}" ng-change="queryChanged()">
+            </div>
+            <div class="checkbox">
+                <label class="input-sm">
+                    <input name="regex" ng-model="regex" ng-change="typeChanged()" type="checkbox"> regex
+                </label>
             </div>
             <div class="form-group">
                 <div class="input-group input-group-sm">
@@ -20,7 +26,7 @@
                            class="form-control text-right" size="2"
                            ng-model="perPage" ng-model-options="{debounce:500, getterSetter: true}">
 
-                    <div class="input-group-addon">/page</div>
+                    <div class="input-group-addon"> / page</div>
                 </div>
             </div>
             <div class="form-group">
@@ -32,10 +38,10 @@
         </form>
     </div>
     <div class="col-sm-12">
-        <span ng-hide="users.length" us-spinner=""></span>
+        <span ng-hide="total != -1" us-spinner=""></span>
 
         <div class="table-responsive">
-            <table class="table table-hover" ng-show="users.length">
+            <table class="table table-hover" ng-hide="total == -1">
                 <thead>
                 <tr>
                     <th>#</th>
@@ -50,6 +56,9 @@
                     <td>{{user.name}}</td>
                     <td>{{user.email}}</td>
                     <td>{{user.created}}</td>
+                </tr>
+                <tr ng-if="total == 0">
+                    <td colspan="4">No results found...</td>
                 </tr>
                 </tbody>
             </table>
