@@ -81,19 +81,19 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
 jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$alert', 'User',
     function ($scope, $routeParams, $alert, User) {
         $scope.user = null;
+        $scope.create = false;
         $scope.userForm = null;
-        $scope.saving = false;
+        $scope.loading = true;
 
         $scope.save = function () {
-            $scope.user.$save();
-        };
 
-        $scope.save = function () {
-            $scope.saving = true;
+            $scope.loading = true;
+
             $scope.user.$save()
                 .then(function () {
 
-                    $scope.saving = false;
+                    $scope.loading = false;
+
                     $scope.userForm.$setPristine();
 
                     $alert({
@@ -105,11 +105,53 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
 
                 });
         };
+
+        $scope.createUser = function () {
+
+            $scope.loading = true;
+
+            $scope.user.$save(
+                //success
+                function (value, responseHeaders) {
+                    $alert({
+                        title: 'User creation succeeded!',
+                        container: '#alert-container',
+                        type: 'success',
+                        show: true
+                    });
+                    $scope.create = false;
+                    $scope.loading = false;
+                },
+                //error
+                function (resp) {
+
+                    $scope.loading = false;
+
+                    $alert({
+                        title: 'User creation failed!',
+                        content: (resp.statusText ? resp.statusText : "Unknown") + " (" + resp.status + ")",
+                        container: '#alert-container',
+                        type: 'danger',
+                        show: true
+                    });
+                });
+        };
+
         $scope.reset = function () {
+
+            $scope.loading = true;
+
+            if ($scope.userForm)
+                $scope.userForm.$setPristine();
+
             if ($routeParams.id) {
-                $scope.user = User.get({id: $routeParams.id});
+                $scope.user = User.get({id: $routeParams.id}, function () {
+                    $scope.loading = false;
+                });
             } else {
                 $scope.user = new User();
+                $scope.create = true;
+                $scope.loading = false;
             }
         };
 

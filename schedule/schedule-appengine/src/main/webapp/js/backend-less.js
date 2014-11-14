@@ -112,10 +112,10 @@
                 var u = users[id];
                 if (u.id > max) max = u.id;
                 if (user.name == u.name) {
-                    return [200 /* bad request */, angular.toJson({
+                    return [400 /* bad request */, angular.toJson({
                         nok: true,
                         nokText: 'Username not available'
-                    }), {}];
+                    }), {}, 'Username not available'];
                 }
             }
             user['id'] = max + 10;

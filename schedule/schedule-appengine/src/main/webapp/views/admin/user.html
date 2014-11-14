@@ -1,12 +1,27 @@
 <form class="form-horizontal" role="form" name="userForm" novalidate>
     <div class="col-md-12">
-        <h4><a href="#/admin/users"><span class="glyphicon glyphicon-backward"></span></a> <span class="glyphicon glyphicon-user"></span> #{{user.id}}</h4>
+        <h4>
+            <a href="#/admin/users"><span class="glyphicon glyphicon-backward"></span></a>
+            <span class="glyphicon glyphicon-user"></span>
+            <span ng-if="!create">#{{user.id}}</span>
+            <span ng-if="create">new</span>
+        </h4>
 
         <div class="form-group">
             <label class="col-sm-2 control-label">name:</label>
 
             <div class="col-sm-4">
-                <p class="form-control-static">@{{user.name}}</p>
+                <p ng-if="!create" class="form-control-static">@{{user.name}}</p>
+                <input ng-if="create" type="text" class="form-control" id="name" name="name" ng-model="user.name"
+                       placeholder="name">
+            </div>
+        </div>
+        <div class="form-group" ng-if="create">
+            <label class="col-sm-2 control-label">password:</label>
+
+            <div class="col-sm-4">
+                <input ng-if="create" type="password" class="form-control" id="password" name="password" ng-model="user.password"
+                       placeholder="password">
             </div>
         </div>
         <div class="form-group">
@@ -27,9 +42,14 @@
         </div>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-4">
-                <button type="button"
+                <button ng-if="!create" type="button"
                         ng-click="save()" ng-disabled="!userForm.$dirty || userForm.$invalid"
                         class="btn btn-default btn-primary"><span class="glyphicon glyphicon-save"></span>
+                    save
+                </button>
+                <button ng-if="create" type="button"
+                        ng-click="createUser()" ng-disabled="!userForm.$dirty || userForm.$invalid"
+                        class="btn btn-default btn-primary"><span class="glyphicon glyphicon-plus"></span>
                     save
                 </button>
                 <button type="button"
@@ -37,7 +57,7 @@
                         class="btn btn-default"><span class="glyphicon glyphicon-open"></span>
                     reset
                 </button>
-                <span ng-hide="user.id && !saving" us-spinner=""></span>
+                <span ng-show="loading" us-spinner=""></span>
             </div>
         </div>
         <div id="alert-container"></div>
