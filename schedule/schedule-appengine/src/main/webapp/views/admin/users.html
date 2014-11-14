@@ -3,21 +3,23 @@
         <form name="usersForm" role="form" class="form-inline" novalidate>
             <div class="form-group"><span class="form-control-static">search: </span></div>
             <div class="form-group">
-                <label class="sr-only" for="searchType">search by:</label>
-                <select id="searchType" class="form-control input-sm">
+                <label class="sr-only" for="searchBy">search by:</label>
+                <select id="searchBy" class="form-control input-sm" name="searchBy" ng-model="searchBy">
                     <option>name</option>
                     <option>email</option>
                 </select>
             </div>
             <div class="form-group">
                 <label class="sr-only" for="query">query</label>
-                <input id="query" type="text" class="form-control input-sm" placeholder="query">
+                <input id="query" type="text" class="form-control input-sm" placeholder="query"
+                       ng-model="query" name="query" ng-model-options="{debounce:500}" ng-change="pageChanged()">
             </div>
             <div class="form-group">
                 <div class="input-group input-group-sm">
                     <input id="perPage" name="perPage" pattern="^[1-9][0-9]*$" type="text"
                            class="form-control text-right" size="2"
                            ng-model="perPage" ng-model-options="{debounce:500, getterSetter: true}">
+
                     <div class="input-group-addon">/page</div>
                 </div>
             </div>

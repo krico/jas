@@ -168,12 +168,12 @@
             var total = 0;
 
             /* /users/page/1/size/10/sort/DESC */
-            var m = /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(.*)$/.exec(url);
+            var m = /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(DESC|ASC)(\?.*)$/.exec(url);
             if (m != null) {
                 var page = parseInt(m[1]);
                 var size = parseInt(m[2]);
                 var sort = m[3];
-                console.log("P: " + page + " S: " + size + " S: " + sort);
+                var q = m[4];
 
                 var start = (page - 1 ) * size;
                 var end = start + size;

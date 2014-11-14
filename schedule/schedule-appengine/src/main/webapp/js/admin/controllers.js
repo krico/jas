@@ -14,16 +14,25 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', 'User',
         $scope.numPages = 1;
         $scope.maxSize = 4;
         $scope.users = [];
+        $scope.searchBy = 'name';
+        $scope.query = '';
 
         $scope.pageChanged = function () {
             $scope.users = User.query({
                     page: $scope.page,
                     size: $scope._perPage,
-                    sort: $scope.sort
+                    sort: $scope.sort,
+                    field: $scope.searchBy,
+                    query: $scope.query
                 },
                 function (data, h) {
                     $scope.total = h('X-Total');
                 });
+        };
+
+        $scope.queryChanged = function () {
+            $scope.page = 1;
+            $scope.pageChanged();
         };
 
         $scope.perPage = function (newValue) {
