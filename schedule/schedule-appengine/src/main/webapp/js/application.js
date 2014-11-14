@@ -46,6 +46,10 @@ jasifyScheduleApp.config(['$routeProvider',
             when('/admin/users', {
                 templateUrl: 'views/admin/users.html',
                 controller: 'AdminUsersCtrl'
+            }).
+            when('/admin/user/:id?', {
+                templateUrl: 'views/admin/user.html',
+                controller: 'AdminUserCtrl'
             });
         /* END: Admin routes */
         //

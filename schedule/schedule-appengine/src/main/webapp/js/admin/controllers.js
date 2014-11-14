@@ -5,8 +5,8 @@
  */
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers');
 
-jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', 'User', 'Modal',
-    function ($scope, User, Modal) {
+jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', 'User', 'Modal',
+    function ($scope, $location, User, Modal) {
         $scope.sort = 'DESC';
         $scope.page = 1;
         $scope._perPage = 10;
@@ -70,5 +70,48 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', 'User', 'Modal
             return $scope._perPage;
 
         };
+
+        $scope.viewUser = function (id) {
+            $location.path('/admin/user/' + id);
+        };
+
         $scope.pageChanged();
+    }]);
+
+jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$alert', 'User',
+    function ($scope, $routeParams, $alert, User) {
+        $scope.user = null;
+        $scope.userForm = null;
+        $scope.saving = false;
+
+        $scope.save = function () {
+            $scope.user.$save();
+        };
+
+        $scope.save = function () {
+            $scope.saving = true;
+            $scope.user.$save()
+                .then(function () {
+
+                    $scope.saving = false;
+                    $scope.userForm.$setPristine();
+
+                    $alert({
+                        title: 'User updated successfully (' + new Date() + ')',
+                        container: '#alert-container',
+                        type: 'success',
+                        show: true
+                    });
+
+                });
+        };
+        $scope.reset = function () {
+            if ($routeParams.id) {
+                $scope.user = User.get({id: $routeParams.id});
+            } else {
+                $scope.user = new User();
+            }
+        };
+
+        $scope.reset();
     }]);

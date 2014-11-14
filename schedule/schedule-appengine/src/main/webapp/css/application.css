@@ -2,7 +2,7 @@ body {
 }
 
 /* This is for angular-bootstrap to recognize links */
-.nav, .pagination, .carousel, .panel-title a {
+.nav, .pagination, .carousel, .panel-title .ptr a {
     cursor: pointer;
 }
 

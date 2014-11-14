@@ -51,8 +51,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="user in users">
-                    <td>{{user.id}}</td>
+                <tr ng-repeat="user in users" ng-click="viewUser(user.id)">
+                    <td>
+                        <button type="button" class="btn btn-link btn-xs" ng-click="viewUser(user.id)"><span
+                                class="glyphicon glyphicon-edit"></span> {{user.id}}
+                        </button>
+                    </td>
                     <td>{{user.name}}</td>
                     <td>{{user.email}}</td>
                     <td>{{user.created}}</td>

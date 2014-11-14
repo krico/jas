@@ -1,5 +1,6 @@
-<form class="form-horizontal" role="form" name="profileForm" novalidate>
+<form class="form-horizontal" role="form" name="userForm" novalidate>
     <div class="col-md-12">
+        <h4><a href="#/admin/users"><span class="glyphicon glyphicon-backward"></span></a> <span class="glyphicon glyphicon-user"></span> #{{user.id}}</h4>
 
         <div class="form-group">
             <label class="col-sm-2 control-label">name:</label>
@@ -36,7 +37,7 @@
                         class="btn btn-default"><span class="glyphicon glyphicon-open"></span>
                     reset
                 </button>
-                <span ng-hide="user.id" us-spinner=""></span>
+                <span ng-hide="user.id && !saving" us-spinner=""></span>
             </div>
         </div>
         <div id="alert-container"></div>
