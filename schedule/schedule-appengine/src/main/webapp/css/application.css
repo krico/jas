@@ -1,5 +1,6 @@
 body {
 }
+
 /* This is for angular-bootstrap to recognize links */
 .nav, .pagination, .carousel, .panel-title a {
     cursor: pointer;
@@ -8,3 +9,105 @@ body {
 .navbar-static-top {
     margin-bottom: 19px;
 }
+
+.border {
+    border: solid 1px;
+}
+
+.border-red {
+    border: solid 1px red;
+}
+.border-green {
+    border: solid 1px green;
+}
+
+.border-blue {
+    border: solid 1px blue;
+}
+
+/* BEGIN: Bootstrap columns of same height */
+.container-xs-height {
+    display: table;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.row-xs-height {
+    display: table-row;
+}
+
+.col-xs-height {
+    display: table-cell;
+    float: none;
+}
+
+@media (min-width: 768px) {
+    .container-sm-height {
+        display: table;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .row-sm-height {
+        display: table-row;
+    }
+
+    .col-sm-height {
+        display: table-cell;
+        float: none;
+    }
+}
+
+@media (min-width: 992px) {
+    .container-md-height {
+        display: table;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .row-md-height {
+        display: table-row;
+    }
+
+    .col-md-height {
+        display: table-cell;
+        float: none;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container-lg-height {
+        display: table;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .row-lg-height {
+        display: table-row;
+    }
+
+    .col-lg-height {
+        display: table-cell;
+        float: none;
+    }
+}
+
+/* firefox fix */
+.img-responsive {
+    width: 100%;
+}
+
+/* vertical alignment styles */
+.col-top {
+    vertical-align: top;
+}
+
+.col-middle {
+    vertical-align: middle;
+}
+
+.col-bottom {
+    vertical-align: bottom;
+}
+
+/* END: Bootstrap columns of same height */

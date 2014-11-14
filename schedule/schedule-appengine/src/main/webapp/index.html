@@ -9,10 +9,17 @@
     <link rel="icon" href="favicon.ico">
 
     <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
         ga('create', 'UA-56638051-1', 'auto');
         ga('send', 'pageview');
@@ -26,6 +33,7 @@
     <script src="bc/angular-route/angular-route.min.js"></script>
     <script src="bc/angular-resource/angular-resource.min.js"></script>
     <script src="bc/angular-animate/angular-animate.min.js"></script>
+    <script src="bc/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
     <script src="bc/angular-strap/dist/angular-strap.min.js"></script>
     <script src="bc/angular-strap/dist/angular-strap.tpl.min.js"></script>
 
@@ -34,6 +42,10 @@
 
     <script src="js/application.js"></script>
     <script src="js/controllers.js"></script>
+
+    <!-- TODO: how do we load this inside a partial only -->
+    <script src="js/admin/controllers.js"></script>
+
     <!-- TODO: backend-less needs to go away at some point, it's used mostly for dev -->
     <script src="js/backend-less.js"></script>
 
@@ -60,10 +72,15 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-           <a class="navbar-brand" href="#/home"><span class="glyphicon glyphicon-calendar"></span>  Jasify</a>
+            <a class="navbar-brand" href="#/home"><span class="glyphicon glyphicon-calendar"></span> Jasify</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse" bs-collapse-target>
             <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a ng-href="#{{path}}" class="dropdown-toggle" bs-dropdown="adminDropDown">admin <span
+                            class="caret"></span></a>
+                </li>
+
                 <li ng-hide="user" data-match-route="/signUp"><a bs-collapse-toggle href="#/signUp">sign up</a></li>
                 <li ng-hide="user" data-match-route="/login">
                     <a bs-collapse-toggle href="#/login">log in</a>
@@ -73,26 +90,15 @@
                     <a bs-collapse-toggle href="#/profile">@{{user.name}}</a>
                 </li>
                 <li ng-show="user" data-match-route="/logout"><a bs-collapse-toggle href="#/logout">log out</a></li>
-                <!-- TODO: contact us and help
-                <li data-match-route="/help" class="dropdown"><a bs-collapse-toggle href="#/help">help</a></li>
-                <li data-match-route="/contactUs"><a bs-collapse-toggle href="#/contactUs">contact us</a></li>
-                -->
             </ul>
         </div>
         <!--/.nav-collapse -->
     </div>
 </nav>
 
-
 <div class="container" ng-view=""></div>
 <!-- /container -->
 
-<!--
-NOTE[krico]: Using angular and jquery is overkill.  Unfortunately the boostrap javascript requires jquery.
-             So for now, we will have to do a few tricks to avoid using bootstrap.js
--->
-<!--<script src="bc/jquery/dist/jquery.min.js"></script>-->
-<!--<script src="bc/bootstrap/dist/js/bootstrap.min.js"></script>-->
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="js/ie10-viewport-bug-workaround.js"></script>
 </body>

@@ -35,13 +35,21 @@
         var database = {
             users: {
                 /* userId : {userData} */
-                100: {
-                    id: 100,
+                1: {
+                    id: 1,
                     name: 'krico',
                     password: 'krico'
                 }
             }
         };
+
+        console.log("Creating user database");
+        for (var i = 2; i < 1000; i++) {
+            database.users[i] = {id: i, name: 'user' + i, password: 'user' + i, created: new Date()};
+            if (i % 3 == 0) {
+                database.users[i].email = 'user' + i + '@jasify.com';
+            }
+        }
 
         /**
          * Username check
@@ -154,6 +162,45 @@
             }), {}];
         });
 
+        $httpBackend.whenGET(/^\/users(.*)?$/).respond(function (method, url, data, headers) {
+            console.log(method + "[user] " + url + " DATA: " + data + " H: " + angular.toJson(headers));
+            var ret = [];
+            var total = 0;
+
+            /* /users/page/1/size/10/sort/DESC */
+            var m = /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(.*)$/.exec(url);
+            if (m != null) {
+                var page = parseInt(m[1]);
+                var size = parseInt(m[2]);
+                var sort = m[3];
+                console.log("P: " + page + " S: " + size + " S: " + sort);
+
+                var start = (page - 1 ) * size;
+                var end = start + size;
+
+                console.log("P: " + page + " S: " + size + " S: " + sort + " start: " + start + "  end: " + end);
+
+                angular.forEach(database.users, function (u, id) {
+                    if (total >= start && total < end) {
+                        ret.push(u);
+                    }
+
+                    ++total;
+                });
+
+
+            } else {
+
+                angular.forEach(database.users, function (u, id) {
+                    ret.push(u);
+                    ++total;
+                });
+
+
+            }
+            return [200, angular.toJson(ret), {'X-Total': total}];
+        });
+
         //Pass through so that gets to our partials work
         $httpBackend.whenGET(/^(\/)?views\/.*\.html$/).passThrough();
     }
@@ -186,5 +233,6 @@
             })
             .run(BackendMock);
     }
-})(angular);
+})
+(angular);
 

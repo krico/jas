@@ -1,8 +1,9 @@
 /**
  * Created by krico on 02/11/14.
  */
-var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngAnimate', 'mgcrea.ngStrap',
-    'angularSpinner', 'jasifyScheduleControllers']);
+var jasifyScheduleApp = angular.module('jasifyScheduleApp',
+    ['ngRoute', 'ngResource', 'ngAnimate', 'ui.bootstrap', 'mgcrea.ngStrap',
+        'angularSpinner', 'jasifyScheduleControllers']);
 
 /**
  * Routes for all navbar links
@@ -30,17 +31,17 @@ jasifyScheduleApp.config(['$routeProvider',
                 templateUrl: 'views/profile.html',
                 controller: 'ProfileCtrl'
             }).
-            when('/help', {
-                templateUrl: 'views/help.html',
-                controller: 'HelpCtrl'
-            }).
-            when('/contactUs', {
-                templateUrl: 'views/contactUs.html',
-                controller: 'ContactUsCtrl'
-            }).
-            otherwise({
-                redirectTo: '/home'
+
+            /* BEGIN: Admin routes */
+            when('/admin/users', {
+                templateUrl: 'views/admin/users.html',
+                controller: 'AdminUsersCtrl'
             });
+        /* END: Admin routes */
+        //
+        //otherwise({
+        //    redirectTo: '/home'
+        //});
     }]);
 
 /**
@@ -199,13 +200,20 @@ jasifyScheduleApp.factory('Util', ['$log',
  */
 jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {
     $log.debug("new User");
-    return $resource('/user/:id', {id: '@id'},
+    var User = $resource('/user/:id', {id: '@id'},
         {
             /* User.checkUsername([params], postData, [success], [error]) */
             'checkUsername': {method: 'POST', url: '/username'},
             'create': {method: 'PUT', url: '/user/new'},
+            'query': {
+                method: 'GET',
+                isArray: true,
+                url: '/users/page/:page/size/:size/sort/:sort',
+                params: {page: '@page', size: '@size', sort: '@sort'}
+            },
             'current': {method: 'GET', url: '/user/current'}
         });
+    return User;
 }]);
 
 jasifyScheduleApp.directive('strongPassword', function () {

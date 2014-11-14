@@ -19,6 +19,7 @@ Features:
 
 Changes:
 
+  - BootstrapUI installed (for pagination): `bower install angular-bootstrap -S`
   - application.js contains core functionality, namely
     - jasifyScheduleApp - the main application
     - routing configuration
