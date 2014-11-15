@@ -175,8 +175,6 @@ jasifyScheduleApp.factory('Util', ['$log',
                 return f && f.$dirty && f.$valid;
             }
         };
-
-
     }]);
 
 /**
@@ -198,6 +196,7 @@ jasifyScheduleApp.directive('strongPassword', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.strongPassword = function (modelValue, viewValue) {
                 if (ctrl.$isEmpty(modelValue)) {
+                    elm.$tooltip.title = "Password must contain at least eight characters uppercase letters lowercase letters numbers";
                     return false; // No password
                 }
 
@@ -209,6 +208,16 @@ jasifyScheduleApp.directive('strongPassword', function () {
                 var status = pwdValidLength && pwdHasUpperLetter && pwdHasLowerLetter && pwdHasNumber;
                 ctrl.$setValidity('pwd', status);
 
+
+                var tooltipTitle = null;
+                if (!status) {
+                    tooltipTitle = "Password must contain";
+                    if (!pwdValidLength) tooltipTitle += " at least eight characters";
+                    if (!pwdHasUpperLetter) tooltipTitle += " uppercase letters";
+                    if (!pwdHasLowerLetter) tooltipTitle += " lowercase letters";
+                    if (!pwdHasNumber) tooltipTitle += " numbers";
+                }
+                elm.$tooltip.title = tooltipTitle;
                 return status;
             };
         }
@@ -221,7 +230,11 @@ jasifyScheduleApp.directive('confirmField', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.confirmField = function (modelValue, viewValue) {
                 var compareTo = scope.$eval(attrs.confirmField);
-                return modelValue == compareTo.$modelValue;
+                if (compareTo.isValid() && modelValue != compareTo.$modelValue) {
+                    elm.$tooltip.title = "The passwords do not match.";
+                    return false;
+                }
+                return true;
             };
         }
     };

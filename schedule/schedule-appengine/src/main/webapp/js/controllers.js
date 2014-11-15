@@ -21,13 +21,8 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
         $scope.user = Auth.getCurrentUser();
     }]);
 
-<<<<<<< HEAD
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$tooltip', 'User',
-    function ($scope, $http, $tooltip, User) {
-=======
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert', '$location', 'Util', 'User', 'Auth',
-    function ($scope, $http, $alert, $location, Util, User, Auth) {
->>>>>>> master
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert', '$location', '$tooltip', 'Util', 'User', 'Auth',
+    function ($scope, $http, $alert, $location, $tooltip, Util, User, Auth) {
 
         $scope.usernameCheck = {};
 
@@ -38,6 +33,8 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
         $scope.hasError = function (fieldName) {
             return Util.formFieldError($scope.signUpForm, fieldName);
         };
+
+        $scope.tooltip = {};
 
         $scope.hasSuccess = function (fieldName) {
             return Util.formFieldSuccess($scope.signUpForm, fieldName);
