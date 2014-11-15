@@ -83,7 +83,7 @@
                     return [200, angular.toJson({ok: true}), {}];
                 }
             }
-            return [404 /* not found */, angular.toJson({nok: true, nokText: 'Invalid username or password.'}), {}];
+            return [200 /* not found */, angular.toJson({nok: true, nokText: 'Invalid username or password.'}), {}];
         });
 
         $httpBackend.whenPOST(/^\/user$/).respond(function (method, url, data) {
@@ -104,7 +104,7 @@
                 var u = users[id];
                 if (u.id > max) max = u.id;
                 if (user.name == u.name) {
-                    return [400 /* bad request */, angular.toJson({
+                    return [200 /* bad request */, angular.toJson({
                         nok: true,
                         nokText: 'Username not available'
                     }), {}];

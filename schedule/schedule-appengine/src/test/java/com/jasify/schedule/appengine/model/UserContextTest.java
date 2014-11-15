@@ -1,0 +1,39 @@
+package com.jasify.schedule.appengine.model;
+
+import com.jasify.schedule.appengine.TestHelper;
+import org.easymock.EasyMock;
+import org.junit.Test;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
+import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNull;
+
+public class UserContextTest {
+    @Test
+    public void testAssertUtilityClassWellDefined() throws Exception {
+        TestHelper.assertUtilityClassWellDefined(UserContext.class);
+    }
+
+
+    @Test
+    public void testSetContext() throws Exception {
+        assertNull(UserContext.getCurrentUser());
+        assertNull(UserContext.getCurrentRequest());
+        assertNull(UserContext.getCurrentResponse());
+        UserSession session = EasyMock.createMock(UserSession.class);
+        ServletRequest request = EasyMock.createMock(ServletRequest.class);
+        ServletResponse response = EasyMock.createMock(ServletResponse.class);
+        UserContext.setContext(session, request, response);
+        assertEquals(session, UserContext.getCurrentUser());
+        assertEquals(request, UserContext.getCurrentRequest());
+        assertEquals(response, UserContext.getCurrentResponse());
+
+        UserContext.setCurrentUser(null);
+
+        assertNull(UserContext.getCurrentUser());
+        assertEquals(request, UserContext.getCurrentRequest());
+        assertEquals(response, UserContext.getCurrentResponse());
+    }
+}
