@@ -78,8 +78,8 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
         $scope.pageChanged();
     }]);
 
-jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$alert', 'User',
-    function ($scope, $routeParams, $alert, User) {
+jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$alert', '$modal', 'User',
+    function ($scope, $routeParams, $alert, $modal, User) {
         $scope.user = null;
         $scope.create = false;
         $scope.userForm = null;
@@ -135,6 +135,21 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
                         show: true
                     });
                 });
+        };
+
+        $scope.pwModal = null;
+
+        $scope.setPassword = function () {
+            if ($scope.pwModal) {
+                $scope.pwModal.$hide();
+            } else {
+                $scope.pwModal = $modal({
+                    scope: $scope,
+                    template: 'views/modal/password.html',
+                    animation: 'am-fade-and-scale',
+                    show: true
+                });
+            }
         };
 
         $scope.reset = function () {

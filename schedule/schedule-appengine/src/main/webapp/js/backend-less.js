@@ -38,7 +38,8 @@
                 1: {
                     id: 1,
                     name: 'krico',
-                    password: 'krico'
+                    password: 'krico',
+                    admin: true
                 }
             }
         };
@@ -72,8 +73,14 @@
             return [200, angular.toJson({ok: true}), {}];
         });
 
+        $httpBackend.whenGET(/^\/logout$/).respond(function (method, url, data) {
+            console.log(method + "[logout] " + url + " DATA: " + data);
+            database.users.current = false;
+            return [200, angular.toJson({ok: true}), {}];
+        });
+
         $httpBackend.whenPOST(/^\/logout$/).respond(function (method, url, data) {
-            console.log("POST[logout] " + url + " DATA: " + data);
+            console.log(method + "[logout] " + url + " DATA: " + data);
             database.users.current = false;
             return [200, angular.toJson({ok: true}), {}];
         });

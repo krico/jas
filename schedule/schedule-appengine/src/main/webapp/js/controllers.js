@@ -6,6 +6,10 @@ var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
 jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth',
     function ($scope, $location, Auth) {
         $scope.user = Auth.getCurrentUser();
+        $scope.isAdmin = function(){
+            return $scope.user && $scope.user.admin;
+        };
+
         $scope.path = "";
 
         $scope.adminDropDown = [

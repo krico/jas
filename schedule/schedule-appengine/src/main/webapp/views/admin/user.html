@@ -20,7 +20,8 @@
             <label class="col-sm-2 control-label">password:</label>
 
             <div class="col-sm-4">
-                <input ng-if="create" type="password" class="form-control" id="password" name="password" ng-model="user.password"
+                <input ng-if="create" type="password" class="form-control" id="password" name="password"
+                       ng-model="user.password"
                        placeholder="password">
             </div>
         </div>
@@ -56,6 +57,10 @@
                         ng-click="reset()" ng-disabled="!userForm.$dirty"
                         class="btn btn-default"><span class="glyphicon glyphicon-open"></span>
                     reset
+                </button>
+                <button ng-if="!create" type="button"
+                        ng-click="showPasswordMOdal()" ng-disabled="loading"
+                        class="btn btn-default btn-link"> set password
                 </button>
                 <span ng-show="loading" us-spinner=""></span>
             </div>

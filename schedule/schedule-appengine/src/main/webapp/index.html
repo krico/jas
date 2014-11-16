@@ -76,7 +76,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse" bs-collapse-target>
             <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
+                <li class="dropdown" ng-if="isAdmin()">
                     <a ng-href="#{{path}}" class="dropdown-toggle" bs-dropdown="adminDropDown">admin <span
                             class="caret"></span></a>
                 </li>

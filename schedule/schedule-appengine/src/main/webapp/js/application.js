@@ -21,6 +21,10 @@ var jasifyScheduleApp = angular.module('jasifyScheduleApp',
 jasifyScheduleApp.config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
+            when('/', {
+                templateUrl: 'views/home.html',
+                controller: 'HomeCtrl'
+            }).
             when('/home', {
                 templateUrl: 'views/home.html',
                 controller: 'HomeCtrl'
