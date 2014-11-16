@@ -209,8 +209,6 @@ jasifyScheduleApp.factory('Util', ['$log',
                 return f && f.$dirty && f.$valid;
             }
         };
-
-
     }]);
 
 /**
@@ -240,13 +238,31 @@ jasifyScheduleApp.directive('strongPassword', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.strongPassword = function (modelValue, viewValue) {
                 if (ctrl.$isEmpty(modelValue)) {
+                    scope.passwordTooltip = "Password must contain at least eight characters uppercase letters lowercase letters numbers";
                     return false;
                 }
 
-                if (modelValue.length >= 4) {
-                    return true;
+                var pwdValidLength = (modelValue && modelValue.length >= 8 ? true : false);
+                var pwdHasUpperLetter = (modelValue && /[A-Z]/.test(modelValue)) ? true : false;
+                var pwdHasLowerLetter = (modelValue && /[a-z]/.test(modelValue)) ? true : false;
+                var pwdHasNumber = (modelValue && /\d/.test(modelValue)) ? true : false;
+
+                var status = pwdValidLength && pwdHasUpperLetter && pwdHasLowerLetter && pwdHasNumber;
+                ctrl.$setValidity('pwd', status);
+
+
+                var tooltip = "";
+                if (!status) {
+                    tooltip = "Password must contain";
+                    if (!pwdValidLength) tooltip += " at least eight characters";
+                    if (!pwdHasUpperLetter) tooltip += " uppercase letters";
+                    if (!pwdHasLowerLetter) tooltip += " lowercase letters";
+                    if (!pwdHasNumber) tooltip += " numbers";
                 }
-                return false;
+
+                scope.passwordTooltip = tooltip;
+                // TODO: If password and confirm fields are set and than password is updated the confirm field must be invalidated
+                return status;
             };
         }
     };
@@ -258,7 +274,12 @@ jasifyScheduleApp.directive('confirmField', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.confirmField = function (modelValue, viewValue) {
                 var compareTo = scope.$eval(attrs.confirmField);
-                return modelValue == compareTo.$modelValue;
+                if (compareTo.$modelValue != null && modelValue != compareTo.$modelValue) {
+                    scope.confirmTooltip = "The passwords do not match.";
+                    return false;
+                }
+                scope.confirmTooltip = "";
+                return compareTo.$modelValue != null;
             };
         }
     };

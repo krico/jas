@@ -3,7 +3,7 @@
         <div>
             <p>
                 <span class="h4">sign up</span>
-            </p>
+             </p>
         </div>
         <div>
             <div class="form-group has-feedback"
@@ -12,27 +12,24 @@
                 <input id="username" type="text" class="form-control input-sm" name="username"
                        placeholder="Name (your public display name)" ng-model="user.name"
                        ng-model-options="{debounce:500}" ng-change="checkUsername()" required pattern="^..."
-                       maxlength="128">
+                       maxlength="128" data-placement="bottom-right" data-container="body" data-trigger="focus" bs-tooltip="usernameTooltip">
                 <span class="help-block small">{{usernameCheck.nokText}}</span>
                 <span class="glyphicon form-control-feedback"
                       ng-class="{'glyphicon-ok':usernameCheck.ok && hasSuccess('username'), 'glyphicon-remove': usernameCheck.nok || hasError('username')}"></span>
                 <span class="form-control-feedback"
                       ng-hide="spinnerHidden || usernameCheck.ok || usernameCheck.nok"
-                      us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}"></span>
-                <div ng-show="hasError('username')">
-                    <span class="help-block small" ng-show="signUpForm.username.$error.required">Name is required.</span>
-                    <span class="help-block small" ng-show="signUpForm.username.$error.pattern">Name is too short.</span>
-                </div>
+                      us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}">
+                </span>
             </div>
             <div class="form-group has-feedback"
                  ng-class="{'has-error': hasError('email'), 'has-success': hasSuccess('email')}">
                 <label class="sr-only" for="email">Email</label>
                 <input id="email" type="email" name="email" ng-model="user.email" class="form-control input-sm"
-                       placeholder="Email"
-                       required>
+                       placeholder="Email" required data-placement="bottom-right" data-container="body" data-trigger="focus"
+                       bs-tooltip="emailTooltip" title="email">
                 <span class="glyphicon form-control-feedback"
-                      ng-class="{'glyphicon-ok':hasSuccess('email'), 'glyphicon-remove': hasError('email')}"></span>
-
+                      ng-class="{'glyphicon-ok':hasSuccess('email'), 'glyphicon-remove': hasError('email')}">
+                </span>
                 <div ng-show="hasError('email')">
                     <span class="help-block small" ng-show="signUpForm.email.$error.required">Email is required.</span>
                     <span class="help-block small" ng-show="signUpForm.email.$error.email">Email not valid.</span>
@@ -42,32 +39,22 @@
                  ng-class="{'has-error': hasError('password'), 'has-success': hasSuccess('password')}">
                 <label class="sr-only" for="password">Password</label>
                 <input id="password" type="password" name="password" ng-model="user.password"
-                       class="form-control input-sm" placeholder="Password" required strong-password>
+                       class="form-control input-sm" placeholder="Password" required strong-password
+                       data-placement="bottom-right" data-container="body" data-trigger="focus" bs-tooltip="passwordTooltip">
                 <span class="glyphicon form-control-feedback"
-                      ng-class="{'glyphicon-ok':hasSuccess('password'), 'glyphicon-remove': hasError('password')}"></span>
-
-                <div ng-show="hasError('password')">
-                    <span class="help-block small"
-                          ng-show="signUpForm.password.$error.required">Password required.</span>
-                    <span class="help-block small"
-                          ng-show="signUpForm.password.$error.strongPassword">Password too short.</span>
-                </div>
+                      ng-class="{'glyphicon-ok':hasSuccess('password'), 'glyphicon-remove': hasError('password')}">
+                </span>
             </div>
             <div class="form-group has-feedback"
                  ng-class="{'has-error': hasError('confirm'), 'has-success': hasSuccess('confirm')}">
                 <label class="sr-only" for="confirm">Confirm password</label>
                 <input id="confirm" type="password" name="confirm" ng-model="user.confirmPassword"
                        class="form-control input-sm" placeholder="Confirm password" required
-                       confirm-field="signUpForm.password">
+                       confirm-field="signUpForm.password"
+                       data-placement="bottom-right" data-container="body" data-trigger="focus" bs-tooltip="confirmTooltip">
                 <span class="glyphicon form-control-feedback"
-                      ng-class="{'glyphicon-ok':hasSuccess('confirm'), 'glyphicon-remove': hasError('confirm')}"></span>
-
-                <div ng-show="hasError('confirm')">
-                    <span class="help-block small"
-                          ng-show="signUpForm.confirm.$error.required">Confirm your password.</span>
-                    <span class="help-block small"
-                          ng-show="signUpForm.confirm.$error.confirmField">Passwords do not match.</span>
-                </div>
+                      ng-class="{'glyphicon-ok':hasSuccess('confirm'), 'glyphicon-remove': hasError('confirm')}">
+                </span>
             </div>
         </div>
         <div>
