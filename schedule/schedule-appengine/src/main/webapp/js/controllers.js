@@ -21,14 +21,22 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
         $scope.user = Auth.getCurrentUser();
     }]);
 
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert', '$location', 'Util', 'User', 'Auth',
-    function ($scope, $http, $alert, $location, Util, User, Auth) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert', '$location', '$tooltip', 'Util', 'User', 'Auth',
+    function ($scope, $http, $alert, $location, $tooltip, Util, User, Auth) {
 
         $scope.usernameCheck = {};
 
         $scope.spinnerHidden = true;
 
         $scope.newUser = {}; //TODO: remove
+
+        $scope.usernameTooltip = {"title" : "Username is required."};
+
+        $scope.emailTooltip = {"title" : "Email is required."};
+
+        $scope.passwordTooltip = {};
+
+        $scope.confirmTooltip = {"title" : "The passwords do not match."};
 
         $scope.hasError = function (fieldName) {
             return Util.formFieldError($scope.signUpForm, fieldName);
@@ -44,6 +52,7 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
                 $scope.usernameCheck = User.checkUsername($scope.user.name,
                     //success
                     function (value, responseHeaders) {
+                        $scope.usernameTooltip = "";
                     },
                     //error
                     function (httpResponse) {
@@ -53,6 +62,7 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
             } else {
                 $scope.spinnerHidden = true;
                 $scope.usernameCheck = {};
+                $scope.usernameTooltip = "Username is required."
             }
         };
 
