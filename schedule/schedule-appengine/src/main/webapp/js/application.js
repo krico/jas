@@ -212,8 +212,8 @@ jasifyScheduleApp.directive('strongPassword', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.strongPassword = function (modelValue, viewValue) {
                 if (ctrl.$isEmpty(modelValue)) {
-                    elm.$tooltip.title = "Password must contain at least eight characters uppercase letters lowercase letters numbers";
-                    return false; // No password
+                    scope.passwordTooltip = "Password must contain at least eight characters uppercase letters lowercase letters numbers";
+                    return false;
                 }
 
                 var pwdValidLength = (modelValue && modelValue.length >= 8 ? true : false);
@@ -225,15 +225,17 @@ jasifyScheduleApp.directive('strongPassword', function () {
                 ctrl.$setValidity('pwd', status);
 
 
-                var tooltipTitle = null;
+                var tooltip = "";
                 if (!status) {
-                    tooltipTitle = "Password must contain";
-                    if (!pwdValidLength) tooltipTitle += " at least eight characters";
-                    if (!pwdHasUpperLetter) tooltipTitle += " uppercase letters";
-                    if (!pwdHasLowerLetter) tooltipTitle += " lowercase letters";
-                    if (!pwdHasNumber) tooltipTitle += " numbers";
+                    tooltip = "Password must contain";
+                    if (!pwdValidLength) tooltip += " at least eight characters";
+                    if (!pwdHasUpperLetter) tooltip += " uppercase letters";
+                    if (!pwdHasLowerLetter) tooltip += " lowercase letters";
+                    if (!pwdHasNumber) tooltip += " numbers";
                 }
-                elm.$tooltip.title = tooltipTitle;
+
+                scope.passwordTooltip = tooltip;
+                // TODO: If password and confirm fields are set and than password is updated the confirm field must be invalidated
                 return status;
             };
         }
@@ -246,11 +248,12 @@ jasifyScheduleApp.directive('confirmField', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.confirmField = function (modelValue, viewValue) {
                 var compareTo = scope.$eval(attrs.confirmField);
-                if (compareTo.isValid() && modelValue != compareTo.$modelValue) {
-                    elm.$tooltip.title = "The passwords do not match.";
+                if (compareTo.$modelValue != null && modelValue != compareTo.$modelValue) {
+                    scope.confirmTooltip = "The passwords do not match.";
                     return false;
                 }
-                return true;
+                scope.confirmTooltip = "";
+                return compareTo.$modelValue != null;
             };
         }
     };
