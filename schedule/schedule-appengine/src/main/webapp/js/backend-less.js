@@ -130,6 +130,11 @@
             return [200, angular.toJson(user), {}];
         });
 
+        $httpBackend.whenPOST(/^\/change-password\/.*$/).respond(function (method, url, data) {
+            console.log(method + "[user] " + url + " DATA: " + data);
+            return [200, {}, {}];
+        });
+
         $httpBackend.whenGET(/^\/user(\/.*)$/).respond(function (method, url, data) {
             console.log("GET[user] " + url + " DATA: " + data);
 

@@ -82,28 +82,48 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
     function ($scope, $routeParams, $alert, $modal, User) {
         $scope.user = null;
         $scope.create = false;
-        $scope.userForm = null;
         $scope.loading = true;
+
+        $scope.forms  = {};
 
         $scope.save = function () {
 
             $scope.loading = true;
 
-            $scope.user.$save()
-                .then(function () {
+            $scope.user.$save(function () {
+                $scope.loading = false;
+                if ($scope.forms.userForm) {
+                    $scope.forms.userForm.$setPristine();
+                }
 
-                    $scope.loading = false;
-
-                    $scope.userForm.$setPristine();
-
-                    $alert({
-                        title: 'User updated successfully (' + new Date() + ')',
-                        container: '#alert-container',
-                        type: 'success',
-                        show: true
-                    });
-
+                $alert({
+                    title: 'User updated successfully (' + new Date() + ')',
+                    container: '#alert-container',
+                    type: 'success',
+                    show: true
                 });
+
+            });
+        };
+
+        $scope.changePassword = function () {
+
+            $scope.loading = true;
+
+            $scope.user.$changePassword(function () {
+                $scope.loading = false;
+                if ($scope.forms.passwordForm) {
+                    $scope.forms.passwordForm.$setPristine();
+                }
+
+                $alert({
+                    title: 'Password changed successfully (' + new Date() + ')',
+                    container: '#alert-container',
+                    type: 'success',
+                    show: true
+                });
+
+            });
         };
 
         $scope.createUser = function () {
@@ -137,27 +157,14 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
                 });
         };
 
-        $scope.pwModal = null;
-
-        $scope.setPassword = function () {
-            if ($scope.pwModal) {
-                $scope.pwModal.$hide();
-            } else {
-                $scope.pwModal = $modal({
-                    scope: $scope,
-                    template: 'views/modal/password.html',
-                    animation: 'am-fade-and-scale',
-                    show: true
-                });
-            }
-        };
 
         $scope.reset = function () {
 
             $scope.loading = true;
 
-            if ($scope.userForm)
-                $scope.userForm.$setPristine();
+            if ($scope.forms.userForm) {
+                $scope.forms.userForm.$setPristine();
+            }
 
             if ($routeParams.id) {
                 $scope.user = User.get({id: $routeParams.id}, function () {
@@ -171,4 +178,5 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
         };
 
         $scope.reset();
+
     }]);

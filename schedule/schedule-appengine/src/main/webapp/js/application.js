@@ -221,6 +221,7 @@ jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $lo
             /* User.checkUsername([params], postData, [success], [error]) */
             'checkUsername': {method: 'POST', url: '/username'},
             'create': {method: 'PUT', url: '/user/new'},
+            'changePassword': {method: 'POST', url: '/change-password/:id', params: {id: '@id'}},
             'query': {
                 method: 'GET',
                 isArray: true,
