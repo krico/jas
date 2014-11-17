@@ -14,15 +14,14 @@
             <div class="form-group">
                 <div class="col-sm-3">
                     <h5 ng-if="create">create new user</h5>
-                    <h5 ng-if="!create">edit user</h5>
+                    <h5 ng-if="!create">{{user.name}}'s profile</h5>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-if="create">
                 <label class="col-sm-1 control-label input-sm">name:</label>
 
                 <div class="col-sm-4">
-                    <p ng-if="!create" class="form-control-static input-sm">@{{user.name}}</p>
-                    <input ng-if="create" type="text" class="form-control input-sm" id="name" name="name"
+                    <input type="text" class="form-control input-sm" id="name" name="name"
                            ng-model="user.name"
                            placeholder="name">
                 </div>
@@ -81,7 +80,7 @@
             <div class="form-group"></div>
             <div class="form-group">
                 <div class="col-sm-3">
-                    <h5>change {{user.name}}'s password</h5>
+                    <h5>{{user.name}}'s password</h5>
                 </div>
             </div>
             <div class="form-group">
@@ -105,7 +104,8 @@
             <div class="form-group">
                 <div class="col-sm-offset-1 col-sm-4">
                     <button type="button"
-                            ng-click="changePassword()" ng-disabled="!forms.passwordForm.$dirty || forms.passwordForm.$invalid"
+                            ng-click="changePassword()"
+                            ng-disabled="!forms.passwordForm.$dirty || forms.passwordForm.$invalid"
                             class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-save"></span>
                         set password
                     </button>
