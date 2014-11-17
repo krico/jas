@@ -1,11 +1,24 @@
 /**
  * Created by krico on 02/11/14.
  */
-var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', ['mgcrea.ngStrap']);
+var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
 
 jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth',
     function ($scope, $location, Auth) {
         $scope.user = Auth.getCurrentUser();
+        $scope.isAdmin = function(){
+            return $scope.user && $scope.user.admin;
+        };
+
+        $scope.path = "";
+
+        $scope.adminDropDown = [
+            {
+                "text": 'users',
+                html: true,
+                "href": "#/admin/users"
+            }
+        ];
 
         $scope.isActive = function (viewLocation) {
             return viewLocation === $location.path();
@@ -13,6 +26,13 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
 
         $scope.$watch(Auth.getCurrentUser, function (newValue, oldValue) {
             $scope.user = Auth.getCurrentUser();
+        });
+
+        $scope.$watch(function () {
+            return $location.path();
+        }, function (newValue, oldValue) {
+            if (newValue)
+                $scope.path = newValue;
         });
     }]);
 
@@ -159,13 +179,5 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$alert', 'Auth',
             $scope.user = User.get({id: Auth.getCurrentUser().id});
         };
         $scope.reset();
-    }]);
-
-jasifyScheduleControllers.controller('HelpCtrl', ['$scope',
-    function ($scope) {
-    }]);
-
-jasifyScheduleControllers.controller('ContactUsCtrl', ['$scope',
-    function ($scope) {
     }]);
 

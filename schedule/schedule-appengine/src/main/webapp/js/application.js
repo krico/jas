@@ -1,8 +1,19 @@
 /**
  * Created by krico on 02/11/14.
  */
-var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngAnimate', 'mgcrea.ngStrap',
-    'angularSpinner', 'jasifyScheduleControllers']);
+
+/**
+ * A function for quoting regular expressions
+ * @param str the regex
+ * @returns {string} the quoted regex
+ */
+RegExp.quote = function (str) {
+    return (str + '').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+};
+
+var jasifyScheduleApp = angular.module('jasifyScheduleApp',
+    ['ngRoute', 'ngResource', 'ngAnimate', 'ui.bootstrap', 'mgcrea.ngStrap',
+        'angularSpinner', 'jasifyScheduleControllers']);
 
 /**
  * Routes for all navbar links
@@ -10,6 +21,10 @@ var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResou
 jasifyScheduleApp.config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
+            when('/', {
+                templateUrl: 'views/home.html',
+                controller: 'HomeCtrl'
+            }).
             when('/home', {
                 templateUrl: 'views/home.html',
                 controller: 'HomeCtrl'
@@ -30,17 +45,21 @@ jasifyScheduleApp.config(['$routeProvider',
                 templateUrl: 'views/profile.html',
                 controller: 'ProfileCtrl'
             }).
-            when('/help', {
-                templateUrl: 'views/help.html',
-                controller: 'HelpCtrl'
+
+            /* BEGIN: Admin routes */
+            when('/admin/users', {
+                templateUrl: 'views/admin/users.html',
+                controller: 'AdminUsersCtrl'
             }).
-            when('/contactUs', {
-                templateUrl: 'views/contactUs.html',
-                controller: 'ContactUsCtrl'
-            }).
-            otherwise({
-                redirectTo: '/home'
+            when('/admin/user/:id?', {
+                templateUrl: 'views/admin/user.html',
+                controller: 'AdminUserCtrl'
             });
+        /* END: Admin routes */
+        //
+        //otherwise({
+        //    redirectTo: '/home'
+        //});
     }]);
 
 /**
@@ -197,13 +216,21 @@ jasifyScheduleApp.factory('Util', ['$log',
  */
 jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {
     $log.debug("new User");
-    return $resource('/user/:id', {id: '@id'},
+    var User = $resource('/user/:id', {id: '@id'},
         {
             /* User.checkUsername([params], postData, [success], [error]) */
             'checkUsername': {method: 'POST', url: '/username'},
             'create': {method: 'PUT', url: '/user/new'},
+            'changePassword': {method: 'POST', url: '/change-password/:id', params: {id: '@id'}},
+            'query': {
+                method: 'GET',
+                isArray: true,
+                url: '/users/page/:page/size/:size/sort/:sort',
+                params: {page: '@page', size: '@size', sort: '@sort'}
+            },
             'current': {method: 'GET', url: '/user/current'}
         });
+    return User;
 }]);
 
 jasifyScheduleApp.directive('strongPassword', function () {
