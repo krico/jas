@@ -49,6 +49,7 @@ public class UserServiceTest {
         User user1 = service.newUser();
         user1.setName("krico");
         service.create(user1, "password");
+        assertFalse(Permissions.isAdmin(user1));
         ShortBlob password = user1.getPassword();
         assertNotNull("Password should be set", password);
         String pwFromBytes = new String(password.getBytes());
@@ -56,10 +57,11 @@ public class UserServiceTest {
         User user2 = service.newUser();
         user2.setName("krico1");
         service.create(user2, "password2");
+        assertFalse(Permissions.isAdmin(user2));
         ShortBlob password2 = user2.getPassword();
         assertNotNull("Password should be set", password2);
         String pwFromBytes2 = new String(password2.getBytes());
-        assertNotSame("Password should be encrypted", "password2", pwFromBytes);
+        assertNotSame("Password should be encrypted", "password2", pwFromBytes2);
         createdUsers.add(user1);
         createdUsers.add(user2);
     }
@@ -134,7 +136,7 @@ public class UserServiceTest {
         user.setAbout(expectedAbout);
         Email expectedEmail = new Email("test@test.com");
         user.setEmail(expectedEmail);
-        user.addPermission(Permissions.USER);
+        user.addPermission(Permissions.ADMINISTRATOR);
         service.save(user);
         User updated = service.get(user.getId().getId());
         assertNotNull(updated);
@@ -142,7 +144,7 @@ public class UserServiceTest {
         assertEquals(expectedEmail, updated.getEmail());
         assertEquals(expectedCase, updated.getNameWithCase());
         assertEquals(1, updated.getPermissions().size());
-        assertTrue(updated.hasPermission(Permissions.USER));
+        assertTrue(updated.hasPermission(Permissions.ADMINISTRATOR));
     }
 
     @Test(expected = EntityNotFoundException.class)
