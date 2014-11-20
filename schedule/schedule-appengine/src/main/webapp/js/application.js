@@ -12,8 +12,7 @@ RegExp.quote = function (str) {
 };
 
 var jasifyScheduleApp = angular.module('jasifyScheduleApp',
-    ['ngRoute', 'ngResource', 'ngAnimate', 'ui.bootstrap', 'mgcrea.ngStrap',
-        'angularSpinner', 'jasifyScheduleControllers']);
+    ['ngRoute', 'ngResource', 'ngMessages', 'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
 
 /**
  * Routes for all navbar links
@@ -68,20 +67,16 @@ jasifyScheduleApp.config(['$routeProvider',
  */
 jasifyScheduleApp.factory('Modal', ['$log', '$modal', '$rootScope',
     function ($log, $modal, $rootScope) {
-        var error = {scope: $rootScope.$new()};
-
-        error.modal = $modal({
-            scope: error.scope,
-            template: 'views/modal/error.html',
-            animation: 'am-fade-and-scale',
-            show: false
-        });
+        //error.modal = $modal({
+        //    scope: error.scope,
+        //    template: 'views/modal/error.html',
+        //    animation: 'am-fade-and-scale',
+        //    show: false
+        //});
 
         var Modal = {
             showError: function (title, description) {
-                error.scope.title = title;
-                error.scope.content = description;
-                error.modal.show();
+                console.log("showError(" + title + ", " + description + ")");
             }
         };
         $log.debug("new Modal");

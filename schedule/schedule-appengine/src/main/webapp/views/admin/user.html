@@ -3,7 +3,7 @@
         <a href="#/admin/users"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
     </div>
     <div class="col-sm-10">
-        <div id="alert-container"></div>
+        <alert ng-repeat="a in alerts" type="{{a.type}}" close="alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
 </div>
 <tabset>
