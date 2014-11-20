@@ -1,6 +1,5 @@
 <form class="form-horizontal" role="form" name="profileForm" novalidate>
     <div class="col-md-12">
-
         <div class="form-group">
             <label class="col-sm-2 control-label">name:</label>
 
@@ -15,6 +14,9 @@
                 <input type="email" class="form-control" id="email" name="email" ng-model="user.email"
                        placeholder="email">
             </div>
+            <div class="help-block small" ng-messages="profileForm.email.$error">
+                <div class="help-block small" ng-message="email">Invalid email.</div>
+            </div>
         </div>
         <div class="form-group">
             <label for="about" class="col-sm-2 control-label">about:</label>
@@ -27,18 +29,20 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-4">
                 <button type="button"
-                        ng-click="save()" ng-disabled="!userForm.$dirty || userForm.$invalid"
+                        ng-click="save()" ng-disabled="!profileForm.$dirty || profileForm.$invalid"
                         class="btn btn-default btn-primary"><span class="glyphicon glyphicon-save"></span>
                     save
                 </button>
                 <button type="button"
-                        ng-click="reset()" ng-disabled="!userForm.$dirty"
+                        ng-click="reset()" ng-disabled="!profileForm.$dirty"
                         class="btn btn-default"><span class="glyphicon glyphicon-open"></span>
                     reset
                 </button>
                 <span ng-hide="user.id" us-spinner=""></span>
             </div>
         </div>
-        <div id="alert-container"></div>
+        <div class="col-md-3">
+            <alert ng-repeat="a in alerts" type="{{a.type}}" close="alerts.splice($index, 1)">{{a.msg}}</alert>
+        </div>
     </div>
 </form>

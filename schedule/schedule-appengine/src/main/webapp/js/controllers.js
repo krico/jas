@@ -6,7 +6,7 @@ var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
 jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth',
     function ($scope, $location, Auth) {
         $scope.user = Auth.getCurrentUser();
-        $scope.isAdmin = function(){
+        $scope.isAdmin = function () {
             return $scope.user && $scope.user.admin;
         };
 
@@ -41,8 +41,8 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
         $scope.user = Auth.getCurrentUser();
     }]);
 
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert', '$location', '$tooltip', 'Util', 'User', 'Auth',
-    function ($scope, $http, $alert, $location, $tooltip, Util, User, Auth) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'Util', 'User', 'Auth',
+    function ($scope, $http, $location, Util, User, Auth) {
 
         $scope.usernameCheck = {};
 
@@ -50,13 +50,11 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
 
         $scope.newUser = {}; //TODO: remove
 
-        $scope.usernameTooltip = {"title" : "Username is required."};
+        $scope.alerts = [];
 
-        $scope.emailTooltip = {"title" : "Email is required."};
-
-        $scope.passwordTooltip = {};
-
-        $scope.confirmTooltip = {"title" : "The passwords do not match."};
+        $scope.alert = function (t, m) {
+            $scope.alerts.push({type: t, msg: m});
+        };
 
         $scope.hasError = function (fieldName) {
             return Util.formFieldError($scope.signUpForm, fieldName);
@@ -72,7 +70,6 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
                 $scope.usernameCheck = User.checkUsername($scope.user.name,
                     //success
                     function (value, responseHeaders) {
-                        $scope.usernameTooltip = "";
                     },
                     //error
                     function (httpResponse) {
@@ -82,7 +79,6 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
             } else {
                 $scope.spinnerHidden = true;
                 $scope.usernameCheck = {};
-                $scope.usernameTooltip = "Username is required."
             }
         };
 
@@ -90,22 +86,14 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
             $scope.newUser = User.save($scope.user,
                 //success
                 function (value, responseHeaders) {
-                    $alert({
-                        title: 'Registration succeeded!',
-                        content: 'You were successfully registered. Your browser should be redirected shortly.',
-                        container: '#alert-container',
-                        type: 'success',
-                        show: true
-                    });
+
+                    $scope.alert('success', 'Registration succeeded! Your browser should be redirected shortly...');
+
                     //Simulate a login
                     Auth.login($scope.user.name, $scope.user.password, function (message) {
-                        $alert({
-                            title: 'Login failed!',
-                            content: "Funny, even though we just registered you, your login failed...",
-                            container: '#alert-container',
-                            type: 'danger',
-                            show: true
-                        });
+
+                        $scope.alert('danger', 'Funny, even though we just registered you, your login failed...');
+
                         $scope.newUser = {};
                     });
                 },
@@ -114,23 +102,24 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$alert',
                     //simulate a nok
                     $scope.usernameCheck = {nok: true, nokText: 'Registration failed'};
                     $scope.newUser = {};
-                    $alert({
-                        title: 'Registration failed!',
-                        content: "Registration failed, we don't really know why. Please change some fields and try again.",
-                        container: '#alert-container',
-                        type: 'danger',
-                        show: true
-                    });
+                    $scope.alert('danger', ":-( registration failed, since this was really unexpected, please change some fields and try again.");
                 });
         };
     }]);
 
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$alert', 'Util', 'Auth', 'Modal',
-    function ($scope, $alert, Util, Auth, Modal) {
+jasifyScheduleControllers.controller('LoginCtrl', ['$scope', 'Util', 'Auth', 'Modal',
+    function ($scope, Util, Auth, Modal) {
+
+        $scope.alerts = [];
 
         $scope.user = {};
 
         $scope.credentials = {};
+
+        $scope.alert = function (t, m) {
+            $scope.alerts.push({type: t, msg: m});
+        };
+
 
         $scope.hasError = function (fieldName) {
             return Util.formFieldError($scope.loginForm, fieldName);
@@ -142,14 +131,7 @@ jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$alert', 'Util', '
 
         $scope.login = function () {
             Auth.login($scope.credentials.name, $scope.credentials.password, function (reason) {
-                $alert({
-                    title: 'Login failed!',
-                    content: reason,
-                    container: '#alert-container',
-                    type: 'warning',
-                    show: true
-                });
-
+                $scope.alert('warning', 'Login failed!');
             });
         };
 
@@ -160,17 +142,19 @@ jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', 'Auth',
         Auth.logout();
     }]);
 
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$alert', 'Auth', 'User',
-    function ($scope, $alert, Auth, User) {
+jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Auth', 'User',
+    function ($scope, Auth, User) {
         $scope.user = {};
+
+        $scope.alerts = [];
+
+        $scope.alert = function (t, m) {
+            $scope.alerts.push({type: t, msg: m});
+        };
+
         $scope.save = function () {
             $scope.user.$save().then(function () {
-                $alert({
-                    title: 'Profile updated!',
-                    container: '#alert-container',
-                    type: 'success',
-                    show: true
-                });
+                $scope.alert('success', 'Profile updated!');
                 //TODO: We probably need to check for failures
                 Auth.setCurrentUser($scope.user);
             });

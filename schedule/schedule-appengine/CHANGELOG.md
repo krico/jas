@@ -19,6 +19,9 @@ Features:
 
 Changes:
 
+  - ngMessage `bower install angular-messages -S`
+  - upgraded BootstrapUI to 0.12.0
+  - uninstalled angular-strap `bower uninstall angular-strap -S` (conflicts with BootstrapUI)...
   - BootstrapUI installed (for pagination): `bower install angular-bootstrap -S`
   - application.js contains core functionality, namely
     - jasifyScheduleApp - the main application

@@ -78,13 +78,18 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
         $scope.pageChanged();
     }]);
 
-jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$alert', '$modal', 'User',
-    function ($scope, $routeParams, $alert, $modal, User) {
+jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$modal', 'User',
+    function ($scope, $routeParams, $modal, User) {
         $scope.user = null;
         $scope.create = false;
         $scope.loading = true;
 
-        $scope.forms  = {};
+        $scope.alerts = [];
+        $scope.forms = {};
+
+        $scope.alert = function (t, m) {
+            $scope.alerts.push({type: t, msg: m});
+        };
 
         $scope.save = function () {
 
@@ -96,12 +101,7 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
                     $scope.forms.userForm.$setPristine();
                 }
 
-                $alert({
-                    title: 'User updated successfully (' + new Date() + ')',
-                    container: '#alert-container',
-                    type: 'success',
-                    show: true
-                });
+                $scope.alert('success', 'User updated successfully (' + new Date() + ')');
 
             });
         };
@@ -116,12 +116,7 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
                     $scope.forms.passwordForm.$setPristine();
                 }
 
-                $alert({
-                    title: 'Password changed successfully (' + new Date() + ')',
-                    container: '#alert-container',
-                    type: 'success',
-                    show: true
-                });
+                $scope.alert('success', 'Password changed successfully (' + new Date() + ')');
 
             });
         };
@@ -133,12 +128,7 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
             $scope.user.$save(
                 //success
                 function (value, responseHeaders) {
-                    $alert({
-                        title: 'User creation succeeded!',
-                        container: '#alert-container',
-                        type: 'success',
-                        show: true
-                    });
+                    $scope.alert('success', 'User creation succeeded!');
                     $scope.create = false;
                     $scope.loading = false;
                 },
@@ -147,13 +137,7 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
 
                     $scope.loading = false;
 
-                    $alert({
-                        title: 'User creation failed!',
-                        content: (resp.statusText ? resp.statusText : "Unknown") + " (" + resp.status + ")",
-                        container: '#alert-container',
-                        type: 'danger',
-                        show: true
-                    });
+                    $scope.alert('danger', 'User creation failed!');
                 });
         };
 
