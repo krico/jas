@@ -7,22 +7,23 @@
         </div>
         <div>
             <div class="form-group has-feedback"
-                 ng-class="{'has-success':usernameCheck.ok && hasSuccess('username'), 'has-error': usernameCheck.nok || hasError('username')}">
+                 ng-class="{'has-success':hasSuccess('username'), 'has-error': hasError('username')}">
 
                 <label class="sr-only" for="username">Login name</label>
                 <input id="username" type="text" class="form-control input-sm" name="username"
-                       placeholder="Login name" ng-model="$parent.user.name"
-                       ng-model-options="{debounce:500}" ng-change="checkUsername()"
-                       required pattern="^...." maxlength="32">
+                       placeholder="Login name" ng-model="user.name"
+                       ng-model-options="{debounce:500}"
+                       required pattern="^...." maxlength="32" username>
                 <span class="glyphicon form-control-feedback"
-                      ng-class="{'glyphicon-ok':usernameCheck.ok && hasSuccess('username'), 'glyphicon-remove': usernameCheck.nok || hasError('username')}"></span>
+                      ng-class="{'glyphicon-ok':hasSuccess('username'), 'glyphicon-remove':hasError('username')}"></span>
                 <span class="form-control-feedback"
-                      ng-hide="spinnerHidden || usernameCheck.ok || usernameCheck.nok"
+                      ng-show="signUpForm.username.$pending"
                       us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}">
                 </span>
 
                 <div class="help-block small" ng-show="hasError('username')" ng-messages="signUpForm.username.$error">
                     <div class="help-block small" ng-message="required">Pick a username.</div>
+                    <div class="help-block small" ng-message="username">Username not available.</div>
                     <div class="help-block small" ng-message="pattern">Username too short.</div>
                     <div class="help-block small" ng-message="maxlength">Username too long.</div>
                 </div>
@@ -75,11 +76,11 @@
             </div>
         </div>
         <div>
-            <button type="submit" ng-disabled="signUpForm.$invalid || !usernameCheck.ok || newUser.name"
+            <button type="submit" ng-disabled="signUpForm.$invalid || inProgress" ng-hide="registered"
                     class="btn btn-sm btn-default btn-primary">
                 sign up
             </button>
-            <span ng-hide="newUser.id || !newUser.name" us-spinner=""></span>
+            <span ng-show="inProgress" us-spinner=""></span>
         </div>
     </div>
     <div class="col-md-3">

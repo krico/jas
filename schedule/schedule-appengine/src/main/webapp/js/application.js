@@ -280,3 +280,40 @@ jasifyScheduleApp.directive('confirmField', function () {
         }
     };
 });
+
+
+jasifyScheduleApp.directive('username', ['$q', 'User', function ($q, User) {
+    return {
+        require: 'ngModel',
+        link: function (scope, elm, attrs, ctrl) {
+
+            ctrl.$asyncValidators.username = function (modelValue, viewValue) {
+
+                if (ctrl.$isEmpty(modelValue)) {
+                    return $q.when();
+                }
+
+                var def = $q.defer();
+
+                User.checkUsername(modelValue,
+                    //success
+                    function (value, responseHeaders) {
+                        var check = angular.fromJson(value);
+                        if (check.ok) {
+                            def.resolve();
+                        } else if (check.nok) {
+                            def.reject(check.nokText);
+                        } else {
+                            def.reject('unknown error');
+                        }
+                    },
+                    //error
+                    function (httpResponse) {
+                        def.reject('communication error');
+                    });
+
+                return def.promise;
+            };
+        }
+    };
+}]);
