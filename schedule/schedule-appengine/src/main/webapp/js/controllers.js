@@ -44,13 +44,10 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
 jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'Util', 'User', 'Auth',
     function ($scope, $http, $location, Util, User, Auth) {
 
-        $scope.usernameCheck = {};
-
-        $scope.spinnerHidden = true;
-
-        $scope.newUser = {}; //TODO: remove
-
         $scope.alerts = [];
+
+        $scope.inProgress = false;
+        $scope.registered = false;
 
         $scope.alert = function (t, m) {
             $scope.alerts.push({type: t, msg: m});
@@ -64,28 +61,14 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
             return Util.formFieldSuccess($scope.signUpForm, fieldName);
         };
 
-        $scope.checkUsername = function () {
-            if ($scope.user.name) {
-                $scope.spinnerHidden = false;
-                $scope.usernameCheck = User.checkUsername($scope.user.name,
-                    //success
-                    function (value, responseHeaders) {
-                    },
-                    //error
-                    function (httpResponse) {
-                        //simulate a nok
-                        $scope.usernameCheck = {nok: true, nokText: 'Communication error'};
-                    });
-            } else {
-                $scope.spinnerHidden = true;
-                $scope.usernameCheck = {};
-            }
-        };
-
         $scope.createUser = function () {
-            $scope.newUser = User.save($scope.user,
+            $scope.inProgress = true;
+
+            User.save($scope.user,
                 //success
                 function (value, responseHeaders) {
+                    $scope.registered = true;
+                    $scope.inProgress = false;
 
                     $scope.alert('success', 'Registration succeeded! Your browser should be redirected shortly...');
 
@@ -94,15 +77,14 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
 
                         $scope.alert('danger', 'Funny, even though we just registered you, your login failed...');
 
-                        $scope.newUser = {};
                     });
                 },
                 //error
                 function (httpResponse) {
-                    //simulate a nok
-                    $scope.usernameCheck = {nok: true, nokText: 'Registration failed'};
-                    $scope.newUser = {};
+                    $scope.inProgress = false;
+
                     $scope.alert('danger', ":-( registration failed, since this was really unexpected, please change some fields and try again.");
+
                 });
         };
     }]);
