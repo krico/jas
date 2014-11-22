@@ -2,6 +2,11 @@ package com.jasify.schedule.appengine.model.users;
 
 import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.meta.users.UserMeta;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
@@ -11,6 +16,16 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 public class UserTest {
+    @Before
+    public void initializeDatastore() {
+        TestHelper.initializeDatastore();
+    }
+
+    @After
+    public void cleanupDatastore() {
+        TestHelper.cleanupDatastore();
+    }
+
 
     @Test
     public void testHasPermission() throws Exception {

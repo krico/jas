@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.http.json;
 
+import com.jasify.schedule.appengine.model.users.Permissions;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.JSON;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -18,6 +19,7 @@ public class JsonUser extends JsonObject {
     private String name;
     private String email;
     private String about;
+    private boolean admin;
 
     public JsonUser() {
     }
@@ -29,6 +31,7 @@ public class JsonUser extends JsonObject {
         name = user.getNameWithCase(); /* This is what the user wants to see */
         email = TypeUtil.toString(user.getEmail());
         about = TypeUtil.toString(user.getAbout());
+        admin = Permissions.isAdmin(user);
     }
 
     public static JsonUser parse(String data) {
@@ -93,5 +96,13 @@ public class JsonUser extends JsonObject {
 
     public void setAbout(String about) {
         this.about = about;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

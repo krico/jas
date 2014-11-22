@@ -1,9 +1,11 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.google.appengine.api.datastore.Query;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author krico
@@ -27,4 +29,10 @@ public interface UserService {
 
     @Nonnull
     User login(String name, String password) throws LoginFailedException;
+
+    List<User> list(Query.SortDirection order, int offset, int limit);
+
+    List<User> searchByName(String pattern, Query.SortDirection order, int offset, int limit);
+
+    List<User> searchByEmail(String pattern, Query.SortDirection order, int offset, int limit);
 }

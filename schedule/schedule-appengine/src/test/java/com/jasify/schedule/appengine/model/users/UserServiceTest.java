@@ -1,17 +1,19 @@
 package com.jasify.schedule.appengine.model.users;
 
 import com.google.appengine.api.datastore.Email;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.util.DigestUtil;
+import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,6 +25,16 @@ public class UserServiceTest {
     private static final Logger log = LoggerFactory.getLogger(UserServiceTest.class);
     private UserService service;
     private List<User> createdUsers = new ArrayList<>();
+
+    @BeforeClass
+    public static void lowerIterations() {
+        DigestUtil.setIterations(1);
+    }
+
+    @AfterClass
+    public static void restoreIterations() {
+        DigestUtil.setIterations(16192);
+    }
 
     @Before
     public void initializeDatastore() {
@@ -47,7 +59,7 @@ public class UserServiceTest {
     @Test
     public void testCreateUser() throws Exception {
         User user1 = service.newUser();
-        user1.setName("krico");
+        user1.setName("test");
         service.create(user1, "password");
         assertFalse(Permissions.isAdmin(user1));
         ShortBlob password = user1.getPassword();
@@ -69,20 +81,20 @@ public class UserServiceTest {
     @Test(expected = UsernameExistsException.class)
     public void testCreateUserWithSameNameThrows() throws Exception {
         User user1 = service.newUser();
-        user1.setName("krico");
+        user1.setName("test");
         service.create(user1, "password1");
         User user2 = service.newUser();
-        user2.setName("krico");
+        user2.setName("test");
         service.create(user2, "password2");
     }
 
     @Test(expected = UsernameExistsException.class)
     public void testCreateUserWithSameNameAndDifferentCaseThrows() throws Exception {
         User user1 = service.newUser();
-        user1.setName("krico");
+        user1.setName("test");
         service.create(user1, "password1");
         User user2 = service.newUser();
-        user2.setName("kriCo");
+        user2.setName("teSt");
         service.create(user2, "password2");
     }
 
@@ -130,7 +142,7 @@ public class UserServiceTest {
     public void testSaveUser() throws Exception {
         testCreateUser();
         User user = service.get(createdUsers.get(0).getId().getId());
-        String expectedCase = "KriCo";
+        String expectedCase = "TeSt";
         user.setNameWithCase(expectedCase);
         Text expectedAbout = new Text("About me");
         user.setAbout(expectedAbout);
@@ -145,6 +157,7 @@ public class UserServiceTest {
         assertEquals(expectedCase, updated.getNameWithCase());
         assertEquals(1, updated.getPermissions().size());
         assertTrue(updated.hasPermission(Permissions.ADMINISTRATOR));
+        assertTrue(Permissions.isAdmin(updated));
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -216,5 +229,130 @@ public class UserServiceTest {
     @Test(expected = LoginFailedException.class)
     public void testUserLoginNullFails() throws Exception {
         service.login(null, null);
+    }
+
+    private void createUsers(int total) throws UsernameExistsException {
+        for (int i = 0; i < total; ++i) {
+            User user = new User();
+            user.setId(Datastore.createKey(User.class, (long) i + 1000));
+            user.setName(String.format("user%03d", i));
+            user.setEmail(TypeUtil.toEmail(String.format("user%03d@new.co", i)));
+            service.create(user, "password");
+        }
+    }
+
+    @Test
+    public void testList() throws Exception {
+        int total = 200;
+        int offset = 20;
+
+        createUsers(total);
+
+        List<User> allAsc = service.list(Query.SortDirection.ASCENDING, 0, -1);
+        assertNotNull("null response", allAsc);
+        assertEquals("I created " + total, total, allAsc.size());
+        for (int i = 0; i < total; i++) {
+            assertEquals(String.format("user%03d", i), allAsc.get(i).getName());
+        }
+
+        List<User> allAscLim = service.list(Query.SortDirection.ASCENDING, offset, -1);
+        assertEquals(total - offset, allAscLim.size());
+        for (int i = offset; i < total; i++) {
+            assertEquals(String.format("user%03d", i), allAscLim.get(i - offset).getName());
+        }
+
+        List<User> allDesc = service.list(Query.SortDirection.DESCENDING, 0, -1);
+        assertNotNull("null response", allDesc);
+        assertEquals("I created " + total, total, allDesc.size());
+        for (int i = 0; i < total; i++) {
+            assertEquals(String.format("user%03d", total - (i + 1)), allDesc.get(i).getName());
+        }
+
+        int limit = 20;
+        List<User> descLimOff = service.list(Query.SortDirection.DESCENDING, offset, limit);
+        assertEquals(limit, descLimOff.size());
+        for (int i = 0; i < limit; i++) {
+            assertEquals(String.format("user%03d", total - 1 - offset - i), descLimOff.get(i).getName());
+        }
+
+    }
+
+    @Test
+    public void testSearchByName() throws Exception {
+        int total = 200;
+
+        createUsers(total);
+
+        String name = String.format("user%03d", total - 1);
+        List<User> directHit = service.searchByName(name, Query.SortDirection.ASCENDING, 0, 0);
+        assertNotNull(directHit);
+        assertEquals(1, directHit.size());
+        assertEquals(name, directHit.get(0).getName());
+
+
+        List<User> oneHundred = service.searchByName("user0[0-9]{2}", Query.SortDirection.ASCENDING, 0, 0);
+        assertEquals(100, oneHundred.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", i), oneHundred.get(i).getName());
+        }
+
+        List<User> oneHundredDesc = service.searchByName("user0[0-9]{2}", Query.SortDirection.DESCENDING, 0, 0);
+        assertEquals(100, oneHundredDesc.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", 100 - i - 1), oneHundredDesc.get(i).getName());
+        }
+        List<User> oneHundredDescLimOff = service.searchByName("user0[0-9]{2}", Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", 80 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+        oneHundredDescLimOff = service.searchByName("", Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", total - 20 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+
+        assertTrue(service.searchByName(null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
+        assertTrue(service.searchByName("u", Query.SortDirection.DESCENDING, total, 1).isEmpty());
+    }
+
+    @Test
+    public void testSearchByEmail() throws Exception {
+        int total = 200;
+
+        createUsers(total);
+
+        String name = String.format("user%03d", total - 1);
+        String email = name + '@';
+        List<User> directHit = service.searchByEmail(email, Query.SortDirection.ASCENDING, 0, 0);
+        assertNotNull(directHit);
+        assertEquals(1, directHit.size());
+        assertEquals(name, directHit.get(0).getName());
+
+
+        List<User> oneHundred = service.searchByEmail("user0[0-9]{2}@", Query.SortDirection.ASCENDING, 0, 0);
+        assertEquals(100, oneHundred.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", i), oneHundred.get(i).getName());
+        }
+
+        List<User> oneHundredDesc = service.searchByEmail("user0[0-9]{2}@", Query.SortDirection.DESCENDING, 0, 0);
+        assertEquals(100, oneHundredDesc.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", 100 - i - 1), oneHundredDesc.get(i).getName());
+        }
+        List<User> oneHundredDescLimOff = service.searchByEmail("user0[0-9]{2}@", Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", 80 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+        oneHundredDescLimOff = service.searchByEmail("", Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", total - 20 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+        assertTrue(service.searchByEmail(null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
+        assertTrue(service.searchByEmail("u", Query.SortDirection.DESCENDING, total, 1).isEmpty());
+
     }
 }

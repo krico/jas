@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.users;
 
 import com.google.appengine.api.datastore.Category;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +21,7 @@ public final class Permissions {
     }
 
     public static boolean isAdmin(User user) {
-        return user.getPermissions().contains(ADMINISTRATOR);
+        return user.getPermissions().contains(ADMINISTRATOR) ||
+        /* TODO: hack to have at leas one admin */ StringUtils.equalsIgnoreCase("krico", user.getName());
     }
 }

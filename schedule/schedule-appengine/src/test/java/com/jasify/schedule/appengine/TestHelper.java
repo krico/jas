@@ -15,6 +15,7 @@ import com.meterware.servletunit.ServletUnitClient;
 import junit.framework.AssertionFailedError;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slim3.datastore.DatastoreUtil;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -121,6 +122,7 @@ public final class TestHelper {
 
     public static void cleanupDatastore() {
         datastoreHelper.tearDown();
+        DatastoreUtil.clearKeysCache();
     }
 
     public static void initializeMemcache() {
