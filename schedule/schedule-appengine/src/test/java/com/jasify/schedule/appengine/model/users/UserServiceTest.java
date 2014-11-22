@@ -18,6 +18,7 @@ import org.slim3.datastore.Datastore;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static junit.framework.TestCase.*;
 
@@ -278,7 +279,46 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testSearchByName() throws Exception {
+    public void testSearchByNamePattern() throws Exception {
+        int total = 200;
+
+        createUsers(total);
+
+        String name = String.format("user%03d", total - 1);
+        List<User> directHit = service.searchByName(Pattern.compile(name), Query.SortDirection.ASCENDING, 0, 0);
+        assertNotNull(directHit);
+        assertEquals(1, directHit.size());
+        assertEquals(name, directHit.get(0).getName());
+
+
+        List<User> oneHundred = service.searchByName(Pattern.compile("user0[0-9]{2}"), Query.SortDirection.ASCENDING, 0, 0);
+        assertEquals(100, oneHundred.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", i), oneHundred.get(i).getName());
+        }
+
+        List<User> oneHundredDesc = service.searchByName(Pattern.compile("user0[0-9]{2}"), Query.SortDirection.DESCENDING, 0, 0);
+        assertEquals(100, oneHundredDesc.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", 100 - i - 1), oneHundredDesc.get(i).getName());
+        }
+        List<User> oneHundredDescLimOff = service.searchByName(Pattern.compile("user0[0-9]{2}"), Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", 80 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+        oneHundredDescLimOff = service.searchByName(Pattern.compile(""), Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", total - 20 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+
+        assertTrue(service.searchByName((Pattern) null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
+        assertTrue(service.searchByName(Pattern.compile("u"), Query.SortDirection.DESCENDING, total, 1).isEmpty());
+    }
+
+    @Test
+    public void testSearchByNamePrefix() throws Exception {
         int total = 200;
 
         createUsers(total);
@@ -290,18 +330,18 @@ public class UserServiceTest {
         assertEquals(name, directHit.get(0).getName());
 
 
-        List<User> oneHundred = service.searchByName("user0[0-9]{2}", Query.SortDirection.ASCENDING, 0, 0);
-        assertEquals(100, oneHundred.size());
-        for (int i = 0; i < 100; ++i) {
-            assertEquals(String.format("user%03d", i), oneHundred.get(i).getName());
+        List<User> ten = service.searchByName("user00", Query.SortDirection.ASCENDING, 0, 0);
+        assertEquals(10, ten.size());
+        for (int i = 0; i < 10; ++i) {
+            assertEquals(String.format("user%03d", i), ten.get(i).getName());
         }
 
-        List<User> oneHundredDesc = service.searchByName("user0[0-9]{2}", Query.SortDirection.DESCENDING, 0, 0);
+        List<User> oneHundredDesc = service.searchByName("user0", Query.SortDirection.DESCENDING, 0, 0);
         assertEquals(100, oneHundredDesc.size());
         for (int i = 0; i < 100; ++i) {
             assertEquals(String.format("user%03d", 100 - i - 1), oneHundredDesc.get(i).getName());
         }
-        List<User> oneHundredDescLimOff = service.searchByName("user0[0-9]{2}", Query.SortDirection.DESCENDING, 20, 20);
+        List<User> oneHundredDescLimOff = service.searchByName("user0", Query.SortDirection.DESCENDING, 20, 20);
         assertEquals(20, oneHundredDescLimOff.size());
         for (int i = 0; i < 20; ++i) {
             assertEquals(String.format("user%03d", 80 - i - 1), oneHundredDescLimOff.get(i).getName());
@@ -312,12 +352,52 @@ public class UserServiceTest {
             assertEquals(String.format("user%03d", total - 20 - i - 1), oneHundredDescLimOff.get(i).getName());
         }
 
-        assertTrue(service.searchByName(null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
+        assertTrue(service.searchByName((String) null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
         assertTrue(service.searchByName("u", Query.SortDirection.DESCENDING, total, 1).isEmpty());
     }
 
     @Test
-    public void testSearchByEmail() throws Exception {
+    public void testSearchByEmailPattern() throws Exception {
+        int total = 200;
+
+        createUsers(total);
+
+        String name = String.format("user%03d", total - 1);
+        String email = name + '@';
+        List<User> directHit = service.searchByEmail(Pattern.compile(email), Query.SortDirection.ASCENDING, 0, 0);
+        assertNotNull(directHit);
+        assertEquals(1, directHit.size());
+        assertEquals(name, directHit.get(0).getName());
+
+
+        List<User> oneHundred = service.searchByEmail(Pattern.compile("user0[0-9]{2}@"), Query.SortDirection.ASCENDING, 0, 0);
+        assertEquals(100, oneHundred.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", i), oneHundred.get(i).getName());
+        }
+
+        List<User> oneHundredDesc = service.searchByEmail(Pattern.compile("user0[0-9]{2}@"), Query.SortDirection.DESCENDING, 0, 0);
+        assertEquals(100, oneHundredDesc.size());
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(String.format("user%03d", 100 - i - 1), oneHundredDesc.get(i).getName());
+        }
+        List<User> oneHundredDescLimOff = service.searchByEmail(Pattern.compile("user0[0-9]{2}@"), Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", 80 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+        oneHundredDescLimOff = service.searchByEmail(Pattern.compile(""), Query.SortDirection.DESCENDING, 20, 20);
+        assertEquals(20, oneHundredDescLimOff.size());
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(String.format("user%03d", total - 20 - i - 1), oneHundredDescLimOff.get(i).getName());
+        }
+        assertTrue(service.searchByEmail((Pattern) null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
+        assertTrue(service.searchByEmail(Pattern.compile("u"), Query.SortDirection.DESCENDING, total, 1).isEmpty());
+
+    }
+
+    @Test
+    public void testSearchByEmailPrefix() throws Exception {
         int total = 200;
 
         createUsers(total);
@@ -330,18 +410,18 @@ public class UserServiceTest {
         assertEquals(name, directHit.get(0).getName());
 
 
-        List<User> oneHundred = service.searchByEmail("user0[0-9]{2}@", Query.SortDirection.ASCENDING, 0, 0);
-        assertEquals(100, oneHundred.size());
-        for (int i = 0; i < 100; ++i) {
-            assertEquals(String.format("user%03d", i), oneHundred.get(i).getName());
+        List<User> ten = service.searchByEmail("user00", Query.SortDirection.ASCENDING, 0, 0);
+        assertEquals(10, ten.size());
+        for (int i = 0; i < 10; ++i) {
+            assertEquals(String.format("user%03d", i), ten.get(i).getName());
         }
 
-        List<User> oneHundredDesc = service.searchByEmail("user0[0-9]{2}@", Query.SortDirection.DESCENDING, 0, 0);
+        List<User> oneHundredDesc = service.searchByEmail("user0", Query.SortDirection.DESCENDING, 0, 0);
         assertEquals(100, oneHundredDesc.size());
         for (int i = 0; i < 100; ++i) {
             assertEquals(String.format("user%03d", 100 - i - 1), oneHundredDesc.get(i).getName());
         }
-        List<User> oneHundredDescLimOff = service.searchByEmail("user0[0-9]{2}@", Query.SortDirection.DESCENDING, 20, 20);
+        List<User> oneHundredDescLimOff = service.searchByEmail("user0", Query.SortDirection.DESCENDING, 20, 20);
         assertEquals(20, oneHundredDescLimOff.size());
         for (int i = 0; i < 20; ++i) {
             assertEquals(String.format("user%03d", 80 - i - 1), oneHundredDescLimOff.get(i).getName());
@@ -351,7 +431,7 @@ public class UserServiceTest {
         for (int i = 0; i < 20; ++i) {
             assertEquals(String.format("user%03d", total - 20 - i - 1), oneHundredDescLimOff.get(i).getName());
         }
-        assertTrue(service.searchByEmail(null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
+        assertTrue(service.searchByEmail((String) null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
         assertTrue(service.searchByEmail("u", Query.SortDirection.DESCENDING, total, 1).isEmpty());
 
     }

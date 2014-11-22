@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author krico
@@ -25,6 +26,8 @@ public interface UserService {
 
     User findByName(String name);
 
+    User findByEmail(String email);
+
     boolean exists(String name);
 
     @Nonnull
@@ -32,7 +35,11 @@ public interface UserService {
 
     List<User> list(Query.SortDirection order, int offset, int limit);
 
-    List<User> searchByName(String pattern, Query.SortDirection order, int offset, int limit);
+    List<User> searchByName(Pattern pattern, Query.SortDirection order, int offset, int limit);
 
-    List<User> searchByEmail(String pattern, Query.SortDirection order, int offset, int limit);
+    List<User> searchByName(String startsWith, Query.SortDirection order, int offset, int limit);
+
+    List<User> searchByEmail(Pattern pattern, Query.SortDirection order, int offset, int limit);
+
+    List<User> searchByEmail(String startsWith, Query.SortDirection order, int offset, int limit);
 }

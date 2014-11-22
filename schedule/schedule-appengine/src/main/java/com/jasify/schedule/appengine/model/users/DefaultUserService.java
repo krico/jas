@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.InMemoryFilterCriterion;
 import org.slim3.datastore.ModelQuery;
+import org.slim3.datastore.SortCriterion;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -102,6 +103,11 @@ class DefaultUserService implements UserService {
     }
 
     @Override
+    public User findByEmail(String email) {
+        return null;
+    }
+
+    @Override
     public boolean exists(String name) {
         return !Datastore.query(User.class).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asKeyList().isEmpty();
     }
@@ -125,25 +131,17 @@ class DefaultUserService implements UserService {
 
     @Override
     public List<User> list(Query.SortDirection order, int offset, int limit) {
-
-        ModelQuery<User> query = Datastore.query(userMeta);
-
-
-        if (offset > 0) query.offset(offset);
-        if (limit > 0) query.limit(limit);
-
-        if (order == Query.SortDirection.DESCENDING) {
-            query.sort(userMeta.id.desc);
-        } else {
-            query.sort(userMeta.id.asc);
-        }
-
-        return query.asList();
+        return search(offset, limit, order == Query.SortDirection.DESCENDING ? userMeta.id.desc : userMeta.id.asc);
 
     }
 
     @Override
-    public List<User> searchByName(String pattern, Query.SortDirection order, int offset, int limit) {
+    public List<User> searchByName(final Pattern pattern, Query.SortDirection order, int offset, int limit) {
+
+        if (pattern == null) {
+            return search(offset, limit, order == Query.SortDirection.DESCENDING ? userMeta.name.desc : userMeta.name.asc);
+        }
+
         ModelQuery<User> query = Datastore.query(userMeta);
 
         if (order == Query.SortDirection.DESCENDING) {
@@ -152,37 +150,52 @@ class DefaultUserService implements UserService {
             query.sort(userMeta.name.asc);
         }
 
-        if (StringUtils.isNotBlank(pattern)) {
-            final Pattern pat = Pattern.compile(pattern);
-            /* TODO: in memory search might be slow when we have millions of users :-) */
-            query.filterInMemory(new InMemoryFilterCriterion() {
-                @Override
-                public boolean accept(Object model) {
-                    return pat.matcher(((User) model).getName()).find();
-                }
-            });
-            List<User> users = query.asList();
-            if (offset > 0 || limit > 0) {
-                if (offset < users.size()) {
-                    if (limit <= 0) limit = users.size();
-                    return new ArrayList<>(users.subList(offset, Math.min(offset + limit, users.size())));
-                } else {
-                    return Collections.emptyList();
-                }
+        /* TODO: in memory search might be slow when we have millions of users :-) */
+        query.filterInMemory(new InMemoryFilterCriterion() {
+            @Override
+            public boolean accept(Object model) {
+                return pattern.matcher(((User) model).getName()).find();
             }
-            return users;
-        } else {
-
-            if (offset > 0) query.offset(offset);
-            if (limit > 0) query.limit(limit);
-
-            return query.asList();
+        });
+        List<User> users = query.asList();
+        if (offset > 0 || limit > 0) {
+            if (offset < users.size()) {
+                if (limit <= 0) limit = users.size();
+                return new ArrayList<>(users.subList(offset, Math.min(offset + limit, users.size())));
+            } else {
+                return Collections.emptyList();
+            }
         }
-
+        return users;
     }
 
     @Override
-    public List<User> searchByEmail(String pattern, Query.SortDirection order, int offset, int limit) {
+    public List<User> searchByName(String startsWith, Query.SortDirection order, int offset, int limit) {
+        ModelQuery<User> query = Datastore.query(userMeta);
+
+        if (StringUtils.isNotBlank(startsWith)) {
+            query.filter(userMeta.name.startsWith(startsWith));
+        }
+
+        if (offset > 0) query.offset(offset);
+        if (limit > 0) query.limit(limit);
+
+        if (order == Query.SortDirection.DESCENDING) {
+            query.sort(userMeta.name.desc);
+        } else {
+            query.sort(userMeta.name.asc);
+        }
+
+        return query.asList();
+    }
+
+    @Override
+    public List<User> searchByEmail(final Pattern pattern, Query.SortDirection order, int offset, int limit) {
+
+        if (pattern == null) {
+            return search(offset, limit, order == Query.SortDirection.DESCENDING ? userMeta.email.desc : userMeta.email.asc);
+        }
+
         ModelQuery<User> query = Datastore.query(userMeta);
 
         if (order == Query.SortDirection.DESCENDING) {
@@ -191,32 +204,38 @@ class DefaultUserService implements UserService {
             query.sort(userMeta.email.asc);
         }
 
-        if (StringUtils.isNotBlank(pattern)) {
-            final Pattern pat = Pattern.compile(pattern);
             /* TODO: in memory search might be slow when we have millions of users :-) */
-            query.filterInMemory(new InMemoryFilterCriterion() {
-                @Override
-                public boolean accept(Object model) {
-                    String emailString = TypeUtil.toString(((User) model).getEmail());
-                    return pat.matcher(StringUtils.trimToEmpty(emailString)).find();
-                }
-            });
-            List<User> users = query.asList();
-            if (offset > 0 || limit > 0) {
-                if (offset < users.size()) {
-                    if (limit <= 0) limit = users.size();
-                    return new ArrayList<>(users.subList(offset, Math.min(offset + limit, users.size())));
-                } else {
-                    return Collections.emptyList();
-                }
+        query.filterInMemory(new InMemoryFilterCriterion() {
+            @Override
+            public boolean accept(Object model) {
+                String emailString = TypeUtil.toString(((User) model).getEmail());
+                return pattern.matcher(StringUtils.trimToEmpty(emailString)).find();
             }
-            return users;
-        } else {
-
-            if (offset > 0) query.offset(offset);
-            if (limit > 0) query.limit(limit);
-
-            return query.asList();
+        });
+        List<User> users = query.asList();
+        if (offset > 0 || limit > 0) {
+            if (offset < users.size()) {
+                if (limit <= 0) limit = users.size();
+                return new ArrayList<>(users.subList(offset, Math.min(offset + limit, users.size())));
+            } else {
+                return Collections.emptyList();
+            }
         }
+        return users;
+    }
+
+    @Override
+    public List<User> searchByEmail(String startsWith, Query.SortDirection order, int offset, int limit) {
+        if (StringUtils.isBlank(startsWith)) {
+            return search(offset, limit, order == Query.SortDirection.DESCENDING ? userMeta.email.desc : userMeta.email.asc);
+        }
+        return searchByEmail(Pattern.compile("^" + Pattern.quote(startsWith)), order, offset, limit);
+    }
+
+    private List<User> search(int offset, int limit, SortCriterion criteria) {
+        ModelQuery<User> query = Datastore.query(userMeta);
+        if (offset > 0) query.offset(offset);
+        if (limit > 0) query.limit(limit);
+        return query.sort(criteria).asList();
     }
 }
