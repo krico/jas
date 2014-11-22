@@ -11,7 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by krico on 08/11/14.
+ * @author krico
+ * @since 08/11/14.
  */
 @Model
 public class User {
