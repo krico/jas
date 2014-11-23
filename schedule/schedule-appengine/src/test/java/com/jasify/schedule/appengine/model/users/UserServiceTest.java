@@ -1,14 +1,11 @@
 package com.jasify.schedule.appengine.model.users;
 
-import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
-import com.google.appengine.api.datastore.Text;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.util.DigestUtil;
-import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.*;
 import org.slf4j.Logger;
@@ -62,7 +59,7 @@ public class UserServiceTest {
         User user1 = service.newUser();
         user1.setName("test");
         service.create(user1, "password");
-        assertFalse(Permissions.isAdmin(user1));
+        assertFalse(user1.isAdmin());
         ShortBlob password = user1.getPassword();
         assertNotNull("Password should be set", password);
         String pwFromBytes = new String(password.getBytes());
@@ -70,7 +67,7 @@ public class UserServiceTest {
         User user2 = service.newUser();
         user2.setName("krico1");
         service.create(user2, "password2");
-        assertFalse(Permissions.isAdmin(user2));
+        assertFalse(user2.isAdmin());
         ShortBlob password2 = user2.getPassword();
         assertNotNull("Password should be set", password2);
         String pwFromBytes2 = new String(password2.getBytes());
@@ -145,20 +142,18 @@ public class UserServiceTest {
         User user = service.get(createdUsers.get(0).getId().getId());
         String expectedCase = "TeSt";
         user.setNameWithCase(expectedCase);
-        Text expectedAbout = new Text("About me");
+        String expectedAbout = "About me";
         user.setAbout(expectedAbout);
-        Email expectedEmail = new Email("test@test.com");
-        user.setEmail(expectedEmail);
-        user.addPermission(Permissions.ADMINISTRATOR);
+        String expectedEmail = "test@test.com";
+        user.setEmail("teSt@tesT.com");
+        user.setAdmin(true);
         service.save(user);
         User updated = service.get(user.getId().getId());
         assertNotNull(updated);
         assertEquals(expectedAbout, updated.getAbout());
         assertEquals(expectedEmail, updated.getEmail());
         assertEquals(expectedCase, updated.getNameWithCase());
-        assertEquals(1, updated.getPermissions().size());
-        assertTrue(updated.hasPermission(Permissions.ADMINISTRATOR));
-        assertTrue(Permissions.isAdmin(updated));
+        assertTrue(updated.isAdmin());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -237,7 +232,7 @@ public class UserServiceTest {
             User user = new User();
             user.setId(Datastore.createKey(User.class, (long) i + 1000));
             user.setName(String.format("user%03d", i));
-            user.setEmail(TypeUtil.toEmail(String.format("user%03d@new.co", i)));
+            user.setEmail(String.format("user%03d@new.co", i));
             service.create(user, "password");
         }
     }

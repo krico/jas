@@ -10,7 +10,8 @@ import org.slim3.datastore.Datastore;
 import java.util.TreeMap;
 
 /**
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
 public final class ApplicationData {
     private static final Logger log = LoggerFactory.getLogger(ApplicationData.class);

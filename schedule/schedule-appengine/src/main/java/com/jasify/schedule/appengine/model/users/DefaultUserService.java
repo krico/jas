@@ -9,7 +9,6 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.util.DigestUtil;
-import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +66,8 @@ class DefaultUserService implements UserService {
 
     @Override
     public User save(User user) throws EntityNotFoundException, FieldValueException {
+        //TODO: permissioning?
+
         Transaction tx = Datastore.beginTransaction();
         User db = Datastore.getOrNull(tx, userMeta, user.getId());
         if (db == null) {
@@ -81,10 +82,16 @@ class DefaultUserService implements UserService {
             throw new FieldValueException("Cannot change 'name' casing with save();");
         }
         db.setAbout(user.getAbout());
-        db.setPermissions(user.getPermissions());
-        db.setEmail(user.getEmail());
+        db.setEmail(StringUtils.lowerCase(user.getEmail()));
         db.setNameWithCase(user.getNameWithCase());
-        Datastore.put(tx, db);
+        db.setAdmin(user.isAdmin());
+
+        UserDetail model = db.getDetailRef().getModel();
+        if (model == null) {
+            Datastore.put(tx, db);
+        } else {
+            Datastore.put(tx, db, model);
+        }
         tx.commit();
         return user;
     }
@@ -208,8 +215,7 @@ class DefaultUserService implements UserService {
         query.filterInMemory(new InMemoryFilterCriterion() {
             @Override
             public boolean accept(Object model) {
-                String emailString = TypeUtil.toString(((User) model).getEmail());
-                return pattern.matcher(StringUtils.trimToEmpty(emailString)).find();
+                return pattern.matcher(StringUtils.trimToEmpty(((User) model).getEmail())).find();
             }
         });
         List<User> users = query.asList();
@@ -226,10 +232,22 @@ class DefaultUserService implements UserService {
 
     @Override
     public List<User> searchByEmail(String startsWith, Query.SortDirection order, int offset, int limit) {
-        if (StringUtils.isBlank(startsWith)) {
-            return search(offset, limit, order == Query.SortDirection.DESCENDING ? userMeta.email.desc : userMeta.email.asc);
+        ModelQuery<User> query = Datastore.query(userMeta);
+
+        if (StringUtils.isNotBlank(startsWith)) {
+            query.filter(userMeta.email.startsWith(startsWith));
         }
-        return searchByEmail(Pattern.compile("^" + Pattern.quote(startsWith)), order, offset, limit);
+
+        if (offset > 0) query.offset(offset);
+        if (limit > 0) query.limit(limit);
+
+        if (order == Query.SortDirection.DESCENDING) {
+            query.sort(userMeta.email.desc);
+        } else {
+            query.sort(userMeta.email.asc);
+        }
+
+        return query.asList();
     }
 
     private List<User> search(int offset, int limit, SortCriterion criteria) {

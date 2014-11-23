@@ -7,7 +7,6 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.util.JSON;
-import com.jasify.schedule.appengine.util.TypeUtil;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
@@ -80,8 +79,8 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
         assertEquals(user.getNameWithCase(), jUser.getName());
-        assertEquals(TypeUtil.toString(user.getEmail()), jUser.getEmail());
-        assertEquals(TypeUtil.toString(user.getAbout()), jUser.getAbout());
+        assertEquals(user.getEmail(), jUser.getEmail());
+        assertEquals(user.getAbout(), jUser.getAbout());
     }
 
     @Test
@@ -105,11 +104,11 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
         assertEquals(user.getNameWithCase(), jUser.getName());
-        assertEquals(TypeUtil.toString(user.getEmail()), jUser.getEmail());
+        assertEquals(user.getEmail(), jUser.getEmail());
 
         assertEquals(updatedUser.getAbout(), jUser.getAbout());
         User db = UserServiceFactory.getUserService().get(jUser.getId());
-        assertEquals(TypeUtil.toString(db.getAbout()), jUser.getAbout());
+        assertEquals(db.getAbout(), jUser.getAbout());
     }
 
     @Test
@@ -149,8 +148,8 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
         assertEquals(user.getNameWithCase(), jUser.getName());
-        assertEquals(TypeUtil.toString(user.getEmail()), jUser.getEmail());
-        assertEquals(TypeUtil.toString(user.getAbout()), jUser.getAbout());
+        assertEquals(user.getEmail(), jUser.getEmail());
+        assertEquals(user.getAbout(), jUser.getAbout());
     }
 
     @Test

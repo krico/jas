@@ -1,9 +1,7 @@
 package com.jasify.schedule.appengine.http.json;
 
-import com.jasify.schedule.appengine.model.users.Permissions;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.JSON;
-import com.jasify.schedule.appengine.util.TypeUtil;
 
 import java.io.Reader;
 import java.util.Date;
@@ -29,9 +27,9 @@ public class JsonUser extends JsonObject {
         created = user.getCreated();
         modified = user.getModified();
         name = user.getNameWithCase(); /* This is what the user wants to see */
-        email = TypeUtil.toString(user.getEmail());
-        about = TypeUtil.toString(user.getAbout());
-        admin = Permissions.isAdmin(user);
+        email = user.getEmail();
+        about = user.getAbout();
+        admin = user.isAdmin();
     }
 
     public static JsonUser parse(String data) {
@@ -45,8 +43,8 @@ public class JsonUser extends JsonObject {
     public User writeTo(User user) {
         /* we don't set id, created, modified */
         user.setNameWithCase(name);
-        user.setEmail(TypeUtil.toEmail(email));
-        user.setAbout(TypeUtil.toText(about));
+        user.setEmail(email);
+        user.setAbout(about);
         return user;
     }
 

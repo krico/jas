@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.application;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Text;
+import com.jasify.schedule.appengine.Constants;
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.CreationDate;
 import org.slim3.datastore.Model;
@@ -12,9 +13,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
-@Model(kind = "AppProp")
+@Model(kind = "AppProp", schemaVersionName = Constants.SCHEMA_VERSION_NAME, schemaVersion = 0)
 public class ApplicationProperty {
     @Attribute(primaryKey = true)
     private Key key;

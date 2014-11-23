@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.application;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.meta.application.ApplicationPropertyMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +14,11 @@ import java.util.TreeMap;
 
 /**
  * Mainly used as an ancestor to all application properties
- * Created by krico on 09/11/14.
+ *
+ * @author krico
+ * @since 09/11/14.
  */
-@Model(kind = "App")
+@Model(kind = "App", schemaVersionName = Constants.SCHEMA_VERSION_NAME, schemaVersion = 0)
 public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 

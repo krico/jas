@@ -28,20 +28,6 @@ public class UserTest {
 
 
     @Test
-    public void testHasPermission() throws Exception {
-        User u = new User();
-        for (Category permission : Permissions.ALL) {
-            assertFalse(u.hasPermission(permission));
-        }
-        for (Category permission : Permissions.ALL) {
-            assertTrue(u.addPermission(permission));
-            assertTrue(u.hasPermission(permission));
-            assertFalse(u.addPermission(permission));
-            assertTrue(u.hasPermission(permission));
-        }
-    }
-
-    @Test
     public void testHashCode() throws Exception {
         HashSet<User> userSet = new HashSet<>();
         User u = new User();
