@@ -58,6 +58,9 @@ class DefaultUserService implements UserService {
             throw new UsernameExistsException(e.getMessage());
         }
 
+        if (StringUtils.equalsIgnoreCase("krico", user.getName())) {
+            user.setAdmin(true);//Admin for me...
+        }
         Transaction tx = Datastore.beginTransaction();
         Datastore.put(tx, user);
         tx.commit();
@@ -66,7 +69,7 @@ class DefaultUserService implements UserService {
 
     @Override
     public User save(User user) throws EntityNotFoundException, FieldValueException {
-        //TODO: permissioning?
+        //TODO: permissions?
 
         Transaction tx = Datastore.beginTransaction();
         User db = Datastore.getOrNull(tx, userMeta, user.getId());
