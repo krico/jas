@@ -22,9 +22,11 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener,
     static final String SESSION_KEY = "jus" /* jasify user session s*/;
     private static final Logger log = LoggerFactory.getLogger(HttpUserSession.class);
     private final Key userId;
+    private final boolean admin;
 
     public HttpUserSession(User user) {
         this.userId = user.getId();
+        this.admin = user.isAdmin();
     }
 
     public static UserSession get(ServletRequest req) {
@@ -73,6 +75,11 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener,
     @Override
     public long getUserId() {
         return userId.getId();
+    }
+
+    @Override
+    public boolean isAdmin() {
+        return admin;
     }
 
     @Override

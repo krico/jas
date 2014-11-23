@@ -11,4 +11,6 @@ public interface UserSession {
     void invalidate();
 
     long getUserId();
+
+    boolean isAdmin();
 }

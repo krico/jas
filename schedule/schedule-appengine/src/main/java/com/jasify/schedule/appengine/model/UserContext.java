@@ -47,6 +47,11 @@ public final class UserContext {
         return (T) CURRENT_USER.get().response;
     }
 
+    public static boolean isCurrentUserAdmin() {
+        UserSession currentUser = getCurrentUser();
+        return currentUser != null && currentUser.isAdmin();
+    }
+
     private static class Context {
         private UserSession userSession;
         private ServletRequest request;
