@@ -17,20 +17,30 @@
                     <h5 ng-if="!create">{{user.name}}'s profile</h5>
                 </div>
             </div>
-            <div class="form-group" ng-if="create">
+            <div class="form-group">
                 <label class="col-sm-1 control-label input-sm">name:</label>
 
                 <div class="col-sm-4">
-                    <input type="text" class="form-control input-sm" id="name" name="name"
+                    <input ng-disabled="!create" type="text" class="form-control input-sm" id="name" name="name"
                            ng-model="user.name"
                            placeholder="name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-1 control-label input-sm">type:</label>
+
+                <div class="col-sm-4">
+                    <select class="form-control input-sm" id="type" name="type" ng-model="user.admin">
+                        <option value="false">User</option>
+                        <option value="true">Admin</option>
+                    </select>
                 </div>
             </div>
             <div class="form-group" ng-if="create">
                 <label class="col-sm-1 control-label input-sm">password:</label>
 
                 <div class="col-sm-4">
-                    <input ng-if="create" type="password" class="form-control input-sm" id="password" name="password"
+                    <input type="password" class="form-control input-sm" id="password" name="password"
                            ng-model="user.password"
                            placeholder="password">
                 </div>

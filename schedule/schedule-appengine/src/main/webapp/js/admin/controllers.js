@@ -124,6 +124,7 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
         $scope.createUser = function () {
 
             $scope.loading = true;
+            $scope.user.confirmPassword = $scope.user.password;
 
             $scope.user.$save(
                 //success
