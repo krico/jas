@@ -63,6 +63,7 @@ public class SchemaMigrationTest {
         UserDetail himDetail = Datastore.query(UserDetail.class, migratedHim.getId()).asSingle();
         assertNotNull(himDetail);
         assertEquals("About him...", TypeUtil.toString(himDetail.getAbout()));
+        assertEquals("Link not working", himDetail, migratedHim.getDetailRef().getModel());
 
         User migratedHer = users.get(1);
         assertEquals(56, migratedHer.getId().getId());

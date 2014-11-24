@@ -92,6 +92,7 @@ public final class SchemaMigration {
                 userDetail.setAbout(about);
                 log.info("Upgrading {}/{} moving about to {}", user_v0.getId(), user_v0.getName(), userDetail);
                 Datastore.put(userDetail);
+                e.setProperty("detailRef", userDetail.getId());
             }
 
 
