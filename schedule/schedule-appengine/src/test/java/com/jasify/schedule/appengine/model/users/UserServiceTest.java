@@ -5,12 +5,12 @@ import com.google.appengine.api.datastore.ShortBlob;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.util.DigestUtil;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,16 +23,6 @@ public class UserServiceTest {
     private static final Logger log = LoggerFactory.getLogger(UserServiceTest.class);
     private UserService service;
     private List<User> createdUsers = new ArrayList<>();
-
-    @BeforeClass
-    public static void lowerIterations() {
-        DigestUtil.setIterations(1);
-    }
-
-    @AfterClass
-    public static void restoreIterations() {
-        DigestUtil.setIterations(16192);
-    }
 
     @Before
     public void initializeDatastore() {
@@ -227,22 +217,12 @@ public class UserServiceTest {
         service.login(null, null);
     }
 
-    private void createUsers(int total) throws UsernameExistsException {
-        for (int i = 0; i < total; ++i) {
-            User user = new User();
-            user.setId(Datastore.createKey(User.class, (long) i + 1000));
-            user.setName(String.format("user%03d", i));
-            user.setEmail(String.format("user%03d@new.co", i));
-            service.create(user, "password");
-        }
-    }
-
     @Test
     public void testList() throws Exception {
         int total = 200;
         int offset = 20;
 
-        createUsers(total);
+        TestHelper.createUsers(total);
 
         List<User> allAsc = service.list(Query.SortDirection.ASCENDING, 0, -1);
         assertNotNull("null response", allAsc);
@@ -277,7 +257,7 @@ public class UserServiceTest {
     public void testSearchByNamePattern() throws Exception {
         int total = 200;
 
-        createUsers(total);
+        TestHelper.createUsers(total);
 
         String name = String.format("user%03d", total - 1);
         List<User> directHit = service.searchByName(Pattern.compile(name), Query.SortDirection.ASCENDING, 0, 0);
@@ -316,7 +296,7 @@ public class UserServiceTest {
     public void testSearchByNamePrefix() throws Exception {
         int total = 200;
 
-        createUsers(total);
+        TestHelper.createUsers(total);
 
         String name = String.format("user%03d", total - 1);
         List<User> directHit = service.searchByName(name, Query.SortDirection.ASCENDING, 0, 0);
@@ -355,7 +335,7 @@ public class UserServiceTest {
     public void testSearchByEmailPattern() throws Exception {
         int total = 200;
 
-        createUsers(total);
+        TestHelper.createUsers(total);
 
         String name = String.format("user%03d", total - 1);
         String email = name + '@';
@@ -395,7 +375,7 @@ public class UserServiceTest {
     public void testSearchByEmailPrefix() throws Exception {
         int total = 200;
 
-        createUsers(total);
+        TestHelper.createUsers(total);
 
         String name = String.format("user%03d", total - 1);
         String email = name + '@';

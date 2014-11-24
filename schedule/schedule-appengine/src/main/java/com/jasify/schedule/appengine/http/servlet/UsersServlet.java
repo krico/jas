@@ -30,8 +30,9 @@ public class UsersServlet extends HttpServlet {
     private final Pattern PAGE_PATTERN = Pattern.compile("/page/([0-9]+)/?");
     private final Pattern SIZE_PATTERN = Pattern.compile("/size/([0-9]+)/?");
     private final Pattern SORT_PATTERN = Pattern.compile("(?i)/sort/(asc|desc)/?");
-  /* /users/page/1/size/10/sort/DESC?field=email&query=user */
-//  /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(DESC|ASC)\?(.*)$/.exec(url);
+
+
+    /* URL example: /users/page/1/size/10/sort/DESC?field=email&query=user */
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -63,7 +64,17 @@ public class UsersServlet extends HttpServlet {
 
         int offset = (page - 1) * size;
 
-        List<User> list = UserServiceFactory.getUserService().list(order, offset, size);
+        String field = req.getParameter("field");
+
+        List<User> list;
+        String query = StringUtils.trimToNull(req.getParameter("query"));
+        if ("email".equals(field)) {
+            list = UserServiceFactory.getUserService().searchByEmail(query == null ? null : Pattern.compile(query), order, offset, size);
+        } else if ("name".equals(field)) {
+            list = UserServiceFactory.getUserService().searchByName(query == null ? null : Pattern.compile(query), order, offset, size);
+        } else {
+            list = UserServiceFactory.getUserService().list(order, offset, size);
+        }
         ArrayList<JsonUser> ret = new ArrayList<>();
         for (User user : list) {
             ret.add(new JsonUser(user));

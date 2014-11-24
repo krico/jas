@@ -6,6 +6,10 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.model.users.UsernameExistsException;
+import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.JSON;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
@@ -15,6 +19,7 @@ import com.meterware.servletunit.ServletUnitClient;
 import junit.framework.AssertionFailedError;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slim3.datastore.Datastore;
 import org.slim3.datastore.DatastoreUtil;
 import org.xml.sax.SAXException;
 
@@ -23,7 +28,9 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static junit.framework.TestCase.*;
 
@@ -140,6 +147,23 @@ public final class TestHelper {
             long l1 = d1.getTime() / 1000L;
             long l2 = d2.getTime() / 1000L;
             assertEquals(new Date(l1 * 1000L), new Date(l2 * 1000L));
+        }
+    }
+
+    public static List<User> createUsers(int total) throws UsernameExistsException {
+        DigestUtil.setIterations(1);
+        try {
+            List<User> created = new ArrayList<>();
+            for (int i = 0; i < total; ++i) {
+                User user = new User();
+                user.setId(Datastore.createKey(User.class, (long) i + 1000));
+                user.setName(String.format("user%03d", i));
+                user.setEmail(String.format("user%03d@new.co", i));
+                created.add(UserServiceFactory.getUserService().create(user, "password"));
+            }
+            return created;
+        } finally {
+            DigestUtil.setIterations(16192);
         }
     }
 }
