@@ -176,6 +176,7 @@
                 <version>1.0-alpha-5</version>
                 <configuration>
                     <factory>org.slim3.gen.processor.ModelProcessorFactory</factory>
+                    <sourceOutputDirectory>${project.build.sourceDirectory}</sourceOutputDirectory>
                 </configuration>
             </plugin>
             <plugin>
