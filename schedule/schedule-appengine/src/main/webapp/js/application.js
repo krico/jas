@@ -159,6 +159,23 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal'
                         }
                     });
             },
+            changePassword: function (user, oldPassword, newPassword, successFun, errorFun) {
+                var req = {
+                    'oldPassword': oldPassword,
+                    'newPassword': newPassword
+                };
+                $http.post('/change-password/' + user.id, angular.toJson(req))
+                    .success(function (data, status, headers, config) {
+                        if (angular.isFunction(successFun)) {
+                            successFun(data, status, headers, config);
+                        }
+                    })
+                    .error(function (data, status, headers, config) {
+                        if (angular.isFunction(errorFun)) {
+                            errorFun(data, status, headers, config);
+                        }
+                    });
+            },
             onLoggedIn: function (user) {
                 Auth.setCurrentUser(user);
                 $location.path('/home');
@@ -172,7 +189,7 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal'
             }
 
         };
-        User.current(
+        User.current( //todo: use /isloggedin first
             //success
             function (u, responseHeaders) {
                 Auth.setCurrentUser(u);
@@ -270,12 +287,12 @@ jasifyScheduleApp.directive('confirmField', function () {
         link: function (scope, elm, attrs, ctrl) {
             ctrl.$validators.confirmField = function (modelValue, viewValue) {
                 var compareTo = scope.$eval(attrs.confirmField);
-                if (compareTo.$modelValue != null && modelValue != compareTo.$modelValue) {
+                if (compareTo && compareTo.$modelValue != null && modelValue != compareTo.$modelValue) {
                     scope.confirmTooltip = "The passwords do not match.";
                     return false;
                 }
                 scope.confirmTooltip = "";
-                return compareTo.$modelValue != null;
+                return compareTo && compareTo.$modelValue != null;
             };
         }
     };

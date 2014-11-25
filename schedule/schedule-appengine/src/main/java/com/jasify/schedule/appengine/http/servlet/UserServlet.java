@@ -138,6 +138,10 @@ public class UserServlet extends HttpServlet {
                     JsonUser js = JsonUser.parse(req.getReader());
                     js.writeTo(user);
 
+                    if (UserContext.isCurrentUserAdmin()) {
+                        user.setAdmin(js.isAdmin());
+                    }
+
                     new JsonUser(userService.save(user)).toJson(resp.getWriter());
 
                 } catch (EntityNotFoundException | FieldValueException | NullPointerException e) {

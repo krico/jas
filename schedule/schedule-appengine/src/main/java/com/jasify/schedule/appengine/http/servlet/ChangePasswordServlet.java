@@ -81,6 +81,7 @@ public class ChangePasswordServlet extends HttpServlet {
 
                 try {
 
+                    log.info("User {} changing password of {}", UserContext.getCurrentUser().getUserId(), user.getId());
                     userService.setPassword(user, js.getNewPassword());
                     OK.toJson(resp.getWriter());
 
