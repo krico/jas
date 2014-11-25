@@ -47,6 +47,7 @@
                     <th><a href="#/admin/user"><span class="glyphicon glyphicon-plus"></span></a></th>
                     <th>name</th>
                     <th>email</th>
+                    <th>admin</th>
                     <th>created</th>
                 </tr>
                 </thead>
@@ -59,6 +60,7 @@
                     </td>
                     <td>{{user.name}}</td>
                     <td>{{user.email}}</td>
+                    <td><span ng-if="user.admin" class="glyphicon glyphicon-check"></span></td>
                     <td>{{user.created}}</td>
                 </tr>
                 <tr ng-if="total == 0">

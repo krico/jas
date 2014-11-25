@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+    <listener>
+        <listener-class>com.jasify.schedule.appengine.http.JasifyServletContextListener</listener-class>
+    </listener>
+
     <filter>
         <filter-name>user-context</filter-name>
         <filter-class>com.jasify.schedule.appengine.http.filter.UserContextFilter</filter-class>
@@ -29,6 +34,14 @@
         <servlet-name>user</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.UserServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>users</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.UsersServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>changePassword</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.ChangePasswordServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>username</servlet-name>
         <url-pattern>/username</url-pattern>
@@ -48,6 +61,14 @@
     <servlet-mapping>
         <servlet-name>user</servlet-name>
         <url-pattern>/user/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>users</servlet-name>
+        <url-pattern>/users/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>changePassword</servlet-name>
+        <url-pattern>/change-password/*</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>

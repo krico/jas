@@ -13,14 +13,13 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Objects;
 
 /**
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
 public final class DigestUtil {
     private static final Logger log = LoggerFactory.getLogger(DigestUtil.class);
     private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA1";
     private static final int SALT_LENGTH = 8;
-    /* The bigger this is, the longer it takes for it to be hacked (and checked) */
-    private static final int ITERATIONS = 16192;
     private static final int KEY_LENGTH = 256;
     private static final ByteOrder ORDER = ByteOrder.LITTLE_ENDIAN;
     private static final ThreadLocal<ByteBuffer> WRITER = new ThreadLocal<ByteBuffer>() {
@@ -29,8 +28,19 @@ public final class DigestUtil {
             return ByteBuffer.allocate(2048).order(ORDER);
         }
     };
+    /* The bigger this is, the longer it takes for it to be hacked (and checked) */
+    private static int iterations = 16192;
 
     private DigestUtil() {
+    }
+
+    /**
+     * Change the number of iterations on password encryption
+     *
+     * @param iterations the number
+     */
+    public static void setIterations(int iterations) {
+        DigestUtil.iterations = iterations;
     }
 
     public static byte[] encrypt(String data) {
@@ -41,9 +51,9 @@ public final class DigestUtil {
             byte[] salt = new byte[SALT_LENGTH];
             SecureRandom.getInstance("SHA1PRNG").nextBytes(salt);
             buffer.put(salt);
-            buffer.putInt(ITERATIONS);
+            buffer.putInt(iterations);
 
-            PBEKeySpec spec = new PBEKeySpec(data.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
+            PBEKeySpec spec = new PBEKeySpec(data.toCharArray(), salt, iterations, KEY_LENGTH);
             SecretKeyFactory skf = SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM);
             buffer.put(skf.generateSecret(spec).getEncoded());
             buffer.flip();

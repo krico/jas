@@ -12,6 +12,23 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
 
         $scope.path = "";
 
+        $scope.navbarCollapsed = true;
+
+        $scope.toggleCollapse = function () {
+            $scope.navbarCollapsed = !$scope.navbarCollapsed;
+        };
+
+        $scope.collapse = function () {
+            $scope.navbarCollapsed = true;
+        };
+
+        $scope.menuActive = function (path) {
+            if (path == $location.path()) {
+                return 'active';
+            }
+            return false;
+        };
+
         $scope.adminDropDown = [
             {
                 "text": 'users',

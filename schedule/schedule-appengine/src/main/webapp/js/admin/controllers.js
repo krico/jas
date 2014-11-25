@@ -78,9 +78,10 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
         $scope.pageChanged();
     }]);
 
-jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$modal', 'User',
-    function ($scope, $routeParams, $modal, User) {
+jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$modal', 'User', 'Auth',
+    function ($scope, $routeParams, $modal, User, Auth) {
         $scope.user = null;
+        $scope.pw = {};
         $scope.create = false;
         $scope.loading = true;
 
@@ -110,20 +111,38 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
 
             $scope.loading = true;
 
-            $scope.user.$changePassword(function () {
-                $scope.loading = false;
-                if ($scope.forms.passwordForm) {
+            Auth.changePassword($scope.user, "", $scope.pw.newPassword,
+                // success
+                function (data) {
+                    $scope.loading = false;
+                    if ($scope.forms.passwordForm) {
+                        $scope.forms.passwordForm.$setPristine();
+                    }
+                    var jr = angular.fromJson(data);
+                    if (jr.ok) {
+                        $scope.alert('success', 'Password changed (' + new Date() + ')');
+                        $scope.pw = {};
+                    } else {
+                        $scope.alert('danger', 'Password change failed: ' + jr.nokText + ' (' + new Date() + ')');
+                    }
+                },
+                // failure
+                function (data) {
+                    $scope.loading = false;
+                    if ($scope.forms.passwordForm) {
+                        $scope.forms.passwordForm.$setPristine();
+                    }
                     $scope.forms.passwordForm.$setPristine();
+                    $scope.alert('danger', 'Password change failed (' + new Date() + ')');
+
                 }
-
-                $scope.alert('success', 'Password changed successfully (' + new Date() + ')');
-
-            });
+            );
         };
 
         $scope.createUser = function () {
 
             $scope.loading = true;
+            $scope.user.confirmPassword = $scope.user.password;
 
             $scope.user.$save(
                 //success

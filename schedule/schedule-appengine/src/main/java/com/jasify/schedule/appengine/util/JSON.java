@@ -5,12 +5,16 @@ import com.google.gson.GsonBuilder;
 
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Type;
 
 /**
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
 public final class JSON {
+
     public static final String CONTENT_TYPE = "application/json";
+
     private static final ThreadLocal<Gson> GSON = new ThreadLocal<Gson>() {
         @Override
         protected Gson initialValue() {
@@ -35,5 +39,13 @@ public final class JSON {
 
     public static <T> T fromJson(Reader reader, Class<T> klass) {
         return GSON.get().fromJson(reader, klass);
+    }
+
+    public static <T> T fromJson(String data, Type typeOfT) {
+        return GSON.get().fromJson(data, typeOfT);
+    }
+
+    public static <T> T fromJson(Reader reader, Type typeOfT) {
+        return GSON.get().fromJson(reader, typeOfT);
     }
 }

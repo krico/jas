@@ -54,7 +54,7 @@ public class UserServlet extends HttpServlet {
 
             String matched = matcher.group(1);
             long userId = "current".equals(matched) ? currentUser.getUserId() : Long.parseLong(matched);
-            if (userId == currentUser.getUserId()) { //TODO: isSysAdmin should be allowed
+            if (UserContext.isCurrentUserAdmin() || userId == currentUser.getUserId()) {
 
                 User user = Preconditions.checkNotNull(UserServiceFactory.getUserService().get(userId), "Logged in user was deleted?");
                 new JsonUser(user).toJson(resp.getWriter());
@@ -99,6 +99,10 @@ public class UserServlet extends HttpServlet {
             User newUser = signUp.writeTo(userService.newUser());
             newUser.setName(signUp.getName());
 
+            if (UserContext.isCurrentUserAdmin()) {
+                newUser.setAdmin(signUp.isAdmin());
+            }
+
             new JsonUser(userService.create(newUser, signUp.getPassword())).toJson(resp.getWriter());
 
         } catch (Exception e) {
@@ -125,17 +129,22 @@ public class UserServlet extends HttpServlet {
 
             String matched = matcher.group(1);
             long userId = "current".equals(matched) ? currentUser.getUserId() : Long.parseLong(matched);
-            if (userId == currentUser.getUserId()) { //TODO: isSysAdmin should be allowed
+            if (UserContext.isCurrentUserAdmin() || userId == currentUser.getUserId()) {
 
-                UserService userService = UserServiceFactory.getUserService();
-                User user = Preconditions.checkNotNull(userService.get(userId), "Logged in user was deleted?");
-                JsonUser js = JsonUser.parse(req.getReader());
-                js.writeTo(user);
                 try {
+
+                    UserService userService = UserServiceFactory.getUserService();
+                    User user = Preconditions.checkNotNull(userService.get(userId), "Logged in user was deleted?");
+                    JsonUser js = JsonUser.parse(req.getReader());
+                    js.writeTo(user);
+
+                    if (UserContext.isCurrentUserAdmin()) {
+                        user.setAdmin(js.isAdmin());
+                    }
 
                     new JsonUser(userService.save(user)).toJson(resp.getWriter());
 
-                } catch (EntityNotFoundException | FieldValueException e) {
+                } catch (EntityNotFoundException | FieldValueException | NullPointerException e) {
 
                     log.warn("Failed to save user", e);
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);

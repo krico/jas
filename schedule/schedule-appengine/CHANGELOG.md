@@ -2,6 +2,7 @@
 
 Features:
 
+  - Schema migration logic implemented (JasifyServletContextListener + SchemaMigration)
   - SignUp view (backend-less), our first view!  To get it going we had to setup
     - routing + navbar
     - backend-less support (index.html?nobackend)

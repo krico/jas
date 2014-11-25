@@ -1,21 +1,23 @@
 package com.jasify.schedule.appengine.model.users;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.ShortBlob;
-import com.google.appengine.api.datastore.Text;
-import com.jasify.schedule.appengine.Constants;
-import com.jasify.schedule.appengine.util.TypeUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.slim3.datastore.*;
+import com.google.appengine.api.datastore.*;
+import org.slim3.datastore.Attribute;
+import org.slim3.datastore.CreationDate;
+import org.slim3.datastore.Model;
+import org.slim3.datastore.ModificationDate;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
+ * This is a temporary class for migration purposes from User schemaVersion 0 -> 1, it serves more as a reference
+ *
  * @author krico
  * @since 08/11/14.
  */
-@Model(schemaVersionName = Constants.SCHEMA_VERSION_NAME, schemaVersion = 1)
-public class User {
+@Model(kind = "User" /* so we get the same entity */)
+public class User_v0 {
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -30,13 +32,13 @@ public class User {
     /* If the user wants his username like BigTom we keep it here with the case */
     private String nameWithCase;
 
-    private String email;
+    private Email email;
+
+    private Text about;
 
     private ShortBlob password;
 
-    private boolean admin = false;
-
-    private ModelRef<UserDetail> detailRef = new ModelRef<>(UserDetail.class);
+    private Set<Category> permissions = new HashSet<>();
 
     public Key getId() {
         return id;
@@ -78,20 +80,20 @@ public class User {
         this.nameWithCase = nameWithCase;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(Email email) {
         this.email = email;
     }
 
-    public boolean isAdmin() {
-        return admin;
+    public Text getAbout() {
+        return about;
     }
 
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
+    public void setAbout(Text about) {
+        this.about = about;
     }
 
     public ShortBlob getPassword() {
@@ -102,51 +104,31 @@ public class User {
         this.password = password;
     }
 
-    public String getAbout() {
-        UserDetail userDetail = getDetailRef().getModel();
-        if (userDetail == null) return null;
-        return TypeUtil.toString(userDetail.getAbout());
+    public Set<Category> getPermissions() {
+        return permissions;
     }
 
-    public void setAbout(String about) {
-        Text text = TypeUtil.toText(StringUtils.trimToNull(about));
-        UserDetail userDetail = getDetailRef().getModel();
-        if (userDetail == null) {
-
-            if (text == null) return; // no need to create detail to set text to null
-
-            userDetail = new UserDetail(this);
-            getDetailRef().setModel(userDetail);
-        }
-        userDetail.setAbout(text);
-        //TODO: test
-        //TODO: We need to save this
+    public void setPermissions(Set<Category> permissions) {
+        this.permissions = permissions;
     }
 
-    public ModelRef<UserDetail> getDetailRef() {
-        return detailRef;
+    public boolean addPermission(Category newPermission) {
+        return permissions.add(newPermission);
     }
 
-    public String debugString() {
-        return "User{" +
-                "id=" + id +
-                ", created=" + created +
-                ", modified=" + modified +
-                ", name='" + name + '\'' +
-                ", email=" + email +
-                ", admin=" + admin +
-                ", password=" + password +
-                '}';
+    public boolean hasPermission(Category check) {
+        return permissions != null && permissions.contains(check);
     }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        User user = (User) o;
+        User_v0 user = (User_v0) o;
 
-        if (admin != user.admin) return false;
+        if (about != null ? !about.equals(user.about) : user.about != null) return false;
         if (created != null ? !created.equals(user.created) : user.created != null) return false;
         if (email != null ? !email.equals(user.email) : user.email != null) return false;
         if (id != null ? !id.equals(user.id) : user.id != null) return false;
@@ -154,6 +136,7 @@ public class User {
         if (name != null ? !name.equals(user.name) : user.name != null) return false;
         if (nameWithCase != null ? !nameWithCase.equals(user.nameWithCase) : user.nameWithCase != null) return false;
         if (password != null ? !password.equals(user.password) : user.password != null) return false;
+        if (permissions != null ? !permissions.equals(user.permissions) : user.permissions != null) return false;
 
         return true;
     }
@@ -164,11 +147,24 @@ public class User {
         result = 31 * result + (created != null ? created.hashCode() : 0);
         result = 31 * result + (modified != null ? modified.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (nameWithCase != null ? nameWithCase.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (about != null ? about.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (admin ? 1 : 0);
+        result = 31 * result + (permissions != null ? permissions.hashCode() : 0);
         return result;
+    }
+
+    public String debugString() {
+        return "User{" +
+                "id=" + id +
+                ", created=" + created +
+                ", modified=" + modified +
+                ", name='" + name + '\'' +
+                ", email=" + email +
+                ", about=" + about +
+                ", password=" + password +
+                ", permissions=" + permissions +
+                '}';
     }
 
     @Override
