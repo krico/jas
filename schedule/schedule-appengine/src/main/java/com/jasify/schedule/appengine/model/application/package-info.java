@@ -3,6 +3,7 @@
  *
  * EntryPoint is via {@link com.jasify.schedule.appengine.model.application.ApplicationData#instance()}
  *
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
 package com.jasify.schedule.appengine.model.application;

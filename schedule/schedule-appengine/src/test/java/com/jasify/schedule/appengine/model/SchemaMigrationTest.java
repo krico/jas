@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model;
 import com.google.appengine.api.datastore.Category;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserDetail;
 import com.jasify.schedule.appengine.model.users.User_v0;
@@ -21,11 +22,18 @@ public class SchemaMigrationTest {
     @Before
     public void initializeDatastore() {
         TestHelper.initializeDatastore();
+        ApplicationData.instance().reload();
     }
 
     @After
     public void cleanupDatastore() {
         TestHelper.cleanupDatastore();
+    }
+
+    @Test
+    public void testExecutePendingMigrations() throws Exception {
+        assertTrue(SchemaMigration.instance().executePendingMigrations());
+        assertFalse(SchemaMigration.instance().executePendingMigrations());
     }
 
     @Test
@@ -76,7 +84,5 @@ public class SchemaMigrationTest {
         assertNull(herDetail);
 
         assertEquals(0, SchemaMigration.instance().migrateUser_v0_to_User_v1());
-
-
     }
 }

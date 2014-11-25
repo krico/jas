@@ -1,7 +1,8 @@
 package com.jasify.schedule.appengine;
 
 /**
- * Created by krico on 09/11/14.
+ * @author krico
+ * @since 09/11/14.
  */
 public final class Constants {
     public static final String SCHEMA_VERSION_NAME = "SV";

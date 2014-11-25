@@ -131,15 +131,16 @@ public class UserServlet extends HttpServlet {
             long userId = "current".equals(matched) ? currentUser.getUserId() : Long.parseLong(matched);
             if (UserContext.isCurrentUserAdmin() || userId == currentUser.getUserId()) {
 
-                UserService userService = UserServiceFactory.getUserService();
-                User user = Preconditions.checkNotNull(userService.get(userId), "Logged in user was deleted?");
-                JsonUser js = JsonUser.parse(req.getReader());
-                js.writeTo(user);
                 try {
+
+                    UserService userService = UserServiceFactory.getUserService();
+                    User user = Preconditions.checkNotNull(userService.get(userId), "Logged in user was deleted?");
+                    JsonUser js = JsonUser.parse(req.getReader());
+                    js.writeTo(user);
 
                     new JsonUser(userService.save(user)).toJson(resp.getWriter());
 
-                } catch (EntityNotFoundException | FieldValueException e) {
+                } catch (EntityNotFoundException | FieldValueException | NullPointerException e) {
 
                     log.warn("Failed to save user", e);
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);

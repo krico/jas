@@ -79,6 +79,17 @@ public class ChangePasswordServletTest {
     }
 
     @Test
+    public void testFailIfNewPasswordIsEmpty() throws Exception {
+        ServletUnitClient client = TestHelper.login("user", "password");
+        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest("password", "");
+        WebRequest request = new PostMethodWebRequest(createUrl(user), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+        InvocationContext ic = client.newInvocation(request);
+        ic.service();
+        JsonResponse jr = JsonResponse.parse(ic.getServletResponse().getText());
+        assertTrue("New password cannot be empty", jr.isNok());
+    }
+
+    @Test
     public void testFailIfOldPasswordDoesNotMatch() throws Exception {
         ServletUnitClient client = TestHelper.login("user", "password");
         JsonPasswordChangeRequest req = new JsonPasswordChangeRequest("password1", "password2");

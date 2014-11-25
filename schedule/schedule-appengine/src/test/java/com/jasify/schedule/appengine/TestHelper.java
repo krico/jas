@@ -96,6 +96,9 @@ public final class TestHelper {
     }
 
     public static void cleanupServletRunner() {
+        if (servletRunner != null) {
+            servletRunner.shutDown();
+        }
         servletRunner = null;
         cleanupDatastore();
     }

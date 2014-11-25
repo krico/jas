@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.http.json.JsonSignUpUser;
 import com.jasify.schedule.appengine.http.json.JsonUser;
 import com.jasify.schedule.appengine.model.users.User;
@@ -27,6 +28,7 @@ import static org.apache.commons.io.IOUtils.toInputStream;
 public class UserServletTest {
     private ServletRunner servletRunner;
     private User user;
+    private User admin;
 
     @Before
     public void servletRunner() throws UsernameExistsException {
@@ -35,6 +37,11 @@ public class UserServletTest {
         user.setName("Jas");
         user = UserServiceFactory.getUserService().create(user, "password");
         assertNotNull(user);
+        admin = UserServiceFactory.getUserService().newUser();
+        admin.setName("Admin");
+        admin.setAdmin(true);
+        admin = UserServiceFactory.getUserService().create(admin, "password");
+        assertNotNull(admin);
     }
 
     @After
@@ -109,6 +116,47 @@ public class UserServletTest {
         assertEquals(updatedUser.getAbout(), jUser.getAbout());
         User db = UserServiceFactory.getUserService().get(jUser.getId());
         assertEquals(db.getAbout(), jUser.getAbout());
+    }
+
+    @Test
+    public void testPostSaveAdmin() throws Exception {
+        ServletUnitClient client = TestHelper.login("Admin", "password");
+        JsonUser updatedUser = new JsonUser(user);
+        updatedUser.setAbout("Now I have an about...");
+        WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/user/" + user.getId().getId(), toInputStream(updatedUser.toJson()), JSON.CONTENT_TYPE);
+        InvocationContext ic = client.newInvocation(request);
+        ic.service();
+        WebResponse response = ic.getServletResponse();
+        assertNotNull(response);
+        assertEquals(HttpServletResponse.SC_OK, response.getResponseCode());
+        assertEquals(JSON.CONTENT_TYPE, response.getContentType());
+        String text = response.getText();
+        assertNotNull(text);
+        JsonUser jUser = JsonUser.parse(text);
+        assertNotNull(jUser);
+        assertEquals(user.getId().getId(), jUser.getId());
+        assertEqualsNoMillis(user.getCreated(), jUser.getCreated());
+        assertEqualsNoMillis(user.getModified(), jUser.getModified());
+        assertEquals(user.getName(), jUser.getName().toLowerCase());
+        assertEquals(user.getNameWithCase(), jUser.getName());
+        assertEquals(user.getEmail(), jUser.getEmail());
+
+        assertEquals(updatedUser.getAbout(), jUser.getAbout());
+        User db = UserServiceFactory.getUserService().get(jUser.getId());
+        assertEquals(db.getAbout(), jUser.getAbout());
+    }
+
+    @Test
+    public void testPostSaveAdminInvalidId() throws Exception {
+        ServletUnitClient client = TestHelper.login("Admin", "password");
+        JsonUser updatedUser = new JsonUser(user);
+        updatedUser.setAbout("Now I have an about...");
+        WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/user/" + 1976071, toInputStream(updatedUser.toJson()), JSON.CONTENT_TYPE);
+        InvocationContext ic = client.newInvocation(request);
+        ic.service();
+        WebResponse response = ic.getServletResponse();
+        assertNotNull(response);
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.getResponseCode());
     }
 
     @Test

@@ -36,7 +36,7 @@ public final class SchemaMigration {
         return Singleton.INSTANCE;
     }
 
-    public void executePendingMigrations() {
+    public boolean executePendingMigrations() {
         ApplicationData applicationData = ApplicationData.instance();
 
         String user_v0_key = SchemaMigration.class.getName() + ".User_v0";
@@ -44,8 +44,10 @@ public final class SchemaMigration {
         if (Boolean.TRUE != user_v0_migrated) {
             migrateUser_v0_to_User_v1();
             applicationData.setProperty(user_v0_key, true);
+            return true;
         } else {
             log.debug("No migrations pending...");
+            return false;
         }
     }
 
