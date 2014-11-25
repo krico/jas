@@ -111,6 +111,17 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testSetPassword() throws Exception {
+        testCreateUser();
+        User login1 = service.login("test", "password");
+        assertNotNull(login1);
+        service.setPassword(login1, "newPassword");
+        User login2 = service.login("test", "newPassword");
+        assertNotNull(login2);
+
+    }
+
+    @Test
     public void testFindUserByName() throws Exception {
         testCreateUser();
         User user = createdUsers.get(0);

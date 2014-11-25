@@ -100,6 +100,20 @@ class DefaultUserService implements UserService {
     }
 
     @Override
+    public User setPassword(User user, String newPassword) throws EntityNotFoundException {
+        Transaction tx = Datastore.beginTransaction();
+        User db = Datastore.getOrNull(tx, userMeta, user.getId());
+        if (db == null) {
+            tx.rollback();
+            throw new EntityNotFoundException();
+        }
+        db.setPassword(new ShortBlob(DigestUtil.encrypt(newPassword)));
+        Datastore.put(tx, db);
+        tx.commit();
+        return db;
+    }
+
+    @Override
     public User get(long id) {
         return Datastore.getOrNull(User.class, Datastore.createKey(User.class, id));
     }

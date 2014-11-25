@@ -22,6 +22,8 @@ public interface UserService {
 
     User save(User user) throws EntityNotFoundException, FieldValueException;
 
+    User setPassword(User login1, String newPassword) throws EntityNotFoundException;
+
     User get(long id);
 
     User findByName(String name);

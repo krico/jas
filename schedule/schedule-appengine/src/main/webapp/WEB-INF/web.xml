@@ -38,6 +38,10 @@
         <servlet-name>users</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.UsersServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>changePassword</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.ChangePasswordServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>username</servlet-name>
         <url-pattern>/username</url-pattern>
@@ -61,6 +65,10 @@
     <servlet-mapping>
         <servlet-name>users</servlet-name>
         <url-pattern>/users/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>changePassword</servlet-name>
+        <url-pattern>/change-password/*</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
