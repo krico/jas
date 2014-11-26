@@ -38,7 +38,7 @@ public class UserServletTest {
         user = UserServiceFactory.getUserService().create(user, "password");
         assertNotNull(user);
         admin = UserServiceFactory.getUserService().newUser();
-        admin.setName("Admin");
+        admin.setName("TestAdmin");
         admin.setAdmin(true);
         admin = UserServiceFactory.getUserService().create(admin, "password");
         assertNotNull(admin);
@@ -120,7 +120,7 @@ public class UserServletTest {
 
     @Test
     public void testPostSaveAdmin() throws Exception {
-        ServletUnitClient client = TestHelper.login("Admin", "password");
+        ServletUnitClient client = TestHelper.login("TestAdmin", "password");
         JsonUser updatedUser = new JsonUser(user);
         updatedUser.setAbout("Now I have an about...");
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/user/" + user.getId().getId(), toInputStream(updatedUser.toJson()), JSON.CONTENT_TYPE);
@@ -148,7 +148,7 @@ public class UserServletTest {
 
     @Test
     public void testPostSaveAdminInvalidId() throws Exception {
-        ServletUnitClient client = TestHelper.login("Admin", "password");
+        ServletUnitClient client = TestHelper.login("TestAdmin", "password");
         JsonUser updatedUser = new JsonUser(user);
         updatedUser.setAbout("Now I have an about...");
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/user/" + 1976071, toInputStream(updatedUser.toJson()), JSON.CONTENT_TYPE);

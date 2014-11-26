@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.http.servlet;
 
+import com.google.appengine.api.datastore.Query;
 import com.google.gson.reflect.TypeToken;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.http.json.JsonUser;
@@ -27,7 +28,7 @@ public class UsersServletTest {
     };
     private User admin;
     private User user;
-    private List<User> allUsers = new ArrayList<>();
+    private List<User> allUsers;
 
     private static String createUrl(int page, int size, boolean ascending) {
         return "http://schedule.jasify.com/users/page/" + page + "/size/" + size + "/sort/" + (ascending ? "asc" : "desc");
@@ -37,7 +38,7 @@ public class UsersServletTest {
     public void servletRunner() throws UsernameExistsException {
         TestHelper.initializeServletRunner();
         admin = UserServiceFactory.getUserService().newUser();
-        admin.setName("admin");
+        admin.setName("test-admin");
         admin.setEmail("boss@boss.ta");
         admin.setAdmin(true);
         admin = UserServiceFactory.getUserService().create(admin, "password");
@@ -46,9 +47,10 @@ public class UsersServletTest {
         user.setName("user");
         user = UserServiceFactory.getUserService().create(user, "password");
         assertNotNull(user);
-        allUsers.addAll(TestHelper.createUsers(100));
-        allUsers.add(admin);
-        allUsers.add(user);
+        TestHelper.createUsers(100);
+
+        allUsers = new ArrayList<>();
+        allUsers.addAll(UserServiceFactory.getUserService().list(Query.SortDirection.ASCENDING, 0,0));
     }
 
     @After
@@ -85,7 +87,7 @@ public class UsersServletTest {
         });
 
 
-        ServletUnitClient client = TestHelper.login("admin", "password");
+        ServletUnitClient client = TestHelper.login("test-admin", "password");
 
         InvocationContext ic = client.newInvocation(new GetMethodWebRequest(createUrl(1, 10, true)));
 
@@ -128,9 +130,9 @@ public class UsersServletTest {
     @Test
     public void testGetByName() throws Exception {
 
-        ServletUnitClient client = TestHelper.login("admin", "password");
+        ServletUnitClient client = TestHelper.login("test-admin", "password");
 
-        InvocationContext ic = client.newInvocation(new GetMethodWebRequest(createUrl(1, 10, true) + "?field=name&query=admin"));
+        InvocationContext ic = client.newInvocation(new GetMethodWebRequest(createUrl(1, 10, true) + "?field=name&query=test-admin"));
 
         ic.service();
 
@@ -144,7 +146,7 @@ public class UsersServletTest {
     @Test
     public void testGetByEmail() throws Exception {
 
-        ServletUnitClient client = TestHelper.login("admin", "password");
+        ServletUnitClient client = TestHelper.login("test-admin", "password");
 
         InvocationContext ic = client.newInvocation(new GetMethodWebRequest(createUrl(1, 10, true) + "?field=email&query=boss"));
 

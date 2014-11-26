@@ -1,8 +1,6 @@
 package com.jasify.schedule.appengine;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.appengine.tools.development.testing.*;
 import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
@@ -39,6 +37,8 @@ import static junit.framework.TestCase.*;
  * @since 09/11/14.
  */
 public final class TestHelper {
+    private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(new LocalMailServiceTestConfig());
+    private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     private static final LocalServiceTestHelper memcacheHelper = new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
     private static ServletRunner servletRunner;
@@ -141,6 +141,22 @@ public final class TestHelper {
 
     public static void cleanupMemcache() {
         memcacheHelper.tearDown();
+    }
+
+    public static void initializeAppIdentity() {
+        appIdentityHelper.setUp();
+    }
+
+    public static void cleanupAppIdentity() {
+        appIdentityHelper.tearDown();
+    }
+
+    public static void initializeMail() {
+        mailHelper.setUp();
+    }
+
+    public static void cleanupMail() {
+        mailHelper.tearDown();
     }
 
     public static void assertEqualsNoMillis(Date d1, Date d2) {

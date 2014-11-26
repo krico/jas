@@ -31,7 +31,7 @@ public class ChangePasswordServletTest {
     public void servletRunner() throws Exception {
         TestHelper.initializeServletRunner();
         admin = UserServiceFactory.getUserService().newUser();
-        admin.setName("admin");
+        admin.setName("test-admin");
         admin.setEmail("boss@boss.ta");
         admin.setAdmin(true);
         admin = UserServiceFactory.getUserService().create(admin, "password");
@@ -114,7 +114,7 @@ public class ChangePasswordServletTest {
 
     @Test
     public void testAdminChangesUserNoNeedForOld() throws Exception {
-        ServletUnitClient client = TestHelper.login("admin", "password");
+        ServletUnitClient client = TestHelper.login("test-admin", "password");
         JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(null, "byAdminPassword");
         WebRequest request = new PostMethodWebRequest(createUrl(user), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
         InvocationContext ic = client.newInvocation(request);
@@ -122,6 +122,6 @@ public class ChangePasswordServletTest {
         JsonResponse jr = JsonResponse.parse(ic.getServletResponse().getText());
         assertTrue("Password changed", jr.isOk());
         TestHelper.login("user", "byAdminPassword");
-        TestHelper.login("admin", "password");
+        TestHelper.login("test-admin", "password");
     }
 }
