@@ -4,12 +4,13 @@ import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Text;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.meta.users.User_v0Meta;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
-import com.jasify.schedule.appengine.model.users.UserDetail;
-import com.jasify.schedule.appengine.model.users.User_v0;
+import com.jasify.schedule.appengine.model.users.*;
+import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +39,42 @@ public final class SchemaMigration {
 
     public boolean executePendingMigrations() {
         ApplicationData applicationData = ApplicationData.instance();
+        boolean executed = false;
 
         String user_v0_key = SchemaMigration.class.getName() + ".User_v0";
         Boolean user_v0_migrated = applicationData.getProperty(user_v0_key);
         if (Boolean.TRUE != user_v0_migrated) {
             migrateUser_v0_to_User_v1();
             applicationData.setProperty(user_v0_key, true);
-            return true;
+            executed = true;
         } else {
             log.debug("No migrations pending...");
-            return false;
+        }
+
+        if (EnvironmentUtil.isDevelopment()) {
+            String devInitialize = SchemaMigration.class.getName() + ".DevInitialize";
+            Boolean devInitialized = applicationData.getProperty(devInitialize);
+            if (Boolean.TRUE != devInitialized) {
+                initializeDevSystem();
+                applicationData.setProperty(devInitialize, true);
+                executed = true;
+            } else {
+                log.debug("No dev initialization pending...");
+            }
+        }
+
+        return executed;
+    }
+
+    void initializeDevSystem() {
+        Preconditions.checkState(!EnvironmentUtil.isProduction(), "Cannot initializeDev in prod!");
+        User admin = new User();
+        admin.setName("admin");
+        admin.setAdmin(true);
+        try {
+            UserServiceFactory.getUserService().create(admin, "admin");
+        } catch (UsernameExistsException e) {
+            // Don't really care
         }
     }
 

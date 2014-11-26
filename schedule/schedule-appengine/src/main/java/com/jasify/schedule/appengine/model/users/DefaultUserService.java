@@ -3,6 +3,8 @@ package com.jasify.schedule.appengine.model.users;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
@@ -28,7 +30,6 @@ import java.util.regex.Pattern;
  * @since 22/11/14.
  */
 class DefaultUserService implements UserService {
-    static final DefaultUserService INSTANCE = new DefaultUserService();
     private static final Logger log = LoggerFactory.getLogger(DefaultUserService.class);
     private final UniqueConstraint uniqueName;
     private final UserMeta userMeta;
@@ -36,6 +37,10 @@ class DefaultUserService implements UserService {
     private DefaultUserService() {
         uniqueName = UniqueConstraint.create(UserMeta.get(), "name");
         userMeta = UserMeta.get();
+    }
+
+    static UserService instance() {
+        return Singleton.INSTANCE;
     }
 
     @Override
@@ -47,7 +52,7 @@ class DefaultUserService implements UserService {
 
     @Override
     public User create(User user, String password) throws UsernameExistsException {
-        String withCase = user.getName();
+        String withCase = Preconditions.checkNotNull(StringUtils.trimToNull(user.getName()), "User.Name cannot be null");
         user.setNameWithCase(withCase);
         user.setName(StringUtils.lowerCase(withCase));
         user.setPassword(new ShortBlob(DigestUtil.encrypt(password)));
@@ -64,7 +69,27 @@ class DefaultUserService implements UserService {
         Transaction tx = Datastore.beginTransaction();
         Datastore.put(tx, user);
         tx.commit();
+
+        notify(user);
+
         return user;
+    }
+
+    private void notify(User user) {
+        try {
+            String subject = String.format("[Jasify] SignUp [%s]", user.getNameWithCase());
+            StringBuilder body = new StringBuilder()
+                    .append("<h1>User: ").append(user.getNameWithCase()).append("</h1>")
+                    .append("<p>")
+                    .append("Id: ").append(user.getId()).append("<br/>")
+                    .append("Created: ").append(user.getCreated()).append("<br/>")
+                    .append("</p>")
+                    .append("<p>Regards,<br>Jasify</p>");
+
+            MailServiceFactory.getMailService().sendToApplicationOwners(subject, body.toString());
+        } catch (Exception e) {
+            log.warn("Failed to notify", e);
+        }
     }
 
     @Override
@@ -273,4 +298,9 @@ class DefaultUserService implements UserService {
         if (limit > 0) query.limit(limit);
         return query.sort(criteria).asList();
     }
+
+    private static final class Singleton {
+        private static final UserService INSTANCE = new DefaultUserService();
+    }
+
 }

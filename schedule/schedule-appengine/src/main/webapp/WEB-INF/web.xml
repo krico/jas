@@ -70,6 +70,28 @@
         <servlet-name>changePassword</servlet-name>
         <url-pattern>/change-password/*</url-pattern>
     </servlet-mapping>
+
+
+    <!-- BEGIN: Incoming mail handling -->
+    <servlet>
+        <servlet-name>mail</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.MailServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>mail</servlet-name>
+        <url-pattern>/_ah/mail/*</url-pattern>
+    </servlet-mapping>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>mail</web-resource-name>
+            <url-pattern>/_ah/mail/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <!-- END: Incoming mail handling -->
+
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
