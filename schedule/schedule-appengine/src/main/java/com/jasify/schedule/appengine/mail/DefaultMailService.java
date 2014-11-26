@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class DefaultMailService implements MailService {
     public static final String DEFAULT_SENDER_NAME = "Jasify (Do Not Reply)";
-    public static final String DEFAULT_SENDER = "DoNotReply@jasify-schedule.appspot.com";
+    public static final String DEFAULT_SENDER = "DoNotReply@jasify-schedule.appspotmail.com";
     public static final String DEFAULT_OWNER = "github@cwa.to";
     private static final Logger log = LoggerFactory.getLogger(DefaultMailService.class);
     private final AtomicReference<StateEnum> initializationState = new AtomicReference<>(StateEnum.NEW);
