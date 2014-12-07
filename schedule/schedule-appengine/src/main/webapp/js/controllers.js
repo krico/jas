@@ -3,8 +3,24 @@
  */
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
 
-jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth',
-    function ($scope, $location, Auth) {
+/**
+ * ApplicationCtrl
+ * - Root of the scope tree.  Practically all other scopes will inherit from this one.
+ */
+jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope',
+    function ($scope) {
+        $scope.currentUser = null;
+
+        $scope.setCurrentUser = function (u) {
+            $scope.currentUser = u;
+        };
+    }]);
+
+/**
+ * NavbarCtrl
+ */
+jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth', 'AUTH_EVENTS',
+    function ($scope, $location, Auth, AUTH_EVENTS) {
         $scope.user = Auth.getCurrentUser();
         $scope.isAdmin = function () {
             return $scope.user && $scope.user.admin;
@@ -41,6 +57,10 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
             return viewLocation === $location.path();
         };
 
+        $scope.$on(AUTH_EVENTS.loginSuccess, function () {
+            console.log("LOGIN!!!");
+        });
+
         $scope.$watch(Auth.getCurrentUser, function (newValue, oldValue) {
             $scope.user = Auth.getCurrentUser();
         });
@@ -53,11 +73,17 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
         });
     }]);
 
+/**
+ * HomeCtrl
+ */
 jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
     function ($scope, Auth) {
         $scope.user = Auth.getCurrentUser();
     }]);
 
+/**
+ * SignUpCtrl
+ */
 jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'Util', 'User', 'Auth',
     function ($scope, $http, $location, Util, User, Auth) {
 
@@ -106,41 +132,45 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
         };
     }]);
 
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope', 'Util', 'Auth', 'Modal',
-    function ($scope, Util, Auth, Modal) {
+/**
+ * LoginCtrl
+ */
+jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS',
+    function ($scope, $rootScope, Auth, AUTH_EVENTS) {
 
-        $scope.alerts = [];
-
-        $scope.user = {};
-
-        $scope.credentials = {};
+        $scope.credentials = {
+            name: '',
+            password: ''
+        };
 
         $scope.alert = function (t, m) {
             $scope.alerts.push({type: t, msg: m});
         };
 
-
-        $scope.hasError = function (fieldName) {
-            return Util.formFieldError($scope.loginForm, fieldName);
-        };
-
-        $scope.hasSuccess = function (fieldName) {
-            return Util.formFieldSuccess($scope.loginForm, fieldName);
-        };
-
-        $scope.login = function () {
-            Auth.login($scope.credentials.name, $scope.credentials.password, function (reason) {
-                $scope.alert('warning', 'Login failed!');
-            });
+        $scope.login = function (cred) {
+            Auth.login(cred).then(
+                function (user) {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                    $scope.setCurrentUser(user);
+                },
+                function () {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+                });
         };
 
     }]);
 
+/**
+ * LogoutCtrl
+ */
 jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', 'Auth',
     function ($scope, Auth) {
         Auth.logout();
     }]);
 
+/**
+ * ProfileCtrl
+ */
 jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Auth', 'User',
     function ($scope, Auth, User) {
         $scope.user = {};

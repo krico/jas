@@ -212,6 +212,75 @@
                     </jvmFlags -->
                 </configuration>
             </plugin>
+
+            <!-- configure surefire for java testing -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <forkMode>always</forkMode>
+                    <systemPropertyVariables>
+                        <java.util.logging.config.class>
+                            com.jasify.schedule.appengine.LoggingConfiguration
+                        </java.util.logging.config.class>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+
+            <!-- WebDriver for jasmine (below) -->
+            <plugin>
+                <groupId>com.github.klieber</groupId>
+                <artifactId>phantomjs-maven-plugin</artifactId>
+                <version>0.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <version>1.9.7</version>
+                </configuration>
+            </plugin>
+
+
+            <!-- Jasmine for javascript testing -->
+            <plugin>
+                <groupId>com.github.searls</groupId>
+                <artifactId>jasmine-maven-plugin</artifactId>
+                <version>1.3.1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsSrcDir>src/main/webapp/js</jsSrcDir>
+                    <jsTestSrcDir>src/test/webapp/js</jsTestSrcDir>
+                    <preloadSources>
+                        <source>src/main/webapp/bc/angular/angular.js</source>
+                        <source>src/main/webapp/bc/angular-mocks/angular-mocks.js</source>
+                        <source>src/main/webapp/bc/angular-route/angular-route.min.js</source>
+                        <source>src/main/webapp/bc/angular-resource/angular-resource.min.js</source>
+                        <source>src/main/webapp/js/application.js</source>
+                        <source>src/main/webapp/js/controllers.js</source>
+                    </preloadSources>
+                    <webDriverClassName>org.openqa.selenium.phantomjs.PhantomJSDriver</webDriverClassName>
+                    <webDriverCapabilities>
+                        <capability>
+                            <name>phantomjs.binary.path</name>
+                            <!-- BUG?  -->
+                            <!--<value>${phantomjs.binary}</value>-->
+                            <value>target/phantomjs-maven-plugin/phantomjs-1.9.7-macosx/bin/phantomjs</value>
+                        </capability>
+                    </webDriverCapabilities>
+                    <haltOnFailure>true</haltOnFailure>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

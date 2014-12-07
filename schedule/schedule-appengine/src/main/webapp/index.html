@@ -56,7 +56,7 @@
     <![endif]-->
 </head>
 
-<body>
+<body ng-controller="ApplicationCtrl">
 
 <!-- Static navbar -->
 <nav class="navbar navbar-static-top navbar-inverse" role="navigation" ng-controller="NavbarCtrl">
@@ -79,6 +79,9 @@
                     </ul>
                 </li>
 
+                <li ng-hide="currentUser" ng-class="menuActive('/signUp')">
+                    hi {{currentUser}}
+                </li>
                 <li ng-hide="user" ng-class="menuActive('/signUp')">
                     <a ng-click="collapse()" href="#/signUp">sign up</a>
                 </li>

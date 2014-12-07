@@ -11,8 +11,7 @@ RegExp.quote = function (str) {
     return (str + '').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 };
 
-var jasifyScheduleApp = angular.module('jasifyScheduleApp',
-    ['ngRoute', 'ngResource', 'ngMessages', 'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
+var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngMessages', 'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
 
 /**
  * Routes for all navbar links
@@ -62,6 +61,35 @@ jasifyScheduleApp.config(['$routeProvider',
     }]);
 
 /**
+ * Constant for the authentication related events
+ */
+jasifyScheduleApp.constant('AUTH_EVENTS', {
+    loginSuccess: 'auth-login-success',
+    loginFailed: 'auth-login-failed',
+    logoutSuccess: 'auth-logout-success',
+    sessionTimeout: 'auth-session-timeout',
+    notAuthenticated: 'auth-not-authenticated',
+    notAuthorized: 'auth-not-authorized'
+});
+
+/**
+ *  Session is a singleton that mimics the server-side session
+ */
+jasifyScheduleApp.service('Session', function () {
+    this.create = function (sessionId, userId, userRole) {
+        this.id = sessionId;
+        this.userId = userId;
+        this.userRole = userRole;
+    };
+    this.destroy = function () {
+        this.id = null;
+        this.userId = null;
+        this.userRole = null;
+    };
+    return this;
+});
+
+/**
  * Modal service
  * To talk to the user from any view/controller
  */
@@ -76,87 +104,36 @@ jasifyScheduleApp.factory('Modal', ['$log', '$modal', '$rootScope',
 
         var Modal = {
             showError: function (title, description) {
+                //TODO: modal missing
                 console.log("showError(" + title + ", " + description + ")");
             }
         };
-        $log.debug("new Modal");
         return Modal;
     }]);
+
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal',
-    function ($log, $location, $http, User, Modal) {
+jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session', 'User', 'Modal',
+    function ($log, $location, $http, Session, User, Modal) {
         var currentUser;
         var Auth = {
             isLoggedIn: function () {
-                if (currentUser) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return !!Session.userId;
             },
+
             logout: function () {
                 $log.info("Log out!");
                 currentUser = null;
                 $http.get('/logout');
             },
 
-            /**
-             * Login
-             * @param name username
-             * @param pass password
-             * @param callback optional error handler function with signature function(reason)
-             */
-            login: function (name, pass, callback) {
-                $http.post('/login', {name: name, password: pass})
-                    .success(function (data, status, headers, config) {
-                        var ret;
-                        try {
-                            ret = angular.fromJson(data);
-                        } catch (e) {
-                        }
-                        if (ret.ok) {
-                            User.current(
-                                //success
-                                function (u, responseHeaders) {
-                                    Auth.onLoggedIn(u);
-                                },
-                                //error
-                                function (httpResponse) {
-                                    Modal.showError('Unexpected error', 'We failed to fetch your user, sorry :-(')
-                                });
-                        } else {
-                            var message;
-                            if (ret && ret.nokText) {
-                                message = ret.nokText;
-                            } else {
-                                message = 'We failed to log you in, sorry :-(';
-                            }
-                            if (callback) {
-                                callback(message);
-                            } else {
-                                Modal.showError('Unhandled login failure', message)
-                            }
-                        }
-                    })
-                    .error(function (data, status, headers, config) {
-                        var ret;
-                        try {
-                            ret = angular.fromJson(data);
-                        } catch (e) {
-                        }
-                        var message;
-                        if (ret && ret.nokText) {
-                            message = ret.nokText;
-                        } else {
-                            message = 'We failed to log you in, sorry :-(';
-                        }
-                        if (callback) {
-                            callback(message);
-                        } else {
-                            Modal.showError('Unhandled login failure', message)
-                        }
+            login: function (credentials) {
+                $log.info("Logging in...");
+                return $http.post('/login', credentials)
+                    .then(function (res) {
+                        Session.create(res.id, res.userId, res.userRole);
+                        return res.user;
                     });
             },
             changePassword: function (user, oldPassword, newPassword, successFun, errorFun) {
@@ -189,20 +166,9 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal'
             }
 
         };
-        User.current( //todo: use /isloggedin first
-            //success
-            function (u, responseHeaders) {
-                Auth.setCurrentUser(u);
-            },
-            //error
-            function (httpResponse) {
-                $log.debug('Not logged in');//todo: remove
-            });
 
-        $log.debug("new Auth");
         return Auth;
     }]);
-
 
 /**
  * Util service (global utility functions)
@@ -245,6 +211,9 @@ jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $lo
     return User;
 }]);
 
+/**
+ * Strong password directive
+ */
 jasifyScheduleApp.directive('strongPassword', function () {
     return {
         require: 'ngModel',
@@ -281,6 +250,9 @@ jasifyScheduleApp.directive('strongPassword', function () {
     };
 });
 
+/**
+ * ConfirmField directive
+ */
 jasifyScheduleApp.directive('confirmField', function () {
     return {
         require: 'ngModel',
@@ -298,7 +270,9 @@ jasifyScheduleApp.directive('confirmField', function () {
     };
 });
 
-
+/**
+ * Username directive
+ */
 jasifyScheduleApp.directive('username', ['$q', 'User', function ($q, User) {
     return {
         require: 'ngModel',
