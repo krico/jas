@@ -95,8 +95,8 @@ jasifyScheduleApp.service('Session', function () {
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session', 'User',
-    function ($log, $location, $http, Session, User) {
+jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session',
+    function ($log, $location, $http, Session) {
         var currentUser;
         var Auth = {
             isLoggedIn: function () {
@@ -109,14 +109,6 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session', 'Use
                 $http.get('/logout');
             },
 
-            login: function (credentials) {
-                $log.info("Logging in...");
-                return $http.post('/login', credentials)
-                    .then(function (res) {
-                        Session.create(res.id, res.userId, res.userRole);
-                        return res.user;
-                    });
-            },
             changePassword: function (user, oldPassword, newPassword, successFun, errorFun) {
                 var req = {
                     'oldPassword': oldPassword,
@@ -146,6 +138,20 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session', 'Use
                 return currentUser;
             }
 
+        };
+
+        Auth.isAuthenticated = function () {
+            return !!Session.id;
+        };
+
+        Auth.login = function (credentials) {
+            $log.info("Logging in (name=" + credentials.name + ") ...");
+            return $http.post('/auth/login', credentials)
+                .then(function (res) {
+                    $log.info("Logged in! (userId=" + res.data.userId + ")");
+                    Session.create(res.data.id, res.data.userId);
+                    return res.data.user;
+                });
         };
 
         return Auth;
