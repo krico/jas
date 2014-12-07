@@ -97,51 +97,16 @@ jasifyScheduleApp.service('Session', function () {
  */
 jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session',
     function ($log, $location, $http, Session) {
-        var currentUser;
-        var Auth = {
-            isLoggedIn: function () {
-                return !!Session.userId;
-            },
 
-            logout: function () {
-                $log.info("Log out!");
-                currentUser = null;
-                $http.get('/logout');
-            },
-
-            changePassword: function (user, oldPassword, newPassword, successFun, errorFun) {
-                var req = {
-                    'oldPassword': oldPassword,
-                    'newPassword': newPassword
-                };
-                $http.post('/change-password/' + user.id, angular.toJson(req))
-                    .success(function (data, status, headers, config) {
-                        if (angular.isFunction(successFun)) {
-                            successFun(data, status, headers, config);
-                        }
-                    })
-                    .error(function (data, status, headers, config) {
-                        if (angular.isFunction(errorFun)) {
-                            errorFun(data, status, headers, config);
-                        }
-                    });
-            },
-            onLoggedIn: function (user) {
-                Auth.setCurrentUser(user);
-                $location.path('/home');
-            },
-            setCurrentUser: function (u) {
-                $log.info('Auth.currentUser=' + u)
-                currentUser = u;
-            },
-            getCurrentUser: function () {
-                return currentUser;
-            }
-
-        };
+        var Auth = {};
 
         Auth.isAuthenticated = function () {
             return !!Session.id;
+        };
+
+        var loggedIn = function (res) {
+            Session.create(res.data.id, res.data.userId);
+            return res.data.user;
         };
 
         Auth.login = function (credentials) {
@@ -149,8 +114,30 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session',
             return $http.post('/auth/login', credentials)
                 .then(function (res) {
                     $log.info("Logged in! (userId=" + res.data.userId + ")");
-                    Session.create(res.data.id, res.data.userId);
-                    return res.data.user;
+                    return loggedIn(res);
+                });
+        };
+
+        Auth.restore = function () {
+            $log.debug("Restoring session...");
+            return $http.get('/auth/restore')
+                .then(function (res) {
+                    $log.info("Session restored! (userId=" + res.data.userId + ")");
+                    return loggedIn(res);
+                });
+        };
+
+        Auth.changePassword = function (credentials, newPassword) {
+            $log.info("Changing password (userId=" + Session.userId + ")!");
+            return $http.post('/auth/change-password', {credentials: credentials, newPassword: newPassword});
+        };
+
+        Auth.logout = function () {
+            $log.info("Logging out (" + Session.userId + ")!");
+            return $http.get('/auth/logout')
+                .then(function (res) {
+                    $log.info("Logged out!");
+                    Session.destroy();
                 });
         };
 

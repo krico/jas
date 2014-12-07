@@ -21,14 +21,14 @@ describe("Application", function () {
             Session = _Session_;
         }));
 
-        it("Should be null after instantiation", function () {
+        it("should be null after instantiation", function () {
 
             expect(Session.id).toBe(null);
             expect(Session.userId).toBe(null);
 
         });
 
-        it("Should keep the values of create", function () {
+        it("should keep the values of create", function () {
 
             Session.create(123, 555);
 
@@ -41,7 +41,7 @@ describe("Application", function () {
             expect(Session.userId).toBe(null);
         });
 
-        it("Should be null after destroy", function () {
+        it("should be null after destroy", function () {
 
             Session.create(123, 555);
             Session.destroy();
@@ -59,13 +59,13 @@ describe("Application", function () {
             Auth = _Auth_;
         }));
 
-        it("Should not be authenticated before login", function () {
+        it("should not be authenticated before login", function () {
 
             expect(Auth.isAuthenticated()).toBe(false);
 
         });
 
-        it("Should be authenticated after successful login", function () {
+        it("should be authenticated after successful login", function () {
 
             expect(Auth.isAuthenticated()).toBe(false);
 
@@ -84,7 +84,7 @@ describe("Application", function () {
             expect(Auth.isAuthenticated()).toBe(true);
         });
 
-        it("Should forward user on successful login", function () {
+        it("should forward user on successful login", function () {
 
             var credentials = {name: 'test', password: 'password'};
             $httpBackend
@@ -111,7 +111,7 @@ describe("Application", function () {
             expect(Session.userId).toBe(user.id);
         });
 
-        it("Should fail when login fails and not be authorized", function () {
+        it("should fail when login fails and not be authorized", function () {
 
             var credentials = {name: 'test', password: 'password'};
             $httpBackend
@@ -140,6 +140,107 @@ describe("Application", function () {
             expect(failed).toBe(true);
             expect(Auth.isAuthenticated()).toBe(false);
 
+        });
+        it("should fail when login fails and not be authorized", function () {
+
+            var credentials = {name: 'test', password: 'password'};
+            $httpBackend
+                .expectPOST('/auth/login', credentials)
+                .respond(401 /* Unauthorized */);
+
+            var succeeded = false;
+            var failed = false;
+            Auth.login(credentials).then(
+                //ok
+                function (u) {
+                    succeeded = true;
+                },
+                //fail
+                function () {
+                    failed = true;
+                });
+
+            //Not flushed (e.g. authentication in progress)
+            expect(succeeded).toBe(false);
+            expect(failed).toBe(false);
+
+            $httpBackend.flush();
+
+            expect(succeeded).toBe(false);
+            expect(failed).toBe(true);
+            expect(Auth.isAuthenticated()).toBe(false);
+
+        });
+
+        it("should change password", function () {
+
+            var credentials = {name: 'test', password: 'password'};
+            $httpBackend.expectPOST('/auth/login', credentials)
+                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: credentials.name}});
+
+
+            Auth.login(credentials);
+
+            $httpBackend.flush();
+
+            expect(Auth.isAuthenticated()).toBe(true);
+
+            $httpBackend.expectPOST('/auth/change-password', {
+                credentials: credentials,
+                newPassword: 'newPw'
+            }).respond(200);
+
+            var ok = false;
+
+            Auth.changePassword(credentials, 'newPw').then(function () {
+                ok = true;
+            });
+
+            expect(ok).toBe(false);
+
+            $httpBackend.flush();
+
+            expect(ok).toBe(true);
+        });
+
+        it("should restore an existing session", function () {
+
+            $httpBackend.expectGET('/auth/restore')
+                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}});
+
+            var user = null;
+
+            Auth.restore().then(function (u) {
+                user = u;
+            });
+
+            $httpBackend.flush();
+
+            expect(Auth.isAuthenticated()).toBe(true);
+            expect(user).not.toBe(null);
+            expect(user.id).toBe(555);
+            expect(Session.userId).toBe(user.id);
+        });
+
+        it("should detect there is no session to restore", function () {
+
+            $httpBackend.expectGET('/auth/restore').respond(401);
+
+            var user = null;
+            var failed = false;
+
+            Auth.restore().then(function (u) {
+                    user = u;
+                },
+                function () {
+                    failed = true;
+                });
+
+            $httpBackend.flush();
+
+            expect(Auth.isAuthenticated()).toBe(false);
+            expect(user).toBe(null);
+            expect(failed).toBe(true);
         });
 
     });
