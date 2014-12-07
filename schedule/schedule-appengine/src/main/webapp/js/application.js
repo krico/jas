@@ -76,46 +76,27 @@ jasifyScheduleApp.constant('AUTH_EVENTS', {
  *  Session is a singleton that mimics the server-side session
  */
 jasifyScheduleApp.service('Session', function () {
-    this.create = function (sessionId, userId, userRole) {
+
+    this.create = function (sessionId, userId) {
         this.id = sessionId;
         this.userId = userId;
-        this.userRole = userRole;
     };
+
     this.destroy = function () {
         this.id = null;
         this.userId = null;
-        this.userRole = null;
     };
+
+    this.destroy();
+
     return this;
 });
 
 /**
- * Modal service
- * To talk to the user from any view/controller
- */
-jasifyScheduleApp.factory('Modal', ['$log', '$modal', '$rootScope',
-    function ($log, $modal, $rootScope) {
-        //error.modal = $modal({
-        //    scope: error.scope,
-        //    template: 'views/modal/error.html',
-        //    animation: 'am-fade-and-scale',
-        //    show: false
-        //});
-
-        var Modal = {
-            showError: function (title, description) {
-                //TODO: modal missing
-                console.log("showError(" + title + ", " + description + ")");
-            }
-        };
-        return Modal;
-    }]);
-
-/**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session', 'User', 'Modal',
-    function ($log, $location, $http, Session, User, Modal) {
+jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session', 'User',
+    function ($log, $location, $http, Session, User) {
         var currentUser;
         var Auth = {
             isLoggedIn: function () {

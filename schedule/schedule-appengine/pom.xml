@@ -264,8 +264,13 @@
                     <preloadSources>
                         <source>src/main/webapp/bc/angular/angular.js</source>
                         <source>src/main/webapp/bc/angular-mocks/angular-mocks.js</source>
-                        <source>src/main/webapp/bc/angular-route/angular-route.min.js</source>
-                        <source>src/main/webapp/bc/angular-resource/angular-resource.min.js</source>
+                        <source>src/main/webapp/bc/angular-route/angular-route.js</source>
+                        <source>src/main/webapp/bc/angular-resource/angular-resource.js</source>
+                        <source>src/main/webapp/bc/angular-messages/angular-messages.js</source>
+                        <source>src/main/webapp/bc/angular-messages/angular-messages.js</source>
+                        <source>src/main/webapp/bc/angular-bootstrap/ui-bootstrap-tpls.js</source>
+                        <source>src/main/webapp/bc/spin.js/spin.js</source>
+                        <source>src/main/webapp/bc/angular-spinner/angular-spinner.min.js</source>
                         <source>src/main/webapp/js/application.js</source>
                         <source>src/main/webapp/js/controllers.js</source>
                     </preloadSources>
@@ -274,8 +279,8 @@
                         <capability>
                             <name>phantomjs.binary.path</name>
                             <!-- BUG?  -->
-                            <!--<value>${phantomjs.binary}</value>-->
-                            <value>target/phantomjs-maven-plugin/phantomjs-1.9.7-macosx/bin/phantomjs</value>
+                            <value>${phantomjs.binary}</value>
+                            <!--<value>target/phantomjs-maven-plugin/phantomjs-1.9.7-macosx/bin/phantomjs</value>-->
                         </capability>
                     </webDriverCapabilities>
                     <haltOnFailure>true</haltOnFailure>
