@@ -1,13 +1,14 @@
 describe("Application", function () {
 
-    var $httpBackend;
+    var $httpBackend, $rootScope;
 
     beforeEach(module('jasifyScheduleApp', function ($provide) {
         $provide.value('$log', console);
     }));
 
-    beforeEach(inject(function (_$httpBackend_) {
+    beforeEach(inject(function (_$httpBackend_, _$rootScope_) {
         $httpBackend = _$httpBackend_;
+        $rootScope = _$rootScope_;
     }));
 
     afterEach(function () {
@@ -237,6 +238,76 @@ describe("Application", function () {
                 });
 
             $httpBackend.flush();
+
+            expect(Auth.isAuthenticated()).toBe(false);
+            expect(user).toBe(null);
+            expect(failed).toBe(true);
+        });
+
+        it("should not restore again when session existed", function () {
+
+            $httpBackend.expectGET('/auth/restore')
+                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}});
+
+            var user = null;
+
+            Auth.restore().then(function (u) {
+                user = u;
+            });
+
+            $httpBackend.flush();
+
+            expect(Auth.isAuthenticated()).toBe(true);
+            expect(user).not.toBe(null);
+            expect(user.id).toBe(555);
+            expect(Session.userId).toBe(user.id);
+
+            user = null;
+
+            Auth.restore().then(function (u) {
+                user = u;
+            });
+
+            //propagate promise resolution (damn I lost a lot of time on this one!)
+            $rootScope.$apply();
+
+            expect(Auth.isAuthenticated()).toBe(true);
+            expect(user).not.toBe(null);
+            expect(user.id).toBe(555);
+            expect(Session.userId).toBe(user.id);
+
+        });
+
+        it("should not restore again when session is not available", function () {
+
+            $httpBackend.expectGET('/auth/restore').respond(401);
+
+            var user = null;
+            var failed = false;
+
+            Auth.restore().then(function (u) {
+                    user = u;
+                },
+                function (why) {
+                    failed = true;
+                });
+
+            $httpBackend.flush();
+
+            expect(Auth.isAuthenticated()).toBe(false);
+            expect(user).toBe(null);
+            expect(failed).toBe(true);
+
+            failed = false;
+
+            Auth.restore().then(function (u) {
+                    user = u;
+                },
+                function () {
+                    failed = true;
+                });
+
+            $rootScope.$apply();
 
             expect(Auth.isAuthenticated()).toBe(false);
             expect(user).toBe(null);

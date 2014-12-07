@@ -95,18 +95,24 @@ jasifyScheduleApp.service('Session', function () {
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session',
-    function ($log, $location, $http, Session) {
+jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', '$q', 'Session',
+    function ($log, $location, $http, $q, Session) {
 
         var Auth = {};
-
-        Auth.isAuthenticated = function () {
-            return !!Session.id;
-        };
 
         var loggedIn = function (res) {
             Session.create(res.data.id, res.data.userId);
             return res.data.user;
+        };
+
+        var restore = {
+            invoked: false,
+            failed: false,
+            data: null
+        };
+
+        Auth.isAuthenticated = function () {
+            return !!Session.id;
         };
 
         Auth.login = function (credentials) {
@@ -119,12 +125,36 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'Session',
         };
 
         Auth.restore = function () {
+            if (restore.invoked) {
+                //This is a cache of the last restore call, we make it look like it was called again
+                $log.info("Restore called more than once, returning cached values...");
+
+                var deferred = $q.defer();
+
+                if (restore.failed) {
+                    deferred.reject(restore.data);
+                } else {
+                    deferred.resolve(restore.data);
+                }
+
+                return deferred.promise;
+            }
+
+            restore.invoked = true;
+
             $log.debug("Restoring session...");
             return $http.get('/auth/restore')
                 .then(function (res) {
                     $log.info("Session restored! (userId=" + res.data.userId + ")");
-                    return loggedIn(res);
-                });
+                    restore.data = loggedIn(res);
+                    return restore.data;
+                },
+                function (reason) {
+                    restore.failed = true;
+                    restore.data = reason;
+                    return $q.reject(restore.data);
+                }
+            );
         };
 
         Auth.changePassword = function (credentials, newPassword) {
