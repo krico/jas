@@ -95,8 +95,8 @@ jasifyScheduleApp.service('Session', function () {
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', '$q', 'Session',
-    function ($log, $location, $http, $q, Session) {
+jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
+    function ($log, $http, $q, Session) {
 
         var Auth = {};
 
@@ -174,12 +174,22 @@ jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', '$q', 'Session'
         return Auth;
     }]);
 
+jasifyScheduleApp.factory('Username', ['$log', '$http',
+    function ($log, $http) {
+        var Username = {};
+
+        Username.check = function (name) {
+            return $http.post('/username', name);
+        };
+
+        return Username;
+    }]);
+
 /**
  * Util service (global utility functions)
  */
 jasifyScheduleApp.factory('Util', ['$log',
     function ($log) {
-        $log.debug("new Util");
 
         return {
             formFieldError: function (form, fieldName) {

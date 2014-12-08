@@ -315,4 +315,52 @@ describe("Application", function () {
         });
 
     });
+
+    describe('Username', function () {
+        var Username;
+
+        beforeEach(inject(function (_Username_) {
+            Username = _Username_;
+        }));
+
+        it("should tell us if username is available", function () {
+            $httpBackend.expectPOST('/username', 'good').respond(200);
+
+            var ok = null;
+            var nok = null;
+
+            Username.check('good').then(function (res) {
+                    ok = true;
+                },
+                function (r) {
+                    nok = true;
+                });
+
+            $httpBackend.flush();
+
+            expect(ok).toBe(true);
+            expect(nok).toBe(null);
+
+        });
+
+        it("should tell us if username is unavailable", function () {
+            $httpBackend.expectPOST('/username', 'bad-name').respond(406);
+
+
+            var ok = null;
+            var nok = null;
+
+            Username.check('bad-name').then(function (res) {
+                    ok = true;
+                },
+                function (r) {
+                    nok = true;
+                });
+
+            $httpBackend.flush();
+
+            expect(ok).toBe(null);
+            expect(nok).toBe(true);
+        });
+    });
 });
