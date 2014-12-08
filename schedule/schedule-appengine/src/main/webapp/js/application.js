@@ -186,24 +186,6 @@ jasifyScheduleApp.factory('Username', ['$log', '$http',
     }]);
 
 /**
- * Util service (global utility functions)
- */
-jasifyScheduleApp.factory('Util', ['$log',
-    function ($log) {
-
-        return {
-            formFieldError: function (form, fieldName) {
-                var f = form[fieldName];
-                return f && f.$dirty && f.$invalid;
-            },
-            formFieldSuccess: function (form, fieldName) {
-                var f = form[fieldName];
-                return f && f.$dirty && f.$valid;
-            }
-        };
-    }]);
-
-/**
  * User service
  */
 jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {

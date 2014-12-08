@@ -84,8 +84,8 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
 /**
  * SignUpCtrl
  */
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'Util', 'User', 'Auth',
-    function ($scope, $http, $location, Util, User, Auth) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'User', 'Auth',
+    function ($scope, $http, $location, User, Auth) {
 
         $scope.alerts = [];
 
@@ -97,11 +97,13 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
         };
 
         $scope.hasError = function (fieldName) {
-            return Util.formFieldError($scope.signUpForm, fieldName);
+            var f = $scope.signUpForm[fieldName];
+            return f && f.$dirty && f.$invalid;
         };
 
         $scope.hasSuccess = function (fieldName) {
-            return Util.formFieldSuccess($scope.signUpForm, fieldName);
+            var f = $scope.signUpForm[fieldName];
+            return f && f.$dirty && f.$valid;
         };
 
         $scope.createUser = function () {
