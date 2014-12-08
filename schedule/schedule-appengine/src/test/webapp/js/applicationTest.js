@@ -363,4 +363,46 @@ describe("Application", function () {
             expect(nok).toBe(true);
         });
     });
+
+    describe('User', function () {
+        var User;
+
+        beforeEach(inject(function (_User_) {
+            User = _User_;
+        }));
+
+        it('should get a user by id', function () {
+
+            $httpBackend.expectGET('/user/555').respond(200, {id: 555, name: 'user', email: 'user@jasify.com'});
+            var user = User.get({id: 555});
+            $httpBackend.flush();
+            expect(user).toBeDefined();
+            expect(user.id).toBe(555);
+            expect(user.name).toBe('user');
+            expect(user.email).toBe('user@jasify.com');
+
+        });
+
+        it('should save an existing user', function () {
+
+            $httpBackend.expectGET('/user/555').respond(200, {id: 555, name: 'user', email: 'user@jasify.com'});
+            var user = User.get({id: 555});
+            $httpBackend.flush();
+
+            $httpBackend.expectPOST('/user/555', {id: 555, name: 'user', email: 'user2@jasify.com'})
+                .respond(200, {id: 555, name: 'user', email: 'user2@jasify.com'});
+
+            user.email = 'user2@jasify.com';
+
+            user.$save();
+
+            $httpBackend.flush();
+
+            expect(user).toBeDefined();
+            expect(user.id).toBe(555);
+            expect(user.name).toBe('user');
+            expect(user.email).toBe('user2@jasify.com');
+
+        });
+    });
 });

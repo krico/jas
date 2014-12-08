@@ -189,22 +189,15 @@ jasifyScheduleApp.factory('Username', ['$log', '$http',
  * User service
  */
 jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {
-    $log.debug("new User");
-    var User = $resource('/user/:id', {id: '@id'},
+    return $resource('/user/:id', {id: '@id'},
         {
-            /* User.checkUsername([params], postData, [success], [error]) */
-            'checkUsername': {method: 'POST', url: '/username'},
-            'create': {method: 'PUT', url: '/user/new'},
-            'changePassword': {method: 'POST', url: '/change-password/:id', params: {id: '@id'}},
             'query': {
                 method: 'GET',
                 isArray: true,
                 url: '/users/page/:page/size/:size/sort/:sort',
                 params: {page: '@page', size: '@size', sort: '@sort'}
-            },
-            'current': {method: 'GET', url: '/user/current'}
+            }
         });
-    return User;
 }]);
 
 /**
@@ -269,7 +262,7 @@ jasifyScheduleApp.directive('confirmField', function () {
 /**
  * Username directive
  */
-jasifyScheduleApp.directive('username', ['$q', 'User', function ($q, User) {
+jasifyScheduleApp.directive('username', ['$q', 'Username', function ($q, Username) {
     return {
         require: 'ngModel',
         link: function (scope, elm, attrs, ctrl) {
@@ -282,24 +275,7 @@ jasifyScheduleApp.directive('username', ['$q', 'User', function ($q, User) {
 
                 var def = $q.defer();
 
-                User.checkUsername(modelValue,
-                    //success
-                    function (value, responseHeaders) {
-                        var check = angular.fromJson(value);
-                        if (check.ok) {
-                            def.resolve();
-                        } else if (check.nok) {
-                            def.reject(check.nokText);
-                        } else {
-                            def.reject('unknown error');
-                        }
-                    },
-                    //error
-                    function (httpResponse) {
-                        def.reject('communication error');
-                    });
-
-                return def.promise;
+                return Username.check(modelValue);
             };
         }
     };
