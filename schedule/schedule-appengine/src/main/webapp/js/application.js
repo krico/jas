@@ -189,15 +189,11 @@ jasifyScheduleApp.factory('Username', ['$log', '$http',
  * User service
  */
 jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {
-    return $resource('/user/:id', {id: '@id'},
-        {
-            'query': {
-                method: 'GET',
-                isArray: true,
-                url: '/users/page/:page/size/:size/sort/:sort',
-                params: {page: '@page', size: '@size', sort: '@sort'}
-            }
-        });
+    return $resource('/user/:id', {id: '@id'});
+    /*        {
+     'query': {method: 'GET', isArray: true}
+     });
+     */
 }]);
 
 /**
