@@ -21,9 +21,8 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope',
  */
 jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth', 'AUTH_EVENTS',
     function ($scope, $location, Auth, AUTH_EVENTS) {
-        $scope.user = Auth.getCurrentUser();
         $scope.isAdmin = function () {
-            return $scope.user && $scope.user.admin;
+            return $scope.currentUser && $scope.currentUser.admin;
         };
 
         $scope.path = "";
