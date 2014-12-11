@@ -74,6 +74,30 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
     }]);
 
 /**
+ * LoginCtrl
+ */
+jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS',
+    function ($scope, $rootScope, Auth, AUTH_EVENTS) {
+
+        $scope.credentials = {
+            name: '',
+            password: ''
+        };
+
+        $scope.login = function (cred) {
+            Auth.login(cred).then(
+                function (user) {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                    $scope.setCurrentUser(user);
+                },
+                function () {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+                });
+        };
+
+    }]);
+
+/**
  * SignUpCtrl
  */
 jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'User', 'Auth',
@@ -124,34 +148,6 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
 
                 });
         };
-    }]);
-
-/**
- * LoginCtrl
- */
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS',
-    function ($scope, $rootScope, Auth, AUTH_EVENTS) {
-
-        $scope.credentials = {
-            name: '',
-            password: ''
-        };
-
-        $scope.alert = function (t, m) {
-            $scope.alerts.push({type: t, msg: m});
-        };
-
-        $scope.login = function (cred) {
-            Auth.login(cred).then(
-                function (user) {
-                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                    $scope.setCurrentUser(user);
-                },
-                function () {
-                    $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
-                });
-        };
-
     }]);
 
 /**
