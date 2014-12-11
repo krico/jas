@@ -111,4 +111,16 @@ describe('Controllers', function () {
         });
     });
 
+    describe('HomeCtrl', function () {
+        var $scope, controller;
+
+        beforeEach(function () {
+            $scope = {};
+            controller = $controller('HomeCtrl', {$scope: $scope});
+        });
+
+        it('is empty', function () {
+        });
+
+    });
 });

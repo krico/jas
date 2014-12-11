@@ -4,3 +4,4 @@
 - username directive check
 - User.query now calls get(/user);
 - Auth.isAdmin and NavController
+- test directives

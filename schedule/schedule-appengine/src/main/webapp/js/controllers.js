@@ -69,9 +69,8 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
 /**
  * HomeCtrl
  */
-jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
-    function ($scope, Auth) {
-        $scope.user = Auth.getCurrentUser();
+jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
+    function ($scope) {
     }]);
 
 /**
