@@ -65,6 +65,50 @@ describe('Controllers', function () {
             expect($scope.navbarCollapsed).toBe(true);
 
         });
+
+        it('can collapse the navbar ', function () {
+
+            expect($scope.navbarCollapsed).toBe(true);
+            $scope.toggleCollapse();
+            expect($scope.navbarCollapsed).toBe(false);
+            $scope.collapse();
+            expect($scope.navbarCollapsed).toBe(true);
+
+        });
+
+        it('can determine if a menu is active ', function () {
+
+            expect($scope.menuActive('/profile')).toBe(false);
+
+            $location.path('/profile');
+
+            expect($scope.menuActive('/profile')).toBe('active');
+
+        });
+
+        it('should register a loginSucceeded as a listener for the login event', function () {
+
+            $scope = $rootScope.$new();
+            spyOn($scope, '$on');
+            controller = $controller('NavbarCtrl', {
+                $scope: $scope,
+                $location: $location,
+                Auth: Auth,
+                AUTH_EVENTS: AUTH_EVENTS
+            });
+            expect($scope.$on).toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess, $scope.loginSucceeded);
+
+        });
+
+        it('should watch the path', function () {
+            $location.path('/tmp');
+            $rootScope.$digest();
+            expect($scope.path).toEqual('/tmp');
+            $location.path('/tmp2');
+            expect($scope.path).toEqual('/tmp');
+            $rootScope.$digest();
+            expect($scope.path).toEqual('/tmp2');
+        });
     });
 
 });

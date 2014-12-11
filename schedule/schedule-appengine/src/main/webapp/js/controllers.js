@@ -52,17 +52,11 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
             }
         ];
 
-        $scope.isActive = function (viewLocation) {
-            return viewLocation === $location.path();
+        $scope.loginSucceeded = function () {
+            console.log("LOGIN!!!");
         };
 
-        $scope.$on(AUTH_EVENTS.loginSuccess, function () {
-            console.log("LOGIN!!!");
-        });
-
-        $scope.$watch(Auth.getCurrentUser, function (newValue, oldValue) {
-            $scope.user = Auth.getCurrentUser();
-        });
+        $scope.$on(AUTH_EVENTS.loginSuccess, $scope.loginSucceeded);
 
         $scope.$watch(function () {
             return $location.path();
