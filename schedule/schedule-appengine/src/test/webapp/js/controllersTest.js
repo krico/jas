@@ -173,6 +173,7 @@ describe('Controllers', function () {
                 .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: $scope.credentials.name}});
 
             $scope.login($scope.credentials);
+
             spyOn($rootScope, '$broadcast');
 
             $httpBackend.flush();
