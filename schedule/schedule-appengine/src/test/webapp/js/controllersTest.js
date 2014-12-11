@@ -100,7 +100,7 @@ describe('Controllers', function () {
 
         });
 
-        it('should watch the path', function () {
+        it('should watch the $location.path', function () {
             $location.path('/tmp');
             $rootScope.$digest();
             expect($scope.path).toEqual('/tmp');

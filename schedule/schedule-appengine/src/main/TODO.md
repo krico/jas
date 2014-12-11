@@ -3,3 +3,4 @@
 - Need to init and check if user is logged in
 - username directive check
 - User.query now calls get(/user);
+- Auth.isAdmin and NavController
