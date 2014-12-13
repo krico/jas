@@ -87,13 +87,10 @@
                 var user = users[id];
                 if (user.name == name) {
                     //User exists
-                    return [200, angular.toJson({
-                        nok: true,
-                        nokText: 'Username not available'
-                    }), {}];
+                    return [406 /* not acceptable */];
                 }
             }
-            return [200, angular.toJson({ok: true}), {}];
+            return [200];
         });
 
         $httpBackend.whenPOST(/^\/user$/).respond(function (method, url, data) {

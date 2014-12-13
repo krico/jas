@@ -16,6 +16,8 @@ describe("Application", function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
+    //TODO: test routes
+
     describe('Session', function () {
         var Session;
         beforeEach(inject(function (_Session_) {

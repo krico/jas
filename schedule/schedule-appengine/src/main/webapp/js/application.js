@@ -39,7 +39,7 @@ jasifyScheduleApp.config(['$routeProvider',
                 templateUrl: 'views/logout.html',
                 controller: 'LogoutCtrl'
             }).
-            when('/profile', {
+            when('/profile/:extra?', {
                 templateUrl: 'views/profile.html',
                 controller: 'ProfileCtrl'
             }).

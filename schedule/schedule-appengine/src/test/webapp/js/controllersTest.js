@@ -114,6 +114,14 @@ describe('Controllers', function () {
 
         });
 
+        it('should redirect /signUp to /profile/welcome on loginSucceeded', function () {
+
+            $location.path('/signUp');
+            $scope.loginSucceeded();
+            expect($location.path()).toEqual('/profile/welcome');
+
+        });
+
         it('should watch the $location.path', function () {
             $location.path('/tmp');
             $rootScope.$digest();
@@ -426,12 +434,27 @@ describe('Controllers', function () {
     });
 
     describe('ProfileCtrl', function () {
-        var $scope, controller, User, Session;
+        var $scope, controller, $routeParams, User, Session;
 
-        beforeEach(inject(function (_User_, _Session_) {
+        beforeEach(inject(function (_$routeParams_, _User_, _Session_) {
+            $routeParams = _$routeParams_;
             User = _User_;
             Session = _Session_;
         }));
+
+        var construct = function () {
+            Session.create(1, 555);
+            $httpBackend
+                .expectGET('/user/555')
+                .respond(200, {id: 555, name: 'test'});
+
+            controller = $controller('ProfileCtrl', {
+                $scope: $scope,
+                $routeParams: $routeParams,
+                Session: Session,
+                User: User
+            });
+        };
 
         beforeEach(function () {
             $applicationScope = $rootScope.$new();
@@ -440,16 +463,26 @@ describe('Controllers', function () {
             //to create the scope tree, we instantiate applicationCtrl
             $controller('ApplicationCtrl', {$scope: $applicationScope});
 
-            Session.create(1, 555);
-            $httpBackend
-                .expectGET('/user/555')
-                .respond(200, {id: 555, name: 'test'});
+            construct();
+        });
 
-            controller = $controller('ProfileCtrl', {
-                $scope: $scope,
-                Session: Session,
-                User: User
-            });
+        it('knows if isWelcome is tru or note', function () {
+            $httpBackend.flush(); //load the user
+
+            $routeParams.extra = 'welcome';
+            construct();
+            $httpBackend.flush(); //load the user
+            expect($scope.isWelcome()).toEqual(true);
+
+            $routeParams.extra = 'foo';
+            construct();
+            $httpBackend.flush(); //load the user
+            expect($scope.isWelcome()).toEqual(false);
+        });
+
+        it('sets extra to false when there are not route parameters', function () {
+            $httpBackend.flush(); //load the user
+            expect($scope.isWelcome()).toEqual(false);
         });
 
         it('can handle alerts', function () {

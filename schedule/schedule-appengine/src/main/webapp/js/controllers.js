@@ -56,6 +56,8 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location
             $log.debug("LOGIN SUCCEEDED!");
             if ($scope.menuActive('/login')) {
                 $location.path('/profile');
+            } else if ($scope.menuActive('/signUp')) {
+                $location.path('/profile/welcome');
             }
         };
 
@@ -143,7 +145,7 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUT
                     $scope.registered = true;
                     $scope.inProgress = false;
 
-                    $scope.alert('success', 'Registration succeeded! Your browser should be redirected shortly...');
+                    $scope.alert('success', 'Registration succeeded! You should be redirected shortly...');
 
                     //Simulate a login
                     Auth.login($scope.user)
@@ -186,11 +188,18 @@ jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUT
 /**
  * ProfileCtrl
  */
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Session', 'User',
-    function ($scope, Session, User) {
+jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', 'Session', 'User',
+    function ($scope, $routeParams, Session, User) {
         $scope.user = null;
 
         $scope.alerts = [];
+
+        $scope.isWelcome = function () {
+            if ($routeParams.extra) {
+                return 'welcome' == $routeParams.extra;
+            }
+            return false;
+        };
 
         $scope.alert = function (t, m) {
             $scope.alerts.push({type: t, msg: m});
