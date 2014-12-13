@@ -205,7 +205,11 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Session', 'User'
         };
 
         $scope.reset = function () {
-            $scope.user = User.get({id: Session.userId});
+            $scope.user = User.get({id: Session.userId}, function () {
+                if ($scope.profileForm) {
+                    $scope.profileForm.$setPristine();
+                }
+            });
         };
         $scope.reset();
     }]);

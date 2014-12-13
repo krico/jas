@@ -504,6 +504,28 @@ describe('Controllers', function () {
             expect($scope.user.about).not.toBeDefined();
         });
 
+        it('calls profileForm.$setPristine on reset ', function () {
+            $httpBackend.flush(); //load the user
+
+            $httpBackend
+                .expectGET('/user/555')
+                .respond(200, {id: 555, name: 'test'});
+
+            var called = null;
+            $scope.profileForm = {
+                $setPristine: function () {
+                    called = true;
+                }
+            };
+
+            $scope.reset();
+
+            $httpBackend.flush();
+
+            expect(called).toEqual(true);
+
+        });
+
     });
 
 
