@@ -69,6 +69,12 @@
             return [401 /* unauthorized */];
         });
 
+        $httpBackend.whenGET(/^\/auth\/logout$/).respond(function (method, url, data) {
+            console.log(method + "[logout] " + url + " DATA: " + data);
+            database.users.current = false;
+            return [200];
+        });
+
         /**
          * Username check
          */
@@ -89,19 +95,6 @@
             }
             return [200, angular.toJson({ok: true}), {}];
         });
-
-        $httpBackend.whenGET(/^\/logout$/).respond(function (method, url, data) {
-            console.log(method + "[logout] " + url + " DATA: " + data);
-            database.users.current = false;
-            return [200, angular.toJson({ok: true}), {}];
-        });
-
-        $httpBackend.whenPOST(/^\/logout$/).respond(function (method, url, data) {
-            console.log(method + "[logout] " + url + " DATA: " + data);
-            database.users.current = false;
-            return [200, angular.toJson({ok: true}), {}];
-        });
-
 
         $httpBackend.whenPOST(/^\/user$/).respond(function (method, url, data) {
             console.log("POST[user](CREATE) " + url + " DATA: " + data);
