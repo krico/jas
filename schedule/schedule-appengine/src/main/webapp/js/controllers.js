@@ -19,8 +19,8 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope',
 /**
  * NavbarCtrl
  */
-jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth', 'AUTH_EVENTS',
-    function ($scope, $location, Auth, AUTH_EVENTS) {
+jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location', 'Auth', 'AUTH_EVENTS',
+    function ($scope, $log, $location, Auth, AUTH_EVENTS) {
         $scope.isAdmin = function () {
             return $scope.currentUser && $scope.currentUser.admin;
         };
@@ -53,7 +53,10 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
         ];
 
         $scope.loginSucceeded = function () {
-            console.log("LOGIN!!!");
+            $log.debug("LOGIN SUCCEEDED!");
+            if ($scope.menuActive('/login')) {
+                $location.path('/profile');
+            }
         };
 
         $scope.$on(AUTH_EVENTS.loginSuccess, $scope.loginSucceeded);

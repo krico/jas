@@ -106,6 +106,14 @@ describe('Controllers', function () {
 
         });
 
+        it('should redirect /login to /profile on loginSucceeded', function () {
+
+            $location.path('/login');
+            $scope.loginSucceeded();
+            expect($location.path()).toEqual('/profile');
+
+        });
+
         it('should watch the $location.path', function () {
             $location.path('/tmp');
             $rootScope.$digest();

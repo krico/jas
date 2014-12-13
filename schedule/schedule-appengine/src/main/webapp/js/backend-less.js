@@ -43,6 +43,7 @@
                 }
             }
         };
+        database.sessionCount = 1;
 
         console.log("Creating user database");
         for (var i = 2; i < 1000; i++) {
@@ -51,6 +52,22 @@
                 database.users[i].email = 'user' + i + '@jasify.com';
             }
         }
+
+        $httpBackend.whenPOST(/^\/auth\/login$/).respond(function (method, url, data) {
+            console.log("POST[login] " + url + " DATA: " + data);
+
+            var req = angular.fromJson(data);
+            var users = database.users;
+            for (var id in users) {
+                var u = users[id];
+                if (req.name != 'nologin' && req.name == u.name && req.password == u.password) {
+                    database.users.current = u;
+                    console.log('Login: set current=' + angular.toJson(u));
+                    return [200, {id: database.sessionCount++, userId: u.id, user: u}, {}];
+                }
+            }
+            return [401 /* unauthorized */];
+        });
 
         /**
          * Username check
@@ -85,21 +102,6 @@
             return [200, angular.toJson({ok: true}), {}];
         });
 
-        $httpBackend.whenPOST(/^\/login$/).respond(function (method, url, data) {
-            console.log("POST[login] " + url + " DATA: " + data);
-
-            var req = angular.fromJson(data);
-            var users = database.users;
-            for (var id in users) {
-                var u = users[id];
-                if (req.name != 'nologin' && req.name == u.name && req.password == u.password) {
-                    database.users.current = u;
-                    console.log('Login: set current=' + angular.toJson(u));
-                    return [200, angular.toJson({ok: true}), {}];
-                }
-            }
-            return [200 /* not found */, angular.toJson({nok: true, nokText: 'Invalid username or password.'}), {}];
-        });
 
         $httpBackend.whenPOST(/^\/user$/).respond(function (method, url, data) {
             console.log("POST[user](CREATE) " + url + " DATA: " + data);
