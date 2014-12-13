@@ -398,7 +398,7 @@ describe('Controllers', function () {
             });
         });
 
-        it('executes a logout', function () {
+        it('can logout', function () {
 
             $scope.setCurrentUser({id: 15});
             Session.create(1, 2);
@@ -413,6 +413,87 @@ describe('Controllers', function () {
             expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
             expect(Auth.isAuthenticated()).toBe(false);
             expect($scope.currentUser).toBe(null);
+        });
+
+    });
+
+    describe('ProfileCtrl', function () {
+        var $scope, controller, User, Session;
+
+        beforeEach(inject(function (_User_, _Session_) {
+            User = _User_;
+            Session = _Session_;
+        }));
+
+        beforeEach(function () {
+            $applicationScope = $rootScope.$new();
+            $scope = $applicationScope.$new();
+
+            //to create the scope tree, we instantiate applicationCtrl
+            $controller('ApplicationCtrl', {$scope: $applicationScope});
+
+            Session.create(1, 555);
+            $httpBackend
+                .expectGET('/user/555')
+                .respond(200, {id: 555, name: 'test'});
+
+            controller = $controller('ProfileCtrl', {
+                $scope: $scope,
+                Session: Session,
+                User: User
+            });
+        });
+
+        it('can handle alerts', function () {
+            $httpBackend.flush(); //load the user
+
+            expect($scope.alerts.length).toEqual(0);
+            $scope.alert('success', 'alert text');
+
+            expect($scope.alerts.length).toEqual(1);
+            expect($scope.alerts[0].type).toEqual('success');
+            expect($scope.alerts[0].msg).toEqual('alert text');
+
+        });
+
+        it('loads user when constructed', function () {
+            expect($scope.user.$resolved).toEqual(false);
+            $httpBackend.flush(); //load the user
+            expect($scope.user.$resolved).toEqual(true);
+            expect($scope.user).toBeDefined();
+            expect($scope.user.name).toEqual('test');
+        });
+
+        it('saves the user and updates currentUser ', function () {
+            $httpBackend.flush(); //load the user
+
+            $scope.user.about = 'about him';
+
+            $httpBackend
+                .expectPOST('/user/555')
+                .respond(200, $scope.user);
+
+            $scope.save();
+
+            $httpBackend.flush();
+
+            expect($scope.currentUser.about).toEqual('about him');
+        });
+
+        it('resets to original user ', function () {
+            $httpBackend.flush(); //load the user
+
+            $scope.user.about = 'about him';
+
+            $httpBackend
+                .expectGET('/user/555')
+                .respond(200, {id: 555, name: 'test'});
+
+            $scope.reset();
+
+            $httpBackend.flush();
+
+            expect($scope.user.about).not.toBeDefined();
         });
 
     });

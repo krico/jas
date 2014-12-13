@@ -183,9 +183,9 @@ jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUT
 /**
  * ProfileCtrl
  */
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Auth', 'User',
-    function ($scope, Auth, User) {
-        $scope.user = {};
+jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Session', 'User',
+    function ($scope, Session, User) {
+        $scope.user = null;
 
         $scope.alerts = [];
 
@@ -197,11 +197,12 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Auth', 'User',
             $scope.user.$save().then(function () {
                 $scope.alert('success', 'Profile updated!');
                 //TODO: We probably need to check for failures
-                Auth.setCurrentUser($scope.user);
+                $scope.setCurrentUser($scope.user);
             });
         };
+
         $scope.reset = function () {
-            $scope.user = User.get({id: Auth.getCurrentUser().id});
+            $scope.user = User.get({id: Session.userId});
         };
         $scope.reset();
     }]);
