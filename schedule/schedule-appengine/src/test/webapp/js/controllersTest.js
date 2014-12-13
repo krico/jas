@@ -12,6 +12,11 @@ describe('Controllers', function () {
         $rootScope = _$rootScope_;
     }));
 
+    afterEach(function () {
+        $httpBackend.verifyNoOutstandingExpectation();
+        $httpBackend.verifyNoOutstandingRequest();
+    });
+
     describe('ApplicationCtrl', function () {
         var $scope, controller;
 
@@ -196,6 +201,220 @@ describe('Controllers', function () {
             expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.loginFailed);
 
         });
+    });
+
+    describe('SignUpCtrl', function () {
+        var $scope, controller, AUTH_EVENTS, $applicationScope, Auth, User;
+
+        beforeEach(inject(function (_$location_, _AUTH_EVENTS_, _Auth_, _User_) {
+            AUTH_EVENTS = _AUTH_EVENTS_;
+            Auth = _Auth_;
+            User = _User_;
+        }));
+
+        beforeEach(function () {
+            $applicationScope = $rootScope.$new();
+            $scope = $applicationScope.$new();
+
+            //to create the scope tree, we instantiate applicationCtrl
+            $controller('ApplicationCtrl', {$scope: $applicationScope});
+
+            controller = $controller('SignUpCtrl', {
+                $scope: $scope,
+                $rootScope: $rootScope,
+                Auth: Auth,
+                User: User
+            });
+        });
+
+        it('can handle alerts', function () {
+
+            expect($scope.alerts.length).toEqual(0);
+            $scope.alert('success', 'alert text');
+
+            expect($scope.alerts.length).toEqual(1);
+            expect($scope.alerts[0].type).toEqual('success');
+            expect($scope.alerts[0].msg).toEqual('alert text');
+
+        });
+
+        it('can test if a form field for success and error', function () {
+            var form = {'someField': {}};
+            $scope.signUpForm = form;
+            expect($scope.hasError('someField')).not.toBe(true);
+            expect($scope.hasSuccess('someField')).not.toBe(true);
+
+            // not dirty, so still not error or success
+            form.someField.$invalid = true;
+            form.someField.$valid = false;
+            expect($scope.hasError('someField')).not.toBe(true);
+            expect($scope.hasSuccess('someField')).not.toBe(true);
+
+            // not dirty, so still not error or success
+            form.someField.$invalid = false;
+            form.someField.$valid = true;
+            expect($scope.hasError('someField')).not.toBe(true);
+            expect($scope.hasSuccess('someField')).not.toBe(true);
+
+            form.someField.$dirty = true;
+            expect($scope.hasError('someField')).not.toBe(true);
+            expect($scope.hasSuccess('someField')).toBe(true);
+
+            form.someField.$invalid = true;
+            form.someField.$valid = false;
+            expect($scope.hasError('someField')).toBe(true);
+            expect($scope.hasSuccess('someField')).not.toBe(true);
+        });
+
+        it('can register a new user', function () {
+            $scope.user = {name: 'user', password: 'password'};
+
+            expect($scope.inProgress).toBe(false);
+            expect($scope.registered).toBe(false);
+
+            $httpBackend
+                .expectPOST('/user', $scope.user)
+                .respond(200);
+
+            //after save
+            $httpBackend
+                .expectPOST('/auth/login', $scope.user)
+                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: $scope.user.name}});
+
+            $scope.createUser();
+
+            //check the async nature of inProgress
+            expect($scope.inProgress).toBe(true);
+            expect($scope.registered).toBe(false);
+            expect($scope.alerts.length).toEqual(0);
+
+            $httpBackend.flush(1);
+
+            expect($scope.inProgress).toBe(false);
+            expect($scope.registered).toBe(true);
+            expect($scope.alerts.length).toEqual(1);
+            expect($scope.alerts[0].type).toEqual('success');
+
+            spyOn($rootScope, '$broadcast');
+            $httpBackend.flush();
+
+            expect($scope.alerts.length).toEqual(1);
+            expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess);
+
+            expect($scope.currentUser).not.toEqual(null);
+            expect($scope.currentUser.name).toEqual('user');
+            expect($scope.currentUser.id).toEqual(555);
+
+        });
+
+        it('can handle a failed registration', function () {
+            $scope.user = {name: 'user', password: 'password'};
+
+            expect($scope.inProgress).toBe(false);
+            expect($scope.registered).toBe(false);
+
+            $httpBackend
+                .expectPOST('/user', $scope.user)
+                .respond(500);
+
+            $scope.createUser();
+
+            //check the async nature of inProgress
+            expect($scope.inProgress).toBe(true);
+            expect($scope.registered).toBe(false);
+            expect($scope.alerts.length).toEqual(0);
+
+            $httpBackend.flush();
+
+            expect($scope.inProgress).toBe(false);
+            expect($scope.registered).toBe(false);
+            expect($scope.alerts.length).toEqual(1);
+            expect($scope.alerts[0].type).toEqual('danger');
+            expect($scope.currentUser).toEqual(null);
+
+
+        });
+
+        it('can handle a failed login after a successful registration', function () {
+            $scope.user = {name: 'user', password: 'password'};
+
+            expect($scope.inProgress).toBe(false);
+            expect($scope.registered).toBe(false);
+
+            $httpBackend
+                .expectPOST('/user', $scope.user)
+                .respond(200);
+
+            //after save
+            $httpBackend
+                .expectPOST('/auth/login', $scope.user)
+                .respond(401);
+
+            $scope.createUser();
+
+            //check the async nature of inProgress
+            expect($scope.inProgress).toBe(true);
+            expect($scope.registered).toBe(false);
+            expect($scope.alerts.length).toEqual(0);
+
+            $httpBackend.flush(1);
+
+            expect($scope.inProgress).toBe(false);
+            expect($scope.registered).toBe(true);
+            expect($scope.alerts.length).toEqual(1);
+            expect($scope.alerts[0].type).toEqual('success');
+
+            spyOn($rootScope, '$broadcast');
+            $httpBackend.flush();
+
+            expect($scope.alerts.length).toEqual(2);
+            expect($scope.alerts[1].type).toEqual('danger');
+            expect($rootScope.$broadcast).not.toHaveBeenCalled();
+            expect($scope.currentUser).toEqual(null);
+        });
+    });
+
+    describe('LogoutCtrl', function () {
+        var $scope, controller, AUTH_EVENTS, Auth, Session;
+
+        beforeEach(inject(function (_AUTH_EVENTS_, _Auth_, _Session_) {
+            AUTH_EVENTS = _AUTH_EVENTS_;
+            Auth = _Auth_;
+            Session = _Session_;
+        }));
+
+        beforeEach(function () {
+            $applicationScope = $rootScope.$new();
+            $scope = $applicationScope.$new();
+
+            //to create the scope tree, we instantiate applicationCtrl
+            $controller('ApplicationCtrl', {$scope: $applicationScope});
+
+            controller = $controller('LogoutCtrl', {
+                $scope: $scope,
+                $rootScope: $rootScope,
+                Auth: Auth,
+                AUTH_EVENTS: AUTH_EVENTS
+            });
+        });
+
+        it('executes a logout', function () {
+
+            $scope.setCurrentUser({id: 15});
+            Session.create(1, 2);
+
+            $httpBackend
+                .expectGET('/auth/logout')
+                .respond(200);
+            $scope.logout();
+
+            spyOn($rootScope, '$broadcast');
+            $httpBackend.flush();
+            expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
+            expect(Auth.isAuthenticated()).toBe(false);
+            expect($scope.currentUser).toBe(null);
+        });
+
     });
 
 

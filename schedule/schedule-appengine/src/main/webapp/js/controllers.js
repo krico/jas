@@ -100,8 +100,8 @@ jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth
 /**
  * SignUpCtrl
  */
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'User', 'Auth',
-    function ($scope, $http, $location, User, Auth) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth',
+    function ($scope, $rootScope, AUTH_EVENTS, User, Auth) {
 
         $scope.alerts = [];
 
@@ -113,20 +113,29 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
         };
 
         $scope.hasError = function (fieldName) {
-            var f = $scope.signUpForm[fieldName];
-            return f && f.$dirty && f.$invalid;
+            if ($scope.signUpForm[fieldName]) {
+                var f = $scope.signUpForm[fieldName];
+                return f && f.$dirty && f.$invalid;
+            } else {
+                return false;
+            }
         };
 
         $scope.hasSuccess = function (fieldName) {
-            var f = $scope.signUpForm[fieldName];
-            return f && f.$dirty && f.$valid;
+            if ($scope.signUpForm[fieldName]) {
+                var f = $scope.signUpForm[fieldName];
+                return f && f.$dirty && f.$valid;
+            } else {
+                return false;
+            }
         };
 
         $scope.createUser = function () {
             $scope.inProgress = true;
 
+            //TODO: this seems a little too complicated...  maybe save could already login the user?
             User.save($scope.user,
-                //success
+                //User.save success
                 function (value, responseHeaders) {
                     $scope.registered = true;
                     $scope.inProgress = false;
@@ -134,13 +143,19 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
                     $scope.alert('success', 'Registration succeeded! Your browser should be redirected shortly...');
 
                     //Simulate a login
-                    Auth.login($scope.user.name, $scope.user.password, function (message) {
-
-                        $scope.alert('danger', 'Funny, even though we just registered you, your login failed...');
-
-                    });
+                    Auth.login($scope.user)
+                        .then(
+                        //Login success
+                        function (user) {
+                            $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                            $scope.setCurrentUser(user);
+                        },
+                        //Login failure
+                        function (message) {
+                            $scope.alert('danger', 'Funny, even though we just registered you, your login failed...');
+                        });
                 },
-                //error
+                //User.save error
                 function (httpResponse) {
                     $scope.inProgress = false;
 
@@ -153,9 +168,16 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
 /**
  * LogoutCtrl
  */
-jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', 'Auth',
-    function ($scope, Auth) {
-        Auth.logout();
+jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'Auth',
+    function ($scope, $rootScope, AUTH_EVENTS, Auth) {
+        $scope.logout = function () {
+            Auth.logout().then(
+                function () {
+                    $scope.setCurrentUser(null);
+                    $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
+                }
+            );
+        };
     }]);
 
 /**
