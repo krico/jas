@@ -273,6 +273,7 @@
                         <source>src/main/webapp/bc/angular-spinner/angular-spinner.min.js</source>
                         <source>src/main/webapp/js/application.js</source>
                         <source>src/main/webapp/js/controllers.js</source>
+                        <source>src/main/webapp/js/admin/controllers.js</source>
                     </preloadSources>
                     <webDriverClassName>org.openqa.selenium.phantomjs.PhantomJSDriver</webDriverClassName>
                     <webDriverCapabilities>

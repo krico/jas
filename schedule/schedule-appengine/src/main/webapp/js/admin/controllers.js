@@ -5,8 +5,8 @@
  */
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers');
 
-jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', 'User', 'Modal',
-    function ($scope, $location, User, Modal) {
+jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', 'User',
+    function ($scope, $location, User) {
         $scope.sort = 'DESC';
         $scope.page = 1;
         $scope._perPage = 10;
@@ -41,7 +41,7 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
                 },
                 function (response) {
                     $scope.total = 0;
-                    Modal.showError("Server error", "The server responded with an error...")
+                    //TODO: show error
                 });
         };
 
