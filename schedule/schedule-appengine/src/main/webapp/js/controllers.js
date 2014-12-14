@@ -7,13 +7,31 @@ var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
  * ApplicationCtrl
  * - Root of the scope tree.  Practically all other scopes will inherit from this one.
  */
-jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope',
-    function ($scope) {
+jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$modal', '$log', '$location','AUTH_EVENTS',
+    function ($scope, $modal, $log, $location, AUTH_EVENTS) {
         $scope.currentUser = null;
 
         $scope.setCurrentUser = function (u) {
             $scope.currentUser = u;
         };
+
+        //TODO: handle other authEvents
+
+        $scope.$on(AUTH_EVENTS.notAuthenticated, function () {
+            var modalInstance = $modal.open({
+                //TODO: should bring up login.html some how
+                templateUrl: 'views/modal/not-authenticated.html',
+                //controller: 'ModalInstanceCtrl',
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function (reason) {
+                $log.info('Modal accepted at: ' + new Date());
+                $location.path('/login');//TODO: LOGIN SHOULD BE POPUP
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        });
     }]);
 
 /**

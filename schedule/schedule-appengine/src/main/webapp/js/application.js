@@ -14,6 +14,16 @@ RegExp.quote = function (str) {
 var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngMessages', 'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
 
 /**
+ * Listen to route changes and check
+ */
+jasifyScheduleApp.run(function ($rootScope, $log, AUTH_EVENTS, Auth) {
+    //TODO: remove, not really needed
+    $rootScope.$on('$routeChangeError', function (event, next, current) {
+        $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
+    });
+});
+
+/**
  * Routes for all navbar links
  */
 jasifyScheduleApp.config(['$routeProvider',
@@ -21,37 +31,77 @@ jasifyScheduleApp.config(['$routeProvider',
         $routeProvider.
             when('/', {
                 templateUrl: 'views/home.html',
-                controller: 'HomeCtrl'
+                controller: 'HomeCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.all();
+                    }
+                }
             }).
             when('/home', {
                 templateUrl: 'views/home.html',
-                controller: 'HomeCtrl'
+                controller: 'HomeCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.all();
+                    }
+                }
             }).
             when('/signUp', {
                 templateUrl: 'views/signUp.html',
-                controller: 'SignUpCtrl'
+                controller: 'SignUpCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.guest();
+                    }
+                }
             }).
             when('/login', {
                 templateUrl: 'views/login.html',
-                controller: 'LoginCtrl'
+                controller: 'LoginCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.guest();
+                    }
+                }
             }).
             when('/logout', {
                 templateUrl: 'views/logout.html',
-                controller: 'LogoutCtrl'
+                controller: 'LogoutCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.all();
+                    }
+                }
             }).
             when('/profile/:extra?', {
                 templateUrl: 'views/profile.html',
-                controller: 'ProfileCtrl'
+                controller: 'ProfileCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.user();
+                    }
+                }
             }).
 
             /* BEGIN: Admin routes */
             when('/admin/users', {
                 templateUrl: 'views/admin/users.html',
-                controller: 'AdminUsersCtrl'
+                controller: 'AdminUsersCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.admin();
+                    }
+                }
             }).
             when('/admin/user/:id?', {
                 templateUrl: 'views/admin/user.html',
-                controller: 'AdminUserCtrl'
+                controller: 'AdminUserCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.admin();
+                    }
+                }
             });
         /* END: Admin routes */
         //
@@ -69,7 +119,8 @@ jasifyScheduleApp.constant('AUTH_EVENTS', {
     logoutSuccess: 'auth-logout-success',
     sessionTimeout: 'auth-session-timeout',
     notAuthenticated: 'auth-not-authenticated',
-    notAuthorized: 'auth-not-authorized'
+    notAuthorized: 'auth-not-authorized',
+    notGuest: 'auth-not-guest'
 });
 
 /**
@@ -77,14 +128,16 @@ jasifyScheduleApp.constant('AUTH_EVENTS', {
  */
 jasifyScheduleApp.service('Session', function () {
 
-    this.create = function (sessionId, userId) {
+    this.create = function (sessionId, userId, admin) {
         this.id = sessionId;
         this.userId = userId;
+        this.admin = admin == true;
     };
 
     this.destroy = function () {
         this.id = null;
         this.userId = null;
+        this.admin = false;
     };
 
     this.destroy();
@@ -101,7 +154,7 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
         var Auth = {};
 
         var loggedIn = function (res) {
-            Session.create(res.data.id, res.data.userId);
+            Session.create(res.data.id, res.data.userId, res.data.user.admin);
             return res.data.user;
         };
 
@@ -113,6 +166,10 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
 
         Auth.isAuthenticated = function () {
             return !!Session.id;
+        };
+
+        Auth.isAdmin = function () {
+            return Session.admin;
         };
 
         Auth.login = function (credentials) {
@@ -173,6 +230,60 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
 
         return Auth;
     }]);
+
+/**
+ * Allow - used in Route resolve promises as Allow.all for example
+ */
+jasifyScheduleApp.factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EVENTS',
+    function ($log, $q, $rootScope, Auth, AUTH_EVENTS) {
+        var Allow = {};
+
+        Allow.all = function () {
+            var deferred = $q.defer();
+            deferred.resolve('ok');
+            return deferred.promise;
+        };
+
+        Allow.guest = function () {
+            var deferred = $q.defer();
+            if (Auth.isAuthenticated()) {
+                deferred.reject('guests only');
+                $rootScope.$broadcast(AUTH_EVENTS.notGuest);
+            } else {
+                deferred.resolve('ok');
+            }
+            return deferred.promise;
+        };
+
+        Allow.user = function () {
+            var deferred = $q.defer();
+            if (Auth.isAuthenticated()) {
+                deferred.resolve('ok');
+            } else {
+                deferred.reject('users only');
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+            }
+            return deferred.promise;
+        };
+
+        Allow.admin = function () {
+            var deferred = $q.defer();
+            if (Auth.isAuthenticated() && Auth.isAdmin()) {
+                deferred.resolve('ok');
+            } else {
+                if (Auth.isAuthenticated()) {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+                } else {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                }
+                deferred.reject('admins only');
+            }
+            return deferred.promise;
+        };
+
+        return Allow;
+    }]);
+
 
 jasifyScheduleApp.factory('Username', ['$log', '$http',
     function ($log, $http) {

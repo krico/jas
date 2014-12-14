@@ -18,11 +18,16 @@ describe('Controllers', function () {
     });
 
     describe('ApplicationCtrl', function () {
-        var $scope, controller;
+        var $scope, controller, $modal, AUTH_EVENTS;
+
+        beforeEach(inject(function (_$modal_, _AUTH_EVENTS_) {
+            $modal = _$modal_;
+            AUTH_EVENTS = _AUTH_EVENTS_;
+        }));
 
         beforeEach(function () {
             $scope = $rootScope.$new();
-            controller = $controller('ApplicationCtrl', {$scope: $scope});
+            controller = $controller('ApplicationCtrl', {$scope: $scope, $modal: $modal});
         });
 
         it('keeps a reference to the current user', function () {
@@ -35,6 +40,23 @@ describe('Controllers', function () {
 
             expect($scope.currentUser).toEqual(u);
 
+        });
+        it('reacts on AUTH_EVENT.notAuthorized', function () {
+            var fakeModal = {
+                result: {
+                    then: function (confirmCallback, cancelCallback) {
+                        fakeModal.confirmCallBack = confirmCallback;
+                        fakeModal.cancelCallback = cancelCallback;
+                    }
+                }
+            };
+
+            spyOn($modal, 'open').andReturn(fakeModal);
+            $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+            expect($modal.open).toHaveBeenCalled();
+            $rootScope.$apply();
+            expect(fakeModal.confirmCallBack).toBeDefined();
+            expect(fakeModal.cancelCallback).toBeDefined();
         });
     });
 
