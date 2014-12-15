@@ -150,8 +150,231 @@ describe('AdminControllers', function () {
 
         });
 
-        it('can be instantiated', function () {
-            //TODO: really test
+        it('reads routeParams and loads user', function () {
+
+            expect($scope.create).toBe(false);
+
+            expect($scope.user.id).toEqual(555);
+            expect($scope.user.name).toEqual('test');
+
         });
+
+        it('can handle alerts', function () {
+
+            expect($scope.alerts.length).toEqual(0);
+            $scope.alert('success', 'alert text');
+
+            expect($scope.alerts.length).toEqual(1);
+            expect($scope.alerts[0].type).toEqual('success');
+            expect($scope.alerts[0].msg).toEqual('alert text');
+
+        });
+
+        it('saves the user data and handles loading on success', function () {
+
+            $httpBackend.expectPOST('/user/555', {id: 555, name: 'test'})
+                .respond(200, {id: 555, name: 'test'});
+
+            expect($scope.loading).toBe(false);
+            $scope.save();
+            expect($scope.loading).toBe(true);
+            $httpBackend.flush();
+            expect($scope.loading).toBe(false);
+            expect($scope.alerts[0].type).toEqual('success');
+        });
+
+        it('saves the user data and handles loading on error', function () {
+
+            $httpBackend.expectPOST('/user/555', {id: 555, name: 'test'})
+                .respond(500, {id: 555, name: 'test'});
+
+            expect($scope.loading).toBe(false);
+            $scope.save();
+            expect($scope.loading).toBe(true);
+            $httpBackend.flush();
+            expect($scope.loading).toBe(false);
+            expect($scope.alerts[0].type).toEqual('danger');
+        });
+
+        it('reloads user on reset success', function () {
+
+            $httpBackend.expectGET('/user/555')
+                .respond(200, {id: 555, name: 'test'});
+
+            $scope.user.name = 'boo';
+
+            expect($scope.loading).toBe(false);
+            $scope.reset();
+            expect($scope.loading).toBe(true);
+            $httpBackend.flush();
+            expect($scope.loading).toBe(false);
+            expect($scope.user.name).toEqual('test');
+        });
+
+        it('warns if fails to reload the user', function () {
+
+            $httpBackend.expectGET('/user/555')
+                .respond(500, {id: 555, name: 'test'});
+
+            $scope.user.name = 'boo';
+
+            expect($scope.loading).toBe(false);
+            $scope.reset();
+            expect($scope.loading).toBe(true);
+            $httpBackend.flush();
+            expect($scope.loading).toBe(false);
+            expect($scope.alerts[0].type).toEqual('danger');
+
+        });
+
+        it('creates a new user instance when called with no id', function () {
+
+            delete $routeParams.id;
+
+            controller = $controller('AdminUserCtrl', {
+                $scope: $scope,
+                $routeParams: $routeParams,
+                User: User,
+                Auth: Auth
+            });
+
+            expect($scope.loading).toBe(false);
+            expect($scope.create).toBe(true);
+            expect($scope.user instanceof User).toBe(true);
+            expect($scope.user.id).not.toBeDefined();
+        });
+
+        it('can create a new user', function () {
+
+            delete $routeParams.id;
+
+            controller = $controller('AdminUserCtrl', {
+                $scope: $scope,
+                $routeParams: $routeParams,
+                User: User,
+                Auth: Auth
+            });
+
+            expect($scope.loading).toBe(false);
+
+            $scope.user.name = 'test';
+            $scope.user.password = 'password';
+
+
+            $httpBackend.expectPOST('/user', {name: 'test', password: 'password'})
+                .respond(200, {id: 555, name: 'test'});
+
+            $scope.createUser();
+
+            expect($scope.loading).toBe(true);
+            expect($scope.create).toBe(true);
+
+            $httpBackend.flush();
+
+            expect($scope.loading).toBe(false);
+            expect($scope.create).toBe(false);
+            expect($scope.user.id).toEqual(555);
+            expect($scope.user.name).toEqual('test');
+
+            expect($scope.alerts[0].type).toEqual('success');
+
+
+        });
+
+        it('can handle if create user fails', function () {
+
+            delete $routeParams.id;
+
+            controller = $controller('AdminUserCtrl', {
+                $scope: $scope,
+                $routeParams: $routeParams,
+                User: User,
+                Auth: Auth
+            });
+
+            expect($scope.loading).toBe(false);
+
+            $scope.user.name = 'test';
+            $scope.user.password = 'password';
+
+
+            $httpBackend.expectPOST('/user', {name: 'test', password: 'password'})
+                .respond(500, {id: 555, name: 'test'});
+
+            $scope.createUser();
+
+            expect($scope.loading).toBe(true);
+            expect($scope.create).toBe(true);
+
+            $httpBackend.flush();
+
+            expect($scope.loading).toBe(false);
+            expect($scope.create).toBe(true);
+            expect($scope.user.id).not.toBeDefined();
+
+            expect($scope.alerts[0].type).toEqual('danger');
+
+        });
+
+        it('can change password and calls $setPristine', function () {
+            var pristine = null;
+            $scope.forms.passwordForm = {
+                $setPristine: function () {
+                    pristine = true;
+                }
+            };
+
+            $scope.user.password = 'pass';
+            $scope.pw.newPassword = 'newPass';
+            expect($scope.loading).toBe(false);
+
+
+            $httpBackend.expectPOST('/auth/change-password', {credentials: $scope.user, newPassword: $scope.pw.newPassword})
+                .respond(200);
+
+
+            $scope.changePassword();
+
+            expect($scope.loading).toBe(true);
+
+            $httpBackend.flush();
+
+            expect($scope.loading).toBe(false);
+            expect(pristine).toBe(true);
+            expect($scope.alerts[0].type).toEqual('success');
+
+
+        });
+
+        it('can handle if change password fails and calls $setPristine', function () {
+            var pristine = null;
+            $scope.forms.passwordForm = {
+                $setPristine: function () {
+                    pristine = true;
+                }
+            };
+
+            $scope.user.password = 'pass';
+            $scope.pw.newPassword = 'newPass';
+            expect($scope.loading).toBe(false);
+
+
+            $httpBackend.expectPOST('/auth/change-password', {credentials: $scope.user, newPassword: $scope.pw.newPassword})
+                .respond(500);
+
+
+            $scope.changePassword();
+
+            expect($scope.loading).toBe(true);
+
+            $httpBackend.flush();
+
+            expect($scope.loading).toBe(false);
+            expect(pristine).toBe(true);
+            expect($scope.alerts[0].type).toEqual('danger');
+
+        });
+
+
     });
 });
