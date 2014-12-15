@@ -122,7 +122,7 @@
             return [200, angular.toJson(user), {}];
         });
 
-        $httpBackend.whenPOST(/^\/change-password\/.*$/).respond(function (method, url, data) {
+        $httpBackend.whenPOST(/^\/auth\/change-password$/).respond(function (method, url, data) {
             console.log(method + "[user] " + url + " DATA: " + data);
             return [200, {}, {}];
         });
@@ -166,23 +166,19 @@
             }), {}];
         });
 
-        $httpBackend.whenGET(/^\/users(.*)?$/).respond(function (method, url, data, headers) {
+        $httpBackend.whenGET(/^\/user?.*$/).respond(function (method, url, data, headers) {
             console.log(method + "[user] " + url + " DATA: " + data + " H: " + angular.toJson(headers));
             var ret = [];
             var total = 0;
 
-            /* /users/page/1/size/10/sort/DESC?field=email&query=user */
-            var m = /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(DESC|ASC)\?(.*)$/.exec(url);
+            /* ?field=name&page=1&query=&size=10&sort=DESC */
+            var m = /^\/user\?field=([^&]*)&page=([^&]*)&query=([^&]*)&size=([^&]*)&sort=([^&]*)$/.exec(url);
             if (m != null) {
-                var page = parseInt(m[1]);
-                var size = parseInt(m[2]);
-                var sort = m[3];
-                var q = decodeURIComponent(m[4]);
-
-                m = /field=([^&]+)/.exec(q);
-                var field = m == null ? 'name' : m[1];
-                m = /query=([^&]+)/.exec(q);
-                var query = m == null ? '.' : m[1];
+                var field = m[1];
+                var page = parseInt(m[2]);
+                var query = m[3];
+                var size = parseInt(m[4]);
+                var sort = m[5];
 
                 var start = (page - 1 ) * size;
                 var end = start + size;
@@ -224,7 +220,7 @@
 
             }
 
-            return [200, angular.toJson(ret), {'X-Total': total}];
+            return [200, ret, {'X-Total': total}];
         });
 
         //Pass through so that gets to our partials work
