@@ -37,7 +37,7 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
                 function (data, h) {
                     var t = h('X-Total');
                     if (t != $scope.total)
-                        $scope.total = t;
+                        $scope.total = Math.floor(t);
                 },
                 function (response) {
                     $scope.total = 0;
