@@ -5,3 +5,4 @@
 - User.query now calls get(/user);
 - Auth.isAdmin and NavController
 - test directives
+- not-authorized.html should login

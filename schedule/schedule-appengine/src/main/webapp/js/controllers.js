@@ -32,6 +32,20 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$modal', '$l
                 $log.info('Modal dismissed at: ' + new Date());
             });
         });
+
+        $scope.$on(AUTH_EVENTS.notAuthorized, function () {
+            var modalInstance = $modal.open({
+                templateUrl: 'views/modal/not-authorized.html',
+                //controller: 'ModalInstanceCtrl',
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function (reason) {
+                $log.info('Modal accepted at: ' + new Date());
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        });
     }]);
 
 /**

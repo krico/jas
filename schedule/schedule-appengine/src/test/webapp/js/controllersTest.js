@@ -41,6 +41,7 @@ describe('Controllers', function () {
             expect($scope.currentUser).toEqual(u);
 
         });
+
         it('reacts on AUTH_EVENT.notAuthorized', function () {
             var fakeModal = {
                 result: {
@@ -53,6 +54,24 @@ describe('Controllers', function () {
 
             spyOn($modal, 'open').andReturn(fakeModal);
             $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+            expect($modal.open).toHaveBeenCalled();
+            $rootScope.$apply();
+            expect(fakeModal.confirmCallBack).toBeDefined();
+            expect(fakeModal.cancelCallback).toBeDefined();
+        });
+
+        it('reacts on AUTH_EVENT.notAuthorized', function () {
+            var fakeModal = {
+                result: {
+                    then: function (confirmCallback, cancelCallback) {
+                        fakeModal.confirmCallBack = confirmCallback;
+                        fakeModal.cancelCallback = cancelCallback;
+                    }
+                }
+            };
+
+            spyOn($modal, 'open').andReturn(fakeModal);
+            $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
             expect($modal.open).toHaveBeenCalled();
             $rootScope.$apply();
             expect(fakeModal.confirmCallBack).toBeDefined();
@@ -169,9 +188,10 @@ describe('Controllers', function () {
     });
 
     describe('LoginCtrl', function () {
-        var $scope, controller, $applicationScope, Auth, AUTH_EVENTS;
+        var $scope, controller, $applicationScope, $modal, Auth, AUTH_EVENTS;
 
-        beforeEach(inject(function (_Auth_, _AUTH_EVENTS_) {
+        beforeEach(inject(function (_$modal_, _Auth_, _AUTH_EVENTS_) {
+            $modal = _$modal_;
             Auth = _Auth_;
             AUTH_EVENTS = _AUTH_EVENTS_;
         }));
@@ -179,9 +199,16 @@ describe('Controllers', function () {
         beforeEach(function () {
             $applicationScope = $rootScope.$new();
             $scope = $applicationScope.$new();
-
+            var mock = {
+                result: {
+                    then: function (confirmCallback, cancelCallback) {
+                        console.log("HI");
+                    }
+                }
+            };
+            spyOn($modal, 'open').andReturn(mock);
             //to create the scope tree, we instantiate applicationCtrl
-            $controller('ApplicationCtrl', {$scope: $applicationScope});
+            $controller('ApplicationCtrl', {$scope: $applicationScope, $modal: $modal});
 
             controller = $controller('LoginCtrl', {
                 $scope: $scope,
@@ -217,7 +244,7 @@ describe('Controllers', function () {
 
             $scope.login($scope.credentials);
 
-            spyOn($rootScope, '$broadcast');
+            spyOn($rootScope, '$broadcast').andCallThrough();
 
             $httpBackend.flush();
 
@@ -232,7 +259,7 @@ describe('Controllers', function () {
                 .respond(401);
 
             $scope.login($scope.credentials);
-            spyOn($rootScope, '$broadcast');
+            spyOn($rootScope, '$broadcast').andCallThrough();
 
             $httpBackend.flush();
 
@@ -413,12 +440,13 @@ describe('Controllers', function () {
     });
 
     describe('LogoutCtrl', function () {
-        var $scope, controller, AUTH_EVENTS, Auth, Session;
+        var $scope, controller, AUTH_EVENTS, Auth, Session, $modal;
 
-        beforeEach(inject(function (_AUTH_EVENTS_, _Auth_, _Session_) {
+        beforeEach(inject(function (_AUTH_EVENTS_, _Auth_, _Session_, _$modal_) {
             AUTH_EVENTS = _AUTH_EVENTS_;
             Auth = _Auth_;
             Session = _Session_;
+            $modal = _$modal_;
         }));
 
         beforeEach(function () {
@@ -426,7 +454,7 @@ describe('Controllers', function () {
             $scope = $applicationScope.$new();
 
             //to create the scope tree, we instantiate applicationCtrl
-            $controller('ApplicationCtrl', {$scope: $applicationScope});
+            $controller('ApplicationCtrl', {$scope: $applicationScope, $modal: $modal});
 
             controller = $controller('LogoutCtrl', {
                 $scope: $scope,
@@ -446,7 +474,7 @@ describe('Controllers', function () {
                 .respond(200);
             $scope.logout();
 
-            spyOn($rootScope, '$broadcast');
+            spyOn($rootScope, '$broadcast').andCallThrough();
             $httpBackend.flush();
             expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
             expect(Auth.isAuthenticated()).toBe(false);
