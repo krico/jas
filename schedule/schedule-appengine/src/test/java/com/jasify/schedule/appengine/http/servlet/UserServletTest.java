@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.http.json.JsonSignUpUser;
 import com.jasify.schedule.appengine.http.json.JsonUser;
 import com.jasify.schedule.appengine.model.users.User;
@@ -69,7 +68,7 @@ public class UserServletTest {
 
     @Test
     public void testGet() throws Exception {
-        ServletUnitClient client = TestHelper.login("jas", "password");
+        ServletUnitClient client = ServletTestHelper.login("jas", "password");
         WebRequest request = new GetMethodWebRequest("http://schedule.jasify.com/user/" + user.getId().getId());
         InvocationContext ic = client.newInvocation(request);
         ic.service();
@@ -92,7 +91,7 @@ public class UserServletTest {
 
     @Test
     public void testPost() throws Exception {
-        ServletUnitClient client = TestHelper.login("jas", "password");
+        ServletUnitClient client = ServletTestHelper.login("jas", "password");
         JsonUser updatedUser = new JsonUser(user);
         updatedUser.setAbout("Now I have an about...");
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/user/" + user.getId().getId(), toInputStream(updatedUser.toJson()), JSON.CONTENT_TYPE);
@@ -120,7 +119,7 @@ public class UserServletTest {
 
     @Test
     public void testPostSaveAdmin() throws Exception {
-        ServletUnitClient client = TestHelper.login("TestAdmin", "password");
+        ServletUnitClient client = ServletTestHelper.login("TestAdmin", "password");
         JsonUser updatedUser = new JsonUser(user);
         updatedUser.setAbout("Now I have an about...");
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/user/" + user.getId().getId(), toInputStream(updatedUser.toJson()), JSON.CONTENT_TYPE);
@@ -148,7 +147,7 @@ public class UserServletTest {
 
     @Test
     public void testPostSaveAdminInvalidId() throws Exception {
-        ServletUnitClient client = TestHelper.login("TestAdmin", "password");
+        ServletUnitClient client = ServletTestHelper.login("TestAdmin", "password");
         JsonUser updatedUser = new JsonUser(user);
         updatedUser.setAbout("Now I have an about...");
         WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/user/" + 1976071, toInputStream(updatedUser.toJson()), JSON.CONTENT_TYPE);
@@ -161,7 +160,7 @@ public class UserServletTest {
 
     @Test
     public void testGetAnotherUserIsUnauthorized() throws Exception {
-        ServletUnitClient client = TestHelper.login("jas", "password");
+        ServletUnitClient client = ServletTestHelper.login("jas", "password");
         WebRequest request = new GetMethodWebRequest("http://schedule.jasify.com/user/" + (user.getId().getId() + 1));
         InvocationContext ic = client.newInvocation(request);
         ic.service();
@@ -170,7 +169,7 @@ public class UserServletTest {
 
     @Test
     public void testGetBadPath() throws Exception {
-        ServletUnitClient client = TestHelper.login("jas", "password");
+        ServletUnitClient client = ServletTestHelper.login("jas", "password");
         WebRequest request = new GetMethodWebRequest("http://schedule.jasify.com/user/wrong");
         InvocationContext ic = client.newInvocation(request);
         ic.service();
@@ -179,7 +178,7 @@ public class UserServletTest {
 
     @Test
     public void testGetCurrent() throws Exception {
-        ServletUnitClient client = TestHelper.login("jas", "password");
+        ServletUnitClient client = ServletTestHelper.login("jas", "password");
         WebRequest request = new GetMethodWebRequest("http://schedule.jasify.com/user/current");
         InvocationContext ic = client.newInvocation(request);
         ic.service();

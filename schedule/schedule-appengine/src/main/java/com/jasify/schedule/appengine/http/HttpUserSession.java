@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * @author krico
@@ -21,6 +22,7 @@ import java.io.Serializable;
 public class HttpUserSession implements UserSession, HttpSessionBindingListener, Serializable {
     static final String SESSION_KEY = "jus" /* jasify user session s*/;
     private static final Logger log = LoggerFactory.getLogger(HttpUserSession.class);
+    private final String sessionId = UUID.randomUUID().toString().replaceAll("-", "");
     private final Key userId;
     private final boolean admin;
 
@@ -80,6 +82,10 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener,
     @Override
     public boolean isAdmin() {
         return admin;
+    }
+
+    public String getSessionId() {
+        return sessionId;
     }
 
     @Override

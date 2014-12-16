@@ -2,7 +2,7 @@ package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
-import com.jasify.schedule.appengine.http.json.JsonResponse;
+import com.jasify.schedule.appengine.http.json.JsonSessionResponse;
 import com.jasify.schedule.appengine.model.users.LoginFailedException;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
@@ -23,9 +23,6 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
-    private final JsonResponse OK = new JsonResponse(true);
-    private final JsonResponse FAIL = new JsonResponse("Invalid username/password.");
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
@@ -35,24 +32,25 @@ public class LoginServlet extends HttpServlet {
 
         if (jr == null) {
 
-            FAIL.toJson(resp.getWriter());
-
-        } else {
-
-            try {
-
-                User user = UserServiceFactory.getUserService().login(jr.getName(), jr.getPassword());
-                new HttpUserSession(user).put(req);
-                OK.toJson(resp.getWriter());
-                log.info("[{}] user={} logged in!", req.getRemoteAddr(), user.getName());
-
-            } catch (LoginFailedException e) {
-
-                log.info("[{}] user={} login failed!", req.getRemoteAddr(), jr.getName());
-                FAIL.toJson(resp.getWriter());
-
-            }
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
 
         }
+
+        try {
+
+            User user = UserServiceFactory.getUserService().login(jr.getName(), jr.getPassword());
+            HttpUserSession userSession = new HttpUserSession(user).put(req);
+            log.info("[{}] user={} logged in!", req.getRemoteAddr(), user.getName());
+            new JsonSessionResponse(user, userSession).toJson(resp.getWriter());
+
+        } catch (LoginFailedException e) {
+
+            log.info("[{}] user={} login failed!", req.getRemoteAddr(), jr.getName());
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+
+        }
+
+
     }
 }

@@ -69,7 +69,7 @@ public class UsersServletTest {
 
     @Test
     public void testUnauthorizedAccessUserNotAdmin() throws Exception {
-        ServletUnitClient client = TestHelper.login("user", "password");
+        ServletUnitClient client = ServletTestHelper.login("user", "password");
         WebRequest request = new GetMethodWebRequest(createUrl(1, 10, true));
         InvocationContext ic = client.newInvocation(request);
         ic.service();
@@ -87,7 +87,7 @@ public class UsersServletTest {
         });
 
 
-        ServletUnitClient client = TestHelper.login("test-admin", "password");
+        ServletUnitClient client = ServletTestHelper.login("test-admin", "password");
 
         InvocationContext ic = client.newInvocation(new GetMethodWebRequest(createUrl(1, 10, true)));
 
@@ -130,7 +130,7 @@ public class UsersServletTest {
     @Test
     public void testGetByName() throws Exception {
 
-        ServletUnitClient client = TestHelper.login("test-admin", "password");
+        ServletUnitClient client = ServletTestHelper.login("test-admin", "password");
 
         InvocationContext ic = client.newInvocation(new GetMethodWebRequest(createUrl(1, 10, true) + "?field=name&query=test-admin"));
 
@@ -146,7 +146,7 @@ public class UsersServletTest {
     @Test
     public void testGetByEmail() throws Exception {
 
-        ServletUnitClient client = TestHelper.login("test-admin", "password");
+        ServletUnitClient client = ServletTestHelper.login("test-admin", "password");
 
         InvocationContext ic = client.newInvocation(new GetMethodWebRequest(createUrl(1, 10, true) + "?field=email&query=boss"));
 
