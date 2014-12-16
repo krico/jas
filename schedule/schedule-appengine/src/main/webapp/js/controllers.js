@@ -7,7 +7,7 @@ var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
  * ApplicationCtrl
  * - Root of the scope tree.  Practically all other scopes will inherit from this one.
  */
-jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$modal', '$log', '$location','AUTH_EVENTS',
+jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$modal', '$log', '$location', 'AUTH_EVENTS',
     function ($scope, $modal, $log, $location, AUTH_EVENTS) {
         $scope.currentUser = null;
 
@@ -93,7 +93,12 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location
             }
         };
 
+        $scope.logoutSucceeded = function () {
+            $log.debug("LOGOUT SUCCEEDED!");
+        };
+
         $scope.$on(AUTH_EVENTS.loginSuccess, $scope.loginSucceeded);
+        $scope.$on(AUTH_EVENTS.logoutSuccess, $scope.logoutSucceeded);
 
         $scope.$watch(function () {
             return $location.path();
@@ -208,10 +213,11 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUT
 jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'Auth',
     function ($scope, $rootScope, AUTH_EVENTS, Auth) {
         $scope.logout = function () {
+            if (!Auth.isAuthenticated()) return;
             Auth.logout().then(
                 function () {
-                    $scope.setCurrentUser(null);
                     $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
+                    $scope.setCurrentUser(null);
                 }
             );
         };
@@ -242,6 +248,10 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '
                 $scope.alert('success', 'Profile updated!');
                 //TODO: We probably need to check for failures
                 $scope.setCurrentUser($scope.user);
+                if ($scope.profileForm) {
+                    $scope.profileForm.$setPristine();
+                }
+
             });
         };
 

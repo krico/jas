@@ -44,4 +44,6 @@ public interface UserService {
     List<User> searchByEmail(Pattern pattern, Query.SortDirection order, int offset, int limit);
 
     List<User> searchByEmail(String startsWith, Query.SortDirection order, int offset, int limit);
+
+    int getTotalUsers();
 }

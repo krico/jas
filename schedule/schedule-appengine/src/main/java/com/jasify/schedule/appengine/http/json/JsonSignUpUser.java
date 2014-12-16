@@ -10,7 +10,6 @@ import java.io.Reader;
  */
 public class JsonSignUpUser extends JsonUser {
     private String password;
-    private String confirmPassword;
 
     public static JsonSignUpUser parse(String data) {
         return JSON.fromJson(data, JsonSignUpUser.class);
@@ -28,11 +27,4 @@ public class JsonSignUpUser extends JsonUser {
         this.password = password;
     }
 
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
 }

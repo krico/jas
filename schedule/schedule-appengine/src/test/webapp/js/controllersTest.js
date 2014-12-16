@@ -147,6 +147,20 @@ describe('Controllers', function () {
 
         });
 
+        it('should register a logoutSucceeded as a listener for the logout event', function () {
+
+            $scope = $rootScope.$new();
+            spyOn($scope, '$on');
+            controller = $controller('NavbarCtrl', {
+                $scope: $scope,
+                $location: $location,
+                Auth: Auth,
+                AUTH_EVENTS: AUTH_EVENTS
+            });
+            expect($scope.$on).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess, $scope.logoutSucceeded);
+
+        });
+
         it('should redirect /login to /profile on loginSucceeded', function () {
 
             $location.path('/login');
@@ -555,7 +569,7 @@ describe('Controllers', function () {
             expect($scope.user.name).toEqual('test');
         });
 
-        it('saves the user and updates currentUser ', function () {
+        it('saves the user and updates currentUser and calls setPristine', function () {
             $httpBackend.flush(); //load the user
 
             $scope.user.about = 'about him';
@@ -564,11 +578,21 @@ describe('Controllers', function () {
                 .expectPOST('/user/555')
                 .respond(200, $scope.user);
 
+            var called = null;
+
+            $scope.profileForm = {
+                $setPristine: function () {
+                    called = true;
+                }
+            };
+
+
             $scope.save();
 
             $httpBackend.flush();
 
             expect($scope.currentUser.about).toEqual('about him');
+            expect(called).toBe(true);
         });
 
         it('resets to original user ', function () {

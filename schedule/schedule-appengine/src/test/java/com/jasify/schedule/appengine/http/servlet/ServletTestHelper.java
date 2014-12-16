@@ -66,6 +66,6 @@ public final class ServletTestHelper {
         public static final String CHANGE_PASSWORD = "http://schedule.jasify.com/auth/change-password";
         public static final String LOGIN_URL = "http://schedule.jasify.com/auth/login";
         public static final String RESTORE_URL = "http://schedule.jasify.com/auth/restore";
-        public static final String LOGOUT_URL = "http://schedule.jasify.com/logout";
+        public static final String LOGOUT_URL = "http://schedule.jasify.com/auth/logout";
     }
 }
