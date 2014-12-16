@@ -195,16 +195,6 @@ public class UserServletTest {
         signUp.setPassword("abcde");
 
         request = new PostMethodWebRequest("http://schedule.jasify.com/user", toInputStream(signUp.toJson()), JSON.CONTENT_TYPE);
-        expectResponse(client, request, HttpServletResponse.SC_BAD_REQUEST);
-
-        signUp.setConfirmPassword(signUp.getPassword() + "x");
-
-        request = new PostMethodWebRequest("http://schedule.jasify.com/user", toInputStream(signUp.toJson()), JSON.CONTENT_TYPE);
-        expectResponse(client, request, HttpServletResponse.SC_BAD_REQUEST);
-
-        signUp.setConfirmPassword(signUp.getPassword());
-
-        request = new PostMethodWebRequest("http://schedule.jasify.com/user", toInputStream(signUp.toJson()), JSON.CONTENT_TYPE);
         InvocationContext ic = expectResponse(client, request, HttpServletResponse.SC_OK);
         assertEquals(JSON.CONTENT_TYPE, ic.getServletResponse().getContentType());
         String text = ic.getServletResponse().getText();

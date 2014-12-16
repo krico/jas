@@ -64,6 +64,7 @@ public class UserServiceTest {
         assertNotSame("Password should be encrypted", "password2", pwFromBytes2);
         createdUsers.add(user1);
         createdUsers.add(user2);
+        assertEquals(createdUsers.size(), service.getTotalUsers());
     }
 
     @Test(expected = UsernameExistsException.class)

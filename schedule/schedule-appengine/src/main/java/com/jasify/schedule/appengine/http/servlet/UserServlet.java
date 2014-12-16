@@ -90,6 +90,7 @@ public class UserServlet extends HttpServlet {
         for (User user : list) {
             ret.add(new JsonUser(user));
         }
+        resp.addHeader("X-Total", Integer.toString(UserServiceFactory.getUserService().getTotalUsers()));
         JSON.toJson(resp.getWriter(), ret);
     }
 
@@ -98,14 +99,6 @@ public class UserServlet extends HttpServlet {
 
         String pathInfo = StringUtils.trimToEmpty(req.getPathInfo());
         UserSession currentUser = UserContext.getCurrentUser();
-
-        if (currentUser == null) {
-
-            log.info("Unauthorized GET access to {}", pathInfo);
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-
-        }
 
         Matcher matcher = PATH_INFO_PATTERN.matcher(pathInfo);
         if (matcher.matches()) {
@@ -149,8 +142,6 @@ public class UserServlet extends HttpServlet {
         try {
             JsonSignUpUser signUp = JsonSignUpUser.parse(req.getReader());
             String pw = Preconditions.checkNotNull(StringUtils.trimToNull(signUp.getPassword()), "NULL password");
-            if (!pw.equals(signUp.getConfirmPassword()))
-                throw new IllegalArgumentException("password and confirm do not match");
 
             UserService userService = UserServiceFactory.getUserService();
 
