@@ -43,6 +43,7 @@
                 }
             }
         };
+        database.sessionCount = 1;
 
         console.log("Creating user database");
         for (var i = 2; i < 1000; i++) {
@@ -51,6 +52,28 @@
                 database.users[i].email = 'user' + i + '@jasify.com';
             }
         }
+
+        $httpBackend.whenPOST(/^\/auth\/login$/).respond(function (method, url, data) {
+            console.log("POST[login] " + url + " DATA: " + data);
+
+            var req = angular.fromJson(data);
+            var users = database.users;
+            for (var id in users) {
+                var u = users[id];
+                if (req.name != 'nologin' && req.name == u.name && req.password == u.password) {
+                    database.users.current = u;
+                    console.log('Login: set current=' + angular.toJson(u));
+                    return [200, {id: database.sessionCount++, userId: u.id, user: u}, {}];
+                }
+            }
+            return [401 /* unauthorized */];
+        });
+
+        $httpBackend.whenGET(/^\/auth\/logout$/).respond(function (method, url, data) {
+            console.log(method + "[logout] " + url + " DATA: " + data);
+            database.users.current = false;
+            return [200];
+        });
 
         /**
          * Username check
@@ -64,41 +87,10 @@
                 var user = users[id];
                 if (user.name == name) {
                     //User exists
-                    return [200, angular.toJson({
-                        nok: true,
-                        nokText: 'Username not available'
-                    }), {}];
+                    return [406 /* not acceptable */];
                 }
             }
-            return [200, angular.toJson({ok: true}), {}];
-        });
-
-        $httpBackend.whenGET(/^\/logout$/).respond(function (method, url, data) {
-            console.log(method + "[logout] " + url + " DATA: " + data);
-            database.users.current = false;
-            return [200, angular.toJson({ok: true}), {}];
-        });
-
-        $httpBackend.whenPOST(/^\/logout$/).respond(function (method, url, data) {
-            console.log(method + "[logout] " + url + " DATA: " + data);
-            database.users.current = false;
-            return [200, angular.toJson({ok: true}), {}];
-        });
-
-        $httpBackend.whenPOST(/^\/login$/).respond(function (method, url, data) {
-            console.log("POST[login] " + url + " DATA: " + data);
-
-            var req = angular.fromJson(data);
-            var users = database.users;
-            for (var id in users) {
-                var u = users[id];
-                if (req.name != 'nologin' && req.name == u.name && req.password == u.password) {
-                    database.users.current = u;
-                    console.log('Login: set current=' + angular.toJson(u));
-                    return [200, angular.toJson({ok: true}), {}];
-                }
-            }
-            return [200 /* not found */, angular.toJson({nok: true, nokText: 'Invalid username or password.'}), {}];
+            return [200];
         });
 
         $httpBackend.whenPOST(/^\/user$/).respond(function (method, url, data) {
@@ -130,7 +122,7 @@
             return [200, angular.toJson(user), {}];
         });
 
-        $httpBackend.whenPOST(/^\/change-password\/.*$/).respond(function (method, url, data) {
+        $httpBackend.whenPOST(/^\/auth\/change-password$/).respond(function (method, url, data) {
             console.log(method + "[user] " + url + " DATA: " + data);
             return [200, {}, {}];
         });
@@ -174,23 +166,19 @@
             }), {}];
         });
 
-        $httpBackend.whenGET(/^\/users(.*)?$/).respond(function (method, url, data, headers) {
+        $httpBackend.whenGET(/^\/user?.*$/).respond(function (method, url, data, headers) {
             console.log(method + "[user] " + url + " DATA: " + data + " H: " + angular.toJson(headers));
             var ret = [];
             var total = 0;
 
-            /* /users/page/1/size/10/sort/DESC?field=email&query=user */
-            var m = /^\/users\/page\/([0-9]+)\/size\/([0-9]+)\/sort\/(DESC|ASC)\?(.*)$/.exec(url);
+            /* ?field=name&page=1&query=&size=10&sort=DESC */
+            var m = /^\/user\?field=([^&]*)&page=([^&]*)&query=([^&]*)&size=([^&]*)&sort=([^&]*)$/.exec(url);
             if (m != null) {
-                var page = parseInt(m[1]);
-                var size = parseInt(m[2]);
-                var sort = m[3];
-                var q = decodeURIComponent(m[4]);
-
-                m = /field=([^&]+)/.exec(q);
-                var field = m == null ? 'name' : m[1];
-                m = /query=([^&]+)/.exec(q);
-                var query = m == null ? '.' : m[1];
+                var field = m[1];
+                var page = parseInt(m[2]);
+                var query = m[3];
+                var size = parseInt(m[4]);
+                var sort = m[5];
 
                 var start = (page - 1 ) * size;
                 var end = start + size;
@@ -232,7 +220,7 @@
 
             }
 
-            return [200, angular.toJson(ret), {'X-Total': total}];
+            return [200, ret, {'X-Total': total}];
         });
 
         //Pass through so that gets to our partials work

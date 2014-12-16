@@ -5,8 +5,8 @@
  */
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers');
 
-jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', 'User', 'Modal',
-    function ($scope, $location, User, Modal) {
+jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', 'User',
+    function ($scope, $location, User) {
         $scope.sort = 'DESC';
         $scope.page = 1;
         $scope._perPage = 10;
@@ -37,11 +37,11 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
                 function (data, h) {
                     var t = h('X-Total');
                     if (t != $scope.total)
-                        $scope.total = t;
+                        $scope.total = Math.floor(t);
                 },
                 function (response) {
                     $scope.total = 0;
-                    Modal.showError("Server error", "The server responded with an error...")
+                    //TODO: show error
                 });
         };
 
@@ -97,52 +97,47 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
             $scope.loading = true;
 
             $scope.user.$save(function () {
-                $scope.loading = false;
-                if ($scope.forms.userForm) {
-                    $scope.forms.userForm.$setPristine();
-                }
+                    $scope.loading = false;
+                    if ($scope.forms.userForm) {
+                        $scope.forms.userForm.$setPristine();
+                    }
 
-                $scope.alert('success', 'User updated successfully (' + new Date() + ')');
+                    $scope.alert('success', 'User updated successfully (' + new Date() + ')');
 
-            });
+                },
+                function () {
+                    $scope.loading = false;
+                    $scope.alert('danger', 'User update failed (' + new Date() + ')');
+                });
         };
 
-        $scope.changePassword = function () {
+        $scope.reset = function () {
 
             $scope.loading = true;
 
-            Auth.changePassword($scope.user, "", $scope.pw.newPassword,
-                // success
-                function (data) {
-                    $scope.loading = false;
-                    if ($scope.forms.passwordForm) {
-                        $scope.forms.passwordForm.$setPristine();
-                    }
-                    var jr = angular.fromJson(data);
-                    if (jr.ok) {
-                        $scope.alert('success', 'Password changed (' + new Date() + ')');
-                        $scope.pw = {};
-                    } else {
-                        $scope.alert('danger', 'Password change failed: ' + jr.nokText + ' (' + new Date() + ')');
-                    }
-                },
-                // failure
-                function (data) {
-                    $scope.loading = false;
-                    if ($scope.forms.passwordForm) {
-                        $scope.forms.passwordForm.$setPristine();
-                    }
-                    $scope.forms.passwordForm.$setPristine();
-                    $scope.alert('danger', 'Password change failed (' + new Date() + ')');
+            if ($scope.forms.userForm) {
+                $scope.forms.userForm.$setPristine();
+            }
 
-                }
-            );
+            if ($routeParams.id) {
+                $scope.user = User.get({id: $routeParams.id},
+                    function ok() {
+                        $scope.loading = false;
+                    },
+                    function fail() {
+                        $scope.loading = false;
+                        $scope.alert('danger', 'Failed to read the user data from the server (' + new Date() + ')');
+                    });
+            } else {
+                $scope.user = new User();
+                $scope.create = true;
+                $scope.loading = false;
+            }
         };
 
         $scope.createUser = function () {
 
             $scope.loading = true;
-            $scope.user.confirmPassword = $scope.user.password;
 
             $scope.user.$save(
                 //success
@@ -161,24 +156,33 @@ jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams',
         };
 
 
-        $scope.reset = function () {
+        $scope.changePassword = function () {
 
             $scope.loading = true;
 
-            if ($scope.forms.userForm) {
-                $scope.forms.userForm.$setPristine();
-            }
-
-            if ($routeParams.id) {
-                $scope.user = User.get({id: $routeParams.id}, function () {
+            Auth.changePassword($scope.user, $scope.pw.newPassword)
+                .then(
+                //success
+                function () {
                     $scope.loading = false;
-                });
-            } else {
-                $scope.user = new User();
-                $scope.create = true;
-                $scope.loading = false;
-            }
+                    if ($scope.forms.passwordForm) {
+                        $scope.forms.passwordForm.$setPristine();
+                    }
+                    $scope.alert('success', 'Password changed (' + new Date() + ')');
+                    $scope.pw = {};
+                },
+                // failure
+                function (data) {
+                    $scope.loading = false;
+                    if ($scope.forms.passwordForm) {
+                        $scope.forms.passwordForm.$setPristine();
+                    }
+                    $scope.alert('danger', 'Password change failed (' + new Date() + ')');
+
+                }
+            );
         };
+
 
         $scope.reset();
 

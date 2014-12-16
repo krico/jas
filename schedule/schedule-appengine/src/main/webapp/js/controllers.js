@@ -3,11 +3,58 @@
  */
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
 
-jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth',
-    function ($scope, $location, Auth) {
-        $scope.user = Auth.getCurrentUser();
+/**
+ * ApplicationCtrl
+ * - Root of the scope tree.  Practically all other scopes will inherit from this one.
+ */
+jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$modal', '$log', '$location', 'AUTH_EVENTS',
+    function ($scope, $modal, $log, $location, AUTH_EVENTS) {
+        $scope.currentUser = null;
+
+        $scope.setCurrentUser = function (u) {
+            $scope.currentUser = u;
+        };
+
+        //TODO: handle other authEvents
+
+        $scope.$on(AUTH_EVENTS.notAuthenticated, function () {
+            var modalInstance = $modal.open({
+                //TODO: should bring up login.html some how
+                templateUrl: 'views/modal/not-authenticated.html',
+                //controller: 'ModalInstanceCtrl',
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function (reason) {
+                $log.info('Modal accepted at: ' + new Date());
+                $location.path('/login');//TODO: LOGIN SHOULD BE POPUP
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        });
+
+        $scope.$on(AUTH_EVENTS.notAuthorized, function () {
+            var modalInstance = $modal.open({
+                templateUrl: 'views/modal/not-authorized.html',
+                //controller: 'ModalInstanceCtrl',
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function (reason) {
+                $log.info('Modal accepted at: ' + new Date());
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        });
+    }]);
+
+/**
+ * NavbarCtrl
+ */
+jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location', 'Auth', 'AUTH_EVENTS',
+    function ($scope, $log, $location, Auth, AUTH_EVENTS) {
         $scope.isAdmin = function () {
-            return $scope.user && $scope.user.admin;
+            return $scope.currentUser && $scope.currentUser.admin;
         };
 
         $scope.path = "";
@@ -37,13 +84,21 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
             }
         ];
 
-        $scope.isActive = function (viewLocation) {
-            return viewLocation === $location.path();
+        $scope.loginSucceeded = function () {
+            $log.debug("LOGIN SUCCEEDED!");
+            if ($scope.menuActive('/login')) {
+                $location.path('/profile');
+            } else if ($scope.menuActive('/signUp')) {
+                $location.path('/profile/welcome');
+            }
         };
 
-        $scope.$watch(Auth.getCurrentUser, function (newValue, oldValue) {
-            $scope.user = Auth.getCurrentUser();
-        });
+        $scope.logoutSucceeded = function () {
+            $log.debug("LOGOUT SUCCEEDED!");
+        };
+
+        $scope.$on(AUTH_EVENTS.loginSuccess, $scope.loginSucceeded);
+        $scope.$on(AUTH_EVENTS.logoutSuccess, $scope.logoutSucceeded);
 
         $scope.$watch(function () {
             return $location.path();
@@ -53,13 +108,42 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$location', 'Auth
         });
     }]);
 
-jasifyScheduleControllers.controller('HomeCtrl', ['$scope', 'Auth',
-    function ($scope, Auth) {
-        $scope.user = Auth.getCurrentUser();
+/**
+ * HomeCtrl
+ */
+jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
+    function ($scope) {
     }]);
 
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$location', 'Util', 'User', 'Auth',
-    function ($scope, $http, $location, Util, User, Auth) {
+/**
+ * LoginCtrl
+ */
+jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS',
+    function ($scope, $rootScope, Auth, AUTH_EVENTS) {
+
+        $scope.credentials = {
+            name: '',
+            password: ''
+        };
+
+        $scope.login = function (cred) {
+            Auth.login(cred).then(
+                function (user) {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                    $scope.setCurrentUser(user);
+                },
+                function () {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+                });
+        };
+
+    }]);
+
+/**
+ * SignUpCtrl
+ */
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth',
+    function ($scope, $rootScope, AUTH_EVENTS, User, Auth) {
 
         $scope.alerts = [];
 
@@ -71,32 +155,49 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
         };
 
         $scope.hasError = function (fieldName) {
-            return Util.formFieldError($scope.signUpForm, fieldName);
+            if ($scope.signUpForm[fieldName]) {
+                var f = $scope.signUpForm[fieldName];
+                return f && f.$dirty && f.$invalid;
+            } else {
+                return false;
+            }
         };
 
         $scope.hasSuccess = function (fieldName) {
-            return Util.formFieldSuccess($scope.signUpForm, fieldName);
+            if ($scope.signUpForm[fieldName]) {
+                var f = $scope.signUpForm[fieldName];
+                return f && f.$dirty && f.$valid;
+            } else {
+                return false;
+            }
         };
 
         $scope.createUser = function () {
             $scope.inProgress = true;
 
+            //TODO: this seems a little too complicated...  maybe save could already login the user?
             User.save($scope.user,
-                //success
+                //User.save success
                 function (value, responseHeaders) {
                     $scope.registered = true;
                     $scope.inProgress = false;
 
-                    $scope.alert('success', 'Registration succeeded! Your browser should be redirected shortly...');
+                    $scope.alert('success', 'Registration succeeded! You should be redirected shortly...');
 
                     //Simulate a login
-                    Auth.login($scope.user.name, $scope.user.password, function (message) {
-
-                        $scope.alert('danger', 'Funny, even though we just registered you, your login failed...');
-
-                    });
+                    Auth.login($scope.user)
+                        .then(
+                        //Login success
+                        function (user) {
+                            $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                            $scope.setCurrentUser(user);
+                        },
+                        //Login failure
+                        function (message) {
+                            $scope.alert('danger', 'Funny, even though we just registered you, your login failed...');
+                        });
                 },
-                //error
+                //User.save error
                 function (httpResponse) {
                     $scope.inProgress = false;
 
@@ -106,46 +207,37 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$http', '$locatio
         };
     }]);
 
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope', 'Util', 'Auth', 'Modal',
-    function ($scope, Util, Auth, Modal) {
+/**
+ * LogoutCtrl
+ */
+jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'Auth',
+    function ($scope, $rootScope, AUTH_EVENTS, Auth) {
+        $scope.logout = function () {
+            if (!Auth.isAuthenticated()) return;
+            Auth.logout().then(
+                function () {
+                    $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
+                    $scope.setCurrentUser(null);
+                }
+            );
+        };
+    }]);
+
+/**
+ * ProfileCtrl
+ */
+jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', 'Session', 'User',
+    function ($scope, $routeParams, Session, User) {
+        $scope.user = null;
 
         $scope.alerts = [];
 
-        $scope.user = {};
-
-        $scope.credentials = {};
-
-        $scope.alert = function (t, m) {
-            $scope.alerts.push({type: t, msg: m});
+        $scope.isWelcome = function () {
+            if ($routeParams.extra) {
+                return 'welcome' == $routeParams.extra;
+            }
+            return false;
         };
-
-
-        $scope.hasError = function (fieldName) {
-            return Util.formFieldError($scope.loginForm, fieldName);
-        };
-
-        $scope.hasSuccess = function (fieldName) {
-            return Util.formFieldSuccess($scope.loginForm, fieldName);
-        };
-
-        $scope.login = function () {
-            Auth.login($scope.credentials.name, $scope.credentials.password, function (reason) {
-                $scope.alert('warning', 'Login failed!');
-            });
-        };
-
-    }]);
-
-jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', 'Auth',
-    function ($scope, Auth) {
-        Auth.logout();
-    }]);
-
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Auth', 'User',
-    function ($scope, Auth, User) {
-        $scope.user = {};
-
-        $scope.alerts = [];
 
         $scope.alert = function (t, m) {
             $scope.alerts.push({type: t, msg: m});
@@ -155,11 +247,20 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', 'Auth', 'User',
             $scope.user.$save().then(function () {
                 $scope.alert('success', 'Profile updated!');
                 //TODO: We probably need to check for failures
-                Auth.setCurrentUser($scope.user);
+                $scope.setCurrentUser($scope.user);
+                if ($scope.profileForm) {
+                    $scope.profileForm.$setPristine();
+                }
+
             });
         };
+
         $scope.reset = function () {
-            $scope.user = User.get({id: Auth.getCurrentUser().id});
+            $scope.user = User.get({id: Session.userId}, function () {
+                if ($scope.profileForm) {
+                    $scope.profileForm.$setPristine();
+                }
+            });
         };
         $scope.reset();
     }]);

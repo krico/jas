@@ -8,6 +8,12 @@ Notes for developers working on schedule-appengine...
  * If you change any class annotated with @Model (usually under com.jasify.schedule.appengine.model.users) you **MUST**
  run `mvn apt:process`
 
+## Jasmine (testing javscript)
+
+ * To run only the jasmine tests, you need to run `mvn phantomjs:install jasmine:test`.  Another option is to run a webserver
+   and run your tests in the browser.  Then you can simply reload the browser to test again.  For this, run `mvn jasmine:bdd`.
+ * Checkout [Jasmine Documentation](http://jasmine.github.io/2.0/introduction.html)
+
 ## Links
 
  * [angular-spinner](https://github.com/urish/angular-spinner) and [spin.js](http://fgnass.github.io/spin.js/#!)

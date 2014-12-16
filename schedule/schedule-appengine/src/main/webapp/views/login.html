@@ -1,4 +1,4 @@
-<form role="form" name="loginForm" novalidate ng-submit="login()">
+<form role="form" name="loginForm" novalidate ng-submit="login(credentials)">
     <div class="col-md-3">
         <div>
             <p>
@@ -7,24 +7,15 @@
         </div>
 
         <div>
-            <div class="form-group has-feedback"
-                 ng-class="{'has-warning': hasError('name'), 'has-success': hasSuccess('name')}">
+            <div class="form-group">
                 <label class="sr-only" for="name">Name (your login)</label>
                 <input id="name" name="name" ng-model="credentials.name" type="text" class="form-control input-sm"
-                       placeholder="Name"
-                       pattern="^..." required autofocus>
-                <span class="glyphicon form-control-feedback"
-                      ng-class="{'glyphicon-ok':hasSuccess('name'), 'glyphicon-warning-sign': hasError('name')}"></span>
+                       placeholder="Name" required autofocus>
             </div>
-            <div class="form-group has-feedback"
-                 ng-class="{'has-warning': hasError('password'), 'has-success': hasSuccess('password')}">
+            <div class="form-group has-feedback">
                 <label class="sr-only" for="password">Password</label>
                 <input id="password" ng-model="credentials.password" name="password" type="password"
-                       class="form-control input-sm"
-                       placeholder="Password"
-                       pattern="^...." required>
-                <span class="glyphicon form-control-feedback"
-                      ng-class="{'glyphicon-ok':hasSuccess('password'), 'glyphicon-warning-sign': hasError('password')}"></span>
+                       class="form-control input-sm" placeholder="Password" required>
             </div>
         </div>
         <div>
@@ -33,8 +24,5 @@
                 login
             </button>
         </div>
-    </div>
-    <div class="col-md-3">
-        <alert ng-repeat="a in alerts" type="{{a.type}}" close="alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
 </form>

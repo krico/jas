@@ -2,13 +2,11 @@ package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.http.json.JsonPasswordChangeRequest;
-import com.jasify.schedule.appengine.http.json.JsonResponse;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.JSON;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
-import com.meterware.servletunit.InvocationContext;
 import com.meterware.servletunit.ServletUnitClient;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -17,15 +15,14 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static junit.framework.TestCase.*;
+import static com.jasify.schedule.appengine.http.servlet.ServletTestHelper.Urls.CHANGE_PASSWORD;
+import static com.jasify.schedule.appengine.http.servlet.ServletTestHelper.expectResponse;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 
 public class ChangePasswordServletTest {
     private User admin;
     private User user;
-
-    private static String createUrl(User user) {
-        return "http://schedule.jasify.com/change-password/" + user.getId().getId();
-    }
 
     @Before
     public void servletRunner() throws Exception {
@@ -49,79 +46,66 @@ public class ChangePasswordServletTest {
 
     @Test
     public void testNoInputFails() throws Exception {
-        ServletUnitClient client = TestHelper.servletRunner().newClient();
-        WebRequest request = new PostMethodWebRequest(createUrl(user));
-        InvocationContext ic = client.newInvocation(request);
-        ic.service();
-        assertEquals(HttpServletResponse.SC_BAD_REQUEST, ic.getServletResponse().getResponseCode());
+        ServletUnitClient client = ServletTestHelper.login("user", "password");
+        WebRequest request = new PostMethodWebRequest(CHANGE_PASSWORD);
+        expectResponse(client, request, HttpServletResponse.SC_BAD_REQUEST);
     }
+
     @Test
     public void testUnauthorizedAccessNoUser() throws Exception {
         ServletUnitClient client = TestHelper.servletRunner().newClient();
-        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest("password", "changedPassword");
+        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(user, "password", "changedPassword");
 
-        WebRequest request = new PostMethodWebRequest(createUrl(user), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        InvocationContext ic = client.newInvocation(request);
-        ic.service();
-        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, ic.getServletResponse().getResponseCode());
+        WebRequest request = new PostMethodWebRequest(CHANGE_PASSWORD, IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+        expectResponse(client, request, HttpServletResponse.SC_UNAUTHORIZED);
     }
 
     @Test
     public void testUnauthorizedAccessUserNotAdminChangingAnotherPassword() throws Exception {
-        ServletUnitClient client = TestHelper.login("user", "password");
+        ServletUnitClient client = ServletTestHelper.login("user", "password");
 
-        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest("password", "changedPassword");
+        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(admin, "password", "changedPassword");
 
-        WebRequest request = new PostMethodWebRequest(createUrl(admin), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        InvocationContext ic = client.newInvocation(request);
-        ic.service();
-        assertEquals(HttpServletResponse.SC_UNAUTHORIZED, ic.getServletResponse().getResponseCode());
+        WebRequest request = new PostMethodWebRequest(CHANGE_PASSWORD, IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+        expectResponse(client, request, HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Test
     public void testFailIfNewPasswordIsEmpty() throws Exception {
-        ServletUnitClient client = TestHelper.login("user", "password");
-        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest("password", "");
-        WebRequest request = new PostMethodWebRequest(createUrl(user), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        InvocationContext ic = client.newInvocation(request);
-        ic.service();
-        JsonResponse jr = JsonResponse.parse(ic.getServletResponse().getText());
-        assertTrue("New password cannot be empty", jr.isNok());
+        ServletUnitClient client = ServletTestHelper.login("user", "password");
+        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(user, "password", "");
+        WebRequest request = new PostMethodWebRequest(CHANGE_PASSWORD, IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+        expectResponse(client, request, HttpServletResponse.SC_BAD_REQUEST);
     }
 
     @Test
     public void testFailIfOldPasswordDoesNotMatch() throws Exception {
-        ServletUnitClient client = TestHelper.login("user", "password");
-        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest("password1", "password2");
-        WebRequest request = new PostMethodWebRequest(createUrl(user), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        InvocationContext ic = client.newInvocation(request);
-        ic.service();
-        JsonResponse jr = JsonResponse.parse(ic.getServletResponse().getText());
-        assertTrue("Old password must match", jr.isNok());
+        ServletUnitClient client = ServletTestHelper.login("user", "password");
+        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(user, "password1", "password2");
+        WebRequest request = new PostMethodWebRequest(CHANGE_PASSWORD, IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+        expectResponse(client, request, HttpServletResponse.SC_BAD_REQUEST);
     }
 
     @Test
     public void testUserChangesOwn() throws Exception {
-        ServletUnitClient client = TestHelper.login("user", "password");
-        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest("password", "changedPassword");
-        WebRequest request = new PostMethodWebRequest(createUrl(user), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        InvocationContext ic = client.newInvocation(request);
-        ic.service();
-        JsonResponse jr = JsonResponse.parse(ic.getServletResponse().getText());
-        assertTrue("Password changed", jr.isOk());
-        TestHelper.login("user", "changedPassword");
+        ServletUnitClient client = ServletTestHelper.login("user", "password");
+        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(user, "password", "changedPassword");
+        WebRequest request = new PostMethodWebRequest(CHANGE_PASSWORD, IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+
+        expectResponse(client, request, HttpServletResponse.SC_OK);
+
+        ServletTestHelper.login("user", "changedPassword");
     }
 
     @Test
     public void testAdminChangesUserNoNeedForOld() throws Exception {
-        ServletUnitClient client = TestHelper.login("test-admin", "password");
-        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(null, "byAdminPassword");
-        WebRequest request = new PostMethodWebRequest(createUrl(user), IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        InvocationContext ic = client.newInvocation(request);
-        ic.service();
-        JsonResponse jr = JsonResponse.parse(ic.getServletResponse().getText());
-        assertTrue("Password changed", jr.isOk());
-        TestHelper.login("user", "byAdminPassword");
-        TestHelper.login("test-admin", "password");
+        ServletUnitClient client = ServletTestHelper.login("test-admin", "password");
+        JsonPasswordChangeRequest req = new JsonPasswordChangeRequest(user, null, "byAdminPassword");
+        WebRequest request = new PostMethodWebRequest(CHANGE_PASSWORD, IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
+
+        expectResponse(client, request, HttpServletResponse.SC_OK);
+
+        ServletTestHelper.login("user", "byAdminPassword");
+        ServletTestHelper.login("test-admin", "password");
     }
 }

@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine;
 import com.google.appengine.tools.development.testing.*;
 import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
 import com.jasify.schedule.appengine.http.json.JsonResponse;
+import com.jasify.schedule.appengine.http.servlet.LoginServletTest;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
@@ -106,24 +107,6 @@ public final class TestHelper {
     public static ServletRunner servletRunner() {
         assertNotNull("Must call initializeServletRunner", servletRunner);
         return servletRunner;
-    }
-
-    public static ServletUnitClient login(String name, String password) throws IOException, SAXException {
-        ServletUnitClient client = servletRunner().newClient();
-        JsonLoginRequest req = new JsonLoginRequest(name, password);
-        WebRequest request = new PostMethodWebRequest("http://schedule.jasify.com/login", IOUtils.toInputStream(req.toJson()), JSON.CONTENT_TYPE);
-        WebResponse response = client.getResponse(request);
-        assertNotNull("No response received", response);
-        assertEquals("content type", JSON.CONTENT_TYPE, response.getContentType());
-        String text = response.getText();
-        assertNotNull(text);
-        JsonResponse jr = JsonResponse.parse(text);
-        assertNotNull(jr);
-        assertFalse(jr.isNok());
-        assertTrue(jr.isOk());
-        assertTrue(StringUtils.isBlank(jr.getNokText()));
-
-        return client;
     }
 
     public static void initializeDatastore() {

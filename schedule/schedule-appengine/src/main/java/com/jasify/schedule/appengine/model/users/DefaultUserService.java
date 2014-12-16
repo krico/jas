@@ -292,6 +292,11 @@ class DefaultUserService implements UserService {
         return query.asList();
     }
 
+    @Override
+    public int getTotalUsers() {
+        return Datastore.query(userMeta).asKeyList().size();
+    }
+
     private List<User> search(int offset, int limit, SortCriterion criteria) {
         ModelQuery<User> query = Datastore.query(userMeta);
         if (offset > 0) query.offset(offset);

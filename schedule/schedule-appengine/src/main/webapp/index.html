@@ -56,7 +56,7 @@
     <![endif]-->
 </head>
 
-<body>
+<body ng-controller="ApplicationCtrl">
 
 <!-- Static navbar -->
 <nav class="navbar navbar-static-top navbar-inverse" role="navigation" ng-controller="NavbarCtrl">
@@ -72,24 +72,27 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse" collapse="navbarCollapsed">
             <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown" ng-if="isAdmin()" ng-class="menuActive('/admin/')" dropdown>
+                <li class="dropdown" ng-if="currentUser.admin" ng-class="menuActive('/admin/')" dropdown>
                     <a ng-href="#{{path}}" class="dropdown-toggle" dropdown-toggle>admin <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <li><a ng-click="collapse()" href="#/admin/users">users</a></li>
                     </ul>
                 </li>
 
-                <li ng-hide="user" ng-class="menuActive('/signUp')">
+                <li ng-hide="currentUser" ng-class="menuActive('/signUp')">
+                    hi {{currentUser}}
+                </li>
+                <li ng-hide="currentUser" ng-class="menuActive('/signUp')">
                     <a ng-click="collapse()" href="#/signUp">sign up</a>
                 </li>
-                <li ng-hide="user" ng-class="menuActive('/login')">
+                <li ng-hide="currentUser" ng-class="menuActive('/login')">
                     <a ng-click="collapse()" href="#/login">log in</a>
                 </li>
 
-                <li ng-show="user" ng-class="menuActive('/profile')">
-                    <a ng-click="collapse()" href="#/profile">@{{user.name}}</a>
+                <li ng-show="currentUser" ng-class="menuActive('/profile')">
+                    <a ng-click="collapse()" href="#/profile">@{{currentUser.name}}</a>
                 </li>
-                <li ng-show="user" ng-class="menuActive('/logout')">
+                <li ng-show="currentUser" ng-class="menuActive('/logout')">
                     <a ng-click="collapse()" href="#/logout">log out</a>
                 </li>
             </ul>

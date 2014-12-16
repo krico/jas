@@ -11,8 +11,17 @@ RegExp.quote = function (str) {
     return (str + '').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 };
 
-var jasifyScheduleApp = angular.module('jasifyScheduleApp',
-    ['ngRoute', 'ngResource', 'ngMessages', 'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
+var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngMessages', 'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
+
+/**
+ * Listen to route changes and check
+ */
+jasifyScheduleApp.run(function ($rootScope, $log, AUTH_EVENTS, Auth) {
+    //TODO: remove, not really needed
+    $rootScope.$on('$routeChangeError', function (event, next, current) {
+        $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
+    });
+});
 
 /**
  * Routes for all navbar links
@@ -22,37 +31,77 @@ jasifyScheduleApp.config(['$routeProvider',
         $routeProvider.
             when('/', {
                 templateUrl: 'views/home.html',
-                controller: 'HomeCtrl'
+                controller: 'HomeCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.all();
+                    }
+                }
             }).
             when('/home', {
                 templateUrl: 'views/home.html',
-                controller: 'HomeCtrl'
+                controller: 'HomeCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.all();
+                    }
+                }
             }).
             when('/signUp', {
                 templateUrl: 'views/signUp.html',
-                controller: 'SignUpCtrl'
+                controller: 'SignUpCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.guest();
+                    }
+                }
             }).
             when('/login', {
                 templateUrl: 'views/login.html',
-                controller: 'LoginCtrl'
+                controller: 'LoginCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.guest();
+                    }
+                }
             }).
             when('/logout', {
                 templateUrl: 'views/logout.html',
-                controller: 'LogoutCtrl'
+                controller: 'LogoutCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.all();
+                    }
+                }
             }).
-            when('/profile', {
+            when('/profile/:extra?', {
                 templateUrl: 'views/profile.html',
-                controller: 'ProfileCtrl'
+                controller: 'ProfileCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.user();
+                    }
+                }
             }).
 
             /* BEGIN: Admin routes */
             when('/admin/users', {
                 templateUrl: 'views/admin/users.html',
-                controller: 'AdminUsersCtrl'
+                controller: 'AdminUsersCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.admin();
+                    }
+                }
             }).
             when('/admin/user/:id?', {
                 templateUrl: 'views/admin/user.html',
-                controller: 'AdminUserCtrl'
+                controller: 'AdminUserCtrl',
+                resolve: {
+                    allow: function (Allow) {
+                        return Allow.admin();
+                    }
+                }
             });
         /* END: Admin routes */
         //
@@ -62,189 +111,205 @@ jasifyScheduleApp.config(['$routeProvider',
     }]);
 
 /**
- * Modal service
- * To talk to the user from any view/controller
+ * Constant for the authentication related events
  */
-jasifyScheduleApp.factory('Modal', ['$log', '$modal', '$rootScope',
-    function ($log, $modal, $rootScope) {
-        //error.modal = $modal({
-        //    scope: error.scope,
-        //    template: 'views/modal/error.html',
-        //    animation: 'am-fade-and-scale',
-        //    show: false
-        //});
+jasifyScheduleApp.constant('AUTH_EVENTS', {
+    loginSuccess: 'auth-login-success',
+    loginFailed: 'auth-login-failed',
+    logoutSuccess: 'auth-logout-success',
+    sessionTimeout: 'auth-session-timeout',
+    notAuthenticated: 'auth-not-authenticated',
+    notAuthorized: 'auth-not-authorized',
+    notGuest: 'auth-not-guest'
+});
 
-        var Modal = {
-            showError: function (title, description) {
-                console.log("showError(" + title + ", " + description + ")");
-            }
-        };
-        $log.debug("new Modal");
-        return Modal;
-    }]);
+/**
+ *  Session is a singleton that mimics the server-side session
+ */
+jasifyScheduleApp.service('Session', function () {
+
+    this.create = function (sessionId, userId, admin) {
+        this.id = sessionId;
+        this.userId = userId;
+        this.admin = admin == true;
+    };
+
+    this.destroy = function () {
+        this.id = null;
+        this.userId = null;
+        this.admin = false;
+    };
+
+    this.destroy();
+
+    return this;
+});
+
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$location', '$http', 'User', 'Modal',
-    function ($log, $location, $http, User, Modal) {
-        var currentUser;
-        var Auth = {
-            isLoggedIn: function () {
-                if (currentUser) {
-                    return true;
-                } else {
-                    return false;
-                }
-            },
-            logout: function () {
-                $log.info("Log out!");
-                currentUser = null;
-                $http.get('/logout');
-            },
+jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
+    function ($log, $http, $q, Session) {
 
-            /**
-             * Login
-             * @param name username
-             * @param pass password
-             * @param callback optional error handler function with signature function(reason)
-             */
-            login: function (name, pass, callback) {
-                $http.post('/login', {name: name, password: pass})
-                    .success(function (data, status, headers, config) {
-                        var ret;
-                        try {
-                            ret = angular.fromJson(data);
-                        } catch (e) {
-                        }
-                        if (ret.ok) {
-                            User.current(
-                                //success
-                                function (u, responseHeaders) {
-                                    Auth.onLoggedIn(u);
-                                },
-                                //error
-                                function (httpResponse) {
-                                    Modal.showError('Unexpected error', 'We failed to fetch your user, sorry :-(')
-                                });
-                        } else {
-                            var message;
-                            if (ret && ret.nokText) {
-                                message = ret.nokText;
-                            } else {
-                                message = 'We failed to log you in, sorry :-(';
-                            }
-                            if (callback) {
-                                callback(message);
-                            } else {
-                                Modal.showError('Unhandled login failure', message)
-                            }
-                        }
-                    })
-                    .error(function (data, status, headers, config) {
-                        var ret;
-                        try {
-                            ret = angular.fromJson(data);
-                        } catch (e) {
-                        }
-                        var message;
-                        if (ret && ret.nokText) {
-                            message = ret.nokText;
-                        } else {
-                            message = 'We failed to log you in, sorry :-(';
-                        }
-                        if (callback) {
-                            callback(message);
-                        } else {
-                            Modal.showError('Unhandled login failure', message)
-                        }
-                    });
-            },
-            changePassword: function (user, oldPassword, newPassword, successFun, errorFun) {
-                var req = {
-                    'oldPassword': oldPassword,
-                    'newPassword': newPassword
-                };
-                $http.post('/change-password/' + user.id, angular.toJson(req))
-                    .success(function (data, status, headers, config) {
-                        if (angular.isFunction(successFun)) {
-                            successFun(data, status, headers, config);
-                        }
-                    })
-                    .error(function (data, status, headers, config) {
-                        if (angular.isFunction(errorFun)) {
-                            errorFun(data, status, headers, config);
-                        }
-                    });
-            },
-            onLoggedIn: function (user) {
-                Auth.setCurrentUser(user);
-                $location.path('/home');
-            },
-            setCurrentUser: function (u) {
-                $log.info('Auth.currentUser=' + u)
-                currentUser = u;
-            },
-            getCurrentUser: function () {
-                return currentUser;
+        var Auth = {};
+
+        var loggedIn = function (res) {
+            Session.create(res.data.id, res.data.userId, res.data.user.admin);
+            return res.data.user;
+        };
+
+        var restore = {
+            invoked: false,
+            failed: false,
+            data: null
+        };
+
+        Auth.isAuthenticated = function () {
+            return !!Session.id;
+        };
+
+        Auth.isAdmin = function () {
+            return Session.admin;
+        };
+
+        Auth.login = function (credentials) {
+            $log.info("Logging in (name=" + credentials.name + ") ...");
+            return $http.post('/auth/login', credentials)
+                .then(function (res) {
+                    $log.info("Logged in! (userId=" + res.data.userId + ")");
+                    return loggedIn(res);
+                });
+        };
+
+        Auth.restore = function () {
+            if (restore.invoked) {
+                //This is a cache of the last restore call, we make it look like it was called again
+                $log.info("Restore called more than once, returning cached values...");
+
+                var deferred = $q.defer();
+
+                if (restore.failed) {
+                    deferred.reject(restore.data);
+                } else {
+                    deferred.resolve(restore.data);
+                }
+
+                return deferred.promise;
             }
 
-        };
-        User.current( //todo: use /isloggedin first
-            //success
-            function (u, responseHeaders) {
-                Auth.setCurrentUser(u);
-            },
-            //error
-            function (httpResponse) {
-                $log.debug('Not logged in');//todo: remove
-            });
+            restore.invoked = true;
 
-        $log.debug("new Auth");
+            $log.debug("Restoring session...");
+            return $http.get('/auth/restore')
+                .then(function (res) {
+                    $log.info("Session restored! (userId=" + res.data.userId + ")");
+                    restore.data = loggedIn(res);
+                    return restore.data;
+                },
+                function (reason) {
+                    restore.failed = true;
+                    restore.data = reason;
+                    return $q.reject(restore.data);
+                }
+            );
+        };
+
+        Auth.changePassword = function (credentials, newPassword) {
+            $log.info("Changing password (userId=" + Session.userId + ")!");
+            return $http.post('/auth/change-password', {credentials: credentials, newPassword: newPassword});
+        };
+
+        Auth.logout = function () {
+            $log.info("Logging out (" + Session.userId + ")!");
+            return $http.get('/auth/logout')
+                .then(function (res) {
+                    $log.info("Logged out!");
+                    Session.destroy();
+                });
+        };
+
         return Auth;
     }]);
 
-
 /**
- * Util service (global utility functions)
+ * Allow - used in Route resolve promises as Allow.all for example
  */
-jasifyScheduleApp.factory('Util', ['$log',
-    function ($log) {
-        $log.debug("new Util");
+jasifyScheduleApp.factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EVENTS',
+    function ($log, $q, $rootScope, Auth, AUTH_EVENTS) {
+        var Allow = {};
 
-        return {
-            formFieldError: function (form, fieldName) {
-                var f = form[fieldName];
-                return f && f.$dirty && f.$invalid;
-            },
-            formFieldSuccess: function (form, fieldName) {
-                var f = form[fieldName];
-                return f && f.$dirty && f.$valid;
-            }
+        Allow.all = function () {
+            var deferred = $q.defer();
+            deferred.resolve('ok');
+            return deferred.promise;
         };
+
+        Allow.guest = function () {
+            var deferred = $q.defer();
+            if (Auth.isAuthenticated()) {
+                deferred.reject('guests only');
+                $rootScope.$broadcast(AUTH_EVENTS.notGuest);
+            } else {
+                deferred.resolve('ok');
+            }
+            return deferred.promise;
+        };
+
+        Allow.user = function () {
+            var deferred = $q.defer();
+            if (Auth.isAuthenticated()) {
+                deferred.resolve('ok');
+            } else {
+                deferred.reject('users only');
+                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+            }
+            return deferred.promise;
+        };
+
+        Allow.admin = function () {
+            var deferred = $q.defer();
+            if (Auth.isAuthenticated() && Auth.isAdmin()) {
+                deferred.resolve('ok');
+            } else {
+                if (Auth.isAuthenticated()) {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+                } else {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                }
+                deferred.reject('admins only');
+            }
+            return deferred.promise;
+        };
+
+        return Allow;
+    }]);
+
+
+jasifyScheduleApp.factory('Username', ['$log', '$http',
+    function ($log, $http) {
+        var Username = {};
+
+        Username.check = function (name) {
+            return $http.post('/username', name);
+        };
+
+        return Username;
     }]);
 
 /**
  * User service
  */
 jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {
-    $log.debug("new User");
-    var User = $resource('/user/:id', {id: '@id'},
-        {
-            /* User.checkUsername([params], postData, [success], [error]) */
-            'checkUsername': {method: 'POST', url: '/username'},
-            'create': {method: 'PUT', url: '/user/new'},
-            'changePassword': {method: 'POST', url: '/change-password/:id', params: {id: '@id'}},
-            'query': {
-                method: 'GET',
-                isArray: true,
-                url: '/users/page/:page/size/:size/sort/:sort',
-                params: {page: '@page', size: '@size', sort: '@sort'}
-            },
-            'current': {method: 'GET', url: '/user/current'}
-        });
-    return User;
+    return $resource('/user/:id', {id: '@id'});
+    /*        {
+     'query': {method: 'GET', isArray: true}
+     });
+     */
 }]);
 
+/**
+ * Strong password directive
+ */
 jasifyScheduleApp.directive('strongPassword', function () {
     return {
         require: 'ngModel',
@@ -281,6 +346,9 @@ jasifyScheduleApp.directive('strongPassword', function () {
     };
 });
 
+/**
+ * ConfirmField directive
+ */
 jasifyScheduleApp.directive('confirmField', function () {
     return {
         require: 'ngModel',
@@ -298,8 +366,10 @@ jasifyScheduleApp.directive('confirmField', function () {
     };
 });
 
-
-jasifyScheduleApp.directive('username', ['$q', 'User', function ($q, User) {
+/**
+ * Username directive
+ */
+jasifyScheduleApp.directive('username', ['$q', 'Username', function ($q, Username) {
     return {
         require: 'ngModel',
         link: function (scope, elm, attrs, ctrl) {
@@ -312,24 +382,7 @@ jasifyScheduleApp.directive('username', ['$q', 'User', function ($q, User) {
 
                 var def = $q.defer();
 
-                User.checkUsername(modelValue,
-                    //success
-                    function (value, responseHeaders) {
-                        var check = angular.fromJson(value);
-                        if (check.ok) {
-                            def.resolve();
-                        } else if (check.nok) {
-                            def.reject(check.nokText);
-                        } else {
-                            def.reject('unknown error');
-                        }
-                    },
-                    //error
-                    function (httpResponse) {
-                        def.reject('communication error');
-                    });
-
-                return def.promise;
+                return Username.check(modelValue);
             };
         }
     };
