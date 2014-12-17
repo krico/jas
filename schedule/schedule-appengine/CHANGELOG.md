@@ -20,6 +20,7 @@ Features:
 
 Changes:
 
+  - added angular-cookies `bower install angular-cookies -S` for mini stateful things like loggedIn
   - added [jasmine-maven-plugin](http://searls.github.io/jasmine-maven-plugin) to allow for javascript testing
   - ngMessage `bower install angular-messages -S`
   - upgraded BootstrapUI to 0.12.0

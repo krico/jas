@@ -268,6 +268,7 @@
                         <source>src/main/webapp/bc/angular-resource/angular-resource.js</source>
                         <source>src/main/webapp/bc/angular-messages/angular-messages.js</source>
                         <source>src/main/webapp/bc/angular-messages/angular-messages.js</source>
+                        <source>src/main/webapp/bc/angular-cookies/angular-cookies.js</source>
                         <source>src/main/webapp/bc/angular-bootstrap/ui-bootstrap-tpls.js</source>
                         <source>src/main/webapp/bc/spin.js/spin.js</source>
                         <source>src/main/webapp/bc/angular-spinner/angular-spinner.min.js</source>

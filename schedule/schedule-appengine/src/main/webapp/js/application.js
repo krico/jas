@@ -11,7 +11,8 @@ RegExp.quote = function (str) {
     return (str + '').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 };
 
-var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngMessages', 'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
+var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngMessages', 'ngCookies',
+    'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
 
 /**
  * Listen to route changes and check
@@ -148,20 +149,15 @@ jasifyScheduleApp.service('Session', function () {
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
-    function ($log, $http, $q, Session) {
+jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
+    function ($log, $http, $q, $cookies, Session) {
 
         var Auth = {};
 
         var loggedIn = function (res) {
             Session.create(res.data.id, res.data.userId, res.data.user.admin);
+            $cookies.loggedIn = true;
             return res.data.user;
-        };
-
-        var restore = {
-            invoked: false,
-            failed: false,
-            data: null
         };
 
         Auth.isAuthenticated = function () {
@@ -181,10 +177,27 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
                 });
         };
 
+        var restore = {
+            invoked: false,
+            failed: false,
+            promise: null,
+            data: null
+        };
+
         Auth.restore = function () {
+            if (!$cookies.loggedIn) {
+                restore.invoked = true;
+                restore.failed = true;
+                restore.data = 'Not logged in';
+            }
+
             if (restore.invoked) {
                 //This is a cache of the last restore call, we make it look like it was called again
-                $log.info("Restore called more than once, returning cached values...");
+
+                if (restore.promise != null) {
+                    //In case the http request is pending
+                    return $q.when(restore.promise);
+                }
 
                 var deferred = $q.defer();
 
@@ -200,18 +213,23 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
             restore.invoked = true;
 
             $log.debug("Restoring session...");
-            return $http.get('/auth/restore')
+            restore.promise = $http.get('/auth/restore')
                 .then(function (res) {
                     $log.info("Session restored! (userId=" + res.data.userId + ")");
+                    restore.promise = null;
                     restore.data = loggedIn(res);
                     return restore.data;
                 },
                 function (reason) {
+                    $log.info("Session restore failed: " + reason);
+                    restore.promise = null;
                     restore.failed = true;
                     restore.data = reason;
                     return $q.reject(restore.data);
                 }
             );
+
+            return restore.promise;
         };
 
         Auth.changePassword = function (credentials, newPassword) {
@@ -225,8 +243,19 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', 'Session',
                 .then(function (res) {
                     $log.info("Logged out!");
                     Session.destroy();
+                    $cookies.loggedIn = false;
                 });
         };
+
+
+        if ($cookies.loggedIn) {
+            Auth.restore().then(function (u) {
+                    $cookies.loggedIn = true;
+                },
+                function (data) {
+                    $cookies.loggedIn = false;
+                });
+        }
 
         return Auth;
     }]);
@@ -244,41 +273,49 @@ jasifyScheduleApp.factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EV
             return deferred.promise;
         };
 
+        Allow.restoreThen = function (fn) {
+            return Auth.restore().then(function (u) {
+                    return fn();
+                },
+                function (data) {
+                    return fn();
+                });
+        };
+
         Allow.guest = function () {
-            var deferred = $q.defer();
-            if (Auth.isAuthenticated()) {
-                deferred.reject('guests only');
-                $rootScope.$broadcast(AUTH_EVENTS.notGuest);
-            } else {
-                deferred.resolve('ok');
-            }
-            return deferred.promise;
+            return Allow.restoreThen(function () {
+                if (Auth.isAuthenticated()) {
+                    $rootScope.$broadcast(AUTH_EVENTS.notGuest);
+                    return $q.reject('guests only');
+                } else {
+                    return true;
+                }
+            });
         };
 
         Allow.user = function () {
-            var deferred = $q.defer();
-            if (Auth.isAuthenticated()) {
-                deferred.resolve('ok');
-            } else {
-                deferred.reject('users only');
-                $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-            }
-            return deferred.promise;
+            return Allow.restoreThen(function () {
+                if (!Auth.isAuthenticated()) {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                    return $q.reject('users only');
+                } else {
+                    return true;
+                }
+            });
         };
 
         Allow.admin = function () {
-            var deferred = $q.defer();
-            if (Auth.isAuthenticated() && Auth.isAdmin()) {
-                deferred.resolve('ok');
-            } else {
-                if (Auth.isAuthenticated()) {
-                    $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-                } else {
+            return Allow.restoreThen(function () {
+                if (!Auth.isAuthenticated()) {
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                    return $q.reject('admins only');
+                } else if (!Auth.isAdmin()) {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+                    return $q.reject('admins only');
+                } else {
+                    return true;
                 }
-                deferred.reject('admins only');
-            }
-            return deferred.promise;
+            });
         };
 
         return Allow;
