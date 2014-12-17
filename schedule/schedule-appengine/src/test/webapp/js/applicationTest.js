@@ -56,8 +56,9 @@ describe("Application", function () {
     });
 
     describe('Auth', function () {
-        var Session, Auth;
-        beforeEach(inject(function (_Session_, _Auth_) {
+        var Session, Auth, $cookies;
+        beforeEach(inject(function (_$cookies_, _Session_, _Auth_) {
+            $cookies = _$cookies_;
             Session = _Session_;
             Auth = _Auth_;
         }));
@@ -234,6 +235,8 @@ describe("Application", function () {
 
             var user = null;
 
+            $cookies.loggedIn = true;
+
             Auth.restore().then(function (u) {
                 user = u;
             });
@@ -252,6 +255,8 @@ describe("Application", function () {
 
             var user = null;
             var failed = false;
+
+            $cookies.loggedIn = true;
 
             Auth.restore().then(function (u) {
                     user = u;
@@ -273,6 +278,8 @@ describe("Application", function () {
                 .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}});
 
             var user = null;
+
+            $cookies.loggedIn = true;
 
             Auth.restore().then(function (u) {
                 user = u;
@@ -307,6 +314,8 @@ describe("Application", function () {
 
             var user = null;
             var failed = false;
+
+            $cookies.loggedIn = true;
 
             Auth.restore().then(function (u) {
                     user = u;
