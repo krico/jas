@@ -2,6 +2,24 @@
 
 Notes for developers working on schedule-appengine...
 
+## Create a local config
+
+To run your dev env you need to create a file called jasify.json inside your user home.
+It should look something like (*you need to replace REAL_CLIENT_ID and REAL_CLIENT_SECRET with, duh...*), but if you
+are not using oauth with google, you can put any value there:
+
+```javascript
+
+{
+  "ApplicationConfig" : {
+    "OAuth2ProviderConfig.Google.ClientId" : "REAL_CLIENT_ID",
+    "OAuth2ProviderConfig.Google.ClientSecret" : "REAL_CLIENT_SECRET"
+  }
+}
+
+
+```
+
 ## Model (Slim3)
 
  * If you get problems missing classes named *Meta (e.g. UserMeta) you need to run `mvn apt:process`

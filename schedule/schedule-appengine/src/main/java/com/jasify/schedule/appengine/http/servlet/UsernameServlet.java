@@ -21,8 +21,6 @@ import java.util.List;
  */
 public class UsernameServlet extends HttpServlet {
 
-    private final JsonResponse OK = new JsonResponse(true);
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(JSON.CONTENT_TYPE);

@@ -5,19 +5,25 @@ import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Text;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.meta.users.User_v0Meta;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
+import com.jasify.schedule.appengine.util.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.jasify.schedule.appengine.Constants.SCHEMA_VERSION_NAME;
 
@@ -75,6 +81,22 @@ public final class SchemaMigration {
             UserServiceFactory.getUserService().create(admin, "admin");
         } catch (UsernameExistsException e) {
             // Don't really care
+        }
+        File jasifyLocalConfig = new File(System.getProperty("user.home"), "jasify.json");
+        if (!jasifyLocalConfig.exists()) {
+            log.error("You MUST create jasify.json (check DEVELOPER.md)!");
+            throw new IllegalStateException("You MUST create jasify.json (check DEVELOPER.md)!");
+        }
+        try (FileReader reader = new FileReader(jasifyLocalConfig)) {
+            Map map = JSON.fromJson(reader, Map.class);
+            Map applicationConfig = (Map) map.get("ApplicationConfig");
+            for (Object key : applicationConfig.keySet()) {
+                Object value = applicationConfig.get(key);
+                log.info("Setting Application property '{}' = '{}'", key, value);
+                ApplicationData.instance().setProperty(key.toString(), value);
+            }
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
         }
     }
 

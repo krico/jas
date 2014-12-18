@@ -107,6 +107,15 @@
         </dependency>
         <!-- END: google appengine frameworks, originally for oauth, but probably much more -->
 
+        <!-- BEGIN: Google API services -->
+        <!-- To get tokeninfo and userinfo from oauth2 -->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-oauth2</artifactId>
+            <version>v2-rev83-1.19.0</version>
+        </dependency>
+        <!-- END: Google API services -->
+
         <!-- BEGIN: Slim3 used for Datastore (see: https://github.com/krico/jas/issues/15) -->
         <dependency>
             <groupId>org.slim3</groupId>
