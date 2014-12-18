@@ -4,14 +4,18 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.mail.Message;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -98,7 +102,7 @@ public final class DefaultMailService implements MailService {
     }
 
     @Override
-    public void sendToApplicationOwners(String subject, String body) {
+    public void sendToApplicationOwners(String subject, String htmlBody) {
         initialize();
         Preconditions.checkNotNull(senderAddress);
         Preconditions.checkNotNull(applicationOwners);
@@ -112,11 +116,30 @@ public final class DefaultMailService implements MailService {
                 msg.addRecipient(Message.RecipientType.TO, owner);
             }
             msg.setSubject(subject);
-            msg.setText(body);
+
+            Multipart mp = new MimeMultipart();
+
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlBody, "text/html");
+            mp.addBodyPart(htmlPart);
+
+            String textBody = Jsoup.parse(htmlBody).text();
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setContent(textBody, "text/plain");
+            mp.addBodyPart(textPart);
+
+            msg.setContent(mp);
+
+
             Transport.send(msg);
         } catch (Exception e) {
             log.warn("Failed to send e-mail", e);
         }
+    }
+
+    private void foo() {
+
+
     }
 
     private static enum StateEnum {
