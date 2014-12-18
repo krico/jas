@@ -20,6 +20,7 @@ Features:
 
 Changes:
 
+  - added [jsoup HTML parser](http://jsoup.org) to extract HTML tags from message body
   - added angular-cookies `bower install angular-cookies -S` for mini stateful things like loggedIn
   - added [jasmine-maven-plugin](http://searls.github.io/jasmine-maven-plugin) to allow for javascript testing
   - ngMessage `bower install angular-messages -S`

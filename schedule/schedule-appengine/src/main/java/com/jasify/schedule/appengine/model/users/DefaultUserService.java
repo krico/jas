@@ -77,6 +77,7 @@ class DefaultUserService implements UserService {
 
     private void notify(User user) {
         try {
+            //TODO: I guess this should come from some kind of template
             String subject = String.format("[Jasify] SignUp [%s]", user.getNameWithCase());
             StringBuilder body = new StringBuilder()
                     .append("<h1>User: ").append(user.getNameWithCase()).append("</h1>")

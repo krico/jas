@@ -57,6 +57,7 @@ public class MailServiceTest {
         MailServicePb.MailMessage mailMessage = sentMessages.get(0);
         assertEquals(subject, mailMessage.getSubject());
         assertEquals(body, mailMessage.getTextBody());
+        assertEquals(body, mailMessage.getHtmlBody());
         String expectedSender = String.format("\"%s\" <%s>", DefaultMailService.DEFAULT_SENDER_NAME, DefaultMailService.DEFAULT_SENDER);
         assertEquals(expectedSender, mailMessage.getSender());
         assertEquals(DefaultMailService.DEFAULT_OWNER, mailMessage.getTo(0));
