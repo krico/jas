@@ -142,8 +142,6 @@ public class UserServiceTest {
     public void testSaveUser() throws Exception {
         testCreateUser();
         User user = service.get(createdUsers.get(0).getId().getId());
-        String expectedCase = "TeSt";
-        user.setNameWithCase(expectedCase);
         String expectedAbout = "About me";
         user.setAbout(expectedAbout);
         String expectedEmail = "test@test.com";
@@ -154,7 +152,6 @@ public class UserServiceTest {
         assertNotNull(updated);
         assertEquals(expectedAbout, updated.getAbout());
         assertEquals(expectedEmail, updated.getEmail());
-        assertEquals(expectedCase, updated.getNameWithCase());
         assertTrue(updated.isAdmin());
     }
 
@@ -169,15 +166,6 @@ public class UserServiceTest {
         user.setName("TesT");
         service.create(user, "password");
         user.setName("TesT1");
-        service.save(user);
-    }
-
-    @Test(expected = FieldValueException.class)
-    public void testSaveFieldValueExceptionWithChangeNameWithCase() throws Exception {
-        User user = service.newUser();
-        user.setName("TesT");
-        service.create(user, "password");
-        user.setNameWithCase("test1");
         service.save(user);
     }
 

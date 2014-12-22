@@ -94,7 +94,6 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getCreated(), jUser.getCreated());
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
-        assertEquals(user.getNameWithCase(), jUser.getName());
         assertEquals(user.getEmail(), jUser.getEmail());
         assertEquals(user.getAbout(), jUser.getAbout());
     }
@@ -119,7 +118,6 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getCreated(), jUser.getCreated());
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
-        assertEquals(user.getNameWithCase(), jUser.getName());
         assertEquals(user.getEmail(), jUser.getEmail());
 
         assertEquals(updatedUser.getAbout(), jUser.getAbout());
@@ -147,7 +145,6 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getCreated(), jUser.getCreated());
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
-        assertEquals(user.getNameWithCase(), jUser.getName());
         assertEquals(user.getEmail(), jUser.getEmail());
 
         assertEquals(updatedUser.getAbout(), jUser.getAbout());

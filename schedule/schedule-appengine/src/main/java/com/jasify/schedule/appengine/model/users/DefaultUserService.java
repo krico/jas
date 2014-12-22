@@ -53,7 +53,6 @@ class DefaultUserService implements UserService {
     @Override
     public User create(User user, String password) throws UsernameExistsException {
         String withCase = Preconditions.checkNotNull(StringUtils.trimToNull(user.getName()), "User.Name cannot be null");
-        user.setNameWithCase(withCase);
         user.setName(StringUtils.lowerCase(withCase));
         user.setPassword(new ShortBlob(DigestUtil.encrypt(password)));
 
@@ -78,9 +77,9 @@ class DefaultUserService implements UserService {
     private void notify(User user) {
         try {
             //TODO: I guess this should come from some kind of template
-            String subject = String.format("[Jasify] SignUp [%s]", user.getNameWithCase());
+            String subject = String.format("[Jasify] SignUp [%s]", user.getName());
             StringBuilder body = new StringBuilder()
-                    .append("<h1>User: ").append(user.getNameWithCase()).append("</h1>")
+                    .append("<h1>User: ").append(user.getName()).append("</h1>")
                     .append("<p>")
                     .append("Id: ").append(user.getId()).append("<br/>")
                     .append("Created: ").append(user.getCreated()).append("<br/>")
@@ -107,12 +106,8 @@ class DefaultUserService implements UserService {
         if (!StringUtils.equals(db.getName(), user.getName())) {
             throw new FieldValueException("Cannot change 'name' with save();");
         }
-        if (!StringUtils.equalsIgnoreCase(db.getName(), user.getNameWithCase())) {
-            throw new FieldValueException("Cannot change 'name' casing with save();");
-        }
         db.setAbout(user.getAbout());
         db.setEmail(StringUtils.lowerCase(user.getEmail()));
-        db.setNameWithCase(user.getNameWithCase());
         db.setAdmin(user.isAdmin());
 
         UserDetail model = db.getDetailRef().getModel();
