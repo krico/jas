@@ -1,5 +1,5 @@
 <form role="form" novalidate name="signUpForm" ng-submit="createUser()">
-    <div class="col-md-3">
+    <div class="col-md-offset-4 col-md-3">
         <div>
             <p>
                 <span class="h4">sign up</span>
@@ -77,10 +77,9 @@
         </div>
         <div>
             <button type="submit" ng-disabled="signUpForm.$invalid || inProgress" ng-hide="registered"
-                    class="btn btn-sm btn-default btn-primary">
+                    class="btn btn-sm btn-primary btn-block">
                 sign up
             </button>
-            <a href="/oauth2/request/google">google</a>
             <span ng-show="inProgress" us-spinner=""></span>
         </div>
     </div>
@@ -88,3 +87,10 @@
         <alert ng-repeat="a in alerts" type="{{a.type}}" close="alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
 </form>
+<div class="col-md-offset-4 col-md-3">
+    <div>
+        <button class="btn btn-sm btn-default btn-block" ng-click="oauth('Google')">
+            sign up with Google
+        </button>
+    </div>
+</div>

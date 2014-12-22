@@ -1,13 +1,13 @@
 package com.jasify.schedule.appengine.http.servlet;
 
 import com.google.api.client.auth.oauth2.*;
-import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Tokeninfo;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * After an oauth2 provider has authenticated a user, the user gets redirected here
@@ -36,12 +37,12 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No session");
             return;
         }
-        String state = (String) session.getAttribute("oauth-request-state");
+        String state = (String) session.getAttribute(HttpUserSession.OAUTH_STATE_KEY);
         if (StringUtils.isBlank(state)) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No state");
             return;
         }
-        session.removeAttribute("oauth-request-state");
+        session.removeAttribute(HttpUserSession.OAUTH_STATE_KEY);
 
         StringBuffer fullUrlBuf = req.getRequestURL();
         if (req.getQueryString() != null) {
@@ -76,20 +77,15 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
                     .build().setFromTokenResponse(tokenResponse);
 
             Oauth2 oauth2 = new Oauth2.Builder(transport, JacksonFactory.getDefaultInstance(), credential).build();
-            log.info("Getting tokenInfo");
             Tokeninfo tokenInfo = oauth2.tokeninfo().setAccessToken(credential.getAccessToken()).execute();
-            log.info("GOT tokenInfo");
-            resp.getWriter().append("Token info: ").append(tokenInfo.toPrettyString()).append("\n");
-
-            log.info("Getting userInfo");
             Userinfoplus userInfo = oauth2.userinfo().get().execute();
-            log.info("GOT userInfo");
-            resp.getWriter().append("User info: ").append(userInfo.toPrettyString()).append("\n");
-
+            PrintWriter writer = resp.getWriter();
+            writer.append("<html><head><script type=\"application/json\" id=\"json-response\">");
+            writer.append(tokenInfo.toString());//TODO: acutal data
+            writer.append("</script></head><body></body></html>");
         } catch (TokenResponseException e) {
             log.info("Failed to get token", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Failed to get token");
-            return;
         }
 
     }

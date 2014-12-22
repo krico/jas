@@ -150,8 +150,8 @@ jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth
 /**
  * SignUpCtrl
  */
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth',
-    function ($scope, $rootScope, AUTH_EVENTS, User, Auth) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth', 'Popup',
+    function ($scope, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
 
         $scope.alerts = [];
 
@@ -213,6 +213,18 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUT
 
                 });
         };
+
+        $scope.oauth = function () {
+            Popup.open('/oauth2/request/Google')
+                .then(
+                function (r) {
+                    $scope.alert('success', 'authenticated: ' + angular.toJson(r));
+                },
+                function (msg) {
+                    $scope.alert('danger', '! ' + msg);
+                });
+        };
+
     }]);
 
 /**

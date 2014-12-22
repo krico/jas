@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.http.servlet;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.http.GenericUrl;
+import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
 
 import javax.servlet.ServletException;
@@ -25,7 +26,7 @@ public class OAuth2CodeRequestServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String state = new BigInteger(130, new SecureRandom()).toString(32);
         HttpSession session = req.getSession(true);
-        session.setAttribute("oauth-request-state", state);
+        session.setAttribute(HttpUserSession.OAUTH_STATE_KEY, state);
 
         GenericUrl redirectUrl = new GenericUrl(req.getRequestURL().toString());
         redirectUrl.setRawPath("/oauth2/callback");
