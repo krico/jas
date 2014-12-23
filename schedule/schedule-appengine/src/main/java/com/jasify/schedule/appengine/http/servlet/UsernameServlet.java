@@ -24,7 +24,7 @@ public class UsernameServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(JSON.CONTENT_TYPE);
-        ;
+
         String username = IOUtils.toString(req.getInputStream());
         List<String> reasons = UsernameValidator.INSTANCE.validate(username);
         if (!reasons.isEmpty()) {

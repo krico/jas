@@ -43,10 +43,6 @@ describe("Application", function () {
             expect(Session.id).toBe(123);
             expect(Session.userId).toBe(555);
 
-            Session.destroy();
-
-            expect(Session.id).toBe(null);
-            expect(Session.userId).toBe(null);
         });
 
         it("should be null after destroy", function () {
@@ -56,6 +52,7 @@ describe("Application", function () {
 
             expect(Session.id).toBe(null);
             expect(Session.userId).toBe(null);
+
         });
 
     });
@@ -141,36 +138,6 @@ describe("Application", function () {
             expect(Session.userId).toBe(user.id);
         });
 
-        it("should fail when login fails and not be authorized", function () {
-
-            var credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', credentials)
-                .respond(401 /* Unauthorized */);
-
-            var succeeded = false;
-            var failed = false;
-            Auth.login(credentials).then(
-                //ok
-                function (u) {
-                    succeeded = true;
-                },
-                //fail
-                function () {
-                    failed = true;
-                });
-
-            //Not flushed (e.g. authentication in progress)
-            expect(succeeded).toBe(false);
-            expect(failed).toBe(false);
-
-            $httpBackend.flush();
-
-            expect(succeeded).toBe(false);
-            expect(failed).toBe(true);
-            expect(Auth.isAuthenticated()).toBe(false);
-
-        });
         it("should fail when login fails and not be authorized", function () {
 
             var credentials = {name: 'test', password: 'password'};
