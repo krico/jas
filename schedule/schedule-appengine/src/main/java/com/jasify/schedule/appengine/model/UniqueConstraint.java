@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model;
 
 import com.google.appengine.api.datastore.*;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.application.ApplicationProperty;
@@ -9,35 +10,49 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelMeta;
+import org.slim3.datastore.StringAttributeMeta;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Class to implement unique constraints on a property.
  * Use it with care :-)
  * <p/>
- * Created by krico on 09/11/14.
+ *
+ * @author krico
+ * @since 09/11/14.
  */
 public class UniqueConstraint {
+    private static final String KIND_CLASSIFIER_SEPARATOR = ".";
     private static final Logger log = LoggerFactory.getLogger(UniqueConstraint.class);
     private static final String COUNT_PROPERTY_NAME = "jasify.UniqueConstraint.count";
-
     private final DatastoreService datastore;
     private final ModelMeta<?> meta;
     private final String uniquePropertyName;
+    private final String uniqueClassifierPropertyName;
     private final String uniqueKind;
 
     UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName) throws UniqueConstraintException {
+        this(meta, uniquePropertyName, null);
+    }
+
+    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, String uniqueClassifierPropertyName) throws UniqueConstraintException {
         this.datastore = DatastoreServiceFactory.getDatastoreService();
         this.meta = meta;
         this.uniquePropertyName = uniquePropertyName;
+        this.uniqueClassifierPropertyName = uniqueClassifierPropertyName;
         this.uniqueKind = determineKind();
     }
 
-    public static UniqueConstraint create(ModelMeta<?> meta, String uniquePropertyName) throws RuntimeException {
+    public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty) throws RuntimeException {
+        return create(meta, uniqueProperty, null);
+    }
+
+    public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty) throws RuntimeException {
         try {
-            return new UniqueConstraint(meta, uniquePropertyName);
+            return new UniqueConstraint(meta, uniqueProperty.getName(), uniqueClassifierProperty == null ? null : uniqueClassifierProperty.getName());
         } catch (UniqueConstraintException e) {
             throw new RuntimeException(e);
         }
@@ -48,7 +63,7 @@ public class UniqueConstraint {
     }
 
     private String getEntityKindPropertyName() {
-        return "jasify.UniqueConstraint." + meta.getKind() + "#" + uniquePropertyName;
+        return "jasify.UniqueConstraint." + meta.getKind() + "#" + uniquePropertyName + (uniqueClassifierPropertyName == null ? "" : "+" + uniqueClassifierPropertyName);
     }
 
     private String determineKind() throws UniqueConstraintException {
@@ -56,7 +71,7 @@ public class UniqueConstraint {
         ApplicationData applicationData = ApplicationData.instance();
         String kind = applicationData.getProperty(name);
         if (kind != null) {
-            log.info("Existing constraint model: {}, prop: {}, uniqueKind = [{}]", meta.getKind(), uniquePropertyName, kind);
+            log.info("Existing constraint: {}, uniqueKind = [{}]", getEntityKindPropertyName(), kind);
             return kind;
         }
         ApplicationProperty indexProperty;
@@ -90,7 +105,7 @@ public class UniqueConstraint {
             Datastore.put(txn, indexProperty); //only put if createIndex works
         } catch (UniqueConstraintException e) {
             uce = e;
-            log.warn("The existing data for {}.{} is non-unique. We failed to create index {}", meta.getKind(), uniquePropertyName, indexProperty.getValue());
+            log.warn("The existing data for: {} is non-unique, failed to create: {}", getEntityKindPropertyName(), e.getMessage());
         }
 
         txn.commit();
@@ -102,43 +117,59 @@ public class UniqueConstraint {
         }
         applicationData.reload();
 
-        log.info("Allocated new index: {}", indexProperty);
+        log.info("Allocated new index: {} for: {}", indexProperty, getEntityKindPropertyName());
         return indexProperty.getValue();
     }
 
     private void createIndex(String kind) throws UniqueConstraintException {
-        log.info("Creating index {} for {}.{}", kind, meta.getKind(), uniquePropertyName);
+        log.info("Creating index {} for {}", kind, getEntityKindPropertyName());
         int count = 0;
         Iterator<Entity> it = Datastore.query(meta).asEntityIterator();
         while (it.hasNext()) {
             Entity next = it.next();
             String uniqueProperty = Objects.toString(next.getProperty(uniquePropertyName));
+            String uniqueClassifier;
+            String suffix;
+            if (uniqueClassifierPropertyName == null) {
+                uniqueClassifier = null;
+                suffix = "";
+            } else {
+                uniqueClassifier = Objects.toString(next.getProperty(uniqueClassifierPropertyName));
+                suffix = KIND_CLASSIFIER_SEPARATOR + uniqueClassifier;
+            }
             Transaction tx = Datastore.beginTransaction();
-            Entity e = new Entity(kind, uniqueProperty);
+            Entity e = new Entity(kind + suffix, uniqueProperty);
             Entity found = Datastore.getOrNull(tx, e.getKey());
             if (found != null) {
                 tx.rollback();
-                throw new UniqueConstraintException(meta, uniquePropertyName, uniqueProperty);
+                throw new UniqueConstraintException(meta, uniquePropertyName, uniqueClassifierPropertyName, uniqueProperty, uniqueClassifier);
             }
             Datastore.put(tx, e);
             tx.commit();
             ++count;
         }
-        log.info("Successfully created index with {} entries {} for {}.{}", count, kind, meta.getKind(), uniquePropertyName);
+        log.info("Successfully created index with {} entries {} for {}", count, kind, getEntityKindPropertyName());
     }
 
-    private void deleteIndex(String kind) {
-        log.warn("Deleting index {} for {}.{}", kind, meta.getKind(), uniquePropertyName);
+    private void deleteIndex(String kindPrefix) {
+        log.warn("Deleting index {} for {}", kindPrefix, getEntityKindPropertyName());
         int count = 0;
-        Iterator<Key> it = Datastore.query(meta).asKeyIterator();
-        while (it.hasNext()) {
-            Datastore.delete(it.next());
-            ++count;
+        Set<String> kinds = ModelMetadataUtil.queryKindsThatStartWith(kindPrefix);
+        for (String kind : kinds) {
+            log.warn("Deleting index {} for {}", kind, getEntityKindPropertyName());
+            Iterator<Key> it = Datastore.query(kind).asKeyIterator();
+            while (it.hasNext()) {
+                Key next = it.next();
+                Datastore.delete(next);
+                ++count;
+            }
         }
-        log.info("Successfully deleted all({}) entries index {} for {}.{}", count, kind, meta.getKind(), uniquePropertyName);
+        log.info("Successfully deleted all({}) entries index {} for {}", count, kindPrefix, getEntityKindPropertyName());
     }
 
     public void reserve(String uniqueValue) throws UniqueConstraintException {
+        Preconditions.checkArgument(uniqueClassifierPropertyName == null, "Classified UniqueConstraint MUST reserve(String, String)");
+
         if (StringUtils.isBlank(uniqueValue))
             throw new UniqueConstraintException("NULL uniqueValue not allowed");
 
@@ -158,8 +189,47 @@ public class UniqueConstraint {
     }
 
     public void release(String uniqueValue) {
+        Preconditions.checkArgument(uniqueClassifierPropertyName == null, "Classified UniqueConstraint MUST release(String, String)");
+
         Transaction tx = Datastore.beginTransaction();
         Key key = Datastore.createKey(uniqueKind, uniqueValue);
+        Entity entity = Datastore.getOrNull(tx, key);
+        if (entity != null) {
+            Datastore.delete(tx, key);
+        }
+        tx.commit();
+    }
+
+    public void reserve(String uniqueValue, String classifier) throws UniqueConstraintException {
+        Preconditions.checkArgument(uniqueClassifierPropertyName != null, "Non classified UniqueConstraint MUST reserve(String)");
+
+
+        if (StringUtils.isBlank(uniqueValue))
+            throw new UniqueConstraintException("NULL uniqueValue not allowed");
+
+        if (StringUtils.isBlank(classifier))
+            throw new UniqueConstraintException("NULL classifier not allowed");
+
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            Key key = Datastore.createKey(uniqueKind + KIND_CLASSIFIER_SEPARATOR + classifier, uniqueValue);
+            Entity entity = Datastore.getOrNull(tx, key);
+            if (entity != null) {
+                tx.rollback();
+                throw new UniqueConstraintException(meta, uniquePropertyName, uniqueClassifierPropertyName, uniqueValue, classifier);
+            }
+            Datastore.put(tx, new Entity(key));
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
+        }
+    }
+
+    public void release(String uniqueValue, String classifier) {
+        Preconditions.checkArgument(uniqueClassifierPropertyName != null, "Non classified UniqueConstraint MUST release(String)");
+
+        Transaction tx = Datastore.beginTransaction();
+        Key key = Datastore.createKey(uniqueKind + KIND_CLASSIFIER_SEPARATOR + classifier, uniqueValue);
         Entity entity = Datastore.getOrNull(tx, key);
         if (entity != null) {
             Datastore.delete(tx, key);
