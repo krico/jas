@@ -18,6 +18,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 import static junit.framework.TestCase.*;
 
@@ -26,7 +27,9 @@ import static junit.framework.TestCase.*;
  * @since 09/11/14.
  */
 public final class TestHelper {
-    private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(new LocalMailServiceTestConfig());
+    private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(
+            new LocalMailServiceTestConfig().setLogMailLevel(Level.FINE)
+    );
     private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(
             new LocalDatastoreServiceTestConfig()

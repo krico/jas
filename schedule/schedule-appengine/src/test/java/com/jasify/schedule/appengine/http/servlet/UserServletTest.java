@@ -15,6 +15,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.servletunit.InvocationContext;
 import com.meterware.servletunit.ServletUnitClient;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -199,7 +200,7 @@ public class UserServletTest {
         JsonUser newUser = JsonUser.parse(text);
         assertTrue("reg should work", newUser.getId() > 0);
         assertEquals(signUp.getName(), newUser.getName());
-        assertEquals(signUp.getEmail(), newUser.getEmail());
+        assertEquals(StringUtils.lowerCase(signUp.getEmail()), newUser.getEmail());
         assertNotNull(newUser.getCreated());
 
         //try again, user should exist
