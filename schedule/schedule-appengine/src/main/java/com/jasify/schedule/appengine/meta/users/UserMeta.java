@@ -17,7 +17,13 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User> name = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User>(this, "name", "name");
 
     /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User> realName = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User>(this, "realName", "realName");
+
+    /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User> email = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User>(this, "email", "email");
+
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.User, java.lang.Boolean> emailVerified = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.User, java.lang.Boolean>(this, "emailVerified", "emailVerified", boolean.class);
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.User, com.google.appengine.api.datastore.ShortBlob> password = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.User, com.google.appengine.api.datastore.ShortBlob>(this, "password", "password", com.google.appengine.api.datastore.ShortBlob.class);
@@ -53,7 +59,9 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setModified((java.util.Date) entity.getProperty("modified"));
         model.setName((java.lang.String) entity.getProperty("name"));
+        model.setRealName((java.lang.String) entity.getProperty("realName"));
         model.setEmail((java.lang.String) entity.getProperty("email"));
+        model.setEmailVerified(booleanToPrimitiveBoolean((java.lang.Boolean) entity.getProperty("emailVerified")));
         model.setPassword((com.google.appengine.api.datastore.ShortBlob) entity.getProperty("password"));
         model.setAdmin(booleanToPrimitiveBoolean((java.lang.Boolean) entity.getProperty("admin")));
         if (model.getDetailRef() == null) {
@@ -75,7 +83,9 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         entity.setProperty("created", m.getCreated());
         entity.setProperty("modified", m.getModified());
         entity.setProperty("name", m.getName());
+        entity.setProperty("realName", m.getRealName());
         entity.setProperty("email", m.getEmail());
+        entity.setProperty("emailVerified", m.isEmailVerified());
         entity.setProperty("password", m.getPassword());
         entity.setProperty("admin", m.isAdmin());
         if (m.getDetailRef() == null) {
@@ -164,10 +174,16 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
             writer.setNextPropertyName("name");
             encoder0.encode(writer, m.getName());
         }
+        if(m.getRealName() != null){
+            writer.setNextPropertyName("realName");
+            encoder0.encode(writer, m.getRealName());
+        }
         if(m.getEmail() != null){
             writer.setNextPropertyName("email");
             encoder0.encode(writer, m.getEmail());
         }
+        writer.setNextPropertyName("emailVerified");
+        encoder0.encode(writer, m.isEmailVerified());
         if(m.getPassword() != null){
             writer.setNextPropertyName("password");
             encoder0.encode(writer, m.getPassword());
@@ -194,8 +210,12 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         m.setModified(decoder0.decode(reader, m.getModified()));
         reader = rootReader.newObjectReader("name");
         m.setName(decoder0.decode(reader, m.getName()));
+        reader = rootReader.newObjectReader("realName");
+        m.setRealName(decoder0.decode(reader, m.getRealName()));
         reader = rootReader.newObjectReader("email");
         m.setEmail(decoder0.decode(reader, m.getEmail()));
+        reader = rootReader.newObjectReader("emailVerified");
+        m.setEmailVerified(decoder0.decode(reader, m.isEmailVerified()));
         reader = rootReader.newObjectReader("password");
         m.setPassword(decoder0.decode(reader, m.getPassword()));
         reader = rootReader.newObjectReader("admin");

@@ -20,11 +20,15 @@ public interface UserService {
 
     User create(User user, String password) throws UsernameExistsException;
 
+    User create(User user, UserLogin login) throws UsernameExistsException, UserLoginExistsException;
+
     User save(User user) throws EntityNotFoundException, FieldValueException;
 
-    User setPassword(User login1, String newPassword) throws EntityNotFoundException;
+    User setPassword(User user, String newPassword) throws EntityNotFoundException;
 
     User get(long id);
+
+    User findByLogin(String provider, String userId);
 
     User findByName(String name);
 
