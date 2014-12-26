@@ -12,9 +12,8 @@ public class UniqueConstraintException extends ModelException {
         super(message);
     }
 
-    @Deprecated
     public UniqueConstraintException(ModelMeta<?> meta, String propertyName, String violatingValue) {
-        super("Entity:" + meta.getKind() + ", property=" + propertyName + ", duplicate=" + violatingValue);
+        this(meta, propertyName, null, violatingValue, null);
     }
 
     public UniqueConstraintException(ModelMeta<?> meta, String propertyName, String classifierName, String violatingValue, String violatingClassifierValue) {

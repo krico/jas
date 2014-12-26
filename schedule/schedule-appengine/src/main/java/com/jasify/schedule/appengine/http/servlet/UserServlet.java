@@ -161,7 +161,7 @@ public class UserServlet extends HttpServlet {
                 String pw = Preconditions.checkNotNull(StringUtils.trimToNull(signUp.getPassword()), "NULL password");
                 userService.create(newUser, pw);
             }
-            if (UserContext.getCurrentUser() != null)
+            if (UserContext.getCurrentUser() == null)
                 new HttpUserSession(newUser).put(req); //login
 
             new JsonUser(newUser).toJson(resp.getWriter());

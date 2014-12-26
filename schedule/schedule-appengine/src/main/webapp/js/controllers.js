@@ -146,7 +146,7 @@ jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth
         };
 
         $scope.oauth = function (provider) {
-            Popup.open('/oauth2/request/' + provider)
+            Popup.open('/oauth2/request/' + provider, provider)
                 .then(
                 function (oauthDetail) {
                     if (oauthDetail.loggedIn) {
@@ -236,7 +236,7 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$log', '$rootScop
         $scope.oauth = function (provider) {
             $scope.inProgress = true;
             $scope.provider = provider;
-            Popup.open('/oauth2/request/' + provider)
+            Popup.open('/oauth2/request/' + provider, provider)
                 .then(
                 function (oauthDetail) {
                     $scope.inProgress = false;
