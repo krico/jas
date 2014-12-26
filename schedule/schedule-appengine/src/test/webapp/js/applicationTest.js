@@ -661,7 +661,7 @@ describe("Application", function () {
             };
             var ok = null;
             var fail = null;
-            Popup.open('testUrl')
+            Popup.open('testUrl', 'Facebook')
                 .then(
                 function () {
                     ok = true;
@@ -671,7 +671,7 @@ describe("Application", function () {
                 });
             expect(param.x).toEqual('testUrl');
             expect(param.y).toEqual('_blank');
-            expect(param.z.indexOf('height=500')).not.toEqual(-1);
+            expect(param.z.indexOf('height=269')).not.toEqual(-1);
 
             ret.closed = true;
 

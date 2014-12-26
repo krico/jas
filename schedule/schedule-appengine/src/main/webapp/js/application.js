@@ -359,6 +359,10 @@ jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', functi
     var waiting = null;
 
     var Popup = {};
+    var Providers = {
+        Google: {},
+        Facebook: {height: 269}
+    };
     Popup.popupWindow = popupWindow;
 
     Popup.getOptions = function (options) {
@@ -381,8 +385,13 @@ jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', functi
         return parts.join(',');
     };
 
-    Popup.open = function (url, opts) {
+    Popup.open = function (url, provider) {
+        var opts = {};
+        if (provider && Providers[provider]) {
+            opts = Providers[provider];
+        }
         var optStr = Popup.optionsString(Popup.getOptions(opts));
+        $log.debug("optStr="+optStr);
         popupWindow = $window.open(url, '_blank', optStr);
         if (popupWindow && popupWindow.focus) {
             popupWindow.focus();
