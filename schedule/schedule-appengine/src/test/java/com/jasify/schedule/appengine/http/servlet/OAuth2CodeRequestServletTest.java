@@ -56,7 +56,7 @@ public class OAuth2CodeRequestServletTest {
         assertEquals(code, parameters.get("state"));
         assertEquals("code", parameters.get("response_type"));
         assertEquals(OAuth2ProviderConfig.ProviderEnum.Google.config().getClientId(), parameters.get("client_id"));
-        assertEquals("http://schedule.jasify.com/oauth2/callback", parameters.get("redirect_uri"));
+        assertEquals("http://schedule.jasify.com/oauth2/callback/Google", parameters.get("redirect_uri"));
     }
 
     public static class TestServlet extends HttpServlet {
