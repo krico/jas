@@ -121,7 +121,7 @@ public class UserLogin implements Serializable {
         if (profile != null ? !profile.equals(userLogin.profile) : userLogin.profile != null) return false;
         if (provider != null ? !provider.equals(userLogin.provider) : userLogin.provider != null) return false;
         if (userId != null ? !userId.equals(userLogin.userId) : userLogin.userId != null) return false;
-        if (userRef != null ? !userRef.equals(userLogin.userRef) : userLogin.userRef != null) return false;
+//        if (userRef != null ? !userRef.equals(userLogin.userRef) : userLogin.userRef != null) return false;
 
         return true;
     }
