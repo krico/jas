@@ -12,6 +12,7 @@ import com.jasify.schedule.appengine.meta.users.User_v0Meta;
 import com.jasify.schedule.appengine.meta.users.User_v1Meta;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.*;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +77,26 @@ public final class SchemaMigration {
             }
         }
 
+        executed |= createOauthProviderConfig();
+
+        return executed;
+    }
+
+    private boolean createOauthProviderConfig() {
+        boolean executed = false;
+        ApplicationData applicationData = ApplicationData.instance();
+        for (OAuth2ProviderConfig.ProviderEnum provider : OAuth2ProviderConfig.ProviderEnum.values()) {
+            Object property1 = applicationData.getProperty(provider.clientIdKey());
+            if (property1 == null) {
+                executed |= true;
+                applicationData.setProperty(provider.clientIdKey(), "SET-CLIENT-ID");
+            }
+            Object property2 = applicationData.getProperty(provider.clientSecretKey());
+            if (property2 == null) {
+                executed |= true;
+                applicationData.setProperty(provider.clientSecretKey(), "SET-CLIENT-SECRET");
+            }
+        }
         return executed;
     }
 
