@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Email;
+import com.google.appengine.api.datastore.Link;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
 
@@ -24,8 +25,16 @@ public final class TypeUtil {
         return text == null ? null : text.getValue();
     }
 
+    public static String toString(Link link) {
+        return link == null ? null : link.getValue();
+    }
+
     public static Text toText(String text) {
         return text == null ? null : new Text(text);
+    }
+
+    public static Link toLink(String url) {
+        return url == null ? null : new Link(url);
     }
 
 

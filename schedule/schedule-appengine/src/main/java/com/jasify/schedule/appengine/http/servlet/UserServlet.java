@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.http.servlet;
 
 import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.http.json.JsonSignUpUser;
 import com.jasify.schedule.appengine.http.json.JsonUser;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -9,6 +10,7 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.JSON;
@@ -20,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -138,22 +141,30 @@ public class UserServlet extends HttpServlet {
     }
 
     private void doPostCreate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
         try {
-            JsonSignUpUser signUp = JsonSignUpUser.parse(req.getReader());
-            String pw = Preconditions.checkNotNull(StringUtils.trimToNull(signUp.getPassword()), "NULL password");
-
             UserService userService = UserServiceFactory.getUserService();
+
+            JsonSignUpUser signUp = JsonSignUpUser.parse(req.getReader());
+            HttpSession session = req.getSession();
 
             User newUser = signUp.writeTo(userService.newUser());
             newUser.setName(signUp.getName());
-
             if (UserContext.isCurrentUserAdmin()) {
                 newUser.setAdmin(signUp.isAdmin());
             }
 
-            new JsonUser(userService.create(newUser, signUp.getPassword())).toJson(resp.getWriter());
+            if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
+                UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+                userService.create(newUser, login);
+                session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+            } else {
+                String pw = Preconditions.checkNotNull(StringUtils.trimToNull(signUp.getPassword()), "NULL password");
+                userService.create(newUser, pw);
+            }
+            if (UserContext.getCurrentUser() != null)
+                new HttpUserSession(newUser).put(req); //login
 
+            new JsonUser(newUser).toJson(resp.getWriter());
         } catch (Exception e) {
             log.warn("Failed to create user", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);

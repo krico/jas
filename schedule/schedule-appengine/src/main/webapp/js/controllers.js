@@ -126,8 +126,8 @@ jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
 /**
  * LoginCtrl
  */
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS',
-    function ($scope, $rootScope, Auth, AUTH_EVENTS) {
+jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS', 'Popup',
+    function ($scope, $rootScope, Auth, AUTH_EVENTS, Popup) {
 
         $scope.credentials = {
             name: '',
@@ -145,18 +145,41 @@ jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth
                 });
         };
 
+        $scope.oauth = function (provider) {
+            Popup.open('/oauth2/request/' + provider)
+                .then(
+                function (oauthDetail) {
+                    if (oauthDetail.loggedIn) {
+                        Auth.restore(true).then(
+                            function (u) {
+                                $scope.setCurrentUser(u);
+                                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                            },
+                            function (msg) {
+                                $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+                            });
+                    }
+                },
+                function (msg) {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+                });
+        };
+
+
     }]);
 
 /**
  * SignUpCtrl
  */
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth', 'Popup',
-    function ($scope, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
+jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$log', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth', 'Popup',
+    function ($scope, $log, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
 
         $scope.alerts = [];
 
         $scope.inProgress = false;
         $scope.registered = false;
+        $scope.provider = null;
+        $scope.user = {};
 
         $scope.alert = function (t, m) {
             $scope.alerts.push({type: t, msg: m});
@@ -183,7 +206,6 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUT
         $scope.createUser = function () {
             $scope.inProgress = true;
 
-            //TODO: this seems a little too complicated...  maybe save could already login the user?
             User.save($scope.user,
                 //User.save success
                 function (value, responseHeaders) {
@@ -192,18 +214,15 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUT
 
                     $scope.alert('success', 'Registration succeeded! You should be redirected shortly...');
 
-                    //Simulate a login
-                    Auth.login($scope.user)
-                        .then(
-                        //Login success
-                        function (user) {
+                    Auth.restore(true).then(
+                        function (u) {
+                            $scope.setCurrentUser(u);
                             $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                            $scope.setCurrentUser(user);
                         },
-                        //Login failure
-                        function (message) {
-                            $scope.alert('danger', 'Funny, even though we just registered you, your login failed...');
+                        function (msg) {
+                            $scope.alert('danger', '! Something went really wrong...');
                         });
+
                 },
                 //User.save error
                 function (httpResponse) {
@@ -214,13 +233,40 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$rootScope', 'AUT
                 });
         };
 
-        $scope.oauth = function () {
-            Popup.open('/oauth2/request/Google')
+        $scope.oauth = function (provider) {
+            $scope.inProgress = true;
+            $scope.provider = provider;
+            Popup.open('/oauth2/request/' + provider)
                 .then(
-                function (r) {
-                    $scope.alert('success', 'authenticated: ' + angular.toJson(r));
+                function (oauthDetail) {
+                    $scope.inProgress = false;
+                    if (oauthDetail.loggedIn) {
+                        $scope.alert('info', 'Authenticated! This user is already registered, will log you in');
+
+                        Auth.restore(true).then(
+                            function (u) {
+                                $scope.setCurrentUser(u);
+                                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                            },
+                            function (msg) {
+                                $scope.alert('danger', '! Something went really wrong...');
+                            });
+                        return;
+                    }
+
+                    if (oauthDetail) {
+                        $scope.user.realName = oauthDetail.realName;
+                        $scope.user.email = oauthDetail.email;
+                    }
+                    $scope.alert('info', 'Authenticated! You just need to finish registering your user by selecting a Display Name');
+                    try {
+                        $scope.signUpForm.username.focus();
+                    } catch (e) {
+                    }
                 },
                 function (msg) {
+                    $scope.inProgress = false;
+                    $scope.provider = null;
                     $scope.alert('danger', '! ' + msg);
                 });
         };

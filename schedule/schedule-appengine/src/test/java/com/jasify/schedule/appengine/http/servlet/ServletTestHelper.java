@@ -35,7 +35,7 @@ public final class ServletTestHelper {
         InvocationContext ic = client.newInvocation(request);
         ic.service();
         WebResponse servletResponse = ic.getServletResponse();
-        ;
+
         assertNotNull(servletResponse);
         assertEquals(responseType, servletResponse.getResponseCode());
         if (responseMessage != null) {

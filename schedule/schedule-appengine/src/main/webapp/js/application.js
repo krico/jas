@@ -184,32 +184,38 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
             data: null
         };
 
-        Auth.restore = function () {
-            if (!$cookies.loggedIn) {
-                restore.invoked = true;
-                restore.failed = true;
-                restore.data = 'Not logged in';
-            }
-
-            if (restore.invoked) {
-                //This is a cache of the last restore call, we make it look like it was called again
-
-                if (restore.promise != null) {
-                    //In case the http request is pending
-                    return $q.when(restore.promise);
+        Auth.restore = function (force) {
+            if (force) {
+                restore.invoked = false;
+                restore.failed = false;
+                restore.promise = null;
+                restore.data = null;
+            } else {
+                if (!$cookies.loggedIn) {
+                    restore.invoked = true;
+                    restore.failed = true;
+                    restore.data = 'Not logged in';
                 }
 
-                var deferred = $q.defer();
+                if (restore.invoked) {
+                    //This is a cache of the last restore call, we make it look like it was called again
 
-                if (restore.failed) {
-                    deferred.reject(restore.data);
-                } else {
-                    deferred.resolve(restore.data);
+                    if (restore.promise != null) {
+                        //In case the http request is pending
+                        return $q.when(restore.promise);
+                    }
+
+                    var deferred = $q.defer();
+
+                    if (restore.failed) {
+                        deferred.reject(restore.data);
+                    } else {
+                        deferred.resolve(restore.data);
+                    }
+
+                    return deferred.promise;
                 }
-
-                return deferred.promise;
             }
-
             restore.invoked = true;
 
             $log.debug("Restoring session...");
@@ -393,9 +399,9 @@ jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', functi
                     var script = popupWindow.document.getElementById("json-response");
                     popupWindow.close();
                     $interval.cancel(waiting);
+                    popupWindow = null;
                     if (script && script.text) {
                         var r = angular.fromJson(script.text);
-                        $log.debug(script.text);
                         deferred.resolve(r);
                     } else {
                         deferred.reject('Bad response...');
@@ -405,8 +411,9 @@ jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', functi
                 $log.debug("E: " + error);
             }
 
-            if (popupWindow.closed) {
+            if (popupWindow && popupWindow.closed) {
                 $interval.cancel(waiting);
+                popupWindow = null;
                 deferred.reject('Authorization failed (window closed)');
             }
         }, 34);
