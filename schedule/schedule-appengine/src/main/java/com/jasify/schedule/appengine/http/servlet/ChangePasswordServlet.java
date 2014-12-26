@@ -72,7 +72,6 @@ public class ChangePasswordServlet extends HttpServlet {
 
         resp.setContentType(JSON.CONTENT_TYPE);
         try {
-
             log.info("User {} changing password of {}", UserContext.getCurrentUser().getUserId(), user.getId());
             userService.setPassword(user, js.getNewPassword());
 

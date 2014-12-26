@@ -1,35 +1,24 @@
 package com.jasify.schedule.appengine;
 
 import com.google.appengine.tools.development.testing.*;
-import com.jasify.schedule.appengine.http.json.JsonLoginRequest;
-import com.jasify.schedule.appengine.http.json.JsonResponse;
-import com.jasify.schedule.appengine.http.servlet.LoginServletTest;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.util.DigestUtil;
-import com.jasify.schedule.appengine.util.JSON;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
 import com.meterware.servletunit.ServletRunner;
-import com.meterware.servletunit.ServletUnitClient;
 import junit.framework.AssertionFailedError;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.DatastoreUtil;
-import org.xml.sax.SAXException;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 import static junit.framework.TestCase.*;
 
@@ -38,9 +27,14 @@ import static junit.framework.TestCase.*;
  * @since 09/11/14.
  */
 public final class TestHelper {
-    private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(new LocalMailServiceTestConfig());
+    private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(
+            new LocalMailServiceTestConfig().setLogMailLevel(Level.FINE)
+    );
     private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
-    private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(
+            new LocalDatastoreServiceTestConfig()
+                    .setNoIndexAutoGen(true)
+    );
     private static final LocalServiceTestHelper memcacheHelper = new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
     private static ServletRunner servletRunner;
 

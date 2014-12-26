@@ -15,6 +15,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.servletunit.InvocationContext;
 import com.meterware.servletunit.ServletUnitClient;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +95,6 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getCreated(), jUser.getCreated());
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
-        assertEquals(user.getNameWithCase(), jUser.getName());
         assertEquals(user.getEmail(), jUser.getEmail());
         assertEquals(user.getAbout(), jUser.getAbout());
     }
@@ -119,7 +119,6 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getCreated(), jUser.getCreated());
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
-        assertEquals(user.getNameWithCase(), jUser.getName());
         assertEquals(user.getEmail(), jUser.getEmail());
 
         assertEquals(updatedUser.getAbout(), jUser.getAbout());
@@ -147,7 +146,6 @@ public class UserServletTest {
         assertEqualsNoMillis(user.getCreated(), jUser.getCreated());
         assertEqualsNoMillis(user.getModified(), jUser.getModified());
         assertEquals(user.getName(), jUser.getName().toLowerCase());
-        assertEquals(user.getNameWithCase(), jUser.getName());
         assertEquals(user.getEmail(), jUser.getEmail());
 
         assertEquals(updatedUser.getAbout(), jUser.getAbout());
@@ -202,7 +200,7 @@ public class UserServletTest {
         JsonUser newUser = JsonUser.parse(text);
         assertTrue("reg should work", newUser.getId() > 0);
         assertEquals(signUp.getName(), newUser.getName());
-        assertEquals(signUp.getEmail(), newUser.getEmail());
+        assertEquals(StringUtils.lowerCase(signUp.getEmail()), newUser.getEmail());
         assertNotNull(newUser.getCreated());
 
         //try again, user should exist

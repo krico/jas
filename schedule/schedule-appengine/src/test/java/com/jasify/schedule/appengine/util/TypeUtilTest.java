@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Email;
+import com.google.appengine.api.datastore.Link;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
 import com.jasify.schedule.appengine.TestHelper;
@@ -30,6 +31,14 @@ public class TypeUtilTest {
         assertNull(TypeUtil.toText(null));
         assertEquals("My text", TypeUtil.toString(new Text("My text")));
         assertEquals(new Text("My text"), TypeUtil.toText("My text"));
+    }
+
+    @Test
+    public void testLink() {
+        assertNull(TypeUtil.toString((Link) null));
+        assertNull(TypeUtil.toLink(null));
+        assertEquals("http://foo.com/avatar.jpg", TypeUtil.toString(new Link("http://foo.com/avatar.jpg")));
+        assertEquals(new Link("http://foo.com/avatar.jpg"), TypeUtil.toLink("http://foo.com/avatar.jpg"));
     }
 
     @Test

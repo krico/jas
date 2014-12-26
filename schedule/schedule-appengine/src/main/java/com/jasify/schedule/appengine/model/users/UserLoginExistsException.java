@@ -4,10 +4,10 @@ import com.jasify.schedule.appengine.model.UniqueConstraintException;
 
 /**
  * @author krico
- * @since 09/11/14.
+ * @since 23/12/14.
  */
-public class UsernameExistsException extends UniqueConstraintException {
-    public UsernameExistsException(String message) {
+public class UserLoginExistsException extends UniqueConstraintException {
+    public UserLoginExistsException(String message) {
         super(message);
     }
 }

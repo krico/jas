@@ -5,19 +5,26 @@ import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Text;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.meta.users.User_v0Meta;
+import com.jasify.schedule.appengine.meta.users.User_v1Meta;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
+import com.jasify.schedule.appengine.util.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.jasify.schedule.appengine.Constants.SCHEMA_VERSION_NAME;
 
@@ -47,8 +54,14 @@ public final class SchemaMigration {
             migrateUser_v0_to_User_v1();
             applicationData.setProperty(user_v0_key, true);
             executed = true;
-        } else {
-            log.debug("No migrations pending...");
+        }
+
+        String user_v1_key = SchemaMigration.class.getName() + ".User_v1";
+        Boolean user_v1_migrated = applicationData.getProperty(user_v1_key);
+        if (Boolean.TRUE != user_v1_migrated) {
+            migrateUser_v1_to_User_v2();
+            applicationData.setProperty(user_v1_key, true);
+            executed = true;
         }
 
         if (EnvironmentUtil.isDevelopment()) {
@@ -75,6 +88,22 @@ public final class SchemaMigration {
             UserServiceFactory.getUserService().create(admin, "admin");
         } catch (UsernameExistsException e) {
             // Don't really care
+        }
+        File jasifyLocalConfig = new File(System.getProperty("user.home"), "jasify.json");
+        if (!jasifyLocalConfig.exists()) {
+            log.error("You MUST create jasify.json (check DEVELOPER.md)!");
+            throw new IllegalStateException("You MUST create jasify.json (check DEVELOPER.md)!");
+        }
+        try (FileReader reader = new FileReader(jasifyLocalConfig)) {
+            Map map = JSON.fromJson(reader, Map.class);
+            Map applicationConfig = (Map) map.get("ApplicationConfig");
+            for (Object key : applicationConfig.keySet()) {
+                Object value = applicationConfig.get(key);
+                log.info("Setting Application property '{}' = '{}'", key, value);
+                ApplicationData.instance().setProperty(key.toString(), value);
+            }
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
         }
     }
 
@@ -126,6 +155,34 @@ public final class SchemaMigration {
 
 
             e.setProperty(SCHEMA_VERSION_NAME, 1);
+        }
+
+        Datastore.put(usersToUpgrade);
+
+        return usersToUpgrade.size();
+    }
+
+    int migrateUser_v1_to_User_v2() {
+        log.warn("Starting schema migration User_v1 to User_v2");
+
+        final User_v1Meta user_v1Meta = User_v1Meta.get();
+        final UserMeta userMeta = UserMeta.get();
+
+        List<Entity> entities = Datastore.query(user_v1Meta.getKind()).asList();
+        List<Entity> usersToUpgrade = new ArrayList<>();
+        for (Entity e : entities) {
+            Object schemaVersion = e.getProperty(SCHEMA_VERSION_NAME);
+            if (schemaVersion instanceof Long && schemaVersion.equals(1L)) {
+                log.info("Upgrading {}/{} to schema version 1", e.getKey(), e.getProperty(user_v1Meta.name.getName()));
+                usersToUpgrade.add(e);
+
+                e.removeProperty(user_v1Meta.nameWithCase.getName());
+
+                e.setProperty(SCHEMA_VERSION_NAME, 2);
+            } else {
+                log.debug("Skipping {} since it has {} = {}", e.getKey(), SCHEMA_VERSION_NAME, schemaVersion);
+            }
+
         }
 
         Datastore.put(usersToUpgrade);

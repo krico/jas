@@ -1,19 +1,19 @@
 <form role="form" novalidate name="signUpForm" ng-submit="createUser()">
-    <div class="col-md-3">
+    <div class="col-md-offset-4 col-md-3">
         <div>
             <p>
-                <span class="h4">sign up</span>
+                <span class="h4">sign up {{provider ? 'with '+provider : ''}}</span>
             </p>
         </div>
         <div>
             <div class="form-group has-feedback"
                  ng-class="{'has-success':hasSuccess('username'), 'has-error': hasError('username')}">
 
-                <label class="sr-only" for="username">Login name</label>
+                <label class="sr-only" for="username">Display Name</label>
                 <input id="username" type="text" class="form-control input-sm" name="username"
-                       placeholder="Login name" ng-model="user.name"
+                       placeholder="Display Name" ng-model="user.name"
                        ng-model-options="{debounce:500}"
-                       required pattern="^...." maxlength="32" username>
+                       required pattern="^[a-zA-Z0-9-._]+$" maxlength="32" minlength="3" username>
                 <span class="glyphicon form-control-feedback"
                       ng-class="{'glyphicon-ok':hasSuccess('username'), 'glyphicon-remove':hasError('username')}"></span>
                 <span class="form-control-feedback"
@@ -22,10 +22,13 @@
                 </span>
 
                 <div class="help-block small" ng-show="hasError('username')" ng-messages="signUpForm.username.$error">
-                    <div class="help-block small" ng-message="required">Pick a username.</div>
-                    <div class="help-block small" ng-message="username">Username not available.</div>
-                    <div class="help-block small" ng-message="pattern">Username too short.</div>
-                    <div class="help-block small" ng-message="maxlength">Username too long.</div>
+                    <div class="help-block small" ng-message="required">Pick a display name.</div>
+                    <div class="help-block small" ng-message="username">Not available</div>
+                    <div class="help-block small" ng-message="pattern">Letters, numbers and characters "-", "." and
+                        "_".
+                    </div>
+                    <div class="help-block small" ng-message="minlength">Must be more than 3 characters long.</div>
+                    <div class="help-block small" ng-message="maxlength">Display name too long.</div>
                 </div>
             </div>
             <div class="form-group has-feedback"
@@ -43,6 +46,20 @@
                 </div>
             </div>
             <div class="form-group has-feedback"
+                 ng-class="{'has-error': hasError('realName'), 'has-success': hasSuccess('realName')}">
+                <label class="sr-only" for="realName">Real Name</label>
+                <input id="realName" type="text" name="realName" ng-model="user.realName" class="form-control input-sm"
+                       placeholder="Real Name">
+                <span class="glyphicon form-control-feedback"
+                      ng-class="{'glyphicon-ok':hasSuccess('realName'), 'glyphicon-remove': hasError('realName')}">
+                </span>
+
+                <div class="help-block small" ng-show="hasError('realName')" ng-messages="signUpForm.realName.$error">
+                    <!-- Never happens -->
+                    <div class="help-block small" ng-message="realName">Real Name not valid.</div>
+                </div>
+            </div>
+            <div ng-if="!provider" class="form-group has-feedback"
                  ng-class="{'has-error': hasError('password'), 'has-success': hasSuccess('password')}">
                 <label class="sr-only" for="password">Password</label>
                 <input id="password" type="password" name="password" ng-model="user.password"
@@ -59,7 +76,7 @@
                     </div>
                 </div>
             </div>
-            <div class="form-group has-feedback"
+            <div ng-if="!provider" class="form-group has-feedback"
                  ng-class="{'has-error': hasError('confirm'), 'has-success': hasSuccess('confirm')}">
                 <label class="sr-only" for="confirm">Confirm password</label>
                 <input id="confirm" type="password" name="confirm" ng-model="user.confirmPassword"
@@ -77,7 +94,7 @@
         </div>
         <div>
             <button type="submit" ng-disabled="signUpForm.$invalid || inProgress" ng-hide="registered"
-                    class="btn btn-sm btn-default btn-primary">
+                    class="btn btn-sm btn-primary btn-block">
                 sign up
             </button>
             <span ng-show="inProgress" us-spinner=""></span>
@@ -87,3 +104,10 @@
         <alert ng-repeat="a in alerts" type="{{a.type}}" close="alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
 </form>
+<div class="col-md-offset-4 col-md-3">
+    <div>
+        <button class="btn btn-sm btn-default btn-block" ng-click="oauth('Google')" ng-if="!provider">
+            sign up with Google
+        </button>
+    </div>
+</div>

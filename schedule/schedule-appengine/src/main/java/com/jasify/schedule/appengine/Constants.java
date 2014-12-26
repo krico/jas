@@ -15,6 +15,8 @@ public final class Constants {
     public static final String DEFAULT_UNIQUE_CONSTRAINT_PREFIX = "UC_";
     public static final String UNIQUE_CONSTRAINT_PREFIX = System.getProperty(UNIQUE_CONSTRAINT_PREFIX_PROPERTY, DEFAULT_UNIQUE_CONSTRAINT_PREFIX);
 
+    public static final String DATASTORE_HIGH_VALUE = "\ufffd";
+
     private Constants() {
     }
 }

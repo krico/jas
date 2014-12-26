@@ -1,12 +1,15 @@
 package com.jasify.schedule.appengine.model;
 
 import com.google.appengine.api.datastore.Category;
+import com.google.appengine.api.datastore.Entity;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
+import com.jasify.schedule.appengine.meta.users.User_v1Meta;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserDetail;
 import com.jasify.schedule.appengine.model.users.User_v0;
+import com.jasify.schedule.appengine.model.users.User_v1;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -65,7 +68,6 @@ public class SchemaMigrationTest {
         assertEquals(55, migratedHim.getId().getId());
         assertEquals("him@him.com", migratedHim.getEmail());
         assertEquals("him", migratedHim.getName());
-        assertEquals("hIm", migratedHim.getNameWithCase());
         assertTrue(Objects.deepEquals(new byte[]{1, 2, 3, 4}, TypeUtil.toBytes(migratedHim.getPassword())));
         assertTrue(migratedHim.isAdmin());
         UserDetail himDetail = Datastore.query(UserDetail.class, migratedHim.getId()).asSingle();
@@ -77,12 +79,70 @@ public class SchemaMigrationTest {
         assertEquals(56, migratedHer.getId().getId());
         assertEquals("her@him.com", migratedHer.getEmail());
         assertEquals("her", migratedHer.getName());
-        assertEquals("hEr", migratedHer.getNameWithCase());
         assertTrue(Objects.deepEquals(new byte[]{1, 1, 1}, TypeUtil.toBytes(migratedHer.getPassword())));
         assertFalse(migratedHer.isAdmin());
         UserDetail herDetail = Datastore.query(UserDetail.class, migratedHer.getId()).asSingle();
         assertNull(herDetail);
 
         assertEquals(0, SchemaMigration.instance().migrateUser_v0_to_User_v1());
+    }
+
+    @Test
+    public void testMigrateUser_v1_to_User_v2() throws Exception {
+        List<Entity> entities = Datastore.query(UserMeta.get()).sort(UserMeta.get().id.asc).asEntityList();
+        for (Entity entity : entities) {
+            assertTrue(entity.hasProperty(User_v1Meta.get().nameWithCase.getName()));
+        }
+
+        User_v1 him = new User_v1();
+        him.setId(Datastore.createKey(User_v1.class, 55));
+        him.setAbout("About him...");
+        him.setEmail("him@him.com");
+        him.setName("him");
+        him.setNameWithCase("hIm");
+        him.setPassword(TypeUtil.toShortBlob(new byte[]{1, 2, 3, 4}));
+        him.setAdmin(true);
+
+        User_v1 her = new User_v1();
+        her.setId(Datastore.createKey(User_v1.class, 56));
+        her.setEmail("her@him.com");
+        her.setName("her");
+        her.setNameWithCase("hEr");
+        her.setPassword(TypeUtil.toShortBlob(new byte[]{1, 1, 1}));
+
+        Datastore.put(him, her, him.getDetailRef().getModel());
+
+        assertEquals(2, SchemaMigration.instance().migrateUser_v1_to_User_v2());
+
+        List<User> users = Datastore.query(UserMeta.get()).sort(UserMeta.get().id.asc).asList();
+        assertNotNull(users);
+        assertEquals(2, users.size());
+        User migratedHim = users.get(0);
+        assertEquals(55, migratedHim.getId().getId());
+        assertEquals("him@him.com", migratedHim.getEmail());
+        assertEquals("him", migratedHim.getName());
+        assertTrue(Objects.deepEquals(new byte[]{1, 2, 3, 4}, TypeUtil.toBytes(migratedHim.getPassword())));
+        assertTrue(migratedHim.isAdmin());
+        UserDetail himDetail = Datastore.query(UserDetail.class, migratedHim.getId()).asSingle();
+        assertNotNull(himDetail);
+        assertEquals("About him...", TypeUtil.toString(himDetail.getAbout()));
+        assertEquals("Link not working", himDetail, migratedHim.getDetailRef().getModel());
+
+        User migratedHer = users.get(1);
+        assertEquals(56, migratedHer.getId().getId());
+        assertEquals("her@him.com", migratedHer.getEmail());
+        assertEquals("her", migratedHer.getName());
+        assertTrue(Objects.deepEquals(new byte[]{1, 1, 1}, TypeUtil.toBytes(migratedHer.getPassword())));
+        assertFalse(migratedHer.isAdmin());
+        UserDetail herDetail = Datastore.query(UserDetail.class, migratedHer.getId()).asSingle();
+        assertNull(herDetail);
+
+        assertEquals(0, SchemaMigration.instance().migrateUser_v0_to_User_v1());
+
+        entities = Datastore.query(UserMeta.get()).sort(UserMeta.get().id.asc).asEntityList();
+        for (Entity entity : entities) {
+            assertFalse(entity.hasProperty(User_v1Meta.get().nameWithCase.getName()));
+        }
+
     }
 }

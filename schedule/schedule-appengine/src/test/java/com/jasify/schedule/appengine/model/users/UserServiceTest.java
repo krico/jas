@@ -45,7 +45,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testCreateUser() throws Exception {
+    public void testCreateWithPassword() throws Exception {
         User user1 = service.newUser();
         user1.setName("test");
         service.create(user1, "password");
@@ -67,8 +67,29 @@ public class UserServiceTest {
         assertEquals(createdUsers.size(), service.getTotalUsers());
     }
 
+    private UserLogin newGoogleLogin() {
+        return new UserLogin("Google", "1234");
+    }
+
+    @Test
+    public void testCreateWithUserLogin() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        service.create(user1, newGoogleLogin());
+        assertFalse(user1.isAdmin());
+        assertNull("Password should not be set", user1.getPassword());
+        User user2 = service.newUser();
+        user2.setName("krico1");
+        service.create(user2, new UserLogin("Google", "5678"));
+        assertFalse(user2.isAdmin());
+        assertNull("Password should not be set", user2.getPassword());
+        createdUsers.add(user1);
+        createdUsers.add(user2);
+        assertEquals(createdUsers.size(), service.getTotalUsers());
+    }
+
     @Test(expected = UsernameExistsException.class)
-    public void testCreateUserWithSameNameThrows() throws Exception {
+    public void testCreateWithPasswordSameNameThrows() throws Exception {
         User user1 = service.newUser();
         user1.setName("test");
         service.create(user1, "password1");
@@ -78,7 +99,37 @@ public class UserServiceTest {
     }
 
     @Test(expected = UsernameExistsException.class)
-    public void testCreateUserWithSameNameAndDifferentCaseThrows() throws Exception {
+    public void testCreateWithUserLoginSameNameAsPasswordThrows() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        service.create(user1, "password1");
+        User user2 = service.newUser();
+        user2.setName("test");
+        service.create(user2, new UserLogin("Google", "123456"));
+    }
+
+    @Test(expected = UsernameExistsException.class)
+    public void testCreateWithUserLoginSameNameAsUserLoginThrows() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        service.create(user1, new UserLogin("Google", "123456"));
+        User user2 = service.newUser();
+        user2.setName("test");
+        service.create(user2, "password");
+    }
+
+    @Test(expected = UserLoginExistsException.class)
+    public void testCreateWithExistingUserLogin() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test1");
+        service.create(user1, new UserLogin("Google", "123456"));
+        User user2 = service.newUser();
+        user2.setName("test2");
+        service.create(user2, new UserLogin("Google", "123456"));
+    }
+
+    @Test(expected = UsernameExistsException.class)
+    public void testCreateWithPasswordSameNameAndDifferentCaseThrows() throws Exception {
         User user1 = service.newUser();
         user1.setName("test");
         service.create(user1, "password1");
@@ -87,9 +138,19 @@ public class UserServiceTest {
         service.create(user2, "password2");
     }
 
+    @Test(expected = UsernameExistsException.class)
+    public void testCreateWithUserLoginSameNameAndDifferentCaseThrows() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        service.create(user1, new UserLogin("Google", "1"));
+        User user2 = service.newUser();
+        user2.setName("teSt");
+        service.create(user2, new UserLogin("Google", "2"));
+    }
+
     @Test
     public void testGet() throws Exception {
-        testCreateUser();
+        testCreateWithPassword();
         HashSet<Long> usedIds = new HashSet<>();
         User expected1 = createdUsers.get(0);
         long id1 = expected1.getId().getId();
@@ -113,7 +174,7 @@ public class UserServiceTest {
 
     @Test
     public void testSetPassword() throws Exception {
-        testCreateUser();
+        testCreateWithPassword();
         User login1 = service.login("test", "password");
         assertNotNull(login1);
         service.setPassword(login1, "newPassword");
@@ -124,7 +185,7 @@ public class UserServiceTest {
 
     @Test
     public void testFindUserByName() throws Exception {
-        testCreateUser();
+        testCreateWithPassword();
         User user = createdUsers.get(0);
         User krico = service.findByName(user.getName().toUpperCase());
         assertNotNull("Upper case", krico);
@@ -139,22 +200,52 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testFindUserByEmail() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("mE@Foo.baR");
+        service.create(user1, "password");
+        User fetched = service.findByEmail("mE@Foo.baR".toUpperCase());
+        assertNotNull("Upper case", fetched);
+        assertEquals(user1, fetched);
+
+        assertNull(service.findByEmail("sasquatch"));
+        assertNull(service.findByEmail(null));
+        assertNull(service.findByEmail(""));
+    }
+
+    @Test
+    public void testFindUserByUserLogin() throws Exception {
+        testCreateWithUserLogin();
+        User user = createdUsers.get(0);
+        UserLogin userLogin = newGoogleLogin();
+        User krico = service.findByLogin(userLogin.getProvider(), userLogin.getUserId());
+        assertNotNull(krico);
+        assertEquals(user, krico);
+
+        assertNull(service.findByLogin(userLogin.getProvider() + "x", userLogin.getUserId()));
+        assertNull(service.findByLogin(userLogin.getProvider(), userLogin.getUserId() + "x"));
+        assertNull(service.findByLogin(userLogin.getProvider(), null));
+        assertNull(service.findByLogin(null, userLogin.getUserId()));
+
+    }
+
+    @Test
     public void testSaveUser() throws Exception {
-        testCreateUser();
+        testCreateWithPassword();
         User user = service.get(createdUsers.get(0).getId().getId());
-        String expectedCase = "TeSt";
-        user.setNameWithCase(expectedCase);
         String expectedAbout = "About me";
         user.setAbout(expectedAbout);
         String expectedEmail = "test@test.com";
         user.setEmail("teSt@tesT.com");
+        user.setRealName("Real Name");
         user.setAdmin(true);
         service.save(user);
         User updated = service.get(user.getId().getId());
         assertNotNull(updated);
         assertEquals(expectedAbout, updated.getAbout());
         assertEquals(expectedEmail, updated.getEmail());
-        assertEquals(expectedCase, updated.getNameWithCase());
+        assertEquals("Real Name", updated.getRealName());
         assertTrue(updated.isAdmin());
     }
 
@@ -169,15 +260,6 @@ public class UserServiceTest {
         user.setName("TesT");
         service.create(user, "password");
         user.setName("TesT1");
-        service.save(user);
-    }
-
-    @Test(expected = FieldValueException.class)
-    public void testSaveFieldValueExceptionWithChangeNameWithCase() throws Exception {
-        User user = service.newUser();
-        user.setName("TesT");
-        service.create(user, "password");
-        user.setNameWithCase("test1");
         service.save(user);
     }
 
@@ -207,6 +289,22 @@ public class UserServiceTest {
     }
 
     @Test(expected = LoginFailedException.class)
+    public void testUserWitLoginFailsToLoginWithPassword() throws Exception {
+        User user = service.newUser();
+        user.setName("TesT");
+        service.create(user, new UserLogin("Google", "12345"));
+        service.login(user.getName(), "password");
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testUserWitLoginFailsToLoginWithNullPassword() throws Exception {
+        User user = service.newUser();
+        user.setName("TesT");
+        service.create(user, new UserLogin("Google", "12345"));
+        service.login(user.getName(), null);
+    }
+
+    @Test(expected = LoginFailedException.class)
     public void testUserLoginNonExistentFails() throws Exception {
         User user = service.newUser();
         user.setName("TesT");
@@ -224,7 +322,7 @@ public class UserServiceTest {
         service.login("", "");
     }
 
-    @Test(expected = LoginFailedException.class)
+    @Test(expected = NullPointerException.class)
     public void testUserLoginNullFails() throws Exception {
         service.login(null, null);
     }

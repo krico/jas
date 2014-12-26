@@ -22,3 +22,28 @@
             $httpBackend.expectPOST('/user/555', {id: 555, name: 'user', email: 'user2@jasify.com'})
             $httpBackend.expectGET('/user').respond(200, [{id: 555, name: 'user', email: 'user@jasify.com'}]);
 ```
+
+```
+Token info: {
+  "access_type" : "online",
+  "audience" : "205399701546-0h55q7jogn0kp1mdebgvd0foahobkj6i.apps.googleusercontent.com",
+  "email" : "krico@cwa.to",
+  "expires_in" : 3595,
+  "issued_to" : "205399701546-0h55q7jogn0kp1mdebgvd0foahobkj6i.apps.googleusercontent.com",
+  "scope" : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.me",
+  "user_id" : "113701523626567860489",
+  "verified_email" : true
+}
+User info: {
+  "email" : "krico@cwa.to",
+  "family_name" : "Asmussen",
+  "gender" : "male",
+  "given_name" : "Christian",
+  "hd" : "cwa.to",
+  "id" : "113701523626567860489",
+  "link" : "https://plus.google.com/113701523626567860489",
+  "name" : "Christian Asmussen",
+  "picture" : "https://lh3.googleusercontent.com/-0fPNn_hjgyE/AAAAAAAAAAI/AAAAAAAAALY/zecPUz4G_pA/photo.jpg",
+  "verified_email" : true
+}
+```

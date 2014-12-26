@@ -357,7 +357,7 @@ describe('Controllers', function () {
 
             //after save
             $httpBackend
-                .expectPOST('/auth/login', $scope.user)
+                .expectGET('/auth/restore')
                 .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: $scope.user.name}});
 
             $scope.createUser();
@@ -426,7 +426,7 @@ describe('Controllers', function () {
 
             //after save
             $httpBackend
-                .expectPOST('/auth/login', $scope.user)
+                .expectGET('/auth/restore')
                 .respond(401);
 
             $scope.createUser();

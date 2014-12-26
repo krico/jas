@@ -184,32 +184,38 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
             data: null
         };
 
-        Auth.restore = function () {
-            if (!$cookies.loggedIn) {
-                restore.invoked = true;
-                restore.failed = true;
-                restore.data = 'Not logged in';
-            }
-
-            if (restore.invoked) {
-                //This is a cache of the last restore call, we make it look like it was called again
-
-                if (restore.promise != null) {
-                    //In case the http request is pending
-                    return $q.when(restore.promise);
+        Auth.restore = function (force) {
+            if (force) {
+                restore.invoked = false;
+                restore.failed = false;
+                restore.promise = null;
+                restore.data = null;
+            } else {
+                if (!$cookies.loggedIn) {
+                    restore.invoked = true;
+                    restore.failed = true;
+                    restore.data = 'Not logged in';
                 }
 
-                var deferred = $q.defer();
+                if (restore.invoked) {
+                    //This is a cache of the last restore call, we make it look like it was called again
 
-                if (restore.failed) {
-                    deferred.reject(restore.data);
-                } else {
-                    deferred.resolve(restore.data);
+                    if (restore.promise != null) {
+                        //In case the http request is pending
+                        return $q.when(restore.promise);
+                    }
+
+                    var deferred = $q.defer();
+
+                    if (restore.failed) {
+                        deferred.reject(restore.data);
+                    } else {
+                        deferred.resolve(restore.data);
+                    }
+
+                    return deferred.promise;
                 }
-
-                return deferred.promise;
             }
-
             restore.invoked = true;
 
             $log.debug("Restoring session...");
@@ -342,6 +348,80 @@ jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $lo
      'query': {method: 'GET', isArray: true}
      });
      */
+}]);
+
+/**
+ * Popup services (windows)
+ * Inspired by satelizer (https://github.com/sahat/satellizer)
+ */
+jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', function ($log, $q, $interval, $window) {
+    var popupWindow = null;
+    var waiting = null;
+
+    var Popup = {};
+    Popup.popupWindow = popupWindow;
+
+    Popup.getOptions = function (options) {
+        options = options || {};
+        var width = options.width || 500;
+        var height = options.height || 500;
+        return angular.extend({
+            width: width,
+            height: height,
+            left: $window.screenX + (($window.outerWidth - width) / 2),
+            top: $window.screenY + (($window.outerHeight - height) / 2.5)
+        }, options);
+    };
+
+    Popup.optionsString = function (options) {
+        var parts = [];
+        angular.forEach(options, function (value, key) {
+            parts.push(key + '=' + value);
+        });
+        return parts.join(',');
+    };
+
+    Popup.open = function (url, opts) {
+        var optStr = Popup.optionsString(Popup.getOptions(opts));
+        popupWindow = $window.open(url, '_blank', optStr);
+        if (popupWindow && popupWindow.focus) {
+            popupWindow.focus();
+        }
+        var deferred = $q.defer();
+
+        waiting = $interval(function () {
+            try {
+                if (popupWindow.document &&
+                    popupWindow.document.readyState == 'complete' &&
+                    popupWindow.document.domain === document.domain &&
+                    popupWindow.location &&
+                    popupWindow.location.pathname.indexOf('/oauth2/callback') == 0) {
+                    var script = popupWindow.document.getElementById("json-response");
+                    popupWindow.close();
+                    $interval.cancel(waiting);
+                    popupWindow = null;
+                    if (script && script.text) {
+                        var r = angular.fromJson(script.text);
+                        deferred.resolve(r);
+                    } else {
+                        deferred.reject('Bad response...');
+                    }
+                }
+            } catch (error) {
+                $log.debug("E: " + error);
+            }
+
+            if (popupWindow && popupWindow.closed) {
+                $interval.cancel(waiting);
+                popupWindow = null;
+                deferred.reject('Authorization failed (window closed)');
+            }
+        }, 34);
+        return deferred.promise;
+    };
+
+
+    return Popup;
 }]);
 
 /**
