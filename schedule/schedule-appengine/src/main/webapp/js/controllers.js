@@ -32,6 +32,12 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope',
                 $log.info('Modal dismissed at: ' + new Date());
             });
         });
+        $scope.$on(AUTH_EVENTS.loginFailed, function () {
+            var modalInstance = $modal.open({
+                templateUrl: 'views/modal/login-failed.html',
+                size: 'sm'
+            });
+       });
 
         $scope.$on(AUTH_EVENTS.notAuthorized, function () {
             var modalInstance = $modal.open({
