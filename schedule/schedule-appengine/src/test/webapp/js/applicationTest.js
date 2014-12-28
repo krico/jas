@@ -1,6 +1,6 @@
 describe("Application", function () {
 
-    var $httpBackend, $rootScope, $windowMock;
+    var $httpBackend, $rootScope, $windowMock, $gapiMock;
 
     beforeEach(module('jasifyScheduleApp', function ($provide) {
         $provide.value('$log', console);
@@ -9,6 +9,25 @@ describe("Application", function () {
             innerWidth: 500
         };
         $provide.value('$window', $windowMock);
+        $gapiMock = {data: {}};
+        $gapiMock.client = {};
+        $gapiMock.client.load = function (api, version, callback, path) {
+            $gapiMock.data.load = {
+                api: api,
+                version: version,
+                callback: callback,
+                path: path,
+                then: {}
+            };
+            return {
+                then: function (success, fail) {
+                    $gapiMock.data.load.then.success = success;
+                    $gapiMock.data.load.then.fail = fail;
+                }
+            };
+        };
+        $provide.value('$gapi', $gapiMock);
+
     }));
 
     beforeEach(inject(function (_$httpBackend_, _$rootScope_) {
@@ -53,6 +72,105 @@ describe("Application", function () {
             expect(Session.id).toBe(null);
             expect(Session.userId).toBe(null);
 
+        });
+
+    });
+
+    describe('Endpoint', function () {
+        var Endpoint;
+        beforeEach(inject(function (_Endpoint_) {
+            Endpoint = _Endpoint_;
+        }));
+
+        it('loads proper api on init', function () {
+            Endpoint.init();
+            expect($gapiMock.data.load.api).toEqual('jasify');
+            expect($gapiMock.data.load.version).toEqual('v1');
+            expect($gapiMock.data.load.path).toEqual('/_ah/api');
+            expect($gapiMock.data.load.callback).toBe(null);
+            expect($gapiMock.data.load.then.success).toBeDefined();
+            expect($gapiMock.data.load.then.success).toBeDefined();
+            expect(angular.isFunction($gapiMock.data.load.then.success)).toBe(true);
+            expect(angular.isFunction($gapiMock.data.load.then.fail)).toBe(true);
+        });
+
+        it('load returns a promise', function () {
+            var loadPromise = Endpoint.load();
+            expect(loadPromise.then).toBeDefined();
+            expect(angular.isFunction(loadPromise.then)).toBe(true);
+        });
+
+        it('multiple loads resolve after init', function () {
+            var ok1 = null;
+            var fail1 = null;
+            Endpoint.load().then(
+                function (r) {
+                    ok1 = true;
+                },
+                function (r) {
+                    fail1 = true;
+                }
+            );
+            expect(ok1).toBe(null);
+            expect(fail1).toBe(null);
+
+            var ok2 = null;
+            var fail2 = null;
+            Endpoint.load().then(
+                function (r) {
+                    ok2 = true;
+                },
+                function (r) {
+                    fail2 = true;
+                }
+            );
+            expect(ok2).toBe(null);
+            expect(fail2).toBe(null);
+
+            $rootScope.$apply(); //not resolved
+
+            expect(ok1).toBe(null);
+            expect(fail1).toBe(null);
+            expect(ok2).toBe(null);
+            expect(fail2).toBe(null);
+
+            Endpoint.init();
+            $gapiMock.data.load.then.success(); //TODO: test then.fail() case
+
+            expect(ok1).toBe(null);
+            expect(fail1).toBe(null);
+            expect(ok2).toBe(null);
+            expect(fail2).toBe(null);
+
+            $rootScope.$apply();
+
+            expect(ok1).toBe(true);
+            expect(fail1).toBe(null);
+            expect(ok2).toBe(true);
+            expect(fail2).toBe(null);
+
+            var ok3 = null;
+            var fail3 = null;
+            Endpoint.load().then(
+                function (r) {
+                    ok3 = true;
+                },
+                function (r) {
+                    fail3 = true;
+                }
+            );
+
+            expect(ok3).toBe(null);
+            expect(fail3).toBe(null);
+
+            $rootScope.$apply(); //resolve
+
+            expect(ok1).toBe(true);
+            expect(fail1).toBe(null);
+            expect(ok2).toBe(true);
+            expect(fail2).toBe(null);
+            expect(ok3).toBe(true);
+            expect(fail3).toBe(null);
         });
 
     });

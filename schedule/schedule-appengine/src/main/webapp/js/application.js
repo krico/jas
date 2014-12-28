@@ -2,6 +2,40 @@
  * Created by krico on 02/11/14.
  */
 
+var gapi = gapi || {};
+var jas = {};
+
+/**
+ * This is the function called by the google api client when gapi is loaded
+ */
+function initializeEndpoint() {
+    window.endpointInitialize();
+}
+
+/**
+ * When you are not sure what an object is, this function tries to help.
+ * Example $log.debug('What is this: ' + jas.debugObjext(x));
+ *
+ * @param o anytihng
+ * @returns {string} with the debug data
+ */
+jas.debugObject = function jasDebugObject(o) {
+    try {
+        return o.toSource();
+    } catch (e) {
+    }
+    var dbg = '';
+    for (i in o) {
+        dbg += 'o.' + i + ' = "';
+        try {
+            dbg += o[i];
+        } catch (e) {
+        }
+        dbg += '"\n';
+    }
+    return dbg;
+};
+
 /**
  * A function for quoting regular expressions
  * @param str the regex
@@ -124,6 +158,18 @@ jasifyScheduleApp.constant('AUTH_EVENTS', {
     notGuest: 'auth-not-guest'
 });
 
+
+/**
+ * To follow the "Angular way", instead of accessing gapi.client directly,
+ * we provide the $gapi service and use it instead.  This allows us to
+ * easily mock it for tests for example.
+ */
+jasifyScheduleApp.provider('$gapi', function $GapiProvider() {
+    this.$get = function () {
+        return gapi;
+    };
+});
+
 /**
  *  Session is a singleton that mimics the server-side session
  */
@@ -145,6 +191,83 @@ jasifyScheduleApp.service('Session', function () {
 
     return this;
 });
+
+/**
+ * Endpoint service, provide the glue between AngularJs and gapi (or $gapi).
+ * It registers a 'global' function on $window that is called when the gapi client load
+ * is finished.  You can call 'Endpoint.load()' to get a promise that get resolved when
+ * the gapi client is loaded.  After that you can use either $gapi directly, or you can
+ * use Endpoint to get the api.
+ */
+jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
+    function ($log, $q, $window, $gapi) {
+
+        /**
+         * Function to initialize google cloud endpoints
+         */
+        $window.endpointInitialize = function () {
+            Endpoint.init();
+        };
+
+        var Endpoint = {
+            loaded: false,
+            promise: null,
+            deferred: null,
+            api: null,
+            failed: false,
+            settings: null
+        };
+
+
+        /**
+         * Get a promise that gets resolved when the endpoint is loaded
+         */
+        Endpoint.load = function () {
+            if (Endpoint.loaded) {
+                var deferred = $q.defer();
+                if (Endpoint.failed) {
+                    deferred.reject('Loading failed');
+                } else {
+                    deferred.resolve('already loaded');
+                }
+                return deferred.promise;
+            }
+            if (Endpoint.promise != null) {
+                return $q.when(Endpoint.promise); //loading
+            }
+            Endpoint.deferred = $q.defer();
+            Endpoint.promise = Endpoint.deferred.promise;
+            return Endpoint.promise;
+        };
+
+        Endpoint.init = function () {
+            $log.debug('Endpoint.init');
+            if (Endpoint.promise == null) {
+                Endpoint.load(); //create promise
+            }
+            $gapi.client.load('jasify', 'v1', null, '/_ah/api').then(
+                function () {
+                    Endpoint.loaded = true;
+                    Endpoint.promise = null;
+                    Endpoint.deferred.resolve('loaded');
+                    Endpoint.deferred = null;
+                    Endpoint.api = $gapi.client.jasify;
+                    $log.debug('Endpoint.initialized');
+                },
+                function (r) {
+                    $log.warn('Failed to load api: ' + r);
+                    Endpoint.loaded = true;
+                    Endpoint.failed = true;
+                    Endpoint.promise = null;
+                    Endpoint.deferred.reject('failed');
+                    Endpoint.deferred = null;
+
+                });
+        };
+
+        return Endpoint;
+    }]);
+
 
 /**
  * Auth service
