@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -86,6 +87,96 @@ public class UserServiceTest {
         createdUsers.add(user1);
         createdUsers.add(user2);
         assertEquals(createdUsers.size(), service.getTotalUsers());
+    }
+
+    @Test
+    public void testGetUserLoginsWithOneLogin() throws Exception {
+        User googleUser = service.newUser();
+        googleUser.setName("test");
+        UserLogin originalGoogleLogin = newGoogleLogin();
+        googleUser = service.create(googleUser, originalGoogleLogin);
+
+        List<UserLogin> googleLogins = service.getUserLogins(googleUser);
+        assertNotNull(googleLogins);
+        assertEquals(1, googleLogins.size());
+        UserLogin userLogin = googleLogins.get(0);
+        assertEquals(originalGoogleLogin.getProvider(), userLogin.getProvider());
+        assertEquals(originalGoogleLogin.getUserId(), userLogin.getUserId());
+        assertNotNull(originalGoogleLogin.getUserRef());
+        assertNotNull(originalGoogleLogin.getUserRef().getModel());
+        assertEquals(googleUser, originalGoogleLogin.getUserRef().getModel());
+    }
+
+    @Test
+    public void testGetUserLoginsWithNoLogin() throws Exception {
+        User user = service.newUser();
+        user.setName("test");
+        user = service.create(user, "password");
+
+        List<UserLogin> logins = service.getUserLogins(user);
+        assertNotNull(logins);
+        assertEquals(0, logins.size());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testAddUserLoginThrowsOnNotFound() throws Exception {
+        User user = service.newUser();
+        user.setName("test");
+        service.addLogin(user, newGoogleLogin());
+    }
+
+    @Test(expected = UserLoginExistsException.class)
+    public void testAddUserLoginThrowsOnDuplicate() throws Exception {
+        User user = service.newUser();
+        user.setName("test");
+        user = service.create(user, "password");
+
+        UserLogin login1 = newGoogleLogin();
+        service.addLogin(user, login1);
+        service.addLogin(user, login1);
+    }
+
+    @Test
+    public void testAddUserLogin() throws Exception {
+        User user = service.newUser();
+        user.setName("test");
+        user = service.create(user, "password");
+
+        UserLogin login1 = newGoogleLogin();
+        service.addLogin(user, login1);
+
+        List<UserLogin> logins = service.getUserLogins(user);
+        assertNotNull(logins);
+        assertEquals(1, logins.size());
+        assertEquals(login1.getProvider(), logins.get(0).getProvider());
+        assertEquals(login1.getUserId(), logins.get(0).getUserId());
+
+        UserLogin login2 = new UserLogin("Google", "4321");
+        service.addLogin(user, login2);
+
+        logins = service.getUserLogins(user);
+        assertNotNull(logins);
+        assertEquals(2, logins.size());
+        Collections.sort(logins);
+        assertEquals(login1.getProvider(), logins.get(0).getProvider());
+        assertEquals(login1.getUserId(), logins.get(0).getUserId());
+        assertEquals(login2.getProvider(), logins.get(1).getProvider());
+        assertEquals(login2.getUserId(), logins.get(1).getUserId());
+
+        UserLogin login3 = new UserLogin("Facebook", "4321");
+        service.addLogin(user, login3);
+
+        logins = service.getUserLogins(user);
+        assertNotNull(logins);
+        assertEquals(3, logins.size());
+        Collections.sort(logins);
+        assertEquals(login3.getProvider(), logins.get(0).getProvider());
+        assertEquals(login3.getUserId(), logins.get(0).getUserId());
+        assertEquals(login1.getProvider(), logins.get(1).getProvider());
+        assertEquals(login1.getUserId(), logins.get(1).getUserId());
+        assertEquals(login2.getProvider(), logins.get(2).getProvider());
+        assertEquals(login2.getUserId(), logins.get(2).getUserId());
+
     }
 
     @Test(expected = UsernameExistsException.class)

@@ -9,6 +9,7 @@ import org.slim3.datastore.Datastore;
 
 import java.util.HashSet;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.*;
 
@@ -39,6 +40,22 @@ public class UserLoginTest {
         assertFalse(loginSet.add(e));
     }
 
+    @Test
+    public void testCompare(){
+        UserLogin u1 = new UserLogin("a","1");
+        UserLogin u2 = new UserLogin("a","2");
+        UserLogin u3 = new UserLogin("b","1");
+
+        assertEquals(0, u1.compareTo(u1));
+        assertEquals(0, u2.compareTo(u2));
+        assertEquals(0, u3.compareTo(u3));
+        assertEquals(-1, u1.compareTo(u3));
+        assertEquals(1, u3.compareTo(u1));
+        assertEquals(-1, u1.compareTo(u2));
+        assertEquals(1, u2.compareTo(u1));
+        assertEquals(-1, u2.compareTo(u3));
+        assertEquals(1, u3.compareTo(u2));
+    }
     @Test
     public void testEmptySave(){
         UserLogin ul = new UserLogin();

@@ -178,8 +178,41 @@ class DefaultUserService implements UserService {
     }
 
     @Override
+    public UserLogin addLogin(User user, UserLogin login) throws EntityNotFoundException, UserLoginExistsException {
+        try {
+            uniqueLogin.reserve(login.getProvider(), login.getUserId());
+        } catch (UniqueConstraintException e) {
+            throw new UserLoginExistsException(e.getMessage());
+        }
+
+        Transaction tx = Datastore.beginTransaction();
+        User db = Datastore.getOrNull(tx, userMeta, user.getId());
+        if (db == null) {
+            tx.rollback();
+            uniqueLogin.release(login.getProvider(), login.getUserId());
+            throw new EntityNotFoundException();
+        }
+        login.setId(Datastore.allocateId(db.getId(), UserLogin.class));
+        login.getUserRef().setModel(db);
+
+        Datastore.put(tx, db, login);
+        tx.commit();
+        return login;
+    }
+
+    @Override
     public User get(long id) {
         return Datastore.getOrNull(User.class, Datastore.createKey(User.class, id));
+    }
+
+    @Override
+    public List<UserLogin> getUserLogins(long userId) {
+        return Datastore.query(userLoginMeta, Datastore.createKey(User.class, userId)).asList();
+    }
+
+    @Override
+    public List<UserLogin> getUserLogins(User user) {
+        return getUserLogins(Preconditions.checkNotNull(user.getId()).getId());
     }
 
     @Override
