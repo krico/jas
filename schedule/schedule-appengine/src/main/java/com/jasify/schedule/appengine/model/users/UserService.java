@@ -28,7 +28,11 @@ public interface UserService {
 
     UserLogin addLogin(User user, UserLogin login) throws EntityNotFoundException, UserLoginExistsException;
 
+    void removeLogin(User user, UserLogin login) throws EntityNotFoundException;
+
     User get(long id);
+
+    UserLogin getLogin(long userId, long loginId);
 
     User findByLogin(String provider, String userId);
 

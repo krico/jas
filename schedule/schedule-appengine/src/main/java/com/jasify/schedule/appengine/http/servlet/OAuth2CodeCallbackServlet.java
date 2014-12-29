@@ -13,8 +13,12 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.http.json.JsonOAuthDetail;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.UserContext;
+import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
+import com.jasify.schedule.appengine.model.users.UserLoginExistsException;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
 import com.jasify.schedule.appengine.util.JSON;
@@ -95,15 +99,30 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
             User existingUser = UserServiceFactory.getUserService().findByLogin(provider.name(), oAuthInfo.getUserId());
             if (existingUser == null) {
                 UserLogin userLogin = new UserLogin(provider.name(), oAuthInfo.getUserId());
-                session.setAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY, userLogin);
                 userLogin.setAvatar(TypeUtil.toLink(oAuthInfo.getAvatar()));
                 userLogin.setProfile(TypeUtil.toLink(oAuthInfo.getProfile()));
+                userLogin.setEmail(oAuthInfo.getEmail());
+                userLogin.setRealName(oAuthInfo.getRealName());
+
                 detail.setEmail(oAuthInfo.getEmail());
                 detail.setRealName(oAuthInfo.getRealName());
 
+                if (UserContext.getCurrentUser() == null) {
+                    session.setAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY, userLogin);
+                } else {
+                    UserSession currentUser = UserContext.getCurrentUser();
+                    User user = UserServiceFactory.getUserService().get(currentUser.getUserId());
+                    UserServiceFactory.getUserService().addLogin(user, userLogin);
+                    detail.setAdded(true);
+                }
             } else {
-                detail.setLoggedIn(true);
-                new HttpUserSession(existingUser).put(req); //log in
+                if (UserContext.getCurrentUser() == null) {
+                    //if user not logged in yet
+                    detail.setLoggedIn(true);
+                    new HttpUserSession(existingUser).put(req); //todo: simulate log in
+                } else {
+                    detail.setExists(true);
+                }
             }
 
 
@@ -111,9 +130,9 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
             writer.append("<html><head><script type=\"application/json\" id=\"json-response\">");
             detail.toJson(writer);
             writer.append("</script></head><body></body></html>");
-        } catch (TokenResponseException e) {
-            log.info("Failed to get token", e);
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Failed to get token");
+        } catch (TokenResponseException | UserLoginExistsException | EntityNotFoundException e) {
+            log.info("Failed to process", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Failed to process");
         }
 
     }

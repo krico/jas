@@ -36,10 +36,14 @@ public class UserLogin implements Serializable, Comparable<UserLogin> {
      */
     private String userId;
 
+    private String email;
+
+    private String realName;
+
     private Link profile;
     private Link avatar;
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE) //TODO:remove annotation, should be a different object
     private ModelRef<User> userRef = new ModelRef<>(User.class);
 
     public UserLogin() {
@@ -102,6 +106,22 @@ public class UserLogin implements Serializable, Comparable<UserLogin> {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
     }
 
     public Link getAvatar() {

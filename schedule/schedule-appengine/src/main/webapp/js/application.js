@@ -119,6 +119,31 @@ jasifyScheduleApp.config(['$routeProvider',
                 }
             }).
 
+            when('/profile-logins', {
+                templateUrl: 'views/profile-logins.html',
+                controller: 'ProfileLoginsCtrl',
+                resolve: {
+                    logins: function ($q, Allow, Endpoint, Session) {
+                        //TODO: this is outrageous :-), we need some kind of wrapper to get api calls
+                        return Allow.user().then(
+                            function () {
+                                return Endpoint.load().then(function () {
+                                    return $q.when(Endpoint.api.logins.list({userId: Session.userId}));
+                                });
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                    //TODO: remove
+                    // Not needed, we check for allow on logins:
+                    //allow: function (Allow) {
+                    //    return Allow.user();
+                    //}
+                }
+            }).
+
             /* BEGIN: Admin routes */
             when('/admin/users', {
                 templateUrl: 'views/admin/users.html',
@@ -514,7 +539,6 @@ jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', functi
             opts = Providers[provider];
         }
         var optStr = Popup.optionsString(Popup.getOptions(opts));
-        $log.debug("optStr=" + optStr);
         popupWindow = $window.open(url, '_blank', optStr);
         if (popupWindow && popupWindow.focus) {
             popupWindow.focus();

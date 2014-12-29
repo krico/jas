@@ -18,6 +18,13 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope',
             $scope.currentUser = u;
         };
 
+        $scope.menuActive = function (path) {
+            if (path == $location.path()) {
+                return 'active';
+            }
+            return false;
+        };
+
         //TODO: handle other authEvents
 
         $scope.$on(AUTH_EVENTS.notAuthenticated, function () {
@@ -84,13 +91,6 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location
 
         $scope.collapse = function () {
             $scope.navbarCollapsed = true;
-        };
-
-        $scope.menuActive = function (path) {
-            if (path == $location.path()) {
-                return 'active';
-            }
-            return false;
         };
 
         $scope.adminDropDown = [
@@ -301,8 +301,8 @@ jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUT
 /**
  * ProfileCtrl
  */
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', 'Session', 'User',
-    function ($scope, $routeParams, Session, User) {
+jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '$log', 'Session', 'User',
+    function ($scope, $routeParams, $log, Session, User) {
         $scope.user = null;
 
         $scope.alerts = [];
@@ -338,5 +338,59 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '
             });
         };
         $scope.reset();
+    }]);
+
+/**
+ * ProfileLoginsCtrl
+ */
+jasifyScheduleControllers.controller('ProfileLoginsCtrl', ['$scope', '$log', '$q', 'Endpoint', 'Session', 'Popup', 'logins',
+    function ($scope, $log, $q, Endpoint, Session, Popup, logins) {
+        $scope.logins = logins.result.items;
+        $scope.alerts = [];
+
+        $scope.alert = function (t, m) {
+            $scope.alerts.push({type: t, msg: m});
+        };
+
+        $scope.icon = function (login) {
+            if (login && login.provider) {
+                if (login.provider == 'Google') return 'ion-social-google';
+                if (login.provider == 'Facebook') return 'ion-social-facebook';
+            }
+            return false;
+        };
+
+        $scope.removeLogin = function (login) {
+            //TODO: this should be a service
+            $q.when(Endpoint.api.logins.remove({userId: Session.userId, loginId: login.id.id})).then(function (r) {
+                $log.debug("R: " + jas.debugObject(r));
+                $scope.alert('success', 'Login removed!');
+                $scope.reload();
+            });
+
+        };
+
+        $scope.reload = function () {
+            //TODO: this should be a service
+            $q.when(Endpoint.api.logins.list({userId: Session.userId})).then(function (logins) {
+                $scope.logins = logins.result.items;
+            });
+        };
+
+        $scope.oauth = function (provider) {
+            Popup.open('/oauth2/request/' + provider, provider)
+                .then(
+                function (oauthDetail) {
+                    if (oauthDetail.added) {
+                        $scope.alert('success', 'Login added!');
+                        $scope.reload();
+                    } else if (oauthDetail.exists) {
+                        $scope.alert('warning', 'Login already existed...');
+                    }
+                },
+                function (msg) {
+                    $scope.alert('danger', '! ' + msg);
+                });
+        };
     }]);
 

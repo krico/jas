@@ -137,7 +137,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testAddUserLogin() throws Exception {
+    public void testAddGetRemoveUserLogin() throws Exception {
         User user = service.newUser();
         user.setName("test");
         user = service.create(user, "password");
@@ -165,6 +165,35 @@ public class UserServiceTest {
 
         UserLogin login3 = new UserLogin("Facebook", "4321");
         service.addLogin(user, login3);
+
+        logins = service.getUserLogins(user);
+        assertNotNull(logins);
+        assertEquals(3, logins.size());
+        Collections.sort(logins);
+        assertEquals(login3.getProvider(), logins.get(0).getProvider());
+        assertEquals(login3.getUserId(), logins.get(0).getUserId());
+        assertEquals(login1.getProvider(), logins.get(1).getProvider());
+        assertEquals(login1.getUserId(), logins.get(1).getUserId());
+        assertEquals(login2.getProvider(), logins.get(2).getProvider());
+        assertEquals(login2.getUserId(), logins.get(2).getUserId());
+
+        //Now remove
+        UserLogin gotten = service.getLogin(user.getId().getId(), logins.get(1).getId().getId());
+        assertNotNull(gotten);
+        service.removeLogin(user, gotten);
+
+        logins = service.getUserLogins(user);
+        assertNotNull(logins);
+        assertEquals(2, logins.size());
+        Collections.sort(logins);
+        assertEquals(login3.getProvider(), logins.get(0).getProvider());
+        assertEquals(login3.getUserId(), logins.get(0).getUserId());
+        assertEquals(login2.getProvider(), logins.get(1).getProvider());
+        assertEquals(login2.getUserId(), logins.get(1).getUserId());
+
+
+        //ensure we released this login
+        service.addLogin(user, new UserLogin(login1.getProvider(), login1.getUserId()));
 
         logins = service.getUserLogins(user);
         assertNotNull(logins);
