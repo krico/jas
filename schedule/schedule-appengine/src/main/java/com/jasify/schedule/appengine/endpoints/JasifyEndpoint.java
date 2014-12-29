@@ -24,7 +24,8 @@ import java.util.List;
         defaultVersion = AnnotationBoolean.TRUE,
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
-        authLevel = AuthLevel.REQUIRED,
+        authLevel = AuthLevel.NONE,
+        auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
                 packagePath = ""))
@@ -57,7 +58,7 @@ public class JasifyEndpoint {
         throw new ForbiddenException("Must be admin or same user");
     }
 
-    @ApiMethod(name = "settings", authLevel = AuthLevel.OPTIONAL)
+    @ApiMethod(name = "settings")
     public Settings settings(User caller) {
         Settings settings = new Settings();
         settings.setVersion("1");
