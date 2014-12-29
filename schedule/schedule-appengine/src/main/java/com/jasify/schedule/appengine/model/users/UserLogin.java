@@ -1,10 +1,14 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.google.api.server.spi.config.AnnotationBoolean;
+import com.google.api.server.spi.config.ApiResourceProperty;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slim3.datastore.*;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,7 +19,7 @@ import java.util.Date;
  * @since 23/12/14.
  */
 @Model
-public class UserLogin implements Serializable {
+public class UserLogin implements Serializable, Comparable<UserLogin> {
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -32,9 +36,14 @@ public class UserLogin implements Serializable {
      */
     private String userId;
 
+    private String email;
+
+    private String realName;
+
     private Link profile;
     private Link avatar;
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE) //TODO:remove annotation, should be a different object
     private ModelRef<User> userRef = new ModelRef<>(User.class);
 
     public UserLogin() {
@@ -99,6 +108,22 @@ public class UserLogin implements Serializable {
         this.userId = userId;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
     public Link getAvatar() {
         return avatar;
     }
@@ -160,5 +185,15 @@ public class UserLogin implements Serializable {
                 ", avatar=" + avatar +
                 ", userRef=" + userRef +
                 '}';
+    }
+
+    @Override
+    public int compareTo(@Nonnull UserLogin o) {
+        int cmp = ObjectUtils.compare(getProvider(), o.getProvider());
+        if (cmp == 0) {
+            return ObjectUtils.compare(getUserId(), o.getUserId());
+        } else {
+            return cmp;
+        }
     }
 }

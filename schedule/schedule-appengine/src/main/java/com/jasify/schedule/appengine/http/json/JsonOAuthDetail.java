@@ -12,6 +12,8 @@ public class JsonOAuthDetail extends JsonObject {
     private String email;
     private String realName;
     private boolean loggedIn;
+    private boolean exists;
+    private boolean added;
 
     public static JsonOAuthDetail parse(String data) {
         return JSON.fromJson(data, JsonOAuthDetail.class);
@@ -43,5 +45,21 @@ public class JsonOAuthDetail extends JsonObject {
 
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
+    }
+
+    public boolean isExists() {
+        return exists;
+    }
+
+    public void setExists(boolean exists) {
+        this.exists = exists;
+    }
+
+    public boolean isAdded() {
+        return added;
+    }
+
+    public void setAdded(boolean added) {
+        this.added = added;
     }
 }

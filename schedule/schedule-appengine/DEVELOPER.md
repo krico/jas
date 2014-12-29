@@ -26,6 +26,9 @@ are not using oauth with google, you can put any value there:
  * If you change any class annotated with @Model (usually under com.jasify.schedule.appengine.model.users) you **MUST**
  run `mvn apt:process`
 
+## Google Endpoints
+ * [Javascript API help](https://developers.google.com/api-client-library/javascript/dev/dev_jscript)
+
 ## Jasmine (testing javscript)
 
  * To run only the jasmine tests, you need to run `mvn phantomjs:install jasmine:test`.  Another option is to run a webserver

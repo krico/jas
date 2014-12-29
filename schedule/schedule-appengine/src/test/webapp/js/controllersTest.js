@@ -1,16 +1,49 @@
 describe('Controllers', function () {
 
-    var $controller, $httpBackend, $rootScope;
-
+    var $controller, $httpBackend, $rootScope, $modal, $log, $location, $cookies, $window, Auth, AUTH_EVENTS, Endpoint, $applicationScope;
+    var modalMock;
     beforeEach(module('jasifyScheduleApp', function ($provide) {
         $provide.value('$log', console);
+        modalMock = {
+            data: {open: {}},
+            open: function () {
+                return {
+                    result: {
+                        then: function (confirmCallback, cancelCallback) {
+                            modalMock.data.open.confirmCallback = confirmCallback;
+                            modalMock.data.open.cancelCallback = cancelCallback;
+                        }
+                    }
+                };
+            }
+        };
+        $provide.value('$modal', modalMock);
+
     }));
 
-    beforeEach(inject(function (_$controller_, _$httpBackend_, _$rootScope_) {
+    beforeEach(inject(function (_$controller_, _$httpBackend_, _$rootScope_, _$modal_, _$log_, _$location_, _$cookies_,
+                                _$window_, _Auth_, _AUTH_EVENTS_, _Endpoint_) {
         $controller = _$controller_;
         $httpBackend = _$httpBackend_;
         $rootScope = _$rootScope_;
+        $modal = _$modal_;
+        $log = _$log_;
+        $location = _$location_;
+        $cookies = _$cookies_;
+        $window = _$window_;
+        Auth = _Auth_;
+        AUTH_EVENTS = _AUTH_EVENTS_;
+        Endpoint = _Endpoint_;
+
+        // Since all controllers are children of applicationCtrl we create that scope before each
+        $applicationScope = $rootScope.$new();
+        $controller('ApplicationCtrl',
+            {
+                $scope: $applicationScope, $rootScope: $rootScope, $modal: $modal, $log: $log, $location: $location,
+                $cookies: $cookies, $window: $window, Auth: Auth, AUTH_EVENTS: AUTH_EVENTS, Endpoint: Endpoint
+            });
     }));
+
 
     afterEach(function () {
         $httpBackend.verifyNoOutstandingExpectation();
@@ -18,16 +51,10 @@ describe('Controllers', function () {
     });
 
     describe('ApplicationCtrl', function () {
-        var $scope, controller, $modal, AUTH_EVENTS;
-
-        beforeEach(inject(function (_$modal_, _AUTH_EVENTS_) {
-            $modal = _$modal_;
-            AUTH_EVENTS = _AUTH_EVENTS_;
-        }));
+        var $scope, controller;
 
         beforeEach(function () {
-            $scope = $rootScope.$new();
-            controller = $controller('ApplicationCtrl', {$scope: $scope, $modal: $modal});
+            $scope = $applicationScope;
         });
 
         it('keeps a reference to the current user', function () {
@@ -42,54 +69,36 @@ describe('Controllers', function () {
 
         });
 
-        it('reacts on AUTH_EVENT.notAuthorized', function () {
-            var fakeModal = {
-                result: {
-                    then: function (confirmCallback, cancelCallback) {
-                        fakeModal.confirmCallBack = confirmCallback;
-                        fakeModal.cancelCallback = cancelCallback;
-                    }
-                }
-            };
+        it('can determine if a menu is active ', function () {
 
-            spyOn($modal, 'open').andReturn(fakeModal);
-            $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-            expect($modal.open).toHaveBeenCalled();
-            $rootScope.$apply();
-            expect(fakeModal.confirmCallBack).toBeDefined();
-            expect(fakeModal.cancelCallback).toBeDefined();
+            expect($scope.menuActive('/profile')).toBe(false);
+
+            $location.path('/profile');
+
+            expect($scope.menuActive('/profile')).toBe('active');
+
         });
 
         it('reacts on AUTH_EVENT.notAuthorized', function () {
-            var fakeModal = {
-                result: {
-                    then: function (confirmCallback, cancelCallback) {
-                        fakeModal.confirmCallBack = confirmCallback;
-                        fakeModal.cancelCallback = cancelCallback;
-                    }
-                }
-            };
-
-            spyOn($modal, 'open').andReturn(fakeModal);
-            $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-            expect($modal.open).toHaveBeenCalled();
+            $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
             $rootScope.$apply();
-            expect(fakeModal.confirmCallBack).toBeDefined();
-            expect(fakeModal.cancelCallback).toBeDefined();
+            expect(modalMock.data.open.confirmCallback).toBeDefined();
+            expect(modalMock.data.open.cancelCallback).toBeDefined();
+        });
+
+        it('reacts on AUTH_EVENT.notAuthorized', function () {
+            $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+            $rootScope.$apply();
+            expect(modalMock.data.open.confirmCallback).toBeDefined();
+            expect(modalMock.data.open.cancelCallback).toBeDefined();
         });
     });
 
     describe('NavbarCtrl', function () {
-        var $scope, controller, $location, Auth, AUTH_EVENTS;
-
-        beforeEach(inject(function (_$location_, _Auth_, _AUTH_EVENTS_) {
-            $location = _$location_;
-            Auth = _Auth_;
-            AUTH_EVENTS = _AUTH_EVENTS_;
-        }));
+        var $scope, controller;
 
         beforeEach(function () {
-            $scope = $rootScope.$new();
+            $scope = $applicationScope.$new();
             controller = $controller('NavbarCtrl', {
                 $scope: $scope,
                 $location: $location,
@@ -120,16 +129,6 @@ describe('Controllers', function () {
             expect($scope.navbarCollapsed).toBe(false);
             $scope.collapse();
             expect($scope.navbarCollapsed).toBe(true);
-
-        });
-
-        it('can determine if a menu is active ', function () {
-
-            expect($scope.menuActive('/profile')).toBe(false);
-
-            $location.path('/profile');
-
-            expect($scope.menuActive('/profile')).toBe('active');
 
         });
 
@@ -192,7 +191,7 @@ describe('Controllers', function () {
         var $scope, controller;
 
         beforeEach(function () {
-            $scope = $rootScope.$new();
+            $scope = $applicationScope.$new();
             controller = $controller('HomeCtrl', {$scope: $scope});
         });
 
@@ -202,28 +201,10 @@ describe('Controllers', function () {
     });
 
     describe('LoginCtrl', function () {
-        var $scope, controller, $applicationScope, $modal, Auth, AUTH_EVENTS;
-
-        beforeEach(inject(function (_$modal_, _Auth_, _AUTH_EVENTS_) {
-            $modal = _$modal_;
-            Auth = _Auth_;
-            AUTH_EVENTS = _AUTH_EVENTS_;
-        }));
+        var $scope, controller;
 
         beforeEach(function () {
-            $applicationScope = $rootScope.$new();
             $scope = $applicationScope.$new();
-            var mock = {
-                result: {
-                    then: function (confirmCallback, cancelCallback) {
-                        console.log("HI");
-                    }
-                }
-            };
-            spyOn($modal, 'open').andReturn(mock);
-            //to create the scope tree, we instantiate applicationCtrl
-            $controller('ApplicationCtrl', {$scope: $applicationScope, $modal: $modal});
-
             controller = $controller('LoginCtrl', {
                 $scope: $scope,
                 $rootScope: $rootScope,
@@ -283,20 +264,14 @@ describe('Controllers', function () {
     });
 
     describe('SignUpCtrl', function () {
-        var $scope, controller, AUTH_EVENTS, $applicationScope, Auth, User;
+        var $scope, controller, User;
 
-        beforeEach(inject(function (_$location_, _AUTH_EVENTS_, _Auth_, _User_) {
-            AUTH_EVENTS = _AUTH_EVENTS_;
-            Auth = _Auth_;
+        beforeEach(inject(function (_User_) {
             User = _User_;
         }));
 
         beforeEach(function () {
-            $applicationScope = $rootScope.$new();
             $scope = $applicationScope.$new();
-
-            //to create the scope tree, we instantiate applicationCtrl
-            $controller('ApplicationCtrl', {$scope: $applicationScope});
 
             controller = $controller('SignUpCtrl', {
                 $scope: $scope,
@@ -454,21 +429,14 @@ describe('Controllers', function () {
     });
 
     describe('LogoutCtrl', function () {
-        var $scope, controller, AUTH_EVENTS, Auth, Session, $modal;
+        var $scope, controller, Session;
 
-        beforeEach(inject(function (_AUTH_EVENTS_, _Auth_, _Session_, _$modal_) {
-            AUTH_EVENTS = _AUTH_EVENTS_;
-            Auth = _Auth_;
+        beforeEach(inject(function (_Session_) {
             Session = _Session_;
-            $modal = _$modal_;
         }));
 
         beforeEach(function () {
-            $applicationScope = $rootScope.$new();
             $scope = $applicationScope.$new();
-
-            //to create the scope tree, we instantiate applicationCtrl
-            $controller('ApplicationCtrl', {$scope: $applicationScope, $modal: $modal});
 
             controller = $controller('LogoutCtrl', {
                 $scope: $scope,
@@ -521,12 +489,7 @@ describe('Controllers', function () {
         };
 
         beforeEach(function () {
-            $applicationScope = $rootScope.$new();
             $scope = $applicationScope.$new();
-
-            //to create the scope tree, we instantiate applicationCtrl
-            $controller('ApplicationCtrl', {$scope: $applicationScope});
-
             construct();
         });
 
@@ -631,6 +594,30 @@ describe('Controllers', function () {
 
             expect(called).toEqual(true);
 
+        });
+
+    });
+    describe('ProfileLoginsCtrl', function () {
+        var $scope, controller;
+
+        beforeEach(function () {
+            $scope = $applicationScope.$new();
+            controller = $controller('ProfileLoginsCtrl', {
+                $scope: $scope,
+                logins: {result: {items: ['a', 'b', 'c']}}
+            });
+        });
+
+        it('captures logins from injection', function () {
+            expect($scope.logins).toBeDefined();
+            expect($scope.logins[0]).toEqual('a');
+            expect($scope.logins[1]).toEqual('b');
+            expect($scope.logins[2]).toEqual('c');
+        });
+
+        it('knows icons for providers', function () {
+            expect($scope.icon({provider: 'Google'})).toEqual('ion-social-google');
+            expect($scope.icon({provider: 'Facebook'})).toEqual('ion-social-facebook');
         });
 
     });

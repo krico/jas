@@ -178,8 +178,67 @@ class DefaultUserService implements UserService {
     }
 
     @Override
+    public UserLogin addLogin(User user, UserLogin login) throws EntityNotFoundException, UserLoginExistsException {
+        try {
+            uniqueLogin.reserve(login.getProvider(), login.getUserId());
+        } catch (UniqueConstraintException e) {
+            throw new UserLoginExistsException(e.getMessage());
+        }
+
+        Transaction tx = Datastore.beginTransaction();
+        User db = Datastore.getOrNull(tx, userMeta, user.getId());
+        if (db == null) {
+            tx.rollback();
+            uniqueLogin.release(login.getProvider(), login.getUserId());
+            throw new EntityNotFoundException();
+        }
+        login.setId(Datastore.allocateId(db.getId(), UserLogin.class));
+        login.getUserRef().setModel(db);
+
+        Datastore.put(tx, db, login);
+        tx.commit();
+        return login;
+    }
+
+    @Override
+    public void removeLogin(User user, UserLogin login) throws EntityNotFoundException {
+        Transaction tx = Datastore.beginTransaction();
+        UserLogin dbLogin = Datastore.getOrNull(tx, userLoginMeta, login.getId());
+        if (dbLogin == null) {
+            tx.rollback();
+            throw new EntityNotFoundException("UserLogin");
+        }
+
+        if (!dbLogin.getUserRef().getKey().equals(user.getId())) {
+            tx.rollback();
+            //not a login for this user
+            throw new EntityNotFoundException("User/UserLogin");
+        }
+
+        Datastore.delete(tx, dbLogin.getId());
+        tx.commit();
+
+        uniqueLogin.release(dbLogin.getProvider(), dbLogin.getUserId());
+    }
+
+    @Override
     public User get(long id) {
         return Datastore.getOrNull(User.class, Datastore.createKey(User.class, id));
+    }
+
+    @Override
+    public UserLogin getLogin(long userId, long loginId) {
+        return Datastore.getOrNull(UserLogin.class, Datastore.createKey(Datastore.createKey(userMeta, userId), userLoginMeta, loginId));
+    }
+
+    @Override
+    public List<UserLogin> getUserLogins(long userId) {
+        return Datastore.query(userLoginMeta, Datastore.createKey(User.class, userId)).asList();
+    }
+
+    @Override
+    public List<UserLogin> getUserLogins(User user) {
+        return getUserLogins(Preconditions.checkNotNull(user.getId()).getId());
     }
 
     @Override

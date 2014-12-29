@@ -133,8 +133,8 @@ body {
     border: 1px solid #d54331;
 }
 
-.btn-google-plus:hover,
-.btn-google-plus:focus {
+.btn-google:hover,
+.btn-google:focus {
     color: #fff;
     background-color: #cb3927;
 }

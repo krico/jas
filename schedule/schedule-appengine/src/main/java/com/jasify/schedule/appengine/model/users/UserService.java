@@ -26,7 +26,13 @@ public interface UserService {
 
     User setPassword(User user, String newPassword) throws EntityNotFoundException;
 
+    UserLogin addLogin(User user, UserLogin login) throws EntityNotFoundException, UserLoginExistsException;
+
+    void removeLogin(User user, UserLogin login) throws EntityNotFoundException;
+
     User get(long id);
+
+    UserLogin getLogin(long userId, long loginId);
 
     User findByLogin(String provider, String userId);
 
@@ -48,6 +54,10 @@ public interface UserService {
     List<User> searchByEmail(Pattern pattern, Query.SortDirection order, int offset, int limit);
 
     List<User> searchByEmail(String startsWith, Query.SortDirection order, int offset, int limit);
+
+    List<UserLogin> getUserLogins(User user);
+
+    List<UserLogin> getUserLogins(long userId);
 
     int getTotalUsers();
 }

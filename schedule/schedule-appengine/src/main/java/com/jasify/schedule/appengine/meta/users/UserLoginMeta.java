@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.users;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2014-12-25 16:51:03")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2014-12-29 01:50:26")
 /** */
 public final class UserLoginMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.users.UserLogin> {
 
@@ -18,6 +18,18 @@ public final class UserLoginMeta extends org.slim3.datastore.ModelMeta<com.jasif
 
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin> userId = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin>(this, "userId", "userId");
+
+    /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin> email = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin>(this, "email", "email");
+
+    /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin> realName = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin>(this, "realName", "realName");
+
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin, com.google.appengine.api.datastore.Link> profile = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin, com.google.appengine.api.datastore.Link>(this, "profile", "profile", com.google.appengine.api.datastore.Link.class);
+
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin, com.google.appengine.api.datastore.Link> avatar = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin, com.google.appengine.api.datastore.Link>(this, "avatar", "avatar", com.google.appengine.api.datastore.Link.class);
 
     /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User> userRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.users.UserLogin, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User>(this, "userRef", "userRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.users.User.class);
@@ -48,6 +60,10 @@ public final class UserLoginMeta extends org.slim3.datastore.ModelMeta<com.jasif
         model.setModified((java.util.Date) entity.getProperty("modified"));
         model.setProvider((java.lang.String) entity.getProperty("provider"));
         model.setUserId((java.lang.String) entity.getProperty("userId"));
+        model.setEmail((java.lang.String) entity.getProperty("email"));
+        model.setRealName((java.lang.String) entity.getProperty("realName"));
+        model.setProfile((com.google.appengine.api.datastore.Link) entity.getProperty("profile"));
+        model.setAvatar((com.google.appengine.api.datastore.Link) entity.getProperty("avatar"));
         if (model.getUserRef() == null) {
             throw new NullPointerException("The property(userRef) is null.");
         }
@@ -68,6 +84,10 @@ public final class UserLoginMeta extends org.slim3.datastore.ModelMeta<com.jasif
         entity.setProperty("modified", m.getModified());
         entity.setProperty("provider", m.getProvider());
         entity.setProperty("userId", m.getUserId());
+        entity.setProperty("email", m.getEmail());
+        entity.setProperty("realName", m.getRealName());
+        entity.setProperty("profile", m.getProfile());
+        entity.setProperty("avatar", m.getAvatar());
         if (m.getUserRef() == null) {
             throw new NullPointerException("The property(userRef) must not be null.");
         }
@@ -157,6 +177,22 @@ public final class UserLoginMeta extends org.slim3.datastore.ModelMeta<com.jasif
             writer.setNextPropertyName("userId");
             encoder0.encode(writer, m.getUserId());
         }
+        if(m.getEmail() != null){
+            writer.setNextPropertyName("email");
+            encoder0.encode(writer, m.getEmail());
+        }
+        if(m.getRealName() != null){
+            writer.setNextPropertyName("realName");
+            encoder0.encode(writer, m.getRealName());
+        }
+        if(m.getProfile() != null){
+            writer.setNextPropertyName("profile");
+            encoder0.encode(writer, m.getProfile());
+        }
+        if(m.getAvatar() != null){
+            writer.setNextPropertyName("avatar");
+            encoder0.encode(writer, m.getAvatar());
+        }
         if(m.getUserRef() != null && m.getUserRef().getKey() != null){
             writer.setNextPropertyName("userRef");
             encoder0.encode(writer, m.getUserRef(), maxDepth, currentDepth);
@@ -179,6 +215,14 @@ public final class UserLoginMeta extends org.slim3.datastore.ModelMeta<com.jasif
         m.setProvider(decoder0.decode(reader, m.getProvider()));
         reader = rootReader.newObjectReader("userId");
         m.setUserId(decoder0.decode(reader, m.getUserId()));
+        reader = rootReader.newObjectReader("email");
+        m.setEmail(decoder0.decode(reader, m.getEmail()));
+        reader = rootReader.newObjectReader("realName");
+        m.setRealName(decoder0.decode(reader, m.getRealName()));
+        reader = rootReader.newObjectReader("profile");
+        m.setProfile(decoder0.decode(reader, m.getProfile()));
+        reader = rootReader.newObjectReader("avatar");
+        m.setAvatar(decoder0.decode(reader, m.getAvatar()));
         reader = rootReader.newObjectReader("userRef");
         decoder0.decode(reader, m.getUserRef(), maxDepth, currentDepth);
         return m;

@@ -1,18 +1,28 @@
 /**
  * Created by krico on 02/11/14.
  */
+
 var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
 
 /**
  * ApplicationCtrl
  * - Root of the scope tree.  Practically all other scopes will inherit from this one.
  */
-jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope', '$modal', '$log', '$location', '$cookies', 'Auth', 'AUTH_EVENTS',
-    function ($scope, $rootScope, $modal, $log, $location, $cookies, Auth, AUTH_EVENTS) {
+jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope', '$modal', '$log', '$location', '$cookies', '$window', 'Auth', 'AUTH_EVENTS', 'Endpoint',
+    function ($scope, $rootScope, $modal, $log, $location, $cookies, $window, Auth, AUTH_EVENTS, Endpoint /* TODO: Just so it is created, maybe its not needed */) {
+
+
         $scope.currentUser = null;
 
         $scope.setCurrentUser = function (u) {
             $scope.currentUser = u;
+        };
+
+        $scope.menuActive = function (path) {
+            if (path == $location.path()) {
+                return 'active';
+            }
+            return false;
         };
 
         //TODO: handle other authEvents
@@ -30,6 +40,12 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope',
                 $location.path('/login');//TODO: LOGIN SHOULD BE POPUP
             }, function () {
                 $log.info('Modal dismissed at: ' + new Date());
+            });
+        });
+        $scope.$on(AUTH_EVENTS.loginFailed, function () {
+            var modalInstance = $modal.open({
+                templateUrl: 'views/modal/login-failed.html',
+                size: 'sm'
             });
         });
 
@@ -75,13 +91,6 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location
 
         $scope.collapse = function () {
             $scope.navbarCollapsed = true;
-        };
-
-        $scope.menuActive = function (path) {
-            if (path == $location.path()) {
-                return 'active';
-            }
-            return false;
         };
 
         $scope.adminDropDown = [
@@ -292,8 +301,8 @@ jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUT
 /**
  * ProfileCtrl
  */
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', 'Session', 'User',
-    function ($scope, $routeParams, Session, User) {
+jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '$log', 'Session', 'User',
+    function ($scope, $routeParams, $log, Session, User) {
         $scope.user = null;
 
         $scope.alerts = [];
@@ -329,5 +338,59 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '
             });
         };
         $scope.reset();
+    }]);
+
+/**
+ * ProfileLoginsCtrl
+ */
+jasifyScheduleControllers.controller('ProfileLoginsCtrl', ['$scope', '$log', '$q', 'Endpoint', 'Session', 'Popup', 'logins',
+    function ($scope, $log, $q, Endpoint, Session, Popup, logins) {
+        $scope.logins = logins.result.items;
+        $scope.alerts = [];
+
+        $scope.alert = function (t, m) {
+            $scope.alerts.push({type: t, msg: m});
+        };
+
+        $scope.icon = function (login) {
+            if (login && login.provider) {
+                if (login.provider == 'Google') return 'ion-social-google';
+                if (login.provider == 'Facebook') return 'ion-social-facebook';
+            }
+            return false;
+        };
+
+        $scope.removeLogin = function (login) {
+            //TODO: this should be a service
+            $q.when(Endpoint.api.logins.remove({userId: Session.userId, loginId: login.id.id})).then(function (r) {
+                $log.debug("R: " + jas.debugObject(r));
+                $scope.alert('success', 'Login removed!');
+                $scope.reload();
+            });
+
+        };
+
+        $scope.reload = function () {
+            //TODO: this should be a service
+            $q.when(Endpoint.api.logins.list({userId: Session.userId})).then(function (logins) {
+                $scope.logins = logins.result.items;
+            });
+        };
+
+        $scope.oauth = function (provider) {
+            Popup.open('/oauth2/request/' + provider, provider)
+                .then(
+                function (oauthDetail) {
+                    if (oauthDetail.added) {
+                        $scope.alert('success', 'Login added!');
+                        $scope.reload();
+                    } else if (oauthDetail.exists) {
+                        $scope.alert('warning', 'Login already existed...');
+                    }
+                },
+                function (msg) {
+                    $scope.alert('danger', '! ' + msg);
+                });
+        };
     }]);
 

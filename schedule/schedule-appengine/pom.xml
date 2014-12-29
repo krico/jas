@@ -30,6 +30,12 @@
             <artifactId>appengine-api-1.0-sdk</artifactId>
             <version>${jasify.appengine.sdk.version}</version>
         </dependency>
+        <!-- Google Cloud Endpoints -->
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-endpoints</artifactId>
+            <version>${jasify.appengine.sdk.version}</version>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
