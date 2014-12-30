@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.endpoints;
+package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
@@ -27,8 +27,9 @@ import static org.easymock.EasyMock.*;
 public class JasifyEndpointTest {
     @Mock
     private UserService userService;
+
     @TestSubject
-    private JasifyEndpoint endpoint = new JasifyEndpoint(null);
+    private JasifyEndpoint endpoint = new JasifyEndpoint();
 
     @Before
     public void datastore() {
@@ -41,22 +42,73 @@ public class JasifyEndpointTest {
         EasyMock.verify(userService);
     }
 
-    @Test
-    public void testSettingsNoUser() throws Exception {
+    @Test(expected = UnauthorizedException.class)
+    public void testMustBeLoggedInThrowsNonAuthorizedOnNull() throws UnauthorizedException {
         replay(userService);
-        Settings settings = endpoint.settings(null);
-        assertNotNull(settings);
-        assertNotNull(settings.getVersion());
-        assertFalse(settings.isAuthenticated());
+        JasifyEndpoint.mustBeLoggedIn(null);
     }
 
     @Test
-    public void testSettingsWithUser() throws Exception {
+    public void testMustBeLoggedIn() throws UnauthorizedException {
         replay(userService);
-        Settings settings = endpoint.settings(new JasifyUser("test@foo.bar", 1, false));
-        assertNotNull(settings);
-        assertNotNull(settings.getVersion());
-        assertTrue(settings.isAuthenticated());
+        JasifyUser user = new JasifyUser("", 1, false);
+        assertEquals(user, JasifyEndpoint.mustBeLoggedIn(user));
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testMustBeSameUserOrAdminThrowsNonAuthorizedOnNull() throws UnauthorizedException, ForbiddenException {
+        replay(userService);
+        JasifyEndpoint.mustBeSameUserOrAdmin(null, 1);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testMustBeSameUserOrAdminThrowsForbiddenWhenNotSameUser() throws UnauthorizedException, ForbiddenException {
+        replay(userService);
+        JasifyUser user = new JasifyUser("", 1, false);
+        JasifyEndpoint.mustBeSameUserOrAdmin(user, 2);
+    }
+
+    @Test
+    public void testMustBeSameUserSameUser() throws UnauthorizedException, ForbiddenException {
+        replay(userService);
+        JasifyUser user = new JasifyUser("", 1, false);
+        assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 1));
+    }
+
+    @Test
+    public void testMustBeSameUserOrAdminWithAdmin() throws UnauthorizedException, ForbiddenException {
+        replay(userService);
+        JasifyUser user = new JasifyUser("", 1, true);
+        assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 2));
+    }
+
+    @Test
+    public void testApiInfoNoUser() throws Exception {
+        replay(userService);
+        JasifyInfo info = endpoint.apiInfo(null);
+        assertNotNull(info);
+        assertNotNull(info.getVersion());
+        assertFalse(info.isAuthenticated());
+    }
+
+    @Test
+    public void testApiInfoWithUser() throws Exception {
+        replay(userService);
+        JasifyInfo info = endpoint.apiInfo(new JasifyUser("test@foo.bar", 1, false));
+        assertNotNull(info);
+        assertNotNull(info.getVersion());
+        assertTrue(info.isAuthenticated());
+        assertFalse(info.isAdmin());
+    }
+
+    @Test
+    public void testApiInfoWithAdmin() throws Exception {
+        replay(userService);
+        JasifyInfo info = endpoint.apiInfo(new JasifyUser("test@foo.bar", 1, true));
+        assertNotNull(info);
+        assertNotNull(info.getVersion());
+        assertTrue(info.isAuthenticated());
+        assertTrue(info.isAdmin());
     }
 
     @Test(expected = UnauthorizedException.class)

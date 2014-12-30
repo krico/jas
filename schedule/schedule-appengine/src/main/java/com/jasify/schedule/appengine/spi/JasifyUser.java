@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.endpoints;
+package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.auth.common.User;
 import com.jasify.schedule.appengine.model.UserSession;
