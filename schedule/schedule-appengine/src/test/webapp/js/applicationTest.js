@@ -26,6 +26,7 @@ describe("Application", function () {
                 }
             };
         };
+        $gapiMock.client.jasify = {};
         $provide.value('$gapi', $gapiMock);
 
     }));
@@ -171,6 +172,19 @@ describe("Application", function () {
             expect(fail2).toBe(null);
             expect(ok3).toBe(true);
             expect(fail3).toBe(null);
+        });
+
+        it('passes the jasify api to the jasify call', function () {
+            var captured = null;
+            Endpoint.jasify(function (api) {
+                captured = api;
+            });
+            expect(captured).toBe(null);
+            Endpoint.init();
+            $gapiMock.data.load.then.success();
+            expect(captured).toBe(null);
+            $rootScope.$apply();
+            expect(captured).toBe($gapiMock.client.jasify);
         });
 
     });
@@ -739,6 +753,71 @@ describe("Application", function () {
             expect(users[0].id).toBe(555);
             expect(users[0].name).toBe('user');
             expect(users[0].email).toBe('user@jasify.com');
+
+        });
+    });
+
+    describe('UserLogin', function () {
+        var UserLogin, Endpoint;
+
+        beforeEach(inject(function (_UserLogin_, _Endpoint_) {
+            UserLogin = _UserLogin_;
+            Endpoint = _Endpoint_;
+            Endpoint.jasifyLoaded();
+            $gapiMock.client.jasify.userLogins = {};
+        }));
+
+        it('list calls correct api method with correct parameters', function () {
+            var calls = 0;
+            var captureParams = null;
+            var captureResult = null;
+            var expected = [];
+            var expectedUserId = 123;
+            $gapiMock.client.jasify.userLogins.list = function (params) {
+                ++calls;
+                captureParams = params;
+                return {result: {items: expected}}
+            };
+
+            UserLogin.list(expectedUserId).then(function (result) {
+                captureResult = result;
+            });
+
+            expect(captureParams).toBe(null);
+            expect(captureResult).toBe(null);
+            expect(calls).toEqual(0);
+
+            $rootScope.$apply();
+
+            expect(captureParams).toEqual({userId: expectedUserId});
+            expect(captureResult).toBe(expected);
+            expect(calls).toEqual(1);
+
+        });
+        it('remove calls correct api method with correct parameters', function () {
+            var calls = 0;
+            var captureParams = null;
+            var captureResult = null;
+            var expectedUserId = 123;
+            var expectedLoginId = 123;
+            $gapiMock.client.jasify.userLogins.remove = function (params) {
+                ++calls;
+                captureParams = params;
+                return {result: {}}
+            };
+
+            UserLogin.remove(expectedUserId, {id: {id: expectedLoginId}}).then(function (result) {
+                captureResult = result;
+            });
+
+            expect(captureParams).toBe(null);
+            expect(captureResult).toBe(null);
+            expect(calls).toEqual(0);
+
+            $rootScope.$apply();
+
+            expect(captureParams).toEqual({userId: expectedUserId, loginId: expectedLoginId});
+            expect(calls).toEqual(1);
 
         });
     });

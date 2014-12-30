@@ -123,24 +123,16 @@ jasifyScheduleApp.config(['$routeProvider',
                 templateUrl: 'views/profile-logins.html',
                 controller: 'ProfileLoginsCtrl',
                 resolve: {
-                    logins: function ($q, Allow, Endpoint, Session) {
-                        //TODO: this is outrageous :-), we need some kind of wrapper to get api calls
+                    logins: function ($q, Allow, UserLogin, Session) {
                         return Allow.user().then(
                             function () {
-                                return Endpoint.load().then(function () {
-                                    return $q.when(Endpoint.api.logins.list({userId: Session.userId}));
-                                });
+                                return UserLogin.list(Session.userId);
                             },
                             function (reason) {
                                 return $q.reject(reason);
                             }
                         );
                     }
-                    //TODO: remove
-                    // Not needed, we check for allow on logins:
-                    //allow: function (Allow) {
-                    //    return Allow.user();
-                    //}
                 }
             }).
 
@@ -238,9 +230,20 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
             loaded: false,
             promise: null,
             deferred: null,
-            api: null,
             failed: false,
             settings: null
+        };
+
+        /**
+         * Call a function with the jasify api
+         */
+        Endpoint.jasify = function (fn) {
+            return Endpoint.load().then(function () {
+                    return fn($gapi.client.jasify);
+                },
+                function (resp) {
+                    return $q.reject(resp);
+                });
         };
 
 
@@ -271,14 +274,7 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
                 Endpoint.load(); //create promise
             }
             $gapi.client.load('jasify', 'v1', null, '/_ah/api').then(
-                function () {
-                    Endpoint.loaded = true;
-                    Endpoint.promise = null;
-                    Endpoint.deferred.resolve('loaded');
-                    Endpoint.deferred = null;
-                    Endpoint.api = $gapi.client.jasify;
-                    $log.debug('Endpoint.initialized');
-                },
+                Endpoint.jasifyLoaded,
                 function (r) {
                     $log.warn('Failed to load api: ' + r);
                     Endpoint.loaded = true;
@@ -288,6 +284,14 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
                     Endpoint.deferred = null;
 
                 });
+        };
+
+        Endpoint.jasifyLoaded = function () {
+            Endpoint.loaded = true;
+            Endpoint.promise = null;
+            if (Endpoint.deferred) Endpoint.deferred.resolve('loaded');
+            Endpoint.deferred = null;
+            $log.debug('Endpoint.initialized');
         };
 
         return Endpoint;
@@ -496,6 +500,38 @@ jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $lo
      'query': {method: 'GET', isArray: true}
      });
      */
+}]);
+
+/**
+ * UserLogins service
+ */
+jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint) {
+    var UserLogin = {};
+
+    function errorHandler(resp) {
+        return $q.reject(resp);
+    }
+
+    UserLogin.list = function (userId) {
+        return Endpoint.jasify(function (jasify) {
+            return jasify.userLogins.list({userId: userId});
+        }).then(
+            function (resp) {
+                return resp.result.items;
+            },
+            errorHandler);
+    };
+
+    UserLogin.remove = function (userId, login) {
+        return Endpoint.jasify(function (jasify) {
+            return jasify.userLogins.remove({userId: userId, loginId: login.id.id});
+        }).then(
+            function (resp) {
+                return true;
+            },
+            errorHandler);
+    };
+    return UserLogin;
 }]);
 
 /**

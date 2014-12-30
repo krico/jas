@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.spi;
+package com.jasify.schedule.appengine.spi.auth;
 
 import com.google.api.server.spi.auth.common.User;
 import com.jasify.schedule.appengine.model.UserSession;
@@ -7,17 +7,17 @@ import com.jasify.schedule.appengine.model.UserSession;
  * @author krico
  * @since 27/12/14.
  */
-public class JasifyUser extends User {
+public class JasifyEndpointUser extends User {
     private final long userId;
     private final boolean admin;
 
-    public JasifyUser(String email, long userId, boolean admin) {
+    public JasifyEndpointUser(String email, long userId, boolean admin) {
         super(email);
         this.userId = userId;
         this.admin = admin;
     }
 
-    public JasifyUser(UserSession userSession) {
+    public JasifyEndpointUser(UserSession userSession) {
         super(userSession.getUserId() + "@jasify.com");
         this.userId = userSession.getUserId();
         this.admin = userSession.isAdmin();

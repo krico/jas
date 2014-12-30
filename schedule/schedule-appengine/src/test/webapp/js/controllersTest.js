@@ -604,7 +604,7 @@ describe('Controllers', function () {
             $scope = $applicationScope.$new();
             controller = $controller('ProfileLoginsCtrl', {
                 $scope: $scope,
-                logins: {result: {items: ['a', 'b', 'c']}}
+                logins: ['a', 'b', 'c']
             });
         });
 

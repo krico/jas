@@ -10,6 +10,8 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
+import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +43,8 @@ public class JasifyEndpoint {
 
     static User mustBeSameUserOrAdmin(User caller, long userId) throws UnauthorizedException, ForbiddenException {
         caller = mustBeLoggedIn(caller);
-        if (caller instanceof JasifyUser) {
-            JasifyUser jasifyUser = (JasifyUser) caller;
+        if (caller instanceof JasifyEndpointUser) {
+            JasifyEndpointUser jasifyUser = (JasifyEndpointUser) caller;
             if (jasifyUser.isAdmin() || jasifyUser.getUserId() == userId) {
                 return caller;
             }
@@ -57,26 +59,26 @@ public class JasifyEndpoint {
         return userService;
     }
 
-    @ApiMethod(name = "api.info", httpMethod = ApiMethod.HttpMethod.GET)
-    public JasifyInfo apiInfo(User caller) {
-        JasifyInfo info = new JasifyInfo();
+    @ApiMethod(name = "apiInfo", path = "api-info", httpMethod = ApiMethod.HttpMethod.GET)
+    public ApiInfo getApiInfo(User caller) {
+        ApiInfo info = new ApiInfo();
         info.setVersion("1");
         if (caller != null) {
             info.setAuthenticated(true);
         }
-        if (caller instanceof JasifyUser) {
-            info.setAdmin(((JasifyUser) caller).isAdmin());
+        if (caller instanceof JasifyEndpointUser) {
+            info.setAdmin(((JasifyEndpointUser) caller).isAdmin());
         }
         return info;
     }
 
-    @ApiMethod(name = "logins.list")
+    @ApiMethod(name = "userLogins.list", path = "user-logins/{userId}", httpMethod = ApiMethod.HttpMethod.GET)
     public List<UserLogin> listLogins(User caller, @Named("userId") long userId) throws UnauthorizedException, ForbiddenException {
         mustBeSameUserOrAdmin(caller, userId);
         return getUserService().getUserLogins(userId);
     }
 
-    @ApiMethod(name = "logins.remove")
+    @ApiMethod(name = "userLogins.remove", path = "user-logins/{userId}/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeLogin(User caller, @Named("userId") long userId, @Named("loginId") long loginId) throws UnauthorizedException, BadRequestException, ForbiddenException {
         caller = mustBeSameUserOrAdmin(caller, userId);
 
