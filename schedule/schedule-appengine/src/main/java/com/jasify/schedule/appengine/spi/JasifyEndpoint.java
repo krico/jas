@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.endpoints;
+package com.jasify.schedule.appengine.spi;
 
 import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.api.server.spi.auth.common.User;
@@ -34,21 +34,13 @@ public class JasifyEndpoint {
 
     private UserService userService;
 
-    public JasifyEndpoint() {
-        this(UserServiceFactory.getUserService());
-    }
-
-    JasifyEndpoint(UserService userService) {
-        this.userService = userService;
-    }
-
-    private static User checkLoggedIn(User caller) throws UnauthorizedException {
+    static User mustBeLoggedIn(User caller) throws UnauthorizedException {
         if (caller == null) throw new UnauthorizedException("Only authenticated users can call this method");
         return caller;
     }
 
-    private static User checkAdminOrSameUser(User caller, long userId) throws UnauthorizedException, ForbiddenException {
-        caller = checkLoggedIn(caller);
+    static User mustBeSameUserOrAdmin(User caller, long userId) throws UnauthorizedException, ForbiddenException {
+        caller = mustBeLoggedIn(caller);
         if (caller instanceof JasifyUser) {
             JasifyUser jasifyUser = (JasifyUser) caller;
             if (jasifyUser.isAdmin() || jasifyUser.getUserId() == userId) {
@@ -58,32 +50,44 @@ public class JasifyEndpoint {
         throw new ForbiddenException("Must be admin or same user");
     }
 
-    @ApiMethod(name = "settings")
-    public Settings settings(User caller) {
-        Settings settings = new Settings();
-        settings.setVersion("1");
-        settings.setAuthenticated(caller != null);
-        return settings;
+    UserService getUserService() {
+        if (userService == null) {
+            userService = UserServiceFactory.getUserService();
+        }
+        return userService;
+    }
+
+    @ApiMethod(name = "api.info", httpMethod = ApiMethod.HttpMethod.GET)
+    public JasifyInfo apiInfo(User caller) {
+        JasifyInfo info = new JasifyInfo();
+        info.setVersion("1");
+        if (caller != null) {
+            info.setAuthenticated(true);
+        }
+        if (caller instanceof JasifyUser) {
+            info.setAdmin(((JasifyUser) caller).isAdmin());
+        }
+        return info;
     }
 
     @ApiMethod(name = "logins.list")
     public List<UserLogin> listLogins(User caller, @Named("userId") long userId) throws UnauthorizedException, ForbiddenException {
-        checkAdminOrSameUser(caller, userId);
-        return userService.getUserLogins(userId);
+        mustBeSameUserOrAdmin(caller, userId);
+        return getUserService().getUserLogins(userId);
     }
 
     @ApiMethod(name = "logins.remove")
     public void removeLogin(User caller, @Named("userId") long userId, @Named("loginId") long loginId) throws UnauthorizedException, BadRequestException, ForbiddenException {
-        caller = checkAdminOrSameUser(caller, userId);
+        caller = mustBeSameUserOrAdmin(caller, userId);
 
         com.jasify.schedule.appengine.model.users.User user = Preconditions.checkNotNull(userService.get(userId));
-        UserLogin login = userService.getLogin(userId, loginId);
+        UserLogin login = getUserService().getLogin(userId, loginId);
         if (login == null) {
             //nothing to do
             return;
         }
         try {
-            userService.removeLogin(user, login);
+            getUserService().removeLogin(user, login);
         } catch (EntityNotFoundException e) {
             log.error("Failed to remove login user: {} login: {}", user, login);
             throw new BadRequestException("Failed to remove login");
