@@ -343,9 +343,9 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '
 /**
  * ProfileLoginsCtrl
  */
-jasifyScheduleControllers.controller('ProfileLoginsCtrl', ['$scope', '$log', '$q', 'Endpoint', 'Session', 'Popup', 'logins',
-    function ($scope, $log, $q, Endpoint, Session, Popup, logins) {
-        $scope.logins = logins.result.items;
+jasifyScheduleControllers.controller('ProfileLoginsCtrl', ['$scope', '$log', '$q', 'UserLogin', 'Session', 'Popup', 'logins',
+    function ($scope, $log, $q, UserLogin, Session, Popup, logins) {
+        $scope.logins = logins;
         $scope.alerts = [];
 
         $scope.alert = function (t, m) {
@@ -361,19 +361,20 @@ jasifyScheduleControllers.controller('ProfileLoginsCtrl', ['$scope', '$log', '$q
         };
 
         $scope.removeLogin = function (login) {
-            //TODO: this should be a service
-            $q.when(Endpoint.api.logins.remove({userId: Session.userId, loginId: login.id.id})).then(function (r) {
-                $log.debug("R: " + jas.debugObject(r));
-                $scope.alert('success', 'Login removed!');
-                $scope.reload();
-            });
-
+            UserLogin.remove(Session.userId, login).then(function (ok) {
+                    $scope.alert('success', 'Login removed!');
+                    $scope.reload();
+                },
+                function (msg) {
+                    $scope.alert('danger', '! ' + msg);
+                }
+            );
         };
 
         $scope.reload = function () {
-            //TODO: this should be a service
-            $q.when(Endpoint.api.logins.list({userId: Session.userId})).then(function (logins) {
-                $scope.logins = logins.result.items;
+            $scope.logins = [];
+            UserLogin.list(Session.userId).then(function (logins) {
+                $scope.logins = logins;
             });
         };
 

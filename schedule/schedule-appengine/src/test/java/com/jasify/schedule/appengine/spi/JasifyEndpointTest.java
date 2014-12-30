@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
+import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
@@ -51,7 +52,7 @@ public class JasifyEndpointTest {
     @Test
     public void testMustBeLoggedIn() throws UnauthorizedException {
         replay(userService);
-        JasifyUser user = new JasifyUser("", 1, false);
+        JasifyEndpointUser user = new JasifyEndpointUser("", 1, false);
         assertEquals(user, JasifyEndpoint.mustBeLoggedIn(user));
     }
 
@@ -64,28 +65,28 @@ public class JasifyEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testMustBeSameUserOrAdminThrowsForbiddenWhenNotSameUser() throws UnauthorizedException, ForbiddenException {
         replay(userService);
-        JasifyUser user = new JasifyUser("", 1, false);
+        JasifyEndpointUser user = new JasifyEndpointUser("", 1, false);
         JasifyEndpoint.mustBeSameUserOrAdmin(user, 2);
     }
 
     @Test
     public void testMustBeSameUserSameUser() throws UnauthorizedException, ForbiddenException {
         replay(userService);
-        JasifyUser user = new JasifyUser("", 1, false);
+        JasifyEndpointUser user = new JasifyEndpointUser("", 1, false);
         assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 1));
     }
 
     @Test
     public void testMustBeSameUserOrAdminWithAdmin() throws UnauthorizedException, ForbiddenException {
         replay(userService);
-        JasifyUser user = new JasifyUser("", 1, true);
+        JasifyEndpointUser user = new JasifyEndpointUser("", 1, true);
         assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 2));
     }
 
     @Test
     public void testApiInfoNoUser() throws Exception {
         replay(userService);
-        JasifyInfo info = endpoint.apiInfo(null);
+        ApiInfo info = endpoint.getApiInfo(null);
         assertNotNull(info);
         assertNotNull(info.getVersion());
         assertFalse(info.isAuthenticated());
@@ -94,7 +95,7 @@ public class JasifyEndpointTest {
     @Test
     public void testApiInfoWithUser() throws Exception {
         replay(userService);
-        JasifyInfo info = endpoint.apiInfo(new JasifyUser("test@foo.bar", 1, false));
+        ApiInfo info = endpoint.getApiInfo(new JasifyEndpointUser("test@foo.bar", 1, false));
         assertNotNull(info);
         assertNotNull(info.getVersion());
         assertTrue(info.isAuthenticated());
@@ -104,7 +105,7 @@ public class JasifyEndpointTest {
     @Test
     public void testApiInfoWithAdmin() throws Exception {
         replay(userService);
-        JasifyInfo info = endpoint.apiInfo(new JasifyUser("test@foo.bar", 1, true));
+        ApiInfo info = endpoint.getApiInfo(new JasifyEndpointUser("test@foo.bar", 1, true));
         assertNotNull(info);
         assertNotNull(info.getVersion());
         assertTrue(info.isAuthenticated());
@@ -120,7 +121,7 @@ public class JasifyEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testListLoginsOtherUserThrows() throws Exception {
         replay(userService);
-        JasifyUser user = new JasifyUser("", 5, false);
+        JasifyEndpointUser user = new JasifyEndpointUser("", 5, false);
         endpoint.listLogins(user, 1);
     }
 
@@ -128,7 +129,7 @@ public class JasifyEndpointTest {
     public void testListLoginsSame() throws Exception {
         expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
-        JasifyUser user = new JasifyUser("", 5, false);
+        JasifyEndpointUser user = new JasifyEndpointUser("", 5, false);
         assertNotNull(endpoint.listLogins(user, 5));
     }
 
@@ -136,7 +137,7 @@ public class JasifyEndpointTest {
     public void testListLoginsOtherAdmin() throws Exception {
         expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
-        JasifyUser user = new JasifyUser("", 2, true);
+        JasifyEndpointUser user = new JasifyEndpointUser("", 2, true);
         assertNotNull(endpoint.listLogins(user, 5));
     }
 
@@ -150,7 +151,7 @@ public class JasifyEndpointTest {
         replay(userService);
         User u1 = new User();
         u1.setId(Datastore.createKey(User.class, 23));
-        JasifyUser user = new JasifyUser("", u1.getId().getId(), false);
+        JasifyEndpointUser user = new JasifyEndpointUser("", u1.getId().getId(), false);
         List<UserLogin> logins = endpoint.listLogins(user, u1.getId().getId());
         assertNotNull(logins);
         assertEquals(1, logins.size());
@@ -169,7 +170,7 @@ public class JasifyEndpointTest {
     public void testRemoveLoginNonExistentUser() throws Exception {
         expect(userService.get(EasyMock.anyLong())).andReturn(null);
         replay(userService);
-        endpoint.removeLogin(new JasifyUser("a@b", 1, false), 1, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 1, 1);
     }
 
     @Test
@@ -177,7 +178,7 @@ public class JasifyEndpointTest {
         expect(userService.get(EasyMock.anyLong())).andReturn(new User());
         expect(userService.getLogin(EasyMock.anyLong(), EasyMock.anyLong())).andReturn(null);
         replay(userService);
-        endpoint.removeLogin(new JasifyUser("a@b", 1, false), 1, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 1, 1);
     }
 
     @Test
@@ -189,13 +190,13 @@ public class JasifyEndpointTest {
         userService.removeLogin(user, login);
         expectLastCall();
         replay(userService);
-        endpoint.removeLogin(new JasifyUser("a@b", 1, false), 1, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 1, 1);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testRemoveLoginOtherUserThrows() throws Exception {
         replay(userService);
-        endpoint.removeLogin(new JasifyUser("a@b", 1, false), 2, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 2, 1);
     }
 
     @Test
@@ -207,7 +208,7 @@ public class JasifyEndpointTest {
         userService.removeLogin(user, login);
         expectLastCall();
         replay(userService);
-        endpoint.removeLogin(new JasifyUser("a@b", 1, true), 2, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, true), 2, 1);
     }
 
 }

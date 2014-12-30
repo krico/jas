@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.spi;
+package com.jasify.schedule.appengine.spi.auth;
 
 import com.google.api.server.spi.auth.common.User;
 import com.jasify.schedule.appengine.model.UserContext;
@@ -48,8 +48,8 @@ public class JasifyAuthenticatorTest {
         assertNull(authenticator.authenticate(request));
         UserContext.setContext(session, null, null);
         User user = authenticator.authenticate(request);
-        assertTrue(user instanceof JasifyUser);
-        JasifyUser jas = (JasifyUser) user;
+        assertTrue(user instanceof JasifyEndpointUser);
+        JasifyEndpointUser jas = (JasifyEndpointUser) user;
         assertEquals(userId, jas.getUserId());
         assertEquals(true, jas.isAdmin());
     }

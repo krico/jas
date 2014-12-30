@@ -4,7 +4,7 @@ package com.jasify.schedule.appengine.spi;
  * @author krico
  * @since 27/12/14.
  */
-public class JasifyInfo {
+public class ApiInfo {
     private String version;
     private boolean authenticated;
     private boolean admin;

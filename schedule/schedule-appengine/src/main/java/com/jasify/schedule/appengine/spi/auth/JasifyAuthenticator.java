@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.spi;
+package com.jasify.schedule.appengine.spi.auth;
 
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.Authenticator;
@@ -22,6 +22,6 @@ public class JasifyAuthenticator implements Authenticator {
         log.trace("{}", ServletUtil.debugLazy(req));
         UserSession currentUser = UserContext.getCurrentUser();
         if (currentUser == null) return null;
-        return new JasifyUser(currentUser);
+        return new JasifyEndpointUser(currentUser);
     }
 }
