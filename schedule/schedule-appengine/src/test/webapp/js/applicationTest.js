@@ -598,14 +598,20 @@ describe("Application", function () {
     });
 
     describe('Username', function () {
-        var Username;
+        var Username, $q;
 
-        beforeEach(inject(function (_Username_) {
+        beforeEach(inject(function (_$q_, _Username_, _Endpoint_) {
+            $q = _$q_;
             Username = _Username_;
+            Endpoint = _Endpoint_;
+            Endpoint.jasifyLoaded();
+            $gapiMock.client.jasify.username = {};
+
         }));
 
         it("should tell us if username is available", function () {
-            $httpBackend.expectPOST('/username', 'good').respond(200);
+            $gapiMock.client.jasify.username.check = function () {
+            };
 
             var ok = null;
             var nok = null;
@@ -617,7 +623,7 @@ describe("Application", function () {
                     nok = true;
                 });
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(ok).toBe(true);
             expect(nok).toBe(null);
@@ -625,8 +631,9 @@ describe("Application", function () {
         });
 
         it("should tell us if username is unavailable", function () {
-            $httpBackend.expectPOST('/username', 'bad-name').respond(406);
-
+            $gapiMock.client.jasify.username.check = function () {
+                return $q.reject();
+            };
 
             var ok = null;
             var nok = null;
@@ -638,7 +645,7 @@ describe("Application", function () {
                     nok = true;
                 });
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(ok).toBe(null);
             expect(nok).toBe(true);
