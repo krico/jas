@@ -361,7 +361,7 @@ jasifyScheduleControllers.controller('ProfileLoginsCtrl', ['$scope', '$log', '$q
         };
 
         $scope.removeLogin = function (login) {
-            UserLogin.remove(Session.userId, login).then(function (ok) {
+            UserLogin.remove(login).then(function (ok) {
                     $scope.alert('success', 'Login removed!');
                     $scope.reload();
                 },

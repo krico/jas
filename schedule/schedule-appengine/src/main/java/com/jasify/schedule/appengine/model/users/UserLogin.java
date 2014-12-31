@@ -1,7 +1,5 @@
 package com.jasify.schedule.appengine.model.users;
 
-import com.google.api.server.spi.config.AnnotationBoolean;
-import com.google.api.server.spi.config.ApiResourceProperty;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
@@ -43,7 +41,6 @@ public class UserLogin implements Serializable, Comparable<UserLogin> {
     private Link profile;
     private Link avatar;
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE) //TODO:remove annotation, should be a different object
     private ModelRef<User> userRef = new ModelRef<>(User.class);
 
     public UserLogin() {

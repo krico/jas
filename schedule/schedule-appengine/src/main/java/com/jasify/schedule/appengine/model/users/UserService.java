@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
@@ -28,11 +29,12 @@ public interface UserService {
 
     UserLogin addLogin(User user, UserLogin login) throws EntityNotFoundException, UserLoginExistsException;
 
-    void removeLogin(User user, UserLogin login) throws EntityNotFoundException;
+    UserLogin getLogin(Key id);
+
+    void removeLogin(Key id) throws EntityNotFoundException;
 
     User get(long id);
 
-    UserLogin getLogin(long userId, long loginId);
 
     User findByLogin(String provider, String userId);
 

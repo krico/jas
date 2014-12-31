@@ -1,17 +1,20 @@
 package com.jasify.schedule.appengine.spi;
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +30,7 @@ import java.util.List;
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
+        transformers = {JasUserLoginTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
@@ -78,24 +82,26 @@ public class JasifyEndpoint {
         return getUserService().getUserLogins(userId);
     }
 
-    @ApiMethod(name = "userLogins.remove", path = "user-logins/{userId}/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeLogin(User caller, @Named("userId") long userId, @Named("loginId") long loginId) throws UnauthorizedException, BadRequestException, ForbiddenException {
-        caller = mustBeSameUserOrAdmin(caller, userId);
+    @ApiMethod(name = "userLogins.remove", path = "user-logins/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException {
+        caller = mustBeLoggedIn(caller);
 
-        com.jasify.schedule.appengine.model.users.User user = Preconditions.checkNotNull(userService.get(userId));
-        UserLogin login = getUserService().getLogin(userId, loginId);
+        Key loginKey = KeyFactory.stringToKey(Preconditions.checkNotNull(loginId));
+        UserLogin login = getUserService().getLogin(loginKey);
         if (login == null) {
             //nothing to do
             return;
         }
+        Key userKey = Preconditions.checkNotNull(login.getUserRef().getKey());
+        caller = mustBeSameUserOrAdmin(caller, userKey.getId());
+
         try {
-            getUserService().removeLogin(user, login);
+            getUserService().removeLogin(loginKey);
         } catch (EntityNotFoundException e) {
-            log.error("Failed to remove login user: {} login: {}", user, login);
+            log.error("Failed to remove login user: {} login: {}", userKey, login);
             throw new BadRequestException("Failed to remove login");
         }
         log.info("Removed user: {}, login: {}", caller, login);
     }
-
 
 }

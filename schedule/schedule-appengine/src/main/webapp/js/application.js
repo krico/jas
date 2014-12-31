@@ -522,9 +522,9 @@ jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint
             errorHandler);
     };
 
-    UserLogin.remove = function (userId, login) {
+    UserLogin.remove = function (login) {
         return Endpoint.jasify(function (jasify) {
-            return jasify.userLogins.remove({userId: userId, loginId: login.id.id});
+            return jasify.userLogins.remove({loginId: login.id});
         }).then(
             function (resp) {
                 return true;
