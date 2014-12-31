@@ -30,4 +30,12 @@ public class JasifyEndpointUser extends User {
     public boolean isAdmin() {
         return admin;
     }
+
+    @Override
+    public String toString() {
+        return "JasifyEndpointUser{" +
+                "userId=" + userId +
+                ", admin=" + admin +
+                '}';
+    }
 }

@@ -1,13 +1,16 @@
 describe('AdminControllers', function () {
 
-    var $controller, $httpBackend, $rootScope;
+    var $controller, $q, $httpBackend, $rootScope, $gapiMock;
 
     beforeEach(module('jasifyScheduleApp', function ($provide) {
         $provide.value('$log', console);
+        $gapiMock = jasifyGapiMock();
+        $provide.value('$gapi', $gapiMock);
     }));
 
-    beforeEach(inject(function (_$controller_, _$httpBackend_, _$rootScope_) {
+    beforeEach(inject(function (_$controller_, _$q_, _$httpBackend_, _$rootScope_) {
         $controller = _$controller_;
+        $q = _$q_;
         $httpBackend = _$httpBackend_;
         $rootScope = _$rootScope_;
     }));
@@ -123,13 +126,16 @@ describe('AdminControllers', function () {
     });
 
     describe('AdminUserCtrl', function () {
-        var $scope, controller, $routeParams, $modal, User, Auth;
+        var $scope, controller, $routeParams, $modal, User, Auth, Endpoint;
 
-        beforeEach(inject(function (_$routeParams_, _$modal_, _User_, _Auth_) {
+        beforeEach(inject(function (_$routeParams_, _$modal_, _User_, _Auth_, _Endpoint_) {
             $routeParams = _$routeParams_;
             $modal = _$modal_;
             User = _User_;
             Auth = _Auth_;
+            Endpoint = _Endpoint_;
+            Endpoint.jasifyLoaded();
+            $gapiMock.client.jasify.user = {};
         }));
 
         beforeEach(function () {
@@ -328,16 +334,12 @@ describe('AdminControllers', function () {
             $scope.pw.newPassword = 'newPass';
             expect($scope.loading).toBe(false);
 
-
-            $httpBackend.expectPOST('/auth/change-password', {credentials: $scope.user, newPassword: $scope.pw.newPassword})
-                .respond(200);
-
-
             $scope.changePassword();
 
             expect($scope.loading).toBe(true);
 
-            $httpBackend.flush();
+
+            $rootScope.$apply();
 
             expect($scope.loading).toBe(false);
             expect(pristine).toBe(true);
@@ -358,16 +360,15 @@ describe('AdminControllers', function () {
             $scope.pw.newPassword = 'newPass';
             expect($scope.loading).toBe(false);
 
-
-            $httpBackend.expectPOST('/auth/change-password', {credentials: $scope.user, newPassword: $scope.pw.newPassword})
-                .respond(500);
-
+            $gapiMock.client.jasify.users.changePassword = function () {
+                return $q.reject();
+            };
 
             $scope.changePassword();
 
             expect($scope.loading).toBe(true);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect($scope.loading).toBe(false);
             expect(pristine).toBe(true);

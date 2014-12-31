@@ -9,24 +9,7 @@ describe("Application", function () {
             innerWidth: 500
         };
         $provide.value('$window', $windowMock);
-        $gapiMock = {data: {}};
-        $gapiMock.client = {};
-        $gapiMock.client.load = function (api, version, callback, path) {
-            $gapiMock.data.load = {
-                api: api,
-                version: version,
-                callback: callback,
-                path: path,
-                then: {}
-            };
-            return {
-                then: function (success, fail) {
-                    $gapiMock.data.load.then.success = success;
-                    $gapiMock.data.load.then.fail = fail;
-                }
-            };
-        };
-        $gapiMock.client.jasify = {};
+        $gapiMock = jasifyGapiMock();
         $provide.value('$gapi', $gapiMock);
 
     }));
@@ -190,11 +173,13 @@ describe("Application", function () {
     });
 
     describe('Auth', function () {
-        var Session, Auth, $cookies;
-        beforeEach(inject(function (_$cookies_, _Session_, _Auth_) {
+        var Session, Auth, $cookies, Endpoint;
+        beforeEach(inject(function (_$cookies_, _Session_, _Auth_, _Endpoint_) {
             $cookies = _$cookies_;
             Session = _Session_;
             Auth = _Auth_;
+            Endpoint = _Endpoint_;
+            Endpoint.jasifyLoaded();
         }));
 
         it("should not be authenticated before login", function () {
@@ -314,10 +299,7 @@ describe("Application", function () {
 
             expect(Auth.isAuthenticated()).toBe(true);
 
-            $httpBackend.expectPOST('/auth/change-password', {
-                credentials: credentials,
-                newPassword: 'newPw'
-            }).respond(200);
+            spyOn($gapiMock.client.jasify.users, 'changePassword').andCallThrough();
 
             var ok = false;
 
@@ -327,7 +309,7 @@ describe("Application", function () {
 
             expect(ok).toBe(false);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(ok).toBe(true);
         });
@@ -598,20 +580,17 @@ describe("Application", function () {
     });
 
     describe('Username', function () {
-        var Username, $q;
+        var Username, $q, Endpoint;
 
         beforeEach(inject(function (_$q_, _Username_, _Endpoint_) {
             $q = _$q_;
             Username = _Username_;
             Endpoint = _Endpoint_;
             Endpoint.jasifyLoaded();
-            $gapiMock.client.jasify.username = {};
 
         }));
 
         it("should tell us if username is available", function () {
-            $gapiMock.client.jasify.username.check = function () {
-            };
 
             var ok = null;
             var nok = null;
@@ -771,7 +750,6 @@ describe("Application", function () {
             UserLogin = _UserLogin_;
             Endpoint = _Endpoint_;
             Endpoint.jasifyLoaded();
-            $gapiMock.client.jasify.userLogins = {};
         }));
 
         it('list calls correct api method with correct parameters', function () {
