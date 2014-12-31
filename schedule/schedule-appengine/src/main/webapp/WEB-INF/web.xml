@@ -47,10 +47,6 @@
         <servlet-class>com.jasify.schedule.appengine.http.servlet.UserServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>changePassword</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.ChangePasswordServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>oauth2-request</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.OAuth2CodeRequestServlet</servlet-class>
     </servlet>
@@ -81,10 +77,6 @@
     <servlet-mapping>
         <servlet-name>user</servlet-name>
         <url-pattern>/user/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>changePassword</servlet-name>
-        <url-pattern>/auth/change-password</url-pattern>
     </servlet-mapping>
 
 

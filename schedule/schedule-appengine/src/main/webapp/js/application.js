@@ -302,8 +302,8 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
-    function ($log, $http, $q, $cookies, Session) {
+jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session', 'Endpoint',
+    function ($log, $http, $q, $cookies, Session, Endpoint) {
 
         var Auth = {};
 
@@ -393,7 +393,13 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
 
         Auth.changePassword = function (credentials, newPassword) {
             $log.info("Changing password (userId=" + Session.userId + ")!");
-            return $http.post('/auth/change-password', {credentials: credentials, newPassword: newPassword});
+            return Endpoint.jasify(function (jasify) {
+                return jasify.users.changePassword({
+                    userId: credentials.id,
+                    oldPassword: credentials.password,
+                    newPassword: newPassword
+                });
+            });
         };
 
         Auth.logout = function () {
@@ -628,11 +634,9 @@ jasifyScheduleApp.directive('jasConfirmField', function () {
                 },
                 function (newValue, oldValue) {
                     if (ctrl.$pristine) {
-                        console.log('MV: PRISTINE');
                         return;
                     }
                     if (ctrl.$modelValue == newValue) {
-                        console.log('MV: OK');
                         return;
                     }
                     ctrl.$validate();

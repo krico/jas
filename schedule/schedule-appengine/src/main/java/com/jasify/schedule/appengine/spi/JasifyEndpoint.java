@@ -2,12 +2,10 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
-import com.google.api.server.spi.response.BadRequestException;
-import com.google.api.server.spi.response.ConflictException;
-import com.google.api.server.spi.response.ForbiddenException;
-import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.ShortBlob;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.users.UserLogin;
@@ -16,6 +14,8 @@ import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
+import com.jasify.schedule.appengine.util.DigestUtil;
+import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.UsernameValidator;
 import com.jasify.schedule.appengine.validators.Validator;
 import org.apache.commons.lang3.StringUtils;
@@ -45,18 +45,15 @@ public class JasifyEndpoint {
     private UserService userService;
     private Validator<String> usernameValidator;
 
-    static User mustBeLoggedIn(User caller) throws UnauthorizedException {
-        if (caller == null) throw new UnauthorizedException("Only authenticated users can call this method");
-        return caller;
+    static JasifyEndpointUser mustBeLoggedIn(User caller) throws UnauthorizedException {
+        if (caller instanceof JasifyEndpointUser) return (JasifyEndpointUser) caller;
+        throw new UnauthorizedException("Only authenticated users can call this method");
     }
 
-    static User mustBeSameUserOrAdmin(User caller, long userId) throws UnauthorizedException, ForbiddenException {
-        caller = mustBeLoggedIn(caller);
-        if (caller instanceof JasifyEndpointUser) {
-            JasifyEndpointUser jasifyUser = (JasifyEndpointUser) caller;
-            if (jasifyUser.isAdmin() || jasifyUser.getUserId() == userId) {
-                return caller;
-            }
+    static JasifyEndpointUser mustBeSameUserOrAdmin(User caller, long userId) throws UnauthorizedException, ForbiddenException {
+        JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
+        if (jasifyEndpointUser.isAdmin() || jasifyEndpointUser.getUserId() == userId) {
+            return jasifyEndpointUser;
         }
         throw new ForbiddenException("Must be admin or same user");
     }
@@ -79,10 +76,8 @@ public class JasifyEndpoint {
     public ApiInfo getApiInfo(User caller) {
         ApiInfo info = new ApiInfo();
         info.setVersion("1");
-        if (caller != null) {
-            info.setAuthenticated(true);
-        }
         if (caller instanceof JasifyEndpointUser) {
+            info.setAuthenticated(true);
             info.setAdmin(((JasifyEndpointUser) caller).isAdmin());
         }
         return info;
@@ -95,7 +90,7 @@ public class JasifyEndpoint {
     }
 
     @ApiMethod(name = "userLogins.remove", path = "user-logins/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException {
+    public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException, EntityNotFoundException {
         caller = mustBeLoggedIn(caller);
 
         Key loginKey = KeyFactory.stringToKey(Preconditions.checkNotNull(loginId));
@@ -107,22 +102,41 @@ public class JasifyEndpoint {
         Key userKey = Preconditions.checkNotNull(login.getUserRef().getKey());
         caller = mustBeSameUserOrAdmin(caller, userKey.getId());
 
-        try {
-            getUserService().removeLogin(loginKey);
-        } catch (EntityNotFoundException e) {
-            log.error("Failed to remove login user: {} login: {}", userKey, login);
-            throw new BadRequestException("Failed to remove login");
-        }
+        getUserService().removeLogin(loginKey);
         log.info("Removed user: {}, login: {}", caller, login);
     }
 
-    @ApiMethod(name = "username.check", path = "username/check", httpMethod = ApiMethod.HttpMethod.POST)
+    @ApiMethod(name = "username.check", path = "username-check", httpMethod = ApiMethod.HttpMethod.POST)
     public void checkUsername(@Named("username") String username) throws ConflictException {
         Preconditions.checkNotNull(StringUtils.trimToNull(username));
         List<String> reasons = getUsernameValidator().validate(username);
         if (!reasons.isEmpty()) {
             throw new ConflictException(StringUtils.join(reasons, ", "));
         }
+    }
+
+    @ApiMethod(name = "users.changePassword", path = "user/change-password", httpMethod = ApiMethod.HttpMethod.POST)
+    public void changePassword(User caller, @Named("userId") long userId,
+                               @Named("oldPassword") String oldPassword,
+                               @Named("newPassword") String newPassword)
+            throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, EntityNotFoundException {
+        JasifyEndpointUser jasCaller = mustBeSameUserOrAdmin(caller, userId);
+
+        newPassword = Preconditions.checkNotNull(StringUtils.trimToNull(newPassword));
+
+        com.jasify.schedule.appengine.model.users.User user = getUserService().get(userId);
+        if (user == null) throw new NotFoundException("No user");
+
+        if (jasCaller.getUserId() == userId) { //change your own password
+            ShortBlob dbPassword = Preconditions.checkNotNull(user.getPassword());
+            oldPassword = Preconditions.checkNotNull(StringUtils.trimToNull(oldPassword));
+            if (!DigestUtil.verify(TypeUtil.toBytes(dbPassword), oldPassword)) {
+                throw new ForbiddenException("Password does not match");
+            }
+        }
+
+        log.info("User {} changing password of {}", caller, userId);
+        userService.setPassword(user, newPassword);
     }
 
 }

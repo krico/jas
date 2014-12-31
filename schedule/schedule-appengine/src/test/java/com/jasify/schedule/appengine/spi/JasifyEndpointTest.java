@@ -10,6 +10,8 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.util.DigestUtil;
+import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.Validator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.easymock.EasyMock;
@@ -40,6 +42,10 @@ public class JasifyEndpointTest {
     @TestSubject
     private JasifyEndpoint endpoint = new JasifyEndpoint();
 
+    private static JasifyEndpointUser newCaller(long id, boolean admin) {
+        return new JasifyEndpointUser("a@b", id, admin);
+    }
+
     @Before
     public void datastore() {
         TestHelper.initializeDatastore();
@@ -60,7 +66,7 @@ public class JasifyEndpointTest {
     @Test
     public void testMustBeLoggedIn() throws UnauthorizedException {
         replay(userService);
-        JasifyEndpointUser user = new JasifyEndpointUser("", 1, false);
+        JasifyEndpointUser user = newCaller(1, false);
         assertEquals(user, JasifyEndpoint.mustBeLoggedIn(user));
     }
 
@@ -73,21 +79,21 @@ public class JasifyEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testMustBeSameUserOrAdminThrowsForbiddenWhenNotSameUser() throws UnauthorizedException, ForbiddenException {
         replay(userService);
-        JasifyEndpointUser user = new JasifyEndpointUser("", 1, false);
+        JasifyEndpointUser user = newCaller(1, false);
         JasifyEndpoint.mustBeSameUserOrAdmin(user, 2);
     }
 
     @Test
     public void testMustBeSameUserSameUser() throws UnauthorizedException, ForbiddenException {
         replay(userService);
-        JasifyEndpointUser user = new JasifyEndpointUser("", 1, false);
+        JasifyEndpointUser user = newCaller(1, false);
         assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 1));
     }
 
     @Test
     public void testMustBeSameUserOrAdminWithAdmin() throws UnauthorizedException, ForbiddenException {
         replay(userService);
-        JasifyEndpointUser user = new JasifyEndpointUser("", 1, true);
+        JasifyEndpointUser user = newCaller(1, true);
         assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 2));
     }
 
@@ -103,7 +109,7 @@ public class JasifyEndpointTest {
     @Test
     public void testApiInfoWithUser() throws Exception {
         replay(userService);
-        ApiInfo info = endpoint.getApiInfo(new JasifyEndpointUser("test@foo.bar", 1, false));
+        ApiInfo info = endpoint.getApiInfo(newCaller(1, false));
         assertNotNull(info);
         assertNotNull(info.getVersion());
         assertTrue(info.isAuthenticated());
@@ -113,7 +119,7 @@ public class JasifyEndpointTest {
     @Test
     public void testApiInfoWithAdmin() throws Exception {
         replay(userService);
-        ApiInfo info = endpoint.getApiInfo(new JasifyEndpointUser("test@foo.bar", 1, true));
+        ApiInfo info = endpoint.getApiInfo(newCaller(1, true));
         assertNotNull(info);
         assertNotNull(info.getVersion());
         assertTrue(info.isAuthenticated());
@@ -129,7 +135,7 @@ public class JasifyEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testListLoginsOtherUserThrows() throws Exception {
         replay(userService);
-        JasifyEndpointUser user = new JasifyEndpointUser("", 5, false);
+        JasifyEndpointUser user = newCaller(5, false);
         endpoint.listLogins(user, 1);
     }
 
@@ -137,7 +143,7 @@ public class JasifyEndpointTest {
     public void testListLoginsSame() throws Exception {
         expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
-        JasifyEndpointUser user = new JasifyEndpointUser("", 5, false);
+        JasifyEndpointUser user = newCaller(5, false);
         assertNotNull(endpoint.listLogins(user, 5));
     }
 
@@ -145,7 +151,7 @@ public class JasifyEndpointTest {
     public void testListLoginsOtherAdmin() throws Exception {
         expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
-        JasifyEndpointUser user = new JasifyEndpointUser("", 2, true);
+        JasifyEndpointUser user = newCaller(2, true);
         assertNotNull(endpoint.listLogins(user, 5));
     }
 
@@ -159,7 +165,7 @@ public class JasifyEndpointTest {
         replay(userService);
         User u1 = new User();
         u1.setId(Datastore.createKey(User.class, 23));
-        JasifyEndpointUser user = new JasifyEndpointUser("", u1.getId().getId(), false);
+        JasifyEndpointUser user = newCaller(u1.getId().getId(), false);
         List<UserLogin> logins = endpoint.listLogins(user, u1.getId().getId());
         assertNotNull(logins);
         assertEquals(1, logins.size());
@@ -178,7 +184,7 @@ public class JasifyEndpointTest {
     public void testRemoveLoginThatDoesNotExist() throws Exception {
         expect(userService.getLogin(EasyMock.<Key>anyObject())).andReturn(null);
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), KeyFactory.keyToString(Datastore.createKey(UserLogin.class, 23)));
+        endpoint.removeLogin(newCaller(1, false), KeyFactory.keyToString(Datastore.createKey(UserLogin.class, 23)));
     }
 
     @Test
@@ -190,7 +196,7 @@ public class JasifyEndpointTest {
         userService.removeLogin(login.getId());
         expectLastCall();
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), KeyFactory.keyToString(login.getId()));
+        endpoint.removeLogin(newCaller(1, false), KeyFactory.keyToString(login.getId()));
     }
 
     @Test(expected = ForbiddenException.class)
@@ -200,7 +206,7 @@ public class JasifyEndpointTest {
         login.getUserRef().setKey(Datastore.createKey(User.class, 2));
         expect(userService.getLogin(login.getId())).andReturn(login);
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), KeyFactory.keyToString(login.getId()));
+        endpoint.removeLogin(newCaller(1, false), KeyFactory.keyToString(login.getId()));
     }
 
     @Test
@@ -212,7 +218,7 @@ public class JasifyEndpointTest {
         userService.removeLogin(login.getId());
         expectLastCall();
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, true), KeyFactory.keyToString(login.getId()));
+        endpoint.removeLogin(newCaller(1, true), KeyFactory.keyToString(login.getId()));
     }
 
     @Test(expected = ConflictException.class)
@@ -230,6 +236,39 @@ public class JasifyEndpointTest {
         replay(userService);
         endpoint.checkUsername(RandomStringUtils.randomAlphabetic(5));
         verify(usernameValidator);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testChangePasswordCheckAuthentication() throws Exception {
+        replay(userService);
+        endpoint.changePassword(newCaller(1, false), 2, "abc", "def");
+    }
+
+    @Test
+    public void testChangePassword() throws Exception {
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 1));
+        String oldPw = "abc";
+        user.setPassword(TypeUtil.toShortBlob(DigestUtil.encrypt(oldPw)));
+        expect(userService.get(1)).andReturn(user).times(2);
+        expect(userService.setPassword(user, "def")).andReturn(user).times(2);
+        replay(userService);
+
+        endpoint.changePassword(newCaller(1, false), 1, oldPw, "def");
+        //admin
+        endpoint.changePassword(newCaller(2, true), 1, "", "def");
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testChangePasswordWrongOld() throws Exception {
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 1));
+        String oldPw = "abc";
+        user.setPassword(TypeUtil.toShortBlob(DigestUtil.encrypt(oldPw)));
+        expect(userService.get(1)).andReturn(user);
+        replay(userService);
+
+        endpoint.changePassword(newCaller(1, false), 1, oldPw + "x", "def");
     }
 
 }
