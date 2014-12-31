@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
@@ -9,6 +10,8 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.validators.Validator;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
@@ -20,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,6 +34,8 @@ import static org.easymock.EasyMock.*;
 public class JasifyEndpointTest {
     @Mock
     private UserService userService;
+    @Mock
+    private Validator<String> usernameValidator;
 
     @TestSubject
     private JasifyEndpoint endpoint = new JasifyEndpoint();
@@ -207,6 +213,23 @@ public class JasifyEndpointTest {
         expectLastCall();
         replay(userService);
         endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, true), KeyFactory.keyToString(login.getId()));
+    }
+
+    @Test(expected = ConflictException.class)
+    public void testCheckUsernameThrows() throws ConflictException {
+        expect(usernameValidator.validate(EasyMock.anyString())).andReturn(Arrays.asList("Bad")).once();
+        replay(usernameValidator);
+        replay(userService);
+        endpoint.checkUsername(RandomStringUtils.randomAlphabetic(5));
+    }
+
+    @Test
+    public void testCheckUsername() throws ConflictException {
+        expect(usernameValidator.validate(EasyMock.anyString())).andReturn(Collections.<String>emptyList()).once();
+        replay(usernameValidator);
+        replay(userService);
+        endpoint.checkUsername(RandomStringUtils.randomAlphabetic(5));
+        verify(usernameValidator);
     }
 
 }

@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.spi;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
@@ -15,6 +16,9 @@ import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
+import com.jasify.schedule.appengine.validators.UsernameValidator;
+import com.jasify.schedule.appengine.validators.Validator;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +43,7 @@ public class JasifyEndpoint {
     private static final Logger log = LoggerFactory.getLogger(JasifyEndpoint.class);
 
     private UserService userService;
+    private Validator<String> usernameValidator;
 
     static User mustBeLoggedIn(User caller) throws UnauthorizedException {
         if (caller == null) throw new UnauthorizedException("Only authenticated users can call this method");
@@ -54,6 +59,13 @@ public class JasifyEndpoint {
             }
         }
         throw new ForbiddenException("Must be admin or same user");
+    }
+
+    Validator<String> getUsernameValidator() {
+        if (usernameValidator == null) {
+            usernameValidator = UsernameValidator.INSTANCE;
+        }
+        return usernameValidator;
     }
 
     UserService getUserService() {
@@ -102,6 +114,15 @@ public class JasifyEndpoint {
             throw new BadRequestException("Failed to remove login");
         }
         log.info("Removed user: {}, login: {}", caller, login);
+    }
+
+    @ApiMethod(name = "username.check", path = "username/check", httpMethod = ApiMethod.HttpMethod.POST)
+    public void checkUsername(@Named("username") String username) throws ConflictException {
+        Preconditions.checkNotNull(StringUtils.trimToNull(username));
+        List<String> reasons = getUsernameValidator().validate(username);
+        if (!reasons.isEmpty()) {
+            throw new ConflictException(StringUtils.join(reasons, ", "));
+        }
     }
 
 }

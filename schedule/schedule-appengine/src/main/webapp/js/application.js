@@ -234,16 +234,17 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
             settings: null
         };
 
+        Endpoint.errorHandler = function (resp) {
+            return $q.reject(resp);
+        };
+
         /**
          * Call a function with the jasify api
          */
         Endpoint.jasify = function (fn) {
             return Endpoint.load().then(function () {
-                    return fn($gapi.client.jasify);
-                },
-                function (resp) {
-                    return $q.reject(resp);
-                });
+                return $q.when(fn($gapi.client.jasify));
+            }, Endpoint.errorHandler);
         };
 
 
@@ -480,12 +481,14 @@ jasifyScheduleApp.factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EV
     }]);
 
 
-jasifyScheduleApp.factory('Username', ['$log', '$http',
-    function ($log, $http) {
+jasifyScheduleApp.factory('Username', ['$log', 'Endpoint',
+    function ($log, Endpoint) {
         var Username = {};
 
         Username.check = function (name) {
-            return $http.post('/username', name);
+            return Endpoint.jasify(function (jasify) {
+                return jasify.username.check({username: name});
+            });
         };
 
         return Username;
@@ -508,10 +511,6 @@ jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $lo
 jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint) {
     var UserLogin = {};
 
-    function errorHandler(resp) {
-        return $q.reject(resp);
-    }
-
     UserLogin.list = function (userId) {
         return Endpoint.jasify(function (jasify) {
             return jasify.userLogins.list({userId: userId});
@@ -519,7 +518,7 @@ jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint
             function (resp) {
                 return resp.result.items;
             },
-            errorHandler);
+            Endpoint.errorHandler);
     };
 
     UserLogin.remove = function (login) {
@@ -529,7 +528,7 @@ jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint
             function (resp) {
                 return true;
             },
-            errorHandler);
+            Endpoint.errorHandler);
     };
     return UserLogin;
 }]);
