@@ -54,6 +54,13 @@ public class UsernameValidatorTest {
     }
 
     @Test
+    public void testValidateNull() throws Exception {
+        List<String> list = validator.validate(null);
+        assertContains(list, UsernameValidator.REASON_LENGTH);
+        assertContains(list, UsernameValidator.REASON_VALID_CHARS);
+    }
+
+    @Test
     public void testValidateEmpty() throws Exception {
         List<String> list = validator.validate("");
         assertContains(list, UsernameValidator.REASON_LENGTH);

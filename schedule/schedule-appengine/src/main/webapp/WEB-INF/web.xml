@@ -31,10 +31,6 @@
     <!-- END: Google Cloud Endpoints -->
 
     <servlet>
-        <servlet-name>username</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.UsernameServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>login</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.LoginServlet</servlet-class>
     </servlet>
@@ -62,10 +58,6 @@
         <servlet-name>oauth2-callback</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.OAuth2CodeCallbackServlet</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>username</servlet-name>
-        <url-pattern>/username</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>login</servlet-name>
         <url-pattern>/auth/login</url-pattern>

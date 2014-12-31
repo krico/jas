@@ -3,12 +3,14 @@ package com.jasify.schedule.appengine.validators;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Created by krico on 10/11/14.
+ * @author krico
+ * @since 10/11/14.
  */
 public class UsernameValidator implements Validator<String> {
     public static final UsernameValidator INSTANCE = new UsernameValidator();
@@ -19,10 +21,11 @@ public class UsernameValidator implements Validator<String> {
 
     private static final Pattern VALID_CHARS = Pattern.compile("^[a-z0-9-._]+$");
 
+    @Nonnull
     @Override
     public List<String> validate(String value) {
         ArrayList<String> ret = new ArrayList<>();
-        String name = StringUtils.trim(value);
+        String name = StringUtils.trimToEmpty(value);
         name = StringUtils.lowerCase(name);
 
         if (name.length() < 3) {
