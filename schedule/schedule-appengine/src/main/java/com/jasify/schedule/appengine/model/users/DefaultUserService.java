@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Transaction;
@@ -201,24 +202,18 @@ class DefaultUserService implements UserService {
     }
 
     @Override
-    public void removeLogin(User user, UserLogin login) throws EntityNotFoundException {
+    public void removeLogin(Key id) throws EntityNotFoundException {
         Transaction tx = Datastore.beginTransaction();
-        UserLogin dbLogin = Datastore.getOrNull(tx, userLoginMeta, login.getId());
+        UserLogin dbLogin = Datastore.getOrNull(tx, userLoginMeta, id);
         if (dbLogin == null) {
             tx.rollback();
             throw new EntityNotFoundException("UserLogin");
         }
-
-        if (!dbLogin.getUserRef().getKey().equals(user.getId())) {
-            tx.rollback();
-            //not a login for this user
-            throw new EntityNotFoundException("User/UserLogin");
-        }
-
         Datastore.delete(tx, dbLogin.getId());
         tx.commit();
 
         uniqueLogin.release(dbLogin.getProvider(), dbLogin.getUserId());
+
     }
 
     @Override
@@ -227,8 +222,8 @@ class DefaultUserService implements UserService {
     }
 
     @Override
-    public UserLogin getLogin(long userId, long loginId) {
-        return Datastore.getOrNull(UserLogin.class, Datastore.createKey(Datastore.createKey(userMeta, userId), userLoginMeta, loginId));
+    public UserLogin getLogin(Key id) {
+        return Datastore.getOrNull(userLoginMeta, id);
     }
 
     @Override

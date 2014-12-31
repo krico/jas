@@ -2,6 +2,8 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
@@ -163,52 +165,48 @@ public class JasifyEndpointTest {
     @Test(expected = UnauthorizedException.class)
     public void testRemoveLoginNoUser() throws Exception {
         replay(userService);
-        endpoint.removeLogin(null, 1, 1);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testRemoveLoginNonExistentUser() throws Exception {
-        expect(userService.get(EasyMock.anyLong())).andReturn(null);
-        replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 1, 1);
+        endpoint.removeLogin(null, "");
     }
 
     @Test
     public void testRemoveLoginThatDoesNotExist() throws Exception {
-        expect(userService.get(EasyMock.anyLong())).andReturn(new User());
-        expect(userService.getLogin(EasyMock.anyLong(), EasyMock.anyLong())).andReturn(null);
+        expect(userService.getLogin(EasyMock.<Key>anyObject())).andReturn(null);
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 1, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), KeyFactory.keyToString(Datastore.createKey(UserLogin.class, 23)));
     }
 
     @Test
     public void testRemoveLogin() throws Exception {
-        User user = new User();
-        expect(userService.get(EasyMock.anyLong())).andReturn(user);
         UserLogin login = new UserLogin();
-        expect(userService.getLogin(EasyMock.anyLong(), EasyMock.anyLong())).andReturn(login);
-        userService.removeLogin(user, login);
+        login.setId(Datastore.createKey(UserLogin.class, 23));
+        login.getUserRef().setKey(Datastore.createKey(User.class, 1));
+        expect(userService.getLogin(login.getId())).andReturn(login);
+        userService.removeLogin(login.getId());
         expectLastCall();
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 1, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), KeyFactory.keyToString(login.getId()));
     }
 
     @Test(expected = ForbiddenException.class)
     public void testRemoveLoginOtherUserThrows() throws Exception {
+        UserLogin login = new UserLogin();
+        login.setId(Datastore.createKey(UserLogin.class, 23));
+        login.getUserRef().setKey(Datastore.createKey(User.class, 2));
+        expect(userService.getLogin(login.getId())).andReturn(login);
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), 2, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, false), KeyFactory.keyToString(login.getId()));
     }
 
     @Test
     public void testRemoveLoginOtherUserAdmin() throws Exception {
-        User user = new User();
-        expect(userService.get(EasyMock.anyLong())).andReturn(user);
         UserLogin login = new UserLogin();
-        expect(userService.getLogin(EasyMock.anyLong(), EasyMock.anyLong())).andReturn(login);
-        userService.removeLogin(user, login);
+        login.setId(Datastore.createKey(UserLogin.class, 23));
+        login.getUserRef().setKey(Datastore.createKey(User.class, 1));
+        expect(userService.getLogin(login.getId())).andReturn(login);
+        userService.removeLogin(login.getId());
         expectLastCall();
         replay(userService);
-        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, true), 2, 1);
+        endpoint.removeLogin(new JasifyEndpointUser("a@b", 1, true), KeyFactory.keyToString(login.getId()));
     }
 
 }

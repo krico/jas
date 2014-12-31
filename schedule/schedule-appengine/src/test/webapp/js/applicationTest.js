@@ -798,7 +798,6 @@ describe("Application", function () {
             var calls = 0;
             var captureParams = null;
             var captureResult = null;
-            var expectedUserId = 123;
             var expectedLoginId = 123;
             $gapiMock.client.jasify.userLogins.remove = function (params) {
                 ++calls;
@@ -806,7 +805,7 @@ describe("Application", function () {
                 return {result: {}}
             };
 
-            UserLogin.remove(expectedUserId, {id: {id: expectedLoginId}}).then(function (result) {
+            UserLogin.remove({id: expectedLoginId}).then(function (result) {
                 captureResult = result;
             });
 
@@ -816,7 +815,7 @@ describe("Application", function () {
 
             $rootScope.$apply();
 
-            expect(captureParams).toEqual({userId: expectedUserId, loginId: expectedLoginId});
+            expect(captureParams).toEqual({loginId: expectedLoginId});
             expect(calls).toEqual(1);
 
         });
