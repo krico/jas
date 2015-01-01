@@ -9,23 +9,7 @@ describe("Application", function () {
             innerWidth: 500
         };
         $provide.value('$window', $windowMock);
-        $gapiMock = {data: {}};
-        $gapiMock.client = {};
-        $gapiMock.client.load = function (api, version, callback, path) {
-            $gapiMock.data.load = {
-                api: api,
-                version: version,
-                callback: callback,
-                path: path,
-                then: {}
-            };
-            return {
-                then: function (success, fail) {
-                    $gapiMock.data.load.then.success = success;
-                    $gapiMock.data.load.then.fail = fail;
-                }
-            };
-        };
+        $gapiMock = jasifyGapiMock();
         $provide.value('$gapi', $gapiMock);
 
     }));
@@ -173,14 +157,30 @@ describe("Application", function () {
             expect(fail3).toBe(null);
         });
 
+        it('passes the jasify api to the jasify call', function () {
+            var captured = null;
+            Endpoint.jasify(function (api) {
+                captured = api;
+            });
+            expect(captured).toBe(null);
+            Endpoint.init();
+            $gapiMock.data.load.then.success();
+            expect(captured).toBe(null);
+            $rootScope.$apply();
+            expect(captured).toBe($gapiMock.client.jasify);
+        });
+
     });
 
     describe('Auth', function () {
-        var Session, Auth, $cookies;
-        beforeEach(inject(function (_$cookies_, _Session_, _Auth_) {
+        var Session, Auth, $cookies, Endpoint, $q;
+        beforeEach(inject(function (_$cookies_, _Session_, _Auth_, _Endpoint_, _$q_) {
             $cookies = _$cookies_;
             Session = _Session_;
             Auth = _Auth_;
+            $q = _$q_;
+            Endpoint = _Endpoint_;
+            Endpoint.jasifyLoaded();
         }));
 
         it("should not be authenticated before login", function () {
@@ -194,18 +194,20 @@ describe("Application", function () {
             expect(Auth.isAuthenticated()).toBe(false);
 
             var credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', credentials)
-                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: credentials.name}});
+
+            spyOn($gapiMock.client.jasify.auth, 'login')
+                .andReturn({result: {userId: 555, sessionId: "b", name: credentials.name}});
 
             Auth.login(credentials);
 
             //Not flushed (e.g. authentication in progress)
             expect(Auth.isAuthenticated()).toBe(false);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(Auth.isAuthenticated()).toBe(true);
+            expect($gapiMock.client.jasify.auth.login)
+                .toHaveBeenCalledWith({username: credentials.name, password: credentials.password});
         });
 
         it("should be authenticated as admin after successful admin login", function () {
@@ -213,9 +215,9 @@ describe("Application", function () {
             expect(Auth.isAuthenticated()).toBe(false);
 
             var credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', credentials)
-                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: credentials.name, admin: true}});
+
+            spyOn($gapiMock.client.jasify.auth, 'login')
+                .andReturn({result: {userId: 555, sessionId: "b", name: credentials.name, admin: true}});
 
             Auth.login(credentials);
 
@@ -223,18 +225,21 @@ describe("Application", function () {
             expect(Auth.isAuthenticated()).toBe(false);
             expect(Auth.isAdmin()).toBe(false);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(Auth.isAuthenticated()).toBe(true);
             expect(Auth.isAdmin()).toBe(true);
+            expect($gapiMock.client.jasify.auth.login)
+                .toHaveBeenCalledWith({username: credentials.name, password: credentials.password});
         });
 
         it("should forward user on successful login", function () {
 
             var credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', credentials)
-                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: credentials.name}});
+
+            spyOn($gapiMock.client.jasify.auth, 'login')
+                .andReturn({result: {userId: 555, sessionId: "b", name: credentials.name}});
+
 
             var user = null;
             Auth.login(credentials).then(
@@ -249,19 +254,20 @@ describe("Application", function () {
             //Not flushed (e.g. authentication in progress)
             expect(user).toBe(null);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(user).not.toBe(null);
-            expect(user.id).toBe(555);
-            expect(Session.userId).toBe(user.id);
+            expect(user.userId).toBe(555);
+            expect(Session.userId).toBe(user.userId);
         });
 
         it("should fail when login fails and not be authorized", function () {
 
             var credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', credentials)
-                .respond(401 /* Unauthorized */);
+
+            spyOn($gapiMock.client.jasify.auth, 'login')
+                .andReturn($q.reject());
+
 
             var succeeded = false;
             var failed = false;
@@ -279,7 +285,7 @@ describe("Application", function () {
             expect(succeeded).toBe(false);
             expect(failed).toBe(false);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(succeeded).toBe(false);
             expect(failed).toBe(true);
@@ -289,21 +295,9 @@ describe("Application", function () {
 
         it("should change password", function () {
 
-            var credentials = {name: 'test', password: 'password'};
-            $httpBackend.expectPOST('/auth/login', credentials)
-                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: credentials.name}});
+            var credentials = {id: 555, name: 'test', password: 'password'};
 
-
-            Auth.login(credentials);
-
-            $httpBackend.flush();
-
-            expect(Auth.isAuthenticated()).toBe(true);
-
-            $httpBackend.expectPOST('/auth/change-password', {
-                credentials: credentials,
-                newPassword: 'newPw'
-            }).respond(200);
+            spyOn($gapiMock.client.jasify.auth, 'changePassword').andCallThrough();
 
             var ok = false;
 
@@ -313,9 +307,14 @@ describe("Application", function () {
 
             expect(ok).toBe(false);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(ok).toBe(true);
+            expect($gapiMock.client.jasify.auth.changePassword).toHaveBeenCalledWith({
+                userId: credentials.id,
+                oldPassword: credentials.password,
+                newPassword: 'newPw'
+            });
         });
 
         it("should restore an existing session", function () {
@@ -584,14 +583,17 @@ describe("Application", function () {
     });
 
     describe('Username', function () {
-        var Username;
+        var Username, $q, Endpoint;
 
-        beforeEach(inject(function (_Username_) {
+        beforeEach(inject(function (_$q_, _Username_, _Endpoint_) {
+            $q = _$q_;
             Username = _Username_;
+            Endpoint = _Endpoint_;
+            Endpoint.jasifyLoaded();
+
         }));
 
         it("should tell us if username is available", function () {
-            $httpBackend.expectPOST('/username', 'good').respond(200);
 
             var ok = null;
             var nok = null;
@@ -603,7 +605,7 @@ describe("Application", function () {
                     nok = true;
                 });
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(ok).toBe(true);
             expect(nok).toBe(null);
@@ -611,8 +613,9 @@ describe("Application", function () {
         });
 
         it("should tell us if username is unavailable", function () {
-            $httpBackend.expectPOST('/username', 'bad-name').respond(406);
-
+            $gapiMock.client.jasify.username.check = function () {
+                return $q.reject();
+            };
 
             var ok = null;
             var nok = null;
@@ -624,7 +627,7 @@ describe("Application", function () {
                     nok = true;
                 });
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect(ok).toBe(null);
             expect(nok).toBe(true);
@@ -739,6 +742,69 @@ describe("Application", function () {
             expect(users[0].id).toBe(555);
             expect(users[0].name).toBe('user');
             expect(users[0].email).toBe('user@jasify.com');
+
+        });
+    });
+
+    describe('UserLogin', function () {
+        var UserLogin, Endpoint;
+
+        beforeEach(inject(function (_UserLogin_, _Endpoint_) {
+            UserLogin = _UserLogin_;
+            Endpoint = _Endpoint_;
+            Endpoint.jasifyLoaded();
+        }));
+
+        it('list calls correct api method with correct parameters', function () {
+            var calls = 0;
+            var captureParams = null;
+            var captureResult = null;
+            var expected = [];
+            var expectedUserId = 123;
+            $gapiMock.client.jasify.userLogins.list = function (params) {
+                ++calls;
+                captureParams = params;
+                return {result: {items: expected}}
+            };
+
+            UserLogin.list(expectedUserId).then(function (result) {
+                captureResult = result;
+            });
+
+            expect(captureParams).toBe(null);
+            expect(captureResult).toBe(null);
+            expect(calls).toEqual(0);
+
+            $rootScope.$apply();
+
+            expect(captureParams).toEqual({userId: expectedUserId});
+            expect(captureResult).toBe(expected);
+            expect(calls).toEqual(1);
+
+        });
+        it('remove calls correct api method with correct parameters', function () {
+            var calls = 0;
+            var captureParams = null;
+            var captureResult = null;
+            var expectedLoginId = 123;
+            $gapiMock.client.jasify.userLogins.remove = function (params) {
+                ++calls;
+                captureParams = params;
+                return {result: {}}
+            };
+
+            UserLogin.remove({id: expectedLoginId}).then(function (result) {
+                captureResult = result;
+            });
+
+            expect(captureParams).toBe(null);
+            expect(captureResult).toBe(null);
+            expect(calls).toEqual(0);
+
+            $rootScope.$apply();
+
+            expect(captureParams).toEqual({loginId: expectedLoginId});
+            expect(calls).toEqual(1);
 
         });
     });

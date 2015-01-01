@@ -20,6 +20,7 @@ import java.io.IOException;
  * @author krico
  * @since 10/11/14.
  */
+@Deprecated//TODO: remove once other servlets are removed, still needed by tests
 public class LoginServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 

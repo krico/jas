@@ -123,24 +123,16 @@ jasifyScheduleApp.config(['$routeProvider',
                 templateUrl: 'views/profile-logins.html',
                 controller: 'ProfileLoginsCtrl',
                 resolve: {
-                    logins: function ($q, Allow, Endpoint, Session) {
-                        //TODO: this is outrageous :-), we need some kind of wrapper to get api calls
+                    logins: function ($q, Allow, UserLogin, Session) {
                         return Allow.user().then(
                             function () {
-                                return Endpoint.load().then(function () {
-                                    return $q.when(Endpoint.api.logins.list({userId: Session.userId}));
-                                });
+                                return UserLogin.list(Session.userId);
                             },
                             function (reason) {
                                 return $q.reject(reason);
                             }
                         );
                     }
-                    //TODO: remove
-                    // Not needed, we check for allow on logins:
-                    //allow: function (Allow) {
-                    //    return Allow.user();
-                    //}
                 }
             }).
 
@@ -238,9 +230,21 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
             loaded: false,
             promise: null,
             deferred: null,
-            api: null,
             failed: false,
             settings: null
+        };
+
+        Endpoint.errorHandler = function (resp) {
+            return $q.reject(resp);
+        };
+
+        /**
+         * Call a function with the jasify api
+         */
+        Endpoint.jasify = function (fn) {
+            return Endpoint.load().then(function () {
+                return $q.when(fn($gapi.client.jasify));
+            }, Endpoint.errorHandler);
         };
 
 
@@ -271,14 +275,7 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
                 Endpoint.load(); //create promise
             }
             $gapi.client.load('jasify', 'v1', null, '/_ah/api').then(
-                function () {
-                    Endpoint.loaded = true;
-                    Endpoint.promise = null;
-                    Endpoint.deferred.resolve('loaded');
-                    Endpoint.deferred = null;
-                    Endpoint.api = $gapi.client.jasify;
-                    $log.debug('Endpoint.initialized');
-                },
+                Endpoint.jasifyLoaded,
                 function (r) {
                     $log.warn('Failed to load api: ' + r);
                     Endpoint.loaded = true;
@@ -290,6 +287,14 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
                 });
         };
 
+        Endpoint.jasifyLoaded = function () {
+            Endpoint.loaded = true;
+            Endpoint.promise = null;
+            if (Endpoint.deferred) Endpoint.deferred.resolve('loaded');
+            Endpoint.deferred = null;
+            $log.debug('Endpoint.initialized');
+        };
+
         return Endpoint;
     }]);
 
@@ -297,8 +302,8 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
-    function ($log, $http, $q, $cookies, Session) {
+jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session', 'Endpoint',
+    function ($log, $http, $q, $cookies, Session, Endpoint) {
 
         var Auth = {};
 
@@ -318,11 +323,17 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
 
         Auth.login = function (credentials) {
             $log.info("Logging in (name=" + credentials.name + ") ...");
-            return $http.post('/auth/login', credentials)
-                .then(function (res) {
-                    $log.info("Logged in! (userId=" + res.data.userId + ")");
-                    return loggedIn(res);
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.login({
+                    username: credentials.name,
+                    password: credentials.password
                 });
+            }).then(function (resp) {
+                $log.info("Logged in! (userId=" + resp.result.userId + ")");
+                Session.create(resp.result.sessionId, resp.result.userId, resp.result.admin);
+                $cookies.loggedIn = true;
+                return resp.result;
+            });
         };
 
         var restore = {
@@ -388,16 +399,27 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
 
         Auth.changePassword = function (credentials, newPassword) {
             $log.info("Changing password (userId=" + Session.userId + ")!");
-            return $http.post('/auth/change-password', {credentials: credentials, newPassword: newPassword});
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.changePassword({
+                    userId: credentials.id,
+                    oldPassword: credentials.password,
+                    newPassword: newPassword
+                });
+            });
         };
 
         Auth.logout = function () {
             $log.info("Logging out (" + Session.userId + ")!");
-            return $http.get('/auth/logout')
-                .then(function (res) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.logout();
+            }).then(function (res) {
                     $log.info("Logged out!");
                     Session.destroy();
                     $cookies.loggedIn = false;
+                },
+                function (message) {
+                    $log.warn("F: " + message);
+                    return $q.reject(message);
                 });
         };
 
@@ -476,12 +498,14 @@ jasifyScheduleApp.factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EV
     }]);
 
 
-jasifyScheduleApp.factory('Username', ['$log', '$http',
-    function ($log, $http) {
+jasifyScheduleApp.factory('Username', ['$log', 'Endpoint',
+    function ($log, Endpoint) {
         var Username = {};
 
         Username.check = function (name) {
-            return $http.post('/username', name);
+            return Endpoint.jasify(function (jasify) {
+                return jasify.username.check({username: name});
+            });
         };
 
         return Username;
@@ -496,6 +520,34 @@ jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $lo
      'query': {method: 'GET', isArray: true}
      });
      */
+}]);
+
+/**
+ * UserLogins service
+ */
+jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint) {
+    var UserLogin = {};
+
+    UserLogin.list = function (userId) {
+        return Endpoint.jasify(function (jasify) {
+            return jasify.userLogins.list({userId: userId});
+        }).then(
+            function (resp) {
+                return resp.result.items;
+            },
+            Endpoint.errorHandler);
+    };
+
+    UserLogin.remove = function (login) {
+        return Endpoint.jasify(function (jasify) {
+            return jasify.userLogins.remove({loginId: login.id});
+        }).then(
+            function (resp) {
+                return true;
+            },
+            Endpoint.errorHandler);
+    };
+    return UserLogin;
 }]);
 
 /**
@@ -593,11 +645,9 @@ jasifyScheduleApp.directive('jasConfirmField', function () {
                 },
                 function (newValue, oldValue) {
                     if (ctrl.$pristine) {
-                        console.log('MV: PRISTINE');
                         return;
                     }
                     if (ctrl.$modelValue == newValue) {
-                        console.log('MV: OK');
                         return;
                     }
                     ctrl.$validate();

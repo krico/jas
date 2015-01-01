@@ -178,9 +178,9 @@ public class UserServiceTest {
         assertEquals(login2.getUserId(), logins.get(2).getUserId());
 
         //Now remove
-        UserLogin gotten = service.getLogin(user.getId().getId(), logins.get(1).getId().getId());
+        UserLogin gotten = service.getLogin(logins.get(1).getId());
         assertNotNull(gotten);
-        service.removeLogin(user, gotten);
+        service.removeLogin(gotten.getId());
 
         logins = service.getUserLogins(user);
         assertNotNull(logins);

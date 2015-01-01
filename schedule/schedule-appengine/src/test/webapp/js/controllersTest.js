@@ -201,7 +201,11 @@ describe('Controllers', function () {
     });
 
     describe('LoginCtrl', function () {
-        var $scope, controller;
+        var $scope, controller, $q;
+
+        beforeEach(inject(function (_$q_) {
+            $q = _$q_;
+        }));
 
         beforeEach(function () {
             $scope = $applicationScope.$new();
@@ -215,33 +219,33 @@ describe('Controllers', function () {
 
         it('sets current user on successful login', function () {
             $scope.credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', $scope.credentials)
-                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: $scope.credentials.name}});
+            var user = {name: $scope.credentials.name, id: 555};
+            var defer = $q.defer();
+            defer.resolve(user);
+            spyOn(Auth, 'login').andReturn(defer.promise);
 
             $scope.login($scope.credentials);
 
             expect($scope.currentUser).toEqual(null);
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
-            expect($scope.currentUser).not.toEqual(null);
-            expect($scope.currentUser.name).toEqual('test');
-            expect($scope.currentUser.id).toEqual(555);
-
+            expect($scope.currentUser).toEqual(user);
+            expect(Auth.login).toHaveBeenCalledWith($scope.credentials);
         });
 
         it('broadcasts on successful login', function () {
             $scope.credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', $scope.credentials)
-                .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: $scope.credentials.name}});
+            var user = {name: $scope.credentials.name, id: 555};
+            var defer = $q.defer();
+            defer.resolve(user);
+            spyOn(Auth, 'login').andReturn(defer.promise);
+            spyOn($rootScope, '$broadcast').andCallThrough();
 
             $scope.login($scope.credentials);
 
-            spyOn($rootScope, '$broadcast').andCallThrough();
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess);
 
@@ -249,14 +253,14 @@ describe('Controllers', function () {
 
         it('broadcasts on failed login', function () {
             $scope.credentials = {name: 'test', password: 'password'};
-            $httpBackend
-                .expectPOST('/auth/login', $scope.credentials)
-                .respond(401);
+            var defer = $q.defer();
+            defer.reject();
+            spyOn(Auth, 'login').andReturn(defer.promise);
 
             $scope.login($scope.credentials);
             spyOn($rootScope, '$broadcast').andCallThrough();
 
-            $httpBackend.flush();
+            $rootScope.$apply();
 
             expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.loginFailed);
 
@@ -429,10 +433,11 @@ describe('Controllers', function () {
     });
 
     describe('LogoutCtrl', function () {
-        var $scope, controller, Session;
+        var $scope, controller, Session, $q;
 
-        beforeEach(inject(function (_Session_) {
+        beforeEach(inject(function (_Session_, _$q_) {
             Session = _Session_;
+            $q = _$q_;
         }));
 
         beforeEach(function () {
@@ -447,19 +452,21 @@ describe('Controllers', function () {
         });
 
         it('can logout', function () {
+            $scope.setCurrentUser({});
+            var defer = $q.defer();
+            defer.resolve();
+            spyOn(Auth, 'logout').andReturn(defer.promise);
+            spyOn($rootScope, '$broadcast').andCallThrough();
+            Session.create("aa", 555, false);
 
-            $scope.setCurrentUser({id: 15});
-            Session.create(1, 2);
-
-            $httpBackend
-                .expectGET('/auth/logout')
-                .respond(200);
             $scope.logout();
 
-            spyOn($rootScope, '$broadcast').andCallThrough();
-            $httpBackend.flush();
+            expect($rootScope.$broadcast).not.toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
+            expect($scope.currentUser).not.toBe(null);
+
+            $rootScope.$apply();
+
             expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
-            expect(Auth.isAuthenticated()).toBe(false);
             expect($scope.currentUser).toBe(null);
         });
 
@@ -604,7 +611,7 @@ describe('Controllers', function () {
             $scope = $applicationScope.$new();
             controller = $controller('ProfileLoginsCtrl', {
                 $scope: $scope,
-                logins: {result: {items: ['a', 'b', 'c']}}
+                logins: ['a', 'b', 'c']
             });
         });
 

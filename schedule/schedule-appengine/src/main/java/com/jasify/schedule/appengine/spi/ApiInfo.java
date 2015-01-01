@@ -1,12 +1,13 @@
-package com.jasify.schedule.appengine.endpoints;
+package com.jasify.schedule.appengine.spi;
 
 /**
  * @author krico
  * @since 27/12/14.
  */
-public class Settings {
+public class ApiInfo {
     private String version;
     private boolean authenticated;
+    private boolean admin;
 
     public String getVersion() {
         return version;
@@ -22,5 +23,13 @@ public class Settings {
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

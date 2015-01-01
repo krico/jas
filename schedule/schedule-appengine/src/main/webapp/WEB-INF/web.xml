@@ -21,7 +21,7 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>com.jasify.schedule.appengine.endpoints.JasifyEndpoint</param-value>
+            <param-value>com.jasify.schedule.appengine.spi.JasifyEndpoint</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
@@ -31,11 +31,8 @@
     <!-- END: Google Cloud Endpoints -->
 
     <servlet>
-        <servlet-name>username</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.UsernameServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>login</servlet-name>
+        <!-- TODO: remove this servlet -->
         <servlet-class>com.jasify.schedule.appengine.http.servlet.LoginServlet</servlet-class>
     </servlet>
     <servlet>
@@ -43,16 +40,8 @@
         <servlet-class>com.jasify.schedule.appengine.http.servlet.RestoreSessionServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>logout</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.LogoutServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>user</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.UserServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>changePassword</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.ChangePasswordServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>oauth2-request</servlet-name>
@@ -62,10 +51,6 @@
         <servlet-name>oauth2-callback</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.OAuth2CodeCallbackServlet</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>username</servlet-name>
-        <url-pattern>/username</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>login</servlet-name>
         <url-pattern>/auth/login</url-pattern>
@@ -83,16 +68,8 @@
         <url-pattern>/auth/restore</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>logout</servlet-name>
-        <url-pattern>/auth/logout</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>user</servlet-name>
         <url-pattern>/user/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>changePassword</servlet-name>
-        <url-pattern>/auth/change-password</url-pattern>
     </servlet-mapping>
 
 
