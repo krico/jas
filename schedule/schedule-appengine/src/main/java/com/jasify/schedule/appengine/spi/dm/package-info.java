@@ -1,6 +1,6 @@
 /**
- * All model entities should start with <b>Jas</b> for Jasify.
- * Example JasUserLogin
+ * All model entities should start with <b>Jas</b> for Jasify and must implement JasEndpointEntity
+ * Example public class JasUserLogin implements JasEndpointEntity
  * @author krico
  * @since 30/12/14.
  */

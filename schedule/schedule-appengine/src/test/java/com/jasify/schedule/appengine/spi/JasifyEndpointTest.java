@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.Validator;
@@ -241,7 +242,7 @@ public class JasifyEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testChangePasswordCheckAuthentication() throws Exception {
         replay(userService);
-        endpoint.changePassword(newCaller(1, false), 2, "abc", "def");
+        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(2, "abc", "def"));
     }
 
     @Test
@@ -254,9 +255,9 @@ public class JasifyEndpointTest {
         expect(userService.setPassword(user, "def")).andReturn(user).times(2);
         replay(userService);
 
-        endpoint.changePassword(newCaller(1, false), 1, oldPw, "def");
+        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(1, oldPw, "def"));
         //admin
-        endpoint.changePassword(newCaller(2, true), 1, "", "def");
+        endpoint.changePassword(newCaller(2, true), new JasChangePasswordRequest(1, "", "def"));
     }
 
     @Test(expected = ForbiddenException.class)
@@ -268,7 +269,7 @@ public class JasifyEndpointTest {
         expect(userService.get(1)).andReturn(user);
         replay(userService);
 
-        endpoint.changePassword(newCaller(1, false), 1, oldPw + "x", "def");
+        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(1, oldPw + "x", "def"));
     }
 
 }
