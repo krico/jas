@@ -323,11 +323,17 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
 
         Auth.login = function (credentials) {
             $log.info("Logging in (name=" + credentials.name + ") ...");
-            return $http.post('/auth/login', credentials)
-                .then(function (res) {
-                    $log.info("Logged in! (userId=" + res.data.userId + ")");
-                    return loggedIn(res);
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.login({
+                    username: credentials.name,
+                    password: credentials.password
                 });
+            }).then(function (resp) {
+                $log.info("Logged in! (userId=" + resp.result.userId + ")");
+                Session.create(resp.result.sessionId, resp.result.userId, resp.result.admin);
+                $cookies.loggedIn = true;
+                return resp.result;
+            });
         };
 
         var restore = {
@@ -407,13 +413,13 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
             return Endpoint.jasify(function (jasify) {
                 return jasify.auth.logout();
             }).then(function (res) {
-                    $log.info("Logged out!" + angular.toJson(res));
+                    $log.info("Logged out!");
                     Session.destroy();
                     $cookies.loggedIn = false;
                 },
                 function (message) {
                     $log.warn("F: " + message);
-                    return $q.reject;
+                    return $q.reject(message);
                 });
         };
 

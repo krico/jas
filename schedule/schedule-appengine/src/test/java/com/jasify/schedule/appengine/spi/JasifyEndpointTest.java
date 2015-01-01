@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
@@ -8,11 +9,14 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
+import com.jasify.schedule.appengine.model.users.LoginFailedException;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
+import com.jasify.schedule.appengine.spi.dm.JasLoginRequest;
+import com.jasify.schedule.appengine.spi.dm.JasLoginResponse;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.Validator;
@@ -27,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slim3.datastore.Datastore;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -273,6 +279,79 @@ public class JasifyEndpointTest {
         replay(userService);
 
         endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(1, oldPw + "x", "def"));
+    }
+
+    @Test
+    public void testLogin() throws Exception {
+        String loginName = RandomStringUtils.randomAlphabetic(5);
+        String password = RandomStringUtils.randomAscii(8);
+
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 99));
+        user.setName(loginName.toLowerCase());
+        expect(userService.login(loginName, password)).andReturn(user).once();
+        replay(userService);
+
+        HttpSession httpSession = EasyMock.createMock(HttpSession.class);
+        httpSession.setAttribute(EasyMock.anyString(), EasyMock.anyObject());
+        expectLastCall();
+        replay(httpSession);
+
+        HttpServletRequest httpServletRequest = EasyMock.createMock(HttpServletRequest.class);
+
+        expect(httpServletRequest.getRemoteAddr()).andReturn("127.0.0.1:-)").anyTimes();
+        expect(httpServletRequest.getSession(true)).andReturn(httpSession);
+
+        replay(httpServletRequest);
+
+        JasLoginResponse response = endpoint.login(httpServletRequest, new JasLoginRequest(loginName, password));
+        assertNotNull(response);
+        assertEquals(loginName.toLowerCase(), response.getName());
+        assertEquals(user.getId().getId(), response.getUserId());
+
+
+        verify(httpServletRequest);
+        verify(httpSession);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testLoginBadParametersNullName() throws Exception {
+        replay(userService);
+
+        HttpServletRequest httpServletRequest = EasyMock.createMock(HttpServletRequest.class);
+        expect(httpServletRequest.getRemoteAddr()).andReturn("127.0.0.1:-)").anyTimes();
+        replay(httpServletRequest);
+
+        endpoint.login(httpServletRequest, new JasLoginRequest(null, "aaa"));
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testLoginBadParametersNullPassword() throws Exception {
+        replay(userService);
+
+        HttpServletRequest httpServletRequest = EasyMock.createMock(HttpServletRequest.class);
+        expect(httpServletRequest.getRemoteAddr()).andReturn("127.0.0.1:-)").anyTimes();
+        replay(httpServletRequest);
+
+        endpoint.login(httpServletRequest, new JasLoginRequest("aaa", null));
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testLoginFailed() throws Exception {
+        String loginName = RandomStringUtils.randomAlphabetic(5);
+        String password = RandomStringUtils.randomAscii(8);
+
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 99));
+        user.setName(loginName.toLowerCase());
+        expect(userService.login(loginName, password)).andThrow(new LoginFailedException()).once();
+        replay(userService);
+
+        HttpServletRequest httpServletRequest = EasyMock.createMock(HttpServletRequest.class);
+        expect(httpServletRequest.getRemoteAddr()).andReturn("127.0.0.1:-)").anyTimes();
+        replay(httpServletRequest);
+
+        endpoint.login(httpServletRequest, new JasLoginRequest(loginName, password));
     }
 
     @Test

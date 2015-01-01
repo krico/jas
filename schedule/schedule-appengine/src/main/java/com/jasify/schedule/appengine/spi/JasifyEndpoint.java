@@ -7,15 +7,19 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
+import com.jasify.schedule.appengine.model.users.LoginFailedException;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
+import com.jasify.schedule.appengine.spi.dm.JasLoginRequest;
+import com.jasify.schedule.appengine.spi.dm.JasLoginResponse;
 import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -25,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -139,6 +144,31 @@ public class JasifyEndpoint {
 
         log.info("User {} changing password of {}", caller, request.getUserId());
         userService.setPassword(user, newPassword);
+    }
+
+    @ApiMethod(name = "auth.login", path = "auth/login", httpMethod = ApiMethod.HttpMethod.POST)
+    public JasLoginResponse login(HttpServletRequest httpServletRequest, JasLoginRequest request) throws UnauthorizedException, BadRequestException {
+
+        Preconditions.checkNotNull(request);
+
+        if (StringUtils.isAnyBlank(request.getUsername(), request.getPassword())) {
+            throw new BadRequestException("Login failed");
+        }
+
+        try {
+            com.jasify.schedule.appengine.model.users.User user = getUserService().login(request.getUsername(), request.getPassword());
+            HttpUserSession userSession = new HttpUserSession(user).put(httpServletRequest);
+            log.info("[{}] user={} logged in!", httpServletRequest.getRemoteAddr(), user.getName());
+
+            JasLoginResponse response = new JasLoginResponse();
+            response.setUserId(userSession.getUserId());
+            response.setSessionId(userSession.getSessionId());
+            response.setName(user.getName());
+            return response;
+        } catch (LoginFailedException e) {
+            log.info("[{}] user={} login failed!", httpServletRequest.getRemoteAddr(), request.getUsername(), e);
+            throw new UnauthorizedException("Login failed");
+        }
     }
 
     @ApiMethod(name = "auth.logout", path = "auth/logout", httpMethod = ApiMethod.HttpMethod.POST)

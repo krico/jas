@@ -10,6 +10,7 @@ function jasifyGapiMock() {
             check: angular.noop
         },
         auth: {
+            login: angular.noop,
             changePassword: angular.noop,
             logout: angular.noop
         }

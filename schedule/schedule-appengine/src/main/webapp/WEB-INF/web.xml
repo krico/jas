@@ -32,6 +32,7 @@
 
     <servlet>
         <servlet-name>login</servlet-name>
+        <!-- TODO: remove this servlet -->
         <servlet-class>com.jasify.schedule.appengine.http.servlet.LoginServlet</servlet-class>
     </servlet>
     <servlet>

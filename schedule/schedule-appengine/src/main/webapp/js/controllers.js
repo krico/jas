@@ -78,7 +78,7 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope',
 jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location', 'Auth', 'AUTH_EVENTS',
     function ($scope, $log, $location, Auth, AUTH_EVENTS) {
         $scope.isAdmin = function () {
-            return $scope.currentUser && $scope.currentUser.admin;
+            return Auth.isAdmin();
         };
 
         $scope.path = "";
