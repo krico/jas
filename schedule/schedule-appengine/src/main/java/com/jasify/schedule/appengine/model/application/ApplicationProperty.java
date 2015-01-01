@@ -34,6 +34,7 @@ public class ApplicationProperty {
     private Blob blobValue;
     private List<String> listValue;
 
+    @SuppressWarnings("unchecked")
     public <T> T getValue() {
         if (type == null) return null;
         Object ret = null;
