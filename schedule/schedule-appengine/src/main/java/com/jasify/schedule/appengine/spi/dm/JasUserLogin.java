@@ -4,7 +4,7 @@ package com.jasify.schedule.appengine.spi.dm;
  * @author krico
  * @since 30/12/14.
  */
-public class JasUserLogin {
+public class JasUserLogin implements JasEndpointEntity{
     private String id;
     private String provider;
     private String email;

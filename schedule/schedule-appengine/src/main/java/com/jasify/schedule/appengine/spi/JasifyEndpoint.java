@@ -13,6 +13,7 @@ import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
 import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -106,7 +107,7 @@ public class JasifyEndpoint {
         log.info("Removed user: {}, login: {}", caller, login);
     }
 
-    @ApiMethod(name = "username.check", path = "username-check", httpMethod = ApiMethod.HttpMethod.POST)
+    @ApiMethod(name = "username.check", path = "username-check/{username}", httpMethod = ApiMethod.HttpMethod.GET)
     public void checkUsername(@Named("username") String username) throws ConflictException {
         Preconditions.checkNotNull(StringUtils.trimToNull(username));
         List<String> reasons = getUsernameValidator().validate(username);
@@ -116,26 +117,25 @@ public class JasifyEndpoint {
     }
 
     @ApiMethod(name = "users.changePassword", path = "user/change-password", httpMethod = ApiMethod.HttpMethod.POST)
-    public void changePassword(User caller, @Named("userId") long userId,
-                               @Named("oldPassword") String oldPassword,
-                               @Named("newPassword") String newPassword)
+    public void changePassword(User caller, JasChangePasswordRequest request)
             throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, EntityNotFoundException {
-        JasifyEndpointUser jasCaller = mustBeSameUserOrAdmin(caller, userId);
+        Preconditions.checkNotNull(request);
+        JasifyEndpointUser jasCaller = mustBeSameUserOrAdmin(caller, request.getUserId());
 
-        newPassword = Preconditions.checkNotNull(StringUtils.trimToNull(newPassword));
+        String newPassword = Preconditions.checkNotNull(StringUtils.trimToNull(request.getNewPassword()));
 
-        com.jasify.schedule.appengine.model.users.User user = getUserService().get(userId);
+        com.jasify.schedule.appengine.model.users.User user = getUserService().get(request.getUserId());
         if (user == null) throw new NotFoundException("No user");
 
-        if (jasCaller.getUserId() == userId) { //change your own password
+        if (jasCaller.getUserId() == request.getUserId()) { //change your own password
             ShortBlob dbPassword = Preconditions.checkNotNull(user.getPassword());
-            oldPassword = Preconditions.checkNotNull(StringUtils.trimToNull(oldPassword));
+            String oldPassword = Preconditions.checkNotNull(StringUtils.trimToNull(request.getOldPassword()));
             if (!DigestUtil.verify(TypeUtil.toBytes(dbPassword), oldPassword)) {
                 throw new ForbiddenException("Password does not match");
             }
         }
 
-        log.info("User {} changing password of {}", caller, userId);
+        log.info("User {} changing password of {}", caller, request.getUserId());
         userService.setPassword(user, newPassword);
     }
 
