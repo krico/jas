@@ -299,7 +299,7 @@ describe("Application", function () {
 
             expect(Auth.isAuthenticated()).toBe(true);
 
-            spyOn($gapiMock.client.jasify.users, 'changePassword').andCallThrough();
+            spyOn($gapiMock.client.jasify.auth, 'changePassword').andCallThrough();
 
             var ok = false;
 

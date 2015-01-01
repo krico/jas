@@ -394,7 +394,7 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
         Auth.changePassword = function (credentials, newPassword) {
             $log.info("Changing password (userId=" + Session.userId + ")!");
             return Endpoint.jasify(function (jasify) {
-                return jasify.users.changePassword({
+                return jasify.auth.changePassword({
                     userId: credentials.id,
                     oldPassword: credentials.password,
                     newPassword: newPassword

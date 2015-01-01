@@ -116,7 +116,7 @@ public class JasifyEndpoint {
         }
     }
 
-    @ApiMethod(name = "users.changePassword", path = "user/change-password", httpMethod = ApiMethod.HttpMethod.POST)
+    @ApiMethod(name = "auth.changePassword", path = "auth/change-password", httpMethod = ApiMethod.HttpMethod.POST)
     public void changePassword(User caller, JasChangePasswordRequest request)
             throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, EntityNotFoundException {
         Preconditions.checkNotNull(request);
