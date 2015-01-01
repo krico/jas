@@ -404,11 +404,16 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
 
         Auth.logout = function () {
             $log.info("Logging out (" + Session.userId + ")!");
-            return $http.get('/auth/logout')
-                .then(function (res) {
-                    $log.info("Logged out!");
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.logout();
+            }).then(function (res) {
+                    $log.info("Logged out!" + angular.toJson(res));
                     Session.destroy();
                     $cookies.loggedIn = false;
+                },
+                function (message) {
+                    $log.warn("F: " + message);
+                    return $q.reject;
                 });
         };
 

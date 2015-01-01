@@ -6,6 +6,8 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.UserContext;
+import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
@@ -54,6 +56,7 @@ public class JasifyEndpointTest {
 
     @After
     public void cleanup() {
+        UserContext.clearContext();
         TestHelper.cleanupDatastore();
         EasyMock.verify(userService);
     }
@@ -270,6 +273,18 @@ public class JasifyEndpointTest {
         replay(userService);
 
         endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(1, oldPw + "x", "def"));
+    }
+
+    @Test
+    public void testLogout() throws Exception {
+        replay(userService);
+        UserSession session = EasyMock.createMock(UserSession.class);
+        session.invalidate();
+        expectLastCall();
+        replay(session);
+        UserContext.setContext(session, null, null);
+        endpoint.logout(newCaller(1, false));
+        verify(session);
     }
 
 }
