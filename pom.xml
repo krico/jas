@@ -30,8 +30,6 @@
 
 
     <modules>
-        <module>sandbox/sandbox-appengine</module>
-        <module>sandbox/sandbox-endpoints</module>
         <module>schedule/schedule-appengine</module>
     </modules>
 
