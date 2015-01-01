@@ -8,6 +8,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.UserContext;
+import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
@@ -137,6 +139,15 @@ public class JasifyEndpoint {
 
         log.info("User {} changing password of {}", caller, request.getUserId());
         userService.setPassword(user, newPassword);
+    }
+
+    @ApiMethod(name = "auth.logout", path = "auth/logout", httpMethod = ApiMethod.HttpMethod.POST)
+    public void logout(User caller) {
+        UserSession userSession = UserContext.getCurrentUser();
+        if (userSession != null) {
+            userSession.invalidate();
+        }
+        log.info("Logged out {}", caller);
     }
 
 }

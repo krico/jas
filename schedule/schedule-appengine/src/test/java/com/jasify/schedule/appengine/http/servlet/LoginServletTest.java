@@ -72,9 +72,6 @@ public class LoginServletTest {
         assertEquals(user.getId().getId(), loginResponse.getUserId());
         assertEquals(user.getId().getId(), loginResponse.getUser().getId());
         assertEquals(user.getName(), loginResponse.getUser().getName());
-
-        WebRequest logoutRequest = new GetMethodWebRequest(LOGOUT_URL);
-        expectResponse(client, logoutRequest, HttpServletResponse.SC_OK);
     }
 
 }

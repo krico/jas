@@ -39,10 +39,6 @@
         <servlet-class>com.jasify.schedule.appengine.http.servlet.RestoreSessionServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>logout</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.LogoutServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>user</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.UserServlet</servlet-class>
     </servlet>
@@ -69,10 +65,6 @@
     <servlet-mapping>
         <servlet-name>restore</servlet-name>
         <url-pattern>/auth/restore</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>logout</servlet-name>
-        <url-pattern>/auth/logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>user</servlet-name>
