@@ -360,7 +360,7 @@ describe('AdminControllers', function () {
             $scope.pw.newPassword = 'newPass';
             expect($scope.loading).toBe(false);
 
-            $gapiMock.client.jasify.users.changePassword = function () {
+            $gapiMock.client.jasify.auth.changePassword = function () {
                 return $q.reject();
             };
 
