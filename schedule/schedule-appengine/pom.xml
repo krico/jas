@@ -340,6 +340,7 @@
                         </configuration>
                     </execution>
 
+                    <!-- Bower install is run by gulp
                     <execution>
                         <id>bower install</id>
                         <goals>
@@ -349,7 +350,7 @@
                             <arguments>install</arguments>
                         </configuration>
                     </execution>
-
+                    -->
 
                     <execution>
                         <id>gulp build</id>
