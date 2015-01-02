@@ -1,6 +1,4 @@
-# Jasify Schedule - App Engine
-
-[![Build Status](https://travis-ci.org/krico/jas.svg?branch=master)](https://travis-ci.org/krico/jas)
+# Jasify Schedule - App Engine [![Build Status](https://travis-ci.org/krico/jas.svg?branch=master)](https://travis-ci.org/krico/jas)
 
 *The Jasify Schedule frontend.*
 
