@@ -196,7 +196,7 @@ describe("Application", function () {
             var credentials = {name: 'test', password: 'password'};
 
             spyOn($gapiMock.client.jasify.auth, 'login')
-                .andReturn({result: {userId: 555, sessionId: "b", name: credentials.name}});
+                .and.returnValue({result: {userId: 555, sessionId: "b", name: credentials.name}});
 
             Auth.login(credentials);
 
@@ -217,7 +217,7 @@ describe("Application", function () {
             var credentials = {name: 'test', password: 'password'};
 
             spyOn($gapiMock.client.jasify.auth, 'login')
-                .andReturn({result: {userId: 555, sessionId: "b", name: credentials.name, admin: true}});
+                .and.returnValue({result: {userId: 555, sessionId: "b", name: credentials.name, admin: true}});
 
             Auth.login(credentials);
 
@@ -238,7 +238,7 @@ describe("Application", function () {
             var credentials = {name: 'test', password: 'password'};
 
             spyOn($gapiMock.client.jasify.auth, 'login')
-                .andReturn({result: {userId: 555, sessionId: "b", name: credentials.name}});
+                .and.returnValue({result: {userId: 555, sessionId: "b", name: credentials.name}});
 
 
             var user = null;
@@ -266,7 +266,7 @@ describe("Application", function () {
             var credentials = {name: 'test', password: 'password'};
 
             spyOn($gapiMock.client.jasify.auth, 'login')
-                .andReturn($q.reject());
+                .and.returnValue($q.reject());
 
 
             var succeeded = false;
@@ -297,7 +297,7 @@ describe("Application", function () {
 
             var credentials = {id: 555, name: 'test', password: 'password'};
 
-            spyOn($gapiMock.client.jasify.auth, 'changePassword').andCallThrough();
+            spyOn($gapiMock.client.jasify.auth, 'changePassword').and.callThrough();
 
             var ok = false;
 

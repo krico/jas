@@ -12,7 +12,7 @@ var concat = require('gulp-concat');
 var del = require('del');
 var symlink = require('gulp-sym');
 var bower = require('gulp-bower');
-
+var karma = require('gulp-karma');
 var paths = require('./paths.json');
 
 gulp.task('clean', function (cb) {
@@ -25,9 +25,9 @@ gulp.task('sym', ['build'], function (cb) {
         .pipe(symlink(paths.symBuild, {force: true, relative: true}));
 });
 
-gulp.task('bower', function () {
+gulp.task('bower', function (cb) {
     return bower()
-        .pipe(gulp.dest(paths.build + '/lib'))
+        .pipe(gulp.dest(paths.build + '/lib'));
 });
 
 gulp.task('javascript', function (cb) {
@@ -37,8 +37,8 @@ gulp.task('javascript', function (cb) {
         .pipe(jshint.reporter('default'))
         .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))
-/*        .pipe(ngAnnotate())
-        .pipe(uglify())        */
+        /*        .pipe(ngAnnotate())
+         .pipe(uglify())        */
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/js'));
@@ -63,6 +63,15 @@ gulp.task('html', function (cb) {
     return gulp.src(paths.html)
         //.pipe(minifyHTML(opts))
         .pipe(gulp.dest(paths.build + '/../'))
+});
+
+gulp.task('test', ['build'], function (cb) {
+    return gulp.src([])
+        .pipe(karma({configFile: paths.test.karmaConfig, cmd: 'start'}))
+        .on('error', function (err) {
+            // Make sure failed tests cause gulp to exit non-zero
+            throw err;
+        });
 });
 
 gulp.task('watch', function () {

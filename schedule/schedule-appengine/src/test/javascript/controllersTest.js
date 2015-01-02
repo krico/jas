@@ -222,7 +222,7 @@ describe('Controllers', function () {
             var user = {name: $scope.credentials.name, id: 555};
             var defer = $q.defer();
             defer.resolve(user);
-            spyOn(Auth, 'login').andReturn(defer.promise);
+            spyOn(Auth, 'login').and.returnValue(defer.promise);
 
             $scope.login($scope.credentials);
 
@@ -239,8 +239,8 @@ describe('Controllers', function () {
             var user = {name: $scope.credentials.name, id: 555};
             var defer = $q.defer();
             defer.resolve(user);
-            spyOn(Auth, 'login').andReturn(defer.promise);
-            spyOn($rootScope, '$broadcast').andCallThrough();
+            spyOn(Auth, 'login').and.returnValue(defer.promise);
+            spyOn($rootScope, '$broadcast').and.callThrough();
 
             $scope.login($scope.credentials);
 
@@ -255,10 +255,10 @@ describe('Controllers', function () {
             $scope.credentials = {name: 'test', password: 'password'};
             var defer = $q.defer();
             defer.reject();
-            spyOn(Auth, 'login').andReturn(defer.promise);
+            spyOn(Auth, 'login').and.returnValue(defer.promise);
 
             $scope.login($scope.credentials);
-            spyOn($rootScope, '$broadcast').andCallThrough();
+            spyOn($rootScope, '$broadcast').and.callThrough();
 
             $rootScope.$apply();
 
@@ -455,8 +455,8 @@ describe('Controllers', function () {
             $scope.setCurrentUser({});
             var defer = $q.defer();
             defer.resolve();
-            spyOn(Auth, 'logout').andReturn(defer.promise);
-            spyOn($rootScope, '$broadcast').andCallThrough();
+            spyOn(Auth, 'logout').and.returnValue(defer.promise);
+            spyOn($rootScope, '$broadcast').and.callThrough();
             Session.create("aa", 555, false);
 
             $scope.logout();
