@@ -1,6 +1,6 @@
 # jasify
 
-[![Build Status](https://travis-ci.org/krico/jas.svg?branch=jas-96)](https://travis-ci.org/krico/jas)
+[![Build Status](https://travis-ci.org/krico/jas.svg?branch=master)](https://travis-ci.org/krico/jas)
 
 Janes Asmussen Szarmach
 
