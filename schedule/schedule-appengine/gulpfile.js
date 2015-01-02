@@ -37,8 +37,8 @@ gulp.task('javascript', function (cb) {
         .pipe(jshint.reporter('default'))
         .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))
-        /*        .pipe(ngAnnotate())
-         .pipe(uglify())        */
+        .pipe(ngAnnotate())
+        .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/js'));
@@ -61,7 +61,7 @@ gulp.task('html', function (cb) {
     var opts = {spare: true, conditionals: true};
 
     return gulp.src(paths.html)
-        //.pipe(minifyHTML(opts))
+        .pipe(minifyHTML(opts))
         .pipe(gulp.dest(paths.build + '/../'))
 });
 
