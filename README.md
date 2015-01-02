@@ -1,5 +1,7 @@
 # jasify
 
+[![Build Status](https://travis-ci.org/krico/jas.svg?branch=jas-96)](https://travis-ci.org/krico/jas)
+
 Janes Asmussen Szarmach
 
 Development should be focused on [Jasify Schedule App Engine](schedule/schedule-appengine)
