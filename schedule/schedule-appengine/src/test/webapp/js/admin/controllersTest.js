@@ -2,7 +2,7 @@ describe('AdminControllers', function () {
 
     var $controller, $q, $httpBackend, $rootScope, $gapiMock;
 
-    beforeEach(module('jasifyScheduleApp', function ($provide) {
+    beforeEach(module('jasify', function ($provide) {
         $provide.value('$log', console);
         $gapiMock = jasifyGapiMock();
         $provide.value('$gapi', $gapiMock);

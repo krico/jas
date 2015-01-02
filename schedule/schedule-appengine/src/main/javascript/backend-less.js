@@ -48,7 +48,7 @@
         console.log("Creating user database");
         for (var i = 2; i < 1000; i++) {
             database.users[i] = {id: i, name: 'user' + i, password: 'user' + i, created: new Date()};
-            if (i % 3 == 0) {
+            if (i % 3 === 0) {
                 database.users[i].email = 'user' + i + '@jasify.com';
             }
         }
@@ -117,7 +117,7 @@
                     }), {}, 'Username not available'];
                 }
             }
-            user['id'] = max + 10;
+            user.id = max + 10;
             users[user.id] = user;
             return [200, angular.toJson(user), {}];
         });
@@ -131,7 +131,7 @@
             console.log("GET[user] " + url + " DATA: " + data);
 
             var matches = /^\/user\/(.+)$/.exec(url);
-            if (matches != null) {
+            if (matches !== null) {
                 var userId = matches[1];
                 console.log('User: userId:' + userId);
                 /* User by ID */
@@ -150,7 +150,7 @@
             console.log("POST[user] " + url + " DATA: " + data);
             var update = angular.fromJson(data);
             var matches = /^\/user\/(.+)$/.exec(url);
-            if (update.name != 'badsave' && matches != null) {
+            if (update.name != 'badsave' && matches !== null) {
                 var userId = matches[1];
                 console.log('User: userId:' + userId);
                 /* User by ID */
@@ -173,7 +173,7 @@
 
             /* ?field=name&page=1&query=&size=10&sort=DESC */
             var m = /^\/user\?field=([^&]*)&page=([^&]*)&query=([^&]*)&size=([^&]*)&sort=([^&]*)$/.exec(url);
-            if (m != null) {
+            if (m !== null) {
                 var field = m[1];
                 var page = parseInt(m[2]);
                 var query = m[3];
@@ -183,8 +183,9 @@
                 var start = (page - 1 ) * size;
                 var end = start + size;
 
+                var regex;
                 try {
-                    var regex = new RegExp(query);
+                    regex = new RegExp(query);
                 } catch (e) {
                     return [505, 'E: ' + e, {}];
                 }
@@ -231,7 +232,7 @@
     initializeStubbedBackend();
 
     function initializeStubbedBackend() {
-        ng.module('jasifyScheduleApp')
+        ng.module('jasify')
             .config(function ($provide) {
                 // decorate http with an 2e2 mock
                 $provide.decorator('$httpBackend', angular.mock.e2e.$httpBackendDecorator);

@@ -19,7 +19,10 @@ are not using oauth with google, you can put any value there:
 
 
 ```
+## Style
 
+ * You [MUST read this](https://github.com/johnpapa/angularjs-styleguide)
+ 
 ## Model (Slim3)
 
  * If you get problems missing classes named *Meta (e.g. UserMeta) you need to run `mvn apt:process`

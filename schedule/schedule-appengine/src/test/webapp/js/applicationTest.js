@@ -2,7 +2,7 @@ describe("Application", function () {
 
     var $httpBackend, $rootScope, $windowMock, $gapiMock;
 
-    beforeEach(module('jasifyScheduleApp', function ($provide) {
+    beforeEach(module('jasify', function ($provide) {
         $provide.value('$log', console);
         $windowMock = {
             innerHeight: 400,

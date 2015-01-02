@@ -9,7 +9,7 @@ var jas = {};
  * This is the function called by the google api client when gapi is loaded
  */
 function initializeEndpoint() {
-    window.endpointInitialize();
+    if(window.endpointInitialize) window.endpointInitialize();
 }
 
 /**
@@ -25,7 +25,7 @@ jas.debugObject = function jasDebugObject(o) {
     } catch (e) {
     }
     var dbg = '';
-    for (i in o) {
+    for (var i in o) {
         dbg += 'o.' + i + ' = "';
         try {
             dbg += o[i];
@@ -45,13 +45,13 @@ RegExp.quote = function (str) {
     return (str + '').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 };
 
-var jasifyScheduleApp = angular.module('jasifyScheduleApp', ['ngRoute', 'ngResource', 'ngMessages', 'ngCookies',
+angular.module('jasify', ['ngRoute', 'ngResource', 'ngMessages', 'ngCookies',
     'ui.bootstrap', 'angularSpinner', 'jasifyScheduleControllers']);
 
 /**
  * Listen to route changes and check
  */
-jasifyScheduleApp.run(function ($rootScope, $log, AUTH_EVENTS, Auth) {
+angular.module('jasify').run(function ($rootScope, $log, AUTH_EVENTS, Auth) {
     //TODO: remove, not really needed
     $rootScope.$on('$routeChangeError', function (event, next, current) {
         $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
@@ -61,7 +61,7 @@ jasifyScheduleApp.run(function ($rootScope, $log, AUTH_EVENTS, Auth) {
 /**
  * Routes for all navbar links
  */
-jasifyScheduleApp.config(['$routeProvider',
+angular.module('jasify').config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
             when('/', {
@@ -165,7 +165,7 @@ jasifyScheduleApp.config(['$routeProvider',
 /**
  * Constant for the authentication related events
  */
-jasifyScheduleApp.constant('AUTH_EVENTS', {
+angular.module('jasify').constant('AUTH_EVENTS', {
     loginSuccess: 'auth-login-success',
     loginFailed: 'auth-login-failed',
     logoutSuccess: 'auth-logout-success',
@@ -181,7 +181,7 @@ jasifyScheduleApp.constant('AUTH_EVENTS', {
  * we provide the $gapi service and use it instead.  This allows us to
  * easily mock it for tests for example.
  */
-jasifyScheduleApp.provider('$gapi', function $GapiProvider() {
+angular.module('jasify').provider('$gapi', function $GapiProvider() {
     this.$get = function () {
         return gapi;
     };
@@ -190,12 +190,12 @@ jasifyScheduleApp.provider('$gapi', function $GapiProvider() {
 /**
  *  Session is a singleton that mimics the server-side session
  */
-jasifyScheduleApp.service('Session', function () {
+angular.module('jasify').service('Session', function () {
 
     this.create = function (sessionId, userId, admin) {
         this.id = sessionId;
         this.userId = userId;
-        this.admin = admin == true;
+        this.admin = admin === true;
     };
 
     this.destroy = function () {
@@ -216,7 +216,7 @@ jasifyScheduleApp.service('Session', function () {
  * the gapi client is loaded.  After that you can use either $gapi directly, or you can
  * use Endpoint to get the api.
  */
-jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
+angular.module('jasify').factory('Endpoint', ['$log', '$q', '$window', '$gapi',
     function ($log, $q, $window, $gapi) {
 
         /**
@@ -261,7 +261,7 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
                 }
                 return deferred.promise;
             }
-            if (Endpoint.promise != null) {
+            if (Endpoint.promise !== null) {
                 return $q.when(Endpoint.promise); //loading
             }
             Endpoint.deferred = $q.defer();
@@ -271,7 +271,7 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
 
         Endpoint.init = function () {
             $log.debug('Endpoint.init');
-            if (Endpoint.promise == null) {
+            if (Endpoint.promise === null) {
                 Endpoint.load(); //create promise
             }
             $gapi.client.load('jasify', 'v1', null, '/_ah/api').then(
@@ -302,7 +302,7 @@ jasifyScheduleApp.factory('Endpoint', ['$log', '$q', '$window', '$gapi',
 /**
  * Auth service
  */
-jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session', 'Endpoint',
+angular.module('jasify').factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session', 'Endpoint',
     function ($log, $http, $q, $cookies, Session, Endpoint) {
 
         var Auth = {};
@@ -359,7 +359,7 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
                 if (restore.invoked) {
                     //This is a cache of the last restore call, we make it look like it was called again
 
-                    if (restore.promise != null) {
+                    if (restore.promise !== null) {
                         //In case the http request is pending
                         return $q.when(restore.promise);
                     }
@@ -439,7 +439,7 @@ jasifyScheduleApp.factory('Auth', ['$log', '$http', '$q', '$cookies', 'Session',
 /**
  * Allow - used in Route resolve promises as Allow.all for example
  */
-jasifyScheduleApp.factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EVENTS',
+angular.module('jasify').factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EVENTS',
     function ($log, $q, $rootScope, Auth, AUTH_EVENTS) {
         var Allow = {};
 
@@ -498,7 +498,7 @@ jasifyScheduleApp.factory('Allow', ['$log', '$q', '$rootScope', 'Auth', 'AUTH_EV
     }]);
 
 
-jasifyScheduleApp.factory('Username', ['$log', 'Endpoint',
+angular.module('jasify').factory('Username', ['$log', 'Endpoint',
     function ($log, Endpoint) {
         var Username = {};
 
@@ -514,7 +514,7 @@ jasifyScheduleApp.factory('Username', ['$log', 'Endpoint',
 /**
  * User service
  */
-jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $log) {
+angular.module('jasify').factory('User', ['$resource', '$log', function ($resource, $log) {
     return $resource('/user/:id', {id: '@id'});
     /*        {
      'query': {method: 'GET', isArray: true}
@@ -525,7 +525,7 @@ jasifyScheduleApp.factory('User', ['$resource', '$log', function ($resource, $lo
 /**
  * UserLogins service
  */
-jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint) {
+angular.module('jasify').factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint) {
     var UserLogin = {};
 
     UserLogin.list = function (userId) {
@@ -554,7 +554,7 @@ jasifyScheduleApp.factory('UserLogin', ['$q', 'Endpoint', function ($q, Endpoint
  * Popup services (windows)
  * Inspired by satelizer (https://github.com/sahat/satellizer)
  */
-jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', function ($log, $q, $interval, $window) {
+angular.module('jasify').factory('Popup', ['$log', '$q', '$interval', '$window', function ($log, $q, $interval, $window) {
     var popupWindow = null;
     var waiting = null;
 
@@ -603,7 +603,7 @@ jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', functi
                     popupWindow.document.readyState == 'complete' &&
                     popupWindow.document.domain === document.domain &&
                     popupWindow.location &&
-                    popupWindow.location.pathname.indexOf('/oauth2/callback') == 0) {
+                    popupWindow.location.pathname.indexOf('/oauth2/callback') === 0) {
                     var script = popupWindow.document.getElementById("json-response");
                     popupWindow.close();
                     $interval.cancel(waiting);
@@ -635,7 +635,7 @@ jasifyScheduleApp.factory('Popup', ['$log', '$q', '$interval', '$window', functi
 /**
  * ConfirmField directive
  */
-jasifyScheduleApp.directive('jasConfirmField', function () {
+angular.module('jasify').directive('jasConfirmField', function () {
     return {
         require: 'ngModel',
         link: function (scope, elm, attrs, ctrl) {
@@ -655,10 +655,10 @@ jasifyScheduleApp.directive('jasConfirmField', function () {
 
             ctrl.$validators.jasConfirmField = function (modelValue, viewValue) {
                 var compareTo = scope.$eval(attrs.jasConfirmField);
-                if (compareTo && compareTo.$modelValue != null && modelValue != compareTo.$modelValue) {
+                if (compareTo && compareTo.$modelValue !== null && modelValue != compareTo.$modelValue) {
                     return false;
                 }
-                return compareTo && compareTo.$modelValue != null;
+                return compareTo && compareTo.$modelValue !== null;
             };
         }
     };
@@ -667,7 +667,7 @@ jasifyScheduleApp.directive('jasConfirmField', function () {
 /**
  * Username directive
  */
-jasifyScheduleApp.directive('jasUsername', ['$q', 'Username', function ($q, Username) {
+angular.module('jasify').directive('jasUsername', ['$q', 'Username', function ($q, Username) {
     return {
         require: 'ngModel',
         link: function (scope, elm, attrs, ctrl) {
@@ -689,7 +689,7 @@ jasifyScheduleApp.directive('jasUsername', ['$q', 'Username', function ($q, User
 /**
  * Password strength meter
  */
-jasifyScheduleApp.directive('jasPasswordStrength', ['$log', function ($log) {
+angular.module('jasify').directive('jasPasswordStrength', ['$log', function ($log) {
     return {
         replace: true,
         restrict: 'E' /* A - attribute name, E - element name, C - classname */,

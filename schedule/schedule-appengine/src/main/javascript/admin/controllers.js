@@ -3,9 +3,8 @@
  *
  * We keep the admin controllers separate so that only admins actually need to load them.
  */
-var jasifyScheduleControllers = angular.module('jasifyScheduleControllers');
 
-jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', 'User',
+angular.module('jasifyScheduleControllers').controller('AdminUsersCtrl', ['$scope', '$location', 'User',
     function ($scope, $location, User) {
         $scope.sort = 'DESC';
         $scope.page = 1;
@@ -64,7 +63,7 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
                     $scope.page = 1 + ((($scope.page - 1) * old) / newValue);
 
                     $scope._perPage = newValue;
-                    $scope.pageChanged()
+                    $scope.pageChanged();
                 }
             }
             return $scope._perPage;
@@ -78,7 +77,7 @@ jasifyScheduleControllers.controller('AdminUsersCtrl', ['$scope', '$location', '
         $scope.pageChanged();
     }]);
 
-jasifyScheduleControllers.controller('AdminUserCtrl', ['$scope', '$routeParams', '$modal', 'User', 'Auth',
+angular.module('jasifyScheduleControllers').controller('AdminUserCtrl', ['$scope', '$routeParams', '$modal', 'User', 'Auth',
     function ($scope, $routeParams, $modal, User, Auth) {
         $scope.user = null;
         $scope.pw = {};

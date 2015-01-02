@@ -1,0 +1,7 @@
+{
+  "js": ["src/main/javascript/**/*.js"],
+  "css": ["src/main/stylesheet/**/*.css"],
+  "html": ["src/main/html/**/*.html"],
+  "build": "target/schedule-appengine-1.0-SNAPSHOT/build",
+  "symBuild": "src/main/html/build"
+}

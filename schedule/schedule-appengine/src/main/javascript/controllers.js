@@ -2,13 +2,13 @@
  * Created by krico on 02/11/14.
  */
 
-var jasifyScheduleControllers = angular.module('jasifyScheduleControllers', []);
+angular.module('jasifyScheduleControllers', []);
 
 /**
  * ApplicationCtrl
  * - Root of the scope tree.  Practically all other scopes will inherit from this one.
  */
-jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope', '$modal', '$log', '$location', '$cookies', '$window', 'Auth', 'AUTH_EVENTS', 'Endpoint',
+angular.module('jasifyScheduleControllers').controller('ApplicationCtrl', ['$scope', '$rootScope', '$modal', '$log', '$location', '$cookies', '$window', 'Auth', 'AUTH_EVENTS', 'Endpoint',
     function ($scope, $rootScope, $modal, $log, $location, $cookies, $window, Auth, AUTH_EVENTS, Endpoint /* TODO: Just so it is created, maybe its not needed */) {
 
 
@@ -75,7 +75,7 @@ jasifyScheduleControllers.controller('ApplicationCtrl', ['$scope', '$rootScope',
 /**
  * NavbarCtrl
  */
-jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location', 'Auth', 'AUTH_EVENTS',
+angular.module('jasifyScheduleControllers').controller('NavbarCtrl', ['$scope', '$log', '$location', 'Auth', 'AUTH_EVENTS',
     function ($scope, $log, $location, Auth, AUTH_EVENTS) {
         $scope.isAdmin = function () {
             return Auth.isAdmin();
@@ -128,14 +128,14 @@ jasifyScheduleControllers.controller('NavbarCtrl', ['$scope', '$log', '$location
 /**
  * HomeCtrl
  */
-jasifyScheduleControllers.controller('HomeCtrl', ['$scope',
+angular.module('jasifyScheduleControllers').controller('HomeCtrl', ['$scope',
     function ($scope) {
     }]);
 
 /**
  * LoginCtrl
  */
-jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS', 'Popup',
+angular.module('jasifyScheduleControllers').controller('LoginCtrl', ['$scope', '$rootScope', 'Auth', 'AUTH_EVENTS', 'Popup',
     function ($scope, $rootScope, Auth, AUTH_EVENTS, Popup) {
 
         $scope.credentials = {
@@ -180,7 +180,7 @@ jasifyScheduleControllers.controller('LoginCtrl', ['$scope', '$rootScope', 'Auth
 /**
  * SignUpCtrl
  */
-jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$log', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth', 'Popup',
+angular.module('jasifyScheduleControllers').controller('SignUpCtrl', ['$scope', '$log', '$rootScope', 'AUTH_EVENTS', 'User', 'Auth', 'Popup',
     function ($scope, $log, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
 
         $scope.alerts = [];
@@ -285,7 +285,7 @@ jasifyScheduleControllers.controller('SignUpCtrl', ['$scope', '$log', '$rootScop
 /**
  * LogoutCtrl
  */
-jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'Auth',
+angular.module('jasifyScheduleControllers').controller('LogoutCtrl', ['$scope', '$rootScope', 'AUTH_EVENTS', 'Auth',
     function ($scope, $rootScope, AUTH_EVENTS, Auth) {
         $scope.logout = function () {
             if (!Auth.isAuthenticated()) return;
@@ -301,7 +301,7 @@ jasifyScheduleControllers.controller('LogoutCtrl', ['$scope', '$rootScope', 'AUT
 /**
  * ProfileCtrl
  */
-jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '$log', 'Session', 'User',
+angular.module('jasifyScheduleControllers').controller('ProfileCtrl', ['$scope', '$routeParams', '$log', 'Session', 'User',
     function ($scope, $routeParams, $log, Session, User) {
         $scope.user = null;
 
@@ -343,7 +343,7 @@ jasifyScheduleControllers.controller('ProfileCtrl', ['$scope', '$routeParams', '
 /**
  * ProfileLoginsCtrl
  */
-jasifyScheduleControllers.controller('ProfileLoginsCtrl', ['$scope', '$log', '$q', 'UserLogin', 'Session', 'Popup', 'logins',
+angular.module('jasifyScheduleControllers').controller('ProfileLoginsCtrl', ['$scope', '$log', '$q', 'UserLogin', 'Session', 'Popup', 'logins',
     function ($scope, $log, $q, UserLogin, Session, Popup, logins) {
         $scope.logins = logins;
         $scope.alerts = [];

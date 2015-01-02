@@ -2,7 +2,7 @@ describe('Controllers', function () {
 
     var $controller, $httpBackend, $rootScope, $modal, $log, $location, $cookies, $window, Auth, AUTH_EVENTS, Endpoint, $applicationScope;
     var modalMock;
-    beforeEach(module('jasifyScheduleApp', function ($provide) {
+    beforeEach(module('jasify', function ($provide) {
         $provide.value('$log', console);
         modalMock = {
             data: {open: {}},

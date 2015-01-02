@@ -187,10 +187,9 @@
         <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
         <plugins>
             <!--
-            NOTE: To generate the Meta classes we use apt to run slim3-gen.
-            To get this to be generated run
+            apt-maven-plugin
+            NOTE: To generate the Meta classes we use apt to run slim3-gen.  To get this to be generated run
             mvn apt:process
-            I don't want to add this to the build cycle as we shouldn't be changing our model too much.
             -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -201,6 +200,8 @@
                     <sourceOutputDirectory>${project.build.sourceDirectory}</sourceOutputDirectory>
                 </configuration>
             </plugin>
+
+            <!-- maven-war-plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -218,6 +219,7 @@
                 </configuration>
             </plugin>
 
+            <!-- appengine-maven-plugin -->
             <plugin>
                 <groupId>com.google.appengine</groupId>
                 <artifactId>appengine-maven-plugin</artifactId>
@@ -235,7 +237,7 @@
                 </configuration>
             </plugin>
 
-            <!-- configure surefire for java testing -->
+            <!-- maven-surefire-plugin: configure surefire for java testing -->
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.17</version>
@@ -250,7 +252,7 @@
             </plugin>
 
 
-            <!-- WebDriver for jasmine (below) -->
+            <!-- phantomjs-maven-plugin: WebDriver for jasmine (below) -->
             <plugin>
                 <groupId>com.github.klieber</groupId>
                 <artifactId>phantomjs-maven-plugin</artifactId>
@@ -267,8 +269,7 @@
                 </configuration>
             </plugin>
 
-
-            <!-- Jasmine for javascript testing -->
+            <!-- jasmine-maven-plugin: Jasmine for javascript testing -->
             <plugin>
                 <groupId>com.github.searls</groupId>
                 <artifactId>jasmine-maven-plugin</artifactId>
@@ -309,6 +310,68 @@
                     </webDriverCapabilities>
                     <haltOnFailure>true</haltOnFailure>
                 </configuration>
+            </plugin>
+
+            <!--frontend-maven-plugin: maven-node-grunt-gulp-npm et all -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>0.0.20</version>
+                <executions>
+
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v0.10.30</nodeVersion>
+                            <npmVersion>1.4.21</npmVersion>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>bower install</id>
+                        <goals>
+                            <goal>bower</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+
+
+                    <execution>
+                        <id>gulp build</id>
+                        <goals>
+                            <goal>gulp</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>--no-color build</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>javascript tests</id>
+                        <goals>
+                            <goal>karma</goal>
+                        </goals>
+                        <configuration>
+                            <karmaConfPath>src/test/javascript/karma.conf.ci.js</karmaConfPath>
+                        </configuration>
+                    </execution>
+
+                </executions>
             </plugin>
         </plugins>
     </build>
