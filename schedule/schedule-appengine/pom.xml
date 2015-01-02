@@ -297,7 +297,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
-                            <arguments>--no-color test</arguments>
+                            <arguments>test --no-color --skiptests${skipTests}</arguments>
                         </configuration>
                     </execution>
 

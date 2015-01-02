@@ -1,6 +1,8 @@
 'use strict';
 
+var argv = require('yargs').argv;
 var gulp = require('gulp');
+var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var ngAnnotate = require('gulp-ng-annotate');
 var uglify = require('gulp-uglify');
@@ -13,6 +15,7 @@ var del = require('del');
 var symlink = require('gulp-sym');
 var bower = require('gulp-bower');
 var karma = require('gulp-karma');
+var gulpif = require('gulp-if');
 var paths = require('./paths.json');
 
 gulp.task('clean', function (cb) {
@@ -66,8 +69,14 @@ gulp.task('html', function (cb) {
 });
 
 gulp.task('test', ['build'], function (cb) {
+    if(argv.skipteststrue){
+        gutil.log(gutil.colors.red('SKIPPING TESTS'));
+    }
     return gulp.src([])
-        .pipe(karma({configFile: paths.test.karmaConfig, cmd: 'start'}))
+        .pipe(gulpif(argv.skipteststrue,
+            gutil.noop(),
+            karma({configFile: paths.test.karmaConfig, cmd: 'start'}
+            )))
         .on('error', function (err) {
             // Make sure failed tests cause gulp to exit non-zero
             throw err;
