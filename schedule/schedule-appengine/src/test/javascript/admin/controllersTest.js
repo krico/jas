@@ -3,7 +3,7 @@ describe('AdminControllers', function () {
     var $controller, $q, $httpBackend, $rootScope, $gapiMock;
 
     beforeEach(module('jasify', function ($provide) {
-        $provide.value('$log', console);
+        //$provide.value('$log', console);
         $gapiMock = jasifyGapiMock();
         $provide.value('$gapi', $gapiMock);
     }));

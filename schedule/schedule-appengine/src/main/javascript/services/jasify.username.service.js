@@ -1,7 +1,7 @@
-(function () {
+(function (ng) {
 
 
-    angular.module('jasify').factory('Username', username);
+    ng.module('jasify').factory('Username', username);
     function username($log, Endpoint) {
         var Username = {
             check: check
@@ -16,4 +16,4 @@
         return Username;
     }
 
-})();
+})(angular);

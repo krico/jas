@@ -1,9 +1,9 @@
-(function () {
+(function (ng) {
 
     /**
      * Allow - used in Route resolve promises as Allow.all for example
      */
-    angular.module('jasify').factory('Allow', allow);
+    ng.module('jasify').factory('Allow', allow);
 
     function allow($log, $q, $rootScope, Auth, AUTH_EVENTS) {
         var Allow = {
@@ -68,4 +68,4 @@
         return Allow;
     }
 
-})();
+})(angular);

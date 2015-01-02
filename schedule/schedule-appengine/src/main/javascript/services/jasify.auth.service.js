@@ -1,10 +1,10 @@
-(function () {
+(function (ng) {
 
 
     /**
      * Auth service
      */
-    angular.module('jasify').factory('Auth', auth);
+    ng.module('jasify').factory('Auth', auth);
 
     function auth($log, $http, $q, $cookies, Session, Endpoint) {
 
@@ -147,4 +147,4 @@
         return Auth;
     }
 
-})();
+})(angular);

@@ -13,7 +13,7 @@ function initializeEndpoint() {
     if (window.endpointInitialize) window.endpointInitialize();
 }
 
-(function () {
+(function (j) {
 
     /**
      * A function for quoting regular expressions
@@ -31,7 +31,7 @@ function initializeEndpoint() {
      * @param o anytihng
      * @returns {string} with the debug data
      */
-    jas.debugObject = function jasDebugObject(o) {
+    j.debugObject = function jasDebugObject(o) {
         try {
             return o.toSource();
         } catch (e) {
@@ -47,4 +47,4 @@ function initializeEndpoint() {
         }
         return dbg;
     };
-})();
+})(jas);

@@ -1,4 +1,4 @@
-(function () {
+(function (ng) {
 
     /**
      * Endpoint service, provide the glue between AngularJs and gapi (or $gapi).
@@ -7,7 +7,7 @@
      * the gapi client is loaded.  After that you can use either $gapi directly, or you can
      * use Endpoint to get the api.
      */
-    angular.module('jasify').factory('Endpoint', endpoint);
+    ng.module('jasify').factory('Endpoint', endpoint);
 
     function endpoint($log, $q, $window, $gapi) {
 
@@ -95,4 +95,4 @@
 
         return Endpoint;
     }
-})();
+})(angular);

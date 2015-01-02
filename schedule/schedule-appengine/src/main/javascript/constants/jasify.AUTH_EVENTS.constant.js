@@ -1,9 +1,9 @@
-(function () {
+(function (ng) {
 
     /**
      * Constant for the authentication related events
      */
-    angular.module('jasify').constant('AUTH_EVENTS', {
+    ng.module('jasify').constant('AUTH_EVENTS', {
         loginSuccess: 'auth-login-success',
         loginFailed: 'auth-login-failed',
         logoutSuccess: 'auth-logout-success',
@@ -13,4 +13,4 @@
         notGuest: 'auth-not-guest'
     });
 
-})();
+})(angular);

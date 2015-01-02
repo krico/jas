@@ -1,8 +1,8 @@
-(function () {
+(function (ng) {
     /**
      * Username directive
      */
-    angular.module('jasify').directive('jasUsername', jasUsername);
+    ng.module('jasify').directive('jasUsername', jasUsername);
 
     function jasUsername($q, Username) {
         return {
@@ -22,4 +22,4 @@
             }
         };
     }
-})();
+})(angular);

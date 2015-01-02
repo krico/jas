@@ -1,9 +1,9 @@
-(function () {
+(function (ng) {
 
     /**
      * ConfirmField directive
      */
-    angular.module('jasify').directive('jasConfirmField', jasConfirmField);
+    ng.module('jasify').directive('jasConfirmField', jasConfirmField);
 
     function jasConfirmField() {
         return {
@@ -34,4 +34,4 @@
         };
     }
 
-})();
+})(angular);

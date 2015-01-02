@@ -1,8 +1,8 @@
-(function () {
+(function (ng) {
     /**
      * Routes for all navbar links
      */
-    angular.module('jasify').config(jasifyRoutes);
+    ng.module('jasify').config(jasifyRoutes);
 
     function jasifyRoutes($routeProvider) {
         $routeProvider.
@@ -102,4 +102,4 @@
         //});
     }
 
-})();
+})(angular);

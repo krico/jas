@@ -1,6 +1,6 @@
-(function () {
+(function (ng) {
 
-    angular
+    ng
         .module('jasify', [
             'ngRoute',
             'ngResource',
@@ -14,13 +14,13 @@
     /**
      * Listen to route changes and check
      */
-    angular.module('jasify').run(jasifyRun);
+    ng.module('jasify').run(jasifyRun);
 
     function jasifyRun($rootScope, $log, AUTH_EVENTS, Auth) {
         //TODO: remove, not really needed
         $rootScope.$on('$routeChangeError', function (event, next, current) {
-            $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
+            $log.debug('$routeChangeError, event=' + ng.toJson(event) + ' next=' + ng.toJson(next));
         });
     }
 
-})();
+})(angular);
