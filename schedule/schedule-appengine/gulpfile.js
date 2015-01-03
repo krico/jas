@@ -2,6 +2,7 @@
 
 var argv = require('yargs').argv;
 var gulp = require('gulp');
+var print = require('gulp-print');
 var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var ngAnnotate = require('gulp-ng-annotate');
@@ -36,17 +37,24 @@ gulp.task('bower', function (cb) {
 gulp.task('javascript', function (cb) {
     return gulp.src(paths.js)
         .pipe(sourcemaps.init())
+        //.pipe(print(function (filepath) {
+        //    return "built: " + filepath;
+        //}))
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
         .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))
-        /*
         .pipe(ngAnnotate())
-        .pipe(uglify())
-        */
+        //.pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/js'));
+});
+
+gulp.task('javascript-test-jshint', function (cb) {
+    return gulp.src(paths.test.js)
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'));
 });
 
 gulp.task('stylesheet', function (cb) {
@@ -71,7 +79,7 @@ gulp.task('html', function (cb) {
 });
 
 gulp.task('test', ['build'], function (cb) {
-    if(argv.skipteststrue){
+    if (argv.skipteststrue) {
         gutil.log(gutil.colors.red('SKIPPING TESTS'));
     }
     return gulp.src([])
@@ -87,10 +95,11 @@ gulp.task('test', ['build'], function (cb) {
 
 gulp.task('watch', function () {
     gulp.watch(paths.js, ['javascript']);
+    gulp.watch(paths.test.js, ['javascript-test-jshint']);
     gulp.watch(paths.css, ['stylesheet']);
     gulp.watch(paths.html, ['html']);
 });
 
 gulp.task('build', ['javascript', 'stylesheet', 'html', 'bower']);
 
-gulp.task('default', ['watch', 'sym', 'build']);
+gulp.task('default', ['watch', 'sym', 'build', 'javascript-test-jshint']);

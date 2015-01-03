@@ -1,5 +1,6 @@
-module.exports = function (config) {
+module.exports = function (config, min) {
     var paths = require('../../../paths.json');
+    var suffix = min ? '.min.js' : '.js';
     config.set({
         basePath: '../../..',
         frameworks: ['jasmine'],
@@ -14,8 +15,7 @@ module.exports = function (config) {
             paths.build + '/lib/angular-bootstrap/ui-bootstrap-tpls.js',
             paths.build + '/lib/spin.js/spin.js',
             paths.build + '/lib/angular-spinner/angular-spinner.min.js',
-            paths.build + '/js/jasify.js',
-            //TODO: 'src/main/javascript/**/*.js',
+            paths.build + '/js/jasify'+suffix,
             'src/test/javascript/**/*.js'
         ],
         exclude: ['src/test/javascript/karma.conf*.js'],

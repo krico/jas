@@ -19,7 +19,7 @@ describe('UserLogin', function () {
         $gapiMock.client.jasify.userLogins.list = function (params) {
             ++calls;
             captureParams = params;
-            return {result: {items: expected}}
+            return {result: {items: expected}};
         };
 
         UserLogin.list(expectedUserId).then(function (result) {
@@ -45,7 +45,7 @@ describe('UserLogin', function () {
         $gapiMock.client.jasify.userLogins.remove = function (params) {
             ++calls;
             captureParams = params;
-            return {result: {}}
+            return {result: {}};
         };
 
         UserLogin.remove({id: expectedLoginId}).then(function (result) {

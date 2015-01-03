@@ -56,13 +56,13 @@
         $httpBackend.whenPOST(/^\/auth\/login$/).respond(function (method, url, data) {
             console.log("POST[login] " + url + " DATA: " + data);
 
-            var req = angular.fromJson(data);
+            var req = ng.fromJson(data);
             var users = database.users;
             for (var id in users) {
                 var u = users[id];
                 if (req.name != 'nologin' && req.name == u.name && req.password == u.password) {
                     database.users.current = u;
-                    console.log('Login: set current=' + angular.toJson(u));
+                    console.log('Login: set current=' + ng.toJson(u));
                     return [200, {id: database.sessionCount++, userId: u.id, user: u}, {}];
                 }
             }
@@ -96,10 +96,10 @@
         $httpBackend.whenPOST(/^\/user$/).respond(function (method, url, data) {
             console.log("POST[user](CREATE) " + url + " DATA: " + data);
             /* CREATE USER */
-            var user = angular.fromJson(data);
+            var user = ng.fromJson(data);
 
             if (user.name == 'badsignup') {
-                return [400 /* bad request */, angular.toJson({
+                return [400 /* bad request */, ng.toJson({
                     nok: true,
                     nokText: 'Sign up failed :-('
                 }), {}];
@@ -111,7 +111,7 @@
                 var u = users[id];
                 if (u.id > max) max = u.id;
                 if (user.name == u.name) {
-                    return [400 /* bad request */, angular.toJson({
+                    return [400 /* bad request */, ng.toJson({
                         nok: true,
                         nokText: 'Username not available'
                     }), {}, 'Username not available'];
@@ -119,7 +119,7 @@
             }
             user.id = max + 10;
             users[user.id] = user;
-            return [200, angular.toJson(user), {}];
+            return [200, ng.toJson(user), {}];
         });
 
         $httpBackend.whenPOST(/^\/auth\/change-password$/).respond(function (method, url, data) {
@@ -136,11 +136,11 @@
                 console.log('User: userId:' + userId);
                 /* User by ID */
                 if (database.users[userId]) {
-                    return [200, angular.toJson(database.users[userId]), {}];
+                    return [200, ng.toJson(database.users[userId]), {}];
                 }
             }
 
-            return [404 /* not found */, angular.toJson({
+            return [404 /* not found */, ng.toJson({
                 nok: true,
                 nokText: 'No user found at: ' + url + ' :-('
             }), {}];
@@ -148,7 +148,7 @@
 
         $httpBackend.whenPOST(/^\/user(\/.*)$/).respond(function (method, url, data) {
             console.log("POST[user] " + url + " DATA: " + data);
-            var update = angular.fromJson(data);
+            var update = ng.fromJson(data);
             var matches = /^\/user\/(.+)$/.exec(url);
             if (update.name != 'badsave' && matches !== null) {
                 var userId = matches[1];
@@ -156,18 +156,18 @@
                 /* User by ID */
                 if (database.users[userId]) {
                     database.users[userId] = update;
-                    return [200, angular.toJson(database.users[userId]), {}];
+                    return [200, ng.toJson(database.users[userId]), {}];
                 }
             }
 
-            return [404 /* not found */, angular.toJson({
+            return [404 /* not found */, ng.toJson({
                 nok: true,
                 nokText: 'No user found at: ' + url + ' :-('
             }), {}];
         });
 
         $httpBackend.whenGET(/^\/user?.*$/).respond(function (method, url, data, headers) {
-            console.log(method + "[user] " + url + " DATA: " + data + " H: " + angular.toJson(headers));
+            console.log(method + "[user] " + url + " DATA: " + data + " H: " + ng.toJson(headers));
             var ret = [];
             var total = 0;
 
@@ -199,7 +199,7 @@
                     return false;
                 };
 
-                angular.forEach(database.users, function (u, id) {
+                ng.forEach(database.users, function (u, id) {
                     if (select(u)) {
 
                         if (total >= start && total < end) {
@@ -213,7 +213,7 @@
 
             } else {
 
-                angular.forEach(database.users, function (u, id) {
+                ng.forEach(database.users, function (u, id) {
                     ret.push(u);
                     ++total;
                 });
@@ -232,29 +232,30 @@
     initializeStubbedBackend();
 
     function initializeStubbedBackend() {
-        ng.module('jasify')
-            .config(function ($provide) {
-                // decorate http with an 2e2 mock
-                $provide.decorator('$httpBackend', angular.mock.e2e.$httpBackendDecorator);
-                //decorate it with a timeout
-                $provide.decorator('$httpBackend', function ($delegate) {
-                    var proxy = function (method, url, data, callback, headers) {
-                        var interceptor = function () {
-                            var _this = this,
-                                _arguments = arguments;
-                            setTimeout(function () {
-                                callback.apply(_this, _arguments);
-                            }, 700);
-                        };
-                        return $delegate.call(this, method, url, data, interceptor, headers);
+        ng.module('jasify').config(stub).run(BackendMock);
+
+        //@ngInject
+        function stub($provide) {
+            // decorate http with an 2e2 mock
+            $provide.decorator('$httpBackend', ng.mock.e2e.$httpBackendDecorator);
+            //decorate it with a timeout
+            $provide.decorator('$httpBackend', function ($delegate) {
+                var proxy = function (method, url, data, callback, headers) {
+                    var interceptor = function () {
+                        var _this = this,
+                            _arguments = arguments;
+                        setTimeout(function () {
+                            callback.apply(_this, _arguments);
+                        }, 700);
                     };
-                    for (var key in $delegate) {
-                        proxy[key] = $delegate[key];
-                    }
-                    return proxy;
-                });
-            })
-            .run(BackendMock);
+                    return $delegate.call(this, method, url, data, interceptor, headers);
+                };
+                for (var key in $delegate) {
+                    proxy[key] = $delegate[key];
+                }
+                return proxy;
+            });
+        }
     }
 })
 (angular);

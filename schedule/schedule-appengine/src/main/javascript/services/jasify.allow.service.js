@@ -5,7 +5,7 @@
      */
     ng.module('jasify').factory('Allow', allow);
 
-    function allow($log, $q, $rootScope, Auth, AUTH_EVENTS) {
+    function allow($q, $rootScope, Auth, AUTH_EVENTS) {
         var Allow = {
             all: all,
             restoreThen: restoreThen,

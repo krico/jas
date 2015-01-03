@@ -1,5 +1,9 @@
 {
-  "js": ["src/main/javascript/**/*.js"],
+  "js": [
+    "src/main/javascript/**/*.module.js",
+    "src/main/javascript/**/jasify.main.js",
+    "src/main/javascript/**/*.js"
+  ],
   "test": {
     "js": [
       "src/test/javascript/**/*.js",

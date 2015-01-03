@@ -26,6 +26,10 @@ Development should be focused on [Jasify Schedule App Engine](schedule/schedule-
  - **Example**: `schedule/schedule-appengine/pom.xml` **groupId**: `com.jasify.schedule`, **artifactId**: schedule-appengine
  and **package**: com.jasify.schedule.appengine
 
+## Developers
+
+Information on how to get started as a developer id described on [DEVELOPER.md](schedule/schedule-appengine/DEVELOPER.md)
+
 ## Change log
 
  - Created [Jasify Schedule App Engine](schedule/schedule-appengine)

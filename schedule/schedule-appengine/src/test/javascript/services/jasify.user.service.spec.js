@@ -101,8 +101,8 @@ describe('User', function () {
 
         var q = {page: 1, size: 5, sort: 'asc', field: 'email', query: 'something@'};
         $httpBackend.expectGET(function (url) {
-            if (url.indexOf('/user?') != 0) return false;
-            for (p in q) {
+            if (url.indexOf('/user?') !== 0) return false;
+            for (var p in q) {
                 var re = new RegExp(p + '=' + q[p]);
                 if (!url.match(re)) {
                     console.log('re=' + re);

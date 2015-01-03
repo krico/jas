@@ -4,69 +4,69 @@
      */
     ng.module('jasify').config(jasifyRoutes);
 
-    //TODO: move routes to controller modules, eg. jasify.admin.routes.js
+    //TODO: move routes to controller modules, eg. jasify.admin.routes.js test
 
     function jasifyRoutes($routeProvider) {
-        $routeProvider.
-            when('/', {
+        $routeProvider
+            .when('/', {
                 templateUrl: 'views/home.html',
-                controller: 'HomeCtrl',
+                controller: 'HomeController',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
                     }
                 }
             })
             .when('/home', {
                 templateUrl: 'views/home.html',
-                controller: 'HomeCtrl',
+                controller: 'HomeController',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
                     }
                 }
             })
             .when('/signUp', {
                 templateUrl: 'views/signUp.html',
-                controller: 'SignUpCtrl',
+                controller: 'SignUpController',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.guest();
                     }
                 }
             })
             .when('/login', {
                 templateUrl: 'views/login.html',
-                controller: 'LoginCtrl',
+                controller: 'LoginController',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.guest();
                     }
                 }
             })
             .when('/logout', {
                 templateUrl: 'views/logout.html',
-                controller: 'LogoutCtrl',
+                controller: 'LogoutController',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
                     }
                 }
             })
             .when('/profile/:extra?', {
                 templateUrl: 'views/profile.html',
-                controller: 'ProfileCtrl',
+                controller: 'ProfileController',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.user();
                     }
                 }
             })
             .when('/profile-logins', {
                 templateUrl: 'views/profile-logins.html',
-                controller: 'ProfileLoginsCtrl',
+                controller: 'ProfileLoginsController',
                 resolve: {
-                    logins: function ($q, Allow, UserLogin, Session) {
+                    logins: /*@ngInject*/ function ($q, Allow, UserLogin, Session) {
                         return Allow.user().then(
                             function () {
                                 return UserLogin.list(Session.userId);
@@ -84,7 +84,7 @@
                 controller: 'AdminUsersController',
                 controllerAs: 'vm',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.admin();
                     }
                 }
@@ -94,7 +94,7 @@
                 controller: 'AdminUserController',
                 controllerAs: 'vm',
                 resolve: {
-                    allow: function (Allow) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.admin();
                     }
                 }

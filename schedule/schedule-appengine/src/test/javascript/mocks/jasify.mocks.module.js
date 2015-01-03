@@ -10,9 +10,17 @@
             $provide.decorator('$window', function ($windowMock) {
                 return $windowMock;
             });
+
+            $provide.decorator('$modal', function ($modalMock) {
+                return $modalMock;
+            });
         });
 
     ng.module('jasify.mocks').factory('$gapiMock', $gapiMock);
+
+    ng.module('jasify.mocks').factory('$windowMock', $windowMock);
+
+    ng.module('jasify.mocks').factory('$modalMock', $modalMock);
 
     function $gapiMock() {
         /* we mock all api calls, you can always override or spyOn them */
@@ -33,10 +41,10 @@
         };
 
 
-        var $gapiMock = {data: {}};
-        $gapiMock.client = {};
-        $gapiMock.client.load = function (api, version, callback, path) {
-            $gapiMock.data.load = {
+        var mock = {data: {}};
+        mock.client = {};
+        mock.client.load = function (api, version, callback, path) {
+            mock.data.load = {
                 api: api,
                 version: version,
                 callback: callback,
@@ -45,23 +53,38 @@
             };
             return {
                 then: function (success, fail) {
-                    $gapiMock.data.load.then.success = success;
-                    $gapiMock.data.load.then.fail = fail;
+                    mock.data.load.then.success = success;
+                    mock.data.load.then.fail = fail;
                 }
             };
         };
-        $gapiMock.client.jasify = jasify;
-        return $gapiMock;
+        mock.client.jasify = jasify;
+        return mock;
     }
 
-    ng.module('jasify.mocks').factory('$windowMock', $windowMock);
-
     function $windowMock() {
-        windowMock = {
+        var mock = {
             innerHeight: 400,
             innerWidth: 500
         };
-        return windowMock;
+        return mock;
+    }
+
+    function $modalMock() {
+        var mock = {
+            data: {open: {}},
+            open: function () {
+                return {
+                    result: {
+                        then: function (confirmCallback, cancelCallback) {
+                            mock.data.open.confirmCallback = confirmCallback;
+                            mock.data.open.cancelCallback = cancelCallback;
+                        }
+                    }
+                };
+            }
+        };
+        return mock;
     }
 
 })(angular);
