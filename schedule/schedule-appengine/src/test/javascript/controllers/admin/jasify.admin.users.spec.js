@@ -1,10 +1,7 @@
 describe('AdminUsersController', function () {
     var $controller, $httpBackend, $location, User, vm;
 
-    beforeEach(module('jasify', function ($provide) {
-        $gapiMock = jasifyGapiMock();
-        $provide.value('$gapi', $gapiMock);
-    }));
+    beforeEach(module('jasify'));
 
 
     beforeEach(inject(function (_$controller_, _$httpBackend_, _$location_, _User_) {

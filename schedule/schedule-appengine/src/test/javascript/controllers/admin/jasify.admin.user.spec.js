@@ -1,17 +1,17 @@
 describe('AdminUserController', function () {
-    var $controller, $rootScope, $httpBackend, $routeParams, $q, User, Auth, Endpoint, vm;
+    var $controller, $rootScope, $httpBackend, $routeParams, $q, $gapiMock, User, Auth, Endpoint, vm;
 
-    beforeEach(module('jasify', function ($provide) {
-        $gapiMock = jasifyGapiMock();
-        $provide.value('$gapi', $gapiMock);
-    }));
+    beforeEach(module('jasify'));
 
-    beforeEach(inject(function (_$controller_, _$rootScope_, _$httpBackend_, _$routeParams_, _$q_, _User_, _Auth_, _Endpoint_) {
+    beforeEach(module('jasify.mocks'));
+
+    beforeEach(inject(function (_$controller_, _$rootScope_, _$httpBackend_, _$routeParams_, _$q_, _$gapiMock_, _User_, _Auth_, _Endpoint_) {
         $controller = _$controller_;
         $rootScope = _$rootScope_;
         $httpBackend = _$httpBackend_;
         $routeParams = _$routeParams_;
         $q = _$q_;
+        $gapiMock = _$gapiMock_;
         User = _User_;
         Auth = _Auth_;
         Endpoint = _Endpoint_;
