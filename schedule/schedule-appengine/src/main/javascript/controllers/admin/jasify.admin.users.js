@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('AdminUsersController', AdminUsersController);
+    angular.module('jasifyScheduleControllers').controller('AdminUsersController', AdminUsersController);
 
     function AdminUsersController($location, User) {
         var vm = this;
@@ -64,7 +64,7 @@
         }
 
         function perPage(newValue) {
-            if (ng.isDefined(newValue)) {
+            if (angular.isDefined(newValue)) {
                 var old = vm._perPage;
                 if (old != newValue) {
                     /* stay on the same record */

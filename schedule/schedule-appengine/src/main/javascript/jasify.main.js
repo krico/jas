@@ -1,25 +1,24 @@
-(function (ng) {
+(function (angular) {
 
-    ng
-        .module('jasify', [
-            'ngRoute',
-            'ngResource',
-            'ngMessages',
-            'ngCookies',
-            'ui.bootstrap',
-            'angularSpinner',
-            'jasifyScheduleControllers'
-        ]);
+    angular.module('jasify', [
+        'ngRoute',
+        'ngResource',
+        'ngMessages',
+        'ngCookies',
+        'ui.bootstrap',
+        'angularSpinner',
+        'jasifyScheduleControllers'
+    ]);
 
     /**
      * Listen to route changes and check
      */
-    ng.module('jasify').run(jasifyRun);
+    angular.module('jasify').run(jasifyRun);
 
-    function jasifyRun($rootScope, $log, AUTH_EVENTS, Auth) {
+    function jasifyRun($rootScope, $log) {
         //TODO: remove, not really needed
         $rootScope.$on('$routeChangeError', function (event, next, current) {
-            $log.debug('$routeChangeError, event=' + ng.toJson(event) + ' next=' + ng.toJson(next));
+            $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
         });
     }
 

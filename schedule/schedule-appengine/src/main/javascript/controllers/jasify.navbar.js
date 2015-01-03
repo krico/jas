@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('NavbarController', NavbarController);
+    angular.module('jasifyScheduleControllers').controller('NavbarController', NavbarController);
 
     function NavbarController($scope, $log, $location, Auth, AUTH_EVENTS) {
         $scope.isAdmin = function () {

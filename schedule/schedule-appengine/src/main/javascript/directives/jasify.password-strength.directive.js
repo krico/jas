@@ -1,8 +1,8 @@
-(function (ng) {
+(function (angular) {
     /**
      * Password strength meter
      */
-    ng.module('jasify').directive('jasPasswordStrength', jasPasswordStrength);
+    angular.module('jasify').directive('jasPasswordStrength', jasPasswordStrength);
 
     function jasPasswordStrength($log) {
         return {
@@ -49,7 +49,7 @@
                     points.pos.symbols = criteria.pos.symbols ? criteria.pos.symbols.length : 0;
 
                     var ctx = {points: 0};
-                    ng.forEach(points.pos, function (value, key) {
+                    angular.forEach(points.pos, function (value, key) {
                         this.points += Math.min(1, value);
                     }, ctx);
 
@@ -111,7 +111,7 @@
 
                     // repeated chars
                     var counts = {};
-                    ng.forEach(p.toLowerCase().split(''), function (v, k) {
+                    angular.forEach(p.toLowerCase().split(''), function (v, k) {
                         if (!this[k]) {
                             this[k] = 1;
                         } else {
@@ -120,7 +120,7 @@
                     }, counts);
 
                     var total = {count: 0};
-                    ng.forEach(counts, function (v, k) {
+                    angular.forEach(counts, function (v, k) {
                         if (v > 1) this.count += v;
                     }, total);
 

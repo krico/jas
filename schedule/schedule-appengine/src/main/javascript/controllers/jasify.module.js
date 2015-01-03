@@ -1,5 +1,5 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers', []);
+    angular.module('jasifyScheduleControllers', []);
 
 })(angular);

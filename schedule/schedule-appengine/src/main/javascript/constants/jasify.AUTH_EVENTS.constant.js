@@ -1,9 +1,9 @@
-(function (ng) {
+(function (angular) {
 
     /**
      * Constant for the authentication related events
      */
-    ng.module('jasify').constant('AUTH_EVENTS', {
+    angular.module('jasify').constant('AUTH_EVENTS', {
         loginSuccess: 'auth-login-success',
         loginFailed: 'auth-login-failed',
         logoutSuccess: 'auth-logout-success',

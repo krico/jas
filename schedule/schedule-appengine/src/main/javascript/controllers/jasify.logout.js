@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('LogoutController', LogoutController);
+    angular.module('jasifyScheduleControllers').controller('LogoutController', LogoutController);
 
     function LogoutController($scope, $rootScope, AUTH_EVENTS, Auth) {
         $scope.logout = function () {

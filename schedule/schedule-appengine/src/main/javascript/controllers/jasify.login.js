@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('LoginController', LoginController);
+    angular.module('jasifyScheduleControllers').controller('LoginController', LoginController);
 
     function LoginController($scope, $rootScope, Auth, AUTH_EVENTS, Popup) {
 

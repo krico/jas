@@ -1,9 +1,9 @@
-(function (ng) {
+(function (angular) {
 
     /**
      *  Session is a singleton that mimics the server-side session
      */
-    ng.module('jasify').service('Session', session);
+    angular.module('jasify').service('Session', session);
 
     function session() {
 

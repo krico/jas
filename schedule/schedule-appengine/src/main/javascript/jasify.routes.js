@@ -1,8 +1,8 @@
-(function (ng) {
+(function (angular) {
     /**
      * Routes for all navbar links
      */
-    ng.module('jasify').config(jasifyRoutes);
+    angular.module('jasify').config(jasifyRoutes);
 
     //TODO: move routes to controller modules, eg. jasify.admin.routes.js test
 

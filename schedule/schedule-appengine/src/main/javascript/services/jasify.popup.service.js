@@ -1,9 +1,9 @@
-(function (ng) {
+(function (angular) {
     /**
      * Popup services (windows)
      * Inspired by satelizer (https://github.com/sahat/satellizer)
      */
-    ng.module('jasify').factory('Popup', popup);
+    angular.module('jasify').factory('Popup', popup);
 
     function popup($log, $q, $interval, $window) {
         var popupWindow = null;
@@ -26,7 +26,7 @@
             options = options || {};
             var width = options.width || 500;
             var height = options.height || 500;
-            return ng.extend({
+            return angular.extend({
                 width: width,
                 height: height,
                 left: $window.screenX + (($window.outerWidth - width) / 2),
@@ -36,7 +36,7 @@
 
         function optionsString(options) {
             var parts = [];
-            ng.forEach(options, function (value, key) {
+            angular.forEach(options, function (value, key) {
                 parts.push(key + '=' + value);
             });
             return parts.join(',');
@@ -66,7 +66,7 @@
                         $interval.cancel(waiting);
                         popupWindow = null;
                         if (script && script.text) {
-                            var r = ng.fromJson(script.text);
+                            var r = angular.fromJson(script.text);
                             deferred.resolve(r);
                         } else {
                             deferred.reject('Bad response...');

@@ -1,9 +1,9 @@
-(function (ng) {
+(function (angular) {
 
     /**
      * ConfirmField directive
      */
-    ng.module('jasify').directive('jasConfirmField', jasConfirmField);
+    angular.module('jasify').directive('jasConfirmField', jasConfirmField);
 
     function jasConfirmField() {
         return {

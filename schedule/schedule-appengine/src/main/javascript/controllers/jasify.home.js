@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('HomeController', HomeController);
+    angular.module('jasifyScheduleControllers').controller('HomeController', HomeController);
 
     function HomeController() {
         var vm = this;

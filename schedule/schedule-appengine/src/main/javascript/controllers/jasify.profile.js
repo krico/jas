@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('ProfileController', ProfileController);
+    angular.module('jasifyScheduleControllers').controller('ProfileController', ProfileController);
 
     function ProfileController($scope, $routeParams, $log, Session, User) {
         $scope.user = null;

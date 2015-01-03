@@ -1,8 +1,8 @@
-(function (ng) {
+(function (angular) {
     /**
      * UserLogins service
      */
-    ng.module('jasify').factory('UserLogin', userLogin);
+    angular.module('jasify').factory('UserLogin', userLogin);
 
     function userLogin($q, Endpoint) {
         var UserLogin = {

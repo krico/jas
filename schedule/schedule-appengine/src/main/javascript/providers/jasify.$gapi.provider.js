@@ -1,10 +1,10 @@
-(function (ng) {
+(function (angular) {
     /**
      * To follow the "Angular way", instead of accessing gapi.client directly,
      * we provide the $gapi service and use it instead.  This allows us to
      * easily mock it for tests for example.
      */
-    ng.module('jasify').provider('$gapi', $gapiProvider);
+    angular.module('jasify').provider('$gapi', $gapiProvider);
 
     function $gapiProvider() {
         this.$get = function () {

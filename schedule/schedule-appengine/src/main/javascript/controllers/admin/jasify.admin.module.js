@@ -1,5 +1,5 @@
-(function (ng) {
-    ng.module('jasify.admin', [
+(function (angular) {
+    angular.module('jasify.admin', [
 
     ]);
 })(angular);

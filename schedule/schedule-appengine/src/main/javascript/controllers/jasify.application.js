@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('ApplicationController', ApplicationController);
+    angular.module('jasifyScheduleControllers').controller('ApplicationController', ApplicationController);
 
     function ApplicationController($scope, $rootScope, $modal, $log, $location, $cookies, $window, Auth, AUTH_EVENTS, Endpoint /* TODO: Just so it is created, maybe its not needed */) {
 

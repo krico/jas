@@ -1,10 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-
-    /**
-     * Auth service
-     */
-    ng.module('jasify').factory('Auth', auth);
+    angular.module('jasify').factory('Auth', auth);
 
     function auth($log, $http, $q, $cookies, Session, Endpoint) {
 

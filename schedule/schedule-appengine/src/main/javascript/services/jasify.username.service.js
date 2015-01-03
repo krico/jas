@@ -1,7 +1,7 @@
-(function (ng) {
+(function (angular) {
 
 
-    ng.module('jasify').factory('Username', username);
+    angular.module('jasify').factory('Username', username);
     function username($log, Endpoint) {
         var Username = {
             check: check

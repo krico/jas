@@ -1,9 +1,8 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('SignUpController', SignUpController);
+    angular.module('jasifyScheduleControllers').controller('SignUpController', SignUpController);
 
-    function SignUpController($scope, $log, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
-
+    function SignUpController($scope, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
         $scope.alerts = [];
 
         $scope.inProgress = false;

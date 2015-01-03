@@ -1,6 +1,6 @@
-(function (ng) {
+(function (angular) {
 
-    ng.module('jasifyScheduleControllers').controller('ProfileLoginsController', ProfileLoginsController);
+    angular.module('jasifyScheduleControllers').controller('ProfileLoginsController', ProfileLoginsController);
 
     function ProfileLoginsController($scope, $log, $q, UserLogin, Session, Popup, logins) {
         $scope.logins = logins;
