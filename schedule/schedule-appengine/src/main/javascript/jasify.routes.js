@@ -4,6 +4,8 @@
      */
     ng.module('jasify').config(jasifyRoutes);
 
+    //TODO: move routes to controller modules, eg. jasify.admin.routes.js
+
     function jasifyRoutes($routeProvider) {
         $routeProvider.
             when('/', {
@@ -79,7 +81,8 @@
             /* BEGIN: Admin routes */
             .when('/admin/users', {
                 templateUrl: 'views/admin/users.html',
-                controller: 'AdminUsersCtrl',
+                controller: 'AdminUsersController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: function (Allow) {
                         return Allow.admin();
@@ -88,7 +91,8 @@
             })
             .when('/admin/user/:id?', {
                 templateUrl: 'views/admin/user.html',
-                controller: 'AdminUserCtrl',
+                controller: 'AdminUserController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: function (Allow) {
                         return Allow.admin();
@@ -96,10 +100,7 @@
                 }
             });
         /* END: Admin routes */
-        //
-        //otherwise({
-        //    redirectTo: '/home'
-        //});
+
     }
 
 })(angular);

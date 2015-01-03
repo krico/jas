@@ -3,26 +3,26 @@
         <a href="#/admin/users"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
     </div>
     <div class="col-sm-10">
-        <alert ng-repeat="a in alerts" type="{{a.type}}" close="alerts.splice($index, 1)">{{a.msg}}</alert>
+        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
 </div>
 <tabset>
     <tab>
         <tab-heading><span class="glyphicon glyphicon-user"></span> user</tab-heading>
-        <form class="form-horizontal" role="form" name="forms.userForm" novalidate>
+        <form class="form-horizontal" role="form" name="vm.forms.userForm" novalidate>
             <div class="form-group"></div>
             <div class="form-group">
                 <div class="col-sm-3">
-                    <h5 ng-if="create">create new user</h5>
-                    <h5 ng-if="!create">{{user.name}}'s profile</h5>
+                    <h5 ng-if="vm.create">create new user</h5>
+                    <h5 ng-if="!vm.create">{{vm.user.name}}'s profile</h5>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-1 control-label input-sm">name:</label>
 
                 <div class="col-sm-4">
-                    <input ng-disabled="!create" type="text" class="form-control input-sm" id="name" name="name"
-                           ng-model="user.name"
+                    <input ng-disabled="!vm.create" type="text" class="form-control input-sm" id="name" name="name"
+                           ng-model="vm.user.name"
                            placeholder="name">
                 </div>
             </div>
@@ -30,18 +30,18 @@
                 <label class="col-sm-1 control-label input-sm">type:</label>
 
                 <div class="col-sm-4">
-                    <select class="form-control input-sm" id="type" name="type" ng-model="user.admin">
+                    <select class="form-control input-sm" id="type" name="type" ng-model="vm.user.admin">
                         <option value="false">User</option>
                         <option value="true">Admin</option>
                     </select>
                 </div>
             </div>
-            <div class="form-group" ng-if="create">
+            <div class="form-group" ng-if="vm.create">
                 <label class="col-sm-1 control-label input-sm">password:</label>
 
                 <div class="col-sm-4">
                     <input type="password" class="form-control input-sm" id="password" name="password"
-                           ng-model="user.password"
+                           ng-model="vm.user.password"
                            placeholder="password">
                 </div>
             </div>
@@ -49,7 +49,7 @@
                 <label for="email" class="col-sm-1 control-label input-sm">email:</label>
 
                 <div class="col-sm-4">
-                    <input type="email" class="form-control input-sm" id="email" name="email" ng-model="user.email"
+                    <input type="email" class="form-control input-sm" id="email" name="email" ng-model="vm.user.email"
                            placeholder="email">
                 </div>
             </div>
@@ -57,40 +57,40 @@
                 <label for="about" class="col-sm-1 control-label input-sm">about:</label>
 
                 <div class="col-sm-4">
-                    <textarea class="form-control input-sm" id="about" ng-model="user.about"
+                    <textarea class="form-control input-sm" id="about" ng-model="vm.user.about"
                               placeholder="about the user..."
                               rows="3"></textarea>
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-1 col-sm-4">
-                    <button ng-if="!create" type="button"
-                            ng-click="save()" ng-disabled="!forms.userForm.$dirty || forms.userForm.$invalid"
+                    <button ng-if="!vm.create" type="button"
+                            ng-click="vm.save()" ng-disabled="!vm.forms.userForm.$dirty || vm.forms.userForm.$invalid"
                             class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-save"></span>
                         save
                     </button>
-                    <button ng-if="create" type="button"
-                            ng-click="createUser()" ng-disabled="!forms.userForm.$dirty || forms.userForm.$invalid"
+                    <button ng-if="vm.create" type="button"
+                            ng-click="vm.createUser()" ng-disabled="!vm.forms.userForm.$dirty || vm.forms.userForm.$invalid"
                             class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span>
                         save
                     </button>
                     <button type="button"
-                            ng-click="reset()" ng-disabled="!forms.userForm.$dirty"
+                            ng-click="vm.reset()" ng-disabled="!vm.forms.userForm.$dirty"
                             class="btn btn-default btn-sm"><span class="glyphicon glyphicon-open"></span>
                         reset
                     </button>
-                    <span ng-show="loading" us-spinner=""></span>
+                    <span ng-show="vm.loading" us-spinner=""></span>
                 </div>
             </div>
         </form>
     </tab>
     <tab disabled="create">
         <tab-heading><span class="glyphicon glyphicon-lock"></span> password</tab-heading>
-        <form class="form-horizontal" role="form" name="forms.passwordForm" novalidate>
+        <form class="form-horizontal" role="form" name="vm.forms.passwordForm" novalidate>
             <div class="form-group"></div>
             <div class="form-group">
                 <div class="col-sm-3">
-                    <h5>{{user.name}}'s password</h5>
+                    <h5>{{vm.user.name}}'s password</h5>
                 </div>
             </div>
             <div class="form-group">
@@ -98,7 +98,7 @@
 
                 <div class="col-sm-4">
                     <input type="password" class="form-control input-sm" id="ch.password" name="password"
-                           ng-model="pw.newPassword"
+                           ng-model="vm.pw.newPassword"
                            placeholder="password" required>
                 </div>
             </div>
@@ -107,19 +107,20 @@
 
                 <div class="col-sm-4">
                     <input type="password" class="form-control input-sm" id="ch.confirm" name="confirm"
-                           ng-model="pw.confirmPassword" required jas-confirm-field="forms.passwordForm.password"
+                           ng-model="vm.pw.confirmPassword" required jas-confirm-field="vm.forms.passwordForm.password"
                            placeholder="confirm">
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-1 col-sm-4">
                     <button type="button"
-                            ng-click="changePassword()"
-                            ng-disabled="!forms.passwordForm.$dirty || forms.passwordForm.$invalid"
+                            ng-click="vm.changePassword()"
+                            ng-disabled="!vm.forms.passwordForm.$dirty || vm.forms.passwordForm.$invalid"
                             class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-save"></span>
                         set password
                     </button>
-                    <span ng-show="loading" us-spinner=""></span>
+
+                    <span ng-show="vm.loading" us-spinner=""></span>
                 </div>
             </div>
         </form>

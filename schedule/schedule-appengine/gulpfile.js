@@ -40,8 +40,10 @@ gulp.task('javascript', function (cb) {
         .pipe(jshint.reporter('default'))
         .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))
+        /*
         .pipe(ngAnnotate())
         .pipe(uglify())
+        */
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/js'));
