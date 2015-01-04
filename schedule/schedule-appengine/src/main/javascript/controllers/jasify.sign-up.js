@@ -85,17 +85,17 @@
 
                     Auth.restore(true).then(restoreSuccess, restoreError);
 
-                    function restoreSuccess(u) {
-                        $scope.setCurrentUser(u);
-                        $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                    }
-
-                    function restoreError(msg) {
-                        vm.alert('danger', '! Something went really wrong...');
-                    }
-
                     return;
                 }
+                function restoreSuccess(u) {
+                    $scope.setCurrentUser(u);
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                }
+
+                function restoreError(msg) {
+                    vm.alert('danger', '! Something went really wrong...');
+                }
+
 
                 if (oauthDetail) {
                     vm.user.realName = oauthDetail.realName;
