@@ -11,6 +11,7 @@
             .when('/', {
                 templateUrl: 'views/home.html',
                 controller: 'HomeController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
@@ -20,6 +21,7 @@
             .when('/home', {
                 templateUrl: 'views/home.html',
                 controller: 'HomeController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
@@ -29,6 +31,7 @@
             .when('/signUp', {
                 templateUrl: 'views/signUp.html',
                 controller: 'SignUpController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.guest();
@@ -38,6 +41,7 @@
             .when('/login', {
                 templateUrl: 'views/login.html',
                 controller: 'LoginController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.guest();
@@ -47,6 +51,7 @@
             .when('/logout', {
                 templateUrl: 'views/logout.html',
                 controller: 'LogoutController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
@@ -56,6 +61,7 @@
             .when('/profile/:extra?', {
                 templateUrl: 'views/profile.html',
                 controller: 'ProfileController',
+                controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.user();
@@ -65,6 +71,7 @@
             .when('/profile-logins', {
                 templateUrl: 'views/profile-logins.html',
                 controller: 'ProfileLoginsController',
+                controllerAs: 'vm',
                 resolve: {
                     logins: /*@ngInject*/ function ($q, Allow, UserLogin, Session) {
                         return Allow.user().then(

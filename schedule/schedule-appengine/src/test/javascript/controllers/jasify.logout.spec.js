@@ -26,7 +26,7 @@ describe('LogoutController', function () {
         spyOn($rootScope, '$broadcast').and.callThrough();
         Session.create("aa", 555, false);
 
-        $scope.logout();
+        vm.logout();
 
         expect($rootScope.$broadcast).not.toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
         expect($scope.currentUser).not.toBe(null);

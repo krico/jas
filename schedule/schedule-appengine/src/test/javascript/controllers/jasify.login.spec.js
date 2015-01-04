@@ -1,5 +1,5 @@
 describe('LoginController', function () {
-    var $scope, controller, $rootScope, $applicationScope, $q, $httpBackend, Auth, AUTH_EVENTS;
+    var $scope, vm, $rootScope, $applicationScope, $q, $httpBackend, Auth, AUTH_EVENTS;
     beforeEach(module('jasify'));
     beforeEach(module('jasify.mocks'));
 
@@ -13,7 +13,7 @@ describe('LoginController', function () {
         $controller('ApplicationController', {$scope: $applicationScope});
 
         $scope = $applicationScope.$new();
-        controller = $controller('LoginController', {$scope: $scope});
+        vm = $controller('LoginController', {$scope: $scope});
     }));
 
     afterEach(function () {
@@ -22,31 +22,31 @@ describe('LoginController', function () {
     });
 
     it('sets current user on successful login', function () {
-        $scope.credentials = {name: 'test', password: 'password'};
-        var user = {name: $scope.credentials.name, id: 555};
+        vm.credentials = {name: 'test', password: 'password'};
+        var user = {name: vm.credentials.name, id: 555};
         var defer = $q.defer();
         defer.resolve(user);
         spyOn(Auth, 'login').and.returnValue(defer.promise);
 
-        $scope.login($scope.credentials);
+        vm.login(vm.credentials);
 
         expect($scope.currentUser).toEqual(null);
 
         $rootScope.$apply();
 
         expect($scope.currentUser).toEqual(user);
-        expect(Auth.login).toHaveBeenCalledWith($scope.credentials);
+        expect(Auth.login).toHaveBeenCalledWith(vm.credentials);
     });
 
     it('broadcasts on successful login', function () {
-        $scope.credentials = {name: 'test', password: 'password'};
-        var user = {name: $scope.credentials.name, id: 555};
+        vm.credentials = {name: 'test', password: 'password'};
+        var user = {name: vm.credentials.name, id: 555};
         var defer = $q.defer();
         defer.resolve(user);
         spyOn(Auth, 'login').and.returnValue(defer.promise);
         spyOn($rootScope, '$broadcast').and.callThrough();
 
-        $scope.login($scope.credentials);
+        vm.login(vm.credentials);
 
 
         $rootScope.$apply();
@@ -56,12 +56,12 @@ describe('LoginController', function () {
     });
 
     it('broadcasts on failed login', function () {
-        $scope.credentials = {name: 'test', password: 'password'};
+        vm.credentials = {name: 'test', password: 'password'};
         var defer = $q.defer();
         defer.reject();
         spyOn(Auth, 'login').and.returnValue(defer.promise);
 
-        $scope.login($scope.credentials);
+        vm.login(vm.credentials);
         spyOn($rootScope, '$broadcast').and.callThrough();
 
         $rootScope.$apply();

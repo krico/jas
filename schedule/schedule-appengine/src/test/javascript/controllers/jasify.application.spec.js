@@ -29,11 +29,11 @@ describe('ApplicationController', function () {
 
     it('can determine if a menu is active ', function () {
 
-        expect($scope.menuActive('/profile')).toBe(false);
+        expect(vm.menuActive('/profile')).toBe(false);
 
         $location.path('/profile');
 
-        expect($scope.menuActive('/profile')).toBe('active');
+        expect(vm.menuActive('/profile')).toBe('active');
 
     });
 

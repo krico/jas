@@ -3,13 +3,15 @@
     angular.module('jasifyScheduleControllers').controller('LoginController', LoginController);
 
     function LoginController($scope, $rootScope, Auth, AUTH_EVENTS, Popup) {
-
-        $scope.credentials = {
+        var vm = this;
+        vm.login = login;
+        vm.oauth = oauth;
+        vm.credentials = {
             name: '',
             password: ''
         };
 
-        $scope.login = function (cred) {
+        function login(cred) {
             Auth.login(cred).then(
                 function (user) {
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
@@ -18,27 +20,31 @@
                 function () {
                     $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
                 });
-        };
+        }
 
-        $scope.oauth = function (provider) {
+        function oauth(provider) {
             Popup.open('/oauth2/request/' + provider, provider)
-                .then(
-                function (oauthDetail) {
-                    if (oauthDetail.loggedIn) {
-                        Auth.restore(true).then(
-                            function (u) {
-                                $scope.setCurrentUser(u);
-                                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                            },
-                            function (msg) {
-                                $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
-                            });
-                    }
-                },
-                function (msg) {
+                .then(popupSuccess, popupFailed);
+
+            function popupSuccess(oauthDetail) {
+                if (oauthDetail.loggedIn) {
+                    Auth.restore(true).then(restoreSuccess, restoreFailed);
+                }
+
+                function restoreSuccess(u) {
+                    $scope.setCurrentUser(u);
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                }
+
+                function restoreFailed(msg) {
                     $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
-                });
-        };
+                }
+            }
+
+            function popupFailed(msg) {
+                $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+            }
+        }
 
     }
 

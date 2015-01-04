@@ -3,14 +3,16 @@
     angular.module('jasifyScheduleControllers').controller('ProfileLoginsController', ProfileLoginsController);
 
     function ProfileLoginsController($scope, $log, $q, UserLogin, Session, Popup, logins) {
-        $scope.logins = logins;
-        $scope.alerts = [];
+        var vm = this;
 
-        $scope.alert = function (t, m) {
-            $scope.alerts.push({type: t, msg: m});
+        vm.logins = logins;
+        vm.alerts = [];
+
+        vm.alert = function (t, m) {
+            vm.alerts.push({type: t, msg: m});
         };
 
-        $scope.icon = function (login) {
+        vm.icon = function (login) {
             if (login && login.provider) {
                 if (login.provider == 'Google') return 'ion-social-google';
                 if (login.provider == 'Facebook') return 'ion-social-facebook';
@@ -18,37 +20,37 @@
             return false;
         };
 
-        $scope.removeLogin = function (login) {
+        vm.removeLogin = function (login) {
             UserLogin.remove(login).then(function (ok) {
-                    $scope.alert('success', 'Login removed!');
-                    $scope.reload();
+                    vm.alert('success', 'Login removed!');
+                    vm.reload();
                 },
                 function (msg) {
-                    $scope.alert('danger', '! ' + msg);
+                    vm.alert('danger', '! ' + msg);
                 }
             );
         };
 
-        $scope.reload = function () {
-            $scope.logins = [];
+        vm.reload = function () {
+            vm.logins = [];
             UserLogin.list(Session.userId).then(function (logins) {
-                $scope.logins = logins;
+                vm.logins = logins;
             });
         };
 
-        $scope.oauth = function (provider) {
+        vm.oauth = function (provider) {
             Popup.open('/oauth2/request/' + provider, provider)
                 .then(
                 function (oauthDetail) {
                     if (oauthDetail.added) {
-                        $scope.alert('success', 'Login added!');
-                        $scope.reload();
+                        vm.alert('success', 'Login added!');
+                        vm.reload();
                     } else if (oauthDetail.exists) {
-                        $scope.alert('warning', 'Login already existed...');
+                        vm.alert('warning', 'Login already existed...');
                     }
                 },
                 function (msg) {
-                    $scope.alert('danger', '! ' + msg);
+                    vm.alert('danger', '! ' + msg);
                 });
         };
     }

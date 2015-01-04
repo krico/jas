@@ -4,6 +4,6 @@
 
     function HomeController() {
         var vm = this;
-
+        vm.home = true;
     }
 })(angular);

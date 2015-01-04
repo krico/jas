@@ -19,26 +19,26 @@ describe('NavbarController', function () {
     }));
 
     it('starts with a collapsed navbar ', function () {
-        expect($scope.navbarCollapsed).toBe(true);
+        expect(vm.navbarCollapsed).toBe(true);
     });
 
     it('can toggle the collapse status of the navbar ', function () {
 
-        expect($scope.navbarCollapsed).toBe(true);
-        $scope.toggleCollapse();
-        expect($scope.navbarCollapsed).toBe(false);
-        $scope.toggleCollapse();
-        expect($scope.navbarCollapsed).toBe(true);
+        expect(vm.navbarCollapsed).toBe(true);
+        vm.toggleCollapse();
+        expect(vm.navbarCollapsed).toBe(false);
+        vm.toggleCollapse();
+        expect(vm.navbarCollapsed).toBe(true);
 
     });
 
     it('can collapse the navbar ', function () {
 
-        expect($scope.navbarCollapsed).toBe(true);
-        $scope.toggleCollapse();
-        expect($scope.navbarCollapsed).toBe(false);
-        $scope.collapse();
-        expect($scope.navbarCollapsed).toBe(true);
+        expect(vm.navbarCollapsed).toBe(true);
+        vm.toggleCollapse();
+        expect(vm.navbarCollapsed).toBe(false);
+        vm.collapse();
+        expect(vm.navbarCollapsed).toBe(true);
 
     });
 
@@ -48,7 +48,7 @@ describe('NavbarController', function () {
         spyOn($scope, '$on');
         vm = $controller('NavbarController', {
             $scope: $scope});
-        expect($scope.$on).toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess, $scope.loginSucceeded);
+        expect($scope.$on).toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess, vm.loginSucceeded);
 
     });
 
@@ -59,14 +59,14 @@ describe('NavbarController', function () {
         vm = $controller('NavbarController', {
             $scope: $scope
         });
-        expect($scope.$on).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess, $scope.logoutSucceeded);
+        expect($scope.$on).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess, vm.logoutSucceeded);
 
     });
 
     it('should redirect /login to /profile on loginSucceeded', function () {
 
         $location.path('/login');
-        $scope.loginSucceeded();
+        vm.loginSucceeded();
         expect($location.path()).toEqual('/profile');
 
     });
@@ -74,7 +74,7 @@ describe('NavbarController', function () {
     it('should redirect /signUp to /profile/welcome on loginSucceeded', function () {
 
         $location.path('/signUp');
-        $scope.loginSucceeded();
+        vm.loginSucceeded();
         expect($location.path()).toEqual('/profile/welcome');
 
     });
@@ -82,10 +82,10 @@ describe('NavbarController', function () {
     it('should watch the $location.path', function () {
         $location.path('/tmp');
         $rootScope.$digest();
-        expect($scope.path).toEqual('/tmp');
+        expect(vm.path).toEqual('/tmp');
         $location.path('/tmp2');
-        expect($scope.path).toEqual('/tmp');
+        expect(vm.path).toEqual('/tmp');
         $rootScope.$digest();
-        expect($scope.path).toEqual('/tmp2');
+        expect(vm.path).toEqual('/tmp2');
     });
 });

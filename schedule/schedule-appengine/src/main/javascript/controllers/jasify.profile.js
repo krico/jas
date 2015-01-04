@@ -3,41 +3,52 @@
     angular.module('jasifyScheduleControllers').controller('ProfileController', ProfileController);
 
     function ProfileController($scope, $routeParams, $log, Session, User) {
-        $scope.user = null;
+        var vm = this;
+        vm.isWelcome = isWelcome;
+        vm.alert = alert;
+        vm.save = save;
+        vm.reset = reset;
+        vm.user = null;
 
-        $scope.alerts = [];
+        vm.alerts = [];
 
-        $scope.isWelcome = function () {
+        vm.reset();
+
+        function isWelcome() {
             if ($routeParams.extra) {
                 return 'welcome' == $routeParams.extra;
             }
             return false;
-        };
+        }
 
-        $scope.alert = function (t, m) {
-            $scope.alerts.push({type: t, msg: m});
-        };
+        function alert(t, m) {
+            vm.alerts.push({type: t, msg: m});
+        }
 
-        $scope.save = function () {
-            $scope.user.$save().then(function () {
-                $scope.alert('success', 'Profile updated!');
-                //TODO: We probably need to check for failures
-                $scope.setCurrentUser($scope.user);
-                if ($scope.profileForm) {
-                    $scope.profileForm.$setPristine();
+        function save() {
+            vm.user.$save().then(saveSuccess, saveFailed);
+            function saveSuccess() {
+                vm.alert('success', 'Profile updated!');
+                $scope.setCurrentUser(vm.user);
+                if (vm.profileForm) {
+                    vm.profileForm.$setPristine();
                 }
 
-            });
-        };
+            }
 
-        $scope.reset = function () {
-            $scope.user = User.get({id: Session.userId}, function () {
-                if ($scope.profileForm) {
-                    $scope.profileForm.$setPristine();
+            function saveFailed(msg) {
+                vm.alert('danger', 'Failed to save...');
+                $log.debug('Failed to save: ' + msg);
+            }
+        }
+
+        function reset() {
+            vm.user = User.get({id: Session.userId}, function () {
+                if (vm.profileForm) {
+                    vm.profileForm.$setPristine();
                 }
             });
-        };
-        $scope.reset();
+        }
     }
 
 })(angular);

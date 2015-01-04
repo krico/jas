@@ -6,7 +6,8 @@ describe('HomeController', function () {
         vm = $controller('HomeController');
     }));
 
-    it('is empty', function () {
+    it('is home', function () {
+        expect(vm.home).toBe(true);
     });
 
 });

@@ -3,102 +3,117 @@
     angular.module('jasifyScheduleControllers').controller('SignUpController', SignUpController);
 
     function SignUpController($scope, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
-        $scope.alerts = [];
+        var vm = this;
 
-        $scope.inProgress = false;
-        $scope.registered = false;
-        $scope.provider = null;
-        $scope.user = {};
+        vm.alerts = [];
 
-        $scope.alert = function (t, m) {
-            $scope.alerts.push({type: t, msg: m});
-        };
+        vm.inProgress = false;
+        vm.registered = false;
+        vm.provider = null;
+        vm.user = {};
+        vm.alert = alert;
+        vm.hasError = hasError;
+        vm.hasSuccess = hasSuccess;
+        vm.createUser = createUser;
+        vm.oauth = oauth;
 
-        $scope.hasError = function (fieldName) {
-            if ($scope.signUpForm[fieldName]) {
-                var f = $scope.signUpForm[fieldName];
+        function alert(t, m) {
+            vm.alerts.push({type: t, msg: m});
+        }
+
+        function hasError(fieldName) {
+            if (vm.signUpForm[fieldName]) {
+                var f = vm.signUpForm[fieldName];
                 return f && f.$dirty && f.$invalid;
             } else {
                 return false;
             }
-        };
+        }
 
-        $scope.hasSuccess = function (fieldName) {
-            if ($scope.signUpForm[fieldName]) {
-                var f = $scope.signUpForm[fieldName];
+        function hasSuccess(fieldName) {
+            if (vm.signUpForm[fieldName]) {
+                var f = vm.signUpForm[fieldName];
                 return f && f.$dirty && f.$valid;
             } else {
                 return false;
             }
-        };
+        }
 
-        $scope.createUser = function () {
-            $scope.inProgress = true;
+        function createUser() {
+            vm.inProgress = true;
 
-            User.save($scope.user,
-                //User.save success
-                function (value, responseHeaders) {
-                    $scope.registered = true;
-                    $scope.inProgress = false;
+            User.save(vm.user, saveSuccess, saveError);
 
-                    $scope.alert('success', 'Registration succeeded! You should be redirected shortly...');
+            function saveSuccess(value, responseHeaders) {
+                vm.registered = true;
+                vm.inProgress = false;
 
-                    Auth.restore(true).then(
-                        function (u) {
-                            $scope.setCurrentUser(u);
-                            $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                        },
-                        function (msg) {
-                            $scope.alert('danger', '! Something went really wrong...');
-                        });
+                vm.alert('success', 'Registration succeeded! You should be redirected shortly...');
 
-                },
-                //User.save error
-                function (httpResponse) {
-                    $scope.inProgress = false;
+                Auth.restore(true).then(restoreSuccess, restoreError);
 
-                    $scope.alert('danger', ":-( registration failed, since this was really unexpected, please change some fields and try again.");
+                function restoreSuccess(u) {
+                    $scope.setCurrentUser(u);
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                }
 
-                });
-        };
+                function restoreError(msg) {
+                    vm.alert('danger', '! Something went really wrong...');
+                }
 
-        $scope.oauth = function (provider) {
-            $scope.inProgress = true;
-            $scope.provider = provider;
+            }
+
+            //User.save error
+            function saveError(httpResponse) {
+                vm.inProgress = false;
+
+                vm.alert('danger', ":-( registration failed, since this was really unexpected, please change some fields and try again.");
+
+            }
+        }
+
+        function oauth(provider) {
+            vm.inProgress = true;
+            vm.provider = provider;
             Popup.open('/oauth2/request/' + provider, provider)
-                .then(
-                function (oauthDetail) {
-                    $scope.inProgress = false;
-                    if (oauthDetail.loggedIn) {
-                        $scope.alert('info', 'Authenticated! This user is already registered, will log you in');
+                .then(popupSuccess, popupError);
 
-                        Auth.restore(true).then(
-                            function (u) {
-                                $scope.setCurrentUser(u);
-                                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                            },
-                            function (msg) {
-                                $scope.alert('danger', '! Something went really wrong...');
-                            });
-                        return;
+            function popupSuccess(oauthDetail) {
+                vm.inProgress = false;
+                if (oauthDetail.loggedIn) {
+                    vm.alert('info', 'Authenticated! This user is already registered, will log you in');
+
+                    Auth.restore(true).then(restoreSuccess, restoreError);
+
+                    function restoreSuccess(u) {
+                        $scope.setCurrentUser(u);
+                        $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                     }
 
-                    if (oauthDetail) {
-                        $scope.user.realName = oauthDetail.realName;
-                        $scope.user.email = oauthDetail.email;
+                    function restoreError(msg) {
+                        vm.alert('danger', '! Something went really wrong...');
                     }
-                    $scope.alert('info', 'Authenticated! You just need to finish registering your user by selecting a Display Name');
-                    try {
-                        $scope.signUpForm.username.focus();
-                    } catch (e) {
-                    }
-                },
-                function (msg) {
-                    $scope.inProgress = false;
-                    $scope.provider = null;
-                    $scope.alert('danger', '! ' + msg);
-                });
-        };
+
+                    return;
+                }
+
+                if (oauthDetail) {
+                    vm.user.realName = oauthDetail.realName;
+                    vm.user.email = oauthDetail.email;
+                }
+                vm.alert('info', 'Authenticated! You just need to finish registering your user by selecting a Display Name');
+                try {
+                    vm.signUpForm.username.focus();
+                } catch (e) {
+                }
+            }
+
+            function popupError(msg) {
+                vm.inProgress = false;
+                vm.provider = null;
+                vm.alert('danger', '! ' + msg);
+            }
+        }
 
     }
 

@@ -21,10 +21,7 @@ describe('ProfileController', function () {
             .respond(200, {id: 555, name: 'test'});
 
         vm = $controller('ProfileController', {
-            $scope: $scope,
-            $routeParams: $routeParams,
-            Session: Session,
-            User: User
+            $scope: $scope
         });
     };
 
@@ -39,58 +36,58 @@ describe('ProfileController', function () {
         $routeParams.extra = 'welcome';
         construct();
         $httpBackend.flush(); //load the user
-        expect($scope.isWelcome()).toEqual(true);
+        expect(vm.isWelcome()).toEqual(true);
 
         $routeParams.extra = 'foo';
         construct();
         $httpBackend.flush(); //load the user
-        expect($scope.isWelcome()).toEqual(false);
+        expect(vm.isWelcome()).toEqual(false);
     });
 
     it('sets extra to false when there are not route parameters', function () {
         $httpBackend.flush(); //load the user
-        expect($scope.isWelcome()).toEqual(false);
+        expect(vm.isWelcome()).toEqual(false);
     });
 
     it('can handle alerts', function () {
         $httpBackend.flush(); //load the user
 
-        expect($scope.alerts.length).toEqual(0);
-        $scope.alert('success', 'alert text');
+        expect(vm.alerts.length).toEqual(0);
+        vm.alert('success', 'alert text');
 
-        expect($scope.alerts.length).toEqual(1);
-        expect($scope.alerts[0].type).toEqual('success');
-        expect($scope.alerts[0].msg).toEqual('alert text');
+        expect(vm.alerts.length).toEqual(1);
+        expect(vm.alerts[0].type).toEqual('success');
+        expect(vm.alerts[0].msg).toEqual('alert text');
 
     });
 
     it('loads user when constructed', function () {
-        expect($scope.user.$resolved).toEqual(false);
+        expect(vm.user.$resolved).toEqual(false);
         $httpBackend.flush(); //load the user
-        expect($scope.user.$resolved).toEqual(true);
-        expect($scope.user).toBeDefined();
-        expect($scope.user.name).toEqual('test');
+        expect(vm.user.$resolved).toEqual(true);
+        expect(vm.user).toBeDefined();
+        expect(vm.user.name).toEqual('test');
     });
 
     it('saves the user and updates currentUser and calls setPristine', function () {
         $httpBackend.flush(); //load the user
 
-        $scope.user.about = 'about him';
+        vm.user.about = 'about him';
 
         $httpBackend
             .expectPOST('/user/555')
-            .respond(200, $scope.user);
+            .respond(200, vm.user);
 
         var called = null;
 
-        $scope.profileForm = {
+        vm.profileForm = {
             $setPristine: function () {
                 called = true;
             }
         };
 
 
-        $scope.save();
+        vm.save();
 
         $httpBackend.flush();
 
@@ -101,17 +98,17 @@ describe('ProfileController', function () {
     it('resets to original user ', function () {
         $httpBackend.flush(); //load the user
 
-        $scope.user.about = 'about him';
+        vm.user.about = 'about him';
 
         $httpBackend
             .expectGET('/user/555')
             .respond(200, {id: 555, name: 'test'});
 
-        $scope.reset();
+        vm.reset();
 
         $httpBackend.flush();
 
-        expect($scope.user.about).not.toBeDefined();
+        expect(vm.user.about).not.toBeDefined();
     });
 
     it('calls profileForm.$setPristine on reset ', function () {
@@ -122,13 +119,13 @@ describe('ProfileController', function () {
             .respond(200, {id: 555, name: 'test'});
 
         var called = null;
-        $scope.profileForm = {
+        vm.profileForm = {
             $setPristine: function () {
                 called = true;
             }
         };
 
-        $scope.reset();
+        vm.reset();
 
         $httpBackend.flush();
 
