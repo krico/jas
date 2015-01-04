@@ -15,6 +15,7 @@ import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.JSON;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,21 +111,29 @@ public final class SchemaMigration {
         } catch (UsernameExistsException e) {
             // Don't really care
         }
-        File jasifyLocalConfig = new File(System.getProperty("user.home"), "jasify.json");
-        if (!jasifyLocalConfig.exists()) {
-            log.error("You MUST create jasify.json (check DEVELOPER.md)!");
-            throw new IllegalStateException("You MUST create jasify.json (check DEVELOPER.md)!");
-        }
-        try (FileReader reader = new FileReader(jasifyLocalConfig)) {
-            Map map = JSON.fromJson(reader, Map.class);
-            Map applicationConfig = (Map) map.get("ApplicationConfig");
-            for (Object key : applicationConfig.keySet()) {
-                Object value = applicationConfig.get(key);
-                log.info("Setting Application property '{}' = '{}'", key, value);
-                ApplicationData.instance().setProperty(key.toString(), value);
+        if (EnvironmentUtil.isContinuousIntegrationEnvironment()) {
+            log.warn("CONTINUOUS INTEGRATION: Creating test values for OAuth2ProviderConfig");
+            for (OAuth2ProviderConfig.ProviderEnum provider : OAuth2ProviderConfig.ProviderEnum.values()) {
+                ApplicationData.instance().setProperty(provider.clientIdKey(), RandomStringUtils.randomAscii(16));
+                ApplicationData.instance().setProperty(provider.clientSecretKey(), RandomStringUtils.randomAscii(32));
             }
-        } catch (IOException e) {
-            throw Throwables.propagate(e);
+        } else {
+            File jasifyLocalConfig = new File(System.getProperty("user.home"), "jasify.json");
+            if (!jasifyLocalConfig.exists()) {
+                log.error("You MUST create jasify.json (check DEVELOPER.md)!");
+                throw new IllegalStateException("You MUST create jasify.json (check DEVELOPER.md)!");
+            }
+            try (FileReader reader = new FileReader(jasifyLocalConfig)) {
+                Map map = JSON.fromJson(reader, Map.class);
+                Map applicationConfig = (Map) map.get("ApplicationConfig");
+                for (Object key : applicationConfig.keySet()) {
+                    Object value = applicationConfig.get(key);
+                    log.info("Setting Application property '{}' = '{}'", key, value);
+                    ApplicationData.instance().setProperty(key.toString(), value);
+                }
+            } catch (IOException e) {
+                throw Throwables.propagate(e);
+            }
         }
     }
 

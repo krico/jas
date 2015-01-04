@@ -11,6 +11,8 @@ import java.util.Objects;
  * @since 26/11/14.
  */
 public final class EnvironmentUtil {
+    public static final String CI_ENV_KEY = "ENV_IS_CI";
+
     private EnvironmentUtil() {
     }
 
@@ -43,4 +45,9 @@ public final class EnvironmentUtil {
     public static boolean isProduction() {
         return SystemProperty.environment.value() == SystemProperty.Environment.Value.Production;
     }
+
+    public static boolean isContinuousIntegrationEnvironment() {
+        return Boolean.valueOf(System.getenv(CI_ENV_KEY));
+    }
+
 }

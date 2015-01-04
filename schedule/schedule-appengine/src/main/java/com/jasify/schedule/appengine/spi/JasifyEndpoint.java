@@ -164,6 +164,7 @@ public class JasifyEndpoint {
             response.setUserId(userSession.getUserId());
             response.setSessionId(userSession.getSessionId());
             response.setName(user.getName());
+            response.setAdmin(user.isAdmin());
             return response;
         } catch (LoginFailedException e) {
             log.info("[{}] user={} login failed!", httpServletRequest.getRemoteAddr(), request.getUsername(), e);

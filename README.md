@@ -1,4 +1,4 @@
-# jasify
+# jasify [![Build Status](https://travis-ci.org/krico/jas.svg?branch=master)](https://travis-ci.org/krico/jas)
 
 Janes Asmussen Szarmach
 
@@ -25,6 +25,10 @@ Development should be focused on [Jasify Schedule App Engine](schedule/schedule-
  **groupId** `com.jasify.category` **artifactId** `category-module` and the package should be `com.jasify.category.module`.
  - **Example**: `schedule/schedule-appengine/pom.xml` **groupId**: `com.jasify.schedule`, **artifactId**: schedule-appengine
  and **package**: com.jasify.schedule.appengine
+
+## Developers
+
+Information on how to get started as a developer id described on [DEVELOPER.md](schedule/schedule-appengine/DEVELOPER.md)
 
 ## Change log
 

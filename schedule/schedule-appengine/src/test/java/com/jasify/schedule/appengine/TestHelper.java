@@ -27,6 +27,7 @@ import static junit.framework.TestCase.*;
  * @since 09/11/14.
  */
 public final class TestHelper {
+
     private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(
             new LocalMailServiceTestConfig().setLogMailLevel(Level.FINE)
     );

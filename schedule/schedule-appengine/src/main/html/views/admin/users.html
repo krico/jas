@@ -1,0 +1,73 @@
+<div class="row">
+    <div class="col-sm-12">
+        <form name="usersForm" role="form" class="form-inline" novalidate>
+            <div class="form-group"><span class="form-control-static">search: </span></div>
+            <div class="form-group">
+                <label class="sr-only" for="searchBy">search by:</label>
+                <select id="searchBy" class="form-control input-sm" name="searchBy" ng-model="vm.searchBy"
+                        ng-change="vm.typeChanged()">
+                    <option>name</option>
+                    <option>email</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="query">query</label>
+                <input id="query" type="text" class="form-control input-sm" placeholder="query"
+                       ng-model="vm.query" name="query" ng-model-options="{debounce:500}" ng-change="vm.queryChanged()">
+            </div>
+            <div class="checkbox">
+                <label class="input-sm">
+                    <input name="regex" ng-model="vm.regex" ng-change="vm.typeChanged()" type="checkbox"> regex
+                </label>
+            </div>
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <input id="perPage" name="perPage" pattern="^[1-9][0-9]*$" type="text"
+                           class="form-control text-right" size="2"
+                           ng-model="vm.perPage" ng-model-options="{debounce:500, getterSetter: true}">
+
+                    <div class="input-group-addon"> / page</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <pagination class="pagination-sm" max-size="vm.maxSize" ng-model="vm.page" ng-change="vm.pageChanged()"
+                            previous-text="&lt;" next-text="&gt;" first-text="&laquo;" last-text="&raquo;"
+                            total-items="vm.total" num-pages="vm.numPages" items-per-page="vm._perPage"
+                            boundary-links="true" rotate="true"></pagination>
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-12">
+        <span ng-hide="vm.total != -1" us-spinner=""></span>
+
+        <div class="table-responsive">
+            <table class="table table-hover" ng-hide="vm.total == -1">
+                <thead>
+                <tr>
+                    <th><a href="#/admin/user"><span class="glyphicon glyphicon-plus"></span></a></th>
+                    <th>name</th>
+                    <th>email</th>
+                    <th>admin</th>
+                    <th>created</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="user in vm.users" ng-click="vm.viewUser(user.id)">
+                    <td>
+                        <button type="button" class="btn btn-link btn-xs" ng-click="vm.viewUser(user.id)"><span
+                                class="glyphicon glyphicon-edit"></span> {{user.id}}
+                        </button>
+                    </td>
+                    <td>{{user.name}}</td>
+                    <td>{{user.email}}</td>
+                    <td><span ng-if="user.admin" class="glyphicon glyphicon-check"></span></td>
+                    <td>{{user.created}}</td>
+                </tr>
+                <tr ng-if="vm.total == 0">
+                    <td colspan="4">No results found...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+<form role="form" name="vm.loginForm" novalidate ng-submit="vm.login(vm.credentials)">
+    <div class="col-md-offset-4 col-md-3">
+        <div>
+            <p>
+                <span class="h4">login</span>
+            </p>
+        </div>
+
+        <div>
+            <div class="form-group">
+                <label class="sr-only" for="name">Name (your login)</label>
+                <input id="name" name="name" ng-model="vm.credentials.name" type="text" class="form-control input-sm"
+                       placeholder="Name" required autofocus>
+            </div>
+            <div class="form-group has-feedback">
+                <label class="sr-only" for="password">Password</label>
+                <input id="password" ng-model="vm.credentials.password" name="password" type="password"
+                       class="form-control input-sm" placeholder="Password" required>
+            </div>
+        </div>
+        <div>
+            <p>
+                <button type="submit" class="btn btn-primary btn-block" ng-disabled="vm.loginForm.$clean
+             || vm.loginForm.$invalid">
+                    login
+                </button>
+            </p>
+        </div>
+    </div>
+
+</form>
+<div class="col-md-offset-4 col-md-3">
+    <div>
+        <p>
+            <button class="btn btn-google btn-block" ng-click="vm.oauth('Google')" ng-if="!vm.provider">
+                <i class="icon ion-social-google"></i>
+                login with Google
+            </button>
+        </p>
+        <p>
+            <button class="btn btn-facebook btn-block" ng-click="vm.oauth('Facebook')" ng-if="!vm.provider">
+                <i class="icon ion-social-facebook"></i>
+                login with Facebook
+            </button>
+        </p>
+    </div>
+</div>

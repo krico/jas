@@ -2,6 +2,59 @@
 
 Notes for developers working on schedule-appengine...
 
+## Getting started
+
+ * Install [Node.js](http://nodejs.org/)
+ * Install [npm](https://npmjs.com): `npm install npm -g`
+ * Install [Gulp](http://gulpjs.com/): `npm install -g gulp`
+ * Install [Karma](http://karma-runner.github.io/):
+ ```
+ npm install -g karma
+ npm install -g karma-cli
+ ```
+
+### Running gulp
+
+On the command line you should be able to run
+```
+cd jas/schedule/schedule-appengine
+gulp
+```
+
+### Running karma (javascript tests)
+
+Also on the command line, **with gulp running***:
+
+```
+cd jas/schedule/schedule-appengine
+karma start src/test/javascript/karma.conf.js
+```
+
+### Running from IntelliJ (or eclipse)
+
+You can run most of the tasks from intelliJ
+
+#### Running Gulp on IntelliJ
+
+* Run -> Edit Configurations
+* Click on the "+" sign
+* Select Gulp.js
+* Name: gulp (jasify), Tasks: empty, Gulp Package: <JAS_ROOT>/schedule/schedule-appengine/node_modules/gulp
+
+#### Running Karma on IntelliJ
+
+* Plugins
+* Browser repository
+* Search for karma
+* Install and restart
+
+Now add a new run configuration
+* Run -> Edit Configurations
+* Click on the "+" sign
+* Select Karma
+* Name: karma (jasify), Configuration file: <JAS_ROOT>/schedule/schedule-appengine/src/test/javascript/karma.conf.js, Karma package: /Users/krico/Projects/jas/schedule/schedule-appengine/node_modules/karma
+
+
 ## Create a local config
 
 To run your dev env you need to create a file called jasify.json inside your user home.
@@ -19,7 +72,10 @@ are not using oauth with google, you can put any value there:
 
 
 ```
+## Style
 
+ * You [MUST read this](https://github.com/johnpapa/angularjs-styleguide)
+ 
 ## Model (Slim3)
 
  * If you get problems missing classes named *Meta (e.g. UserMeta) you need to run `mvn apt:process`

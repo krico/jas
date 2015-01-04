@@ -1,0 +1,18 @@
+{
+  "js": [
+    "src/main/javascript/**/*.module.js",
+    "src/main/javascript/**/jasify.main.js",
+    "src/main/javascript/**/*.js"
+  ],
+  "test": {
+    "js": [
+      "src/test/javascript/**/*.js",
+      "!src/test/javascript/**/karma.conf*.js"
+    ],
+    "karmaConfig": "src/test/javascript/karma.conf.ci.js"
+  },
+  "css": ["src/main/stylesheet/**/*.css"],
+  "html": ["src/main/html/**/*.html"],
+  "build": "target/schedule-appengine-1.0-SNAPSHOT/build",
+  "symBuild": "src/main/html/build"
+}

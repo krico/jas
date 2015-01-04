@@ -6,3 +6,8 @@ pom.xml.versionsBackup
 pom.xml.next
 release.properties
 *.iml
+node
+node_modules
+log.txt
+npm-debug.log
+src/main/html/build

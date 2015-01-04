@@ -10,6 +10,7 @@ public class JasLoginResponse implements JasEndpointEntity {
     private String sessionId; /* Session id */
     private long userId;
     private String name;
+    private boolean admin;
 
     public String getSessionId() {
         return sessionId;
@@ -33,5 +34,13 @@ public class JasLoginResponse implements JasEndpointEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

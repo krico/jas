@@ -54,4 +54,10 @@ public class EnvironmentUtilTest {
     public void testIsDevelopment() throws Exception {
         assertTrue(EnvironmentUtil.isDevelopment());
     }
+
+    @Test
+    public void testIsContinuousIntegrationEnvironment() {
+        boolean expected = Boolean.valueOf(System.getenv(EnvironmentUtil.CI_ENV_KEY));
+        assertEquals(expected, EnvironmentUtil.isContinuousIntegrationEnvironment());
+    }
 }
