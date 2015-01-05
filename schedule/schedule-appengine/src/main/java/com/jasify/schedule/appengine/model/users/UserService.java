@@ -35,6 +35,8 @@ public interface UserService {
 
     User get(long id);
 
+    User get(Key id);
+
 
     User findByLogin(String provider, String userId);
 

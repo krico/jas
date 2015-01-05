@@ -33,6 +33,8 @@
 
 
         function errorHandler(resp) {
+            $log.debug("jasify() error: (" + resp.status + ") '" + resp.statusText + "'");
+
             return $q.reject(resp);
         }
 
@@ -72,17 +74,18 @@
             if (Endpoint.promise === null) {
                 Endpoint.load(); //create promise
             }
-            $gapi.client.load('jasify', 'v1', null, '/_ah/api').then(
-                Endpoint.jasifyLoaded,
-                function (r) {
-                    $log.warn('Failed to load api: ' + r);
-                    Endpoint.loaded = true;
-                    Endpoint.failed = true;
-                    Endpoint.promise = null;
-                    Endpoint.deferred.reject('failed');
-                    Endpoint.deferred = null;
 
-                });
+            $gapi.client.load('jasify', 'v1', null, '/_ah/api')
+                .then(Endpoint.jasifyLoaded, loadErrorHandler);
+
+            function loadErrorHandler(r) {
+                $log.warn('Failed to load api: ' + r);
+                Endpoint.loaded = true;
+                Endpoint.failed = true;
+                Endpoint.promise = null;
+                Endpoint.deferred.reject('failed');
+                Endpoint.deferred = null;
+            }
         }
 
         function jasifyLoaded() {

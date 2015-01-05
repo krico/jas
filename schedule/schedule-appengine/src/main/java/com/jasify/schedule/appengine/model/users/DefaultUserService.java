@@ -218,7 +218,12 @@ class DefaultUserService implements UserService {
 
     @Override
     public User get(long id) {
-        return Datastore.getOrNull(User.class, Datastore.createKey(User.class, id));
+        return get(Datastore.createKey(User.class, id));
+    }
+
+    @Override
+    public User get(Key id) {
+        return Datastore.getOrNull(User.class, id);
     }
 
     @Override

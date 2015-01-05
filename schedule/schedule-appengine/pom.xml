@@ -78,6 +78,11 @@
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.2</version>
+        </dependency>
         <!-- END: frameworks we can't live without :-) -->
 
         <!-- BEGIN: google appengine frameworks, originally for oauth, but probably much more -->

@@ -1,9 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
-import com.google.api.server.spi.response.BadRequestException;
-import com.google.api.server.spi.response.ConflictException;
-import com.google.api.server.spi.response.ForbiddenException;
-import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
@@ -26,7 +23,8 @@ import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
 import org.easymock.TestSubject;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slim3.datastore.Datastore;
@@ -51,61 +49,26 @@ public class JasifyEndpointTest {
     @TestSubject
     private JasifyEndpoint endpoint = new JasifyEndpoint();
 
-    private static JasifyEndpointUser newCaller(long id, boolean admin) {
+    static JasifyEndpointUser newCaller(long id, boolean admin) {
         return new JasifyEndpointUser("a@b", id, admin);
     }
 
-    @Before
-    public void datastore() {
+    @BeforeClass
+    public static void datastore() {
         TestHelper.initializeDatastore();
+    }
+
+    @AfterClass
+    public static void cleanupDatstore() {
+        TestHelper.cleanupDatastore();
     }
 
     @After
     public void cleanup() {
         UserContext.clearContext();
-        TestHelper.cleanupDatastore();
         EasyMock.verify(userService);
     }
 
-    @Test(expected = UnauthorizedException.class)
-    public void testMustBeLoggedInThrowsNonAuthorizedOnNull() throws UnauthorizedException {
-        replay(userService);
-        JasifyEndpoint.mustBeLoggedIn(null);
-    }
-
-    @Test
-    public void testMustBeLoggedIn() throws UnauthorizedException {
-        replay(userService);
-        JasifyEndpointUser user = newCaller(1, false);
-        assertEquals(user, JasifyEndpoint.mustBeLoggedIn(user));
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void testMustBeSameUserOrAdminThrowsNonAuthorizedOnNull() throws UnauthorizedException, ForbiddenException {
-        replay(userService);
-        JasifyEndpoint.mustBeSameUserOrAdmin(null, 1);
-    }
-
-    @Test(expected = ForbiddenException.class)
-    public void testMustBeSameUserOrAdminThrowsForbiddenWhenNotSameUser() throws UnauthorizedException, ForbiddenException {
-        replay(userService);
-        JasifyEndpointUser user = newCaller(1, false);
-        JasifyEndpoint.mustBeSameUserOrAdmin(user, 2);
-    }
-
-    @Test
-    public void testMustBeSameUserSameUser() throws UnauthorizedException, ForbiddenException {
-        replay(userService);
-        JasifyEndpointUser user = newCaller(1, false);
-        assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 1));
-    }
-
-    @Test
-    public void testMustBeSameUserOrAdminWithAdmin() throws UnauthorizedException, ForbiddenException {
-        replay(userService);
-        JasifyEndpointUser user = newCaller(1, true);
-        assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 2));
-    }
 
     @Test
     public void testApiInfoNoUser() throws Exception {
@@ -364,6 +327,81 @@ public class JasifyEndpointTest {
         UserContext.setContext(session, null, null);
         endpoint.logout(newCaller(1, false));
         verify(session);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testGetUsersMustBeAdmin() throws UnauthorizedException, ForbiddenException {
+        replay(userService);
+        endpoint.getUsers(newCaller(1, false));
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        replay(userService);
+        endpoint.getUser(newCaller(1, false), null);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testGetUserNotSameUSer() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        replay(userService);
+        endpoint.getUser(newCaller(1, false), KeyFactory.createKey("K", 5));
+    }
+
+    @Test
+    public void testGetUser() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        long expectedId = 1;
+        Key key = Datastore.createKey(User.class, expectedId);
+        User expectedUser = new User();
+        expect(userService.get(key)).andReturn(expectedUser);
+        replay(userService);
+        User user = endpoint.getUser(newCaller(expectedId, false), key);
+        assertNotNull(user);
+        assertTrue(expectedUser == user);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetUserNotFound() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        long expectedId = 1;
+        Key key = Datastore.createKey(User.class, expectedId);
+        expect(userService.get(key)).andReturn(null);
+        replay(userService);
+        endpoint.getUser(newCaller(expectedId, false), key);
+    }
+
+    @Test
+    public void testGetUserByAdmin() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        long expectedId = 1;
+        Key key = Datastore.createKey(User.class, expectedId);
+        User expectedUser = new User();
+        expect(userService.get(key)).andReturn(expectedUser);
+        replay(userService);
+        User user = endpoint.getUser(newCaller(expectedId + 100, true), key);
+        assertNotNull(user);
+        assertTrue(expectedUser == user);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testUpdateUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        replay(userService);
+        endpoint.updateUser(newCaller(1, false), null, new User());
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testUpdateUserNotSameUser() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        replay(userService);
+        endpoint.updateUser(newCaller(1, false), KeyFactory.createKey("u", 2), new User());
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testRemoveUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        replay(userService);
+        endpoint.removeUser(newCaller(1, true), null);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testRemoveUserMustBeAdmin() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        replay(userService);
+        endpoint.removeUser(newCaller(1, false), Datastore.createKey(User.class, 1));
     }
 
 }

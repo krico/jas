@@ -16,6 +16,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -44,9 +45,9 @@ public final class TestHelper {
 
     public static void assertUtilityClassWellDefined(Class<?> clazz) throws Exception {
         String name = clazz.getName();
-        assertTrue(name + " must be final",
-                Modifier.isFinal(clazz.getModifiers()));
-        assertEquals(name + " must have a single constructor", 1, clazz.getDeclaredConstructors().length);
+        assertTrue(name + " must be final", Modifier.isFinal(clazz.getModifiers()));
+
+        assertEquals(name + " must have a single constructor " + Arrays.toString(clazz.getDeclaredConstructors()), 1, clazz.getDeclaredConstructors().length);
         final Constructor<?> constructor = clazz.getDeclaredConstructor();
         if (constructor.isAccessible() || !Modifier.isPrivate(constructor.getModifiers())) {
             fail(name + " must have private constructor");

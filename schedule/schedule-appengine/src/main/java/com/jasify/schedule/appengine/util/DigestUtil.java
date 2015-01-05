@@ -28,8 +28,9 @@ public final class DigestUtil {
             return ByteBuffer.allocate(2048).order(ORDER);
         }
     };
+    public static final int DEFAULT_ITERATIONS = 16192;
     /* The bigger this is, the longer it takes for it to be hacked (and checked) */
-    private static int iterations = 16192;
+    private static int iterations = DEFAULT_ITERATIONS;
 
     private DigestUtil() {
     }

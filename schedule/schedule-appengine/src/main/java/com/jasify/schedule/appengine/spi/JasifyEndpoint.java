@@ -20,7 +20,9 @@ import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
 import com.jasify.schedule.appengine.spi.dm.JasLoginRequest;
 import com.jasify.schedule.appengine.spi.dm.JasLoginResponse;
+import com.jasify.schedule.appengine.spi.transform.JasKeyTransformer;
 import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
+import com.jasify.schedule.appengine.spi.transform.JasUserTransformer;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.UsernameValidator;
@@ -42,7 +44,7 @@ import java.util.List;
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasUserLoginTransformer.class},
+        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
@@ -58,12 +60,30 @@ public class JasifyEndpoint {
         throw new UnauthorizedException("Only authenticated users can call this method");
     }
 
+    static JasifyEndpointUser mustBeAdmin(User caller) throws ForbiddenException, UnauthorizedException {
+        JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
+        if (jasifyEndpointUser.isAdmin()) return jasifyEndpointUser;
+        throw new ForbiddenException("Must be admin");
+    }
+
+    static JasifyEndpointUser mustBeSameUserOrAdmin(User caller, Key userId) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        checkFound(userId);
+        return mustBeSameUserOrAdmin(caller, userId.getId());
+    }
+
     static JasifyEndpointUser mustBeSameUserOrAdmin(User caller, long userId) throws UnauthorizedException, ForbiddenException {
         JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
-        if (jasifyEndpointUser.isAdmin() || jasifyEndpointUser.getUserId() == userId) {
-            return jasifyEndpointUser;
-        }
-        throw new ForbiddenException("Must be admin or same user");
+        if (jasifyEndpointUser.getUserId() != userId) return mustBeAdmin(caller);
+        return jasifyEndpointUser;
+    }
+
+    static <T> T checkFound(T e) throws NotFoundException {
+        return checkFound(e, "Not found");
+    }
+
+    static <T> T checkFound(T e, String message) throws NotFoundException {
+        if (e == null) throw new NotFoundException(message);
+        return e;
     }
 
     Validator<String> getUsernameValidator() {
@@ -89,29 +109,6 @@ public class JasifyEndpoint {
             info.setAdmin(((JasifyEndpointUser) caller).isAdmin());
         }
         return info;
-    }
-
-    @ApiMethod(name = "userLogins.list", path = "user-logins/{userId}", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<UserLogin> listLogins(User caller, @Named("userId") long userId) throws UnauthorizedException, ForbiddenException {
-        mustBeSameUserOrAdmin(caller, userId);
-        return getUserService().getUserLogins(userId);
-    }
-
-    @ApiMethod(name = "userLogins.remove", path = "user-logins/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException, EntityNotFoundException {
-        caller = mustBeLoggedIn(caller);
-
-        Key loginKey = KeyFactory.stringToKey(Preconditions.checkNotNull(loginId));
-        UserLogin login = getUserService().getLogin(loginKey);
-        if (login == null) {
-            //nothing to do
-            return;
-        }
-        Key userKey = Preconditions.checkNotNull(login.getUserRef().getKey());
-        caller = mustBeSameUserOrAdmin(caller, userKey.getId());
-
-        getUserService().removeLogin(loginKey);
-        log.info("Removed user: {}, login: {}", caller, login);
     }
 
     @ApiMethod(name = "username.check", path = "username-check/{username}", httpMethod = ApiMethod.HttpMethod.GET)
@@ -179,6 +176,74 @@ public class JasifyEndpoint {
             userSession.invalidate();
         }
         log.info("Logged out {}", caller);
+    }
+
+
+
+    /*
+    TODO: user.$save, User.get User.save, Users.query,
+     */
+
+    /*
+     * A reminder on REST
+     * GET /users       (java:getUsers, js: users.query)
+     * GET /users/{id}  (java:getUser, js: users.get) 404 if not found
+     * PUT /users/{id}  (java:updateUser, js: users.update) 404 if not found
+     * POST /users      (java:addUser, js: users.add)
+     * DELETE /users/{id} (java: removeUser, js: users.remove) 404 if not found
+     */
+
+    @ApiMethod(name = "userLogins.list", path = "user-logins/{userId}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<UserLogin> listLogins(User caller, @Named("userId") long userId) throws UnauthorizedException, ForbiddenException {
+        mustBeSameUserOrAdmin(caller, userId);
+        return getUserService().getUserLogins(userId);
+    }
+
+    @ApiMethod(name = "userLogins.remove", path = "user-logins/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException, EntityNotFoundException {
+        caller = mustBeLoggedIn(caller);
+
+        Key loginKey = KeyFactory.stringToKey(Preconditions.checkNotNull(loginId));
+        UserLogin login = getUserService().getLogin(loginKey);
+        if (login == null) {
+            //nothing to do
+            return;
+        }
+        Key userKey = Preconditions.checkNotNull(login.getUserRef().getKey());
+        caller = mustBeSameUserOrAdmin(caller, userKey.getId());
+
+        getUserService().removeLogin(loginKey);
+        log.info("Removed user: {}, login: {}", caller, login);
+    }
+
+
+    @ApiMethod(name = "users.query", path = "users", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<com.jasify.schedule.appengine.model.users.User> getUsers(User caller) throws UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        return null;
+    }
+
+    @ApiMethod(name = "users.get", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public com.jasify.schedule.appengine.model.users.User getUser(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeSameUserOrAdmin(caller, id);
+        return checkFound(getUserService().get(id));
+    }
+
+    @ApiMethod(name = "users.update", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public com.jasify.schedule.appengine.model.users.User updateUser(User caller, @Named("id") Key id, com.jasify.schedule.appengine.model.users.User user) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeSameUserOrAdmin(caller, id);
+        return null;
+    }
+
+    @ApiMethod(name = "users.remove", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeUser(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        checkFound(id);
+    }
+
+    @ApiMethod(name = "users.add", path = "users", httpMethod = ApiMethod.HttpMethod.POST)
+    public com.jasify.schedule.appengine.model.users.User addUser(User caller, com.jasify.schedule.appengine.model.users.User user) {
+        return null;
     }
 
 }
