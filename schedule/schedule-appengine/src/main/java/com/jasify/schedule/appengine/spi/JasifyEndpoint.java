@@ -5,21 +5,19 @@ import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
-import com.jasify.schedule.appengine.model.users.LoginFailedException;
-import com.jasify.schedule.appengine.model.users.UserLogin;
-import com.jasify.schedule.appengine.model.users.UserService;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
-import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginResponse;
+import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.JasKeyTransformer;
 import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
 import com.jasify.schedule.appengine.spi.transform.JasUserTransformer;
@@ -32,7 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author krico
@@ -218,9 +218,32 @@ public class JasifyEndpoint {
 
 
     @ApiMethod(name = "users.query", path = "users", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<com.jasify.schedule.appengine.model.users.User> getUsers(User caller) throws UnauthorizedException, ForbiddenException {
+    public JasUserList getUsers(User caller,
+                                @Named("offset") Integer offset,
+                                @Named("limit") Integer limit,
+                                @Named("query") String query,
+                                @Named("field") String field,
+                                @Named("orderBy") String orderBy,
+                                @Named("order") Query.SortDirection order) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
-        return null;
+        JasUserList users = new JasUserList();
+
+        if (offset == null) offset = 0;
+        if (limit == null) limit = Constants.DEFAULT_LIMIT;
+        if (order == null) order = Constants.DEFAULT_ORDER;
+
+        UserService svc = getUserService();
+
+        users.setTotal(svc.getTotalUsers());
+
+        if ("email".equals(field)) {
+            users.addAll(svc.searchByEmail(query == null ? null : Pattern.compile(query), order, offset, limit));
+        } else if ("name".equals(field)) {
+            users.addAll(svc.searchByName(query == null ? null : Pattern.compile(query), order, offset, limit));
+        } else {
+            users.addAll(svc.list(order, offset, limit));
+        }
+        return users;
     }
 
     @ApiMethod(name = "users.get", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.GET)
@@ -230,20 +253,43 @@ public class JasifyEndpoint {
     }
 
     @ApiMethod(name = "users.update", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public com.jasify.schedule.appengine.model.users.User updateUser(User caller, @Named("id") Key id, com.jasify.schedule.appengine.model.users.User user) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public com.jasify.schedule.appengine.model.users.User updateUser(User caller, @Named("id") Key id, com.jasify.schedule.appengine.model.users.User user) throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
         mustBeSameUserOrAdmin(caller, id);
-        return null;
+        user.setId(id);
+        try {
+            return getUserService().save(user);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        }
     }
 
+    /* TODO: not supported
     @ApiMethod(name = "users.remove", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeUser(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
         checkFound(id);
     }
+    */
 
     @ApiMethod(name = "users.add", path = "users", httpMethod = ApiMethod.HttpMethod.POST)
-    public com.jasify.schedule.appengine.model.users.User addUser(User caller, com.jasify.schedule.appengine.model.users.User user) {
-        return null;
+    public com.jasify.schedule.appengine.model.users.User addUser(User caller, JasAddUserRequest request, HttpServletRequest servletRequest) throws UserLoginExistsException, UsernameExistsException {
+
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(request.getUser());
+
+        HttpSession session = servletRequest.getSession();
+        if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
+
+            UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+            session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+            return userService.create(request.getUser(), login);
+
+        } else {
+
+            String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
+            return userService.create(request.getUser(), pw);
+
+        }
     }
 
 }

@@ -3,25 +3,22 @@ package com.jasify.schedule.appengine.spi;
 import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
+import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.http.HttpUserSession;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
-import com.jasify.schedule.appengine.model.users.LoginFailedException;
-import com.jasify.schedule.appengine.model.users.User;
-import com.jasify.schedule.appengine.model.users.UserLogin;
-import com.jasify.schedule.appengine.model.users.UserService;
+import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
-import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginResponse;
+import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.Validator;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.easymock.EasyMock;
-import org.easymock.EasyMockRunner;
-import org.easymock.Mock;
-import org.easymock.TestSubject;
+import org.easymock.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -35,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
@@ -256,7 +254,7 @@ public class JasifyEndpointTest {
         replay(userService);
 
         HttpSession httpSession = EasyMock.createMock(HttpSession.class);
-        httpSession.setAttribute(EasyMock.anyString(), EasyMock.anyObject());
+        httpSession.setAttribute(EasyMock.anyString(), anyObject());
         expectLastCall();
         replay(httpSession);
 
@@ -332,7 +330,137 @@ public class JasifyEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testGetUsersMustBeAdmin() throws UnauthorizedException, ForbiddenException {
         replay(userService);
-        endpoint.getUsers(newCaller(1, false));
+        endpoint.getUsers(newCaller(1, false), null, null, null, null, null, null);
+    }
+
+    @Test
+    public void testGetUsersEmpty() throws UnauthorizedException, ForbiddenException {
+        Query.SortDirection order = Constants.DEFAULT_ORDER;
+        int offset = 0;
+        int limit = Constants.DEFAULT_LIMIT;
+        ArrayList<User> expectedUsers = new ArrayList<>();
+        expectedUsers.add(new User());
+        int count = 50;
+
+        expect(userService.getTotalUsers()).andReturn(count);
+        expect(userService.list(order, offset, limit)).andReturn(expectedUsers);
+        replay(userService);
+
+        JasUserList users = endpoint.getUsers(newCaller(1, true), null, null, null, null, null, null);
+        assertNotNull(users);
+        assertEquals(expectedUsers.size(), users.size());
+        assertEquals(expectedUsers.get(0), users.get(0));
+        assertEquals(count, users.getTotal());
+    }
+
+    @Test
+    public void testGetUsersValues() throws UnauthorizedException, ForbiddenException {
+        Query.SortDirection order = Query.SortDirection.DESCENDING;
+        int offset = 10;
+        int limit = Constants.DEFAULT_LIMIT + 1;
+        ArrayList<User> expectedUsers = new ArrayList<>();
+        expectedUsers.add(new User());
+        int count = 50;
+
+        expect(userService.getTotalUsers()).andReturn(count);
+        expect(userService.list(order, offset, limit)).andReturn(expectedUsers);
+        replay(userService);
+
+        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, null, null, null, order);
+        assertNotNull(users);
+        assertEquals(expectedUsers.size(), users.size());
+        assertEquals(expectedUsers.get(0), users.get(0));
+        assertEquals(count, users.getTotal());
+    }
+
+    @Test
+    public void testGetUsersEmailNull() throws UnauthorizedException, ForbiddenException {
+        Query.SortDirection order = Query.SortDirection.DESCENDING;
+        int offset = 10;
+        int limit = Constants.DEFAULT_LIMIT + 1;
+        ArrayList<User> expectedUsers = new ArrayList<>();
+        expectedUsers.add(new User());
+        int count = 50;
+        String query = null;
+
+        expect(userService.getTotalUsers()).andReturn(count);
+        expect(userService.searchByEmail((Pattern) null, order, offset, limit)).andReturn(expectedUsers);
+        replay(userService);
+
+        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, query, "email", null, order);
+        assertNotNull(users);
+        assertEquals(expectedUsers.size(), users.size());
+        assertEquals(expectedUsers.get(0), users.get(0));
+        assertEquals(count, users.getTotal());
+    }
+
+    @Test
+    public void testGetUsersNameNull() throws UnauthorizedException, ForbiddenException {
+        Query.SortDirection order = Query.SortDirection.DESCENDING;
+        int offset = 10;
+        int limit = Constants.DEFAULT_LIMIT + 1;
+        ArrayList<User> expectedUsers = new ArrayList<>();
+        expectedUsers.add(new User());
+        int count = 50;
+        String query = null;
+
+        expect(userService.getTotalUsers()).andReturn(count);
+        expect(userService.searchByName((Pattern) null, order, offset, limit)).andReturn(expectedUsers);
+        replay(userService);
+
+        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, query, "name", null, order);
+        assertNotNull(users);
+        assertEquals(expectedUsers.size(), users.size());
+        assertEquals(expectedUsers.get(0), users.get(0));
+        assertEquals(count, users.getTotal());
+    }
+
+    @Test
+    public void testGetUsersName() throws UnauthorizedException, ForbiddenException {
+        Query.SortDirection order = Query.SortDirection.DESCENDING;
+        int offset = 10;
+        int limit = Constants.DEFAULT_LIMIT + 1;
+        ArrayList<User> expectedUsers = new ArrayList<>();
+        expectedUsers.add(new User());
+        int count = 50;
+        String query = "abc";
+
+        expect(userService.getTotalUsers()).andReturn(count);
+        Capture<Pattern> captured = new Capture<>();
+        expect(userService.searchByName(capture(captured), anyObject(Query.SortDirection.class), anyInt(), anyInt())).andReturn(expectedUsers);
+        replay(userService);
+
+        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, query, "name", null, order);
+        assertNotNull(users);
+        assertEquals(expectedUsers.size(), users.size());
+        assertEquals(expectedUsers.get(0), users.get(0));
+        assertEquals(count, users.getTotal());
+        assertNotNull(captured.getValue());
+        assertEquals(Pattern.compile(query).toString(), captured.getValue().toString());
+    }
+
+    @Test
+    public void testGetUsersEmail() throws UnauthorizedException, ForbiddenException {
+        Query.SortDirection order = Query.SortDirection.DESCENDING;
+        int offset = 10;
+        int limit = Constants.DEFAULT_LIMIT + 1;
+        ArrayList<User> expectedUsers = new ArrayList<>();
+        expectedUsers.add(new User());
+        int count = 50;
+        String query = "abc";
+
+        expect(userService.getTotalUsers()).andReturn(count);
+        Capture<Pattern> captured = new Capture<>();
+        expect(userService.searchByEmail(capture(captured), anyObject(Query.SortDirection.class), anyInt(), anyInt())).andReturn(expectedUsers);
+        replay(userService);
+
+        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, query, "email", null, order);
+        assertNotNull(users);
+        assertEquals(expectedUsers.size(), users.size());
+        assertEquals(expectedUsers.get(0), users.get(0));
+        assertEquals(count, users.getTotal());
+        assertNotNull(captured.getValue());
+        assertEquals(Pattern.compile(query).toString(), captured.getValue().toString());
     }
 
     @Test(expected = NotFoundException.class)
@@ -381,17 +509,64 @@ public class JasifyEndpointTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testUpdateUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public void testUpdateUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
         replay(userService);
         endpoint.updateUser(newCaller(1, false), null, new User());
     }
 
     @Test(expected = ForbiddenException.class)
-    public void testUpdateUserNotSameUser() throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public void testUpdateUserNotSameUser() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
         replay(userService);
         endpoint.updateUser(newCaller(1, false), KeyFactory.createKey("u", 2), new User());
     }
 
+    @Test
+    public void testUpdateUser() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException, EntityNotFoundException {
+        User expected = new User();
+        expect(userService.save(expected)).andReturn(expected);
+        replay(userService);
+        User user = endpoint.updateUser(newCaller(1, true), KeyFactory.createKey("u", 2), expected);
+        assertTrue(expected == user);
+    }
+
+    @Test
+    public void testAddUserPassword() throws UserLoginExistsException, UsernameExistsException {
+        HttpServletRequest servletRequest = EasyMock.createMock(HttpServletRequest.class);
+        expect(servletRequest.getSession()).andReturn(null);
+        replay(servletRequest);
+        User value = new User();
+        expect(userService.create(EasyMock.anyObject(User.class), EasyMock.anyString())).andReturn(value);
+        replay(userService);
+        JasAddUserRequest request = new JasAddUserRequest();
+        request.setUser(value);
+        request.setPassword(RandomStringUtils.randomAscii(10));
+        User user = endpoint.addUser(null, request, servletRequest);
+        assertNotNull(user);
+        assertTrue(value == user);
+    }
+
+    @Test
+    public void testAddUserUserLogin() throws UserLoginExistsException, UsernameExistsException {
+        HttpServletRequest servletRequest = EasyMock.createMock(HttpServletRequest.class);
+        HttpSession session = EasyMock.createMock(HttpSession.class);
+        UserLogin userLogin = new UserLogin();
+        expect(session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY)).andReturn(userLogin).times(2);
+        session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+        expectLastCall();
+        replay(session);
+        expect(servletRequest.getSession()).andReturn(session);
+        replay(servletRequest);
+        User value = new User();
+        expect(userService.create(EasyMock.anyObject(User.class), EasyMock.anyObject(UserLogin.class))).andReturn(value);
+        replay(userService);
+        JasAddUserRequest request = new JasAddUserRequest();
+        request.setUser(value);
+        User user = endpoint.addUser(null, request, servletRequest);
+        assertNotNull(user);
+        assertTrue(value == user);
+    }
+
+    /*
     @Test(expected = NotFoundException.class)
     public void testRemoveUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException {
         replay(userService);
@@ -403,5 +578,5 @@ public class JasifyEndpointTest {
         replay(userService);
         endpoint.removeUser(newCaller(1, false), Datastore.createKey(User.class, 1));
     }
-
+    */
 }
