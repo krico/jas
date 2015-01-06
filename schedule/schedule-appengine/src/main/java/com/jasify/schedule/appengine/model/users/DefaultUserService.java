@@ -150,6 +150,7 @@ class DefaultUserService implements UserService {
 
 
         if (!StringUtils.equals(db.getName(), user.getName())) {
+            tx.rollback();
             throw new FieldValueException("Cannot change 'name' with save();");
         }
         db.setAbout(user.getAbout());
