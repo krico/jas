@@ -1,55 +1,40 @@
 describe('AdminUserController', function () {
-    var $controller, $rootScope, $httpBackend, $routeParams, $q, $gapiMock, User, Auth, Endpoint, vm;
+    var $scope, $q, $controller, $rootScope, $routeParams, $gapiMock, User, Auth, Endpoint, vm;
 
     beforeEach(module('jasify'));
 
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_$controller_, _$rootScope_, _$httpBackend_, _$routeParams_, _$q_, _$gapiMock_, _User_, _Auth_, _Endpoint_) {
+    beforeEach(inject(function (_$q_, _$controller_, _$rootScope_, _$routeParams_, _$gapiMock_, _User_, _Auth_, _Endpoint_) {
+        $q = _$q_;
         $controller = _$controller_;
         $rootScope = _$rootScope_;
-        $httpBackend = _$httpBackend_;
         $routeParams = _$routeParams_;
-        $q = _$q_;
         $gapiMock = _$gapiMock_;
         User = _User_;
         Auth = _Auth_;
         Endpoint = _Endpoint_;
         Endpoint.jasifyLoaded();
-        $gapiMock.client.jasify.user = {};
     }));
 
     beforeEach(function () {
         $scope = $rootScope.$new();
-        $httpBackend.expectGET('/user/555')
-            .respond(200, {id: 555, name: 'test'});
-
         $routeParams.id = 555;
 
-        vm = $controller('AdminUserController', {
-            $scope: $scope,
-            $routeParams: $routeParams,
-            User: User,
-            Auth: Auth
-        });
+        spyOn(User, 'get').and.returnValue($q.when({id: 555, name: 'test'}));
+        vm = $controller('AdminUserController', {$scope: $scope, $routeParams: $routeParams});
+        $rootScope.$apply();
 
-        $httpBackend.flush();
+        expect(User.get).toHaveBeenCalledWith(555);
 
-    });
-
-    afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
     });
 
 
     it('reads routeParams and loads user', function () {
-
         expect(vm.create).toBe(false);
-
         expect(vm.user.id).toEqual(555);
         expect(vm.user.name).toEqual('test');
-
+        expect(User.get).toHaveBeenCalledWith(555);
     });
 
     it('can handle alerts', function () {
@@ -64,57 +49,51 @@ describe('AdminUserController', function () {
     });
 
     it('saves the user data and handles loading on success', function () {
-
-        $httpBackend.expectPOST('/user/555', {id: 555, name: 'test'})
-            .respond(200, {id: 555, name: 'test'});
+        spyOn(User, 'update').and.returnValue($q.when({id: 555, name: 'test'}));
 
         expect(vm.loading).toBe(false);
         vm.save();
         expect(vm.loading).toBe(true);
-        $httpBackend.flush();
+        $rootScope.$apply();
         expect(vm.loading).toBe(false);
         expect(vm.alerts[0].type).toEqual('success');
     });
 
     it('saves the user data and handles loading on error', function () {
 
-        $httpBackend.expectPOST('/user/555', {id: 555, name: 'test'})
-            .respond(500, {id: 555, name: 'test'});
+        spyOn(User, 'update').and.returnValue($q.reject());
 
         expect(vm.loading).toBe(false);
         vm.save();
         expect(vm.loading).toBe(true);
-        $httpBackend.flush();
+        $rootScope.$apply();
         expect(vm.loading).toBe(false);
         expect(vm.alerts[0].type).toEqual('danger');
     });
 
     it('reloads user on reset success', function () {
-
-        $httpBackend.expectGET('/user/555')
-            .respond(200, {id: 555, name: 'test'});
+        User.get.and.returnValue($q.when({id: 555, name: 'test'}));
 
         vm.user.name = 'boo';
 
         expect(vm.loading).toBe(false);
         vm.reset();
         expect(vm.loading).toBe(true);
-        $httpBackend.flush();
+        $rootScope.$apply();
         expect(vm.loading).toBe(false);
         expect(vm.user.name).toEqual('test');
     });
 
     it('warns if fails to reload the user', function () {
 
-        $httpBackend.expectGET('/user/555')
-            .respond(500, {id: 555, name: 'test'});
+        User.get.and.returnValue($q.reject());
 
         vm.user.name = 'boo';
 
         expect(vm.loading).toBe(false);
         vm.reset();
         expect(vm.loading).toBe(true);
-        $httpBackend.flush();
+        $rootScope.$apply();
         expect(vm.loading).toBe(false);
         expect(vm.alerts[0].type).toEqual('danger');
 
@@ -133,7 +112,7 @@ describe('AdminUserController', function () {
 
         expect(vm.loading).toBe(false);
         expect(vm.create).toBe(true);
-        expect(vm.user instanceof User).toBe(true);
+        expect(vm.user).toBeDefined();
         expect(vm.user.id).not.toBeDefined();
     });
 
@@ -153,16 +132,16 @@ describe('AdminUserController', function () {
         vm.user.name = 'test';
         vm.user.password = 'password';
 
+        spyOn(User, 'add');
 
-        $httpBackend.expectPOST('/user', {name: 'test', password: 'password'})
-            .respond(200, {id: 555, name: 'test'});
+        User.add.and.returnValue($q.when({id: 555, name: 'test'}));
 
         vm.createUser();
 
         expect(vm.loading).toBe(true);
         expect(vm.create).toBe(true);
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(vm.loading).toBe(false);
         expect(vm.create).toBe(false);
@@ -191,15 +170,15 @@ describe('AdminUserController', function () {
         vm.user.password = 'password';
 
 
-        $httpBackend.expectPOST('/user', {name: 'test', password: 'password'})
-            .respond(500, {id: 555, name: 'test'});
+        spyOn(User, 'add');
+        User.add.and.returnValue($q.reject({id: 555, name: 'test'}));
 
         vm.createUser();
 
         expect(vm.loading).toBe(true);
         expect(vm.create).toBe(true);
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(vm.loading).toBe(false);
         expect(vm.create).toBe(true);

@@ -1,4 +1,4 @@
-describe('Allow', function () {
+describe('AllowService', function () {
     var $rootScope, Allow, Session, AUTH_EVENTS;
 
     beforeEach(module('jasify'));

@@ -4,9 +4,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.spi.dm.JasUserLogin;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.slim3.datastore.Datastore;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -14,20 +13,20 @@ import static junit.framework.TestCase.assertNotNull;
 public class JasUserLoginTransformerTest {
     private JasUserLoginTransformer transformer = new JasUserLoginTransformer();
 
-    @Before
-    public void datastore() {
+    @BeforeClass
+    public static void datastore() {
         TestHelper.initializeDatastore();
     }
 
-    @After
-    public void cleanup() {
+    @AfterClass
+    public static void cleanup() {
         TestHelper.cleanupDatastore();
     }
 
     @Test
     public void testTransformTo() throws Exception {
         UserLogin internal = new UserLogin();
-        internal.setId(KeyFactory.createKey(UserLogin.class.getSimpleName(), 55));
+        internal.setId(Datastore.createKey(UserLogin.class, 55));
         internal.setEmail("a@b");
         internal.setProvider("Google");
         JasUserLogin transformed = transformer.transformTo(internal);
@@ -40,7 +39,7 @@ public class JasUserLoginTransformerTest {
     @Test
     public void testTransformFrom() throws Exception {
         JasUserLogin external = new JasUserLogin();
-        external.setId(KeyFactory.keyToString(KeyFactory.createKey(UserLogin.class.getSimpleName(), 55)));
+        external.setId(KeyFactory.keyToString(Datastore.createKey(UserLogin.class, 55)));
         external.setEmail("a@b");
         external.setProvider("Google");
         UserLogin transformed = transformer.transformFrom(external);

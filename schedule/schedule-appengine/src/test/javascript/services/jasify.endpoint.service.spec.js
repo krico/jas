@@ -1,4 +1,4 @@
-describe('Endpoint', function () {
+describe('EndpointService', function () {
     var $rootScope, Endpoint, $gapiMock;
 
     beforeEach(module('jasify'));

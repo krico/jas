@@ -1,9 +1,12 @@
 package com.jasify.schedule.appengine;
 
+import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.tools.development.testing.*;
+import com.jasify.schedule.appengine.meta.users.UserMeta;
+import com.jasify.schedule.appengine.model.UniqueConstraint;
+import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.meterware.servletunit.ServletRunner;
@@ -16,6 +19,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,7 +33,9 @@ import static junit.framework.TestCase.*;
 public final class TestHelper {
 
     private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(
-            new LocalMailServiceTestConfig().setLogMailLevel(Level.FINE)
+            new LocalMailServiceTestConfig()
+                    .setLogMailBody(false)
+                    .setLogMailLevel(Level.OFF)
     );
     private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(
@@ -44,9 +50,9 @@ public final class TestHelper {
 
     public static void assertUtilityClassWellDefined(Class<?> clazz) throws Exception {
         String name = clazz.getName();
-        assertTrue(name + " must be final",
-                Modifier.isFinal(clazz.getModifiers()));
-        assertEquals(name + " must have a single constructor", 1, clazz.getDeclaredConstructors().length);
+        assertTrue(name + " must be final", Modifier.isFinal(clazz.getModifiers()));
+
+        assertEquals(name + " must have a single constructor " + Arrays.toString(clazz.getDeclaredConstructors()), 1, clazz.getDeclaredConstructors().length);
         final Constructor<?> constructor = clazz.getDeclaredConstructor();
         if (constructor.isAccessible() || !Modifier.isPrivate(constructor.getModifiers())) {
             fail(name + " must have private constructor");
@@ -111,6 +117,7 @@ public final class TestHelper {
     public static void cleanupDatastore() {
         datastoreHelper.tearDown();
         DatastoreUtil.clearKeysCache();
+        DatastoreUtil.clearActiveGlobalTransactions();
     }
 
     public static void initializeMemcache() {
@@ -148,19 +155,29 @@ public final class TestHelper {
     }
 
     public static List<User> createUsers(int total) throws UsernameExistsException {
-        DigestUtil.setIterations(1);
+        int i = 0;
         try {
+
+            UniqueConstraint constraint = UniqueConstraint.create(UserMeta.get(), UserMeta.get().name);
+
             List<User> created = new ArrayList<>();
-            for (int i = 0; i < total; ++i) {
+            ShortBlob shortBlob = new ShortBlob(DigestUtil.encrypt("password"));
+            for (; i < total; ++i) {
                 User user = new User();
-                user.setId(Datastore.createKey(User.class, (long) i + 1000));
+                user.setId(Datastore.allocateId(User.class));
                 user.setName(String.format("user%03d", i));
+                constraint.reserve(user.getName());
                 user.setEmail(String.format("user%03d@new.co", i));
-                created.add(UserServiceFactory.getUserService().create(user, "password"));
+                user.setPassword(shortBlob);
+                created.add(user);
             }
+            Datastore.put(created);
             return created;
-        } finally {
-            DigestUtil.setIterations(16192);
+        } catch (UniqueConstraintException e) {
+            throw new UsernameExistsException(e.toString());
+        } catch (RuntimeException e) {
+            System.err.println("ERR i=" + i);
+            throw e;
         }
     }
 }

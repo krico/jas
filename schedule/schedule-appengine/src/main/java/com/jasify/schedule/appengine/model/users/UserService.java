@@ -35,6 +35,8 @@ public interface UserService {
 
     User get(long id);
 
+    User get(Key id);
+
 
     User findByLogin(String provider, String userId);
 
@@ -60,6 +62,8 @@ public interface UserService {
     List<UserLogin> getUserLogins(User user);
 
     List<UserLogin> getUserLogins(long userId);
+
+    List<UserLogin> getUserLogins(Key userId);
 
     int getTotalUsers();
 }

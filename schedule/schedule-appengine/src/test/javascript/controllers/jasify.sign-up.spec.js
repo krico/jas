@@ -1,13 +1,14 @@
 describe('SignUpController', function () {
-    var $httpBackend, $scope, $rootScope, $applicationScope, vm, User, AUTH_EVENTS;
+    var $scope, Auth, $rootScope, $q, $applicationScope, vm, User, AUTH_EVENTS;
 
     beforeEach(module('jasify'));
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_$httpBackend_, _$rootScope_, _User_, $controller, _AUTH_EVENTS_) {
-        $httpBackend = _$httpBackend_;
+    beforeEach(inject(function (_$q_, _Auth_, _$rootScope_, _User_, $controller, _AUTH_EVENTS_) {
+        $q = _$q_;
         $rootScope = _$rootScope_;
         User = _User_;
+        Auth = _Auth_;
         AUTH_EVENTS = _AUTH_EVENTS_;
         $applicationScope = $rootScope.$new();
         $controller('ApplicationController', {$scope: $applicationScope});
@@ -17,11 +18,6 @@ describe('SignUpController', function () {
             $scope: $scope
         });
     }));
-
-    afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-    });
 
     it('can handle alerts', function () {
 
@@ -68,15 +64,12 @@ describe('SignUpController', function () {
         expect(vm.inProgress).toBe(false);
         expect(vm.registered).toBe(false);
 
-        $httpBackend
-            .expectPOST('/user', vm.user)
-            .respond(200);
-
+        spyOn(User, 'add').and.returnValue($q.when({id: 555, name: vm.user.name}));
         //after save
-        $httpBackend
-            .expectGET('/auth/restore')
-            .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: vm.user.name}});
 
+        spyOn(Auth, 'restore').and.returnValue($q.when({id: 555, name: 'user'}));
+
+        spyOn($rootScope, '$broadcast').and.callThrough();
         vm.createUser();
 
         //check the async nature of inProgress
@@ -84,15 +77,14 @@ describe('SignUpController', function () {
         expect(vm.registered).toBe(false);
         expect(vm.alerts.length).toEqual(0);
 
-        $httpBackend.flush(1);
+        $rootScope.$apply();
 
         expect(vm.inProgress).toBe(false);
         expect(vm.registered).toBe(true);
         expect(vm.alerts.length).toEqual(1);
         expect(vm.alerts[0].type).toEqual('success');
 
-        spyOn($rootScope, '$broadcast');
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(vm.alerts.length).toEqual(1);
         expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess);
@@ -109,9 +101,7 @@ describe('SignUpController', function () {
         expect(vm.inProgress).toBe(false);
         expect(vm.registered).toBe(false);
 
-        $httpBackend
-            .expectPOST('/user', vm.user)
-            .respond(500);
+        spyOn(User, 'add').and.returnValue($q.reject());
 
         vm.createUser();
 
@@ -120,7 +110,7 @@ describe('SignUpController', function () {
         expect(vm.registered).toBe(false);
         expect(vm.alerts.length).toEqual(0);
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(vm.inProgress).toBe(false);
         expect(vm.registered).toBe(false);
@@ -137,14 +127,11 @@ describe('SignUpController', function () {
         expect(vm.inProgress).toBe(false);
         expect(vm.registered).toBe(false);
 
-        $httpBackend
-            .expectPOST('/user', vm.user)
-            .respond(200);
-
+        spyOn(User, 'add').and.returnValue($q.when({id: 555, name: vm.user.name}));
         //after save
-        $httpBackend
-            .expectGET('/auth/restore')
-            .respond(401);
+
+        spyOn(Auth, 'restore').and.returnValue($q.reject({id: 555, name: 'user'}));
+        spyOn($rootScope, '$broadcast').and.callThrough();
 
         vm.createUser();
 
@@ -153,19 +140,16 @@ describe('SignUpController', function () {
         expect(vm.registered).toBe(false);
         expect(vm.alerts.length).toEqual(0);
 
-        $httpBackend.flush(1);
+        $rootScope.$apply();
 
         expect(vm.inProgress).toBe(false);
         expect(vm.registered).toBe(true);
-        expect(vm.alerts.length).toEqual(1);
+        expect(vm.alerts.length).toEqual(2);
         expect(vm.alerts[0].type).toEqual('success');
 
-        spyOn($rootScope, '$broadcast');
-        $httpBackend.flush();
-
-        expect(vm.alerts.length).toEqual(2);
         expect(vm.alerts[1].type).toEqual('danger');
-        expect($rootScope.$broadcast).not.toHaveBeenCalled();
+        expect($rootScope.$broadcast).not.toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess);
+        expect($rootScope.$broadcast).not.toHaveBeenCalledWith(AUTH_EVENTS.loginFailed);
         expect($scope.currentUser).toEqual(null);
     });
 });

@@ -71,6 +71,9 @@ class DefaultUserService implements UserService {
         if (StringUtils.equalsIgnoreCase("krico", user.getName())) {
             user.setAdmin(true);//Admin for me...
         }
+
+        user.setId(Datastore.allocateId(userMeta));
+
         Transaction tx = Datastore.beginTransaction();
         Datastore.put(tx, user);
         tx.commit();
@@ -147,6 +150,7 @@ class DefaultUserService implements UserService {
 
 
         if (!StringUtils.equals(db.getName(), user.getName())) {
+            tx.rollback();
             throw new FieldValueException("Cannot change 'name' with save();");
         }
         db.setAbout(user.getAbout());
@@ -218,7 +222,12 @@ class DefaultUserService implements UserService {
 
     @Override
     public User get(long id) {
-        return Datastore.getOrNull(User.class, Datastore.createKey(User.class, id));
+        return get(Datastore.createKey(User.class, id));
+    }
+
+    @Override
+    public User get(Key id) {
+        return Datastore.getOrNull(User.class, id);
     }
 
     @Override
@@ -228,7 +237,12 @@ class DefaultUserService implements UserService {
 
     @Override
     public List<UserLogin> getUserLogins(long userId) {
-        return Datastore.query(userLoginMeta, Datastore.createKey(User.class, userId)).asList();
+        return getUserLogins(Datastore.createKey(User.class, userId));
+    }
+
+    @Override
+    public List<UserLogin> getUserLogins(Key userId) {
+        return Datastore.query(userLoginMeta, Preconditions.checkNotNull(userId)).asList();
     }
 
     @Override

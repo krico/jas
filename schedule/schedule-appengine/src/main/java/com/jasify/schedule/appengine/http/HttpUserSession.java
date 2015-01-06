@@ -92,6 +92,6 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener,
 
     @Override
     public String toString() {
-        return userId.toString();
+        return "HttpUserSession{" + (userId == null ? null : userId.toString()) + "}";
     }
 }

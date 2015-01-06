@@ -1,4 +1,4 @@
-describe('Auth', function () {
+describe('AuthService', function () {
     var Session, Auth, $cookies, Endpoint, $q, $httpBackend, $rootScope, $gapiMock;
 
     beforeEach(module('jasify'));

@@ -1,4 +1,4 @@
-describe('Session', function () {
+describe('SessionService', function () {
     var Session;
 
     beforeEach(module('jasify'));

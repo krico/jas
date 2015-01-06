@@ -30,6 +30,12 @@
                 list: angular.noop,
                 remove: angular.noop
             },
+            users: {
+                query: angular.noop,
+                get: angular.noop,
+                update: angular.noop,
+                add: angular.noop
+            },
             username: {
                 check: angular.noop
             },

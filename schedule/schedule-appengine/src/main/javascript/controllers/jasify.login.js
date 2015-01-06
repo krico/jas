@@ -14,8 +14,8 @@
         function login(cred) {
             Auth.login(cred).then(
                 function (user) {
-                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                     $scope.setCurrentUser(user);
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                 },
                 function () {
                     $rootScope.$broadcast(AUTH_EVENTS.loginFailed);

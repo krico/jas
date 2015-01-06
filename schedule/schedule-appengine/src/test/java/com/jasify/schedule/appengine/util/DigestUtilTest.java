@@ -1,12 +1,23 @@
 package com.jasify.schedule.appengine.util;
 
 import com.jasify.schedule.appengine.TestHelper;
-import org.apache.commons.lang3.ArrayUtils;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static junit.framework.TestCase.*;
 
 public class DigestUtilTest {
+    @BeforeClass
+    public static void lowerIterations() {
+        DigestUtil.setIterations(1);
+    }
+
+    @AfterClass
+    public static void resetIterations() {
+        DigestUtil.setIterations(DigestUtil.DEFAULT_ITERATIONS);
+    }
+
     @Test
     public void testAssertUtilityClassWellDefined() throws Exception {
         TestHelper.assertUtilityClassWellDefined(DigestUtil.class);
