@@ -112,7 +112,7 @@ public class JasifyEndpointTest {
 
     @Test
     public void testListLoginsSame() throws Exception {
-        expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
+        expect(userService.getUserLogins(Datastore.createKey(User.class, 5))).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
         JasifyEndpointUser user = newCaller(5, false);
         assertNotNull(endpoint.listLogins(user, Datastore.createKey(User.class, 5)));
@@ -120,7 +120,7 @@ public class JasifyEndpointTest {
 
     @Test
     public void testListLoginsOtherAdmin() throws Exception {
-        expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
+        expect(userService.getUserLogins(Datastore.createKey(User.class, 5))).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
         JasifyEndpointUser user = newCaller(2, true);
         assertNotNull(endpoint.listLogins(user, Datastore.createKey(User.class, 5)));
@@ -132,7 +132,7 @@ public class JasifyEndpointTest {
         List<UserLogin> ret = new ArrayList<>();
         ret.add(new UserLogin("Google", "1234"));
 
-        expect(userService.getUserLogins(23)).andReturn(ret);
+        expect(userService.getUserLogins(Datastore.createKey(User.class, 23))).andReturn(ret);
         replay(userService);
         User u1 = new User();
         u1.setId(Datastore.createKey(User.class, 23));
@@ -221,7 +221,7 @@ public class JasifyEndpointTest {
         user.setId(Datastore.createKey(User.class, 1));
         String oldPw = "abc";
         user.setPassword(TypeUtil.toShortBlob(DigestUtil.encrypt(oldPw)));
-        expect(userService.get(1)).andReturn(user).times(2);
+        expect(userService.get(user.getId())).andReturn(user).times(2);
         expect(userService.setPassword(user, "def")).andReturn(user).times(2);
         replay(userService);
 
@@ -236,7 +236,7 @@ public class JasifyEndpointTest {
         user.setId(Datastore.createKey(User.class, 1));
         String oldPw = "abc";
         user.setPassword(TypeUtil.toShortBlob(DigestUtil.encrypt(oldPw)));
-        expect(userService.get(1)).andReturn(user);
+        expect(userService.get(user.getId())).andReturn(user);
         replay(userService);
 
         endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw + "x", "def"));
@@ -268,7 +268,7 @@ public class JasifyEndpointTest {
         JasLoginResponse response = endpoint.login(httpServletRequest, new JasLoginRequest(loginName, password));
         assertNotNull(response);
         assertEquals(loginName.toLowerCase(), response.getName());
-        assertEquals(user.getId().getId(), response.getUserId());
+        assertEquals(KeyFactory.keyToString(user.getId()), response.getUserId());
 
 
         verify(httpServletRequest);
@@ -532,7 +532,13 @@ public class JasifyEndpointTest {
     @Test
     public void testAddUserPassword() throws UserLoginExistsException, UsernameExistsException {
         HttpServletRequest servletRequest = EasyMock.createMock(HttpServletRequest.class);
+        HttpSession session = EasyMock.createMock(HttpSession.class);
+        session.setAttribute(EasyMock.anyString(), EasyMock.anyObject(HttpUserSession.class));
+        expectLastCall();
+        replay(session);
+        expect(servletRequest.getSession(true)).andReturn(session);
         expect(servletRequest.getSession()).andReturn(null);
+
         replay(servletRequest);
         User value = new User();
         expect(userService.create(EasyMock.anyObject(User.class), EasyMock.anyString())).andReturn(value);
@@ -553,7 +559,10 @@ public class JasifyEndpointTest {
         expect(session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY)).andReturn(userLogin).times(2);
         session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
         expectLastCall();
+        session.setAttribute(EasyMock.anyString(), EasyMock.anyObject(HttpUserSession.class));
+        expectLastCall();
         replay(session);
+        expect(servletRequest.getSession(true)).andReturn(session);
         expect(servletRequest.getSession()).andReturn(session);
         replay(servletRequest);
         User value = new User();
