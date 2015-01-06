@@ -30,19 +30,23 @@
 
             vm.loading = true;
 
-            vm.user.$save(function () {
-                    vm.loading = false;
-                    if (vm.forms.userForm) {
-                        vm.forms.userForm.$setPristine();
-                    }
+            User.update(vm.user).then(ok, fail);
 
-                    vm.alert('success', 'User updated successfully (' + new Date() + ')');
+            function ok(u) {
+                vm.loading = false;
+                vm.user = u;
+                if (vm.forms.userForm) {
+                    vm.forms.userForm.$setPristine();
+                }
 
-                },
-                function () {
-                    vm.loading = false;
-                    vm.alert('danger', 'User update failed (' + new Date() + ')');
-                });
+                vm.alert('success', 'User updated successfully (' + new Date() + ')');
+
+            }
+
+            function fail() {
+                vm.loading = false;
+                vm.alert('danger', 'User update failed (' + new Date() + ')');
+            }
         }
 
         function reset() {
@@ -54,39 +58,46 @@
             }
 
             if ($routeParams.id) {
-                vm.user = User.get({id: $routeParams.id},
-                    function ok() {
-                        vm.loading = false;
-                    },
-                    function fail() {
-                        vm.loading = false;
-                        vm.alert('danger', 'Failed to read the user data from the server (' + new Date() + ')');
-                    });
+                vm.user = {};
+                User.get($routeParams.id).then(ok, fail);
+
             } else {
-                vm.user = new User();
+                vm.user = {};
                 vm.create = true;
                 vm.loading = false;
             }
+
+            function ok(r) {
+                vm.user = r;
+                vm.loading = false;
+            }
+
+            function fail() {
+                vm.loading = false;
+                vm.alert('danger', 'Failed to read the user data from the server (' + new Date() + ')');
+            }
+
         }
 
         function createUser() {
 
             vm.loading = true;
 
-            vm.user.$save(
-                //success
-                function (value, responseHeaders) {
-                    vm.alert('success', 'User creation succeeded!');
-                    vm.create = false;
-                    vm.loading = false;
-                },
-                //error
-                function (resp) {
+            User.add(vm.user).then(ok, fail);
 
-                    vm.loading = false;
+            function ok(r) {
+                vm.user = r;
+                vm.alert('success', 'User creation succeeded!');
+                vm.create = false;
+                vm.loading = false;
+            }
 
-                    vm.alert('danger', 'User creation failed!');
-                });
+            function fail() {
+
+                vm.loading = false;
+
+                vm.alert('danger', 'User creation failed!');
+            }
         }
 
 

@@ -26,9 +26,10 @@
         }
 
         function save() {
-            vm.user.$save().then(saveSuccess, saveFailed);
-            function saveSuccess() {
+            User.update(vm.user).then(saveSuccess, saveFailed);
+            function saveSuccess(r) {
                 vm.alert('success', 'Profile updated!');
+                vm.user = r;
                 $scope.setCurrentUser(vm.user);
                 if (vm.profileForm) {
                     vm.profileForm.$setPristine();
@@ -43,11 +44,18 @@
         }
 
         function reset() {
-            vm.user = User.get({id: Session.userId}, function () {
+            vm.user = {};
+            User.get({id: Session.userId}).then(ok, fail);
+            function ok(r) {
+                vm.user = r;
                 if (vm.profileForm) {
                     vm.profileForm.$setPristine();
                 }
-            });
+            }
+
+            function fail() {
+                vm.alert('danger', 'Failed to load user...');
+            }
         }
     }
 

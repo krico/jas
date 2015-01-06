@@ -22,6 +22,8 @@ public final class Constants {
     public static final int DEFAULT_LIMIT = 10;
     public static final Query.SortDirection DEFAULT_ORDER = Query.SortDirection.ASCENDING;
 
+    public static final String X_TOTAL = "X-Total";
+
     private Constants() {
     }
 }

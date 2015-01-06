@@ -42,11 +42,12 @@
         function createUser() {
             vm.inProgress = true;
 
-            User.save(vm.user, saveSuccess, saveError);
+            User.add(vm.user).then(saveSuccess, saveError);
 
-            function saveSuccess(value, responseHeaders) {
+            function saveSuccess(ret) {
                 vm.registered = true;
                 vm.inProgress = false;
+                vm.user = ret;
 
                 vm.alert('success', 'Registration succeeded! You should be redirected shortly...');
 

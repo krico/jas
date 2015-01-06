@@ -557,9 +557,18 @@ public class JasifyEndpointTest {
         expect(servletRequest.getSession()).andReturn(session);
         replay(servletRequest);
         User value = new User();
-        expect(userService.create(EasyMock.anyObject(User.class), EasyMock.anyObject(UserLogin.class))).andReturn(value);
+        final Capture<User> captured = new Capture<>();
+        expect(userService.create(EasyMock.capture(captured), EasyMock.anyObject(UserLogin.class))).andAnswer(new IAnswer<User>() {
+            @Override
+            public User answer() throws Throwable {
+                assertNotNull(captured.getValue());
+                assertFalse(captured.getValue().isAdmin());
+                return captured.getValue();
+            }
+        });
         replay(userService);
         JasAddUserRequest request = new JasAddUserRequest();
+        value.setAdmin(true);
         request.setUser(value);
         User user = endpoint.addUser(null, request, servletRequest);
         assertNotNull(user);

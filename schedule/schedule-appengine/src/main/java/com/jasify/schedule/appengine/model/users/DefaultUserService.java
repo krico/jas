@@ -71,6 +71,9 @@ class DefaultUserService implements UserService {
         if (StringUtils.equalsIgnoreCase("krico", user.getName())) {
             user.setAdmin(true);//Admin for me...
         }
+
+        user.setId(Datastore.allocateId(userMeta));
+
         Transaction tx = Datastore.beginTransaction();
         Datastore.put(tx, user);
         tx.commit();

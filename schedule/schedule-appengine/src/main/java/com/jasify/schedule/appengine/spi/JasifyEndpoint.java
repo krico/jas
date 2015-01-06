@@ -218,13 +218,7 @@ public class JasifyEndpoint {
 
 
     @ApiMethod(name = "users.query", path = "users", httpMethod = ApiMethod.HttpMethod.GET)
-    public JasUserList getUsers(User caller,
-                                @Named("offset") Integer offset,
-                                @Named("limit") Integer limit,
-                                @Named("query") String query,
-                                @Named("field") String field,
-                                @Named("orderBy") String orderBy,
-                                @Named("order") Query.SortDirection order) throws UnauthorizedException, ForbiddenException {
+    public JasUserList getUsers(User caller, @Named("offset") Integer offset, @Named("limit") Integer limit, @Named("query") String query, @Named("field") String field, @Named("orderBy") String orderBy, @Named("order") Query.SortDirection order) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
         JasUserList users = new JasUserList();
 
@@ -277,17 +271,21 @@ public class JasifyEndpoint {
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(request.getUser());
 
+        if (!(caller instanceof JasifyEndpointUser && ((JasifyEndpointUser) caller).isAdmin())) {
+            request.getUser().setAdmin(false); //Only admin can create an admin
+        }
+
         HttpSession session = servletRequest.getSession();
         if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
 
             UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
             session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
-            return userService.create(request.getUser(), login);
+            return getUserService().create(request.getUser(), login);
 
         } else {
 
             String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
-            return userService.create(request.getUser(), pw);
+            return getUserService().create(request.getUser(), pw);
 
         }
     }

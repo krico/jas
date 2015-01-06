@@ -1,26 +1,21 @@
 describe('AdminUsersController', function () {
-    var $controller, $httpBackend, $location, User, vm;
+    var $controller, $location, User, vm, $q, $rootScope;
 
     beforeEach(module('jasify'));
 
 
-    beforeEach(inject(function (_$controller_, _$httpBackend_, _$location_, _User_) {
+    beforeEach(inject(function (_$controller_, _$location_, _User_, _$q_, _$rootScope_) {
         $controller = _$controller_;
-        $httpBackend = _$httpBackend_;
         $location = _$location_;
         User = _User_;
+        $q = _$q_;
+        $rootScope = _$rootScope_;
     }));
 
     beforeEach(function () {
-        $httpBackend.expectGET('/user?field=name&page=1&query=&size=10&sort=DESC')
-            .respond(200);
+        spyOn(User, 'query').and.returnValue($q.when({total: 0, users: []}));
         vm = $controller('AdminUsersController', {$location: $location, User: User});
-        $httpBackend.flush();
-    });
-
-    afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
+        $rootScope.$apply();
     });
 
 
@@ -34,15 +29,21 @@ describe('AdminUsersController', function () {
         vm._perPage = 5;
         vm.sort = 'ASC';
 
-        $httpBackend.expectGET('/user?field=email&page=2&query=foo&size=5&sort=ASC')
-            .respond(200, [{id: 10}, {id: 11}, {id: 12}, {id: 13}, {id: 14}, {id: 15}], {'X-Total': 50});
+        User.query.and.returnValue($q.when({total: 50, users: []}));
 
         vm.pageChanged();
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(vm.page).toEqual(2);
         expect(vm.total).toEqual(50);
+        expect(User.query).toHaveBeenCalledWith({
+            field: vm.searchBy,
+            offset: (vm.page * vm._perPage),
+            limit: vm._perPage,
+            sort: vm.sort,
+            query: vm.query
+        });
     });
 
     it('typeChanged does nothing if query is not set', function () {
@@ -67,12 +68,11 @@ describe('AdminUsersController', function () {
         vm._perPage = 5;
         vm.sort = 'ASC';
 
-        $httpBackend.expectGET('/user?field=email&page=1&query=foo&size=5&sort=ASC')
-            .respond(200, [{id: 10}, {id: 11}, {id: 12}, {id: 13}, {id: 14}, {id: 15}], {'X-Total': 50});
+        User.query.and.returnValue($q.when({total: 50, users: []}));
 
         vm.queryChanged();
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(vm.page).toEqual(1);
         expect(vm.total).toEqual(50);
@@ -85,24 +85,23 @@ describe('AdminUsersController', function () {
         vm._perPage = 4;
         vm.sort = 'ASC';
 
-        $httpBackend.expectGET('/user?field=email&page=2&query=foo&size=4&sort=ASC')
-            .respond(200, [{id: 10}, {id: 11}, {id: 12}, {id: 13}, {id: 14}, {id: 15}], {'X-Total': 50});
+        User.query.and.returnValue($q.when({total: 50, users: []}));
 
         vm.pageChanged();
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(vm.page).toEqual(2);
         expect(vm.total).toEqual(50);
 
-        //with 4 per page on page 2, we are on record 5
-        //if we change _perPage to 2 we should end on page 3
-        $httpBackend.expectGET('/user?field=email&page=3&query=foo&size=2&sort=ASC')
-            .respond(200, [{id: 10}, {id: 11}, {id: 12}, {id: 13}, {id: 14}, {id: 15}], {'X-Total': 50});
+        User.query.and.returnValue($q.when({total: 50, users: []}));
 
         vm.perPage(2);
 
-        $httpBackend.flush();
+        $rootScope.$apply();
+
+        expect(vm.page).toEqual(3);
+        expect(vm.total).toEqual(50);
     });
 
     it('view users goes to /admin/user/:id', function () {

@@ -18,6 +18,7 @@ public class JasUserTransformer implements Transformer<User, JasUser> {
     public JasUser transformTo(User internal) {
         JasUser external = new JasUser();
         BeanUtil.copyProperties(external, internal);
+        if (internal.getId() != null) external.setNumericId(internal.getId().getId());
         return external;
     }
 

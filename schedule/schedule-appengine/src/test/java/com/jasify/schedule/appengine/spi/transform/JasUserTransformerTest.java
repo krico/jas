@@ -5,7 +5,9 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.dm.JasUser;
 import com.jasify.schedule.appengine.util.TypeUtil;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
 import java.util.Date;
@@ -42,6 +44,7 @@ public class JasUserTransformerTest {
         JasUser transformed = transformer.transformTo(internal);
         assertNotNull(transformed);
         assertEquals(KeyFactory.keyToString(internal.getId()), transformed.getId());
+        assertEquals(internal.getId().getId(), transformed.getNumericId());
         assertEquals(internal.getName(), transformed.getName());
         assertEquals(internal.getEmail(), transformed.getEmail());
         assertEquals(internal.isEmailVerified(), transformed.isEmailVerified());

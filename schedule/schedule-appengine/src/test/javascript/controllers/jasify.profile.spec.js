@@ -1,24 +1,24 @@
 describe('ProfileController', function () {
-    var $scope, $httpBackend, $applicationScope, vm, $routeParams, User, Session, $controller, $rootScope;
+    var $scope, $applicationScope, vm, $routeParams, User, Session, $controller, $rootScope, $q;
 
     beforeEach(module('jasify'));
 
-    beforeEach(inject(function (_$routeParams_, _$httpBackend_, _User_, _Session_, _$controller_, _$rootScope_) {
+    beforeEach(inject(function (_$routeParams_, _User_, _Session_, _$controller_, _$rootScope_, _$q_) {
         $routeParams = _$routeParams_;
-        $httpBackend = _$httpBackend_;
         $controller = _$controller_;
         User = _User_;
         Session = _Session_;
         $rootScope = _$rootScope_;
+        $q = _$q_;
         $applicationScope = $rootScope.$new();
         $controller('ApplicationController', {$scope: $applicationScope});
+        spyOn(User, 'get');
+
     }));
 
     var construct = function () {
         Session.create(1, 555);
-        $httpBackend
-            .expectGET('/user/555')
-            .respond(200, {id: 555, name: 'test'});
+        User.get.and.returnValue($q.when({id: 555, name: 'test'}));
 
         vm = $controller('ProfileController', {
             $scope: $scope
@@ -31,26 +31,26 @@ describe('ProfileController', function () {
     });
 
     it('knows if isWelcome is tru or note', function () {
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
 
         $routeParams.extra = 'welcome';
         construct();
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
         expect(vm.isWelcome()).toEqual(true);
 
         $routeParams.extra = 'foo';
         construct();
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
         expect(vm.isWelcome()).toEqual(false);
     });
 
     it('sets extra to false when there are not route parameters', function () {
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
         expect(vm.isWelcome()).toEqual(false);
     });
 
     it('can handle alerts', function () {
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
 
         expect(vm.alerts.length).toEqual(0);
         vm.alert('success', 'alert text');
@@ -62,22 +62,20 @@ describe('ProfileController', function () {
     });
 
     it('loads user when constructed', function () {
-        expect(vm.user.$resolved).toEqual(false);
-        $httpBackend.flush(); //load the user
-        expect(vm.user.$resolved).toEqual(true);
+        expect(vm.user.id).not.toBeDefined();
+        $rootScope.$apply(); //load the user
+        expect(vm.user.id).toEqual(555);
         expect(vm.user).toBeDefined();
         expect(vm.user.name).toEqual('test');
     });
 
     it('saves the user and updates currentUser and calls setPristine', function () {
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
 
         vm.user.about = 'about him';
 
-        $httpBackend
-            .expectPOST('/user/555')
-            .respond(200, vm.user);
 
+        spyOn(User, 'update').and.returnValue($q.when(vm.user));
         var called = null;
 
         vm.profileForm = {
@@ -89,34 +87,31 @@ describe('ProfileController', function () {
 
         vm.save();
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect($scope.currentUser.about).toEqual('about him');
         expect(called).toBe(true);
     });
 
     it('resets to original user ', function () {
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
 
         vm.user.about = 'about him';
 
-        $httpBackend
-            .expectGET('/user/555')
-            .respond(200, {id: 555, name: 'test'});
+        User.get.and.returnValue($q.when({id: 555, name: 'test'}));
 
         vm.reset();
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
+        expect(vm.user.id).toEqual(555);
         expect(vm.user.about).not.toBeDefined();
     });
 
     it('calls profileForm.$setPristine on reset ', function () {
-        $httpBackend.flush(); //load the user
+        $rootScope.$apply(); //load the user
 
-        $httpBackend
-            .expectGET('/user/555')
-            .respond(200, {id: 555, name: 'test'});
+        User.get.and.returnValue($q.when({id: 555, name: 'test'}));
 
         var called = null;
         vm.profileForm = {
@@ -127,7 +122,7 @@ describe('ProfileController', function () {
 
         vm.reset();
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(called).toEqual(true);
 

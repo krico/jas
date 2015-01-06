@@ -1,4 +1,4 @@
-describe('Popup', function () {
+describe('PopupService', function () {
     var Popup, $interval, $windowMock;
 
     beforeEach(module('jasify'));

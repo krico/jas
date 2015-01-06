@@ -34,22 +34,24 @@
                 q = RegExp.quote(vm.query);
             }
 
-            vm.users = User.query({
-                    page: vm.page,
-                    size: vm._perPage,
-                    sort: vm.sort,
-                    field: vm.searchBy,
-                    query: q
-                },
-                function (data, h) {
-                    var t = h('X-Total');
-                    if (t != vm.total)
-                        vm.total = Math.floor(t);
-                },
-                function (response) {
-                    vm.total = 0;
-                    //TODO: show error
-                });
+            vm.users = [];
+            User.query({
+                offset: vm._perPage * vm.page,
+                limit: vm._perPage,
+                sort: vm.sort,
+                field: vm.searchBy,
+                query: q
+            }).then(ok, fail);
+
+            function ok(r) {
+                if (r.total != vm.total)
+                    vm.total = Math.floor(r.total);
+                vm.users = r.users;
+            }
+
+            function fail(response) {
+                vm.total = 0;
+            }
         }
 
         function typeChanged() {

@@ -8,6 +8,7 @@ import java.util.Date;
  */
 public class JasUser implements JasEndpointEntity {
     private String id;
+    private long numericId;
     private Date created;
     private Date modified;
     private String name;
@@ -22,6 +23,14 @@ public class JasUser implements JasEndpointEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public long getNumericId() {
+        return numericId;
+    }
+
+    public void setNumericId(long numericId) {
+        this.numericId = numericId;
     }
 
     public Date getCreated() {

@@ -95,12 +95,14 @@
             Endpoint.deferred = null;
             $log.debug('Endpoint.initialized');
 
-            //TODO: REMOVE THIS
-            Endpoint.jasify(function (jasify) {
-                return jasify.users.query({offset: 2, order: 'ASCENDING'});
-            }).then(function (r) {
-                $log.info("OK: " + angular.toJson(r));
-            }, Endpoint.errorHandler);
+            /*
+             //TODO: REMOVE THIS
+             Endpoint.jasify(function (jasify) {
+             return jasify.users.query({limit:1});
+             }).then(function (r) {
+             $log.info("OK("  + r.result.total+"): " + angular.toJson(r));
+             }, Endpoint.errorHandler);
+             */
         }
 
         return Endpoint;
