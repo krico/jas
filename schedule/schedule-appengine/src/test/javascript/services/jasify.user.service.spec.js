@@ -61,7 +61,7 @@ describe('UserService', function () {
         $rootScope.$apply();
 
         expect(ok).toBe(true);
-        expect($gapiMock.client.jasify.users.update).toHaveBeenCalledWith({id: user.id, user: user});
+        expect($gapiMock.client.jasify.users.update).toHaveBeenCalledWith(user);
     });
 
     it('should query users', function () {

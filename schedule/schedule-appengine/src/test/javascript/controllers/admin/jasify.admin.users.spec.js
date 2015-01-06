@@ -39,7 +39,7 @@ describe('AdminUsersController', function () {
         expect(vm.total).toEqual(50);
         expect(User.query).toHaveBeenCalledWith({
             field: vm.searchBy,
-            offset: (vm.page * vm._perPage),
+            offset: ((vm.page-1) * vm._perPage),
             limit: vm._perPage,
             sort: vm.sort,
             query: vm.query
