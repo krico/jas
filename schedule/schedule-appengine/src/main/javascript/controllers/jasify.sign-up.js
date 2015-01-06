@@ -42,7 +42,7 @@
         function createUser() {
             vm.inProgress = true;
 
-            User.add(vm.user).then(saveSuccess, saveError);
+            User.add(vm.user, vm.user.password).then(saveSuccess, saveError);
 
             function saveSuccess(ret) {
                 vm.registered = true;

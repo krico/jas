@@ -39,7 +39,7 @@
 
         function update(user) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.users.update({id: user.id, user: user})
+                return jasify.users.update(user)
                     .then(resultHandler, errorHandler);
             });
         }

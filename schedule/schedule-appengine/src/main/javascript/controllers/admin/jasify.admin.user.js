@@ -83,7 +83,7 @@
 
             vm.loading = true;
 
-            User.add(vm.user).then(ok, fail);
+            User.add(vm.user, vm.user.password).then(ok, fail);
 
             function ok(r) {
                 vm.user = r;

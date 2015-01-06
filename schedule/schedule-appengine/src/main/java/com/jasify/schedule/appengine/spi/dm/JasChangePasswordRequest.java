@@ -1,28 +1,30 @@
 package com.jasify.schedule.appengine.spi.dm;
 
+import com.google.appengine.api.datastore.Key;
+
 /**
  * @author krico
  * @since 01/01/15.
  */
 public class JasChangePasswordRequest implements JasEndpointEntity {
-    private long userId;
+    private Key userId;
     private String oldPassword;
     private String newPassword;
 
     public JasChangePasswordRequest() {
     }
 
-    public JasChangePasswordRequest(long userId, String oldPassword, String newPassword) {
+    public JasChangePasswordRequest(Key userId, String oldPassword, String newPassword) {
         this.userId = userId;
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
     }
 
-    public long getUserId() {
+    public Key getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(Key userId) {
         this.userId = userId;
     }
 

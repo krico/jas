@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.http.json;
 
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.spi.transform.JasKeyTransformer;
 import com.jasify.schedule.appengine.util.JSON;
 
 import java.io.Reader;
@@ -12,7 +13,7 @@ import java.io.Reader;
  */
 public class JsonSessionResponse extends JsonObject {
     private String id; /* Session id */
-    private long userId;
+    private String userId;
     private JsonUser user;
 
     public JsonSessionResponse() {
@@ -20,7 +21,7 @@ public class JsonSessionResponse extends JsonObject {
 
     public JsonSessionResponse(User user, HttpUserSession userSession) {
         this.id = userSession.getSessionId();
-        userId = userSession.getUserId();
+        this.userId = new JasKeyTransformer().transformTo(user.getId());
         this.user = new JsonUser(user);
     }
 
@@ -40,11 +41,11 @@ public class JsonSessionResponse extends JsonObject {
         this.id = id;
     }
 
-    public long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

@@ -131,7 +131,7 @@ public class JasifyEndpoint {
         com.jasify.schedule.appengine.model.users.User user = getUserService().get(request.getUserId());
         if (user == null) throw new NotFoundException("No user");
 
-        if (jasCaller.getUserId() == request.getUserId()) { //change your own password
+        if (jasCaller.getUserId() == request.getUserId().getId()) { //change your own password
             ShortBlob dbPassword = Preconditions.checkNotNull(user.getPassword());
             String oldPassword = Preconditions.checkNotNull(StringUtils.trimToNull(request.getOldPassword()));
             if (!DigestUtil.verify(TypeUtil.toBytes(dbPassword), oldPassword)) {
@@ -158,7 +158,7 @@ public class JasifyEndpoint {
             log.info("[{}] user={} logged in!", httpServletRequest.getRemoteAddr(), user.getName());
 
             JasLoginResponse response = new JasLoginResponse();
-            response.setUserId(userSession.getUserId());
+            response.setUserId(KeyFactory.keyToString(user.getId()));
             response.setSessionId(userSession.getSessionId());
             response.setName(user.getName());
             response.setAdmin(user.isAdmin());
@@ -194,7 +194,7 @@ public class JasifyEndpoint {
      */
 
     @ApiMethod(name = "userLogins.list", path = "user-logins/{userId}", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<UserLogin> listLogins(User caller, @Named("userId") long userId) throws UnauthorizedException, ForbiddenException {
+    public List<UserLogin> listLogins(User caller, @Named("userId") Key userId) throws UnauthorizedException, ForbiddenException, NotFoundException {
         mustBeSameUserOrAdmin(caller, userId);
         return getUserService().getUserLogins(userId);
     }
@@ -275,19 +275,27 @@ public class JasifyEndpoint {
             request.getUser().setAdmin(false); //Only admin can create an admin
         }
 
+        com.jasify.schedule.appengine.model.users.User ret;
+
         HttpSession session = servletRequest.getSession();
         if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
 
             UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
             session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
-            return getUserService().create(request.getUser(), login);
+            ret = getUserService().create(request.getUser(), login);
 
         } else {
 
             String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
-            return getUserService().create(request.getUser(), pw);
+            ret= getUserService().create(request.getUser(), pw);
 
         }
+
+        if (caller == null)
+            new HttpUserSession(ret).put(servletRequest); //login
+
+        return ret;
+
     }
 
 }

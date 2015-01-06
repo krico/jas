@@ -36,7 +36,7 @@
 
             vm.users = [];
             User.query({
-                offset: vm._perPage * vm.page,
+                offset: vm._perPage * (vm.page-1),
                 limit: vm._perPage,
                 sort: vm.sort,
                 field: vm.searchBy,

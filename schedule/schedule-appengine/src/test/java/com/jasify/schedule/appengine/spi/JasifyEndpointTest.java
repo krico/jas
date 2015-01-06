@@ -100,14 +100,14 @@ public class JasifyEndpointTest {
     @Test(expected = UnauthorizedException.class)
     public void testListLoginsNoUserThrows() throws Exception {
         replay(userService);
-        endpoint.listLogins(null, 1);
+        endpoint.listLogins(null, Datastore.createKey(User.class, 1));
     }
 
     @Test(expected = ForbiddenException.class)
     public void testListLoginsOtherUserThrows() throws Exception {
         replay(userService);
         JasifyEndpointUser user = newCaller(5, false);
-        endpoint.listLogins(user, 1);
+        endpoint.listLogins(user, Datastore.createKey(User.class, 1));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class JasifyEndpointTest {
         expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
         JasifyEndpointUser user = newCaller(5, false);
-        assertNotNull(endpoint.listLogins(user, 5));
+        assertNotNull(endpoint.listLogins(user, Datastore.createKey(User.class, 5)));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class JasifyEndpointTest {
         expect(userService.getUserLogins(5)).andReturn(Collections.<UserLogin>emptyList());
         replay(userService);
         JasifyEndpointUser user = newCaller(2, true);
-        assertNotNull(endpoint.listLogins(user, 5));
+        assertNotNull(endpoint.listLogins(user, Datastore.createKey(User.class, 5)));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class JasifyEndpointTest {
         User u1 = new User();
         u1.setId(Datastore.createKey(User.class, 23));
         JasifyEndpointUser user = newCaller(u1.getId().getId(), false);
-        List<UserLogin> logins = endpoint.listLogins(user, u1.getId().getId());
+        List<UserLogin> logins = endpoint.listLogins(user, u1.getId());
         assertNotNull(logins);
         assertEquals(1, logins.size());
         UserLogin userLogin = logins.get(0);
@@ -212,7 +212,7 @@ public class JasifyEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testChangePasswordCheckAuthentication() throws Exception {
         replay(userService);
-        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(2, "abc", "def"));
+        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(Datastore.createKey(User.class, 2), "abc", "def"));
     }
 
     @Test
@@ -225,9 +225,9 @@ public class JasifyEndpointTest {
         expect(userService.setPassword(user, "def")).andReturn(user).times(2);
         replay(userService);
 
-        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(1, oldPw, "def"));
+        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw, "def"));
         //admin
-        endpoint.changePassword(newCaller(2, true), new JasChangePasswordRequest(1, "", "def"));
+        endpoint.changePassword(newCaller(2, true), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), "", "def"));
     }
 
     @Test(expected = ForbiddenException.class)
@@ -239,7 +239,7 @@ public class JasifyEndpointTest {
         expect(userService.get(1)).andReturn(user);
         replay(userService);
 
-        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(1, oldPw + "x", "def"));
+        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw + "x", "def"));
     }
 
     @Test

@@ -8,7 +8,7 @@ import com.jasify.schedule.appengine.http.json.JsonUser;
  */
 public class JasLoginResponse implements JasEndpointEntity {
     private String sessionId; /* Session id */
-    private long userId;
+    private String userId;
     private String name;
     private boolean admin;
 
@@ -20,11 +20,11 @@ public class JasLoginResponse implements JasEndpointEntity {
         this.sessionId = sessionId;
     }
 
-    public long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

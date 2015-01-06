@@ -236,7 +236,12 @@ class DefaultUserService implements UserService {
 
     @Override
     public List<UserLogin> getUserLogins(long userId) {
-        return Datastore.query(userLoginMeta, Datastore.createKey(User.class, userId)).asList();
+        return getUserLogins(Datastore.createKey(User.class, userId));
+    }
+
+    @Override
+    public List<UserLogin> getUserLogins(Key userId) {
+        return Datastore.query(userLoginMeta, Preconditions.checkNotNull(userId)).asList();
     }
 
     @Override

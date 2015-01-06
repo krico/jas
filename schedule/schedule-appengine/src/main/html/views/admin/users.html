@@ -55,13 +55,13 @@
                 <tr ng-repeat="user in vm.users" ng-click="vm.viewUser(user.id)">
                     <td>
                         <button type="button" class="btn btn-link btn-xs" ng-click="vm.viewUser(user.id)"><span
-                                class="glyphicon glyphicon-edit"></span> {{user.id}}
+                                class="glyphicon glyphicon-edit"></span> {{user.numericId}}
                         </button>
                     </td>
                     <td>{{user.name}}</td>
                     <td>{{user.email}}</td>
                     <td><span ng-if="user.admin" class="glyphicon glyphicon-check"></span></td>
-                    <td>{{user.created}}</td>
+                    <td>{{user.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
                 </tr>
                 <tr ng-if="vm.total == 0">
                     <td colspan="4">No results found...</td>

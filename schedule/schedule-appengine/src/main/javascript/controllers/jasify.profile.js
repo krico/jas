@@ -45,7 +45,7 @@
 
         function reset() {
             vm.user = {};
-            User.get({id: Session.userId}).then(ok, fail);
+            User.get(Session.userId).then(ok, fail);
             function ok(r) {
                 vm.user = r;
                 if (vm.profileForm) {

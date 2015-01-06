@@ -63,5 +63,7 @@ public interface UserService {
 
     List<UserLogin> getUserLogins(long userId);
 
+    List<UserLogin> getUserLogins(Key userId);
+
     int getTotalUsers();
 }
