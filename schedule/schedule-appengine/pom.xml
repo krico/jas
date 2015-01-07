@@ -53,12 +53,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>${jasify.slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.7</version>
+            <version>${jasify.slf4j.version}</version>
         </dependency>
         <!-- END: logging -->
 
@@ -89,31 +89,34 @@
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-gson</artifactId>
-            <version>1.19.0</version>
+            <version>${jasify.googleapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client</artifactId>
+            <!--<version>${jasify.googleapi.version}</version>-->
             <version>1.19.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-servlet</artifactId>
+            <!--<version>${jasify.googleapi.version}</version>-->
             <version>1.19.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-jackson2</artifactId>
-            <version>1.19.0</version>
+            <version>${jasify.googleapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-java6</artifactId>
-            <version>1.19.0</version>
+            <version>${jasify.googleapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-appengine</artifactId>
+            <!--<version>${jasify.googleapi.version}</version>-->
             <version>1.19.0</version>
         </dependency>
         <!-- END: google appengine frameworks, originally for oauth, but probably much more -->
@@ -123,7 +126,7 @@
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-oauth2</artifactId>
-            <version>v2-rev83-1.19.0</version>
+            <version>v2-rev83-${jasify.googleapi.version}</version>
         </dependency>
         <!-- END: Google API services -->
 
@@ -182,7 +185,7 @@
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
-            <version>3.2</version>
+            <version>3.3.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
