@@ -218,7 +218,13 @@ public class JasifyEndpoint {
 
 
     @ApiMethod(name = "users.query", path = "users", httpMethod = ApiMethod.HttpMethod.GET)
-    public JasUserList getUsers(User caller, @Named("offset") Integer offset, @Named("limit") Integer limit, @Named("query") String query, @Named("field") String field, @Named("orderBy") String orderBy, @Named("order") Query.SortDirection order) throws UnauthorizedException, ForbiddenException {
+    public JasUserList getUsers(User caller,
+                                @Nullable @Named("offset") Integer offset,
+                                @Nullable @Named("limit") Integer limit,
+                                @Nullable @Named("query") String query,
+                                @Nullable @Named("field") String field,
+                                @Nullable @Named("orderBy") String orderBy,
+                                @Nullable @Named("order") Query.SortDirection order) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
         JasUserList users = new JasUserList();
 
