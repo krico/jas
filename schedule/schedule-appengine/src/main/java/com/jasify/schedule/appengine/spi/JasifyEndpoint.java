@@ -18,9 +18,7 @@ import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.*;
-import com.jasify.schedule.appengine.spi.transform.JasKeyTransformer;
-import com.jasify.schedule.appengine.spi.transform.JasUserLoginTransformer;
-import com.jasify.schedule.appengine.spi.transform.JasUserTransformer;
+import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.UsernameValidator;
@@ -44,7 +42,7 @@ import java.util.regex.Pattern;
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class},
+        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
@@ -293,7 +291,7 @@ public class JasifyEndpoint {
         } else {
 
             String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
-            ret= getUserService().create(request.getUser(), pw);
+            ret = getUserService().create(request.getUser(), pw);
 
         }
 

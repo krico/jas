@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Jasify API client example</title>
+    <script language="JavaScript">
+        //pure rest /_ah/api/jasify/v1/api-info
+        function clientLoaded() {
+            debug('Client library loaded');
+
+            //var URL = 'https://jasify-schedule.appspot.com/_ah/api'; // Prod
+            var URL = '/_ah/api'; // Dev
+            /* if you have secret token */
+            gapi.auth.setToken({access_token: 'mywayfit.com is awesome!'});
+            gapi.client.load('jasify', 'v1', jasifyLoaded /* function called when api is loaded */, URL);
+        }
+
+        var activityTypes;
+
+        function jasifyLoaded() {
+            debug('Jasify API loaded');
+
+            /* Get a list of activityTypes, debug them, and store them in a global var "activityTypes"; */
+            gapi.client.jasify.activityTypes.query({partner: "mywayfit.com"})
+                    .execute(responseHandler /* function below */);
+
+
+            function responseHandler(resp) {
+                // This function gets executed when the call response arrives
+                var info = resp.result;
+                activityTypes = info.items;
+                debug('ActivityType list received (' + activityTypes.length + ' types)');
+                for (var i = 0; i < activityTypes.length; ++i) {
+                    // Here is for you to learn how to debug
+                    for (var prop in activityTypes[i]) {
+                        debug('DEBUG: ActivityType[' + i + '].' + prop + ' = [' + activityTypes[i][prop] + ']');
+                    }
+
+                    var activityType = activityTypes[i];
+                    //Now we add the activity to the table.tbody with id "activity-table"
+                    //This is what we are doing
+                    //<tr><td>activityType.name</td><td>activityType.description</td><td>activityType.id</td></tr>
+                    var tbody = document.getElementById('activity-table');
+                    var tr = tbody.appendChild(document.createElement('tr'));
+                    var td1 = tr.appendChild(document.createElement('td'));
+                    td1.appendChild(document.createTextNode(activityType.name));
+                    var td2 = tr.appendChild(document.createElement('td'));
+                    td2.appendChild(document.createTextNode(activityType.description));
+                    var td3 = tr.appendChild(document.createElement('td'));
+                    td3.appendChild(document.createTextNode(activityType.id));
+                }
+            }
+        }
+
+
+        /** This function is called when the button is clicked */
+        function queryActivities() {
+            /* Get a list of activityTypes, debug them, and store them in a global var "activityTypes"; */
+            gapi.client.jasify.activities.query({
+                // you can query with these parameters, they are all optional and if you don't set them, default values are used
+                partner: "mywayfit.com",
+                activityTypeId: activityTypes[0].id, // we got this on the jasifyLoaded
+                fromDate: new Date().toISOString(),
+                toDate: null,
+                limit: 10,
+                offset: 0
+            }).execute(responseHandler /* function below */);
+
+
+            function responseHandler(resp) {
+                if (resp.error) {
+                    var dbg = 'resp.error{';
+                    for (var prop in resp.error) {
+                        dbg += prop + '=' + resp.error[prop] + ', ';
+                    }
+                    dbg += '}';
+                    alert(dbg);
+                    return;
+                }
+                var info = resp.result;
+                var activities = info.items;
+
+                // I'm lazy, you get the point by now.  I just debug it
+                for (var i = 0; i < activities.length; ++i) {
+                    // Here is for you to learn how to debug
+                    var dbg = 'Activity[' + i + ']{';
+                    for (var prop in activities[i]) {
+                        dbg += prop + '=' + activities[i][prop] + ', ';
+                    }
+                    dbg += '}';
+                    debug(dbg);
+                }
+
+                //Ok ok ok... I make a little more pretty..  but I use innerHTML coz I'm lazy...
+                var tfoot = document.getElementById('the-foot');
+                var tr = tfoot.appendChild(document.createElement('tr'));
+                var html = '<td colspan=3><ul>';
+                for (i = 0; i < activities.length; ++i) {
+                    var a = activities[i];
+                    html += '<li>';
+                    var start = new Date(a.start);
+                    var finish = new Date(a.finish);
+                    html += '<a href="' + a.bookItUrl + '">Book IT!</a> (not working yet...)<br/>';
+                    html += '<b>From:</b> ' + start.toLocaleDateString() + ' ' + start.toLocaleTimeString() + '<br/>';
+                    html += '<b>To:</b> ' + finish.toLocaleDateString() + ' ' + finish.toLocaleTimeString() + '<br/>';
+                    html += '<b>At:</b> ' + a.location + '<br/>';
+                    html += '<b>D:</b><small> ' + a.description + '</small><br/>';
+                    html += '<b>Av. spots:</b><small> ' + (a.maxSubscriptions - a.subscriptionCount) + ' of ' + a.maxSubscriptions + '</small><br/>';
+                    html += '</li>';
+                }
+                html += '</ul></td>';
+                tr.innerHTML = html;
+            }
+
+        }
+        /**
+         * Simple function to append a log to the html page
+         * @param str to append
+         */
+        function debug(str) {
+            var li = document.createElement('li');
+            li.appendChild(document.createTextNode('[' + new Date() + '] ' + str));
+            document.getElementById('log').appendChild(li)
+        }
+    </script>
+    <script src="https://apis.google.com/js/client.js?onload=clientLoaded"></script>
+</head>
+<body>
+<h1>Jasify API client example</h1>
+
+<p>
+    Note the &lt;script src="https://apis.google.com/js/client.js?onload=<b>clientLoaded</b>"&gt;<br>
+    <b>clientLoaded</b> is the function called when the google client.js is loaded.
+</p>
+
+<p>
+    You can click on the button to query activitites
+</p>
+
+<h3>Activity Types</h3>
+
+<div id="nice">
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Activity Name</th>
+            <th>Description</th>
+            <th>Id</th>
+        </tr>
+        </thead>
+        <tbody id="activity-table"></tbody>
+        <tfoot id="the-foot">
+        <tr>
+            <td colspan="3">
+                <button style="background: #ddd; color: firebrick" onclick="queryActivities();">Query activities
+                </button>
+                &lt;&lt; this button calls the function <b>queryActivities()</b>. Watch the debug output...
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+
+<h5>Debug output</h5>
+<ul id="log" style="font-size: 9pt"></ul>
+
+</body>
+</html>
