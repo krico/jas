@@ -1,45 +1,45 @@
-package com.jasify.schedule.appengine.meta.activity;
+package com.jasify.schedule.appengine.meta.common;
 
 //@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-08 21:36:28")
 /** */
-public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.activity.ActivityType> {
+public final class GroupMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.common.Group> {
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, com.google.appengine.api.datastore.Key> id = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, com.google.appengine.api.datastore.Key>(this, "__key__", "id", com.google.appengine.api.datastore.Key.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.common.Group, com.google.appengine.api.datastore.Key> id = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.common.Group, com.google.appengine.api.datastore.Key>(this, "__key__", "id", com.google.appengine.api.datastore.Key.class);
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, java.util.Date> created = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, java.util.Date>(this, "created", "created", java.util.Date.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.common.Group, java.util.Date> created = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.common.Group, java.util.Date>(this, "created", "created", java.util.Date.class);
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, java.util.Date> modified = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, java.util.Date>(this, "modified", "modified", java.util.Date.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.common.Group, java.util.Date> modified = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.common.Group, java.util.Date>(this, "modified", "modified", java.util.Date.class);
 
     /** */
-    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType> name = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType>(this, "name", "name");
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.common.Group> name = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.common.Group>(this, "name", "name");
 
     /** */
-    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType>(this, "description", "description");
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.common.Group> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.common.Group>(this, "description", "description");
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
 
-    private static final ActivityTypeMeta slim3_singleton = new ActivityTypeMeta();
+    private static final GroupMeta slim3_singleton = new GroupMeta();
 
     /**
      * @return the singleton
      */
-    public static ActivityTypeMeta get() {
+    public static GroupMeta get() {
        return slim3_singleton;
     }
 
     /** */
-    public ActivityTypeMeta() {
-        super("ActivityType", com.jasify.schedule.appengine.model.activity.ActivityType.class);
+    public GroupMeta() {
+        super("Group", com.jasify.schedule.appengine.model.common.Group.class);
     }
 
     @Override
-    public com.jasify.schedule.appengine.model.activity.ActivityType entityToModel(com.google.appengine.api.datastore.Entity entity) {
-        com.jasify.schedule.appengine.model.activity.ActivityType model = new com.jasify.schedule.appengine.model.activity.ActivityType();
+    public com.jasify.schedule.appengine.model.common.Group entityToModel(com.google.appengine.api.datastore.Entity entity) {
+        com.jasify.schedule.appengine.model.common.Group model = new com.jasify.schedule.appengine.model.common.Group();
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setModified((java.util.Date) entity.getProperty("modified"));
@@ -50,7 +50,7 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
 
     @Override
     public com.google.appengine.api.datastore.Entity modelToEntity(java.lang.Object model) {
-        com.jasify.schedule.appengine.model.activity.ActivityType m = (com.jasify.schedule.appengine.model.activity.ActivityType) model;
+        com.jasify.schedule.appengine.model.common.Group m = (com.jasify.schedule.appengine.model.common.Group) model;
         com.google.appengine.api.datastore.Entity entity = null;
         if (m.getId() != null) {
             entity = new com.google.appengine.api.datastore.Entity(m.getId());
@@ -66,20 +66,20 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
 
     @Override
     protected com.google.appengine.api.datastore.Key getKey(Object model) {
-        com.jasify.schedule.appengine.model.activity.ActivityType m = (com.jasify.schedule.appengine.model.activity.ActivityType) model;
+        com.jasify.schedule.appengine.model.common.Group m = (com.jasify.schedule.appengine.model.common.Group) model;
         return m.getId();
     }
 
     @Override
     protected void setKey(Object model, com.google.appengine.api.datastore.Key key) {
         validateKey(key);
-        com.jasify.schedule.appengine.model.activity.ActivityType m = (com.jasify.schedule.appengine.model.activity.ActivityType) model;
+        com.jasify.schedule.appengine.model.common.Group m = (com.jasify.schedule.appengine.model.common.Group) model;
         m.setId(key);
     }
 
     @Override
     protected long getVersion(Object model) {
-        throw new IllegalStateException("The version property of the model(com.jasify.schedule.appengine.model.activity.ActivityType) is not defined.");
+        throw new IllegalStateException("The version property of the model(com.jasify.schedule.appengine.model.common.Group) is not defined.");
     }
 
     @Override
@@ -92,7 +92,7 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
 
     @Override
     protected void prePut(Object model) {
-        com.jasify.schedule.appengine.model.activity.ActivityType m = (com.jasify.schedule.appengine.model.activity.ActivityType) model;
+        com.jasify.schedule.appengine.model.common.Group m = (com.jasify.schedule.appengine.model.common.Group) model;
         m.setCreated(slim3_createdAttributeListener.prePut(m.getCreated()));
         m.setModified(slim3_modifiedAttributeListener.prePut(m.getModified()));
     }
@@ -118,7 +118,7 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
 
     @Override
     protected void modelToJson(org.slim3.datastore.json.JsonWriter writer, java.lang.Object model, int maxDepth, int currentDepth) {
-        com.jasify.schedule.appengine.model.activity.ActivityType m = (com.jasify.schedule.appengine.model.activity.ActivityType) model;
+        com.jasify.schedule.appengine.model.common.Group m = (com.jasify.schedule.appengine.model.common.Group) model;
         writer.beginObject();
         org.slim3.datastore.json.Default encoder0 = new org.slim3.datastore.json.Default();
         if(m.getId() != null){
@@ -145,8 +145,8 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
     }
 
     @Override
-    protected com.jasify.schedule.appengine.model.activity.ActivityType jsonToModel(org.slim3.datastore.json.JsonRootReader rootReader, int maxDepth, int currentDepth) {
-        com.jasify.schedule.appengine.model.activity.ActivityType m = new com.jasify.schedule.appengine.model.activity.ActivityType();
+    protected com.jasify.schedule.appengine.model.common.Group jsonToModel(org.slim3.datastore.json.JsonRootReader rootReader, int maxDepth, int currentDepth) {
+        com.jasify.schedule.appengine.model.common.Group m = new com.jasify.schedule.appengine.model.common.Group();
         org.slim3.datastore.json.JsonReader reader = null;
         org.slim3.datastore.json.Default decoder0 = new org.slim3.datastore.json.Default();
         reader = rootReader.newObjectReader("id");

@@ -34,7 +34,7 @@ public class JasifyEndpointNotMockedTest {
 
     @Test
     public void testGetUserService() throws UnauthorizedException {
-        UserService service = endpoint.getUserService();
+        UserService service = UserServiceFactory.getUserService();
         assertNotNull(service);
         assertEquals(UserServiceFactory.getUserService(), service);
     }

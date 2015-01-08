@@ -19,10 +19,7 @@ import com.jasify.schedule.appengine.util.TypeUtil;
 import com.jasify.schedule.appengine.validators.Validator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.easymock.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.slim3.datastore.Datastore;
 
@@ -39,8 +36,10 @@ import static org.easymock.EasyMock.*;
 
 @RunWith(EasyMockRunner.class)
 public class JasifyEndpointTest {
-    @Mock
     private UserService userService;
+
+    private TestUserServiceFactory testServiceFactory = new TestUserServiceFactory();
+
     @Mock
     private Validator<String> usernameValidator;
 
@@ -57,14 +56,20 @@ public class JasifyEndpointTest {
     }
 
     @AfterClass
-    public static void cleanupDatstore() {
+    public static void cleanupDatastore() {
         TestHelper.cleanupDatastore();
+    }
+
+    @Before
+    public void setUpTestServiceFactory() {
+        testServiceFactory.setUp();
+        userService = testServiceFactory.getUserServiceMock();
     }
 
     @After
     public void cleanup() {
         UserContext.clearContext();
-        EasyMock.verify(userService);
+        testServiceFactory.tearDown();
     }
 
 
@@ -426,7 +431,7 @@ public class JasifyEndpointTest {
         String query = "abc";
 
         expect(userService.getTotalUsers()).andReturn(count);
-        Capture<Pattern> captured = new Capture<>();
+        Capture<Pattern> captured = EasyMock.newCapture();
         expect(userService.searchByName(capture(captured), anyObject(Query.SortDirection.class), anyInt(), anyInt())).andReturn(expectedUsers);
         replay(userService);
 
@@ -450,7 +455,7 @@ public class JasifyEndpointTest {
         String query = "abc";
 
         expect(userService.getTotalUsers()).andReturn(count);
-        Capture<Pattern> captured = new Capture<>();
+        Capture<Pattern> captured = EasyMock.newCapture();
         expect(userService.searchByEmail(capture(captured), anyObject(Query.SortDirection.class), anyInt(), anyInt())).andReturn(expectedUsers);
         replay(userService);
 
@@ -566,7 +571,7 @@ public class JasifyEndpointTest {
         expect(servletRequest.getSession()).andReturn(session);
         replay(servletRequest);
         User value = new User();
-        final Capture<User> captured = new Capture<>();
+        final Capture<User> captured = EasyMock.newCapture();
         expect(userService.create(EasyMock.capture(captured), EasyMock.anyObject(UserLogin.class))).andAnswer(new IAnswer<User>() {
             @Override
             public User answer() throws Throwable {

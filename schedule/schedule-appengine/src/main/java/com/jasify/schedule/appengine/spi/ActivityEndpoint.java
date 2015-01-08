@@ -15,8 +15,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Endpoint for partners like mywayfit.com that want to integrate to our system
- *
  * @author krico
  * @since 07/01/15.
  */
@@ -31,8 +29,8 @@ import java.util.concurrent.TimeUnit;
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
                 packagePath = ""))
-public class PartnerEndpoint {
-    private static final Logger log = LoggerFactory.getLogger(PartnerEndpoint.class);
+public class ActivityEndpoint {
+    private static final Logger log = LoggerFactory.getLogger(ActivityEndpoint.class);
     private static final Random random = new Random();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)

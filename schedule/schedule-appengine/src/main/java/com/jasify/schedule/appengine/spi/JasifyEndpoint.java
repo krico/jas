@@ -50,7 +50,6 @@ import java.util.regex.Pattern;
 public class JasifyEndpoint {
     private static final Logger log = LoggerFactory.getLogger(JasifyEndpoint.class);
 
-    private UserService userService;
     private Validator<String> usernameValidator;
 
     static JasifyEndpointUser mustBeLoggedIn(User caller) throws UnauthorizedException {
@@ -91,13 +90,6 @@ public class JasifyEndpoint {
         return usernameValidator;
     }
 
-    UserService getUserService() {
-        if (userService == null) {
-            userService = UserServiceFactory.getUserService();
-        }
-        return userService;
-    }
-
     @ApiMethod(name = "apiInfo", path = "api-info", httpMethod = ApiMethod.HttpMethod.GET)
     public ApiInfo getApiInfo(User caller) {
         ApiInfo info = new ApiInfo();
@@ -126,7 +118,7 @@ public class JasifyEndpoint {
 
         String newPassword = Preconditions.checkNotNull(StringUtils.trimToNull(request.getNewPassword()));
 
-        com.jasify.schedule.appengine.model.users.User user = getUserService().get(request.getUserId());
+        com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(request.getUserId());
         if (user == null) throw new NotFoundException("No user");
 
         if (jasCaller.getUserId() == request.getUserId().getId()) { //change your own password
@@ -138,7 +130,7 @@ public class JasifyEndpoint {
         }
 
         log.info("User {} changing password of {}", caller, request.getUserId());
-        userService.setPassword(user, newPassword);
+        UserServiceFactory.getUserService().setPassword(user, newPassword);
     }
 
     @ApiMethod(name = "auth.login", path = "auth/login", httpMethod = ApiMethod.HttpMethod.POST)
@@ -151,7 +143,7 @@ public class JasifyEndpoint {
         }
 
         try {
-            com.jasify.schedule.appengine.model.users.User user = getUserService().login(request.getUsername(), request.getPassword());
+            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().login(request.getUsername(), request.getPassword());
             HttpUserSession userSession = new HttpUserSession(user).put(httpServletRequest);
             log.info("[{}] user={} logged in!", httpServletRequest.getRemoteAddr(), user.getName());
 
@@ -194,7 +186,7 @@ public class JasifyEndpoint {
     @ApiMethod(name = "userLogins.list", path = "user-logins/{userId}", httpMethod = ApiMethod.HttpMethod.GET)
     public List<UserLogin> listLogins(User caller, @Named("userId") Key userId) throws UnauthorizedException, ForbiddenException, NotFoundException {
         mustBeSameUserOrAdmin(caller, userId);
-        return getUserService().getUserLogins(userId);
+        return UserServiceFactory.getUserService().getUserLogins(userId);
     }
 
     @ApiMethod(name = "userLogins.remove", path = "user-logins/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
@@ -202,7 +194,7 @@ public class JasifyEndpoint {
         caller = mustBeLoggedIn(caller);
 
         Key loginKey = KeyFactory.stringToKey(Preconditions.checkNotNull(loginId));
-        UserLogin login = getUserService().getLogin(loginKey);
+        UserLogin login = UserServiceFactory.getUserService().getLogin(loginKey);
         if (login == null) {
             //nothing to do
             return;
@@ -210,7 +202,7 @@ public class JasifyEndpoint {
         Key userKey = Preconditions.checkNotNull(login.getUserRef().getKey());
         caller = mustBeSameUserOrAdmin(caller, userKey.getId());
 
-        getUserService().removeLogin(loginKey);
+        UserServiceFactory.getUserService().removeLogin(loginKey);
         log.info("Removed user: {}, login: {}", caller, login);
     }
 
@@ -230,7 +222,7 @@ public class JasifyEndpoint {
         if (limit == null) limit = Constants.DEFAULT_LIMIT;
         if (order == null) order = Constants.DEFAULT_ORDER;
 
-        UserService svc = getUserService();
+        UserService svc = UserServiceFactory.getUserService();
 
         users.setTotal(svc.getTotalUsers());
 
@@ -247,7 +239,7 @@ public class JasifyEndpoint {
     @ApiMethod(name = "users.get", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public com.jasify.schedule.appengine.model.users.User getUser(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeSameUserOrAdmin(caller, id);
-        return checkFound(getUserService().get(id));
+        return checkFound(UserServiceFactory.getUserService().get(id));
     }
 
     @ApiMethod(name = "users.update", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
@@ -255,7 +247,7 @@ public class JasifyEndpoint {
         mustBeSameUserOrAdmin(caller, id);
         user.setId(id);
         try {
-            return getUserService().save(user);
+            return UserServiceFactory.getUserService().save(user);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("User not found");
         }
@@ -286,12 +278,12 @@ public class JasifyEndpoint {
 
             UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
             session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
-            ret = getUserService().create(request.getUser(), login);
+            ret = UserServiceFactory.getUserService().create(request.getUser(), login);
 
         } else {
 
             String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
-            ret = getUserService().create(request.getUser(), pw);
+            ret = UserServiceFactory.getUserService().create(request.getUser(), pw);
 
         }
 

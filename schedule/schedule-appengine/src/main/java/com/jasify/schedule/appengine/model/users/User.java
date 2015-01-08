@@ -39,6 +39,13 @@ public class User {
 
     private ModelRef<UserDetail> detailRef = new ModelRef<>(UserDetail.class);
 
+    public User() {
+    }
+
+    public User(String name) {
+        this.name = name;
+    }
+
     public Key getId() {
         return id;
     }
