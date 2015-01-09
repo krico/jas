@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.application;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-08 21:36:28")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-09 01:22:49")
 /** */
 public final class ApplicationMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.application.Application> {
 

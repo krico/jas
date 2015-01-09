@@ -23,6 +23,19 @@ public class OrganizationMember {
 
     private ModelRef<Group> groupRef = new ModelRef<>(Group.class);
 
+    public OrganizationMember() {
+    }
+
+    public OrganizationMember(Organization o, User u) {
+        organizationRef.setKey(o.getId());
+        userRef.setKey(u.getId());
+    }
+
+    public OrganizationMember(Organization o, Group g) {
+        organizationRef.setKey(o.getId());
+        groupRef.setKey(g.getId());
+    }
+
     public Key getId() {
         return id;
     }

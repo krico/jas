@@ -6,6 +6,8 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.users.User;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author krico
  * @since 08/01/15.
@@ -18,6 +20,7 @@ public interface OrganizationService {
      * @throws UniqueConstraintException if the name already existed
      * @throws FieldValueException       if any fields had invalid values (e.g name missing)
      */
+    @Nonnull
     public Key addOrganization(Organization organization) throws UniqueConstraintException, FieldValueException;
 
     /**
@@ -26,6 +29,7 @@ public interface OrganizationService {
      * @throws EntityNotFoundException  if the organization doesn't exist
      * @throws IllegalArgumentException if <code>id</code> is not the key to an Organization
      */
+    @Nonnull
     public Organization getOrganization(Key id) throws EntityNotFoundException, IllegalArgumentException;
 
     /**
@@ -33,6 +37,7 @@ public interface OrganizationService {
      * @return the organization with name
      * @throws EntityNotFoundException if organization was not found
      */
+    @Nonnull
     public Organization getOrganization(String name) throws EntityNotFoundException;
 
     /**
@@ -78,6 +83,7 @@ public interface OrganizationService {
      * @throws UniqueConstraintException if the group name already existed withing this context (not so sure ATM)
      * @throws FieldValueException       if any fields had invalid values (e.g name missing)
      */
+    @Nonnull
     public Key addGroup(Group group) throws UniqueConstraintException, FieldValueException;
 
     /**
@@ -86,6 +92,7 @@ public interface OrganizationService {
      * @throws EntityNotFoundException  if the group doesn't exist
      * @throws IllegalArgumentException if <code>id</code> is not the key to a group
      */
+    @Nonnull
     public Group getGroup(Key id) throws EntityNotFoundException, IllegalArgumentException;
 
 

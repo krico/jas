@@ -86,7 +86,8 @@ public class OrganizationServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetOrganizationByIdNotOrganization() throws Exception {
-        organizationService.getOrganization(Datastore.allocateId(Group.class));
+        Key id = organizationService.addGroup(new Group(TEST_GROUP_NAME));
+        organizationService.getOrganization(id);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -114,7 +115,7 @@ public class OrganizationServiceTest {
 
     @Test(expected = EntityNotFoundException.class)
     public void testGetOrganizationByNameNotFound() throws Exception {
-        organizationService.addOrganization(new Organization("no"));
+        organizationService.getOrganization("not found");
     }
 
     @Test
@@ -145,6 +146,7 @@ public class OrganizationServiceTest {
         Datastore.put(user);
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         organizationService.addOrganization(organization);
+        organizationService.addUserToOrganization(organization, user);
         organizationService.addUserToOrganization(organization, user);
         organizationService.removeUserFromOrganization(organization, user);
 
@@ -182,6 +184,7 @@ public class OrganizationServiceTest {
         Key organizationId = organizationService.addOrganization(organization);
 
         organizationService.addGroupToOrganization(organization, group);
+        organizationService.addGroupToOrganization(organization, group);
         organizationService.removeGroupFromOrganization(organization, group);
 
         organization = organizationService.getOrganization(organizationId);
@@ -198,7 +201,8 @@ public class OrganizationServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRemoveOrganizationNotOrganization() throws Exception {
-        organizationService.removeOrganization(Datastore.allocateId(Group.class));
+        Key id = organizationService.addGroup(new Group(TEST_GROUP_NAME));
+        organizationService.removeOrganization(id);
     }
 
     @Test
@@ -255,7 +259,8 @@ public class OrganizationServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetGroupByIdNotGroup() throws Exception {
-        organizationService.getGroup(Datastore.allocateId(Organization.class));
+        Key id = organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME));
+        organizationService.getGroup(id);
     }
 
     @Test
@@ -265,6 +270,16 @@ public class OrganizationServiceTest {
         assertNotNull(group);
         assertEquals(TEST_GROUP_NAME, group.getName());
         assertEquals(id, group.getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testAddUserToGroupUserNotFound() throws Exception {
+        Group group = new Group(TEST_GROUP_NAME);
+        Key id = organizationService.addGroup(group);
+        User user = new User(TEST_USER_NAME);
+        user.setId(Datastore.allocateId(User.class));
+
+        organizationService.addUserToGroup(group, user);
     }
 
     @Test
@@ -297,6 +312,7 @@ public class OrganizationServiceTest {
         Datastore.put(user);
 
         organizationService.addUserToGroup(group, user);
+        organizationService.addUserToGroup(group, user);
         organizationService.removeUserFromGroup(group, user);
 
         group = organizationService.getGroup(id);
@@ -313,7 +329,8 @@ public class OrganizationServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRemoveGroupNotGroup() throws Exception {
-        organizationService.removeGroup(Datastore.allocateId(Organization.class));
+        Key id = organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME));
+        organizationService.removeGroup(id);
     }
 
     @Test

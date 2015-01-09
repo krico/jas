@@ -19,6 +19,14 @@ public class GroupUser {
 
     private ModelRef<User> userRef = new ModelRef<>(User.class);
 
+    public GroupUser() {
+    }
+
+    public GroupUser(Group g, User u) {
+        groupRef.setKey(g.getId());
+        userRef.setKey(u.getId());
+    }
+
     public Key getId() {
         return id;
     }
