@@ -98,6 +98,29 @@ final class DefaultOrganizationService implements OrganizationService {
         return ret;
     }
 
+    @Nonnull
+    @Override
+    public Organization updateOrganization(Organization organization) throws EntityNotFoundException, FieldValueException, UniqueConstraintException {
+        String name = StringUtils.trimToNull(organization.getName());
+        if (name == null) {
+            throw new FieldValueException("Organization.name");
+        }
+
+        Organization dbOrganization = getOrganization(organization.getId());
+        String oldName = null;
+        if (!StringUtils.equalsIgnoreCase(dbOrganization.getName(), name)) {
+            oldName = dbOrganization.getLcName();
+            dbOrganization.setName(name);
+            uniqueOrganizationName.reserve(StringUtils.lowerCase(name));
+        }
+        dbOrganization.setDescription(organization.getDescription());
+        Datastore.put(dbOrganization);
+
+        if (oldName != null) uniqueOrganizationName.release(StringUtils.lowerCase(oldName));
+
+        return dbOrganization;
+    }
+
     @Override
     public void addUserToOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
@@ -113,7 +136,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void removeUserFromOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
-        User dbUser = getUser(user.getId());
+        getUser(user.getId());
 
         Set<Key> toRemove = new HashSet<>();
         List<OrganizationMember> list = dbOrganization.getOrganizationMemberListRef().getModelList();
@@ -196,6 +219,21 @@ final class DefaultOrganizationService implements OrganizationService {
         } catch (EntityNotFoundRuntimeException e) {
             throw new EntityNotFoundException("Group id=" + id);
         }
+    }
+
+    @Nonnull
+    @Override
+    public Group updateGroup(Group group) throws EntityNotFoundException, FieldValueException {
+        String name = StringUtils.trimToNull(group.getName());
+        if (name == null) {
+            throw new FieldValueException("Group.name");
+        }
+
+        Group dbGroup = getGroup(group.getId());
+        dbGroup.setName(name); //TODO: Unique name?
+        dbGroup.setDescription(group.getDescription());
+        Datastore.put(dbGroup);
+        return dbGroup;
     }
 
     @Override

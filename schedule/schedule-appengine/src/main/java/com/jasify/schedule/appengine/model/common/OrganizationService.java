@@ -41,6 +41,16 @@ public interface OrganizationService {
     public Organization getOrganization(String name) throws EntityNotFoundException;
 
     /**
+     * @param organization to update
+     * @return the updated organization
+     * @throws UniqueConstraintException if the name changes and an organization exists with the new name
+     * @throws EntityNotFoundException   if the organization didn't exist
+     * @throws FieldValueException       if invalid fields are changed
+     */
+    @Nonnull
+    public Organization updateOrganization(Organization organization) throws EntityNotFoundException, FieldValueException, UniqueConstraintException;
+
+    /**
      * @param organization to add the user to
      * @param user         to be added to the organization
      * @throws EntityNotFoundException if either the user or the organization don't exist
@@ -95,6 +105,14 @@ public interface OrganizationService {
     @Nonnull
     public Group getGroup(Key id) throws EntityNotFoundException, IllegalArgumentException;
 
+    /**
+     * @param group to update
+     * @return the updated group
+     * @throws EntityNotFoundException if the group didn't exist before
+     * @throws FieldValueException     if fields have invalid values
+     */
+    @Nonnull
+    public Group updateGroup(Group group) throws EntityNotFoundException, FieldValueException;
 
     /**
      * @param group to add the user to

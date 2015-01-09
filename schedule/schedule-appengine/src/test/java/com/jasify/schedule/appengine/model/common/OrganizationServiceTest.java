@@ -119,6 +119,18 @@ public class OrganizationServiceTest {
     }
 
     @Test
+    public void testUpdateOrganization() throws Exception {
+        Organization organization = new Organization(TEST_ORGANIZATION_NAME);
+        Key id = organizationService.addOrganization(organization);
+        organization.setDescription("New Description");
+        Organization returnedOrg = organizationService.updateOrganization(organization);
+        assertNotNull(returnedOrg);
+        assertEquals(id, returnedOrg.getId());
+        Organization fetched = organizationService.getOrganization(id);
+        assertEquals("New Description", fetched.getDescription());
+    }
+
+    @Test
     public void testAddUserToOrganization() throws Exception {
         User user = new User(TEST_USER_NAME);
         Datastore.put(user);
@@ -270,6 +282,18 @@ public class OrganizationServiceTest {
         assertNotNull(group);
         assertEquals(TEST_GROUP_NAME, group.getName());
         assertEquals(id, group.getId());
+    }
+
+    @Test
+    public void testUpdateGroup() throws Exception {
+        Group group = new Group(TEST_GROUP_NAME);
+        Key id = organizationService.addGroup(group);
+        group.setDescription("New Description");
+        Group returnedGroup = organizationService.updateGroup(group);
+        assertNotNull(returnedGroup);
+        assertEquals(id, returnedGroup.getId());
+        Group fetched = organizationService.getGroup(id);
+        assertEquals("New Description", fetched.getDescription());
     }
 
     @Test(expected = EntityNotFoundException.class)
