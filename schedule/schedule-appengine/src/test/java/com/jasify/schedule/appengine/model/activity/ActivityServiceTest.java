@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +21,6 @@ import static junit.framework.TestCase.*;
 
 public class ActivityServiceTest {
     private static final String TEST_ACTIVITY_TYPE = "Test Activity Type";
-    private static final String TEST_ACTIVITY = "Test Activity";
     private ActivityService activityService;
     private Organization organization1 = new Organization("Org1");
     private Organization organization2 = new Organization("Org2");
@@ -133,6 +133,7 @@ public class ActivityServiceTest {
 
     @Test
     public void testGetActivityTypes() throws Exception {
+        Datastore.delete(activityType1OfOrganization1.getId(), activityType2OfOrganization1.getId()); //clean slate ;-)
         List<ActivityType> activityTypes = activityService.getActivityTypes(organization1);
         assertNotNull(activityTypes);
         assertTrue(activityTypes.isEmpty());
@@ -181,7 +182,7 @@ public class ActivityServiceTest {
     @Test
     public void testRemoveActivityType() throws Exception {
         Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        activityService.removeActivity(id);
+        activityService.removeActivityType(id);
         assertNull(Datastore.getOrNull(id));
     }
 
@@ -289,14 +290,38 @@ public class ActivityServiceTest {
     public void testUpdateActivity() throws Exception {
         Activity activity = new Activity(activityType1OfOrganization1);
         Key id = activityService.addActivity(activity);
+        Date expected = activity.getCreated();
         activity.setName("New Name");
         activity.setDescription("Description");
+        activity.setCurrency("CHF");
+        activity.setMaxSubscriptions(20);
+        activity.setSubscriptionCount(10);
+        activity.setStart(new Date(2));
+        activity.setFinish(new Date(5));
+        activity.setLocation("Location");
+
+        activity.setCreated(new Date(99));
+        activity.setModified(new Date(25));
+        long before = System.currentTimeMillis();
+
         Activity updatedActivity = activityService.updateActivity(activity);
+
         assertNotNull(updatedActivity);
         assertEquals(id, updatedActivity.getId());
         assertEquals("New Name", updatedActivity.getName());
         assertEquals("Description", updatedActivity.getDescription());
-        assertEquals("New Name", activityService.getActivity(id).getName());
+
+        Activity fetched = activityService.getActivity(id);
+        assertEquals("New Name", fetched.getName());
+        assertEquals("Description", fetched.getDescription());
+        assertEquals("CHF", fetched.getCurrency());
+        assertEquals(20, fetched.getMaxSubscriptions());
+        assertEquals(10, fetched.getSubscriptionCount());
+        assertEquals(new Date(2), fetched.getStart());
+        assertEquals(new Date(5), fetched.getFinish());
+        assertEquals("Location", fetched.getLocation());
+        assertEquals(expected, fetched.getCreated());
+        assertTrue(before <= fetched.getModified().getTime());
     }
 
     @Test

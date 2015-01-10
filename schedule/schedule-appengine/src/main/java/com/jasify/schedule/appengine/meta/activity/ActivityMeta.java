@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.activity;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-09 01:22:49")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-11 00:42:30")
 /** */
 public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.activity.Activity> {
 
@@ -36,6 +36,9 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity, java.lang.Integer> subscriptionCount = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity, java.lang.Integer>(this, "subscriptionCount", "subscriptionCount", int.class);
+
+    /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity> name = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity>(this, "name", "name");
 
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity>(this, "description", "description");
@@ -75,6 +78,7 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         model.setLocation((java.lang.String) entity.getProperty("location"));
         model.setMaxSubscriptions(longToPrimitiveInt((java.lang.Long) entity.getProperty("maxSubscriptions")));
         model.setSubscriptionCount(longToPrimitiveInt((java.lang.Long) entity.getProperty("subscriptionCount")));
+        model.setName((java.lang.String) entity.getProperty("name"));
         model.setDescription((java.lang.String) entity.getProperty("description"));
         return model;
     }
@@ -101,6 +105,7 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         entity.setProperty("location", m.getLocation());
         entity.setProperty("maxSubscriptions", m.getMaxSubscriptions());
         entity.setProperty("subscriptionCount", m.getSubscriptionCount());
+        entity.setProperty("name", m.getName());
         entity.setProperty("description", m.getDescription());
         return entity;
     }
@@ -207,6 +212,10 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         encoder0.encode(writer, m.getMaxSubscriptions());
         writer.setNextPropertyName("subscriptionCount");
         encoder0.encode(writer, m.getSubscriptionCount());
+        if(m.getName() != null){
+            writer.setNextPropertyName("name");
+            encoder0.encode(writer, m.getName());
+        }
         if(m.getDescription() != null){
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
@@ -241,6 +250,8 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         m.setMaxSubscriptions(decoder0.decode(reader, m.getMaxSubscriptions()));
         reader = rootReader.newObjectReader("subscriptionCount");
         m.setSubscriptionCount(decoder0.decode(reader, m.getSubscriptionCount()));
+        reader = rootReader.newObjectReader("name");
+        m.setName(decoder0.decode(reader, m.getName()));
         reader = rootReader.newObjectReader("description");
         m.setDescription(decoder0.decode(reader, m.getDescription()));
         return m;

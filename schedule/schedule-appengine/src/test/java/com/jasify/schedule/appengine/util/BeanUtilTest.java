@@ -8,6 +8,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Date;
+
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
@@ -68,6 +70,20 @@ public class BeanUtilTest {
         assertEquals(expectedKey, to.getId());
     }
 
+    @Test
+    public void testCopyPropertiesKeyToKey() {
+        EKeyId from = new EKeyId();
+        Key expectedKey = KeyFactory.createKey("E", 1);
+
+        from.setId(expectedKey);
+
+        EKeyId to = new EKeyId();
+
+        BeanUtil.copyProperties(to, from);
+
+        assertEquals(expectedKey, to.getId());
+    }
+
     @Test(expected = RuntimeException.class)
     public void testCopyPropertiesPrivateSetter() {
         E1 from = new E1();
@@ -76,6 +92,27 @@ public class BeanUtilTest {
         E3Throws to = new E3Throws();
 
         BeanUtil.copyProperties(to, from);
+    }
+
+    @Test
+    public void testCopyPropertiesExcluding() {
+        E from = new E();
+        from.setSomeString("string");
+        from.setSomeDate(new Date());
+        from.setSomeInteger(1234);
+        from.setSomeboolean(false);
+        from.setSomelong(9L);
+
+        E to = new E();
+        to.setSomeboolean(true);
+        to.setSomeDate(new Date(5));
+
+        BeanUtil.copyPropertiesExcluding(to, from, "someboolean", "someDate");
+        assertEquals("string", to.getSomeString());
+        assertEquals(new Date(5), to.getSomeDate());
+        assertEquals((Integer) 1234, to.getSomeInteger());
+        assertEquals(true, to.isSomeboolean());
+        assertEquals(9L, to.getSomelong());
     }
 
     public static class E1 {
@@ -130,6 +167,54 @@ public class BeanUtilTest {
 
         public void setId(String id) {
             this.id = id;
+        }
+    }
+
+    public static class E {
+        private String someString;
+        private Date someDate;
+        private Integer someInteger;
+        private boolean someboolean;
+        private long somelong;
+
+        public String getSomeString() {
+            return someString;
+        }
+
+        public void setSomeString(String someString) {
+            this.someString = someString;
+        }
+
+        public Date getSomeDate() {
+            return someDate;
+        }
+
+        public void setSomeDate(Date someDate) {
+            this.someDate = someDate;
+        }
+
+        public Integer getSomeInteger() {
+            return someInteger;
+        }
+
+        public void setSomeInteger(Integer someInteger) {
+            this.someInteger = someInteger;
+        }
+
+        public boolean isSomeboolean() {
+            return someboolean;
+        }
+
+        public void setSomeboolean(boolean someboolean) {
+            this.someboolean = someboolean;
+        }
+
+        public long getSomelong() {
+            return somelong;
+        }
+
+        public void setSomelong(long somelong) {
+            this.somelong = somelong;
         }
     }
 }

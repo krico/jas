@@ -9,6 +9,8 @@ import org.apache.commons.beanutils.*;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author krico
@@ -25,6 +27,8 @@ public final class BeanUtil {
                 return (T) KeyFactory.stringToKey((String) value);
             } else if (targetType == String.class && value instanceof Key) {
                 return (T) KeyFactory.keyToString((Key) value);
+            } else if (targetType == Key.class && value instanceof Key) {
+                return (T) value;
             }
 
             throw new ConversionException("Can't convert " + value.getClass().getName() + " -> " + targetType.getName());
@@ -63,6 +67,16 @@ public final class BeanUtil {
             throw new RuntimeException("Failed to copy properties "
                     + origin.getClass().getName() + " -> " + destination.getClass().getName());
         }
+    }
+
+    public static void copyPropertiesExcluding(Object destination, Object origin, String... excludedProperties) {
+        Preconditions.checkNotNull(destination);
+        Preconditions.checkNotNull(origin);
+        Map<Object, Object> beanMap = new HashMap<>(new BeanMap(origin));
+        for (String excludedProperty : excludedProperties) {
+            beanMap.remove(excludedProperty);
+        }
+        copyProperties(destination, beanMap);
     }
 
     private static class Singleton {
