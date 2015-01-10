@@ -122,23 +122,23 @@ public class OrganizationServiceTest {
 
     @Test
     public void testGetGroups() throws Exception {
-        List<Group> Groups = organizationService.getGroups();
-        assertNotNull(Groups);
-        assertTrue(Groups.isEmpty());
+        List<Group> groups = organizationService.getGroups();
+        assertNotNull(groups);
+        assertTrue(groups.isEmpty());
         int total = 20;
         Set<Key> added = new HashSet<>();
         for (int i = 0; i < total; ++i) {
             added.add(organizationService.addGroup(new Group(TEST_GROUP_NAME + i)));
         }
 
-        Groups = organizationService.getGroups();
-        assertNotNull(Groups);
-        assertEquals(20, Groups.size());
+        groups = organizationService.getGroups();
+        assertNotNull(groups);
+        assertEquals(20, groups.size());
         assertEquals(20, added.size());
-        for (Group Group : Groups) {
-            assertTrue(added.contains(Group.getId()));
+        for (Group group : groups) {
+            assertTrue(added.remove(group.getId()));
         }
-
+        assertTrue(added.isEmpty());
     }
 
     @Test
@@ -157,9 +157,9 @@ public class OrganizationServiceTest {
         assertEquals(20, organizations.size());
         assertEquals(20, added.size());
         for (Organization organization : organizations) {
-            assertTrue(added.contains(organization.getId()));
+            assertTrue(added.remove(organization.getId()));
         }
-
+        assertTrue(added.isEmpty());
     }
 
     @Test

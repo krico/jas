@@ -1,0 +1,308 @@
+package com.jasify.schedule.appengine.model.activity;
+
+import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.common.Organization;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slim3.datastore.Datastore;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static junit.framework.TestCase.*;
+
+public class ActivityServiceTest {
+    private static final String TEST_ACTIVITY_TYPE = "Test Activity Type";
+    private static final String TEST_ACTIVITY = "Test Activity";
+    private ActivityService activityService;
+    private Organization organization1 = new Organization("Org1");
+    private Organization organization2 = new Organization("Org2");
+    private ActivityType activityType1OfOrganization1 = new ActivityType("AT1");
+    private ActivityType activityType2OfOrganization1 = new ActivityType("AT2");
+
+    @Before
+    public void initializeDatastore() {
+        TestHelper.initializeJasify();
+        activityService = ActivityServiceFactory.getActivityService();
+        Datastore.put(organization1, organization2);
+        activityType1OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
+        activityType2OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
+        Datastore.put(activityType1OfOrganization1, activityType2OfOrganization1);
+    }
+
+    @After
+    public void cleanupDatastore() {
+        TestHelper.cleanupDatastore();
+    }
+
+    @Test
+    public void testAddActivityType() throws Exception {
+        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        assertNotNull(id);
+    }
+
+    @Test
+    public void testAddActivityTypeSameNameInDifferentOrganizations() throws Exception {
+        Key id1 = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        Key id2 = activityService.addActivityType(organization2, new ActivityType(TEST_ACTIVITY_TYPE));
+        assertNotNull(id1);
+        assertNotNull(id2);
+        assertNotSame(id1, id2);
+    }
+
+    @Test(expected = UniqueConstraintException.class)
+    public void testAddActivityTypeThrowsUniqueNameConstraint() throws Exception {
+        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testAddActivityTypeThrowsNotFound() throws Exception {
+        activityService.addActivityType(new Organization("any"), new ActivityType(TEST_ACTIVITY_TYPE));
+    }
+
+    @Test(expected = FieldValueException.class)
+    public void testAddActivityTypeThrowsFieldValueException() throws Exception {
+        activityService.addActivityType(organization1, new ActivityType());
+    }
+
+    @Test
+    public void testGetActivityTypeById() throws Exception {
+        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        ActivityType activityType = activityService.getActivityType(id);
+        assertNotNull(activityType);
+        assertEquals(id, activityType.getId());
+        assertEquals(TEST_ACTIVITY_TYPE, activityType.getName());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityTypeByIdThrowsEntityNotFound() throws Exception {
+        activityService.getActivityType(Datastore.allocateId(ActivityType.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetActivityTypeByIdThrowsIllegalArgumentException() throws Exception {
+        activityService.getActivityType(organization1.getId());
+    }
+
+    @Test
+    public void testGetActivityTypeByName() throws Exception {
+        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        ActivityType activityType = activityService.getActivityType(organization1, TEST_ACTIVITY_TYPE);
+        assertNotNull(activityType);
+        assertEquals(id, activityType.getId());
+        assertEquals(TEST_ACTIVITY_TYPE, activityType.getName());
+    }
+
+    @Test
+    public void testGetActivityTypeByNameCaseInsensitive() throws Exception {
+        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        activityService.getActivityType(organization1, TEST_ACTIVITY_TYPE.toLowerCase());
+    }
+
+    @Test
+    public void testGetActivityTypeByNameWithTwoOrganizations() throws Exception {
+        Key id1 = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        Key id2 = activityService.addActivityType(organization2, new ActivityType(TEST_ACTIVITY_TYPE));
+        ActivityType activityType1 = activityService.getActivityType(organization1, TEST_ACTIVITY_TYPE.toLowerCase());
+        ActivityType activityType2 = activityService.getActivityType(organization2, TEST_ACTIVITY_TYPE.toLowerCase());
+        assertNotNull(activityType1);
+        assertNotNull(activityType2);
+        assertEquals(id1, activityType1.getId());
+        assertEquals(id2, activityType2.getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityTypeByNameWithNoOrganization() throws Exception {
+        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        activityService.getActivityType(new Organization("foo"), TEST_ACTIVITY_TYPE);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityTypeByNameWithNoName() throws Exception {
+        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        activityService.getActivityType(organization1, "x" + TEST_ACTIVITY_TYPE);
+    }
+
+    @Test
+    public void testGetActivityTypes() throws Exception {
+        List<ActivityType> activityTypes = activityService.getActivityTypes(organization1);
+        assertNotNull(activityTypes);
+        assertTrue(activityTypes.isEmpty());
+        int total = 20;
+        Set<Key> added = new HashSet<>();
+        for (int i = 0; i < total; ++i) {
+            added.add(activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE + i)));
+        }
+
+        activityTypes = activityService.getActivityTypes(organization1);
+        assertNotNull(activityTypes);
+        assertEquals(20, activityTypes.size());
+        assertEquals(20, added.size());
+        for (ActivityType activityType : activityTypes) {
+            assertTrue(added.remove(activityType.getId()));
+        }
+        assertTrue(added.isEmpty());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityTypesThrowsNotFound() throws Exception {
+        activityService.getActivityTypes(new Organization("Foo"));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityTypesThrowsNotFoundWithId() throws Exception {
+        Organization foo = new Organization("Foo");
+        foo.setId(Datastore.allocateId(Organization.class));
+        activityService.getActivityTypes(foo);
+    }
+
+    @Test
+    public void testUpdateActivityType() throws Exception {
+        ActivityType activityType = new ActivityType(TEST_ACTIVITY_TYPE);
+        Key id = activityService.addActivityType(organization1, activityType);
+        activityType.setName("New Name");
+        activityType.setDescription("Description");
+        ActivityType updatedActivityType = activityService.updateActivityType(activityType);
+        assertNotNull(updatedActivityType);
+        assertEquals(id, updatedActivityType.getId());
+        assertEquals("New Name", updatedActivityType.getName());
+        assertEquals("Description", updatedActivityType.getDescription());
+        assertEquals("New Name", activityService.getActivityType(id).getName());
+    }
+
+    @Test
+    public void testRemoveActivityType() throws Exception {
+        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
+        activityService.removeActivity(id);
+        assertNull(Datastore.getOrNull(id));
+    }
+
+    @Test
+    public void testAddActivity() throws Exception {
+        Key id = activityService.addActivity(new Activity(activityType1OfOrganization1));
+        assertNotNull(id);
+        Key parent = id.getParent();
+        assertNotNull(parent);
+        assertEquals(organization1.getId(), parent);
+    }
+
+    @Test
+    public void testGetActivity() throws Exception {
+        Key id = activityService.addActivity(new Activity(activityType1OfOrganization1));
+        Activity activity = activityService.getActivity(id);
+        assertNotNull(activity);
+        assertEquals(activityType1OfOrganization1.getName(), activity.getName());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivitiesByOrganizationNotFound() throws Exception {
+        try {
+            Datastore.delete(organization1.getId());
+        } catch (Exception e) {
+            fail();
+        }
+        activityService.getActivities(organization1);
+    }
+
+    @Test
+    public void testGetActivitiesByOrganization() throws Exception {
+        List<Activity> activities = activityService.getActivities(organization1);
+        assertNotNull(activities);
+        assertTrue(activities.isEmpty());
+        int total = 20;
+        Set<Key> added = new HashSet<>();
+        for (int i = 0; i < total; ++i) {
+            if (i % 3 == 0) {
+                added.add(activityService.addActivity(new Activity(activityType1OfOrganization1)));
+            } else {
+                added.add(activityService.addActivity(new Activity(activityType2OfOrganization1)));
+            }
+        }
+
+        activities = activityService.getActivities(organization1);
+        assertNotNull(activities);
+        assertEquals(20, activities.size());
+        assertEquals(20, added.size());
+        for (Activity activity : activities) {
+            assertTrue(added.remove(activity.getId()));
+        }
+        assertTrue(added.isEmpty());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivitiesByActivityTypeNotFound() throws Exception {
+        try {
+            Datastore.delete(activityType1OfOrganization1.getId());
+        } catch (Exception e) {
+            fail();
+        }
+        activityService.getActivities(activityType1OfOrganization1);
+    }
+
+    @Test
+    public void testGetActivitiesByActivityType() throws Exception {
+        List<Activity> activities = activityService.getActivities(activityType1OfOrganization1);
+        assertNotNull(activities);
+        assertTrue(activities.isEmpty());
+
+        activities = activityService.getActivities(activityType2OfOrganization1);
+        assertNotNull(activities);
+        assertTrue(activities.isEmpty());
+
+        int total = 20;
+        Set<Key> addedType1 = new HashSet<>();
+        Set<Key> addedType2 = new HashSet<>();
+        for (int i = 0; i < total; ++i) {
+            if (i % 3 == 0) {
+                addedType1.add(activityService.addActivity(new Activity(activityType1OfOrganization1)));
+            } else {
+                addedType2.add(activityService.addActivity(new Activity(activityType2OfOrganization1)));
+            }
+        }
+
+        activities = activityService.getActivities(activityType1OfOrganization1);
+        assertNotNull(activities);
+        assertEquals(addedType1.size(), activities.size());
+        for (Activity activity : activities) {
+            assertTrue(addedType1.remove(activity.getId()));
+        }
+        assertTrue(addedType1.isEmpty());
+
+        activities = activityService.getActivities(activityType2OfOrganization1);
+        assertNotNull(activities);
+        assertEquals(addedType2.size(), activities.size());
+        for (Activity activity : activities) {
+            assertTrue(addedType2.remove(activity.getId()));
+        }
+        assertTrue(addedType2.isEmpty());
+    }
+
+    @Test
+    public void testUpdateActivity() throws Exception {
+        Activity activity = new Activity(activityType1OfOrganization1);
+        Key id = activityService.addActivity(activity);
+        activity.setName("New Name");
+        activity.setDescription("Description");
+        Activity updatedActivity = activityService.updateActivity(activity);
+        assertNotNull(updatedActivity);
+        assertEquals(id, updatedActivity.getId());
+        assertEquals("New Name", updatedActivity.getName());
+        assertEquals("Description", updatedActivity.getDescription());
+        assertEquals("New Name", activityService.getActivity(id).getName());
+    }
+
+    @Test
+    public void testRemoveActivity() throws Exception {
+        Key id = activityService.addActivity(new Activity(activityType1OfOrganization1));
+        activityService.removeActivity(id);
+        assertNull(Datastore.getOrNull(id));
+    }
+}

@@ -27,6 +27,13 @@ public class ActivityType {
 
     private String description;
 
+    public ActivityType() {
+    }
+
+    public ActivityType(String name) {
+        setName(name);
+    }
+
     public Key getId() {
         return id;
     }

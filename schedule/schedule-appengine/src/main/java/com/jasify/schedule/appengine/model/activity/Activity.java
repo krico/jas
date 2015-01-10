@@ -36,7 +36,17 @@ public class Activity {
 
     private int subscriptionCount;
 
+    private String name;
+
     private String description;
+
+    public Activity() {
+    }
+
+    public Activity(ActivityType activityType) {
+        setName(activityType.getName());
+        activityTypeRef.setModel(activityType);
+    }
 
     public Key getId() {
         return id;
@@ -120,6 +130,14 @@ public class Activity {
 
     public void setSubscriptionCount(int subscriptionCount) {
         this.subscriptionCount = subscriptionCount;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
