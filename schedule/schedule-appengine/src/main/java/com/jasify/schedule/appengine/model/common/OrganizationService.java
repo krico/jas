@@ -7,6 +7,7 @@ import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.users.User;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author krico
@@ -39,6 +40,12 @@ public interface OrganizationService {
      */
     @Nonnull
     public Organization getOrganization(String name) throws EntityNotFoundException;
+
+    /**
+     * @return all organizations
+     */
+    @Nonnull
+    public List<Organization> getOrganizations();
 
     /**
      * @param organization to update
@@ -104,6 +111,12 @@ public interface OrganizationService {
      */
     @Nonnull
     public Group getGroup(Key id) throws EntityNotFoundException, IllegalArgumentException;
+
+    /**
+     * @return all groups
+     */
+    @Nonnull
+    public List<Group> getGroups();
 
     /**
      * @param group to update

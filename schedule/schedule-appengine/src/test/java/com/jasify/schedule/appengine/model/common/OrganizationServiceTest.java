@@ -14,7 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.TestCase.*;
 
@@ -116,6 +118,48 @@ public class OrganizationServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testGetOrganizationByNameNotFound() throws Exception {
         organizationService.getOrganization("not found");
+    }
+
+    @Test
+    public void testGetGroups() throws Exception {
+        List<Group> Groups = organizationService.getGroups();
+        assertNotNull(Groups);
+        assertTrue(Groups.isEmpty());
+        int total = 20;
+        Set<Key> added = new HashSet<>();
+        for (int i = 0; i < total; ++i) {
+            added.add(organizationService.addGroup(new Group(TEST_GROUP_NAME + i)));
+        }
+
+        Groups = organizationService.getGroups();
+        assertNotNull(Groups);
+        assertEquals(20, Groups.size());
+        assertEquals(20, added.size());
+        for (Group Group : Groups) {
+            assertTrue(added.contains(Group.getId()));
+        }
+
+    }
+
+    @Test
+    public void testGetOrganizations() throws Exception {
+        List<Organization> organizations = organizationService.getOrganizations();
+        assertNotNull(organizations);
+        assertTrue(organizations.isEmpty());
+        int total = 20;
+        Set<Key> added = new HashSet<>();
+        for (int i = 0; i < total; ++i) {
+            added.add(organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME + i)));
+        }
+
+        organizations = organizationService.getOrganizations();
+        assertNotNull(organizations);
+        assertEquals(20, organizations.size());
+        assertEquals(20, added.size());
+        for (Organization organization : organizations) {
+            assertTrue(added.contains(organization.getId()));
+        }
+
     }
 
     @Test

@@ -3,8 +3,6 @@ package com.jasify.schedule.appengine.model.common;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.meta.common.GroupMeta;
-import com.jasify.schedule.appengine.meta.common.GroupUserMeta;
-import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -13,8 +11,6 @@ import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
@@ -29,23 +25,17 @@ import java.util.Set;
  * @since 08/01/15.
  */
 final class DefaultOrganizationService implements OrganizationService {
-    private static final Logger log = LoggerFactory.getLogger(DefaultOrganizationService.class);
-
     private final UserMeta userMeta;
     private final OrganizationMeta organizationMeta;
     private final UniqueConstraint uniqueOrganizationName;
 
-    private final OrganizationMemberMeta organizationMemberMeta;
     private final GroupMeta groupMeta;
-    private final GroupUserMeta groupUserMeta;
 
     private DefaultOrganizationService() {
         userMeta = UserMeta.get();
         organizationMeta = OrganizationMeta.get();
         uniqueOrganizationName = UniqueConstraint.create(organizationMeta, organizationMeta.name);
-        organizationMemberMeta = OrganizationMemberMeta.get();
         groupMeta = GroupMeta.get();
-        groupUserMeta = GroupUserMeta.get();
     }
 
     static OrganizationService instance() {
@@ -96,6 +86,12 @@ final class DefaultOrganizationService implements OrganizationService {
         Organization ret = Datastore.query(organizationMeta).filter(organizationMeta.lcName.equal(StringUtils.lowerCase(name))).asSingle();
         if (ret == null) throw new EntityNotFoundException("Organization name=" + name);
         return ret;
+    }
+
+    @Nonnull
+    @Override
+    public List<Organization> getOrganizations() {
+        return Datastore.query(organizationMeta).asList();
     }
 
     @Nonnull
@@ -219,6 +215,12 @@ final class DefaultOrganizationService implements OrganizationService {
         } catch (EntityNotFoundRuntimeException e) {
             throw new EntityNotFoundException("Group id=" + id);
         }
+    }
+
+    @Nonnull
+    @Override
+    public List<Group> getGroups() {
+        return Datastore.query(groupMeta).asList();
     }
 
     @Nonnull
