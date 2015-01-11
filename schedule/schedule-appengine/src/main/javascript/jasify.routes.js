@@ -105,7 +105,25 @@
                         return Allow.admin();
                     }
                 }
-            });
+            })
+            .when('/admin/organizations', {
+                templateUrl: 'views/admin/organizations.html',
+                controller: 'AdminOrganizationsController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
+        ;
         /* END: Admin routes */
 
     }

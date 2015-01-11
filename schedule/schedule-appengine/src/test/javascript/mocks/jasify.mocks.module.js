@@ -23,26 +23,41 @@
     ng.module('jasify.mocks').factory('$modalMock', $modalMock);
 
     function $gapiMock() {
+        var nop = angular.noop;
         /* we mock all api calls, you can always override or spyOn them */
         var jasify = {
-            apiInfo: angular.noop,
+            apiInfo: nop,
             userLogins: {
-                list: angular.noop,
-                remove: angular.noop
+                list: nop,
+                remove: nop
             },
             users: {
-                query: angular.noop,
-                get: angular.noop,
-                update: angular.noop,
-                add: angular.noop
+                query: nop,
+                get: nop,
+                update: nop,
+                add: nop
             },
             username: {
-                check: angular.noop
+                check: nop
             },
             auth: {
-                login: angular.noop,
-                changePassword: angular.noop,
-                logout: angular.noop
+                login: nop,
+                changePassword: nop,
+                logout: nop
+            },
+            organizations: {
+                query: nop,
+                get: nop,
+                update: nop,
+                add: nop,
+                remove: nop
+            },
+            groups: {
+                query: nop,
+                get: nop,
+                update: nop,
+                add: nop,
+                remove: nop
             }
         };
 

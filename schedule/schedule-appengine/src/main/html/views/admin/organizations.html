@@ -1,0 +1,13 @@
+<button ng-click="vm.test()">test</button><br/>
+Organizations:
+<ul>
+    <li ng-repeat="org in vm.organizations">{{org.name}}<br/>
+        <a ng-click="vm.remove(org.id)">remove</a>
+        <a ng-click="vm.update(org)">update</a>
+        <small>{{org.description}}</small>
+    </li>
+</ul>
+Response:
+<pre class="success">{{vm.lastResponse}}</pre>
+Failuer:
+<pre class="danger">{{vm.lastFailure}}</pre>
