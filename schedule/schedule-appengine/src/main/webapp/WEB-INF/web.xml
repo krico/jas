@@ -21,7 +21,14 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>com.jasify.schedule.appengine.spi.JasifyEndpoint</param-value>
+            <param-value>
+                com.jasify.schedule.appengine.spi.AuthEndpoint,
+                com.jasify.schedule.appengine.spi.ActivityEndpoint,
+                com.jasify.schedule.appengine.spi.JasifyEndpoint,
+                com.jasify.schedule.appengine.spi.UserEndpoint,
+                com.jasify.schedule.appengine.spi.UserLoginEndpoint,
+                com.jasify.schedule.appengine.spi.UsernameEndpoint
+            </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

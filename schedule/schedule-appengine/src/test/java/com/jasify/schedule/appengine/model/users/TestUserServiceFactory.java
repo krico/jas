@@ -17,7 +17,8 @@ public class TestUserServiceFactory extends UserServiceFactory {
 
     public void tearDown() {
         setInstance(null);
-        EasyMock.verify(userServiceMock);
+        if (userServiceMock != null)
+            EasyMock.verify(userServiceMock);
         userServiceMock = null;
     }
 
