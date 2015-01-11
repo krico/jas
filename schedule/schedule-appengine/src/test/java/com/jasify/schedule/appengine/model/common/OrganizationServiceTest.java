@@ -21,7 +21,6 @@ import java.util.Set;
 import static junit.framework.TestCase.*;
 
 public class OrganizationServiceTest {
-    private static final Logger log = LoggerFactory.getLogger(OrganizationServiceTest.class);
     private static final String TEST_USER_NAME = "pablo";
     private static final String TEST_ORGANIZATION_NAME = "Organization Named Test";
     private static final String TEST_GROUP_NAME = "Group Named Test";
