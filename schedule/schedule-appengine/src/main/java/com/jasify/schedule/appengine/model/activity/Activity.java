@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import org.slim3.datastore.*;
 
 import java.util.Date;
@@ -39,6 +40,11 @@ public class Activity {
     private String name;
 
     private String description;
+
+    @Attribute(persistent = false)
+    private InverseModelListRef<Subscription, Activity> subscriptionListRef =
+            new InverseModelListRef<>(Subscription.class, SubscriptionMeta.get().activityRef.getName(), this);
+
 
     public Activity() {
     }
@@ -146,5 +152,9 @@ public class Activity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public InverseModelListRef<Subscription, Activity> getSubscriptionListRef() {
+        return subscriptionListRef;
     }
 }

@@ -7,6 +7,7 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import static junit.framework.TestCase.*;
 public class ActivityServiceTest {
     private static final String TEST_ACTIVITY_TYPE = "Test Activity Type";
     private ActivityService activityService;
+    private User testUser = new User("testuser");
     private Organization organization1 = new Organization("Org1");
     private Organization organization2 = new Organization("Org2");
     private ActivityType activityType1OfOrganization1 = new ActivityType("AT1");
@@ -31,7 +33,7 @@ public class ActivityServiceTest {
     public void initializeDatastore() {
         TestHelper.initializeJasify();
         activityService = ActivityServiceFactory.getActivityService();
-        Datastore.put(organization1, organization2);
+        Datastore.put(organization1, organization2, testUser);
         activityType1OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
         activityType2OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
         Datastore.put(activityType1OfOrganization1, activityType2OfOrganization1);
@@ -329,5 +331,38 @@ public class ActivityServiceTest {
         Key id = activityService.addActivity(new Activity(activityType1OfOrganization1));
         activityService.removeActivity(id);
         assertNull(Datastore.getOrNull(id));
+    }
+
+    @Test
+    public void testSubscribe() throws Exception {
+        Activity activity = new Activity(activityType1OfOrganization1);
+        activityService.addActivity(activity);
+        Subscription subscription = activityService.subscribe(testUser, activity);
+        assertNotNull(subscription);
+        assertEquals(testUser.getId(), subscription.getUserRef().getKey());
+        assertEquals(activity.getId(), subscription.getActivityRef().getKey());
+        assertEquals(1, activity.getSubscriptionCount());
+        List<Subscription> modelList = activity.getSubscriptionListRef().getModelList();
+        assertEquals(1, modelList.size());
+        assertEquals(subscription.getId(), modelList.get(0).getId());
+    }
+
+    @Test
+    public void testCancel() throws Exception {
+        Activity activity = new Activity(activityType1OfOrganization1);
+        activityService.addActivity(activity);
+        Subscription subscription = activityService.subscribe(testUser, activity);
+
+        // cache it in
+        activity.getSubscriptionListRef().getModelList();
+
+        activityService.cancel(subscription);
+
+        activity = activityService.getActivity(activity.getId());
+
+        assertEquals(0, activity.getSubscriptionCount());
+        List<Subscription> modelList = activity.getSubscriptionListRef().getModelList();
+        assertTrue(modelList.isEmpty());
+        assertNull(Datastore.getOrNull(subscription.getId()));
     }
 }

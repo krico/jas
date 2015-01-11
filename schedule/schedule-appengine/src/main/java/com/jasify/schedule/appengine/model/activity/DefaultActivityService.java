@@ -4,11 +4,14 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
+import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
+import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
@@ -25,16 +28,21 @@ class DefaultActivityService implements ActivityService {
     private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
     private final OrganizationMeta organizationMeta;
+    private final UserMeta userMeta;
+    private final SubscriptionMeta subscriptionMeta;
 
     private DefaultActivityService() {
         activityTypeMeta = ActivityTypeMeta.get();
         activityMeta = ActivityMeta.get();
         organizationMeta = OrganizationMeta.get();
+        userMeta = UserMeta.get();
+        subscriptionMeta = SubscriptionMeta.get();
     }
 
     static ActivityService instance() {
         return Singleton.INSTANCE;
     }
+
 
     private Organization getOrganization(Key id) throws EntityNotFoundException {
         if (id == null) throw new EntityNotFoundException("Organization.id=NULL");
@@ -46,13 +54,32 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
+    private User getUser(Key id) throws EntityNotFoundException {
+        if (id == null) throw new EntityNotFoundException("User id=NULL");
+
+        try {
+            return Datastore.get(userMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("User id=" + id);
+        }
+    }
+
+    private Subscription getSubscription(Key id) throws EntityNotFoundException {
+        if (id == null) throw new EntityNotFoundException("Subscription id=NULL");
+
+        try {
+            return Datastore.get(subscriptionMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("Subscription id=" + id);
+        }
+    }
+
     private boolean isActivityTypeNameUnique(Transaction tx, Key organizationId, String name) {
         return Datastore.query(tx, activityTypeMeta, organizationId)
                 .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
                 .asKeyList()
                 .isEmpty();
     }
-
 
     @Nonnull
     @Override
@@ -198,6 +225,37 @@ class DefaultActivityService implements ActivityService {
     public void removeActivity(Key id) throws EntityNotFoundException, IllegalArgumentException {
         getActivity(id);
         Datastore.delete(id);
+    }
+
+    @Nonnull
+    @Override
+    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException {
+        User dbUser = getUser(user.getId());
+        Activity dbActivity = getActivity(activity.getId());
+
+        Subscription subscription = new Subscription();
+
+        subscription.setId(Datastore.allocateId(dbUser.getId(), subscriptionMeta));
+        subscription.getActivityRef().setKey(dbActivity.getId());
+        subscription.getUserRef().setKey(dbUser.getId());
+
+        //TODO: put this in a transaction
+        dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() + 1);
+        activity.setSubscriptionCount(dbActivity.getSubscriptionCount());
+
+        Datastore.put(dbActivity);
+        Datastore.put(subscription);
+
+        return subscription;
+    }
+
+    @Override
+    public void cancel(Subscription subscription) throws EntityNotFoundException {
+        Subscription dbSubscription = getSubscription(subscription.getId());
+        Activity dbActivity = getActivity(dbSubscription.getActivityRef().getKey());
+        dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
+        Datastore.put(dbActivity);
+        Datastore.delete(dbSubscription.getId());
     }
 
     private static class Singleton {

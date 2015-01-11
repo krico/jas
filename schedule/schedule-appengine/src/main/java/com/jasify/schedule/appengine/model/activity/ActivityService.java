@@ -5,6 +5,7 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.users.User;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -122,4 +123,23 @@ public interface ActivityService {
      * @throws IllegalArgumentException if the id is not of an Activity
      */
     public void removeActivity(Key id) throws EntityNotFoundException, IllegalArgumentException;
+
+    /**
+     * Subscribe a user for an activity
+     *
+     * @param user     to subscribe
+     * @param activity to subscribe to
+     * @return a newly created Subscription for this user to this activity
+     * @throws EntityNotFoundException if any of the entities don't exist
+     */
+    @Nonnull
+    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException;
+
+    /**
+     * Cancel a subscription, effectively doing the reverse of {@link #subscribe}
+     *
+     * @param subscription to cancel
+     * @throws EntityNotFoundException if any of the involved entities don't exist
+     */
+    public void cancel(Subscription subscription) throws EntityNotFoundException;
 }
