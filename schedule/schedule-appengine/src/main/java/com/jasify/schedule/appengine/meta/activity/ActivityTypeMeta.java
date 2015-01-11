@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.activity;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-07 23:31:20")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-11 10:28:29")
 /** */
 public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.activity.ActivityType> {
 
@@ -17,11 +17,16 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType> name = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType>(this, "name", "name");
 
     /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType> lcName = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType>(this, "lcName", "lcName");
+
+    /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType>(this, "description", "description");
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
+
+    private static final com.jasify.schedule.appengine.model.LowerCaseListener slim3_lcNameAttributeListener = new com.jasify.schedule.appengine.model.LowerCaseListener();
 
     private static final ActivityTypeMeta slim3_singleton = new ActivityTypeMeta();
 
@@ -44,6 +49,7 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setModified((java.util.Date) entity.getProperty("modified"));
         model.setName((java.lang.String) entity.getProperty("name"));
+        model.setLcName((java.lang.String) entity.getProperty("lcName"));
         model.setDescription((java.lang.String) entity.getProperty("description"));
         return model;
     }
@@ -60,6 +66,7 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         entity.setProperty("created", m.getCreated());
         entity.setProperty("modified", m.getModified());
         entity.setProperty("name", m.getName());
+        entity.setProperty("lcName", m.getLcName());
         entity.setProperty("description", m.getDescription());
         return entity;
     }
@@ -95,6 +102,7 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         com.jasify.schedule.appengine.model.activity.ActivityType m = (com.jasify.schedule.appengine.model.activity.ActivityType) model;
         m.setCreated(slim3_createdAttributeListener.prePut(m.getCreated()));
         m.setModified(slim3_modifiedAttributeListener.prePut(m.getModified()));
+        m.setLcName(slim3_lcNameAttributeListener.prePut(m.getLcName()));
     }
 
     @Override
@@ -137,6 +145,10 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
             writer.setNextPropertyName("name");
             encoder0.encode(writer, m.getName());
         }
+        if(m.getLcName() != null){
+            writer.setNextPropertyName("lcName");
+            encoder0.encode(writer, m.getLcName());
+        }
         if(m.getDescription() != null){
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
@@ -157,6 +169,8 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         m.setModified(decoder0.decode(reader, m.getModified()));
         reader = rootReader.newObjectReader("name");
         m.setName(decoder0.decode(reader, m.getName()));
+        reader = rootReader.newObjectReader("lcName");
+        m.setLcName(decoder0.decode(reader, m.getLcName()));
         reader = rootReader.newObjectReader("description");
         m.setDescription(decoder0.decode(reader, m.getDescription()));
         return m;

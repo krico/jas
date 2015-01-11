@@ -1,13 +1,21 @@
-package com.jasify.schedule.appengine.spi;
+package com.jasify.schedule.appengine.spi.dm;
+
+import com.google.api.server.spi.config.Api;
+import com.jasify.schedule.appengine.spi.JasifyEndpoint;
 
 /**
  * @author krico
  * @since 27/12/14.
  */
-public class ApiInfo {
+public class JasApiInfo {
     private String version;
     private boolean authenticated;
     private boolean admin;
+
+    public JasApiInfo(JasifyEndpoint endpoint) {
+        Api annotation = endpoint.getClass().getAnnotation(Api.class);
+        setVersion(annotation.version());
+    }
 
     public String getVersion() {
         return version;

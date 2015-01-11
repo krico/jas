@@ -9,8 +9,6 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
-import com.jasify.schedule.appengine.validators.UsernameValidator;
-import com.jasify.schedule.appengine.validators.Validator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +18,6 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
 public class JasifyEndpointNotMockedTest {
-    private JasifyEndpoint endpoint = new JasifyEndpoint();
 
     @BeforeClass
     public static void datastore() {
@@ -34,16 +31,9 @@ public class JasifyEndpointNotMockedTest {
 
     @Test
     public void testGetUserService() throws UnauthorizedException {
-        UserService service = endpoint.getUserService();
+        UserService service = UserServiceFactory.getUserService();
         assertNotNull(service);
         assertEquals(UserServiceFactory.getUserService(), service);
-    }
-
-    @Test
-    public void testGetUsernameValidator() throws UnauthorizedException {
-        Validator<String> validator = endpoint.getUsernameValidator();
-        assertNotNull(validator);
-        assertEquals(UsernameValidator.INSTANCE, validator);
     }
 
     @Test(expected = UnauthorizedException.class)

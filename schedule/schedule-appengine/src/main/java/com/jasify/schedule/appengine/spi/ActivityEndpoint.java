@@ -7,32 +7,27 @@ import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.transform.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Endpoint for partners like mywayfit.com that want to integrate to our system
- *
  * @author krico
- * @since 07/01/15.
+ * @since 11/01/15.
  */
-@Api(name = "jasify",
+@Api(name = "jasify", /* WARN: Its LAME but you have to copy & paste this section to all *Endpoint classes in this package */
         version = "v1",
         defaultVersion = AnnotationBoolean.TRUE,
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class},
+        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
                 packagePath = ""))
-public class PartnerEndpoint {
-    private static final Logger log = LoggerFactory.getLogger(PartnerEndpoint.class);
+public class ActivityEndpoint {
     private static final Random random = new Random();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
@@ -112,6 +107,4 @@ public class PartnerEndpoint {
 
         return ret;
     }
-
-
 }

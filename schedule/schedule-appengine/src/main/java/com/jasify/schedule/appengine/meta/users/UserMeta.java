@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.users;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-07 23:31:20")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-11 10:28:29")
 /** */
 public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.users.User> {
 
@@ -37,6 +37,10 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
+
+    private static final com.jasify.schedule.appengine.model.LowerCaseListener slim3_nameAttributeListener = new com.jasify.schedule.appengine.model.LowerCaseListener();
+
+    private static final com.jasify.schedule.appengine.model.LowerCaseListener slim3_emailAttributeListener = new com.jasify.schedule.appengine.model.LowerCaseListener();
 
     private static final UserMeta slim3_singleton = new UserMeta();
 
@@ -132,6 +136,8 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         com.jasify.schedule.appengine.model.users.User m = (com.jasify.schedule.appengine.model.users.User) model;
         m.setCreated(slim3_createdAttributeListener.prePut(m.getCreated()));
         m.setModified(slim3_modifiedAttributeListener.prePut(m.getModified()));
+        m.setName(slim3_nameAttributeListener.prePut(m.getName()));
+        m.setEmail(slim3_emailAttributeListener.prePut(m.getEmail()));
     }
 
     @Override

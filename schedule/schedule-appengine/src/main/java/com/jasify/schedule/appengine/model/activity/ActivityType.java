@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.LowerCaseListener;
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.CreationDate;
 import org.slim3.datastore.Model;
@@ -25,7 +26,17 @@ public class ActivityType {
 
     private String name;
 
+    @Attribute(listener = LowerCaseListener.class)
+    private String lcName;
+
     private String description;
+
+    public ActivityType() {
+    }
+
+    public ActivityType(String name) {
+        setName(name);
+    }
 
     public Key getId() {
         return id;
@@ -57,6 +68,15 @@ public class ActivityType {
 
     public void setName(String name) {
         this.name = name;
+        this.lcName = name;
+    }
+
+    public String getLcName() {
+        return lcName;
+    }
+
+    public void setLcName(String lcName) {
+        this.lcName = lcName;
     }
 
     public String getDescription() {

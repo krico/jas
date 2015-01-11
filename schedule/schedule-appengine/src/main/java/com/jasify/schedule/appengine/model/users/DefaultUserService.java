@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * @author krico
  * @since 22/11/14.
  */
-class DefaultUserService implements UserService {
+final class DefaultUserService implements UserService {
     private static final Logger log = LoggerFactory.getLogger(DefaultUserService.class);
     private final UserMeta userMeta;
     private final UserLoginMeta userLoginMeta;
