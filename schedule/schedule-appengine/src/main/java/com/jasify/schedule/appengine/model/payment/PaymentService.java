@@ -28,9 +28,10 @@ public interface PaymentService {
      * @param id for the payment
      * @return the payment
      * @throws EntityNotFoundException if the payment doesn't exist
+     * @throws IllegalArgumentException if the key is not of a Payment
      */
     @Nonnull
-    public Payment getPayment(Key id) throws EntityNotFoundException;
+    public Payment getPayment(Key id) throws EntityNotFoundException, IllegalArgumentException;
 
     /**
      * @param payment to be updated
