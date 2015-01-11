@@ -2,11 +2,13 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
-import com.google.api.server.spi.response.*;
+import com.google.api.server.spi.response.ForbiddenException;
+import com.google.api.server.spi.response.NotFoundException;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
-import com.jasify.schedule.appengine.spi.dm.*;
+import com.jasify.schedule.appengine.spi.dm.JasApiInfo;
 import com.jasify.schedule.appengine.spi.transform.*;
 
 /**
@@ -19,7 +21,7 @@ import com.jasify.schedule.appengine.spi.transform.*;
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class},
+        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
@@ -65,5 +67,4 @@ public class JasifyEndpoint {
         }
         return info;
     }
-
 }
