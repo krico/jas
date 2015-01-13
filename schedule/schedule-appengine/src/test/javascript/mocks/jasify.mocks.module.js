@@ -50,7 +50,10 @@
                 get: nop,
                 update: nop,
                 add: nop,
-                remove: nop
+                remove: nop,
+                users: nop,
+                addUser: nop,
+                groups: nop
             },
             groups: {
                 query: nop,

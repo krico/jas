@@ -1,0 +1,99 @@
+<div class="row">
+    <div class="col-sm-1">
+        <a href="#/admin/organizations"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
+    </div>
+    <div class="col-sm-10">
+        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
+            <div class="form-group">
+                <div class="col-sm-3">
+                    <h5>{{vm.organization.name}}</h5>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-1 control-label input-sm">name:</label>
+
+                <div class="col-sm-4">
+                    <input type="text" class="form-control input-sm" id="name" name="name"
+                           ng-model="vm.organization.name"
+                           placeholder="name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label fo="description" class="col-sm-1 control-label input-sm">description:</label>
+
+                <div class="col-sm-4">
+                    <input type="text" class="form-control input-sm" id="description" name="name"
+                           ng-model="vm.organization.description"
+                           placeholder="description">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-1 col-sm-4">
+                    <button type="button"
+                            ng-click="vm.save()"
+                            ng-disabled="!vm.organizationForm.$dirty || vm.organizationForm.$invalid"
+                            class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-save"></span>
+                        save
+                    </button>
+                    <button type="button"
+                            ng-click="vm.reset()" ng-disabled="!vm.organizationForm.$dirty"
+                            class="btn btn-default btn-sm"><span class="glyphicon glyphicon-open"></span>
+                        reset
+                    </button>
+                    <span ng-show="vm.loading" us-spinner=""></span>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <script type="text/ng-template" id="orgUsers.html">
+        <a>
+                        <span ng-show="match.model.name"
+                              bind-html-unsafe="match.model.name | typeaheadHighlight:query"></span>
+                        <span ng-show="match.model.email"
+                              bind-html-unsafe="match.model.email | typeaheadHighlight:query"></span>
+            <small ng-show="match.model.realName"
+                   bind-html-unsafe="match.model.realName | typeaheadHighlight:query"></small>
+        </a>
+    </script>
+    <div class="col-sm-6">
+        <div class="col-sm-12">
+            <h5>Users</h5>
+        </div>
+        <form class="form" role="form" name="vm.usersForm" novalidate>
+            <div class="form-inline">
+                <div class="form-group">
+                    <label class="sr-only" for="user">select user to add</label>
+                    <input type="text" class="form-control input-sm" id="user" name="user"
+                           typeahead="user as vm.displayUser(user) for user in vm.searchUsers($viewValue)"
+                           typeahead-template-url="orgUsers.html"
+                           ng-model="vm.user"
+                           placeholder="search user to add"/>
+                </div>
+                <button ng-disabled="!vm.user.id" class="btn btn-sm btn-primary" ng-click="vm.addUser(vm.user)">add</button>
+            </div>
+            <div class="form-group">
+                <select multiple class="form-control">
+                    <option ng-repeat="user in vm.users">{{vm.displayUser(user)}}</option>
+                </select>
+            </div>
+            <button class="btn btn-sm btn-danger">remove selected</button>
+        </form>
+    </div>
+    <div class="col-sm-6">
+        <h5>Groups</h5>
+
+        <form class="form" role="form" name="vm.groupsForm" novalidate>
+            <select multiple class="form-control">
+                <option ng-repeat="group in vm.groups">{{group.name}}</option>
+            </select>
+        </form>
+    </div>
+</div>

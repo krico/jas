@@ -1,13 +1,51 @@
-<button ng-click="vm.test()">test</button><br/>
-Organizations:
-<ul>
-    <li ng-repeat="org in vm.organizations">{{org.name}}<br/>
-        <a ng-click="vm.remove(org.id)">remove</a>
-        <a ng-click="vm.update(org)">update</a>
-        <small>{{org.description}}</small>
-    </li>
-</ul>
-Response:
-<pre class="success">{{vm.lastResponse}}</pre>
-Failuer:
-<pre class="danger">{{vm.lastFailure}}</pre>
+<div class="row">
+    <div class="col-sm-12">
+        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+    </div>
+    <div class="col-sm-12">
+        <form name="organizationForm" role="form" class="form-inline" novalidate ng-submit="vm.add(vm.organization)">
+            <div class="form-group">
+                <label class="sr-only" for="name">Organization Name</label>
+                <input type="text" class="form-control input-sm" id="name" ng-model="vm.organization.name"
+                       placeholder="Organization Name">
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="description">Organization Name</label>
+                <input type="text" class="form-control input-sm" id="description" ng-model="vm.organization.description"
+                       placeholder="Description">
+            </div>
+            <button type="submit" class="btn btn-primary input-sm">create organization</button>
+        </form>
+    </div>
+    <div class="col-sm-12">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>name</th>
+                    <th>description</th>
+                    <th>created</th>
+                    <th>updated</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="organization in vm.organizations" ng-click="vm.viewOrganization(organization.id)">
+                    <td>{{organization.name}}</td>
+                    <td>{{organization.description | limitTo: 40}}</td>
+                    <td>{{organization.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                    <td>{{organization.modified | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(organization.id)"><span
+                                class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </td>
+                </tr>
+                <tr ng-if="vm.organizations.length == 0">
+                    <td colspan="4">No organizations...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

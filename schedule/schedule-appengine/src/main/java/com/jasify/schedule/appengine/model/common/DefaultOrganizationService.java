@@ -185,6 +185,7 @@ final class DefaultOrganizationService implements OrganizationService {
         }
         Datastore.delete(toDel);
         Datastore.delete(dbOrganization.getId());
+        uniqueOrganizationName.release(dbOrganization.getLcName());
     }
 
     @Nonnull
