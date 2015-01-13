@@ -83,6 +83,62 @@ describe('OrganizationService', function () {
         expect($gapiMock.client.jasify.organizations.add).toHaveBeenCalledWith(expected);
     });
 
+    it('should list users', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.organizations, 'users').and.returnValue($q.when({result: {items: expected}}));
+
+        var id = "abc";
+        Organization.users(id)
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.organizations.users).toHaveBeenCalledWith({id: id});
+    });
+
+    it('should list groups', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.organizations, 'groups').and.returnValue($q.when({result: {items: expected}}));
+
+        var id = "abc";
+        Organization.groups(id)
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.organizations.groups).toHaveBeenCalledWith({id: id});
+    });
+
+    it('should add user', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.organizations, 'addUser').and.returnValue($q.when({result: false}));
+
+        var o = {};
+        var u = {};
+        var id = "abc";
+        Organization.addUser(o, u)
+            .then(function (res) {
+                expect(res).toBe(false);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.organizations.addUser).toHaveBeenCalledWith({organization: o, user: u});
+    });
+
     it('should remove organization', function () {
         var expected = {name: "Organization"};
         spyOn($gapiMock.client.jasify.organizations, 'remove').and.returnValue($q.when({result: expected}));

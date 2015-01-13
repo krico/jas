@@ -7,6 +7,9 @@
             get: get,
             update: update,
             add: add,
+            users: users,
+            groups: groups,
+            addUser: addUser,
             remove: remove
         };
 
@@ -31,9 +34,30 @@
             });
         }
 
+        function addUser(organization, user) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.organizations.addUser({organization: organization, user: user})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
         function add(organization) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.add(organization)
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function users(id) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.organizations.users({id: id})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function groups(id) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.organizations.groups({id: id})
                     .then(resultHandler, errorHandler);
             });
         }

@@ -10,8 +10,6 @@ import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
 import java.util.HashSet;
@@ -258,6 +256,13 @@ public class OrganizationServiceTest {
     public void testRemoveOrganizationNotOrganization() throws Exception {
         Key id = organizationService.addGroup(new Group(TEST_GROUP_NAME));
         organizationService.removeOrganization(id);
+    }
+
+    @Test
+    public void testRemoveOrganizationReleasesName() throws Exception {
+        Key id = organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME));
+        organizationService.removeOrganization(id);
+        organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME));
     }
 
     @Test

@@ -3,47 +3,60 @@
 
     angular.module('jasifyScheduleControllers').controller('AdminOrganizationsController', AdminOrganizationsController);
 
-    function AdminOrganizationsController($log, Organization, organizations) {
+    function AdminOrganizationsController($location, Organization, organizations) {
         var vm = this;
         vm.organizations = organizations.items;
-        vm.lastResponse = '';
-        vm.lastFailure = '';
+        vm.organization = {};
+        vm.alerts = [];
         vm.reload = reload;
         vm.remove = remove;
         vm.update = update;
-        vm.test = test;
+        vm.add = add;
+        vm.viewOrganization = viewOrganization;
+        vm.alert = alert;
 
-        function ok(r) {
-            vm.lastResponse = r;
+        function alert(t, m) {
+            vm.alerts.push({type: t, msg: m});
+        }
+
+
+        function reloadHandler(r) {
             vm.reload();
         }
 
-        function fail(m) {
-            vm.lastFailure = m;
+        function errorHandler(resp) {
+            alert('danger', 'Operation failed: (' + resp.status + ") '" + resp.statusText + "'");
         }
 
-        function test() {
-            var organization = {
-                name: 'Organization at ' + new Date().toISOString(),
-                description: 'This organization was created as a test'
-            };
-            Organization.add(organization).then(ok, fail);
-
+        function add(organization) {
+            Organization.add(organization).then(ok, errorHandler);
+            function ok(r) {
+                vm.alert('success', 'Organization [' + r.name + '] added!');
+                vm.reload();
+            }
         }
 
         function update(org) {
             org.description += " Updated: " + new Date().toTimeString();
-            Organization.update(org).then(ok, fail);
+            Organization.update(org).then(ok, errorHandler);
         }
 
         function remove(id) {
-            Organization.remove(id).then(ok, fail);
+            Organization.remove(id).then(ok, errorHandler);
+            function ok(){
+                vm.alert('warning', 'Organization removed!');
+                vm.reload();
+            }
+        }
+
+        function viewOrganization(id){
+            $location.path('/admin/organization/' + id);
         }
 
         function reload() {
             Organization.query().then(function (r) {
                 vm.organizations = r.items;
-            });
+            }, errorHandler);
         }
     }
 

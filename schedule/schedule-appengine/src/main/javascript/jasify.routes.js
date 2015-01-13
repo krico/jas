@@ -123,6 +123,26 @@
                     }
                 }
             })
+            .when('/admin/organization/:id?', {
+                templateUrl: 'views/admin/organization.html',
+                controller: 'AdminOrganizationController',
+                controllerAs: 'vm',
+                resolve: {
+                    organization: /*@ngInject*/ function ($q, $route, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                if ($route.current.params.id)
+                                    return Organization.get($route.current.params.id);
+                                else
+                                    return {};
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
         ;
         /* END: Admin routes */
 
