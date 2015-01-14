@@ -119,13 +119,13 @@ describe('OrganizationService', function () {
         expect($gapiMock.client.jasify.organizations.groups).toHaveBeenCalledWith({id: id});
     });
 
-    it('should add user', function () {
+    it('should add user by id', function () {
         var expected = [];
         spyOn($gapiMock.client.jasify.organizations, 'addUser').and.returnValue($q.when({result: false}));
 
-        var o = {};
-        var u = {};
-        var id = "abc";
+        var o = {id: 45};
+        var u = {id: 'sas'};
+
         Organization.addUser(o, u)
             .then(function (res) {
                 expect(res).toBe(false);
@@ -136,7 +136,102 @@ describe('OrganizationService', function () {
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.organizations.addUser).toHaveBeenCalledWith({organization: o, user: u});
+        expect($gapiMock.client.jasify.organizations.addUser).toHaveBeenCalledWith({
+            organizationId: o.id,
+            userId: u.id
+        });
+    });
+
+    it('should add user by id regardless of object or id', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.organizations, 'addUser').and.returnValue($q.when({result: false}));
+
+        var o = {id: 45};
+        var u = {id: 'sas'};
+
+        Organization.addUser(o.id, u.id)
+            .then(function (res) {
+                expect(res).toBe(false);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.organizations.addUser).toHaveBeenCalledWith({
+            organizationId: o.id,
+            userId: u.id
+        });
+    });
+
+    it('should remove user by id', function () {
+        spyOn($gapiMock.client.jasify.organizations, 'removeUser').and.returnValue($q.when({result: false}));
+
+        var o = {id: 45};
+        var u = {id: 'sas'};
+
+        Organization.removeUser(o, u)
+            .then(function (res) {
+                expect(res).toBe(false);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.organizations.removeUser).toHaveBeenCalledWith({
+            organizationId: o.id,
+            userId: u.id
+        });
+    });
+
+    it('should remove user by id regardless of object or id', function () {
+        spyOn($gapiMock.client.jasify.organizations, 'removeUser').and.returnValue($q.when({result: false}));
+
+        var o = {id: 45};
+        var u = {id: 'sas'};
+
+        Organization.removeUser(o.id, u.id)
+            .then(function (res) {
+                expect(res).toBe(false);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.organizations.removeUser).toHaveBeenCalledWith({
+            organizationId: o.id,
+            userId: u.id
+        });
+    });
+
+    it('should support remove user with array of users', function () {
+        spyOn($gapiMock.client.jasify.organizations, 'removeUser').and.returnValue($q.when({result: false}));
+
+        var o = {id: 45};
+        var u = [{id: 'sas'}, {id: 'sas1'}];
+
+        Organization.removeUser(o.id, u)
+            .then(function (res) {
+                expect(res).toEqual([false, false]);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        for (var i = 0; i < u.length; ++i) {
+
+            expect($gapiMock.client.jasify.organizations.removeUser).toHaveBeenCalledWith({
+                organizationId: o.id,
+                userId: u[i].id
+            });
+        }
     });
 
     it('should remove organization', function () {

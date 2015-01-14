@@ -184,7 +184,7 @@ public class OrganizationServiceTest {
         assertNotNull(users);
         assertTrue(users.isEmpty());
 
-        organizationService.addUserToOrganization(organization, user);
+        organizationService.addUserToOrganization(id, user.getId());
         organization = organizationService.getOrganization(id);
 
         users = organization.getUsers();
@@ -199,7 +199,7 @@ public class OrganizationServiceTest {
         Datastore.put(user);
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         organizationService.addOrganization(organization);
-        organizationService.addUserToOrganization(organization, user);
+        organizationService.addUserToOrganization(organization.getId(), user.getId());
         organizationService.addUserToOrganization(organization, user);
         organizationService.removeUserFromOrganization(organization, user);
 

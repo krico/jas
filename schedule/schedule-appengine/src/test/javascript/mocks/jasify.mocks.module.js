@@ -53,6 +53,7 @@
                 remove: nop,
                 users: nop,
                 addUser: nop,
+                removeUser: nop,
                 groups: nop
             },
             groups: {
