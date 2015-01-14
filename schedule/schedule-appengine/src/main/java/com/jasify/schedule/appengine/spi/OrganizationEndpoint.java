@@ -14,7 +14,6 @@ import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
-import com.jasify.schedule.appengine.spi.dm.JasAddUserToOrganizationRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 
 import java.util.List;
@@ -108,11 +107,21 @@ public class OrganizationEndpoint {
         }
     }
 
-    @ApiMethod(name = "organizations.addUser", path = "organization-users", httpMethod = ApiMethod.HttpMethod.POST)
-    public void addUserToOrganization(User caller, JasAddUserToOrganizationRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    @ApiMethod(name = "organizations.addUser", path = "organizations/{organizationId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public void addUserToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         mustBeAdmin(caller);
         try {
-            OrganizationServiceFactory.getOrganizationService().addUserToOrganization(checkFound(request.getOrganization()), checkFound(request.getUser()));
+            OrganizationServiceFactory.getOrganizationService().addUserToOrganization(organizationId, userId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "organizations.removeUser", path = "organizations/{organizationId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeUserFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().removeUserFromOrganization(organizationId, userId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

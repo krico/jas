@@ -130,6 +130,16 @@ final class DefaultOrganizationService implements OrganizationService {
     }
 
     @Override
+    public void addUserToOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
+        addUserToOrganization(getOrganization(organizationId), getUser(userId));
+    }
+
+    @Override
+    public void removeUserFromOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
+        removeUserFromOrganization(getOrganization(organizationId), getUser(userId));
+    }
+
+    @Override
     public void removeUserFromOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
         getUser(user.getId());

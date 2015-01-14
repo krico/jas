@@ -65,11 +65,27 @@ public interface OrganizationService {
     public void addUserToOrganization(Organization organization, User user) throws EntityNotFoundException;
 
     /**
+     * @param organizationId of the organization to add to
+     * @param userId         of the user to be added
+     * @throws EntityNotFoundException  if either doesn't exist
+     * @throws IllegalArgumentException if either keys are not of the expected types
+     */
+    public void addUserToOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException;
+
+    /**
      * @param organization to remove the user from
      * @param user         to be removed from the organization
      * @throws EntityNotFoundException if either the user or the organization don't exist
      */
     public void removeUserFromOrganization(Organization organization, User user) throws EntityNotFoundException;
+
+    /**
+     * @param organizationId to remove user from
+     * @param userId         to add to
+     * @throws EntityNotFoundException  if either doesn't exist
+     * @throws IllegalArgumentException if either keys are not the expected types
+     */
+    public void removeUserFromOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException;
 
     /**
      * @param organization to remove the group from

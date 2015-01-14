@@ -14,10 +14,12 @@
         vm.userFilter = userFilter;
         vm.displayUser = displayUser;
         vm.addUser = addUser;
+        vm.removeUser = removeUser;
         vm.loadUsers = loadUsers;
         vm.organizationForm = {};
         vm.users = [];
         vm.user = null;
+        vm.selectedUsers = [];
         vm.allUsers = null;
         vm.groups = [];
 
@@ -86,6 +88,16 @@
             function ok(r) {
                 alert('info', 'User added');
                 vm.user = null;
+                vm.loadUsers();
+            }
+        }
+
+        function removeUser(user) {
+            Organization.removeUser(vm.organization, user).then(ok, errorHandler);
+            function ok(r) {
+                var count = angular.isArray(r) ? r.length : 1;
+                vm.alert('info', 'Removed ' + count + ' user(s)');
+                vm.selectedUsers = [];
                 vm.loadUsers();
             }
         }
