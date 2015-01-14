@@ -17,11 +17,13 @@
         vm.removeUser = removeUser;
         vm.loadUsers = loadUsers;
         vm.organizationForm = {};
-        vm.users = [];
-        vm.user = null;
-        vm.selectedUsers = [];
         vm.allUsers = null;
+        vm.users = [];
+        vm.selectedUsers = [];
+        vm.user = null;
         vm.groups = [];
+        vm.selectedGroups = [];
+        vm.group = null;
 
         vm.loadUsers();
 
