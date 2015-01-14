@@ -10,11 +10,11 @@
                        placeholder="Organization Name">
             </div>
             <div class="form-group">
-                <label class="sr-only" for="description">Organization Name</label>
+                <label class="sr-only" for="description">Organization Description</label>
                 <input type="text" class="form-control input-sm" id="description" ng-model="vm.organization.description"
                        placeholder="Description">
             </div>
-            <button type="submit" class="btn btn-primary input-sm">create organization</button>
+            <button type="submit" ng-disabled="!vm.organization.name" class="btn btn-primary input-sm">create organization</button>
         </form>
     </div>
     <div class="col-sm-12">
@@ -30,11 +30,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="organization in vm.organizations" ng-click="vm.viewOrganization(organization.id)">
-                    <td>{{organization.name}}</td>
-                    <td>{{organization.description | limitTo: 40}}</td>
-                    <td>{{organization.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-                    <td>{{organization.modified | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                <tr ng-repeat="organization in vm.organizations">
+                    <td ng-click="vm.viewOrganization(organization.id)">{{organization.name}}</td>
+                    <td ng-click="vm.viewOrganization(organization.id)">{{organization.description | limitTo: 40}}</td>
+                    <td ng-click="vm.viewOrganization(organization.id)">{{organization.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                    <td ng-click="vm.viewOrganization(organization.id)">{{organization.modified | date:'yyyy-MM-dd HH:mm:ss' }}</td>
                     <td>
                         <button type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(organization.id)"><span
                                 class="glyphicon glyphicon-remove"></span>

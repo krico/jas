@@ -127,6 +127,26 @@ public class OrganizationEndpoint {
         }
     }
 
+    @ApiMethod(name = "organizations.addGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public void addGroupToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().addGroupToOrganization(organizationId, groupId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "organizations.removeGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeGroupFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().removeGroupFromOrganization(organizationId, groupId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
     @ApiMethod(name = "organizations.remove", path = "organizations/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeOrganization(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);

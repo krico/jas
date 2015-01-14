@@ -236,9 +236,9 @@ public class OrganizationServiceTest {
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         Key organizationId = organizationService.addOrganization(organization);
 
+        organizationService.addGroupToOrganization(organization.getId(), group.getId());
         organizationService.addGroupToOrganization(organization, group);
-        organizationService.addGroupToOrganization(organization, group);
-        organizationService.removeGroupFromOrganization(organization, group);
+        organizationService.removeGroupFromOrganization(organization.getId(), group.getId());
 
         organization = organizationService.getOrganization(organizationId);
         assertNotNull(organization);
@@ -383,9 +383,9 @@ public class OrganizationServiceTest {
         User user = new User(TEST_USER_NAME);
         Datastore.put(user);
 
+        organizationService.addUserToGroup(group.getId(), user.getId());
         organizationService.addUserToGroup(group, user);
-        organizationService.addUserToGroup(group, user);
-        organizationService.removeUserFromGroup(group, user);
+        organizationService.removeUserFromGroup(group.getId(), user.getId());
 
         group = organizationService.getGroup(id);
         assertNotNull(group);

@@ -1,15 +1,15 @@
 (function (angular) {
     "use strict";
 
-    angular.module('jasifyScheduleControllers').controller('AdminOrganizationController', AdminOrganizationController);
+    angular.module('jasifyScheduleControllers').controller('AdminGroupController', AdminGroupController);
 
-    function AdminOrganizationController($log, $q, User, Group, Organization, organization) {
+    function AdminGroupController($log, $q, User, Group, group) {
         var vm = this;
         vm.alerts = [];
         vm.alert = alert;
 
-        vm.organization = organization;
-        vm.organizationForm = {};
+        vm.group = group;
+        vm.groupForm = {};
         vm.reset = reset;
         vm.save = save;
 
@@ -25,18 +25,7 @@
         vm.selectedUsers = [];
         vm.user = null;
 
-        vm.searchGroups = searchGroups;
-        vm.addGroup = addGroup;
-        vm.removeGroup = removeGroup;
-        vm.loadGroups = loadGroups;
-
-        vm.allGroups = null;
-        vm.groups = [];
-        vm.selectedGroups = [];
-        vm.group = null;
-
         vm.loadUsers();
-        vm.loadGroups();
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -88,43 +77,15 @@
             }
         }
 
-        function searchGroups(v) {
-            if (vm.allGroups === null) {
-                vm.allGroups = [];
-                return Group.query().then(ok, errorHandler);
-            } else {
-                var ret = [];
-                for (var i in vm.allGroups) {
-                    var group = vm.allGroups[i];
-                    if (group.name && group.name.indexOf(v) != -1) {
-                        ret.push(group);
-                    }
-                }
-                return $q.when(ret);
-            }
-
-            function ok(res) {
-                vm.allGroups = res.items;
-                return vm.searchGroups(v);
-            }
-        }
-
         function loadUsers() {
-            Organization.users(vm.organization.id).then(ok, errorHandler);
+            Group.users(vm.group.id).then(ok, errorHandler);
             function ok(users) {
                 vm.users = users.items;
             }
         }
 
-        function loadGroups() {
-            Organization.groups(vm.organization.id).then(ok, errorHandler);
-            function ok(groups) {
-                vm.groups = groups.items;
-            }
-        }
-
         function addUser(user) {
-            Organization.addUser(vm.organization, user).then(ok, errorHandler);
+            Group.addUser(vm.group, user).then(ok, errorHandler);
             function ok(r) {
                 alert('info', 'User added');
                 vm.user = null;
@@ -133,7 +94,7 @@
         }
 
         function removeUser(user) {
-            Organization.removeUser(vm.organization, user).then(ok, errorHandler);
+            Group.removeUser(vm.group, user).then(ok, errorHandler);
             function ok(r) {
                 var count = angular.isArray(r) ? r.length : 1;
                 vm.alert('info', 'Removed ' + count + ' user(s)');
@@ -142,43 +103,23 @@
             }
         }
 
-        function addGroup(group) {
-            Organization.addGroup(vm.organization, group).then(ok, errorHandler);
-            function ok(r) {
-                alert('info', 'Group added');
-                vm.group = null;
-                vm.loadGroups();
-            }
-        }
-
-        function removeGroup(group) {
-            Organization.removeGroup(vm.organization, group).then(ok, errorHandler);
-            function ok(r) {
-                var count = angular.isArray(r) ? r.length : 1;
-                vm.alert('info', 'Removed ' + count + ' group(s)');
-                vm.selectedGroups = [];
-                vm.loadGroups();
-            }
-        }
-
-
         function save() {
-            Organization.update(vm.organization).then(ok, errorHandler);
+            Group.update(vm.group).then(ok, errorHandler);
             function ok(o) {
-                vm.organization = o;
-                vm.organizationForm.$setPristine();
-                vm.alert('info', 'Organization saved.');
+                vm.group = o;
+                vm.groupForm.$setPristine();
+                vm.alert('info', 'Group saved.');
             }
         }
 
         function reset() {
-            Organization.get(vm.organization.id).then(ok, errorHandler);
+            Group.get(vm.group.id).then(ok, errorHandler);
 
-            vm.organization = {};
+            vm.group = {};
 
             function ok(o) {
-                vm.organization = o;
-                vm.organizationForm.$setPristine();
+                vm.group = o;
+                vm.groupForm.$setPristine();
                 vm.alert('info', 'Form reset.');
             }
         }

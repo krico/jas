@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-sm-1">
-        <a href="#/admin/organizations"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
+        <a href="#/admin/groups"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
     </div>
     <div class="col-sm-10">
         <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
@@ -8,15 +8,15 @@
 </div>
 <div class="row">
     <div class="col-sm-5">
-        <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
+        <form class="form-horizontal" role="form" name="vm.groupForm" novalidate>
             <fieldset>
-                <legend class="h4">Organization details</legend>
+                <legend class="h4">Group details</legend>
                 <div class="form-group">
                     <label class="col-sm-2 control-label input-sm">name:</label>
 
                     <div class="col-sm-8">
                         <input type="text" class="form-control input-sm" id="name" name="name"
-                               ng-model="vm.organization.name"
+                               ng-model="vm.group.name"
                                placeholder="name">
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                     <div class="col-sm-8">
                     <textarea class="form-control input-sm"
                               id="description"
-                              ng-model="vm.organization.description"
+                              ng-model="vm.group.description"
                               placeholder="description"
                               rows="3" maxlength="255"></textarea>
                     </div>
@@ -36,13 +36,13 @@
                     <div class="col-sm-offset-2 col-sm-8">
                         <button type="button"
                                 ng-click="vm.save()"
-                                ng-disabled="!vm.organizationForm.$dirty || vm.organizationForm.$invalid"
+                                ng-disabled="!vm.groupForm.$dirty || vm.groupForm.$invalid"
                                 class="btn btn-default btn-sm btn-primary"><span
                                 class="glyphicon glyphicon-save"></span>
                             save
                         </button>
                         <button type="button"
-                                ng-click="vm.reset()" ng-disabled="!vm.organizationForm.$dirty"
+                                ng-click="vm.reset()" ng-disabled="!vm.groupForm.$dirty"
                                 class="btn btn-default btn-sm"><span class="glyphicon glyphicon-open"></span>
                             reset
                         </button>
@@ -90,38 +90,6 @@
                         ng-click="vm.removeUser(vm.selectedUsers)"
                         class="btn btn-sm btn-danger">
                     remove <span ng-show="vm.selectedUsers.length > 0">({{vm.selectedUsers.length}} users)</span>
-                </button>
-            </fieldset>
-        </form>
-    </div>
-    <div class="col-sm-3">
-        <form class="form col-md-12" role="form" name="vm.groupsForm" novalidate>
-            <fieldset>
-                <legend class="h4">Groups</legend>
-                <div class="form-group">
-                    <div class="form-inline">
-                        <div class="form-group">
-                            <label class="sr-only" for="group">select group to add</label>
-                            <input type="text" id="group" class="form-control input-sm" name="group"
-                                   typeahead="group as group.name for group in vm.searchGroups($viewValue)"
-                                   ng-model="vm.group"
-                                   placeholder="search group to add"/>
-                        </div>
-                        <button ng-disabled="!vm.group.id" class="btn btn-sm btn-primary"
-                                ng-click="vm.addGroup(vm.group)">
-                            add
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <select ng-model="vm.selectedGroups" multiple class="form-control"
-                            ng-options="group as group.name for group in vm.groups">
-                    </select>
-                </div>
-                <button ng-disabled="vm.selectedGroups.length == 0"
-                        ng-click="vm.removeGroup(vm.selectedGroups)"
-                        class="btn btn-sm btn-danger">
-                    remove <span ng-show="vm.selectedGroups.length > 0">({{vm.selectedGroups.length}} groups)</span>
                 </button>
             </fieldset>
         </form>

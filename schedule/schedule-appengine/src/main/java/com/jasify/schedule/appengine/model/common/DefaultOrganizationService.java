@@ -140,6 +140,26 @@ final class DefaultOrganizationService implements OrganizationService {
     }
 
     @Override
+    public void addUserToGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
+        addUserToGroup(getGroup(groupId), getUser(userId));
+    }
+
+    @Override
+    public void removeUserFromGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
+        removeUserFromGroup(getGroup(groupId), getUser(userId));
+    }
+
+    @Override
+    public void removeGroupFromOrganization(Key organizationId, Key groupId) throws EntityNotFoundException, IllegalArgumentException {
+        removeGroupFromOrganization(getOrganization(organizationId), getGroup(groupId));
+    }
+
+    @Override
+    public void addGroupToOrganization(Key organizationId, Key groupId) throws EntityNotFoundException, IllegalArgumentException {
+        addGroupToOrganization(getOrganization(organizationId), getGroup(groupId));
+    }
+
+    @Override
     public void removeUserFromOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
         getUser(user.getId());
@@ -207,15 +227,20 @@ final class DefaultOrganizationService implements OrganizationService {
         }
         group.setName(name);
 
-        //TODO: name constraint
+        if (!isGroupNameAvailable(name)) {
+            throw new UniqueConstraintException("Group.name=" + name);
+        }
 
         group.setId(null);
 
-        Transaction tx = Datastore.beginTransaction();
-        Key ret = Datastore.put(tx, group);
-        tx.commit();
+        return Datastore.put(group);
+    }
 
-        return ret;
+    private boolean isGroupNameAvailable(String name) {
+        return Datastore.query(groupMeta)
+                .filter(groupMeta.lcName.equal(StringUtils.lowerCase(name)))
+                .asKeyList()
+                .isEmpty();
     }
 
     @Nonnull

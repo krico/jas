@@ -1,18 +1,18 @@
 (function (angular) {
     "use strict";
 
-    angular.module('jasifyScheduleControllers').controller('AdminOrganizationsController', AdminOrganizationsController);
+    angular.module('jasifyScheduleControllers').controller('AdminGroupsController', AdminGroupsController);
 
-    function AdminOrganizationsController($location, Organization, organizations) {
+    function AdminGroupsController($location, Group, groups) {
         var vm = this;
-        vm.organizations = organizations.items;
-        vm.organization = {};
+        vm.groups = groups.items;
+        vm.group = {};
         vm.alerts = [];
         vm.reload = reload;
         vm.remove = remove;
         vm.update = update;
         vm.add = add;
-        vm.viewOrganization = viewOrganization;
+        vm.viewGroup = viewGroup;
         vm.alert = alert;
 
         function alert(t, m) {
@@ -28,35 +28,35 @@
             alert('danger', 'Operation failed: (' + resp.status + ") '" + resp.statusText + "'");
         }
 
-        function add(organization) {
-            Organization.add(organization).then(ok, errorHandler);
+        function add(group) {
+            Group.add(group).then(ok, errorHandler);
             function ok(r) {
-                vm.organization = {};
-                vm.alert('success', 'Organization [' + r.name + '] added!');
+                vm.group = {};
+                vm.alert('success', 'Group [' + r.name + '] added!');
                 vm.reload();
             }
         }
 
         function update(org) {
             org.description += " Updated: " + new Date().toTimeString();
-            Organization.update(org).then(ok, errorHandler);
+            Group.update(org).then(ok, errorHandler);
         }
 
         function remove(id) {
-            Organization.remove(id).then(ok, errorHandler);
+            Group.remove(id).then(ok, errorHandler);
             function ok(){
-                vm.alert('warning', 'Organization removed!');
+                vm.alert('warning', 'Group removed!');
                 vm.reload();
             }
         }
 
-        function viewOrganization(id){
-            $location.path('/admin/organization/' + id);
+        function viewGroup(id){
+            $location.path('/admin/group/' + id);
         }
 
         function reload() {
-            Organization.query().then(function (r) {
-                vm.organizations = r.items;
+            Group.query().then(function (r) {
+                vm.groups = r.items;
             }, errorHandler);
         }
     }

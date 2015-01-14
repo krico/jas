@@ -11,6 +11,8 @@
             groups: groups,
             addUser: addUser,
             removeUser: removeUser,
+            addGroup: addGroup,
+            removeGroup: removeGroup,
             remove: remove
         };
 
@@ -63,6 +65,42 @@
             function removeOneUser(organizationId, userId) {
                 return Endpoint.jasify(function (jasify) {
                     return jasify.organizations.removeUser({organizationId: organizationId, userId: userId})
+                        .then(resultHandler, errorHandler);
+                });
+            }
+
+            if (promises.length == 1) return promises[0];
+            return $q.all(promises);
+        }
+
+        function addGroup(organization, group) {
+            var organizationId = angular.isObject(organization) ? organization.id : organization;
+            var groupId = angular.isObject(group) ? group.id : group;
+
+            return Endpoint.jasify(function (jasify) {
+                return jasify.organizations.addGroup({organizationId: organizationId, groupId: groupId})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function removeGroup(organization, group) {
+            var organizationId = angular.isObject(organization) ? organization.id : organization;
+            var groupIds = [];
+            if (!angular.isArray(group)) group = [group];
+
+            for (var x = 0; x < group.length; ++x) {
+                var groupId = angular.isObject(group[x]) ? group[x].id : group[x];
+                groupIds.push(groupId);
+            }
+
+            var promises = [];
+            for (var i = 0; i < groupIds.length; ++i) {
+                promises.push(removeOneGroup(organizationId, groupIds[i]));
+            }
+
+            function removeOneGroup(organizationId, groupId) {
+                return Endpoint.jasify(function (jasify) {
+                    return jasify.organizations.removeGroup({organizationId: organizationId, groupId: groupId})
                         .then(resultHandler, errorHandler);
                 });
             }

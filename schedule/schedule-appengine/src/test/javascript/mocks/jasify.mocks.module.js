@@ -54,6 +54,8 @@
                 users: nop,
                 addUser: nop,
                 removeUser: nop,
+                addGroup: nop,
+                removeGroup: nop,
                 groups: nop
             },
             groups: {
@@ -61,6 +63,9 @@
                 get: nop,
                 update: nop,
                 add: nop,
+                addUser: nop,
+                removeUser: nop,
+                users: nop,
                 remove: nop
             }
         };
