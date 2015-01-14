@@ -102,7 +102,7 @@
                     <div class="form-inline">
                         <div class="form-group">
                             <label class="sr-only" for="group">select group to add</label>
-                            <input type="text" class="form-control input-sm" id="group" name="group"
+                            <input type="text" id="group" class="form-control input-sm" name="group"
                                    typeahead="group as vm.displayGroup(group) for group in vm.searchGroups($viewValue)"
                                    typeahead-template-url="orgGroups.html"
                                    ng-model="vm.group"
