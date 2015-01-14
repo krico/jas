@@ -105,7 +105,82 @@
                         return Allow.admin();
                     }
                 }
-            });
+            })
+            .when('/admin/groups', {
+                templateUrl: 'views/admin/groups.html',
+                controller: 'AdminGroupsController',
+                controllerAs: 'vm',
+                resolve: {
+                    groups: /*@ngInject*/ function ($q, Allow, Group) {
+                        return Allow.admin().then(
+                            function () {
+                                return Group.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
+            .when('/admin/group/:id?', {
+                templateUrl: 'views/admin/group.html',
+                controller: 'AdminGroupController',
+                controllerAs: 'vm',
+                resolve: {
+                    group: /*@ngInject*/ function ($q, $route, Allow, Group) {
+                        return Allow.admin().then(
+                            function () {
+                                if ($route.current.params.id)
+                                    return Group.get($route.current.params.id);
+                                else
+                                    return {};
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
+            .when('/admin/organizations', {
+                templateUrl: 'views/admin/organizations.html',
+                controller: 'AdminOrganizationsController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
+            .when('/admin/organization/:id?', {
+                templateUrl: 'views/admin/organization.html',
+                controller: 'AdminOrganizationController',
+                controllerAs: 'vm',
+                resolve: {
+                    organization: /*@ngInject*/ function ($q, $route, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                if ($route.current.params.id)
+                                    return Organization.get($route.current.params.id);
+                                else
+                                    return {};
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
+        ;
         /* END: Admin routes */
 
     }

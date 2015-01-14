@@ -9,7 +9,10 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
-import com.jasify.schedule.appengine.model.common.*;
+import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationService;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.common.TestOrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -23,11 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.newCapture;
+import static org.easymock.EasyMock.*;
 
 public class OrganizationEndpointTest {
     /**

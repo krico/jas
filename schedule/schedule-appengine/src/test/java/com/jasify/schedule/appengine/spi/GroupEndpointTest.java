@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static org.easymock.EasyMock.*;
 
 public class GroupEndpointTest {

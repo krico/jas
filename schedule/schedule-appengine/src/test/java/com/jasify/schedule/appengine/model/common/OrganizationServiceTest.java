@@ -10,8 +10,6 @@ import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
 import java.util.HashSet;
@@ -186,7 +184,7 @@ public class OrganizationServiceTest {
         assertNotNull(users);
         assertTrue(users.isEmpty());
 
-        organizationService.addUserToOrganization(organization, user);
+        organizationService.addUserToOrganization(id, user.getId());
         organization = organizationService.getOrganization(id);
 
         users = organization.getUsers();
@@ -201,7 +199,7 @@ public class OrganizationServiceTest {
         Datastore.put(user);
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         organizationService.addOrganization(organization);
-        organizationService.addUserToOrganization(organization, user);
+        organizationService.addUserToOrganization(organization.getId(), user.getId());
         organizationService.addUserToOrganization(organization, user);
         organizationService.removeUserFromOrganization(organization, user);
 
@@ -238,9 +236,9 @@ public class OrganizationServiceTest {
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         Key organizationId = organizationService.addOrganization(organization);
 
+        organizationService.addGroupToOrganization(organization.getId(), group.getId());
         organizationService.addGroupToOrganization(organization, group);
-        organizationService.addGroupToOrganization(organization, group);
-        organizationService.removeGroupFromOrganization(organization, group);
+        organizationService.removeGroupFromOrganization(organization.getId(), group.getId());
 
         organization = organizationService.getOrganization(organizationId);
         assertNotNull(organization);
@@ -258,6 +256,13 @@ public class OrganizationServiceTest {
     public void testRemoveOrganizationNotOrganization() throws Exception {
         Key id = organizationService.addGroup(new Group(TEST_GROUP_NAME));
         organizationService.removeOrganization(id);
+    }
+
+    @Test
+    public void testRemoveOrganizationReleasesName() throws Exception {
+        Key id = organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME));
+        organizationService.removeOrganization(id);
+        organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME));
     }
 
     @Test
@@ -378,9 +383,9 @@ public class OrganizationServiceTest {
         User user = new User(TEST_USER_NAME);
         Datastore.put(user);
 
+        organizationService.addUserToGroup(group.getId(), user.getId());
         organizationService.addUserToGroup(group, user);
-        organizationService.addUserToGroup(group, user);
-        organizationService.removeUserFromGroup(group, user);
+        organizationService.removeUserFromGroup(group.getId(), user.getId());
 
         group = organizationService.getGroup(id);
         assertNotNull(group);

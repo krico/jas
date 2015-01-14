@@ -1,0 +1,51 @@
+<div class="row">
+    <div class="col-sm-12">
+        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+    </div>
+    <div class="col-sm-12">
+        <form name="groupForm" role="form" class="form-inline" novalidate ng-submit="vm.add(vm.group)">
+            <div class="form-group">
+                <label class="sr-only" for="name">Group Name</label>
+                <input type="text" class="form-control input-sm" id="name" ng-model="vm.group.name"
+                       placeholder="Group Name">
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="description">Group Description</label>
+                <input type="text" class="form-control input-sm" id="description" ng-model="vm.group.description"
+                       placeholder="Description">
+            </div>
+            <button type="submit" ng-disabled="!vm.group.name" class="btn btn-primary input-sm">create group</button>
+        </form>
+    </div>
+    <div class="col-sm-12">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>name</th>
+                    <th>description</th>
+                    <th>created</th>
+                    <th>updated</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="group in vm.groups">
+                    <td ng-click="vm.viewGroup(group.id)">{{group.name}}</td>
+                    <td ng-click="vm.viewGroup(group.id)">{{group.description | limitTo: 40}}</td>
+                    <td ng-click="vm.viewGroup(group.id)">{{group.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                    <td ng-click="vm.viewGroup(group.id)">{{group.modified | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(group.id)"><span
+                                class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </td>
+                </tr>
+                <tr ng-if="vm.groups.length == 0">
+                    <td colspan="4">No groups...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

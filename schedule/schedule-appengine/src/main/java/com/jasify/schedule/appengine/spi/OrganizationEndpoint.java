@@ -10,6 +10,7 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
@@ -53,6 +54,29 @@ public class OrganizationEndpoint {
         }
     }
 
+    @ApiMethod(name = "organizations.users", path = "organization-users/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<com.jasify.schedule.appengine.model.users.User> getOrganizationUsers(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        try {
+            Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(id);
+            List<com.jasify.schedule.appengine.model.users.User> users = organization.getUsers();
+            return users;
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "organizations.groups", path = "organization-groups/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Group> getOrganizationGroups(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        try {
+            Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(id);
+            return organization.getGroups();
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
     @ApiMethod(name = "organizations.update", path = "organizations/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public Organization updateOrganization(User caller, @Named("id") Key id, Organization organization) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdmin(caller);
@@ -78,6 +102,46 @@ public class OrganizationEndpoint {
         }
         try {
             return OrganizationServiceFactory.getOrganizationService().getOrganization(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "organizations.addUser", path = "organizations/{organizationId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public void addUserToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().addUserToOrganization(organizationId, userId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "organizations.removeUser", path = "organizations/{organizationId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeUserFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().removeUserFromOrganization(organizationId, userId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "organizations.addGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public void addGroupToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().addGroupToOrganization(organizationId, groupId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "organizations.removeGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeGroupFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().removeGroupFromOrganization(organizationId, groupId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

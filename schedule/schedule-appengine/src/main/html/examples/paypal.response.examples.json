@@ -237,5 +237,57 @@
         "method": "GET"
       }
     ]
+  },
+  "Payment Not returned": {
+    "id": "PAY-1NS65676VS204914DKSZYOUQ",
+    "create_time": "2015-01-12T08:35:30Z",
+    "update_time": "2015-01-12T08:35:31Z",
+    "state": "created",
+    "intent": "sale",
+    "payer": {
+      "payment_method": "paypal",
+      "status": "VERIFIED",
+      "payer_info": {
+        "email": "buyer.wszarmach@wp.pl",
+        "first_name": "BuyerWaldemar",
+        "last_name": "Szarmach",
+        "payer_id": "QVDNRD8UUGTL2",
+        "shipping_address": {
+          "line1": "Rue de Bourgogne 5",
+          "line2": "Case postale 12",
+          "city": "GENEVA 5",
+          "postal_code": "1211",
+          "country_code": "CH",
+          "recipient_name": "BuyerWaldemar Szarmach"
+        }
+      }
+    },
+    "transactions": [
+      {
+        "amount": {
+          "total": "1000.00",
+          "currency": "CHF",
+          "details": {"subtotal": "1000.00"}
+        },
+        "related_resources": []
+      }
+    ],
+    "links": [
+      {
+        "href": "https://api.sandbox.paypal.com/v1/payments/payment/PAY-1NS65676VS204914DKSZYOUQ",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-873373567A817860E",
+        "rel": "approval_url",
+        "method": "REDIRECT"
+      },
+      {
+        "href": "https://api.sandbox.paypal.com/v1/payments/payment/PAY-1NS65676VS204914DKSZYOUQ/execute",
+        "rel": "execute",
+        "method": "POST"
+      }
+    ]
   }
 }

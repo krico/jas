@@ -11,6 +11,7 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Group;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.transform.*;
@@ -89,6 +90,38 @@ public class GroupEndpoint {
         checkFound(id);
         try {
             OrganizationServiceFactory.getOrganizationService().removeGroup(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "groups.users", path = "group-users/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<com.jasify.schedule.appengine.model.users.User> getGroupUsers(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        try {
+            Group group = OrganizationServiceFactory.getOrganizationService().getGroup(id);
+            List<com.jasify.schedule.appengine.model.users.User> users = group.getUsers();
+            return users;
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "groups.addUser", path = "groups/{groupId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public void addUserToGroup(User caller, @Named("groupId") Key groupId, @Named("userId") Key userId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().addUserToGroup(groupId, userId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "groups.removeUser", path = "groups/{groupId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeUserFromGroup(User caller, @Named("groupId") Key groupId, @Named("userId") Key userId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            OrganizationServiceFactory.getOrganizationService().removeUserFromGroup(groupId, userId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

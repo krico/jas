@@ -2,8 +2,7 @@
 
     angular.module('jasify').factory('User', user);
 
-    function user(Endpoint, $q, $log) {
-
+    function user(Endpoint, $q) {
         var User = {
             query: query,
             get: get,
