@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.common;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.meta.common.GroupMeta;
+import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -27,6 +28,7 @@ import java.util.Set;
 final class DefaultOrganizationService implements OrganizationService {
     private final UserMeta userMeta;
     private final OrganizationMeta organizationMeta;
+    private final OrganizationMemberMeta organizationMemberMeta;
     private final UniqueConstraint uniqueOrganizationName;
 
     private final GroupMeta groupMeta;
@@ -34,6 +36,7 @@ final class DefaultOrganizationService implements OrganizationService {
     private DefaultOrganizationService() {
         userMeta = UserMeta.get();
         organizationMeta = OrganizationMeta.get();
+        organizationMemberMeta = OrganizationMemberMeta.get();
         uniqueOrganizationName = UniqueConstraint.create(organizationMeta, organizationMeta.name);
         groupMeta = GroupMeta.get();
     }
@@ -313,6 +316,17 @@ final class DefaultOrganizationService implements OrganizationService {
             toDel.add(member.getId());
         }
         Datastore.delete(toDel);
+
+        //TODO: this should be transactional
+
+        List<Key> memberShips = Datastore.query(organizationMemberMeta)
+                .filter(organizationMemberMeta.groupRef.equal(dbGroup.getId()))
+                .asKeyList();
+
+        for (Key memberShip : memberShips) {
+            Datastore.delete(memberShip);
+        }
+
         Datastore.delete(dbGroup.getId());
     }
 
