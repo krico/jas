@@ -3,7 +3,7 @@
 
     angular.module('jasifyScheduleControllers').controller('AdminOrganizationController', AdminOrganizationController);
 
-    function AdminOrganizationController($log, $q, User, Group, Organization, organization) {
+    function AdminOrganizationController($log, $q, $modal, User, Group, Organization, ActivityType, organization) {
         var vm = this;
         vm.alerts = [];
         vm.alert = alert;
@@ -35,8 +35,14 @@
         vm.selectedGroups = [];
         vm.group = null;
 
+        vm.activityTypes = [];
+        vm.loadActivityTypes = loadActivityTypes;
+        vm.addActivityType = addActivityType;
+        vm.removeActivityType = removeActivityType;
+
         vm.loadUsers();
         vm.loadGroups();
+        vm.loadActivityTypes();
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -183,8 +189,47 @@
             }
         }
 
+        function loadActivityTypes() {
+            ActivityType.query(vm.organization.id).then(ok, errorHandler);
+            function ok(resp) {
+                vm.activityTypes = resp.items;
+            }
+        }
+
+        function removeActivityType(activityType) {
+            ActivityType.remove(activityType).then(ok, errorHandler);
+            function ok() {
+                vm.alert('warning', 'Activity type "' + activityType.name + '" removed!');
+                vm.loadActivityTypes();
+            }
+        }
+
+        function addActivityType(organization) {
+            var modalInstance = $modal.open({
+                templateUrl: 'views/admin/organization.activity-type.modal.html?' + new Date(),
+                controller: 'AdminOrganizationActivityTypeController',
+                controllerAs: 'vm',
+                size: 'md',
+                resolve: {
+                    organization: function () {
+                        return organization;
+                    }
+                }
+            });
+
+            modalInstance.result.then(ok, cancel);
+            function ok(res) {
+                vm.loadActivityTypes();
+            }
+
+            function cancel() {
+                vm.alert('info', 'Add Activity Type canceled');
+            }
+        }
+
         function errorHandler(resp) {
             alert('danger', 'Operation failed: (' + resp.status + ") '" + resp.statusText + "'");
+            if (resp.error) $log.debug('ERROR: ' + resp.error.message);
             return $q.reject();
         }
 

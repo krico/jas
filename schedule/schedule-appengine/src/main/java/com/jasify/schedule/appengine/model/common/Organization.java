@@ -3,7 +3,10 @@ package com.jasify.schedule.appengine.model.common;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.*;
 
 import java.util.*;
@@ -14,6 +17,7 @@ import java.util.*;
  */
 @Model
 public class Organization {
+    private static final Logger log = LoggerFactory.getLogger(Organization.class);
 
     @Attribute(primaryKey = true)
     private Key id;
@@ -126,7 +130,12 @@ public class Organization {
         if (members == null) return ret;
 
         for (OrganizationMember member : members) {
-            Group model = member.getGroupRef().getModel();
+            Group model = null;
+            try {
+                model = member.getGroupRef().getModel();
+            } catch (Exception e) {
+                log.warn("Missing group", e);
+            }
             if (model != null) ret.add(model);
         }
 
