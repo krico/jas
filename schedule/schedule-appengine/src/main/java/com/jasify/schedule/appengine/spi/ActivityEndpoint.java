@@ -7,6 +7,8 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -19,9 +21,7 @@ import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.checkFound;
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
@@ -114,10 +114,109 @@ public class ActivityEndpoint {
     public List<Activity> getActivities(User caller,
                                         @Nullable @Named("organizationId") Key organizationId,
                                         @Nullable @Named("activityTypeId") Key activityTypeId,
-                                        @Nullable @Named("fromDate") Date fromDate,
-                                        @Nullable @Named("toDate") Date toDate,
+                                        @Nullable @Named("fromDate") final Date fromDate,
+                                        @Nullable @Named("toDate") final Date toDate,
                                         @Nullable @Named("offset") Integer offset,
-                                        @Nullable @Named("limit") Integer limit) {
-        return null;
+                                        @Nullable @Named("limit") Integer limit) throws BadRequestException, NotFoundException {
+
+        if (activityTypeId != null && organizationId != null) {
+            throw new BadRequestException("Must choose one: activityTypeId or organizationId");
+        }
+        final List<Activity> all = new ArrayList<>();
+        try {
+            if (activityTypeId != null) {
+                checkFound(activityTypeId);
+                ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(activityTypeId);
+                all.addAll(ActivityServiceFactory.getActivityService().getActivities(activityType));
+            } else {
+                checkFound(organizationId);
+                Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
+                all.addAll(ActivityServiceFactory.getActivityService().getActivities(organization));
+            }
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+
+        //TODO: I'm pretty sure this should be done on the Service implementation, but I'm in the bus and lazy and sleepy
+
+        ArrayList<Activity> filtered = new ArrayList<>();
+        filtered.addAll(Collections2.filter(all, new Predicate<Activity>() {
+            @Override
+            public boolean apply(@Nullable Activity input) {
+                if (fromDate != null && input.getStart() != null && fromDate.after(input.getStart())) {
+                    return false;
+                }
+                if (toDate != null && input.getFinish() != null && toDate.before(input.getFinish())) {
+                    return false;
+                }
+                return true;
+            }
+        }));
+
+        if (offset == null) offset = 0;
+        if (limit == null) limit = 0;
+
+        if (offset > 0 || limit > 0) {
+            if (offset < filtered.size()) {
+                if (limit <= 0) limit = filtered.size();
+                return new ArrayList<>(filtered.subList(offset, Math.min(offset + limit, filtered.size())));
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
+        return filtered;
+    }
+
+    @ApiMethod(name = "activities.get", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public Activity getActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        checkFound(id);
+        try {
+            return ActivityServiceFactory.getActivityService().getActivity(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activities.update", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public Activity updateActivity(User caller, @Named("id") Key id, Activity activity) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        mustBeAdmin(caller);
+        checkFound(id);
+        activity.setId(id);
+        try {
+            return ActivityServiceFactory.getActivityService().updateActivity(activity);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        } catch (FieldValueException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activities.add", path = "activities", httpMethod = ApiMethod.HttpMethod.POST)
+    public Activity addActivity(User caller, Activity activity) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        mustBeAdmin(caller);
+        checkFound(activity.getActivityTypeRef());
+        checkFound(activity.getActivityTypeRef().getKey());
+        checkFound(activity.getActivityTypeRef().getModel());
+        try {
+            ActivityServiceFactory.getActivityService().addActivity(activity);
+            return activity;
+        } catch (FieldValueException e) {
+            throw new BadRequestException(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activities.remove", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        checkFound(id);
+        try {
+            ActivityServiceFactory.getActivityService().removeActivity(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
     }
 }

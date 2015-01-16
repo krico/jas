@@ -74,6 +74,13 @@
                 update: nop,
                 add: nop,
                 remove: nop
+            },
+            activities: {
+                query: nop,
+                get: nop,
+                update: nop,
+                add: nop,
+                remove: nop
             }
         };
 
