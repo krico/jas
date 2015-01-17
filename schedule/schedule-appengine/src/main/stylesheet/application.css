@@ -159,3 +159,8 @@ body {
     display: table-cell;
     vertical-align: top;
 }
+
+/* For angular-ui-datetime-picker-popup to show the popup more pretty */
+.datetime-picker div > table .btn-default {
+    border: 0;
+}

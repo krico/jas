@@ -20,6 +20,7 @@ Features:
 
 Changes:
 
+  - added angular-ui-datetime-picker-popup `bower install git@github.com:krico/bootstrap-ui-datetime-picker`
   - added ionicons `bower install ionicons -S` for social icons facebook/google, etc
   - added *google-api-services-oauth2* to interface with google OAuth2 information (tokeninfo and userinfo)
   - added [jsoup HTML parser](http://jsoup.org) to extract HTML tags from message body

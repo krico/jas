@@ -56,7 +56,7 @@
 
                     <div class="col-sm-8">
                         <p class="input-group">
-                            <input id="start" type="text" class="form-control" datepicker-popup="dd.MM.yyyy"
+                            <input id="start" type="text" class="form-control" datetime-picker="dd MMM yyyy HH:mm"
                                    ng-model="vm.activity.start" is-open="vm.isStartOpen" show-weeks="false"
                                    ng-required="true"
                                    close-text="Close"/>
@@ -73,7 +73,7 @@
 
                     <div class="col-sm-8">
                         <p class="input-group">
-                            <input id="finish" type="text" class="form-control" datepicker-popup="dd.MM.yyyy"
+                            <input id="finish" type="text" class="form-control" datetime-picker="dd MMM yyyy HH:mm"
                                    ng-model="vm.activity.finish" is-open="vm.isFinishOpen" show-weeks="false"
                                    ng-required="true"
                                    close-text="Close"/>
@@ -106,10 +106,12 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="maxSubscriptions" class="col-sm-3 control-label" tooltip="Maximum number of subscriptions allowed">Subscriptions:</label>
+                    <label for="maxSubscriptions" class="col-sm-3 control-label"
+                           tooltip="Maximum number of subscriptions allowed">Subscriptions:</label>
 
                     <div class="col-sm-8">
-                        <input id="maxSubscriptions" type="number" class="form-control" ng-model="vm.activity.maxSubscriptions"/>
+                        <input id="maxSubscriptions" type="number" class="form-control"
+                               ng-model="vm.activity.maxSubscriptions"/>
                     </div>
                 </div>
             </fieldset>
