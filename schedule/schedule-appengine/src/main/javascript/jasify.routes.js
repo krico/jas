@@ -180,6 +180,36 @@
                     }
                 }
             })
+            .when('/admin/activity/:id?', {
+                templateUrl: 'views/admin/activity.html',
+                controller: 'AdminActivityController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    },
+                    activity: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+                        return Allow.admin().then(
+                            function () {
+                                if ($route.current.params.id)
+                                    return Activity.get($route.current.params.id);
+                                else
+                                    return {};
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
         ;
         /* END: Admin routes */
 
