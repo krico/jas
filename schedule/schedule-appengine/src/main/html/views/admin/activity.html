@@ -56,9 +56,10 @@
 
                     <div class="col-sm-8">
                         <p class="input-group">
-                            <input id="start" type="text" class="form-control" datetime-picker="dd MMM yyyy HH:mm"
-                                   ng-model="vm.activity.start" is-open="vm.isStartOpen" show-weeks="false"
+                            <input id="start" type="text" class="form-control" datetime-picker="{{vm.dateTimeFormat}}"
+                                   ng-model="vm.activity.start" is-open="vm.isStartOpen"
                                    ng-required="true"
+                                   ng-focus="vm.openStart($event)"
                                    close-text="Close"/>
                             <span class="input-group-btn">
                                 <button type="button" class="btn btn-default" ng-click="vm.openStart($event)">
@@ -73,9 +74,10 @@
 
                     <div class="col-sm-8">
                         <p class="input-group">
-                            <input id="finish" type="text" class="form-control" datetime-picker="dd MMM yyyy HH:mm"
+                            <input id="finish" type="text" class="form-control" datetime-picker="{{vm.dateTimeFormat}}"
                                    ng-model="vm.activity.finish" is-open="vm.isFinishOpen" show-weeks="false"
                                    ng-required="true"
+                                   ng-focus="vm.openFinish($event)"
                                    close-text="Close"/>
                             <span class="input-group-btn">
                                 <button type="button" class="btn btn-default" ng-click="vm.openFinish($event)">

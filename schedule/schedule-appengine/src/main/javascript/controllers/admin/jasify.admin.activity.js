@@ -2,9 +2,10 @@
 
     angular.module('jasifyScheduleControllers').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($log, ActivityType, Activity, activity, organizations) {
+    function AdminActivityController($log, dateFilter, ActivityType, Activity, activity, organizations) {
         var vm = this;
 
+        vm.dateTimeFormat = 'dd MMM yyyy HH:mm';
         vm.alerts = [];
         vm.organization = {};
         vm.activity = activity;
@@ -19,6 +20,7 @@
 
         vm.organizations = organizations.items;
         vm.selectOrganization = selectOrganization;
+        vm.selectActivityType = selectActivityType;
         vm.loadActivityTypes = loadActivityTypes;
         vm.hasActivityTypes = hasActivityTypes;
         vm.alert = alert;
@@ -47,7 +49,7 @@
 
         function hasActivityTypes() {
             if (vm.loadingActivityTypes) return true;
-            return vm.activityTypes.length != 0;
+            return vm.activityTypes.length !== 0;
         }
 
         function loadActivityTypes(organization) {
@@ -62,6 +64,7 @@
             function ok(r) {
                 vm.loadingActivityTypes = false;
                 vm.activityTypes = r.items;
+                vm.selectActivityType(vm.activityTypes, vm.activity);
             }
 
             function fail(r) {
@@ -83,7 +86,27 @@
             vm.loadActivityTypes(vm.organization);
         }
 
+        function selectActivityType(activityTypes, activity) {
+            if (activity.activityType && activity.activityType.id) {
+                angular.forEach(activityTypes, function (value, key) {
+                    if (activity.activityType.id == value.id) {
+                        activity.activityType = value;
+                    }
+                });
+            }
+        }
+
         function save() {
+            Activity.add(vm.activity).then(ok, fail);
+            function ok(r) {
+                vm.alert('info', 'Activity created!');
+                vm.activity = r;
+                vm.selectActivityType(vm.activityTypes, vm.activity);
+            }
+
+            function fail(r) {
+                vm.alert('danger', 'Failed: ' + r.statusText);
+            }
         }
 
         function reset() {
