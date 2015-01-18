@@ -2,6 +2,7 @@
 
 var argv = require('yargs').argv;
 var gulp = require('gulp');
+var merge = require('merge-stream');
 var print = require('gulp-print');
 var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
@@ -9,14 +10,16 @@ var ngAnnotate = require('gulp-ng-annotate');
 var uglify = require('gulp-uglify');
 var jshint = require('gulp-jshint');
 var minifyCSS = require('gulp-minify-css');
-var minifyHTML = require('gulp-minify-html');
+var htmlmin = require('gulp-htmlmin');
 var rename = require('gulp-rename');
 var concat = require('gulp-concat');
+var wrapper = require('gulp-wrapper');
 var del = require('del');
 var symlink = require('gulp-sym');
 var bower = require('gulp-bower');
 var karma = require('gulp-karma');
 var gulpif = require('gulp-if');
+var templateCache = require('gulp-angular-templatecache');
 var paths = require('./paths.json');
 
 gulp.task('clean', function (cb) {
@@ -35,7 +38,24 @@ gulp.task('bower', function (cb) {
 });
 
 gulp.task('javascript', function (cb) {
-    return gulp.src(paths.js)
+    var templates = gulp.src(paths.partials)
+        .pipe(htmlmin({
+            collapseWhitespace: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+            filename: 'templates.js',
+            templateHeader: '',
+            templateFooter: ''
+        }))
+        .pipe(templateCache())
+        .pipe(wrapper({
+            header: '(function(angular){',
+            footer: '})(angular);'
+        }));
+
+    var code = gulp.src(paths.js);
+
+    return merge(code, templates)
         .pipe(sourcemaps.init())
         //.pipe(print(function (filepath) {
         //    return "built: " + filepath;
@@ -69,14 +89,18 @@ gulp.task('stylesheet', function (cb) {
         .pipe(gulp.dest(paths.build + '/css'));
 });
 
-gulp.task('html', function (cb) {
-    //var opts = {comments: false, spare: true, conditionals: true};
-    var opts = {spare: true, conditionals: true};
-
-    return gulp.src(paths.html)
-        .pipe(minifyHTML(opts))
+gulp.task('index', function (cb) {
+    return gulp.src(paths.index)
+        .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
         .pipe(gulp.dest(paths.build + '/../'))
 });
+
+gulp.task('examples', function (cb) {
+    return gulp.src(paths.examples)
+        .pipe(gulp.dest(paths.build + '/../'))
+});
+
+gulp.task('html', ['index', 'examples']);
 
 gulp.task('test', ['build'], function (cb) {
     if (argv.skipteststrue) {
@@ -94,10 +118,11 @@ gulp.task('test', ['build'], function (cb) {
 });
 
 gulp.task('watch', function () {
-    gulp.watch(paths.js, ['javascript']);
+    gulp.watch(paths.js.concat(paths.partials), ['javascript']);
     gulp.watch(paths.test.js, ['javascript-test-jshint']);
     gulp.watch(paths.css, ['stylesheet']);
-    gulp.watch(paths.html, ['html']);
+    gulp.watch(paths.index, ['index']);
+    gulp.watch(paths.examples, ['examples']);
 });
 
 gulp.task('build', ['javascript', 'stylesheet', 'html', 'bower']);

@@ -8,7 +8,8 @@
         'ui.bootstrap',
         'angularSpinner',
         'jasifyScheduleControllers',
-        'ui.bootstrap.datetimepicker'
+        'ui.bootstrap.datetimepicker',
+        'templates'
     ]);
 
     /**
