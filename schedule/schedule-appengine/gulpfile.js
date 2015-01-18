@@ -29,9 +29,10 @@ gulp.task('client', client);
 gulp.task('test-client-js-hint', testClientJsHint);
 gulp.task('styles', styles);
 gulp.task('html', html);
+gulp.task('static-html', staticHtml);
 gulp.task('test', ['build'], testClient);
 gulp.task('watch', rebuild);
-gulp.task('build', ['client', 'styles', 'html', 'bower-install']);
+gulp.task('build', ['client', 'styles', 'html', 'static-html', 'bower-install']);
 gulp.task('default', ['watch', 'build', 'test-client-js-hint']);
 
 function rebuild() {
@@ -39,6 +40,7 @@ function rebuild() {
     gulp.watch(paths.test.js, ['test-client-js-hint']);
     gulp.watch(paths.css, ['styles']);
     gulp.watch(paths.html, ['html']);
+    gulp.watch(paths.staticHtml, ['static-html']);
 }
 
 
@@ -111,6 +113,11 @@ function styles(cb) {
 function html(cb) {
     return gulp.src(paths.html)
         .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
+        .pipe(gulp.dest(paths.build + '/../'))
+}
+
+function staticHtml(cb) {
+    return gulp.src(paths.staticHtml)
         .pipe(gulp.dest(paths.build + '/../'))
 }
 

@@ -9,7 +9,7 @@
     function jasifyRoutes($routeProvider) {
         $routeProvider
             .when('/', {
-                templateUrl: 'home.html',
+                templateUrl: 'home/home.html',
                 controller: 'HomeController',
                 controllerAs: 'vm',
                 resolve: {
@@ -19,7 +19,7 @@
                 }
             })
             .when('/home', {
-                templateUrl: 'home.html',
+                templateUrl: 'home/home.html',
                 controller: 'HomeController',
                 controllerAs: 'vm',
                 resolve: {
@@ -29,7 +29,7 @@
                 }
             })
             .when('/signUp', {
-                templateUrl: 'sign-up.html',
+                templateUrl: 'sign-up/sign-up.html',
                 controller: 'SignUpController',
                 controllerAs: 'vm',
                 resolve: {
@@ -39,7 +39,7 @@
                 }
             })
             .when('/login', {
-                templateUrl: 'login.html',
+                templateUrl: 'login/login.html',
                 controller: 'LoginController',
                 controllerAs: 'vm',
                 resolve: {
@@ -49,7 +49,7 @@
                 }
             })
             .when('/logout', {
-                templateUrl: 'logout.html',
+                templateUrl: 'logout/logout.html',
                 controller: 'LogoutController',
                 controllerAs: 'vm',
                 resolve: {
@@ -59,7 +59,7 @@
                 }
             })
             .when('/profile/:extra?', {
-                templateUrl: 'profile.html',
+                templateUrl: 'profile/profile.html',
                 controller: 'ProfileController',
                 controllerAs: 'vm',
                 resolve: {
@@ -69,7 +69,7 @@
                 }
             })
             .when('/profile-logins', {
-                templateUrl: 'profile-logins.html',
+                templateUrl: 'profile/profile-logins.html',
                 controller: 'ProfileLoginsController',
                 controllerAs: 'vm',
                 resolve: {
@@ -87,7 +87,7 @@
             })
             /* BEGIN: Admin routes */
             .when('/admin/users', {
-                templateUrl: 'admin/admin-users.html',
+                templateUrl: 'admin/user/admin-users.html',
                 controller: 'AdminUsersController',
                 controllerAs: 'vm',
                 resolve: {
@@ -97,7 +97,7 @@
                 }
             })
             .when('/admin/user/:id?', {
-                templateUrl: 'admin/admin-user.html',
+                templateUrl: 'admin/user/admin-user.html',
                 controller: 'AdminUserController',
                 controllerAs: 'vm',
                 resolve: {
@@ -107,7 +107,7 @@
                 }
             })
             .when('/admin/groups', {
-                templateUrl: 'admin/admin-groups.html',
+                templateUrl: 'admin/group/admin-groups.html',
                 controller: 'AdminGroupsController',
                 controllerAs: 'vm',
                 resolve: {
@@ -124,7 +124,7 @@
                 }
             })
             .when('/admin/group/:id?', {
-                templateUrl: 'admin/admin-group.html',
+                templateUrl: 'admin/group/admin-group.html',
                 controller: 'AdminGroupController',
                 controllerAs: 'vm',
                 resolve: {
@@ -144,7 +144,7 @@
                 }
             })
             .when('/admin/organizations', {
-                templateUrl: 'admin/admin-organizations.html',
+                templateUrl: 'admin/organization/admin-organizations.html',
                 controller: 'AdminOrganizationsController',
                 controllerAs: 'vm',
                 resolve: {
@@ -161,7 +161,7 @@
                 }
             })
             .when('/admin/organization/:id?', {
-                templateUrl: 'admin/admin-organization.html',
+                templateUrl: 'admin/organization/admin-organization.html',
                 controller: 'AdminOrganizationController',
                 controllerAs: 'vm',
                 resolve: {
@@ -181,7 +181,7 @@
                 }
             })
             .when('/admin/activities/:organizationId?', {
-                templateUrl: 'admin/admin-activities.html',
+                templateUrl: 'admin/activity/admin-activities.html',
                 controller: 'AdminActivitiesController',
                 controllerAs: 'vm',
                 resolve: {
@@ -214,7 +214,7 @@
                 }
             })
             .when('/admin/activity/:id?', {
-                templateUrl: 'admin/admin-activity.html',
+                templateUrl: 'admin/activity/admin-activity.html',
                 controller: 'AdminActivityController',
                 controllerAs: 'vm',
                 resolve: {

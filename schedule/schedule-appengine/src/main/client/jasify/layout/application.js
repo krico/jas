@@ -44,7 +44,7 @@
         function notAuthenticated() {
             var modalInstance = $modal.open({
                 //TODO: should bring up login.html some how
-                templateUrl: 'authenticate.html',
+                templateUrl: 'authenticate/authenticate.html',
                 controller: 'AuthenticateController',
                 controllerAs: 'vm',
                 size: 'sm'

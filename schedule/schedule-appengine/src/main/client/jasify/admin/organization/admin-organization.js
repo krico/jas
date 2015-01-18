@@ -213,7 +213,7 @@
 
         function addActivityType(organization) {
             var modalInstance = $modal.open({
-                templateUrl: 'admin/admin-organization-activity-type.html?' + new Date(),
+                templateUrl: 'admin/organization/admin-organization-activity-type.html?' + new Date(),
                 controller: 'AdminOrganizationActivityTypeController',
                 controllerAs: 'vm',
                 size: 'md',
