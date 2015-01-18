@@ -12,7 +12,17 @@
     "karmaConfig": "src/test/javascript/karma.conf.ci.js"
   },
   "css": ["src/main/stylesheet/**/*.css"],
-  "html": ["src/main/html/**/*.html"],
+  "index": [
+    "src/main/html/index.html"
+  ],
+  "examples": [
+    "src/main/html/examples/**/*.html"
+  ],
+  "partials": [
+    "src/main/html/**/*.html",
+    "!src/main/html/index.html",
+    "!src/main/html/examples/**/*.html"
+  ],
   "build": "target/schedule-appengine-1.0-SNAPSHOT/build",
   "symBuild": "src/main/html/build"
 }
