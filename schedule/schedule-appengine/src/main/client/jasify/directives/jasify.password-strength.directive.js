@@ -13,7 +13,7 @@
                 password: '=password'
             },
             link: link,
-            templateUrl: 'views/directive/password-strength.html'
+            templateUrl: 'directives/jasify.password-strength.directive.html'
         };
 
         function link(scope, elm, attrs, ctrl) {

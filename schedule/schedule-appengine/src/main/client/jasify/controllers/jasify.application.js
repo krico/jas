@@ -44,7 +44,7 @@
         function notAuthenticated() {
             var modalInstance = $modal.open({
                 //TODO: should bring up login.html some how
-                templateUrl: 'views/authenticate.html',
+                templateUrl: 'authenticate.html',
                 controller: 'AuthenticateController',
                 controllerAs: 'vm',
                 size: 'sm'
@@ -60,14 +60,14 @@
 
         function loginFailed() {
             $modal.open({
-                templateUrl: 'views/modal/login-failed.html',
+                templateUrl: 'modal/login-failed.html',
                 size: 'sm'
             });
         }
 
         function notAuthorized() {
             var modalInstance = $modal.open({
-                templateUrl: 'views/modal/not-authorized.html',
+                templateUrl: 'modal/not-authorized.html',
                 //controller: 'ModalInstanceCtrl',
                 size: 'sm'
             });
