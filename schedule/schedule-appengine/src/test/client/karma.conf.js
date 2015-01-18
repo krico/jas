@@ -24,7 +24,7 @@ module.exports = function (config, min) {
         basePath: '../../..',
         frameworks: ['jasmine'],
         files: files,
-        exclude: ['src/test/javascript/karma.conf*.js'],
+        exclude: ['src/test/client/karma.conf*.js'],
         preprocessors: {},
         reporters: ['progress', 'html'],
         port: 9876,

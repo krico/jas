@@ -34,6 +34,14 @@ gulp.task('watch', rebuild);
 gulp.task('build', ['client', 'styles', 'html', 'bower-install']);
 gulp.task('default', ['watch', 'build', 'test-client-js-hint']);
 
+function rebuild() {
+    gulp.watch(paths.js.concat(paths.partials), ['client']);
+    gulp.watch(paths.test.js, ['test-client-js-hint']);
+    gulp.watch(paths.css, ['styles']);
+    gulp.watch(paths.html, ['html']);
+}
+
+
 function clean(cb) {
     del([paths.build, paths.symBuild], cb);
 }
@@ -120,11 +128,4 @@ function testClient(cb) {
             // Make sure failed tests cause gulp to exit non-zero
             throw err;
         });
-}
-function rebuild() {
-    gulp.watch(paths.js.concat(paths.partials), ['javascript']);
-    gulp.watch(paths.test.js, ['javascript-test-jshint']);
-    gulp.watch(paths.css, ['stylesheet']);
-    gulp.watch(paths.index, ['index']);
-    gulp.watch(paths.examples, ['examples']);
 }
