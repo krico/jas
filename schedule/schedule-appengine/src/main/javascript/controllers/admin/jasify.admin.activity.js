@@ -2,9 +2,9 @@
 
     angular.module('jasifyScheduleControllers').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($log, dateFilter, ActivityType, Activity, activity, organizations) {
+    function AdminActivityController($log, $location, dateFilter, ActivityType, Activity, activity, organizations) {
         var vm = this;
-
+        $log.info('New AdminActivityController');
         vm.dateTimeFormat = 'dd MMM yyyy HH:mm';
         vm.alerts = [];
         vm.organization = {};
@@ -24,7 +24,8 @@
         vm.loadActivityTypes = loadActivityTypes;
         vm.hasActivityTypes = hasActivityTypes;
         vm.alert = alert;
-        vm.save = save;
+        vm.update = update;
+        vm.create = create;
         vm.reset = reset;
 
         vm.selectOrganization(vm.organizations, vm.activity);
@@ -53,6 +54,7 @@
         }
 
         function loadActivityTypes(organization) {
+
             vm.loadingActivityTypes = true;
 
             vm.activityTypes = [];
@@ -74,32 +76,45 @@
         }
 
         function selectOrganization(organizations, activity) {
-            if (activity.id) {
+            if (activity.activityType && activity.activityType.organizationId) {
                 angular.forEach(organizations, function (value, key) {
-                    if (activity.id == value.id) {
+                    if (activity.activityType.organizationId == value.id) {
                         vm.organization = value;
                     }
                 });
-            } else {
-                vm.organization = organizations[0]; //todo: remove this, change to {}
             }
-            vm.loadActivityTypes(vm.organization);
+            if (vm.organization && vm.organization.id) {
+                vm.loadActivityTypes(vm.organization);
+            }
         }
 
         function selectActivityType(activityTypes, activity) {
+
             if (activity.activityType && activity.activityType.id) {
                 angular.forEach(activityTypes, function (value, key) {
                     if (activity.activityType.id == value.id) {
-                        activity.activityType = value;
+                        vm.activity.activityType = value;
                     }
                 });
             }
         }
 
-        function save() {
+        function create() {
             Activity.add(vm.activity).then(ok, fail);
             function ok(r) {
                 vm.alert('info', 'Activity created!');
+                $location.path('/admin/activity/' + r.id);
+            }
+
+            function fail(r) {
+                vm.alert('danger', 'Failed: ' + r.statusText);
+            }
+        }
+
+        function update() {
+            Activity.update(vm.activity).then(ok, fail);
+            function ok(r) {
+                vm.alert('info', 'Activity updated!');
                 vm.activity = r;
                 vm.selectActivityType(vm.activityTypes, vm.activity);
             }
@@ -110,6 +125,16 @@
         }
 
         function reset() {
+            Activity.get(vm.activity.id).then(ok, fail);
+            vm.activity = {};
+            function ok(r) {
+                vm.activity = r;
+                vm.selectOrganization(vm.organizations, vm.activity);
+            }
+
+            function fail(r) {
+                vm.alert('danger', 'Failed: ' + r.statusText);
+            }
         }
     }
 

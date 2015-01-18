@@ -67,12 +67,12 @@
                     <button ng-if="!vm.create" type="button"
                             ng-click="vm.save()" ng-disabled="!vm.forms.userForm.$dirty || vm.forms.userForm.$invalid"
                             class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-save"></span>
-                        save
+                        update
                     </button>
                     <button ng-if="vm.create" type="button"
                             ng-click="vm.createUser()" ng-disabled="!vm.forms.userForm.$dirty || vm.forms.userForm.$invalid"
                             class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span>
-                        save
+                        create
                     </button>
                     <button type="button"
                             ng-click="vm.reset()" ng-disabled="!vm.forms.userForm.$dirty"

@@ -196,17 +196,20 @@
                         );
                     },
                     activity: /*@ngInject*/ function ($q, $route, Allow, Activity) {
-                        return Allow.admin().then(
-                            function () {
-                                if ($route.current.params.id)
-                                    return Activity.get($route.current.params.id);
-                                else
-                                    return {};
-                            },
-                            function (reason) {
-                                return $q.reject(reason);
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.id) {
+                                return Activity.get($route.current.params.id);
+                            } else {
+                                return {};
                             }
-                        );
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
                     }
                 }
             })

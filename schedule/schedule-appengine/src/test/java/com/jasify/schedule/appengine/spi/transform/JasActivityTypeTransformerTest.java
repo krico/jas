@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.spi.dm.JasActivityType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -31,7 +32,8 @@ public class JasActivityTypeTransformerTest {
     @Test
     public void testTransformTo() throws Exception {
         ActivityType internal = new ActivityType();
-        Key id = Datastore.createKey(ActivityType.class, 1);
+        Key orgId = Datastore.allocateId(Organization.class);
+        Key id = Datastore.allocateId(orgId, ActivityType.class);
         internal.setId(id);
         internal.setName("activity");
         internal.setDescription("Desc");
@@ -40,6 +42,8 @@ public class JasActivityTypeTransformerTest {
         assertEquals("activity", external.getName());
         assertEquals("Desc", external.getDescription());
         assertEquals(id, KeyFactory.stringToKey(external.getId()));
+        assertNotNull(external.getOrganizationId());
+        assertEquals(orgId, KeyFactory.stringToKey(external.getOrganizationId()));
     }
 
     @Test

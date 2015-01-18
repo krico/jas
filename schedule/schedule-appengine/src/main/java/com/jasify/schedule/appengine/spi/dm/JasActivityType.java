@@ -8,6 +8,7 @@ public class JasActivityType implements JasEndpointEntity {
     private String id;
     private String name;
     private String description;
+    private String organizationId;
 
     public String getId() {
         return id;
@@ -31,5 +32,13 @@ public class JasActivityType implements JasEndpointEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 }

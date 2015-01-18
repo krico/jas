@@ -11,6 +11,8 @@ import com.jasify.schedule.appengine.util.BeanUtil;
  */
 public class JasActivityTypeTransformer implements Transformer<ActivityType, JasActivityType> {
 
+    private final JasKeyTransformer keyTransformer = new JasKeyTransformer();
+
     public JasActivityTypeTransformer() {
     }
 
@@ -18,6 +20,9 @@ public class JasActivityTypeTransformer implements Transformer<ActivityType, Jas
     public JasActivityType transformTo(ActivityType internal) {
         JasActivityType external = new JasActivityType();
         BeanUtil.copyProperties(external, internal);
+        if (internal.getId() != null && internal.getId().getParent() != null) {
+            external.setOrganizationId(keyTransformer.transformTo(internal.getId().getParent()));
+        }
         return external;
     }
 

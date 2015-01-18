@@ -119,10 +119,15 @@
             </fieldset>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <button type="button"
-                            ng-click="vm.save()" ng-disabled="!vm.activityForm.$dirty || vm.activityForm.$invalid"
+                    <button type="button" ng-if="vm.activity.id"
+                            ng-click="vm.update()" ng-disabled="!vm.activityForm.$dirty || vm.activityForm.$invalid"
                             class="btn btn-default btn-sm btn-primary">
-                        <span class="glyphicon glyphicon-save"></span> save
+                        <span class="glyphicon glyphicon-save"></span> update
+                    </button>
+                    <button type="button" ng-if="!vm.activity.id"
+                            ng-click="vm.create()" ng-disabled="!vm.activityForm.$dirty || vm.activityForm.$invalid"
+                            class="btn btn-default btn-sm btn-primary">
+                        <span class="glyphicon glyphicon-plus"></span> create
                     </button>
                     <button type="button"
                             ng-click="vm.reset()" ng-disabled="!vm.activityForm.$dirty" class="btn btn-default btn-sm">
