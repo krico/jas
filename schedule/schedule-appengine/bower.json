@@ -28,7 +28,7 @@
     "angular-messages": "~1.3.3",
     "angular-cookies": "~1.3.7",
     "ionicons": "~2.0.0",
-    "angular-ui-datetime-picker-popup": "https://github.com/krico/bootstrap-ui-datetime-picker.git"
+    "ui-bootstrap-datetime-picker": "*"
   },
   "resolutions": {
     "angular": "~1.3.1"

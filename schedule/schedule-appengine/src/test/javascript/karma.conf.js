@@ -9,7 +9,7 @@ module.exports = function (config, min) {
         paths.build + '/lib/angular-messages/angular-messages.js',
         paths.build + '/lib/angular-cookies/angular-cookies.js',
         paths.build + '/lib/angular-bootstrap/ui-bootstrap-tpls.js',
-        paths.build + '/lib/angular-ui-datetime-picker-popup/dist/datetime-picker.min.js',
+        paths.build + '/lib/ui-bootstrap-datetime-picker/dist/datetime-picker.min.js',
         paths.build + '/lib/spin.js/spin.js',
         paths.build + '/lib/angular-spinner/angular-spinner.js'
 
