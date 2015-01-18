@@ -180,6 +180,23 @@
                     }
                 }
             })
+            .when('/admin/activities', {
+                templateUrl: 'views/admin/activities.html',
+                controller: 'AdminActivitiesController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
             .when('/admin/activity/:id?', {
                 templateUrl: 'views/admin/activity.html',
                 controller: 'AdminActivityController',

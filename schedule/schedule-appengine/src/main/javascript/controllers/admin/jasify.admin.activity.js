@@ -2,9 +2,9 @@
 
     angular.module('jasifyScheduleControllers').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($log, $location, dateFilter, ActivityType, Activity, activity, organizations) {
+    function AdminActivityController($location, ActivityType, Activity, activity, organizations) {
         var vm = this;
-        $log.info('New AdminActivityController');
+
         vm.dateTimeFormat = 'dd MMM yyyy HH:mm';
         vm.alerts = [];
         vm.organization = {};
