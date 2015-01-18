@@ -67,6 +67,20 @@
                 removeUser: nop,
                 users: nop,
                 remove: nop
+            },
+            activityTypes: {
+                query: nop,
+                get: nop,
+                update: nop,
+                add: nop,
+                remove: nop
+            },
+            activities: {
+                query: nop,
+                get: nop,
+                update: nop,
+                add: nop,
+                remove: nop
             }
         };
 

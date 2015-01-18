@@ -7,7 +7,8 @@
         'ngCookies',
         'ui.bootstrap',
         'angularSpinner',
-        'jasifyScheduleControllers'
+        'jasifyScheduleControllers',
+        'ui.bootstrap.datetimepicker'
     ]);
 
     /**

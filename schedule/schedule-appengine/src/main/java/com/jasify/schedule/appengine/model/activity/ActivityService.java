@@ -55,6 +55,8 @@ public interface ActivityService {
     @Nonnull
     public List<ActivityType> getActivityTypes(Organization organization) throws EntityNotFoundException;
 
+    public List<ActivityType> getActivityTypes(Key organizationId) throws EntityNotFoundException;
+
     /**
      * @param activityType to be updated
      * @return the updated ActivityType

@@ -409,6 +409,14 @@ public class OrganizationServiceTest {
     public void testRemoveGroup() throws Exception {
         Group group = new Group(TEST_GROUP_NAME);
         Key id = organizationService.addGroup(group);
+        organizationService.removeGroup(id);
+        assertTrue(Datastore.query(Group.class).asKeyList().isEmpty());
+    }
+
+    @Test
+    public void testRemoveGroupRemovesGroupUser() throws Exception {
+        Group group = new Group(TEST_GROUP_NAME);
+        Key id = organizationService.addGroup(group);
         User user = new User(TEST_USER_NAME);
         Datastore.put(user);
         organizationService.addUserToGroup(group, user);
@@ -419,6 +427,19 @@ public class OrganizationServiceTest {
 
         //make sure they exists (will throw if they don't)
         Datastore.get(User.class, user.getId());
+    }
 
+    @Test
+    public void testRemoveGroupRemovesOrganizationMember() throws Exception {
+        Key id = organizationService.addGroup(new Group(TEST_GROUP_NAME));
+        Key organizationId = organizationService.addOrganization(new Organization(TEST_ORGANIZATION_NAME));
+        organizationService.addGroupToOrganization(organizationId, id);
+
+        organizationService.removeGroup(id);
+        assertTrue(Datastore.query(Group.class).asKeyList().isEmpty());
+        assertTrue(Datastore.query(OrganizationMember.class).asKeyList().isEmpty());
+
+        //make sure they exists (will throw if they don't)
+        Datastore.get(Organization.class, organizationId);
     }
 }

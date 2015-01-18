@@ -180,6 +180,72 @@
                     }
                 }
             })
+            .when('/admin/activities/:organizationId?', {
+                templateUrl: 'views/admin/activities.html',
+                controller: 'AdminActivitiesController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    },
+                    activities: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.organizationId) {
+                                return Activity.query({organizationId: $route.current.params.organizationId});
+                            } else {
+                                return {items: []};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
+            .when('/admin/activity/:id?', {
+                templateUrl: 'views/admin/activity.html',
+                controller: 'AdminActivityController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    },
+                    activity: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.id) {
+                                return Activity.get($route.current.params.id);
+                            } else {
+                                return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
         ;
         /* END: Admin routes */
 

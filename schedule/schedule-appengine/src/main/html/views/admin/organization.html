@@ -51,6 +51,35 @@
                 </div>
             </fieldset>
         </form>
+        <div>
+            <button ng-click="vm.viewActivities(vm.organization.id)" class="btn btn-link"><span class="glyphicon glyphicon-chevron-right"></span> activities of {{vm.organization.name}}</button>
+        </div>
+        <div class="col-sm-12">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th colspan="2">Activity Types</th>
+                    <th class="text-right">
+                        <a tooltip="add" ng-click="vm.addActivityType(vm.organization)">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </a>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="activityType in vm.activityTypes">
+                    <td>{{activityType.name}}</td>
+                    <td>{{activityType.description | limitTo: 45}}</td>
+                    <td class="text-right">
+                        <button type="button" class="btn btn-danger btn-xs"
+                                ng-click="vm.removeActivityType(activityType.id)">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="col-sm-3">
         <script type="text/ng-template" id="orgUsers.html">

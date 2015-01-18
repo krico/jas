@@ -136,7 +136,13 @@ class DefaultActivityService implements ActivityService {
     @Nonnull
     @Override
     public List<ActivityType> getActivityTypes(Organization organization) throws EntityNotFoundException {
-        getOrganization(organization.getId());
+        return getActivityTypes(organization.getId());
+    }
+
+    @Nonnull
+    @Override
+    public List<ActivityType> getActivityTypes(Key organizationId) throws EntityNotFoundException {
+        Organization organization = getOrganization(organizationId);
         return Datastore.query(activityTypeMeta, organization.getId()).asList();
     }
 
