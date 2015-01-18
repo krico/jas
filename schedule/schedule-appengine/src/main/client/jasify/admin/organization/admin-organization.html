@@ -82,16 +82,6 @@
         </div>
     </div>
     <div class="col-sm-3">
-        <script type="text/ng-template" id="orgUsers.html">
-            <a>
-                        <span ng-show="match.model.name"
-                              bind-html-unsafe="match.model.name | typeaheadHighlight:query"></span>
-                        <span ng-show="match.model.email"
-                              bind-html-unsafe="match.model.email | typeaheadHighlight:query"></span>
-                <small ng-show="match.model.realName"
-                       bind-html-unsafe="match.model.realName | typeaheadHighlight:query"></small>
-            </a>
-        </script>
         <form class="form col-md-12" role="form" name="vm.usersForm" novalidate>
             <fieldset>
                 <legend class="h4">Users</legend>
@@ -101,7 +91,7 @@
                             <label class="sr-only" for="user">select user to add</label>
                             <input type="text" class="form-control input-sm" id="user" name="user"
                                    typeahead="user as vm.displayUser(user) for user in vm.searchUsers($viewValue)"
-                                   typeahead-template-url="orgUsers.html"
+                                   typeahead-template-url="admin/organization/admin-organization-users.html"
                                    ng-model="vm.user"
                                    placeholder="search user to add"/>
                         </div>

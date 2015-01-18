@@ -15,6 +15,9 @@
   "html": [
     "src/main/client/index.html"
   ],
+  "staticHtml": [
+    "src/main/html/**/*.html"
+  ],
   "partials": [
     "src/main/client/jasify/controllers/**/*.html",
     "src/main/client/jasify/**/*.html"

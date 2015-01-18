@@ -3,12 +3,12 @@
 </div>
 <div class="modal-body">
 
-    <div ng-if="vm.isCreateAccount()" ng-include="'create-account.html'"></div>
+    <div ng-if="vm.isCreateAccount()" ng-include="'authenticate/create-account.html'"></div>
     <span class="small" ng-if="vm.isCreateAccount()">Already have an account?
         <a ng-click="vm.switchToSignIn()">Sign In</a>
     </span>
 
-    <div ng-if="vm.isSignIn()" ng-include="'sign-in.html'"></div>
+    <div ng-if="vm.isSignIn()" ng-include="'authenticate/sign-in.html'"></div>
     <span class="small" ng-if="vm.isSignIn()">Don't have an account?
         <a ng-click="vm.switchToCreateAccount()">Create Account</a>
     </span>
