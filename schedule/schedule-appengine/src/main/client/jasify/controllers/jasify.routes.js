@@ -9,7 +9,7 @@
     function jasifyRoutes($routeProvider) {
         $routeProvider
             .when('/', {
-                templateUrl: 'views/home.html',
+                templateUrl: 'home.html',
                 controller: 'HomeController',
                 controllerAs: 'vm',
                 resolve: {
@@ -19,7 +19,7 @@
                 }
             })
             .when('/home', {
-                templateUrl: 'views/home.html',
+                templateUrl: 'home.html',
                 controller: 'HomeController',
                 controllerAs: 'vm',
                 resolve: {
@@ -29,7 +29,7 @@
                 }
             })
             .when('/signUp', {
-                templateUrl: 'views/signUp.html',
+                templateUrl: 'signUp.html',
                 controller: 'SignUpController',
                 controllerAs: 'vm',
                 resolve: {
@@ -39,7 +39,7 @@
                 }
             })
             .when('/login', {
-                templateUrl: 'views/login.html',
+                templateUrl: 'login.html',
                 controller: 'LoginController',
                 controllerAs: 'vm',
                 resolve: {
@@ -49,7 +49,7 @@
                 }
             })
             .when('/logout', {
-                templateUrl: 'views/logout.html',
+                templateUrl: 'logout.html',
                 controller: 'LogoutController',
                 controllerAs: 'vm',
                 resolve: {
@@ -59,7 +59,7 @@
                 }
             })
             .when('/profile/:extra?', {
-                templateUrl: 'views/profile.html',
+                templateUrl: 'profile.html',
                 controller: 'ProfileController',
                 controllerAs: 'vm',
                 resolve: {
@@ -69,7 +69,7 @@
                 }
             })
             .when('/profile-logins', {
-                templateUrl: 'views/profile-logins.html',
+                templateUrl: 'profile-logins.html',
                 controller: 'ProfileLoginsController',
                 controllerAs: 'vm',
                 resolve: {
@@ -87,7 +87,7 @@
             })
             /* BEGIN: Admin routes */
             .when('/admin/users', {
-                templateUrl: 'views/admin/users.html',
+                templateUrl: 'admin/users.html',
                 controller: 'AdminUsersController',
                 controllerAs: 'vm',
                 resolve: {
@@ -97,7 +97,7 @@
                 }
             })
             .when('/admin/user/:id?', {
-                templateUrl: 'views/admin/user.html',
+                templateUrl: 'admin/user.html',
                 controller: 'AdminUserController',
                 controllerAs: 'vm',
                 resolve: {
@@ -107,7 +107,7 @@
                 }
             })
             .when('/admin/groups', {
-                templateUrl: 'views/admin/groups.html',
+                templateUrl: 'admin/groups.html',
                 controller: 'AdminGroupsController',
                 controllerAs: 'vm',
                 resolve: {
@@ -124,7 +124,7 @@
                 }
             })
             .when('/admin/group/:id?', {
-                templateUrl: 'views/admin/group.html',
+                templateUrl: 'admin/group.html',
                 controller: 'AdminGroupController',
                 controllerAs: 'vm',
                 resolve: {
@@ -144,7 +144,7 @@
                 }
             })
             .when('/admin/organizations', {
-                templateUrl: 'views/admin/organizations.html',
+                templateUrl: 'admin/organizations.html',
                 controller: 'AdminOrganizationsController',
                 controllerAs: 'vm',
                 resolve: {
@@ -161,7 +161,7 @@
                 }
             })
             .when('/admin/organization/:id?', {
-                templateUrl: 'views/admin/organization.html',
+                templateUrl: 'admin/organization.html',
                 controller: 'AdminOrganizationController',
                 controllerAs: 'vm',
                 resolve: {
@@ -181,7 +181,7 @@
                 }
             })
             .when('/admin/activities/:organizationId?', {
-                templateUrl: 'views/admin/activities.html',
+                templateUrl: 'admin/activities.html',
                 controller: 'AdminActivitiesController',
                 controllerAs: 'vm',
                 resolve: {
@@ -214,7 +214,7 @@
                 }
             })
             .when('/admin/activity/:id?', {
-                templateUrl: 'views/admin/activity.html',
+                templateUrl: 'admin/activity.html',
                 controller: 'AdminActivityController',
                 controllerAs: 'vm',
                 resolve: {

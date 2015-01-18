@@ -19,7 +19,7 @@ module.exports = function (config, min) {
     } else {
         files = files.concat(paths.js);
     }
-    files.push('src/test/javascript/**/*.js');
+    files.push('src/test/client/**/*.js');
     config.set({
         basePath: '../../..',
         frameworks: ['jasmine'],

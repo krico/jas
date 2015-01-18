@@ -1,28 +1,24 @@
 {
   "js": [
-    "src/main/javascript/**/*.module.js",
-    "src/main/javascript/**/jasify.main.js",
-    "src/main/javascript/**/*.js"
+    "src/main/client/**/*.module.js",
+    "src/main/client/**/jasify.main.js",
+    "src/main/client/**/*.js"
   ],
   "test": {
     "js": [
-      "src/test/javascript/**/*.js",
-      "!src/test/javascript/**/karma.conf*.js"
+      "src/test/client/**/*.js",
+      "!src/test/client/**/karma.conf*.js"
     ],
-    "karmaConfig": "src/test/javascript/karma.conf.ci.js"
+    "karmaConfig": "src/test/client/karma.conf.ci.js"
   },
   "css": ["src/main/stylesheet/**/*.css"],
-  "index": [
-    "src/main/html/index.html"
-  ],
-  "examples": [
-    "src/main/html/examples/**/*.html"
+  "html": [
+    "src/main/client/index.html"
   ],
   "partials": [
-    "src/main/html/**/*.html",
-    "!src/main/html/index.html",
-    "!src/main/html/examples/**/*.html"
+    "src/main/client/jasify/controllers/**/*.html",
+    "src/main/client/jasify/**/*.html"
   ],
   "build": "target/schedule-appengine-1.0-SNAPSHOT/build",
-  "symBuild": "src/main/html/build"
+  "symBuild": "src/main/client/build"
 }

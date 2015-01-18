@@ -1,51 +1,61 @@
 'use strict';
 
-var argv = require('yargs').argv;
-var gulp = require('gulp');
-var merge = require('merge-stream');
-var print = require('gulp-print');
-var gutil = require('gulp-util');
-var sourcemaps = require('gulp-sourcemaps');
-var ngAnnotate = require('gulp-ng-annotate');
-var uglify = require('gulp-uglify');
-var jshint = require('gulp-jshint');
-var minifyCSS = require('gulp-minify-css');
-var htmlmin = require('gulp-htmlmin');
-var rename = require('gulp-rename');
-var concat = require('gulp-concat');
-var wrapper = require('gulp-wrapper');
-var del = require('del');
-var symlink = require('gulp-sym');
-var bower = require('gulp-bower');
-var karma = require('gulp-karma');
-var gulpif = require('gulp-if');
-var templateCache = require('gulp-angular-templatecache');
-var paths = require('./paths.json');
+var argv = require('yargs').argv,
+    gulp = require('gulp'),
+    merge = require('merge-stream'),
+    print = require('gulp-print'),
+    gutil = require('gulp-util'),
+    sourcemaps = require('gulp-sourcemaps'),
+    ngAnnotate = require('gulp-ng-annotate'),
+    uglify = require('gulp-uglify'),
+    jshint = require('gulp-jshint'),
+    minifyCSS = require('gulp-minify-css'),
+    htmlmin = require('gulp-htmlmin'),
+    rename = require('gulp-rename'),
+    concat = require('gulp-concat'),
+    wrapper = require('gulp-wrapper'),
+    del = require('del'),
+    symlink = require('gulp-sym'),
+    bower = require('gulp-bower'),
+    karma = require('gulp-karma'),
+    gulpif = require('gulp-if'),
+    templateCache = require('gulp-angular-templatecache'),
+    paths = require('./paths.json');
 
-gulp.task('clean', function (cb) {
+gulp.task('clean', clean);
+gulp.task('sym', ['build'], sym);
+gulp.task('bower-install', bowerInstall);
+gulp.task('client', client);
+gulp.task('test-client-js-hint', testClientJsHint);
+gulp.task('styles', styles);
+gulp.task('html', html);
+gulp.task('test', ['build'], testClient);
+gulp.task('watch', rebuild);
+gulp.task('build', ['client', 'styles', 'html', 'bower-install']);
+gulp.task('default', ['watch', 'build', 'test-client-js-hint']);
+
+function clean(cb) {
     del([paths.build, paths.symBuild], cb);
-});
+}
 
-gulp.task('sym', ['build'], function (cb) {
+function sym(cb) {
     return gulp
         .src(paths.build)
         .pipe(symlink(paths.symBuild, {force: true, relative: true}));
-});
+}
 
-gulp.task('bower', function (cb) {
+function bowerInstall(cb) {
     return bower()
         .pipe(gulp.dest(paths.build + '/lib'));
-});
+}
 
-gulp.task('javascript', function (cb) {
+function client(cb) {
     var templates = gulp.src(paths.partials)
         .pipe(htmlmin({
             collapseWhitespace: true,
             removeAttributeQuotes: true,
             removeComments: true,
-            filename: 'templates.js',
-            templateHeader: '',
-            templateFooter: ''
+            filename: 'templates.js'
         }))
         .pipe(templateCache())
         .pipe(wrapper({
@@ -69,15 +79,15 @@ gulp.task('javascript', function (cb) {
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/js'));
-});
+}
 
-gulp.task('javascript-test-jshint', function (cb) {
+function testClientJsHint(cb) {
     return gulp.src(paths.test.js)
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
-});
+}
 
-gulp.task('stylesheet', function (cb) {
+function styles(cb) {
     return gulp.src(paths.css)
         .pipe(sourcemaps.init())
         //.pipe(less())
@@ -87,22 +97,17 @@ gulp.task('stylesheet', function (cb) {
         .pipe(rename({extname: '.min.css'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/css'));
-});
+}
 
-gulp.task('index', function (cb) {
-    return gulp.src(paths.index)
+
+function html(cb) {
+    return gulp.src(paths.html)
         .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
         .pipe(gulp.dest(paths.build + '/../'))
-});
+}
 
-gulp.task('examples', function (cb) {
-    return gulp.src(paths.examples)
-        .pipe(gulp.dest(paths.build + '/../'))
-});
 
-gulp.task('html', ['index', 'examples']);
-
-gulp.task('test', ['build'], function (cb) {
+function testClient(cb) {
     if (argv.skipteststrue) {
         gutil.log(gutil.colors.red('SKIPPING TESTS'));
     }
@@ -115,16 +120,11 @@ gulp.task('test', ['build'], function (cb) {
             // Make sure failed tests cause gulp to exit non-zero
             throw err;
         });
-});
-
-gulp.task('watch', function () {
+}
+function rebuild() {
     gulp.watch(paths.js.concat(paths.partials), ['javascript']);
     gulp.watch(paths.test.js, ['javascript-test-jshint']);
     gulp.watch(paths.css, ['stylesheet']);
     gulp.watch(paths.index, ['index']);
     gulp.watch(paths.examples, ['examples']);
-});
-
-gulp.task('build', ['javascript', 'stylesheet', 'html', 'bower']);
-
-gulp.task('default', ['watch', 'sym', 'build', 'javascript-test-jshint']);
+}
