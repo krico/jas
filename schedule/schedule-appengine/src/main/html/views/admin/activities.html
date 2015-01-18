@@ -2,7 +2,11 @@
     <div class="col-sm-4">
         <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
             <div class="form-group">
-                <label class="control-label col-sm-4" for="organization">Organization:</label>
+                <label class="control-label col-sm-4" for="organization">
+                    <nobr><a ng-click="vm.viewOrganization(vm.organization.id)"><span
+                            class="glyphicon glyphicon-chevron-up"></span></a> Organization:
+                    </nobr>
+                </label>
 
                 <div class="col-sm-7">
                     <select ng-model="vm.organization" id="organization" class="form-control"
@@ -18,25 +22,38 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-sm-8">
+    <div class="col-sm-10">
         <table class="table table-hover">
             <thead>
             <tr>
-                <th>type</th>
+                <th>
+                    <a ng-click="vm.addActivity()" tooltip="Create new activity">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </a>
+                </th>
+                <th>activity type</th>
+                <th>location</th>
                 <th>start</th>
                 <th>finish</th>
-                <th>max sub</th>
-                <th>subs</th>
+                <th>subscriptions</th>
+                <th>price</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="activity in vm.activities">
+                <td></td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.activityType.name}}</td>
+                <td ng-click="vm.viewActivity(activity.id)">{{activity.location}}</td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.start | date:'dd.MM.yy HH:mm' }}</td>
-                <td ng-click="vm.viewActivity(activity.id)">{{activity.finish | date:'dd.MM.yy HH:mm' }}</td>
-                <td ng-click="vm.viewActivity(activity.id)">{{activity.maxSubscriptions }}</td>
-                <td ng-click="vm.viewActivity(activity.id)">{{activity.subscriptions }}</td>
+                <td ng-click="vm.viewActivity(activity.id)">{{activity.finish | date:'yyyy-MM-dd HH:mm' }}</td>
+                <td ng-click="vm.viewActivity(activity.id)">{{activity.finish | date:'yyyy-MM-dd HH:mm' }}</td>
+                <td ng-click="vm.viewActivity(activity.id)">
+                    {{activity.subscriptions||0}} of {{activity.maxSubscriptions||0}}
+                </td>
+                <td ng-click="vm.viewActivity(activity.id)">
+                    {{activity.price | currency:activity.currency}}
+                </td>
                 <td>
                     <button type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(activity.id)"><span
                             class="glyphicon glyphicon-remove"></span>
@@ -44,7 +61,7 @@
                 </td>
             </tr>
             <tr ng-if="vm.activities.length == 0">
-                <td colspan="4">No activities...</td>
+                <td colspan="8">No activities...</td>
             </tr>
             </tbody>
         </table>

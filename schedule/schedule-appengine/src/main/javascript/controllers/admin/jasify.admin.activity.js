@@ -27,11 +27,27 @@
         vm.update = update;
         vm.create = create;
         vm.reset = reset;
+        vm.back = back;
 
-        vm.selectOrganization(vm.organizations, vm.activity);
+        vm.selectOrganization(vm.organizations, vm.activity, $location.search().organizationId);
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
+        }
+
+        function back() {
+            var orgId = null;
+            if (vm.activity.activityType && vm.activity.activityType.organizationId) {
+                orgId = vm.activity.activityType.organizationId;
+            } else if (vm.organization.id) {
+                orgId = vm.organization.id;
+            }
+
+            if (orgId === null) {
+                $location.path("/admin/activities");
+            } else {
+                $location.path("/admin/activities/" + orgId); //TODO: path orgID to activity/X
+            }
         }
 
         function openStart($event) {
@@ -75,10 +91,16 @@
             }
         }
 
-        function selectOrganization(organizations, activity) {
+        function selectOrganization(organizations, activity, organizationId) {
             if (activity.activityType && activity.activityType.organizationId) {
                 angular.forEach(organizations, function (value, key) {
                     if (activity.activityType.organizationId == value.id) {
+                        vm.organization = value;
+                    }
+                });
+            } else if (organizationId) {
+                angular.forEach(organizations, function (value, key) {
+                    if (organizationId == value.id) {
                         vm.organization = value;
                     }
                 });
@@ -129,7 +151,7 @@
             vm.activity = {};
             function ok(r) {
                 vm.activity = r;
-                vm.selectOrganization(vm.organizations, vm.activity);
+                vm.selectOrganization(vm.organizations, vm.activity, $location.search().organizationId);
             }
 
             function fail(r) {

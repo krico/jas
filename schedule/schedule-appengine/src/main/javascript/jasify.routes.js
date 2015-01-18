@@ -180,7 +180,7 @@
                     }
                 }
             })
-            .when('/admin/activities', {
+            .when('/admin/activities/:organizationId?', {
                 templateUrl: 'views/admin/activities.html',
                 controller: 'AdminActivitiesController',
                 controllerAs: 'vm',
@@ -194,6 +194,22 @@
                                 return $q.reject(reason);
                             }
                         );
+                    },
+                    activities: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.organizationId) {
+                                return Activity.query({organizationId: $route.current.params.organizationId});
+                            } else {
+                                return {items: []};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
                     }
                 }
             })

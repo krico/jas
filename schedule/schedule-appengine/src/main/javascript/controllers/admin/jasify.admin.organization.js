@@ -3,7 +3,7 @@
 
     angular.module('jasifyScheduleControllers').controller('AdminOrganizationController', AdminOrganizationController);
 
-    function AdminOrganizationController($log, $q, $modal, User, Group, Organization, ActivityType, organization) {
+    function AdminOrganizationController($log, $q, $modal, $location, User, Group, Organization, ActivityType, organization) {
         var vm = this;
         vm.alerts = [];
         vm.alert = alert;
@@ -12,6 +12,7 @@
         vm.organizationForm = {};
         vm.reset = reset;
         vm.save = save;
+        vm.viewActivities = viewActivities;
 
         vm.searchUsers = searchUsers;
         vm.userFilter = userFilter;
@@ -46,6 +47,12 @@
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
+        }
+
+        function viewActivities(id) {
+            if (id) {
+                $location.path('/admin/activities/' + id);
+            }
         }
 
         function userFilter(user, viewValue) {

@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-sm-1">
-        <a href="#/admin/activities"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
+        <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
     </div>
     <div class="col-sm-4">
         <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="form-group">
                     <label for="maxSubscriptions" class="col-sm-3 control-label"
-                           tooltip="Maximum number of subscriptions allowed">Subscriptions:</label>
+                           tooltip="Maximum number of subscriptions allowed">Subscriptions(max):</label>
 
                     <div class="col-sm-8">
                         <input id="maxSubscriptions" type="number" class="form-control"
