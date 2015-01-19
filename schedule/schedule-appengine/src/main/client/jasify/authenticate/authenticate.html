@@ -1,17 +1,20 @@
 <div class="modal-header">
-    <h4 class="modal-title">Please Authenticate</h4>
+    <h5 ng-if="vm.isCreateAccount()" class="modal-title">Create Account</h5>
+    <h5 ng-if="vm.isSignIn()" class="modal-title">Sign In</h5>
 </div>
 <div class="modal-body">
 
-    <div ng-if="vm.isCreateAccount()" ng-include="'authenticate/create-account.html'"></div>
-    <span class="small" ng-if="vm.isCreateAccount()">Already have an account?
+    <p class="small" ng-if="vm.isCreateAccount()">Already have an account?
         <a ng-click="vm.switchToSignIn()">Sign In</a>
-    </span>
+    </p>
+    <div ng-if="vm.isCreateAccount()" ng-controller="CreateAccountController as vm"
+         ng-include="'authenticate/create-account.html'"></div>
 
-    <div ng-if="vm.isSignIn()" ng-include="'authenticate/sign-in.html'"></div>
-    <span class="small" ng-if="vm.isSignIn()">Don't have an account?
+    <p class="small" ng-if="vm.isSignIn()">Don't have an account?
         <a ng-click="vm.switchToCreateAccount()">Create Account</a>
-    </span>
+    </p>
+    <div ng-if="vm.isSignIn()" ng-controller="SignInController as vm"
+         ng-include="'authenticate/sign-in.html'"></div>
 
 </div>
 <!--<div class="modal-footer">-->
