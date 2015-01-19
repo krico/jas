@@ -1,1 +1,22 @@
-<p>Sign In here</p>
+<form role="form" novalidate name="vm.authenticateForm">
+    <fieldset>
+        <div class="form-group col-sm-12">
+            <button class="btn btn-google btn-block" ng-click="vm.oauth('Google')">
+                <i class="icon ion-social-google"></i>
+                Sign In with Google
+            </button>
+            <button class="btn btn-facebook btn-block" ng-click="vm.oauth('Facebook')">
+                <i class="icon ion-social-facebook"></i>
+                Sign In with Facebook
+            </button>
+        </div>
+    </fieldset>
+    <fieldset>
+        <div class="form-group col-sm-12">
+            <button class="btn btn-default btn-block" ng-click="vm.jasify()">
+                <i class="icon ion-email"></i>
+                Sign In with Email
+            </button>
+        </div>
+    </fieldset>
+</form>

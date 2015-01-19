@@ -23,5 +23,5 @@
     "src/main/client/jasify/**/*.html"
   ],
   "build": "target/schedule-appengine-1.0-SNAPSHOT/build",
-  "symBuild": "src/main/client/build"
+  "symBuild": "src/main/html/build"
 }
