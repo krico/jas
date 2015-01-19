@@ -20,6 +20,7 @@ var argv = require('yargs').argv,
     karma = require('gulp-karma'),
     gulpif = require('gulp-if'),
     templateCache = require('gulp-angular-templatecache'),
+    plumber = require('gulp-plumber'),
     paths = require('./paths.json');
 
 gulp.task('clean', clean);
@@ -61,6 +62,7 @@ function bowerInstall(cb) {
 
 function client(cb) {
     var templates = gulp.src(paths.partials)
+        .pipe(plumber())
         .pipe(htmlmin({
             collapseWhitespace: true,
             removeAttributeQuotes: true,
@@ -68,6 +70,7 @@ function client(cb) {
             filename: 'templates.js'
         }))
         .pipe(templateCache())
+        .pipe(plumber.stop())
         .pipe(wrapper({
             header: '(function(angular){',
             footer: '})(angular);'
@@ -77,6 +80,7 @@ function client(cb) {
 
     return merge(code, templates)
         .pipe(sourcemaps.init())
+        .pipe(plumber())
         //.pipe(print(function (filepath) {
         //    return "built: " + filepath;
         //}))
