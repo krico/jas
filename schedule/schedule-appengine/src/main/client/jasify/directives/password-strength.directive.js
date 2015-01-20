@@ -10,7 +10,8 @@
             restrict: 'E' /* A - attribute name, E - element name, C - classname */,
             //require: 'ngModel',
             scope: {
-                password: '=password'
+                password: '=password',
+                callback: '=callback'
             },
             link: link,
             templateUrl: 'directives/password-strength.directive.html'
@@ -21,14 +22,25 @@
             scope.strength = pwStrength;
             scope.style = style;
             scope.css = css;
+            scope.tooltipText = '';
+            scope.tooltipPlacement = 'right';
 
             function style(p) {
-                return {width: scope.strength(p) + '%'};
+                if (p <= 0) {
+                    return {width: '100%'};
+                } else {
+                    return {width: scope.strength(p) + '%'};
+                }
             }
 
             function css(p) {
                 var s = scope.strength(p);
-                if (s <= 15) {
+                if (angular.isFunction(scope.callback)) {
+                    scope.callback(s);
+                }
+                if (s <= 0) {
+                    return ['progress-bar'];
+                } else if (s <= 15) {
                     return ['progress-bar', 'progress-bar-danger'];
                 } else if (s <= 40) {
                     return ['progress-bar', 'progress-bar-warning'];
@@ -45,7 +57,9 @@
             function pwStrength(pwField) {
                 var p = pwField.$viewValue;
 
-                if (!p) return -1;
+                if (!p) {
+                    return -1;
+                }
 
                 var criteria = {pos: {}, neg: {}};
                 var points = {pos: {}, neg: {seqLetter: 0, seqNumber: 0, seqSymbol: 0}};
