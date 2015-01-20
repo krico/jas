@@ -2,7 +2,7 @@ package com.jasify.schedule.appengine.spi.dm;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 
 public class JasLoginRequestTest {
     @Test
