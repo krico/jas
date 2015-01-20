@@ -5,5 +5,5 @@ package com.jasify.schedule.appengine.mail;
  * @since 26/11/14.
  */
 public interface MailService {
-    void sendToApplicationOwners(String subject, String body);
+    boolean sendToApplicationOwners(String subject, String body);
 }
