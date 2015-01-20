@@ -6,7 +6,7 @@
         var vm = this;
         vm.user = {};
         vm.authenticateForm = {};
-        vm.email = true;
+        vm.email = false;
         vm.withEmail = withEmail;
         vm.withOAuth = withOAuth;
         vm.isEmail = isEmail;
