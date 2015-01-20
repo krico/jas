@@ -25,5 +25,9 @@ describe('CreateAccountController', function () {
         expect(typeof vm.user).toEqual('object');
     });
 
+    it('initializes authenticateForm', function () {
+        expect(typeof vm.authenticateForm).toEqual('object');
+    });
+
 
 });

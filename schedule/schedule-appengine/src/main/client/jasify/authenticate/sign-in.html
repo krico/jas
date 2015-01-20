@@ -24,11 +24,11 @@
     <form role="form" novalidate name="vm.authenticateForm">
         <div class="form-group form-group-sm has-feedback">
             <label for="email" class="sr-only">E-mail</label>
-            <input type="email" class="form-control" id="email" ng-model="vm.user.email" placeholder="E-mail"/>
+            <input type="email" class="form-control" id="email" name="email" ng-model="vm.user.email" placeholder="E-mail"/>
         </div>
         <div class="form-group form-group-sm has-feedback">
             <label for="password" class="sr-only">Password</label>
-            <input type="password" class="form-control" id="password" ng-model="vm.user.password"
+            <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password"
                    placeholder="Password"/>
         </div>
         <button class="btn btn-sm btn-primary"><i class="icon ion-email"></i> Sign In</button><br/>

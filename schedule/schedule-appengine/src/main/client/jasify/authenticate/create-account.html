@@ -24,23 +24,30 @@
     <form class="form" role="form" novalidate name="vm.authenticateForm">
         <div class="form-group form-group-sm has-feedback">
             <label for="realName" class="sr-only">Full Name</label>
-            <input type="text" class="form-control" id="realName" ng-model="vm.user.realName" placeholder="Full Name"/>
+            <input type="text" class="form-control" id="realName" name="realName" ng-model="vm.user.realName"
+                   placeholder="Full Name"/>
         </div>
         <div class="form-group form-group-sm has-feedback">
             <label for="email" class="sr-only">E-mail</label>
-            <input type="email" class="form-control" id="email" ng-model="vm.user.email" placeholder="E-mail"/>
+            <input type="email" class="form-control" id="email" name="email" ng-model="vm.user.email"
+                   placeholder="E-mail"/>
         </div>
         <div class="form-group form-group-sm has-feedback">
             <label for="password" class="sr-only">Password</label>
-            <input type="password" class="form-control" id="password" ng-model="vm.user.password"
-                   placeholder="Password"/>
+            <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password"
+                   placeholder="Password" popover="{{vm.popoverText}}" popover-trigger="focus" popover-popup-delay="1000"/>
+            <jas-password-strength callback="vm.passwordStrengthCallback"
+                                   password="vm.authenticateForm.password"/>
+        </div>
+        <div>
         </div>
         <div class="form-group form-group-sm has-feedback">
             <label for="confirm" class="sr-only">Confirm Password</label>
-            <input type="password" class="form-control" id="confirm" ng-model="vm.user.confirm"
+            <input type="password" class="form-control" id="confirm" name="confirm" ng-model="vm.user.confirm"
                    placeholder="Confirm Password"/>
         </div>
-        <button class="btn btn-sm btn-primary"><i class="icon ion-email"></i> Create Account</button><br/>
+        <button class="btn btn-sm btn-primary"><i class="icon ion-email"></i> Create Account</button>
+        <br/>
         <small>Create Account with <a ng-click="vm.withOAuth()">Google or Facebook</a></small>
     </form>
 </div>
