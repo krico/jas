@@ -42,7 +42,6 @@ public class UserEndpointTest {
     public void datastore() {
         TestHelper.initializeDatastore();
         testUserServiceFactory.setUp();
-
     }
 
     @After
@@ -250,6 +249,15 @@ public class UserEndpointTest {
         testUserServiceFactory.replay();
         User user = endpoint.updateUser(newCaller(1, true), KeyFactory.createKey("u", 2), expected);
         assertTrue(expected == user);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testUpdateUserNotFoundException() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException, EntityNotFoundException {
+        User user = new User();
+        UserServiceFactory.getUserService().save(user);
+        expectLastCall().andThrow(new EntityNotFoundException());
+        testUserServiceFactory.replay();
+        endpoint.updateUser(newCaller(1, true), KeyFactory.createKey("u", 2), user);
     }
 
     @Test

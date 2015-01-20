@@ -42,4 +42,13 @@ public class DigestUtilTest {
         assertFalse(DigestUtil.verify(encrypted, "password1"));
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testEncryptWithNullInput() {
+        DigestUtil.encrypt(null);
+    }
+
+    @Test
+    public void testVerifyWithNullInput() {
+        assertFalse(DigestUtil.verify(null, null));
+    }
 }

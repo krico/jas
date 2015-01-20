@@ -12,6 +12,7 @@ import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.OrganizationService;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.common.TestOrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.users.User;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -41,7 +42,6 @@ public class GroupEndpointTest {
     public void datastore() {
         TestHelper.initializeDatastore(); // Starts a inMemory AppEngine datastore
         testOrganizationServiceFactory.setUp();
-
     }
 
     @After
@@ -66,6 +66,24 @@ public class GroupEndpointTest {
     public void testAddGroupNoUser() throws Exception {
         testOrganizationServiceFactory.replay();
         endpoint.addGroup(null, new Group());
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testAddUserToGroupNoUser() throws Exception {
+        testOrganizationServiceFactory.replay();
+        endpoint.addUserToGroup(null, null, null);
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testGetGroupUsersNoUser() throws Exception {
+        testOrganizationServiceFactory.replay();
+        endpoint.getGroupUsers(null, null);
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testRemoveUserFromGroupNoUser() throws Exception {
+        testOrganizationServiceFactory.replay();
+        endpoint.removeUserFromGroup(null, null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -110,6 +128,24 @@ public class GroupEndpointTest {
         endpoint.removeGroup(newCaller(1, false), new Group().getId());
     }
 
+    @Test(expected = ForbiddenException.class)
+    public void testAddUserToGroupNotAdmin() throws Exception {
+        testOrganizationServiceFactory.replay();
+        endpoint.addUserToGroup(newCaller(1, false), null, null);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testRemoveUserFromGroupNotAdmin() throws Exception {
+        testOrganizationServiceFactory.replay();
+        endpoint.removeUserFromGroup(newCaller(1, false), null, null);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testGroupUsersNotAdmin() throws Exception {
+        testOrganizationServiceFactory.replay();
+        endpoint.getGroupUsers(newCaller(1, false), null);
+    }
+
     @Test
     public void testGetGroups() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
@@ -137,7 +173,7 @@ public class GroupEndpointTest {
     }
 
     @Test
-    public void testUpdateGroupCheckFound() throws Exception {
+    public void testUpdateGroup() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
         Group group = new Group();
         final Key key = Datastore.allocateId(Group.class);
@@ -242,6 +278,27 @@ public class GroupEndpointTest {
     }
 
     @Test(expected = NotFoundException.class)
+    public void testGetGroupUsersNotFoundViaFieldValueException() throws Exception {
+        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
+        Key key = Datastore.allocateId(Group.class);
+        service.getGroup(key);
+        expectLastCall().andThrow(new EntityNotFoundException(null));
+        testOrganizationServiceFactory.replay();
+        endpoint.getGroupUsers(newCaller(55, true), key);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testAddUserToGroupNotFoundViaFieldValueException() throws Exception {
+        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
+        Key groupId = Datastore.allocateId(Group.class);
+        Key userId = Datastore.allocateId(User.class);
+        service.addUserToGroup(groupId, userId);
+        expectLastCall().andThrow(new EntityNotFoundException(null));
+        testOrganizationServiceFactory.replay();
+        endpoint.addUserToGroup(newCaller(55, true), groupId, userId);
+    }
+
+    @Test(expected = NotFoundException.class)
     public void testRemoveGroupNotFound() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
         Key key = Datastore.allocateId(Group.class);
@@ -249,5 +306,58 @@ public class GroupEndpointTest {
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
         endpoint.removeGroup(newCaller(55, true), key);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testRemoveUserFromGroupNotFound() throws Exception {
+        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
+        Key groupId = Datastore.allocateId(Group.class);
+        Key userId = Datastore.allocateId(User.class);
+        service.removeUserFromGroup(groupId, userId);
+        expectLastCall().andThrow(new EntityNotFoundException());
+        testOrganizationServiceFactory.replay();
+        endpoint.removeUserFromGroup(newCaller(55, true), groupId, userId);
+    }
+
+    @Test
+    public void testAddUserToGroup() throws Exception {
+        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
+        Key groupId = Datastore.allocateId(Group.class);
+        Key userId = Datastore.allocateId(User.class);
+        service.addUserToGroup(groupId, userId);
+        expectLastCall().once();
+        testOrganizationServiceFactory.replay();
+        endpoint.addUserToGroup(newCaller(55, true), groupId, userId);
+    }
+
+    @Test
+    public void testRemoveUserFromGroup() throws Exception {
+        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
+        Key groupId = Datastore.allocateId(Group.class);
+        Key userId = Datastore.allocateId(User.class);
+        service.removeUserFromGroup(groupId, userId);
+        expectLastCall().once();
+        testOrganizationServiceFactory.replay();
+        endpoint.removeUserFromGroup(newCaller(55, true), groupId, userId);
+    }
+
+    @Test
+    public void testGroupUsers() throws Exception {
+        Group mockGroup = createMock(Group.class);
+        List<User> userList = new ArrayList<>();
+        userList.add(new User());
+        expect(mockGroup.getUsers()).andReturn(userList);
+        expectLastCall().once();
+        replay(mockGroup);
+
+        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
+        Key key = Datastore.allocateId(Group.class);
+        expect(service.getGroup(key)).andReturn(mockGroup);
+        expectLastCall().once();
+        testOrganizationServiceFactory.replay();
+
+        List<User> result = endpoint.getGroupUsers(newCaller(55, true), key);
+
+        assertEquals(userList, result);
     }
 }
