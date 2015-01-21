@@ -5,6 +5,7 @@ import com.google.api.server.spi.response.ConflictException;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.transform.*;
+import com.jasify.schedule.appengine.validators.EmailValidator;
 import com.jasify.schedule.appengine.validators.UsernameValidator;
 import com.jasify.schedule.appengine.validators.Validator;
 import org.apache.commons.lang3.StringUtils;
@@ -26,8 +27,9 @@ import java.util.List;
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
                 packagePath = ""))
-public class UsernameEndpoint {
-    private Validator<String> usernameValidator;
+public class UniqueEndpoint {
+    private UsernameValidator usernameValidator;
+    private EmailValidator emailValidator;
 
 
     Validator<String> getUsernameValidator() {
@@ -37,11 +39,27 @@ public class UsernameEndpoint {
         return usernameValidator;
     }
 
+    Validator<String> getEmailValidator() {
+        if (emailValidator == null) {
+            emailValidator = EmailValidator.INSTANCE;
+        }
+        return emailValidator;
+    }
 
-    @ApiMethod(name = "username.check", path = "username-check/{username}", httpMethod = ApiMethod.HttpMethod.GET)
+
+    @ApiMethod(name = "unique.username", path = "unique/username/{username}", httpMethod = ApiMethod.HttpMethod.GET)
     public void checkUsername(@Named("username") String username) throws ConflictException {
         Preconditions.checkNotNull(StringUtils.trimToNull(username));
         List<String> reasons = getUsernameValidator().validate(username);
+        if (!reasons.isEmpty()) {
+            throw new ConflictException(StringUtils.join(reasons, ", "));
+        }
+    }
+
+    @ApiMethod(name = "unique.email", path = "unique/email/{email}", httpMethod = ApiMethod.HttpMethod.GET)
+    public void checkEmail(@Named("email") String email) throws ConflictException {
+        Preconditions.checkNotNull(StringUtils.trimToNull(email));
+        List<String> reasons = getEmailValidator().validate(email);
         if (!reasons.isEmpty()) {
             throw new ConflictException(StringUtils.join(reasons, ", "));
         }

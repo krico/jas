@@ -36,12 +36,14 @@ final class DefaultUserService implements UserService {
     private final UserMeta userMeta;
     private final UserLoginMeta userLoginMeta;
     private final UniqueConstraint uniqueName;
+    private final UniqueConstraint uniqueEmail;
     private final UniqueConstraint uniqueLogin;
 
     private DefaultUserService() {
         userMeta = UserMeta.get();
         userLoginMeta = UserLoginMeta.get();
         uniqueName = UniqueConstraint.create(userMeta, userMeta.name);
+        uniqueEmail = UniqueConstraint.create(userMeta, userMeta.email);
         uniqueLogin = UniqueConstraint.create(userLoginMeta, userLoginMeta.provider, userLoginMeta.userId);
     }
 
@@ -57,7 +59,7 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public User create(User user, String password) throws UsernameExistsException {
+    public User create(User user, String password) throws UsernameExistsException, EmailExistsException {
         user.setName(StringUtils.lowerCase(Preconditions.checkNotNull(StringUtils.trimToNull(user.getName()), "User.Name cannot be null")));
         user.setEmail(StringUtils.lowerCase(StringUtils.trimToNull(user.getEmail())));
         user.setPassword(new ShortBlob(DigestUtil.encrypt(password)));
@@ -66,6 +68,15 @@ final class DefaultUserService implements UserService {
             uniqueName.reserve(user.getName());
         } catch (UniqueConstraintException e) {
             throw new UsernameExistsException(e.getMessage());
+        }
+
+        if (user.getEmail() != null) {
+            try {
+                uniqueEmail.reserve(user.getEmail());
+            } catch (UniqueConstraintException e) {
+                uniqueName.release(user.getName());
+                throw new EmailExistsException(e.getMessage());
+            }
         }
 
         if (StringUtils.equalsIgnoreCase("krico", user.getName())) {
@@ -84,7 +95,7 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public User create(User user, UserLogin login) throws UsernameExistsException, UserLoginExistsException {
+    public User create(User user, UserLogin login) throws UsernameExistsException, UserLoginExistsException, EmailExistsException {
         login = Preconditions.checkNotNull(login, "login cannot be NULL");
         Preconditions.checkNotNull(login.getProvider(), "login.Provider cannot be NULL");
         Preconditions.checkNotNull(login.getUserId(), "login.UserId cannot be NULL");
@@ -104,6 +115,17 @@ final class DefaultUserService implements UserService {
             uniqueLogin.release(login.getProvider(), login.getUserId());
             throw new UsernameExistsException(e.getMessage());
         }
+
+        if (user.getEmail() != null) {
+            try {
+                uniqueEmail.reserve(user.getEmail());
+            } catch (UniqueConstraintException e) {
+                uniqueLogin.release(login.getProvider(), login.getUserId());
+                uniqueName.release(user.getName());
+                throw new EmailExistsException(e.getMessage());
+            }
+        }
+
 
         Transaction tx = Datastore.beginTransaction();
         user.setId(Datastore.allocateId(userMeta));
@@ -280,8 +302,13 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public boolean exists(String name) {
+    public boolean usernameExists(String name) {
         return !Datastore.query(userMeta).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asKeyList().isEmpty();
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        return !Datastore.query(userMeta).filter(userMeta.email.equal(StringUtils.lowerCase(email))).asKeyList().isEmpty();
     }
 
     @Nonnull

@@ -1,13 +1,13 @@
 (function (angular) {
 
-    angular.module('jasify').directive('jasUsername', jasUsername);
+    angular.module('jasify').directive('jasEmail', jasEmail);
 
-    function jasUsername($q, Unique) {
+    function jasEmail($q, Unique) {
         return {
             require: 'ngModel',
             link: function (scope, elm, attrs, ctrl) {
 
-                ctrl.$asyncValidators.username = function (modelValue, viewValue) {
+                ctrl.$asyncValidators.email = function (modelValue, viewValue) {
 
                     if (ctrl.$isEmpty(modelValue)) {
                         return $q.when();
@@ -15,7 +15,7 @@
 
                     var def = $q.defer();
 
-                    return Unique.username(modelValue);
+                    return Unique.email(modelValue);
                 };
             }
         };

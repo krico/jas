@@ -37,8 +37,9 @@
                 update: nop,
                 add: nop
             },
-            username: {
-                check: nop
+            unique: {
+                username: nop,
+                email: nop
             },
             auth: {
                 login: nop,
