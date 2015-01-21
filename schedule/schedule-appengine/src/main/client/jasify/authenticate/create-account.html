@@ -27,15 +27,22 @@
             <input type="text" class="form-control" id="realName" name="realName" ng-model="vm.user.realName"
                    placeholder="Full Name"/>
         </div>
-        <div class="form-group form-group-sm has-feedback">
+        <div class="form-group form-group-sm has-feedback"
+             ng-model-options="{debounce:500}"
+             ng-class="{'has-success':vm.hasSuccess('email'), 'has-error': vm.hasError('email')}">
             <label for="email" class="sr-only">E-mail</label>
             <input type="email" class="form-control" id="email" name="email" ng-model="vm.user.email"
-                   placeholder="E-mail"/>
+                   placeholder="E-mail" required jas-email/>
+            <span class="form-control-feedback"
+                  ng-show="vm.authenticateForm.email.$pending"
+                  us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}">
+            </span>
         </div>
         <div class="form-group form-group-sm has-feedback">
             <label for="password" class="sr-only">Password</label>
             <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password"
-                   placeholder="Password" popover="{{vm.popoverText}}" popover-trigger="focus" popover-popup-delay="1000" />
+                   placeholder="Password" popover="{{vm.popoverText}}" popover-trigger="focus"
+                   popover-popup-delay="1000"/>
             <jas-password-strength callback="vm.passwordStrengthCallback"
                                    password="vm.authenticateForm.password"/>
         </div>

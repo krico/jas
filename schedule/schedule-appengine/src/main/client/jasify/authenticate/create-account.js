@@ -12,6 +12,27 @@
         vm.isEmail = isEmail;
         vm.passwordStrengthCallback = passwordStrengthCallback;
         vm.popoverText = '';
+        vm.hasSuccess = hasSuccess;
+        vm.hasError = hasError;
+
+        function hasSuccess(fieldName) {
+            if (vm.authenticateForm[fieldName]) {
+                var f = vm.authenticateForm[fieldName];
+                return f && f.$dirty && f.$valid;
+            } else {
+                return false;
+            }
+        }
+
+        function hasError(fieldName) {
+            if (vm.authenticateForm[fieldName]) {
+                var f = vm.authenticateForm[fieldName];
+                return f && f.$dirty && f.$invalid;
+            } else {
+                return false;
+            }
+        }
+
 
         function passwordStrengthCallback(s) {
             if (s <= 0) {
