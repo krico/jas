@@ -43,7 +43,7 @@ final class DefaultUserService implements UserService {
         userMeta = UserMeta.get();
         userLoginMeta = UserLoginMeta.get();
         uniqueName = UniqueConstraint.create(userMeta, userMeta.name);
-        uniqueEmail = UniqueConstraint.create(userMeta, userMeta.email);
+        uniqueEmail = UniqueConstraint.createAllowingNullValues(userMeta, userMeta.email);
         uniqueLogin = UniqueConstraint.create(userLoginMeta, userLoginMeta.provider, userLoginMeta.userId);
     }
 
