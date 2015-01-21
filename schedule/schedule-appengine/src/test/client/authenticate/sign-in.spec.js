@@ -19,5 +19,9 @@ describe('SignInController', function () {
         expect(typeof vm.user).toEqual('object');
     });
 
+    it('initializes rememberMe', function () {
+        expect(vm.rememberMe).toBe(false);
+    });
+
 
 });

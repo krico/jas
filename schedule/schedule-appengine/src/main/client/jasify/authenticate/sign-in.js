@@ -9,6 +9,7 @@
         vm.withEmail = withEmail;
         vm.withOAuth = withOAuth;
         vm.isEmail = isEmail;
+        vm.rememberMe = false;
 
         function withEmail() {
             vm.email = true;

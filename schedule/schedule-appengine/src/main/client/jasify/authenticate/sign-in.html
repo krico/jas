@@ -31,6 +31,11 @@
             <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password"
                    placeholder="Password"/>
         </div>
+        <div class="checkbox">
+            <label>
+                <input ng-model="vm.rememberMe" type="checkbox"> Remember me
+            </label>
+        </div>
         <button class="btn btn-sm btn-primary"><i class="icon ion-email"></i> Sign In</button><br/>
         <small>Sign In with <a ng-click="vm.withOAuth()">Google or Facebook</a></small>
     </form>
