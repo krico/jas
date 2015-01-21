@@ -15,13 +15,15 @@
 
         function passwordStrengthCallback(s) {
             if (s <= 0) {
-                vm.popoverText = 'Type your password';
+                vm.popoverText = 'Choose a password.';
             } else if (s <= 15) {
                 vm.popoverText = 'Weak!';
             } else if (s <= 40) {
                 vm.popoverText = 'Average...';
-            } else {
+            } else if (s <= 80) {
                 vm.popoverText = 'Good!';
+            } else {
+                vm.popoverText = 'Excellent!!!';
             }
         }
 

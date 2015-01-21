@@ -35,7 +35,7 @@
         <div class="form-group form-group-sm has-feedback">
             <label for="password" class="sr-only">Password</label>
             <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password"
-                   placeholder="Password" popover="{{vm.popoverText}}" popover-trigger="focus" popover-popup-delay="1000"/>
+                   placeholder="Password" popover="{{vm.popoverText}}" popover-trigger="focus" popover-popup-delay="1000" />
             <jas-password-strength callback="vm.passwordStrengthCallback"
                                    password="vm.authenticateForm.password"/>
         </div>
