@@ -28,26 +28,6 @@
                     }
                 }
             })
-            .when('/signUp', {
-                templateUrl: 'sign-up/sign-up.html',
-                controller: 'SignUpController',
-                controllerAs: 'vm',
-                resolve: {
-                    allow: /*@ngInject*/ function (Allow) {
-                        return Allow.guest();
-                    }
-                }
-            })
-            .when('/login', {
-                templateUrl: 'login/login.html',
-                controller: 'LoginController',
-                controllerAs: 'vm',
-                resolve: {
-                    allow: /*@ngInject*/ function (Allow) {
-                        return Allow.guest();
-                    }
-                }
-            })
             .when('/logout', {
                 templateUrl: 'logout/logout.html',
                 controller: 'LogoutController',

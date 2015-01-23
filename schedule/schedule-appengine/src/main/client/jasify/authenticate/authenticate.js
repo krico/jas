@@ -2,9 +2,9 @@
 
     angular.module('jasifyScheduleControllers').controller('AuthenticateController', AuthenticateController);
 
-    function AuthenticateController() {
+    function AuthenticateController($scope) {
         var vm = this;
-        vm.signIn = false; // this is the default
+        vm.signIn = !!$scope.signIn; // get this from constructor
         vm.isSignIn = isSignIn;
         vm.isCreateAccount = isCreateAccount;
         vm.switchToCreateAccount = switchToCreateAccount;

@@ -83,15 +83,15 @@
                     </ul>
                 </li>
 
-                <li ng-hide="currentUser" ng-class="vm.menuActive('/signUp')">
-                    <a ng-click="vm.collapse()" href="#/signUp">sign up</a>
+                <li ng-hide="currentUser">
+                    <a ng-click="vm.createAccount()">Create Account</a>
                 </li>
-                <li ng-hide="currentUser" ng-class="vm.menuActive('/login')">
-                    <a ng-click="vm.collapse()" href="#/login">log in</a>
+                <li ng-hide="currentUser">
+                    <a ng-click="vm.signIn()">Sign In</a>
                 </li>
 
                 <li ng-show="currentUser" ng-class="vm.menuActive('/profile')">
-                    <a ng-click="vm.collapse()" href="#/profile">@{{currentUser.name}}</a>
+                    <a ng-click="vm.collapse()" href="#/profile">{{currentUser.name}}</a>
                 </li>
                 <li ng-show="currentUser" ng-class="vm.menuActive('/logout')">
                     <a ng-click="vm.collapse()" href="#/logout">log out</a>

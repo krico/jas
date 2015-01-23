@@ -12,10 +12,15 @@
         appVm.restore = restore;
 
         appVm.notAuthenticated = notAuthenticated;
+        appVm.signIn = signIn;
+        appVm.createAccount = createAccount;
         appVm.loginFailed = loginFailed;
         appVm.notAuthorized = notAuthorized;
+        appVm.authenticate = authenticate;
 
         $scope.$on(AUTH_EVENTS.notAuthenticated, appVm.notAuthenticated);
+        $scope.$on(AUTH_EVENTS.signIn, appVm.signIn);
+        $scope.$on(AUTH_EVENTS.createAccount, appVm.createAccount);
         $scope.$on(AUTH_EVENTS.loginFailed, appVm.loginFailed);
         $scope.$on(AUTH_EVENTS.notAuthorized, appVm.notAuthorized);
 
@@ -42,12 +47,29 @@
         }
 
         function notAuthenticated() {
+            appVm.authenticate(true);
+        }
+
+        function createAccount() {
+            appVm.authenticate(false);
+        }
+
+        function signIn() {
+            appVm.authenticate(true);
+        }
+
+        function authenticate(isSignIn) {
+            var scope = $scope.$new(); //new scope for the modal
+
+            scope.signIn = !!isSignIn;
+
             var modalInstance = $modal.open({
                 //TODO: should bring up login.html some how
                 templateUrl: 'authenticate/authenticate.html',
                 controller: 'AuthenticateController',
                 controllerAs: 'vm',
-                size: 'sm'
+                size: 'sm',
+                scope: scope
             });
 
             modalInstance.result.then(function (reason) {

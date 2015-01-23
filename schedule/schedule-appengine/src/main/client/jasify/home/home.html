@@ -4,8 +4,9 @@
     <p></p>
 
     <p>
-        <a class="btn btn-lg btn-primary" href="#/signUp" role="button">Sign up &raquo;</a> or <a href="#/login">log
-        in</a>
+        <a class="btn btn-lg btn-primary" ng-click="vm.createAccount()" role="button">Create Account &raquo;</a>
+        or
+        <a ng-click="vm.signIn()">Sign In</a>
     </p>
 </div>
 <div ng-show="currentUser">

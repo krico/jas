@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('NavbarController', NavbarController);
 
-    function NavbarController($scope, $log, $location, Auth, AUTH_EVENTS) {
+    function NavbarController($rootScope, $scope, $log, $location, Auth, AUTH_EVENTS) {
         var vm = this;
 
         vm.path = "";
@@ -14,6 +14,8 @@
         vm.menuActive = menuActive;
         vm.isAdmin = isAdmin;
         vm.collapse = collapse;
+        vm.createAccount = createAccount;
+        vm.signIn = signIn;
         vm.adminDropDown = [
             {
                 "text": 'users',
@@ -53,6 +55,16 @@
 
         function collapse() {
             vm.navbarCollapsed = true;
+        }
+
+        function createAccount() {
+            vm.collapse();
+            $rootScope.$broadcast(AUTH_EVENTS.createAccount);
+        }
+
+        function signIn() {
+            vm.collapse();
+            $rootScope.$broadcast(AUTH_EVENTS.signIn);
         }
 
         function loginSucceeded() {
