@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('ApplicationController', ApplicationController);
 
-    function ApplicationController($scope, $rootScope, $modal, $log, $location, $cookies, Auth, AUTH_EVENTS) {
+    function ApplicationController($route, $scope, $rootScope, $modal, $log, $location, $cookies, Auth, AUTH_EVENTS) {
         var appVm = this;
 
         $scope.currentUser = null;
@@ -51,8 +51,16 @@
             });
 
             modalInstance.result.then(function (reason) {
-                $log.info('Modal accepted at: ' + new Date());
-                $location.path('/login');//TODO: LOGIN SHOULD BE POPUP
+                Auth.restore(true).then(ok, fail);
+                function ok(u) {
+                    $scope.setCurrentUser(u);
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                    $route.reload();
+                }
+
+                function fail() {
+
+                }
             }, function () {
                 $log.info('Modal dismissed at: ' + new Date());
             });

@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('CreateAccountController', CreateAccountController);
 
-    function CreateAccountController($log) {
+    function CreateAccountController($route, $scope, $rootScope, User, Auth) {
         var vm = this;
         vm.user = {};
         vm.authenticateForm = {};
@@ -17,12 +17,37 @@
         vm.hasError = hasError;
         vm.create = create;
         vm.getTooltip = getTooltip;
+        vm.inProgress = false;
+        vm.alert = function (type, message) {
+            //TODO:
+            console.log("Alert[" + type + "]:" + message);
+        };
 
-        function create($event) {
+        function create(cb) {
             if (vm.authenticateForm.$invalid) {
                 vm.showErrors = true;
                 return;
             }
+            vm.inProgress = true;
+
+            vm.user.name = vm.user.email; //username == email
+            User.add(vm.user, vm.user.password).then(saveSuccess, saveError);
+
+            function saveSuccess(ret) {
+                vm.inProgress = false;
+                if (angular.isFunction(cb)) {
+                    cb();
+                }
+            }
+
+            //User.save error
+            function saveError(httpResponse) {
+                vm.inProgress = false;
+
+                vm.alert('danger', ":-( registration failed, since this was really unexpected, please change some fields and try again.");
+
+            }
+
         }
 
         function getTooltip() {

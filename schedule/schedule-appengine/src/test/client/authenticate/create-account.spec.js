@@ -33,6 +33,10 @@ describe('CreateAccountController', function () {
         expect(typeof vm.showErrors).toBe(false);
     });
 
+    it('initializes inProgress', function () {
+        expect(typeof vm.inProgress).toBe(false);
+    });
+
     it('has a function to handle password strength callback', function () {
         expect(typeof vm.passwordStrengthCallback).toEqual('function');
     });

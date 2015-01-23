@@ -78,9 +78,10 @@
             </div>
         </div>
 
-        <button class="btn btn-sm btn-primary" ng-click="vm.create($event)"
+        <button class="btn btn-sm btn-primary" ng-click="vm.create($close)"
                 popover="{{vm.getTooltip()}}" popover-trigger="click"
-                popover-placement="right" popover-popup-delay="10">
+                popover-placement="right" popover-popup-delay="10"
+                ng-disabled="vm.inProgress">
             <i class="icon ion-email"></i> Create Account
         </button>
         <br/>
