@@ -7,6 +7,7 @@
         vm.user = {};
         vm.authenticateForm = {};
         vm.email = false;
+        vm.showErrors = false;
         vm.withEmail = withEmail;
         vm.withOAuth = withOAuth;
         vm.isEmail = isEmail;
@@ -14,11 +15,28 @@
         vm.popoverText = '';
         vm.hasSuccess = hasSuccess;
         vm.hasError = hasError;
+        vm.create = create;
+        vm.getTooltip = getTooltip;
+
+        function create($event) {
+            if (vm.authenticateForm.$invalid) {
+                vm.showErrors = true;
+                return;
+            }
+        }
+
+        function getTooltip() {
+            if (vm.authenticateForm.$invalid) {
+                return 'Please fix the errors.';
+            } else {
+                return '';
+            }
+        }
 
         function hasSuccess(fieldName) {
             if (vm.authenticateForm[fieldName]) {
                 var f = vm.authenticateForm[fieldName];
-                return f && f.$dirty && f.$valid;
+                return f && (f.$dirty || vm.showErrors) && f.$valid;
             } else {
                 return false;
             }
@@ -27,7 +45,7 @@
         function hasError(fieldName) {
             if (vm.authenticateForm[fieldName]) {
                 var f = vm.authenticateForm[fieldName];
-                return f && f.$dirty && f.$invalid;
+                return f && (f.$dirty || vm.showErrors) && f.$invalid;
             } else {
                 return false;
             }

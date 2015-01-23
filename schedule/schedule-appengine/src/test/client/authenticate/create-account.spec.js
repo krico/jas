@@ -29,6 +29,10 @@ describe('CreateAccountController', function () {
         expect(typeof vm.authenticateForm).toEqual('object');
     });
 
+    it('initializes showErrors', function () {
+        expect(typeof vm.showErrors).toBe(false);
+    });
+
     it('has a function to handle password strength callback', function () {
         expect(typeof vm.passwordStrengthCallback).toEqual('function');
     });

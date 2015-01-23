@@ -22,13 +22,19 @@
 </div>
 <div ng-show="vm.isEmail()">
     <form class="form" role="form" novalidate name="vm.authenticateForm">
-        <div class="form-group form-group-sm has-feedback">
+        <div class="form-group form-group-sm has-feedback"
+             ng-class="{'has-success':vm.hasSuccess('realName'), 'has-error': vm.hasError('realName')}">
+
             <label for="realName" class="sr-only">Full Name</label>
             <input type="text" class="form-control" id="realName" name="realName" ng-model="vm.user.realName"
-                   placeholder="Full Name"/>
+                   placeholder="Full Name" minlength="3" required/>
+
+            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.realName.$error">
+                <div class="help-block small" ng-message="required">Type in your name.</div>
+            </div>
         </div>
         <div class="form-group form-group-sm has-feedback"
-             ng-model-options="{debounce:500}"
+             ng-model-options="{debounce:1000}"
              ng-class="{'has-success':vm.hasSuccess('email'), 'has-error': vm.hasError('email')}">
             <label for="email" class="sr-only">E-mail</label>
             <input type="email" class="form-control" id="email" name="email" ng-model="vm.user.email"
@@ -37,23 +43,46 @@
                   ng-show="vm.authenticateForm.email.$pending"
                   us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}">
             </span>
+
+            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.email.$error">
+                <div class="help-block small" ng-message="required">Type in your e-mail.</div>
+                <div class="help-block small" ng-message="email">This is not a valid e-mail.</div>
+                <div class="help-block small" ng-message="jasEmail">This e-mail is already registered or invalid.</div>
+            </div>
+
         </div>
-        <div class="form-group form-group-sm has-feedback">
+        <div class="form-group form-group-sm has-feedback"
+             ng-class="{'has-success':vm.hasSuccess('password'), 'has-error': vm.hasError('password')}">
             <label for="password" class="sr-only">Password</label>
             <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password"
                    placeholder="Password" popover="{{vm.popoverText}}" popover-trigger="focus"
-                   popover-popup-delay="1000"/>
+                   popover-popup-delay="1000" required/>
+
+            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.password.$error">
+                <div class="help-block small" ng-message="required">Choose a password.</div>
+            </div>
             <jas-password-strength callback="vm.passwordStrengthCallback"
                                    password="vm.authenticateForm.password"/>
         </div>
         <div>
         </div>
-        <div class="form-group form-group-sm has-feedback">
+        <div class="form-group form-group-sm has-feedback"
+             ng-class="{'has-success':vm.hasSuccess('confirm'), 'has-error': vm.hasError('confirm')}">
             <label for="confirm" class="sr-only">Confirm Password</label>
             <input type="password" class="form-control" id="confirm" name="confirm" ng-model="vm.user.confirm"
-                   placeholder="Confirm Password"/>
+                   placeholder="Confirm Password" required jas-confirm-field="vm.authenticateForm.password"/>
+
+            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.confirm.$error">
+                <div class="help-block small" ng-message="required">Confirm the password.</div>
+                <div class="help-block small" ng-message="jasConfirmField">Passwords do not match.</div>
+            </div>
         </div>
-        <button class="btn btn-sm btn-primary"><i class="icon ion-email"></i> Create Account</button>
+
+        <button class="btn btn-sm btn-primary" ng-click="vm.create($event)"
+                popover="{{vm.getTooltip()}}" popover-trigger="click"
+                popover-placement="right" popover-popup-delay="10">
+            <i class="icon ion-email"></i> Create Account
+        </button>
         <br/>
         <small>Create Account with <a ng-click="vm.withOAuth()">Google or Facebook</a></small>
     </form>
