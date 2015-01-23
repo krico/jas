@@ -16,8 +16,10 @@ module.exports = function (config, min) {
     ];
     if (min) {
         files.push(paths.build + '/js/jasify.min.js');
+        files.push(paths.build + '/js/jasify.tpl.min.js');
     } else {
         files = files.concat(paths.js);
+        files.push(paths.build + '/js/jasify.tpl.js');
     }
     files.push('src/test/client/**/*.js');
     config.set({

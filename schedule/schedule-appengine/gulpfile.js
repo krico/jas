@@ -26,19 +26,28 @@ var argv = require('yargs').argv,
 gulp.task('clean', clean);
 gulp.task('sym', ['build'], sym);
 gulp.task('bower-install', bowerInstall);
-gulp.task('client', client);
-gulp.task('test-client-js-hint', testClientJsHint);
+gulp.task('client-tpl', clientTpl);
+gulp.task('client-js', clientJs);
+gulp.task('client', ['client-tpl', 'client-js']);
+gulp.task('lint-js', lintJs);
+gulp.task('lint-test-js', lintTestJs);
+gulp.task('lint', ['lint-js', 'lint-test-js']);
 gulp.task('styles', styles);
 gulp.task('html', html);
 gulp.task('static-html', staticHtml);
 gulp.task('test', ['build'], testClient);
 gulp.task('watch', rebuild);
 gulp.task('build', ['client', 'styles', 'html', 'static-html', 'bower-install']);
-gulp.task('default', ['watch', 'build', 'test-client-js-hint']);
+gulp.task('default', ['watch', 'build', 'lint']);
 
 function rebuild() {
-    gulp.watch(paths.js.concat(paths.partials), ['client']);
-    gulp.watch(paths.test.js, ['test-client-js-hint']);
+
+    //this is so we only lint after generating client.js (to allow us to reload on browser sooner ;-)
+    gulp.task('lint-after-client-js', ['client-js'], lintJs);
+
+    gulp.watch(paths.js, ['lint-after-client-js']);
+    gulp.watch(paths.partials, ['client-tpl']);
+    gulp.watch(paths.test.js, ['lint-test-js']);
     gulp.watch(paths.css, ['styles']);
     gulp.watch(paths.html, ['html']);
     gulp.watch(paths.staticHtml, ['static-html']);
@@ -60,43 +69,49 @@ function bowerInstall(cb) {
         .pipe(gulp.dest(paths.build + '/lib'));
 }
 
-function client(cb) {
-    var templates = gulp.src(paths.partials)
+function clientTpl(cb) {
+    return gulp.src(paths.partials)
         .pipe(plumber())
         .pipe(htmlmin({
             collapseWhitespace: true,
             removeAttributeQuotes: true,
-            removeComments: true,
-            filename: 'templates.js'
+            removeComments: true
         }))
-        .pipe(templateCache())
-        .pipe(plumber.stop())
+        .pipe(templateCache({filename: 'jasify.tpl.js'}))
         .pipe(wrapper({
             header: '(function(angular){',
             footer: '})(angular);'
-        }));
-
-    var code = gulp.src(paths.js);
-
-    return merge(code, templates)
+        }))
         .pipe(sourcemaps.init())
-        .pipe(plumber())
-        //.pipe(print(function (filepath) {
-        //    return "built: " + filepath;
-        //}))
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-        .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))
         .pipe(ngAnnotate())
-        //.pipe(uglify())
+        .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/js'));
 }
 
-function testClientJsHint(cb) {
+function clientJs(cb) {
+    return gulp.src(paths.js)
+        .pipe(sourcemaps.init())
+        .pipe(plumber())
+        .pipe(concat('jasify.js'))
+        .pipe(gulp.dest(paths.build + '/js'))
+        .pipe(ngAnnotate())
+        .pipe(uglify())
+        .pipe(rename({extname: '.min.js'}))
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest(paths.build + '/js'));
+}
+
+function lintTestJs(cb) {
     return gulp.src(paths.test.js)
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'));
+}
+
+function lintJs(cb) {
+    return gulp.src(paths.js)
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 }

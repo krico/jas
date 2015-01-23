@@ -3,7 +3,7 @@ describe('CreateAccountController', function () {
     beforeEach(module('jasify'));
 
     beforeEach(inject(function ($controller) {
-        vm = $controller('CreateAccountController');
+        vm = $controller('CreateAccountController', {$scope: {}});
     }));
 
     it('is not on e-mail mode when instantiated', function () {
@@ -30,11 +30,11 @@ describe('CreateAccountController', function () {
     });
 
     it('initializes showErrors', function () {
-        expect(typeof vm.showErrors).toBe(false);
+        expect(vm.showErrors).toBe(false);
     });
 
     it('initializes inProgress', function () {
-        expect(typeof vm.inProgress).toBe(false);
+        expect(vm.inProgress).toBe(false);
     });
 
     it('has a function to handle password strength callback', function () {

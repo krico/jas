@@ -3,7 +3,7 @@ describe('AuthenticateController', function () {
     beforeEach(module('jasify'));
 
     beforeEach(inject(function ($controller) {
-        vm = $controller('AuthenticateController');
+        vm = $controller('AuthenticateController', {$scope: {}} );
     }));
 
     it('switches between "Sign In" and "Create Account"', function () {
