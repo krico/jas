@@ -1,15 +1,15 @@
 (function (angular) {
     /**
-     * Popup services (windows)
+     * OAuthWindow services (windows)
      * Inspired by satelizer (https://github.com/sahat/satellizer)
      */
-    angular.module('jasify').factory('Popup', popup);
+    angular.module('jasify').factory('OAuthWindow', oAuthWindow);
 
-    function popup($log, $q, $interval, $window) {
+    function oAuthWindow($log, $q, $interval, $window) {
         var popupWindow = null;
         var waiting = null;
 
-        var Popup = {
+        var OAuthWindow = {
             getOptions: getOptions,
             optionsString: optionsString,
             open: open,
@@ -47,7 +47,7 @@
             if (provider && Providers[provider]) {
                 opts = Providers[provider];
             }
-            var optStr = Popup.optionsString(Popup.getOptions(opts));
+            var optStr = OAuthWindow.optionsString(OAuthWindow.getOptions(opts));
             popupWindow = $window.open(url, '_blank', optStr);
             if (popupWindow && popupWindow.focus) {
                 popupWindow.focus();
@@ -85,7 +85,7 @@
             return deferred.promise;
         }
 
-        return Popup;
+        return OAuthWindow;
     }
 
 })(angular);

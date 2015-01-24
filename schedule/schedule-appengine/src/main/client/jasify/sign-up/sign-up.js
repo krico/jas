@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('SignUpController', SignUpController);
 
-    function SignUpController($scope, $rootScope, AUTH_EVENTS, User, Auth, Popup) {
+    function SignUpController($scope, $rootScope, AUTH_EVENTS, User, Auth, OAuthWindow) {
         var vm = this;
 
         vm.alerts = [];
@@ -76,7 +76,7 @@
         function oauth(provider) {
             vm.inProgress = true;
             vm.provider = provider;
-            Popup.open('/oauth2/request/' + provider, provider)
+            OAuthWindow.open('/oauth2/request/' + provider, provider)
                 .then(popupSuccess, popupError);
 
             function popupSuccess(oauthDetail) {

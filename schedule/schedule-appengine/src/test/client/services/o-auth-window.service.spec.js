@@ -1,29 +1,29 @@
-describe('PopupService', function () {
-    var Popup, $interval, $windowMock;
+describe('OAuthWindowService', function () {
+    var OAuthWindow, $interval, $windowMock;
 
     beforeEach(module('jasify'));
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_$interval_, _Popup_, _$windowMock_) {
+    beforeEach(inject(function (_$interval_, _OAuthWindow_, _$windowMock_) {
         $interval = _$interval_;
-        Popup = _Popup_;
+        OAuthWindow = _OAuthWindow_;
         $windowMock = _$windowMock_;
     }));
 
     it('build options with no args', function () {
-        var opts = Popup.getOptions();
+        var opts = OAuthWindow.getOptions();
         expect(opts.width).toEqual(500);
         expect(opts.height).toEqual(500);
     });
 
     it('build options with args', function () {
-        var opts = Popup.getOptions({width: 600});
+        var opts = OAuthWindow.getOptions({width: 600});
         expect(opts.width).toEqual(600);
         expect(opts.height).toEqual(500);
     });
 
     it('build a string with options', function () {
-        var str = Popup.optionsString({foo: 'bar', baz: 90});
+        var str = OAuthWindow.optionsString({foo: 'bar', baz: 90});
         expect(str).toEqual('foo=bar,baz=90');
     });
 
@@ -38,7 +38,7 @@ describe('PopupService', function () {
         };
         var ok = null;
         var fail = null;
-        Popup.open('testUrl', 'Facebook')
+        OAuthWindow.open('testUrl', 'Facebook')
             .then(
             function () {
                 ok = true;

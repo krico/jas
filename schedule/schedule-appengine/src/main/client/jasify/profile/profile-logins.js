@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('ProfileLoginsController', ProfileLoginsController);
 
-    function ProfileLoginsController($scope, $log, $q, UserLogin, Session, Popup, logins) {
+    function ProfileLoginsController($scope, $log, $q, UserLogin, Session, OAuthWindow, logins) {
         var vm = this;
 
         vm.logins = logins;
@@ -39,7 +39,7 @@
         };
 
         vm.oauth = function (provider) {
-            Popup.open('/oauth2/request/' + provider, provider)
+            OAuthWindow.open('/oauth2/request/' + provider, provider)
                 .then(
                 function (oauthDetail) {
                     if (oauthDetail.added) {

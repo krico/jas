@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('LoginController', LoginController);
 
-    function LoginController($scope, $rootScope, Auth, AUTH_EVENTS, Popup) {
+    function LoginController($scope, $rootScope, Auth, AUTH_EVENTS, OAuthWindow) {
         var vm = this;
         vm.login = login;
         vm.oauth = oauth;
@@ -23,7 +23,7 @@
         }
 
         function oauth(provider) {
-            Popup.open('/oauth2/request/' + provider, provider)
+            OAuthWindow.open('/oauth2/request/' + provider, provider)
                 .then(popupSuccess, popupFailed);
 
             function popupSuccess(oauthDetail) {
