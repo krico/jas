@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('NavbarController', NavbarController);
 
-    function NavbarController($rootScope, $scope, $log, $location, Auth, AUTH_EVENTS) {
+    function NavbarController($rootScope, $scope, $log, $location, $route, Auth, AUTH_EVENTS) {
         var vm = this;
 
         vm.path = "";
@@ -69,10 +69,10 @@
 
         function loginSucceeded() {
             $log.debug("LOGIN SUCCEEDED!");
-            if (vm.menuActive('/login')) {
-                $location.path('/profile');
-            } else if (vm.menuActive('/signUp')) {
-                $location.path('/profile/welcome');
+            if (vm.menuActive('/logout')) {
+                $location.path('/home');
+            } else {
+                $route.reload();
             }
         }
 

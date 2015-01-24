@@ -76,8 +76,8 @@
                 Auth.restore(true).then(ok, fail);
                 function ok(u) {
                     $scope.setCurrentUser(u);
+                    //This gets caught by NavbarController
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-                    $route.reload();
                 }
 
                 function fail() {

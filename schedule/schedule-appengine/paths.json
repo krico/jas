@@ -13,6 +13,7 @@
   },
   "css": ["src/main/stylesheet/**/*.css"],
   "html": [
+    "src/main/client/terms-and-conditions.html",
     "src/main/client/index.html"
   ],
   "staticHtml": [
@@ -34,6 +35,7 @@
         "angular-resource/angular-resource.min.js",
         "angular-messages/angular-messages.min.js",
         "angular-cookies/angular-cookies.min.js",
+        "angular-sanitize/angular-sanitize.min.js",
         "angular-bootstrap/ui-bootstrap-tpls.min.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.min.js",
         "spin.js/spin.js",
