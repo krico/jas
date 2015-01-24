@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('SignInController', SignInController);
 
-    function SignInController($log, $cookies, Auth) {
+    function SignInController($log, $cookies, $rootScope, AUTH_EVENTS, Auth, OAuthWindow) {
         var vm = this;
         vm.user = {};
         vm.email = false;
@@ -16,10 +16,29 @@
         vm.hasSuccess = hasSuccess;
         vm.hasError = hasError;
         vm.getTooltip = getTooltip;
+        vm.oauth = oauth;
 
         if (vm.rememberMe) {
             $log.debug('REMEMBER');
             vm.user.email = $cookies.rememberMe;
+        }
+
+        function oauth(provider, cb) {
+            OAuthWindow.open('/oauth2/request/' + provider, provider)
+                .then(popupSuccess, popupFailed);
+
+            function popupSuccess(oauthDetail) {
+                $log.debug('OK: ' + angular.toJson(oauthDetail));
+                if (oauthDetail.loggedIn) {
+                    if (angular.isFunction(cb)) {
+                        cb();
+                    }
+                }
+            }
+
+            function popupFailed(msg) {
+                $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+            }
         }
 
         function getTooltip() {

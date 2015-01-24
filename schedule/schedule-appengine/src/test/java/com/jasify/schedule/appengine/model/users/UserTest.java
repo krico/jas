@@ -1,10 +1,7 @@
 package com.jasify.schedule.appengine.model.users;
 
-import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.meta.users.UserMeta;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +9,7 @@ import org.slim3.datastore.Datastore;
 
 import java.util.HashSet;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 
@@ -40,5 +38,18 @@ public class UserTest {
         User e = new User();
         e.setId(id);
         assertFalse(userSet.add(e));
+    }
+
+    @Test
+    public void testReadFromUserLogin() {
+        UserLogin userLogin = new UserLogin();
+        String email = "a@com";
+        userLogin.setEmail(email);
+        String realName = "Someone Nice";
+        userLogin.setRealName(realName);
+        User user = new User(userLogin);
+        assertEquals(email, user.getName());
+        assertEquals(email, user.getEmail());
+        assertEquals(realName, user.getRealName());
     }
 }

@@ -1,11 +1,11 @@
 <div ng-hide="vm.isEmail()">
     <fieldset>
         <div class="form-group col-sm-12">
-            <button class="btn btn-google btn-block" ng-click="vm.oauth('Google')">
+            <button class="btn btn-google btn-block" ng-click="vm.oauth('Google', $close)">
                 <i class="icon ion-social-google"></i>
                 Create Account with Google
             </button>
-            <button class="btn btn-facebook btn-block" ng-click="vm.oauth('Facebook')">
+            <button class="btn btn-facebook btn-block" ng-click="vm.oauth('Facebook', $close)">
                 <i class="icon ion-social-facebook"></i>
                 Create Account with Facebook
             </button>

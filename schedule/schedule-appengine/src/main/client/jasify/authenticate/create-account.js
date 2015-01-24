@@ -2,7 +2,7 @@
 
     angular.module('jasifyScheduleControllers').controller('CreateAccountController', CreateAccountController);
 
-    function CreateAccountController($route, $scope, $rootScope, User, Auth) {
+    function CreateAccountController($rootScope, User, OAuthWindow) {
         var vm = this;
         vm.user = {};
         vm.authenticateForm = {};
@@ -18,10 +18,29 @@
         vm.create = create;
         vm.getTooltip = getTooltip;
         vm.inProgress = false;
+        vm.oauth = oauth;
         vm.alert = function (type, message) {
             //TODO:
             console.log("Alert[" + type + "]:" + message);
         };
+
+        function oauth(provider, cb) {
+            OAuthWindow.open('/oauth2/request/' + provider, provider)
+                .then(popupSuccess, popupFailed);
+
+            function popupSuccess(oauthDetail) {
+                if (oauthDetail.loggedIn) {
+                    if (angular.isFunction(cb)) {
+                        cb();
+                    }
+                }
+            }
+
+            function popupFailed(msg) {
+                $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+            }
+        }
+
 
         function create(cb) {
             if (vm.authenticateForm.$invalid) {
