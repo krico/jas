@@ -1,18 +1,9 @@
 module.exports = function (config, min) {
     var paths = require('../../../paths.json');
     var files = [
-        paths.build + '/lib/angular/angular.js',
-        paths.build + '/lib/angular-mocks/angular-mocks.js',
-        paths.build + '/lib/angular-route/angular-route.js',
-        paths.build + '/lib/angular-resource/angular-resource.js',
-        paths.build + '/lib/angular-messages/angular-messages.js',
-        paths.build + '/lib/angular-messages/angular-messages.js',
-        paths.build + '/lib/angular-cookies/angular-cookies.js',
-        paths.build + '/lib/angular-bootstrap/ui-bootstrap-tpls.js',
-        paths.build + '/lib/ui-bootstrap-datetime-picker/dist/datetime-picker.min.js',
-        paths.build + '/lib/spin.js/spin.js',
-        paths.build + '/lib/angular-spinner/angular-spinner.js'
-
+        paths.build + '/js/dep-boot.js',
+        paths.build + '/js/dep-main.js',
+        paths.build + '/js/dep-test.js'
     ];
     if (min) {
         files.push(paths.build + '/js/jasify.min.js');
@@ -21,6 +12,7 @@ module.exports = function (config, min) {
         files = files.concat(paths.js);
         files.push(paths.build + '/js/jasify.tpl.js');
     }
+
     files.push('src/test/client/**/*.js');
     config.set({
         basePath: '../../..',

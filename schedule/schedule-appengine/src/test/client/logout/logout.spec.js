@@ -19,6 +19,7 @@ describe('LogoutController', function () {
     }));
 
     it('can logout', function () {
+
         $scope.setCurrentUser({});
         var defer = $q.defer();
         defer.resolve();

@@ -22,6 +22,35 @@
     "src/main/client/jasify/controllers/**/*.html",
     "src/main/client/jasify/**/*.html"
   ],
+  "dependencies": {
+    "js": {
+      "boot": [
+        "html5shiv/dist/html5shiv.min.js",
+        "respond/dest/respond.min.js"
+      ],
+      "main": [
+        "angular/angular.min.js",
+        "angular-route/angular-route.min.js",
+        "angular-resource/angular-resource.min.js",
+        "angular-messages/angular-messages.min.js",
+        "angular-cookies/angular-cookies.min.js",
+        "angular-bootstrap/ui-bootstrap-tpls.min.js",
+        "ui-bootstrap-datetime-picker/dist/datetime-picker.min.js",
+        "spin.js/spin.js",
+        "angular-spinner/angular-spinner.min.js"
+      ],
+      "test": [
+        "angular-mocks/angular-mocks.js"
+      ]
+    },
+    "css": {
+      "main": [
+        "bootstrap/dist/css/bootstrap.min.css",
+        "ionicons/css/ionicons.min.css"
+      ]
+    }
+  },
   "build": "target/schedule-appengine-1.0-SNAPSHOT/build",
+  "bower": "target/bower_components",
   "symBuild": "src/main/html/build"
 }

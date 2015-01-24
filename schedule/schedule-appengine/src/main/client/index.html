@@ -26,36 +26,20 @@
 
     </script>
 
+    <!--[if lt IE 9]>
+    <script src="build/js/dep-boot.min.js"></script>
+    <![endif]-->
+
     <title>Jasify Schedule</title>
-    <script src="build/lib/angular/angular.min.js"></script>
-    <!-- TODO: angular-mocks needs to go away at some point, it's used mostly for dev  (comments) -->
-    <script src="build/lib/angular-mocks/angular-mocks.js"></script>
-    <script src="build/lib/angular-route/angular-route.min.js"></script>
-    <script src="build/lib/angular-resource/angular-resource.min.js"></script>
-    <script src="build/lib/angular-messages/angular-messages.min.js"></script>
-    <script src="build/lib/angular-cookies/angular-cookies.min.js"></script>
-    <script src="build/lib/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-
-    <!-- date+time popup for angular-ui -->
-    <script src="build/lib/ui-bootstrap-datetime-picker/dist/datetime-picker.min.js"></script>
-
-    <script src="build/lib/spin.js/spin.js"></script>
-    <script src="build/lib/angular-spinner/angular-spinner.min.js"></script>
-
+    <script src="build/js/dep-main.min.js"></script>
     <script src="build/js/jasify.min.js"></script>
     <script src="build/js/jasify.tpl.min.js"></script>
 
-    <link href="build/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="build/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+    <script src="https://apis.google.com/js/client.js?onload=initializeEndpoint"></script>
 
+    <link href="build/css/dep-main.min.css" rel="stylesheet">
     <link href="build/css/jasify.min.css" rel="stylesheet">
 
-    <!--[if lt IE 9]>
-    <script src="build/lib/html5shiv/dist/html5shiv.min.js"></script>
-    <script src="build/lib/respond/dest/respond.min.js"></script>
-    <![endif]-->
-
-    <script src="https://apis.google.com/js/client.js?onload=initializeEndpoint"></script>
 </head>
 
 <body ng-controller="ApplicationController as appVm">
