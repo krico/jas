@@ -63,22 +63,6 @@ describe('NavbarController', function () {
 
     });
 
-    it('should redirect /login to /profile on loginSucceeded', function () {
-
-        $location.path('/login');
-        vm.loginSucceeded();
-        expect($location.path()).toEqual('/profile');
-
-    });
-
-    it('should redirect /signUp to /profile/welcome on loginSucceeded', function () {
-
-        $location.path('/signUp');
-        vm.loginSucceeded();
-        expect($location.path()).toEqual('/profile/welcome');
-
-    });
-
     it('should watch the $location.path', function () {
         $location.path('/tmp');
         $rootScope.$digest();
