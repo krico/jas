@@ -16,10 +16,7 @@ import com.jasify.schedule.appengine.http.json.JsonOAuthDetail;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
-import com.jasify.schedule.appengine.model.users.User;
-import com.jasify.schedule.appengine.model.users.UserLogin;
-import com.jasify.schedule.appengine.model.users.UserLoginExistsException;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
 import com.jasify.schedule.appengine.util.JSON;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -108,7 +105,21 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
                 detail.setRealName(oAuthInfo.getRealName());
 
                 if (UserContext.getCurrentUser() == null) {
-                    session.setAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY, userLogin);
+                    log.info("Creating new user={} authenticated via oauth", userLogin.getEmail());
+                    User newUser = new User(userLogin);
+                    try {
+                        newUser = UserServiceFactory.getUserService().create(newUser, userLogin);
+
+                        //TODO: these two exceptions need to be handled better so that the web interface can react
+                    } catch (EmailExistsException e) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN, "E-mail exists");
+                        return;
+                    } catch (UsernameExistsException e) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Username exists");
+                        return;
+                    }
+                    detail.setLoggedIn(true);
+                    new HttpUserSession(newUser).put(req); //todo: simulate log in
                 } else {
                     UserSession currentUser = UserContext.getCurrentUser();
                     User user = UserServiceFactory.getUserService().get(currentUser.getUserId());

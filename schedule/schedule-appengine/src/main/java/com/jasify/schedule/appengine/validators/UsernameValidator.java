@@ -36,7 +36,7 @@ public class UsernameValidator implements Validator<String> {
             ret.add(REASON_VALID_CHARS);
         }
 
-        if (ret.isEmpty() && UserServiceFactory.getUserService().exists(name)) {
+        if (ret.isEmpty() && UserServiceFactory.getUserService().usernameExists(name)) {
             ret.add(REASON_EXISTS);
         }
 

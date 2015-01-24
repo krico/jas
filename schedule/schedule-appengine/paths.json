@@ -1,18 +1,58 @@
 {
   "js": [
-    "src/main/javascript/**/*.module.js",
-    "src/main/javascript/**/jasify.main.js",
-    "src/main/javascript/**/*.js"
+    "src/main/client/**/*.module.js",
+    "src/main/client/**/jasify.main.js",
+    "src/main/client/**/*.js"
   ],
   "test": {
     "js": [
-      "src/test/javascript/**/*.js",
-      "!src/test/javascript/**/karma.conf*.js"
+      "src/test/client/**/*.js",
+      "!src/test/client/**/karma.conf*.js"
     ],
-    "karmaConfig": "src/test/javascript/karma.conf.ci.js"
+    "karmaConfig": "src/test/client/karma.conf.ci.js"
   },
   "css": ["src/main/stylesheet/**/*.css"],
-  "html": ["src/main/html/**/*.html"],
+  "html": [
+    "src/main/client/terms-and-conditions.html",
+    "src/main/client/index.html"
+  ],
+  "staticHtml": [
+    "src/main/html/**/*.html"
+  ],
+  "partials": [
+    "src/main/client/jasify/controllers/**/*.html",
+    "src/main/client/jasify/**/*.html"
+  ],
+  "dependencies": {
+    "js": {
+      "boot": [
+        "html5shiv/dist/html5shiv.min.js",
+        "respond/dest/respond.min.js"
+      ],
+      "main": [
+        "angular/angular.min.js",
+        "angular-route/angular-route.min.js",
+        "angular-resource/angular-resource.min.js",
+        "angular-messages/angular-messages.min.js",
+        "angular-cookies/angular-cookies.min.js",
+        "angular-sanitize/angular-sanitize.min.js",
+        "angular-bootstrap/ui-bootstrap-tpls.min.js",
+        "ui-bootstrap-datetime-picker/dist/datetime-picker.min.js",
+        "spin.js/spin.js",
+        "angular-spinner/angular-spinner.min.js"
+      ],
+      "test": [
+        "angular-mocks/angular-mocks.js"
+      ]
+    },
+    "css": {
+      "main": [
+        "bootstrap/dist/css/bootstrap.min.css",
+        "ionicons/css/ionicons.min.css"
+      ]
+    }
+  },
   "build": "target/schedule-appengine-1.0-SNAPSHOT/build",
+  "bower": "target/bower_components",
   "symBuild": "src/main/html/build"
 }

@@ -107,7 +107,7 @@ public class UserEndpoint {
     */
 
     @ApiMethod(name = "users.add", path = "users", httpMethod = ApiMethod.HttpMethod.POST)
-    public com.jasify.schedule.appengine.model.users.User addUser(User caller, JasAddUserRequest request, HttpServletRequest servletRequest) throws UserLoginExistsException, UsernameExistsException {
+    public com.jasify.schedule.appengine.model.users.User addUser(User caller, JasAddUserRequest request, HttpServletRequest servletRequest) throws UserLoginExistsException, UsernameExistsException, EmailExistsException {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(request.getUser());

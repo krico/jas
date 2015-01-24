@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Terms and Conditions</title>
+    <!--[if lt IE 9]>
+    <script src="build/js/dep-boot.min.js"></script>
+    <![endif]-->
+    <script src="build/js/dep-main.min.js"></script>
+
+    <link href="build/css/dep-main.min.css" rel="stylesheet">
+    <link href="build/css/jasify.min.css" rel="stylesheet">
+
+    <script language="JavaScript">
+        var tandc = angular.module('tandc', ['ngSanitize']);
+
+        tandc.controller('TermsAndConditionsController', ['$scope', function ($scope) {
+            $scope.company = '?<s>JAS Technology AG</s>?';
+        }]);
+    </script>
+</head>
+<body ng-app="tandc">
+<div class="container" ng-controller="TermsAndConditionsController as vm">
+    <h2>Terms and conditions</h2>
+
+    <h3>Limitation of liability</h3>
+
+    <p>Although every care has been taken by <span ng-bind-html="company"></span> to ensure the accuracy of the
+        information published, no warranty can be given in respect of the accuracy, reliability, up-to-dateness or
+        completeness of this information.</p>
+
+    <p><span ng-bind-html="company"></span> reserve the right to alter or remove the content, in full or in part,
+        without prior notice.</p>
+
+    <p>In no event will <span ng-bind-html="company"></span> be liable for any loss or damage of a material or
+        immaterial nature arising from access to, use or non-use of published information, or from misuse of the
+        connection or technical faults.</p>
+
+    <h3>Links</h3>
+
+    <p>Links to third party websites lie outside the scope of responsibility of <span ng-bind-html="company"></span>.
+        Access and use of such websites occurs entirely at the user’s own risk. <span ng-bind-html="company"></span>
+        expressly state that they have no influence whatsoever over the content of any linked site. Responsibility for
+        information and services of linked sites rests entirely with the relevant third parties.</p>
+
+    <p>No liability can be accepted in respect of the content of such websites.</p>
+
+    <h3>Data protection</h3>
+
+    <p>Based on Article 13 of the Federal Constitution and the provisions of federal data protection legislation,
+        everyone
+        has the right to the protection of their privacy, as well as to protection from misuse of their personal
+        details.
+        <span ng-bind-html="company"></span> comply with these provisions. Personal data is treated as strictly
+        confidential and is
+        neither passed on nor sold to third parties.</p>
+
+    <p>In close cooperation with our hosting provider, we make every effort to protect the databases as well as possible
+        from outside access, data loss, misuse or falsification.</p>
+
+    <p>When you access our websites, the following data is stored in log files: IP address, date, time, browser request
+        and general information on the operating system and browser.</p>
+
+    <p>This usage data forms the basis for statistical, impersonal evaluations for the purpose of tracking trends so
+        that
+        <span ng-bind-html="company"></span> can improve the information on offer. Under the Federal Act on the
+        Surveillance of Post
+        and
+        Telecommunications, there is a statutory duty to store data on all connections made in the past six months.</p>
+
+    <p>When you choose to make contact with us, your e-mail address will be stored in a separate database not connected
+        with the anonymous log files. <s>You may delete your registration at any time.</s></p>
+
+    <h3>Copyright</h3>
+    Copyright, <span ng-bind-html="company"></span>.
+
+    <p>Information on the <span ng-bind-html="company"></span>'s websites is accessible to the public.</p>
+
+    <p>Downloading or copying of texts, illustrations, photos or any other data does not entail any transfer of rights
+        on
+        the content.</p>
+
+    <p>Copyright and any other rights relating to texts, illustrations, photos or any other data available on the
+        <span ng-bind-html="company"></span>'s websites are the exclusive property of <span
+                ng-bind-html="company"></span> or of any other expressly mentioned
+        owners. Any reproduction requires the prior written consent of the copyright holder.</p>
+</div>
+</body>
+</html>

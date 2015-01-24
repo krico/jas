@@ -29,7 +29,7 @@
                 com.jasify.schedule.appengine.spi.OrganizationEndpoint,
                 com.jasify.schedule.appengine.spi.UserEndpoint,
                 com.jasify.schedule.appengine.spi.UserLoginEndpoint,
-                com.jasify.schedule.appengine.spi.UsernameEndpoint
+                com.jasify.schedule.appengine.spi.UniqueEndpoint
             </param-value>
         </init-param>
     </servlet>

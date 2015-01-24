@@ -33,26 +33,40 @@ public class UniqueConstraint {
     private final String uniquePropertyName;
     private final String uniqueClassifierPropertyName;
     private final String uniqueKind;
+    private final boolean ignoreNullValues;
 
     UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName) throws UniqueConstraintException {
-        this(meta, uniquePropertyName, null);
+        this(meta, uniquePropertyName, false);
     }
 
-    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, String uniqueClassifierPropertyName) throws UniqueConstraintException {
+    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, boolean ignoreNullValues) throws UniqueConstraintException {
+        this(meta, uniquePropertyName, null, ignoreNullValues);
+    }
+
+    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, String uniqueClassifierPropertyName, boolean ignoreNullValues) throws UniqueConstraintException {
         this.datastore = DatastoreServiceFactory.getDatastoreService();
         this.meta = meta;
         this.uniquePropertyName = uniquePropertyName;
         this.uniqueClassifierPropertyName = uniqueClassifierPropertyName;
+        this.ignoreNullValues = ignoreNullValues;
         this.uniqueKind = determineKind();
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty) throws RuntimeException {
-        return create(meta, uniqueProperty, null);
+        return create(meta, uniqueProperty, null, false);
+    }
+
+    public static <T> UniqueConstraint createAllowingNullValues(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty) throws RuntimeException {
+        return create(meta, uniqueProperty, null, true);
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty) throws RuntimeException {
+        return create(meta, uniqueProperty, uniqueClassifierProperty, false);
+    }
+
+    public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty, boolean allowNullValues) throws RuntimeException {
         try {
-            return new UniqueConstraint(meta, uniqueProperty.getName(), uniqueClassifierProperty == null ? null : uniqueClassifierProperty.getName());
+            return new UniqueConstraint(meta, uniqueProperty.getName(), uniqueClassifierProperty == null ? null : uniqueClassifierProperty.getName(), allowNullValues);
         } catch (UniqueConstraintException e) {
             throw new RuntimeException(e);
         }
@@ -124,10 +138,16 @@ public class UniqueConstraint {
     private void createIndex(String kind) throws UniqueConstraintException {
         log.info("Creating index {} for {}", kind, getEntityKindPropertyName());
         int count = 0;
+        int indexed = 0;
         Iterator<Entity> it = Datastore.query(meta).asEntityIterator();
         while (it.hasNext()) {
+            ++count;
             Entity next = it.next();
-            String uniqueProperty = Objects.toString(next.getProperty(uniquePropertyName));
+            Object property = next.getProperty(uniquePropertyName);
+            if (property == null && ignoreNullValues) {
+                continue;
+            }
+            String uniqueProperty = Objects.toString(property);
             String uniqueClassifier;
             String suffix;
             if (uniqueClassifierPropertyName == null) {
@@ -146,9 +166,9 @@ public class UniqueConstraint {
             }
             Datastore.put(tx, e);
             tx.commit();
-            ++count;
+            ++indexed;
         }
-        log.info("Successfully created index with {} entries {} for {}", count, kind, getEntityKindPropertyName());
+        log.info("Successfully created index with {}/{} entries {} for {}", indexed, count, kind, getEntityKindPropertyName());
     }
 
     private void deleteIndex(String kindPrefix) {

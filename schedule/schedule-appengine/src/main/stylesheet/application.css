@@ -164,3 +164,7 @@ body {
 .datetime-picker div > table .btn-default {
     border: 0;
 }
+
+.spacer {
+    width: 10px;
+}

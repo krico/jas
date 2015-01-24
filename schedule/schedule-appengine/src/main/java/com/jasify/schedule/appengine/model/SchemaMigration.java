@@ -108,7 +108,7 @@ public final class SchemaMigration {
         admin.setAdmin(true);
         try {
             UserServiceFactory.getUserService().create(admin, "admin");
-        } catch (UsernameExistsException e) {
+        } catch (UsernameExistsException | EmailExistsException e) {
             // Don't really care
         }
         if (EnvironmentUtil.isContinuousIntegrationEnvironment()) {

@@ -20,6 +20,8 @@ Features:
 
 Changes:
 
+  - added plumber `npm i gulp-plumber -S` so that gulp won't barf when fails to compile
+  - added gulp-angular-templatecache `npm install gulp-angular-templatecache --save-dev` so that our partials get loaded into the .js files
   - added angular-ui-datetime-picker-popup `bower install git@github.com:krico/bootstrap-ui-datetime-picker`
   - added ionicons `bower install ionicons -S` for social icons facebook/google, etc
   - added *google-api-services-oauth2* to interface with google OAuth2 information (tokeninfo and userinfo)
