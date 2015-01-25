@@ -168,3 +168,22 @@ body {
 .spacer {
     width: 10px;
 }
+
+.book-it {
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+.book-it-section {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: bolder;
+    line-height: inherit;
+    color: #333;
+    border: 0;
+    border-bottom: 1px solid #e5e5e5;
+}

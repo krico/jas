@@ -9,6 +9,7 @@
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
         'jasifyComponents',
+        'jasify.authenticate',
         'jasify.templates'
     ]);
 
