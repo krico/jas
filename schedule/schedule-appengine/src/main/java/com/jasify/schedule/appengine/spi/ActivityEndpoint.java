@@ -25,6 +25,7 @@ import java.util.*;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.checkFound;
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
+import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
 
 /**
  * @author krico
@@ -170,7 +171,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.get", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public Activity getActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        mustBeAdmin(caller);
+        mustBeLoggedIn(caller);
         checkFound(id);
         try {
             return ActivityServiceFactory.getActivityService().getActivity(id);

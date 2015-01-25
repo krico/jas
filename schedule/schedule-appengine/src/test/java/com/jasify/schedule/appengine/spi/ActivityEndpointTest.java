@@ -321,12 +321,6 @@ public class ActivityEndpointTest {
 
     // TODO getActivities
 
-    @Test(expected = ForbiddenException.class)
-    public void testGetActivityNotAdmin() throws Exception {
-        testActivityServiceFactory.replay();
-        endpoint.getActivity(newCaller(1, false), null);
-    }
-
     @Test(expected = UnauthorizedException.class)
     public void testGetActivityNoUser() throws Exception {
         testActivityServiceFactory.replay();
