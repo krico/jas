@@ -49,6 +49,10 @@ public class User {
         this.name = name;
     }
 
+    public User(UserLogin userLogin) {
+        readFrom(userLogin);
+    }
+
     public Key getId() {
         return id;
     }
@@ -144,6 +148,12 @@ public class User {
 
     public ModelRef<UserDetail> getDetailRef() {
         return detailRef;
+    }
+
+    private void readFrom(UserLogin userLogin) {
+        setName(userLogin.getEmail());
+        setEmail(userLogin.getEmail());
+        setRealName(userLogin.getRealName());
     }
 
     public String debugString() {

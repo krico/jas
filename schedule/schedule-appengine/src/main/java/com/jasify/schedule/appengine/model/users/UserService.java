@@ -19,9 +19,9 @@ public interface UserService {
      */
     User newUser();
 
-    User create(User user, String password) throws UsernameExistsException;
+    User create(User user, String password) throws EmailExistsException, UsernameExistsException;
 
-    User create(User user, UserLogin login) throws UsernameExistsException, UserLoginExistsException;
+    User create(User user, UserLogin login) throws EmailExistsException, UsernameExistsException, UserLoginExistsException;
 
     User save(User user) throws EntityNotFoundException, FieldValueException;
 
@@ -44,7 +44,9 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    boolean exists(String name);
+    boolean usernameExists(String username);
+
+    boolean emailExists(String email);
 
     @Nonnull
     User login(String name, String password) throws LoginFailedException;

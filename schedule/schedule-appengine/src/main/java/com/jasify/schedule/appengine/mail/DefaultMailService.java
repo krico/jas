@@ -83,7 +83,6 @@ public final class DefaultMailService implements MailService {
                     applicationOwners = ArrayUtils.add(applicationOwners, new InternetAddress(owner));
                 }
 
-
                 senderAddress = new InternetAddress(senderAddressString, senderAddressNameString);
                 session = Session.getDefaultInstance(new Properties(), null);
 
@@ -102,7 +101,7 @@ public final class DefaultMailService implements MailService {
     }
 
     @Override
-    public void sendToApplicationOwners(String subject, String htmlBody) {
+    public boolean sendToApplicationOwners(String subject, String htmlBody) {
         initialize();
         Preconditions.checkNotNull(senderAddress);
         Preconditions.checkNotNull(applicationOwners);
@@ -130,16 +129,17 @@ public final class DefaultMailService implements MailService {
 
             msg.setContent(mp);
 
-
             Transport.send(msg);
+            return true;
         } catch (Exception e) {
             log.warn("Failed to send e-mail", e);
+            return false;
         }
     }
 
-    private void foo() {
-
-
+    void reset() {
+        // Reinitialise
+        initializationState.set(StateEnum.NEW);
     }
 
     private static enum StateEnum {

@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine;
 
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.tools.development.testing.*;
+import com.jasify.schedule.appengine.mail.DefaultMailService;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
