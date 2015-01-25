@@ -1,6 +1,6 @@
 describe('SignInController', function () {
     var vm;
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyWeb'));
 
     beforeEach(inject(function ($controller) {
         vm = $controller('SignInController');

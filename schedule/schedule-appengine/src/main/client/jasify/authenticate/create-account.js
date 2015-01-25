@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('CreateAccountController', CreateAccountController);
+    angular.module('jasifyWeb').controller('CreateAccountController', CreateAccountController);
 
     function CreateAccountController($rootScope, User, OAuthWindow) {
         var vm = this;

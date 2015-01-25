@@ -1,7 +1,7 @@
 describe('GroupService', function () {
     var Group, Endpoint, $rootScope, $gapiMock, $q;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
     beforeEach(inject(function (_Group_, _Endpoint_, _$rootScope_, _$gapiMock_, _$q_) {

@@ -1,7 +1,7 @@
 (function (angular) {
     "use strict";
 
-    angular.module('jasifyScheduleControllers').controller('AdminGroupsController', AdminGroupsController);
+    angular.module('jasifyWeb').controller('AdminGroupsController', AdminGroupsController);
 
     function AdminGroupsController($location, Group, groups) {
         var vm = this;

@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasify').directive('jasUsername', jasUsername);
+    angular.module('jasifyComponents').directive('jasUsername', jasUsername);
 
     function jasUsername($q, Unique) {
         return {

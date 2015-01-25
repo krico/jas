@@ -1,24 +1,24 @@
 (function (angular) {
 
-    angular.module('jasify', [
+    angular.module('jasifyWeb', [
         'ngRoute',
         'ngResource',
         'ngMessages',
         'ngCookies',
         'ui.bootstrap',
         'angularSpinner',
-        'jasifyScheduleControllers',
         'ui.bootstrap.datetimepicker',
-        'templates'
+        'jasifyComponents',
+        'jasify.templates'
     ]);
 
     /**
      * Listen to route changes and check
      */
-    angular.module('jasify').run(jasifyRun);
+    angular.module('jasifyWeb').run(jasifyWebRun);
 
-    function jasifyRun($rootScope, $log) {
-        //TODO: remove, not really needed
+    function jasifyWebRun($rootScope, $log) {
+        //TODO: its just an example to know how its done.
         $rootScope.$on('$routeChangeError', function (event, next, current) {
             $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
         });

@@ -1,7 +1,7 @@
 (function (angular) {
 
 
-    angular.module('jasify').factory('Unique', unique);
+    angular.module('jasifyComponents').factory('Unique', unique);
 
     function unique(Endpoint) {
         var Unique = {

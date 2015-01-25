@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('ProfileController', ProfileController);
+    angular.module('jasifyWeb').controller('ProfileController', ProfileController);
 
     function ProfileController($scope, $routeParams, $log, Session, User) {
         var vm = this;

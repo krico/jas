@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('NavbarController', NavbarController);
+    angular.module('jasifyWeb').controller('NavbarController', NavbarController);
 
     function NavbarController($rootScope, $scope, $log, $location, $route, Auth, AUTH_EVENTS) {
         var vm = this;

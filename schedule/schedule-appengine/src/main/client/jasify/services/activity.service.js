@@ -1,5 +1,5 @@
 (function (angular) {
-    angular.module('jasify').factory('Activity', activity);
+    angular.module('jasifyComponents').factory('Activity', activity);
 
     function activity(Endpoint, $q, $log) {
         var Activity = {

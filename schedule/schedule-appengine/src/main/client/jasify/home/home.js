@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('HomeController', HomeController);
+    angular.module('jasifyWeb').controller('HomeController', HomeController);
 
     function HomeController($rootScope, AUTH_EVENTS) {
         var vm = this;

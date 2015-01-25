@@ -4,7 +4,7 @@
      * we provide the $gapi service and use it instead.  This allows us to
      * easily mock it for tests for example.
      */
-    angular.module('jasify').provider('$gapi', $gapiProvider);
+    angular.module('jasifyComponents').provider('$gapi', $gapiProvider);
 
     function $gapiProvider() {
         this.$get = function () {

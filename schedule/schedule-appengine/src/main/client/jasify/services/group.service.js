@@ -1,5 +1,5 @@
 (function (angular) {
-    angular.module('jasify').factory('Group', group);
+    angular.module('jasifyComponents').factory('Group', group);
 
     function group(Endpoint, $q, $log) {
         var Group = {

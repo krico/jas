@@ -1,7 +1,7 @@
 describe('ApplicationController', function () {
     var $controller, $rootScope, $location, $modalMock, $scope, vm, AUTH_EVENTS;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyWeb'));
     beforeEach(module('jasify.mocks'));
 
     beforeEach(inject(function (_$controller_, _$rootScope_, _$location_, _$modalMock_, _AUTH_EVENTS_) {
