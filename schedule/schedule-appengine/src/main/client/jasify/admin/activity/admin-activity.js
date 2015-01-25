@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('AdminActivityController', AdminActivityController);
+    angular.module('jasifyWeb').controller('AdminActivityController', AdminActivityController);
 
     function AdminActivityController($location, ActivityType, Activity, activity, organizations) {
         var vm = this;

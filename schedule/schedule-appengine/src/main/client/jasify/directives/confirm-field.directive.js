@@ -3,7 +3,7 @@
     /**
      * ConfirmField directive
      */
-    angular.module('jasify').directive('jasConfirmField', jasConfirmField);
+    angular.module('jasifyComponents').directive('jasConfirmField', jasConfirmField);
 
     function jasConfirmField() {
         return {

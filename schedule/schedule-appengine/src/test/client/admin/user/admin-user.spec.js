@@ -1,7 +1,7 @@
 describe('AdminUserController', function () {
     var $scope, $q, $controller, $rootScope, $routeParams, $gapiMock, User, Auth, Endpoint, vm;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyWeb'));
 
     beforeEach(module('jasify.mocks'));
 

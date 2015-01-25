@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasify').factory('User', user);
+    angular.module('jasifyComponents').factory('User', user);
 
     function user(Endpoint, $q) {
         var User = {

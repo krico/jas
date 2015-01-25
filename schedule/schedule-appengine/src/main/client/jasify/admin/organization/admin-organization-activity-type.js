@@ -1,7 +1,7 @@
 (function (angular) {
     "use strict";
 
-    angular.module('jasifyScheduleControllers').controller('AdminOrganizationActivityTypeController', AdminOrganizationActivityTypeController);
+    angular.module('jasifyWeb').controller('AdminOrganizationActivityTypeController', AdminOrganizationActivityTypeController);
 
     function AdminOrganizationActivityTypeController($log, $modalInstance, ActivityType, organization) {
         var vm = this;

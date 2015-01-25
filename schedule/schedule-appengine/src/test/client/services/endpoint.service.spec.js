@@ -1,7 +1,7 @@
 describe('EndpointService', function () {
     var $rootScope, Endpoint, $gapiMock;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
 
     beforeEach(module('jasify.mocks'));
 

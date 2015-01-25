@@ -1,7 +1,7 @@
 describe('AllowService', function () {
     var $rootScope, Allow, Session, AUTH_EVENTS;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
     beforeEach(inject(function (_$rootScope_, _Allow_, _Session_, _AUTH_EVENTS_) {

@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasify').factory('Auth', auth);
+    angular.module('jasifyComponents').factory('Auth', auth);
 
     function auth($log, $http, $q, $cookies, Session, Endpoint) {
 

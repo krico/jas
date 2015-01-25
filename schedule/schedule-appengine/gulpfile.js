@@ -89,7 +89,10 @@ function clientTpl(cb) {
             removeAttributeQuotes: true,
             removeComments: true
         }))
-        .pipe(templateCache({filename: 'jasify.tpl.js'}))
+        .pipe(templateCache({
+            filename: 'jasify.tpl.js',
+            module: 'jasify.templates'
+        }))
         .pipe(wrapper({
             header: '(function(angular){',
             footer: '})(angular);'

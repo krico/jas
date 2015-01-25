@@ -3,7 +3,7 @@
     /**
      *  Session is a singleton that mimics the server-side session
      */
-    angular.module('jasify').service('Session', session);
+    angular.module('jasifyComponents').service('Session', session);
 
     function session() {
 

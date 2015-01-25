@@ -1,7 +1,6 @@
 {
   "js": [
     "src/main/client/**/*.module.js",
-    "src/main/client/**/jasify.main.js",
     "src/main/client/**/*.js"
   ],
   "test": {

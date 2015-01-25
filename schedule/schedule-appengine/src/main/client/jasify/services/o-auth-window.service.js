@@ -3,7 +3,7 @@
      * OAuthWindow services (windows)
      * Inspired by satelizer (https://github.com/sahat/satellizer)
      */
-    angular.module('jasify').factory('OAuthWindow', oAuthWindow);
+    angular.module('jasifyComponents').factory('OAuthWindow', oAuthWindow);
 
     function oAuthWindow($log, $q, $interval, $window) {
         var popupWindow = null;

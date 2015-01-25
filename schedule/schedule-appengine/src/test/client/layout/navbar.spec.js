@@ -1,7 +1,7 @@
 describe('NavbarController', function () {
     var $controller, $rootScope, $location, $scope, $applicationScope, vm, AUTH_EVENTS;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyWeb'));
 
     beforeEach(inject(function (_$controller_, _$rootScope_, _$location_, _AUTH_EVENTS_) {
         $controller = _$controller_;

@@ -1,7 +1,7 @@
 describe('OAuthWindowService', function () {
     var OAuthWindow, $interval, $windowMock;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
     beforeEach(inject(function (_$interval_, _OAuthWindow_, _$windowMock_) {

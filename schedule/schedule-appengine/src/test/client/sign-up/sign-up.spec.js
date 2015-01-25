@@ -1,7 +1,7 @@
 describe('SignUpController', function () {
     var $scope, Auth, $rootScope, $q, $applicationScope, vm, User, AUTH_EVENTS;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyWeb'));
     beforeEach(module('jasify.mocks'));
 
     beforeEach(inject(function (_$q_, _Auth_, _$rootScope_, _User_, $controller, _AUTH_EVENTS_) {
