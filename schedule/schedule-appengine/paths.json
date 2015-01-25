@@ -12,8 +12,7 @@
   },
   "css": ["src/main/stylesheet/**/*.css"],
   "html": [
-    "src/main/client/terms-and-conditions.html",
-    "src/main/client/index.html"
+    "src/main/client/*.html"
   ],
   "staticHtml": [
     "src/main/html/**/*.html"
