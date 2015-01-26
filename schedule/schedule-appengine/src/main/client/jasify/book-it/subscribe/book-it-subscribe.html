@@ -36,9 +36,13 @@
                         {{vm.activity.description}}
                     </p>
                 </div>
-                <button class="btn btn-primary" ng-click="vm.bookIt()">
+                <button class="btn btn-primary" ng-show="vm.showBookIt()" ng-disabled="vm.inProgress"
+                        ng-click="vm.bookIt()">
                     <i class="fa fa-shopping-cart"></i> Book it!
                 </button>
+                <span ng-hide="vm.showBookIt()" class="book-it-subscribed">
+                    <i class="fa fa-check"></i> Subscribed <small>(An e-mail confirmation was sent)</small>
+                </span>
             </div>
         </div>
     </div>
