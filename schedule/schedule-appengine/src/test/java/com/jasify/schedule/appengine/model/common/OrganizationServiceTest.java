@@ -7,6 +7,7 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.users.User;
+import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.*;
 
 public class OrganizationServiceTest {
@@ -130,8 +132,8 @@ public class OrganizationServiceTest {
 
         groups = organizationService.getGroups();
         assertNotNull(groups);
-        assertEquals(20, groups.size());
-        assertEquals(20, added.size());
+        assertEquals(total, groups.size());
+        assertEquals(total, added.size());
         for (Group group : groups) {
             assertTrue(added.remove(group.getId()));
         }
@@ -151,8 +153,8 @@ public class OrganizationServiceTest {
 
         organizations = organizationService.getOrganizations();
         assertNotNull(organizations);
-        assertEquals(20, organizations.size());
-        assertEquals(20, added.size());
+        assertEquals(total, organizations.size());
+        assertEquals(total, added.size());
         for (Organization organization : organizations) {
             assertTrue(added.remove(organization.getId()));
         }
@@ -160,7 +162,19 @@ public class OrganizationServiceTest {
     }
 
     @Test
-    public void testUpdateOrganization() throws Exception {
+    public void testUpdateOrganizationName() throws Exception {
+        Organization organization = new Organization(TEST_ORGANIZATION_NAME);
+        Key id = organizationService.addOrganization(organization);
+        organization.setName("New Name");
+        Organization returnedOrg = organizationService.updateOrganization(organization);
+        assertNotNull(returnedOrg);
+        assertEquals(id, returnedOrg.getId());
+        Organization fetched = organizationService.getOrganization(id);
+        assertEquals("New Name", fetched.getName());
+    }
+
+    @Test
+    public void testUpdateOrganizationDescription() throws Exception {
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         Key id = organizationService.addOrganization(organization);
         organization.setDescription("New Description");
@@ -169,6 +183,12 @@ public class OrganizationServiceTest {
         assertEquals(id, returnedOrg.getId());
         Organization fetched = organizationService.getOrganization(id);
         assertEquals("New Description", fetched.getDescription());
+    }
+
+    @Test(expected = FieldValueException.class)
+    public void testUpdateOrganizationThrowsFieldValueException() throws Exception {
+        Organization organization = new Organization();
+        organizationService.updateOrganization(organization);
     }
 
     @Test
@@ -194,15 +214,39 @@ public class OrganizationServiceTest {
     }
 
     @Test
+    public void testAddDuplicateUserToOrganization() throws Exception {
+        User user = new User(TEST_USER_NAME);
+        Datastore.put(user);
+        Organization organization = new Organization(TEST_ORGANIZATION_NAME);
+        organizationService.addOrganization(organization);
+        organizationService.addUserToOrganization(organization, user);
+        organizationService.addUserToOrganization(organization, user);
+        List<User> users = organization.getUsers();
+        assertNotNull(users);
+        assertEquals(1, users.size());
+    }
+
+    @Test
     public void testRemoveUserFromOrganization() throws Exception {
         User user = new User(TEST_USER_NAME);
         Datastore.put(user);
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         organizationService.addOrganization(organization);
-        organizationService.addUserToOrganization(organization.getId(), user.getId());
         organizationService.addUserToOrganization(organization, user);
         organizationService.removeUserFromOrganization(organization, user);
+        List<User> users = organization.getUsers();
+        assertNotNull(users);
+        assertTrue(users.isEmpty());
+    }
 
+    @Test
+    public void testRemoveUserFromOrganizationByKeys() throws Exception {
+        User user = new User(TEST_USER_NAME);
+        Datastore.put(user);
+        Organization organization = new Organization(TEST_ORGANIZATION_NAME);
+        organizationService.addOrganization(organization);
+        organizationService.addUserToOrganization(organization.getId(), user.getId());
+        organizationService.removeUserFromOrganization(organization.getId(), user.getId());
         List<User> users = organization.getUsers();
         assertNotNull(users);
         assertTrue(users.isEmpty());
@@ -226,6 +270,31 @@ public class OrganizationServiceTest {
         assertNotNull(groups);
         assertEquals(1, groups.size());
         assertEquals(group.getId(), groups.get(0).getId());
+    }
+
+    @Test
+    public void testGetOrganizationGroups() throws Exception {
+        Group group1 = new Group(TEST_GROUP_NAME + 1);
+        Group group2 = new Group(TEST_GROUP_NAME + 2);
+        organizationService.addGroup(group1);
+        organizationService.addGroup(group2);
+
+        Organization organization = new Organization(TEST_ORGANIZATION_NAME);
+        Key organizationId = organizationService.addOrganization(organization);
+
+        organizationService.addGroupToOrganization(organization, group1);
+        organizationService.addGroupToOrganization(organization, group2);
+        organization = organizationService.getOrganization(organizationId);
+
+        List<Group> groups = organization.getGroups();
+        assertEquals(2, groups.size());
+
+        // This is a dangerous access but lets see what happens if its used
+        organization.getOrganizationMemberListRef().getModelList().set(0, null);
+
+        groups = organization.getGroups();
+        assertEquals(1, groups.size());
+        assertEquals(group2.getId(), groups.get(0).getId());
     }
 
     @Test
@@ -288,7 +357,6 @@ public class OrganizationServiceTest {
         //make sure they exists (will throw if they don't)
         Datastore.get(User.class, user.getId());
         Datastore.get(Group.class, id);
-
     }
 
     @Test(expected = FieldValueException.class)
@@ -310,6 +378,16 @@ public class OrganizationServiceTest {
         assertEquals(TEST_GROUP_NAME, fetched.getName());
         assertEquals("Description", fetched.getDescription());
         assertEquals(id, fetched.getId());
+    }
+
+    @Test (expected = UniqueConstraintException.class)
+    public void testAddDuplicateGroupThrowsUniqueConstraintException() throws Exception {
+        Group group = new Group(TEST_GROUP_NAME);
+        Key groupId = Datastore.allocateId(Group.class);
+        group.setId(groupId);
+        group.setDescription("Description");
+        organizationService.addGroup(group);
+        organizationService.addGroup(group);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -342,6 +420,12 @@ public class OrganizationServiceTest {
         assertEquals(id, returnedGroup.getId());
         Group fetched = organizationService.getGroup(id);
         assertEquals("New Description", fetched.getDescription());
+    }
+
+    @Test(expected = FieldValueException.class)
+    public void testUpdateGroupThrowsFieldValueException() throws Exception {
+        Group group = new Group();
+        organizationService.updateGroup(group);
     }
 
     @Test(expected = EntityNotFoundException.class)
