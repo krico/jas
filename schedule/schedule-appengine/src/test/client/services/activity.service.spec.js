@@ -106,6 +106,7 @@ describe('ActivityService', function () {
 
         expect($gapiMock.client.jasify.activities.remove).toHaveBeenCalledWith({id: id});
     });
+
     it('should remove activity ', function () {
         spyOn($gapiMock.client.jasify.activities, 'remove').and.returnValue($q.when({result: false}));
 
@@ -121,6 +122,48 @@ describe('ActivityService', function () {
         $rootScope.$apply();
 
         expect($gapiMock.client.jasify.activities.remove).toHaveBeenCalledWith({id: at.id});
+    });
+
+    it('should subscribe to activity ', function () {
+        spyOn($gapiMock.client.jasify.activitySubscriptions, 'add').and.returnValue($q.when({result: false}));
+
+        var user = {id: 'xyz', name: 'foo'};
+        var activity = {id: 'klm', name: 'bar'};
+        Activity.subscribe(user, activity)
+            .then(function (whatever) {
+                expect(whatever).toBe(false);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.activitySubscriptions.add).toHaveBeenCalledWith({
+            userId: user.id,
+            activityId: activity.id
+        });
+    });
+
+    it('should know if user is subscribed to activity ', function () {
+        spyOn($gapiMock.client.jasify.activitySubscriptions, 'query').and.returnValue($q.when({result: false}));
+
+        var user = {id: 'xyz', name: 'foo'};
+        var activity = {id: 'klm', name: 'bar'};
+        Activity.isSubscribed(user, activity)
+            .then(function (whatever) {
+                expect(whatever).toBe(false);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.activitySubscriptions.query).toHaveBeenCalledWith({
+            userId: user.id,
+            activityId: activity.id
+        });
     });
 
 });

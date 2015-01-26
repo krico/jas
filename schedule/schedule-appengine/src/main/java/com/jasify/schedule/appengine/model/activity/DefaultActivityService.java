@@ -235,10 +235,24 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException {
-        User dbUser = getUser(user.getId());
-        Activity dbActivity = getActivity(activity.getId());
+    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException {
+        Subscription subscription = subscribe(user.getId(), activity.getId());
+        activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
+        return subscription;
+    }
 
+    @Nonnull
+    @Override
+    public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, UniqueConstraintException {
+        User dbUser = getUser(userId);
+        Activity dbActivity = getActivity(activityId);
+
+        List<Subscription> existingSubscriptions = dbActivity.getSubscriptionListRef().getModelList();
+        for (Subscription subscription : existingSubscriptions) {
+            if (userId.equals(subscription.getUserRef().getKey())) {
+                throw new UniqueConstraintException("User already subscribed");
+            }
+        }
         Subscription subscription = new Subscription();
 
         subscription.setId(Datastore.allocateId(dbUser.getId(), subscriptionMeta));
@@ -247,7 +261,6 @@ class DefaultActivityService implements ActivityService {
 
         //TODO: put this in a transaction
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() + 1);
-        activity.setSubscriptionCount(dbActivity.getSubscriptionCount());
 
         Datastore.put(dbActivity);
         Datastore.put(subscription);
@@ -262,6 +275,19 @@ class DefaultActivityService implements ActivityService {
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
         Datastore.put(dbActivity);
         Datastore.delete(dbSubscription.getId());
+    }
+
+    @Nonnull
+    @Override
+    public List<Subscription> getSubscriptions(Activity activity) throws EntityNotFoundException {
+        return getSubscriptions(activity.getId());
+    }
+
+    @Nonnull
+    @Override
+    public List<Subscription> getSubscriptions(Key activityId) throws EntityNotFoundException, IllegalArgumentException {
+        Activity dbActivity = getActivity(activityId);
+        return dbActivity.getSubscriptionListRef().getModelList();
     }
 
     private static class Singleton {

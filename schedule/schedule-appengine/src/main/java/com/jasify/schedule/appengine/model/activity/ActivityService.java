@@ -133,9 +133,44 @@ public interface ActivityService {
      * @param activity to subscribe to
      * @return a newly created Subscription for this user to this activity
      * @throws EntityNotFoundException if any of the entities don't exist
+     * @throws UniqueConstraintException user was already subscribed to this activity
      */
     @Nonnull
-    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException;
+    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException;
+
+    /**
+     * Subscribe a user for an activity
+     *
+     * @param userId     to subscribe
+     * @param activityId to subscribe to
+     * @return a newly created Subscription for this user to this activity
+     * @throws EntityNotFoundException  if any of the entities don't exist
+     * @throws IllegalArgumentException if any key is invalid
+     * @throws UniqueConstraintException user was already subscribed to this activity
+     */
+    @Nonnull
+    public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, IllegalArgumentException, UniqueConstraintException;
+
+    /**
+     * List subscriptions for an activity
+     *
+     * @param activity to get the subscriptions from
+     * @return list of subscriptions
+     * @throws EntityNotFoundException if the activity doesn't exist
+     */
+    @Nonnull
+    public List<Subscription> getSubscriptions(Activity activity) throws EntityNotFoundException;
+
+    /**
+     * List subscriptions for an activity
+     *
+     * @param activityId to get the subscriptions from
+     * @return list of subscriptions
+     * @throws EntityNotFoundException  if the activity doesn't exist
+     * @throws IllegalArgumentException if the key is invalid
+     */
+    @Nonnull
+    public List<Subscription> getSubscriptions(Key activityId) throws EntityNotFoundException, IllegalArgumentException;
 
     /**
      * Cancel a subscription, effectively doing the reverse of {@link #subscribe}
