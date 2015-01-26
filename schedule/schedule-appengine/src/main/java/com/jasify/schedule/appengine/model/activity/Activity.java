@@ -157,4 +157,6 @@ public class Activity {
     public InverseModelListRef<Subscription, Activity> getSubscriptionListRef() {
         return subscriptionListRef;
     }
+
+
 }

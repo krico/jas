@@ -1,7 +1,7 @@
 describe('AuthService', function () {
     var Session, Auth, $cookies, Endpoint, $q, $httpBackend, $rootScope, $gapiMock;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
     beforeEach(inject(function (_$cookies_, _Session_, _Auth_, _Endpoint_, _$q_, _$httpBackend_, _$rootScope_, _$gapiMock_) {

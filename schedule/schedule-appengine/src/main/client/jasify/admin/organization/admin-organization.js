@@ -1,7 +1,7 @@
 (function (angular) {
     "use strict";
 
-    angular.module('jasifyScheduleControllers').controller('AdminOrganizationController', AdminOrganizationController);
+    angular.module('jasifyWeb').controller('AdminOrganizationController', AdminOrganizationController);
 
     function AdminOrganizationController($log, $q, $modal, $location, User, Group, Organization, ActivityType, organization) {
         var vm = this;
@@ -213,7 +213,7 @@
 
         function addActivityType(organization) {
             var modalInstance = $modal.open({
-                templateUrl: 'admin/organization/admin-organization-activity-type.html?' + new Date(),
+                templateUrl: 'admin/organization/admin-organization-activity-type.html',
                 controller: 'AdminOrganizationActivityTypeController',
                 controllerAs: 'vm',
                 size: 'md',

@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('LoginController', LoginController);
+    angular.module('jasifyWeb').controller('LoginController', LoginController);
 
     function LoginController($scope, $rootScope, Auth, AUTH_EVENTS, OAuthWindow) {
         var vm = this;

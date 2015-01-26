@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
@@ -14,6 +15,8 @@ import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
@@ -25,6 +28,8 @@ import java.util.List;
  * @since 09/01/15.
  */
 class DefaultActivityService implements ActivityService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultActivityService.class);
+
     private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
     private final OrganizationMeta organizationMeta;
@@ -235,10 +240,42 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException {
-        User dbUser = getUser(user.getId());
-        Activity dbActivity = getActivity(activity.getId());
+    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException {
+        Subscription subscription = subscribe(user.getId(), activity.getId());
+        activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
+        return subscription;
+    }
 
+    private void notify(User user, Activity activity) {
+        try {
+            //TODO: I guess this should come from some kind of template
+            String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
+            StringBuilder body = new StringBuilder()
+                    .append("<h1>User: ").append(user.getEmail()).append("</h1>")
+                    .append("<p>")
+                    .append("Id: ").append(user.getId()).append("<br/>")
+                    .append("Subscribed: ").append(activity.getId()).append("<br/>")
+                    .append("</p>")
+                    .append("<p>Regards,<br>Jasify</p>");
+
+            MailServiceFactory.getMailService().sendToApplicationOwners(subject, body.toString());
+        } catch (Exception e) {
+            log.warn("Failed to notify", e);
+        }
+    }
+
+    @Nonnull
+    @Override
+    public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, UniqueConstraintException {
+        User dbUser = getUser(userId);
+        Activity dbActivity = getActivity(activityId);
+
+        List<Subscription> existingSubscriptions = dbActivity.getSubscriptionListRef().getModelList();
+        for (Subscription subscription : existingSubscriptions) {
+            if (userId.equals(subscription.getUserRef().getKey())) {
+                throw new UniqueConstraintException("User already subscribed");
+            }
+        }
         Subscription subscription = new Subscription();
 
         subscription.setId(Datastore.allocateId(dbUser.getId(), subscriptionMeta));
@@ -247,10 +284,11 @@ class DefaultActivityService implements ActivityService {
 
         //TODO: put this in a transaction
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() + 1);
-        activity.setSubscriptionCount(dbActivity.getSubscriptionCount());
 
         Datastore.put(dbActivity);
         Datastore.put(subscription);
+
+        notify(dbUser, dbActivity);
 
         return subscription;
     }
@@ -262,6 +300,19 @@ class DefaultActivityService implements ActivityService {
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
         Datastore.put(dbActivity);
         Datastore.delete(dbSubscription.getId());
+    }
+
+    @Nonnull
+    @Override
+    public List<Subscription> getSubscriptions(Activity activity) throws EntityNotFoundException {
+        return getSubscriptions(activity.getId());
+    }
+
+    @Nonnull
+    @Override
+    public List<Subscription> getSubscriptions(Key activityId) throws EntityNotFoundException, IllegalArgumentException {
+        Activity dbActivity = getActivity(activityId);
+        return dbActivity.getSubscriptionListRef().getModelList();
     }
 
     private static class Singleton {

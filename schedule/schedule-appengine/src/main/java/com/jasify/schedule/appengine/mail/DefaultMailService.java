@@ -107,7 +107,7 @@ public final class DefaultMailService implements MailService {
         Preconditions.checkNotNull(applicationOwners);
 
         try {
-            log.info("Sent e-mail [{}] as [{}] to {}", subject, senderAddress, Arrays.toString(applicationOwners));
+            log.debug("Sent e-mail [{}] as [{}] to {}", subject, senderAddress, Arrays.toString(applicationOwners));
 
             Message msg = new MimeMessage(session);
             msg.setFrom(senderAddress);

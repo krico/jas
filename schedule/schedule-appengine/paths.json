@@ -1,7 +1,6 @@
 {
   "js": [
     "src/main/client/**/*.module.js",
-    "src/main/client/**/jasify.main.js",
     "src/main/client/**/*.js"
   ],
   "test": {
@@ -13,14 +12,12 @@
   },
   "css": ["src/main/stylesheet/**/*.css"],
   "html": [
-    "src/main/client/terms-and-conditions.html",
-    "src/main/client/index.html"
+    "src/main/client/*.html"
   ],
   "staticHtml": [
     "src/main/html/**/*.html"
   ],
   "partials": [
-    "src/main/client/jasify/controllers/**/*.html",
     "src/main/client/jasify/**/*.html"
   ],
   "dependencies": {
@@ -48,7 +45,8 @@
     "css": {
       "main": [
         "bootstrap/dist/css/bootstrap.min.css",
-        "ionicons/css/ionicons.min.css"
+        "ionicons/css/ionicons.min.css",
+        "font-awesome/css/font-awesome.min.css"
       ]
     }
   },

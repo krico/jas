@@ -15,16 +15,19 @@ import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
-import static com.jasify.schedule.appengine.spi.JasifyEndpoint.checkFound;
-import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
+import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
 
 /**
  * @author krico
@@ -36,13 +39,12 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class},
+        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class, JasSubscriptionTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
                 packagePath = ""))
 public class ActivityEndpoint {
-    private static final Random random = new Random();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
@@ -170,7 +172,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.get", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public Activity getActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        mustBeAdmin(caller);
+        mustBeLoggedIn(caller);
         checkFound(id);
         try {
             return ActivityServiceFactory.getActivityService().getActivity(id);
@@ -218,5 +220,33 @@ public class ActivityEndpoint {
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
+    }
+
+    @ApiMethod(name = "activitySubscriptions.add", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.POST)
+    public Subscription addSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+        mustBeSameUserOrAdmin(caller, userId);
+        try {
+            return ActivityServiceFactory.getActivityService().subscribe(userId, activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (UniqueConstraintException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activitySubscriptions.query", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.GET)
+    public Subscription getSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+        mustBeSameUserOrAdmin(caller, userId);
+        try {
+            List<Subscription> subscriptions = ActivityServiceFactory.getActivityService().getSubscriptions(activityId);
+            for (Subscription subscription : subscriptions) {
+                if (userId.equals(subscription.getUserRef().getKey())) {
+                    return subscription;
+                }
+            }
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+        throw new NotFoundException("No such subscription");
     }
 }

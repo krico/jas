@@ -1,5 +1,5 @@
 (function (angular) {
-    angular.module('jasify').factory('Activity', activity);
+    angular.module('jasifyComponents').factory('Activity', activity);
 
     function activity(Endpoint, $q, $log) {
         var Activity = {
@@ -7,7 +7,9 @@
             get: get,
             update: update,
             add: add,
-            remove: remove
+            remove: remove,
+            subscribe: subscribe,
+            isSubscribed: isSubscribed
         };
 
         function query(param) {
@@ -41,6 +43,20 @@
         function remove(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.activities.remove({id: fetchId(id)})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function subscribe(user, activity) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.activitySubscriptions.add({userId: fetchId(user), activityId: fetchId(activity)})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function isSubscribed(user, activity) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.activitySubscriptions.query({userId: fetchId(user), activityId: fetchId(activity)})
                     .then(resultHandler, errorHandler);
             });
         }

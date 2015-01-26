@@ -2,7 +2,7 @@
     /**
      * Password strength meter
      */
-    angular.module('jasify').directive('jasPasswordStrength', jasPasswordStrength);
+    angular.module('jasifyComponents').directive('jasPasswordStrength', jasPasswordStrength);
 
     function jasPasswordStrength($log) {
         return {

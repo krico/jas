@@ -24,7 +24,7 @@ public class JasActivityTransformer implements Transformer<Activity, JasActivity
         if (activityType != null) {
             external.setActivityType(typeTransformer.transformTo(activityType));
         }
-        external.setBookItUrl("https://jasify-schedule.appspot.com/book-it/" + external.getId());
+        external.setBookItUrl("https://jasify-schedule.appspot.com/book-it.html#/" + external.getId());
         return external;
     }
 

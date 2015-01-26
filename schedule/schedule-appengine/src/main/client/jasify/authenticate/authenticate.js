@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('AuthenticateController', AuthenticateController);
+    angular.module('jasify.authenticate').controller('AuthenticateController', AuthenticateController);
 
     function AuthenticateController($scope) {
         var vm = this;

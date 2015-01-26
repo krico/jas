@@ -1,6 +1,6 @@
 describe('CreateAccountController', function () {
     var vm;
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyWeb'));
 
     beforeEach(inject(function ($controller) {
         vm = $controller('CreateAccountController', {$scope: {}});

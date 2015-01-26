@@ -233,7 +233,7 @@
     initializeStubbedBackend();
 
     function initializeStubbedBackend() {
-        angular.module('jasify').config(stub).run(BackendMock);
+        angular.module('jasifyComponents').config(stub).run(BackendMock);
 
         //@ngInject
         function stub($provide) {
