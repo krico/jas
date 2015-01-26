@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
@@ -14,6 +15,8 @@ import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
@@ -25,6 +28,8 @@ import java.util.List;
  * @since 09/01/15.
  */
 class DefaultActivityService implements ActivityService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultActivityService.class);
+
     private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
     private final OrganizationMeta organizationMeta;
@@ -241,6 +246,24 @@ class DefaultActivityService implements ActivityService {
         return subscription;
     }
 
+    private void notify(User user, Activity activity) {
+        try {
+            //TODO: I guess this should come from some kind of template
+            String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
+            StringBuilder body = new StringBuilder()
+                    .append("<h1>User: ").append(user.getEmail()).append("</h1>")
+                    .append("<p>")
+                    .append("Id: ").append(user.getId()).append("<br/>")
+                    .append("Subscribed: ").append(activity.getId()).append("<br/>")
+                    .append("</p>")
+                    .append("<p>Regards,<br>Jasify</p>");
+
+            MailServiceFactory.getMailService().sendToApplicationOwners(subject, body.toString());
+        } catch (Exception e) {
+            log.warn("Failed to notify", e);
+        }
+    }
+
     @Nonnull
     @Override
     public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, UniqueConstraintException {
@@ -264,6 +287,8 @@ class DefaultActivityService implements ActivityService {
 
         Datastore.put(dbActivity);
         Datastore.put(subscription);
+
+        notify(dbUser, dbActivity);
 
         return subscription;
     }
