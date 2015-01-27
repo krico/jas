@@ -261,7 +261,7 @@ public class UserEndpointTest {
     }
 
     @Test
-    public void testAddUserPassword() throws UserLoginExistsException, UsernameExistsException {
+    public void testAddUserPassword() throws Exception {
         HttpServletRequest servletRequest = EasyMock.createMock(HttpServletRequest.class);
         HttpSession session = EasyMock.createMock(HttpSession.class);
         session.setAttribute(EasyMock.anyString(), EasyMock.anyObject(HttpUserSession.class));
@@ -283,7 +283,7 @@ public class UserEndpointTest {
     }
 
     @Test
-    public void testAddUserUserLogin() throws UserLoginExistsException, UsernameExistsException {
+    public void testAddUserUserLogin() throws Exception {
         HttpServletRequest servletRequest = EasyMock.createMock(HttpServletRequest.class);
         HttpSession session = EasyMock.createMock(HttpSession.class);
         UserLogin userLogin = new UserLogin();

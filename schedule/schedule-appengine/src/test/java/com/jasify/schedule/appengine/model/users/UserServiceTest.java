@@ -8,11 +8,9 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -268,6 +266,31 @@ public class UserServiceTest {
         User user2 = service.newUser();
         user2.setName("teSt");
         service.create(user2, new UserLogin("Google", "2"));
+    }
+
+
+    @Test(expected = EmailExistsException.class)
+    public void testCreateWithLoginSameEmailThrows() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("test@test");
+        service.create(user1, new UserLogin("Google", "1"));
+        User user2 = service.newUser();
+        user2.setName("foo");
+        user2.setEmail(user1.getEmail());
+        service.create(user2, new UserLogin("Google", "2"));
+    }
+
+    @Test(expected = EmailExistsException.class)
+    public void testCreateWithPasswordSameEmailThrows() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("test@test");
+        service.create(user1, "pw");
+        User user2 = service.newUser();
+        user2.setName("foo");
+        user2.setEmail(user1.getEmail());
+        service.create(user2, "pw");
     }
 
     @Test
@@ -641,5 +664,30 @@ public class UserServiceTest {
         assertTrue(service.searchByEmail((String) null, Query.SortDirection.DESCENDING, total, 1).isEmpty());
         assertTrue(service.searchByEmail("u", Query.SortDirection.DESCENDING, total, 1).isEmpty());
 
+    }
+
+    @Test
+    public void testUsernameExists() throws Exception {
+        User user = service.newUser();
+        user.setName("aBcd");
+
+        assertFalse(service.usernameExists("abcd"));
+        service.create(user, "password");
+        assertTrue(service.usernameExists("abcd"));
+        assertTrue(service.usernameExists("aBCd"));
+        assertFalse(service.usernameExists("abcde"));
+    }
+
+    @Test
+    public void testEmailExists() throws Exception {
+        User user = service.newUser();
+        user.setName("abc");
+        user.setEmail("aBc@dEf");
+
+        assertFalse(service.emailExists("aBc@dEf"));
+        service.create(user, "password");
+        assertTrue(service.emailExists("aBc@dEf"));
+        assertTrue(service.emailExists("abc@def"));
+        assertFalse(service.emailExists("abc@defg"));
     }
 }

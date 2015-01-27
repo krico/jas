@@ -4,7 +4,7 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 
 public class JasAddUserRequestTest {
     @Test

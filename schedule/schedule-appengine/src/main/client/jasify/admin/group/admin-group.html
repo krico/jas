@@ -1,0 +1,87 @@
+<div class="row">
+    <div class="col-sm-1">
+        <a href="#/admin/groups"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
+    </div>
+    <div class="col-sm-10">
+        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-5">
+        <form class="form-horizontal" role="form" name="vm.groupForm" novalidate>
+            <fieldset>
+                <legend class="h4">Group details</legend>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label input-sm">name:</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control input-sm" id="name" name="name"
+                               ng-model="vm.group.name"
+                               placeholder="name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label fo="description" class="col-sm-2 control-label input-sm">description:</label>
+
+                    <div class="col-sm-8">
+                    <textarea class="form-control input-sm"
+                              id="description"
+                              ng-model="vm.group.description"
+                              placeholder="description"
+                              rows="3" maxlength="255"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-8">
+                        <button type="button"
+                                ng-click="vm.save()"
+                                ng-disabled="!vm.groupForm.$dirty || vm.groupForm.$invalid"
+                                class="btn btn-default btn-sm btn-primary"><span
+                                class="glyphicon glyphicon-save"></span>
+                            save
+                        </button>
+                        <button type="button"
+                                ng-click="vm.reset()" ng-disabled="!vm.groupForm.$dirty"
+                                class="btn btn-default btn-sm"><span class="glyphicon glyphicon-open"></span>
+                            reset
+                        </button>
+                        <span ng-show="vm.loading" us-spinner=""></span>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <div class="col-sm-3">
+        <form class="form col-md-12" role="form" name="vm.usersForm" novalidate>
+            <fieldset>
+                <legend class="h4">Users</legend>
+                <div class="form-group">
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label class="sr-only" for="user">select user to add</label>
+                            <input type="text" class="form-control input-sm" id="user" name="user"
+                                   typeahead="user as vm.displayUser(user) for user in vm.searchUsers($viewValue)"
+                                   typeahead-template-url="admin/group/admin-group-organization-users.html"
+                                   ng-model="vm.user"
+                                   placeholder="search user to add"/>
+                        </div>
+                        <button ng-disabled="!vm.user.id" class="btn btn-sm btn-primary" ng-click="vm.addUser(vm.user)">
+                            add
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <select ng-model="vm.selectedUsers" multiple class="form-control"
+                            ng-options="user as vm.displayUser(user) for user in vm.users">
+                    </select>
+                </div>
+                <button ng-disabled="vm.selectedUsers.length == 0"
+                        ng-click="vm.removeUser(vm.selectedUsers)"
+                        class="btn btn-sm btn-danger">
+                    remove <span ng-show="vm.selectedUsers.length > 0">({{vm.selectedUsers.length}} users)</span>
+                </button>
+            </fieldset>
+        </form>
+    </div>
+</div>

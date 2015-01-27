@@ -83,6 +83,11 @@
             <artifactId>commons-beanutils</artifactId>
             <version>1.9.2</version>
         </dependency>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.4.1</version>
+        </dependency>
         <!-- END: frameworks we can't live without :-) -->
 
         <!-- BEGIN: google appengine frameworks, originally for oauth, but probably much more -->
