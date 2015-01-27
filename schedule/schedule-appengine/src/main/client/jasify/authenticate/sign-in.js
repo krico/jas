@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('SignInController', SignInController);
+    angular.module('jasify.authenticate').controller('SignInController', SignInController);
 
     function SignInController($log, $cookies, $rootScope, AUTH_EVENTS, Auth, OAuthWindow) {
         var vm = this;

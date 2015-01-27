@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasify').directive('jasEmail', jasEmail);
+    angular.module('jasifyComponents').directive('jasEmail', jasEmail);
 
     function jasEmail($q, Unique) {
         return {

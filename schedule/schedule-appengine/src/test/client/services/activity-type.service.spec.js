@@ -1,7 +1,7 @@
 describe('ActivityTypeService', function () {
     var ActivityType, Endpoint, $rootScope, $gapiMock, $q;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
     beforeEach(inject(function (_ActivityType_, _Endpoint_, _$rootScope_, _$gapiMock_, _$q_) {

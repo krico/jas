@@ -1,5 +1,5 @@
 (function (angular) {
-    angular.module('jasify').factory('Organization', organization);
+    angular.module('jasifyComponents').factory('Organization', organization);
 
     function organization(Endpoint, $q, $log) {
         var Organization = {

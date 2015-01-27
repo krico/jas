@@ -2,11 +2,11 @@
     /**
      * Routes for all navbar links
      */
-    angular.module('jasify').config(jasifyRoutes);
+    angular.module('jasifyWeb').config(jasifyWebRoutes);
 
     //TODO: move routes to controller modules, eg. admin.routes.js test
 
-    function jasifyRoutes($routeProvider) {
+    function jasifyWebRoutes($routeProvider) {
         $routeProvider
             .when('/', {
                 templateUrl: 'home/home.html',

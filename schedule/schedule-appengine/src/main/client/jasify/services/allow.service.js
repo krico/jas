@@ -3,7 +3,7 @@
     /**
      * Allow - used in Route resolve promises as Allow.all for example
      */
-    angular.module('jasify').factory('Allow', allow);
+    angular.module('jasifyComponents').factory('Allow', allow);
 
     function allow($q, $rootScope, Auth, AUTH_EVENTS) {
         var Allow = {

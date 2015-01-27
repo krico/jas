@@ -1,0 +1,49 @@
+<div class="row">
+    <div class="col-sm-5 col-sm-offset-1">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{vm.activity.activityType.name}}</h3>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <span class="book-it-section">Price</span>
+
+                    <p>
+                        {{vm.activity.price | currency : vm.activity.currency : 2}}
+                    </p>
+                </div>
+                <div>
+                    <span class="book-it-section">When</span>
+
+                    <p>
+                        <i>
+                            {{vm.activity.start | date:'EEE, MMMM d'}},
+                            {{vm.activity.start | date:'HH:mm'}} - {{vm.activity.finish | date:'HH:mm'}}
+                        </i>
+                    </p>
+                </div>
+                <div>
+                    <span class="book-it-section">Where</span>
+
+                    <p>
+                        {{vm.activity.location}}
+                    </p>
+                </div>
+                <div>
+                    <span class="book-it-section">Description</span>
+
+                    <p class="small">
+                        {{vm.activity.description}}
+                    </p>
+                </div>
+                <button class="btn btn-primary" ng-show="vm.showBookIt()" ng-disabled="vm.inProgress"
+                        ng-click="vm.bookIt()">
+                    <i class="fa fa-shopping-cart"></i> Book it!
+                </button>
+                <span ng-hide="vm.showBookIt()" class="book-it-subscribed">
+                    <i class="fa fa-check"></i> Subscribed <small>(An e-mail confirmation was sent)</small>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

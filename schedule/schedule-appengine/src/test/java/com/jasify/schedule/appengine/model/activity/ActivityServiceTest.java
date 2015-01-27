@@ -25,6 +25,7 @@ public class ActivityServiceTest {
     private static final String TEST_ACTIVITY_TYPE = "Test Activity Type";
     private ActivityService activityService;
     private User testUser = new User("testuser");
+    private User testUser2 = new User("testuser2");
     private Organization organization1 = new Organization("Org1");
     private Organization organization2 = new Organization("Org2");
     private ActivityType activityType1OfOrganization1 = new ActivityType("AT1");
@@ -34,7 +35,7 @@ public class ActivityServiceTest {
     public void initializeDatastore() {
         TestHelper.initializeJasify();
         activityService = ActivityServiceFactory.getActivityService();
-        Datastore.put(organization1, organization2, testUser);
+        Datastore.put(organization1, organization2, testUser, testUser2);
         activityType1OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
         activityType2OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
         Datastore.put(activityType1OfOrganization1, activityType2OfOrganization1);
@@ -382,11 +383,19 @@ public class ActivityServiceTest {
         activityService.subscribe(user, new Activity(activityType1OfOrganization1));
     }
 
+    @Test(expected = UniqueConstraintException.class)
+    public void testSubscribeTwice() throws Exception {
+        Activity activity = new Activity(activityType1OfOrganization1);
+        activityService.addActivity(activity);
+        activityService.subscribe(testUser, activity);
+        activityService.subscribe(testUser, activity);
+    }
+
     @Test
     public void testCancel() throws Exception {
         Activity activity = new Activity(activityType1OfOrganization1);
         activityService.addActivity(activity);
-        Subscription subscription = activityService.subscribe(testUser, activity);
+        Subscription subscription = activityService.subscribe(testUser.getId(), activity.getId());
 
         // cache it in
         activity.getSubscriptionListRef().getModelList();
@@ -406,5 +415,21 @@ public class ActivityServiceTest {
         Subscription subscription = new Subscription();
         subscription.setId(Datastore.allocateId(Subscription.class));
         activityService.cancel(subscription);
+
+    @Test
+    public void testGetActivities() throws Exception {
+        Activity activity = new Activity(activityType1OfOrganization1);
+        activityService.addActivity(activity);
+        Subscription subscription1 = activityService.subscribe(testUser.getId(), activity.getId());
+        Subscription subscription2 = activityService.subscribe(testUser2, activity);
+        List<Subscription> subscriptions = activityService.getSubscriptions(activity);
+        assertNotNull(subscriptions);
+        assertEquals(2, subscriptions.size());
+        Set<Key> ids = new HashSet<>();
+        for (Subscription subscription : subscriptions) {
+            ids.add(subscription.getId());
+        }
+        assertTrue(ids.contains(subscription1.getId()));
+        assertTrue(ids.contains(subscription2.getId()));
     }
 }

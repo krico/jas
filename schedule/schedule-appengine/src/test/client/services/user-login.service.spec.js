@@ -1,6 +1,6 @@
 describe('UserLoginService', function () {
     var UserLogin, Endpoint, $gapiMock, $rootScope;
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
     beforeEach(inject(function (_UserLogin_, _Endpoint_, _$gapiMock_, _$rootScope_) {
         UserLogin = _UserLogin_;

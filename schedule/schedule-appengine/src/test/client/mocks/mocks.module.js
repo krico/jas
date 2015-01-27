@@ -82,6 +82,10 @@
                 update: nop,
                 add: nop,
                 remove: nop
+            },
+            activitySubscriptions: {
+                add: nop,
+                query: nop
             }
         };
 

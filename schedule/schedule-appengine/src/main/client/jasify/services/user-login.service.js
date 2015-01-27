@@ -2,7 +2,7 @@
     /**
      * UserLogins service
      */
-    angular.module('jasify').factory('UserLogin', userLogin);
+    angular.module('jasifyComponents').factory('UserLogin', userLogin);
 
     function userLogin($q, Endpoint) {
         var UserLogin = {

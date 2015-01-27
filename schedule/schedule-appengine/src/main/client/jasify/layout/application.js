@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyScheduleControllers').controller('ApplicationController', ApplicationController);
+    angular.module('jasifyWeb').controller('ApplicationController', ApplicationController);
 
     function ApplicationController($route, $scope, $rootScope, $modal, $log, $location, $cookies, Auth, AUTH_EVENTS) {
         var appVm = this;

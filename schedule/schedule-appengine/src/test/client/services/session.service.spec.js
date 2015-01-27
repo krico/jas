@@ -1,7 +1,7 @@
 describe('SessionService', function () {
     var Session;
 
-    beforeEach(module('jasify'));
+    beforeEach(module('jasifyComponents'));
 
     beforeEach(inject(function (_Session_) {
         Session = _Session_;
