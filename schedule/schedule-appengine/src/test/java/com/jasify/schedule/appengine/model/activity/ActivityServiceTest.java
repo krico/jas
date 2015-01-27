@@ -8,7 +8,6 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
-import org.apache.commons.lang3.ObjectUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
