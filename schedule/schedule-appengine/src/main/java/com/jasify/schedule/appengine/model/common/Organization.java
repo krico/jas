@@ -3,7 +3,6 @@ package com.jasify.schedule.appengine.model.common;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
-import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

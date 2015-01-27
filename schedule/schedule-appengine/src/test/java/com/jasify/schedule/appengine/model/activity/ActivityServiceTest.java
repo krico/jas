@@ -8,6 +8,7 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -181,6 +182,27 @@ public class ActivityServiceTest {
         assertEquals("New Name", activityService.getActivityType(id).getName());
     }
 
+    @Test(expected = UniqueConstraintException.class)
+    public void testUpdateActivityTypeThrowsUniqueConstraintException() throws Exception {
+        ActivityType activityType1 = new ActivityType(TEST_ACTIVITY_TYPE);
+        activityService.addActivityType(organization1, activityType1);
+        activityType1.setName("New Name");
+        activityType1.setDescription("Description");
+        activityService.updateActivityType(activityType1);
+
+        ActivityType activityType2 = new ActivityType(TEST_ACTIVITY_TYPE);
+        activityService.addActivityType(organization1, activityType2);
+        activityType2.setName("New Name");
+        activityType2.setDescription("Description");
+        activityService.updateActivityType(activityType2);
+    }
+
+    @Test(expected = FieldValueException.class)
+    public void testUpdateActivityTypeThrowsFieldValueException() throws Exception {
+        ActivityType activityType = new ActivityType();
+        activityService.updateActivityType(activityType);
+    }
+
     @Test
     public void testRemoveActivityType() throws Exception {
         Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
@@ -203,6 +225,12 @@ public class ActivityServiceTest {
         Activity activity = activityService.getActivity(id);
         assertNotNull(activity);
         assertEquals(activityType1OfOrganization1.getName(), activity.getName());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityThrowsEntityNotFoundException() throws Exception {
+        Key id = Datastore.allocateId(Activity.class);
+        activityService.getActivity(id);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -347,6 +375,13 @@ public class ActivityServiceTest {
         assertEquals(subscription.getId(), modelList.get(0).getId());
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testSubscribeThrowsEntityNotFoundException() throws Exception {
+        User user = new User("TestUser");
+        user.setId(Datastore.allocateId(User.class));
+        activityService.subscribe(user, new Activity(activityType1OfOrganization1));
+    }
+
     @Test
     public void testCancel() throws Exception {
         Activity activity = new Activity(activityType1OfOrganization1);
@@ -364,5 +399,12 @@ public class ActivityServiceTest {
         List<Subscription> modelList = activity.getSubscriptionListRef().getModelList();
         assertTrue(modelList.isEmpty());
         assertNull(Datastore.getOrNull(subscription.getId()));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCanceThrowsEntityNotFoundExceptionl() throws Exception {
+        Subscription subscription = new Subscription();
+        subscription.setId(Datastore.allocateId(Subscription.class));
+        activityService.cancel(subscription);
     }
 }

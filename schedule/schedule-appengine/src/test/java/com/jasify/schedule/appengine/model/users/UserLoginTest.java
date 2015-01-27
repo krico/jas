@@ -11,6 +11,7 @@ import org.slim3.datastore.Datastore;
 
 import java.util.HashSet;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -97,4 +98,18 @@ public class UserLoginTest {
         new UserLogin(new User());
     }
 
+    @Test
+    public void testOwnerSaveWithId() {
+        User user = new User();
+        user.setId(Datastore.allocateId(User.class));
+        UserLogin userLogin = new UserLogin(user);
+        assertNotNull(userLogin.getUserRef().getModel());
+    }
+
+    @Test
+    public void testCreateWithId() {
+        Key key = Datastore.allocateId(UserLogin.class);
+        UserLogin userLogin = new UserLogin(key);
+        assertEquals(key, userLogin.getId());
+    }
 }

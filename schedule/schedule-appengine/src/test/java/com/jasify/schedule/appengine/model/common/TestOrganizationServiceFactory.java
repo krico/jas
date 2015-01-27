@@ -15,12 +15,8 @@ public class TestOrganizationServiceFactory extends OrganizationServiceFactory {
     }
 
     public void tearDown() {
-        tearDown(true);
-    }
-
-    public void tearDown(boolean doVerify) {
         setInstance(null);
-        if (doVerify) EasyMock.verify(organizationServiceMock);
+        EasyMock.verify(organizationServiceMock);
         organizationServiceMock = null;
     }
 
