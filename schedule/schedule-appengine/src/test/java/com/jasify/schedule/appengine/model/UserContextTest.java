@@ -1,6 +1,5 @@
 package com.jasify.schedule.appengine.model;
 
-import com.google.api.server.spi.auth.common.User;
 import com.jasify.schedule.appengine.TestHelper;
 import org.easymock.EasyMock;
 import org.junit.Test;

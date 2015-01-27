@@ -9,12 +9,14 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationService;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.common.TestOrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -26,6 +28,7 @@ import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -940,5 +943,143 @@ public class ActivityEndpointTest {
         expectLastCall().once();
         testActivityServiceFactory.replay();
         endpoint.removeActivity(newCaller(1, true), key);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testAddSubscriptionNoUserThrowsNotFoundException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.addSubscription(null, null, null);
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testAddSubscriptionNotLoggedInThrowsUnauthorizedException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        User user = new User("Test");
+        Key key = Datastore.allocateId(UserLogin.class);
+        endpoint.addSubscription(user, key, null);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testAddSubscriptionThrowsNotFoundException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(UserLogin.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        expect(service.subscribe(userId, activityId)).andThrow(new EntityNotFoundException());
+        testActivityServiceFactory.replay();
+        endpoint.addSubscription(newCaller(1, true), userId, activityId);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testAddSubscriptionThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(UserLogin.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        expect(service.subscribe(userId, activityId)).andThrow(new UniqueConstraintException(""));
+        testActivityServiceFactory.replay();
+        endpoint.addSubscription(newCaller(1, true), userId, activityId);
+    }
+
+    @Test
+    public void testAddSubscriptionAsAdmin() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(UserLogin.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        Subscription subscription = new Subscription();
+        expect(service.subscribe(userId, activityId)).andReturn(subscription);
+        testActivityServiceFactory.replay();
+        Subscription result = endpoint.addSubscription(newCaller(1, true), userId, activityId);
+        assertEquals(subscription, result);
+    }
+
+    @Test
+    public void testAddSubscriptionAsSignedIn() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(UserLogin.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        Subscription subscription = new Subscription();
+        expect(service.subscribe(userId, activityId)).andReturn(subscription);
+        testActivityServiceFactory.replay();
+        Subscription result = endpoint.addSubscription(newCaller(userId.getId(), false), userId, activityId);
+        assertEquals(subscription, result);
+    }
+
+
+    @Test(expected = NotFoundException.class)
+    public void testGetSubscriptionNoUserThrowsNotFoundException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getSubscription(null, null, null);
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testGetSubscriptionNotLoggedInThrowsUnauthorizedException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        User user = new User("Test");
+        Key key = Datastore.allocateId(UserLogin.class);
+        endpoint.getSubscription(user, key, null);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetSubscriptionThrowsNotFoundException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(UserLogin.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        expect(service.getSubscriptions(activityId)).andThrow(new EntityNotFoundException());
+        testActivityServiceFactory.replay();
+        endpoint.getSubscription(newCaller(1, true), userId, activityId);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetSubscriptionNoResultThrowsNotFoundException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(UserLogin.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        Subscription subscription = new Subscription();
+        List<Subscription> subscriptionList = new ArrayList<>();
+        subscriptionList.add(subscription);
+        expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
+        testActivityServiceFactory.replay();
+        endpoint.getSubscription(newCaller(1, true), userId, activityId);
+    }
+
+    @Test
+    public void testGetSubscriptionAsAdmin() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(com.jasify.schedule.appengine.model.users.User.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        Subscription subscription = new Subscription();
+        subscription.getUserRef().setKey(userId);
+        List<Subscription> subscriptionList = new ArrayList<>();
+        subscriptionList.add(subscription);
+        expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
+        testActivityServiceFactory.replay();
+        Subscription result = endpoint.getSubscription(newCaller(1, true), userId, activityId);
+        assertEquals(subscription, result);
+    }
+
+    @Test
+    public void testGetSubscriptionAsSignedIn() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(com.jasify.schedule.appengine.model.users.User.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        Subscription subscription = new Subscription();
+        subscription.getUserRef().setKey(userId);
+        List<Subscription> subscriptionList = new ArrayList<>();
+        subscriptionList.add(subscription);
+        expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
+        testActivityServiceFactory.replay();
+        Subscription result = endpoint.getSubscription(newCaller(userId.getId(), false), userId, activityId);
+        assertEquals(subscription, result);
     }
 }
