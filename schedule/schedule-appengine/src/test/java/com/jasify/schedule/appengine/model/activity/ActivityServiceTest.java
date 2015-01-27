@@ -414,6 +414,7 @@ public class ActivityServiceTest {
         Subscription subscription = new Subscription();
         subscription.setId(Datastore.allocateId(Subscription.class));
         activityService.cancel(subscription);
+    }
 
     @Test
     public void testGetActivities() throws Exception {
