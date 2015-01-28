@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine;
 
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.tools.development.testing.*;
-import com.jasify.schedule.appengine.mail.DefaultMailService;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -43,7 +42,8 @@ public final class TestHelper {
             new LocalDatastoreServiceTestConfig()
                     .setNoIndexAutoGen(true)
     );
-    private static final LocalServiceTestHelper memcacheHelper = new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
+    private static final LocalServiceTestHelper memcacheWithDatastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+            .setNoIndexAutoGen(true), new LocalMemcacheServiceTestConfig());
     private static ServletRunner servletRunner;
 
     private TestHelper() {
@@ -121,12 +121,12 @@ public final class TestHelper {
         DatastoreUtil.clearActiveGlobalTransactions();
     }
 
-    public static void initializeMemcache() {
-        memcacheHelper.setUp();
+    public static void initializeMemcacheWithDatastore() {
+        memcacheWithDatastoreHelper.setUp();
     }
 
-    public static void cleanupMemcache() {
-        memcacheHelper.tearDown();
+    public static void cleanupMemcacheWithDatastore() {
+        memcacheWithDatastoreHelper.tearDown();
     }
 
     public static void initializeAppIdentity() {

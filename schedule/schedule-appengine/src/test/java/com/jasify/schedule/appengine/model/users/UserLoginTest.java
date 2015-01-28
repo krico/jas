@@ -11,10 +11,7 @@ import org.slim3.datastore.Datastore;
 
 import java.util.HashSet;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static junit.framework.TestCase.*;
 
 public class UserLoginTest {
     private static final Logger log = LoggerFactory.getLogger(UserLoginTest.class);
