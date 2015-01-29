@@ -12,7 +12,7 @@ import com.jasify.schedule.appengine.meta.users.User_v0Meta;
 import com.jasify.schedule.appengine.meta.users.User_v1Meta;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.*;
-import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.JSON;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -86,7 +86,7 @@ public final class SchemaMigration {
     private boolean createOauthProviderConfig() {
         boolean executed = false;
         ApplicationData applicationData = ApplicationData.instance();
-        for (OAuth2ProviderConfig.ProviderEnum provider : OAuth2ProviderConfig.ProviderEnum.values()) {
+        for (OAuth2ProviderEnum provider : OAuth2ProviderEnum.values()) {
             Object property1 = applicationData.getProperty(provider.clientIdKey());
             if (property1 == null) {
                 executed |= true;
@@ -113,7 +113,7 @@ public final class SchemaMigration {
         }
         if (EnvironmentUtil.isContinuousIntegrationEnvironment()) {
             log.warn("CONTINUOUS INTEGRATION: Creating test values for OAuth2ProviderConfig");
-            for (OAuth2ProviderConfig.ProviderEnum provider : OAuth2ProviderConfig.ProviderEnum.values()) {
+            for (OAuth2ProviderEnum provider : OAuth2ProviderEnum.values()) {
                 ApplicationData.instance().setProperty(provider.clientIdKey(), RandomStringUtils.randomAscii(16));
                 ApplicationData.instance().setProperty(provider.clientSecretKey(), RandomStringUtils.randomAscii(32));
             }

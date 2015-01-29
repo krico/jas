@@ -17,7 +17,9 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.*;
+import com.jasify.schedule.appengine.oauth2.OAuth2Info;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import com.jasify.schedule.appengine.util.JSON;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.io.IOUtils;
@@ -53,9 +55,9 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
-        OAuth2ProviderConfig.ProviderEnum provider;
+        OAuth2ProviderEnum provider;
         try {
-            provider = OAuth2ProviderConfig.ProviderEnum.parsePathInfo(req.getPathInfo());
+            provider = OAuth2ProviderEnum.parsePathInfo(req.getPathInfo());
         } catch (Exception e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad provider: " + req.getPathInfo());
             return;
@@ -91,18 +93,18 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
 
         try {
 
-            OAuthInfo oAuthInfo = extractInfo(provider, authResponse, req);
+            OAuth2Info oAuth2Info = extractInfo(provider, authResponse, req);
             JsonOAuthDetail detail = new JsonOAuthDetail();
-            User existingUser = UserServiceFactory.getUserService().findByLogin(provider.name(), oAuthInfo.getUserId());
+            User existingUser = UserServiceFactory.getUserService().findByLogin(provider.name(), oAuth2Info.getUserId());
             if (existingUser == null) {
-                UserLogin userLogin = new UserLogin(provider.name(), oAuthInfo.getUserId());
-                userLogin.setAvatar(TypeUtil.toLink(oAuthInfo.getAvatar()));
-                userLogin.setProfile(TypeUtil.toLink(oAuthInfo.getProfile()));
-                userLogin.setEmail(oAuthInfo.getEmail());
-                userLogin.setRealName(oAuthInfo.getRealName());
+                UserLogin userLogin = new UserLogin(provider.name(), oAuth2Info.getUserId());
+                userLogin.setAvatar(TypeUtil.toLink(oAuth2Info.getAvatar()));
+                userLogin.setProfile(TypeUtil.toLink(oAuth2Info.getProfile()));
+                userLogin.setEmail(oAuth2Info.getEmail());
+                userLogin.setRealName(oAuth2Info.getRealName());
 
-                detail.setEmail(oAuthInfo.getEmail());
-                detail.setRealName(oAuthInfo.getRealName());
+                detail.setEmail(oAuth2Info.getEmail());
+                detail.setRealName(oAuth2Info.getRealName());
 
                 if (UserContext.getCurrentUser() == null) {
                     log.info("Creating new user={} authenticated via oauth", userLogin.getEmail());
@@ -148,7 +150,7 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
 
     }
 
-    private OAuthInfo extractInfo(OAuth2ProviderConfig.ProviderEnum provider, AuthorizationCodeResponseUrl authResponse, HttpServletRequest req) throws IOException {
+    private OAuth2Info extractInfo(OAuth2ProviderEnum provider, AuthorizationCodeResponseUrl authResponse, HttpServletRequest req) throws IOException {
         OAuth2ProviderConfig providerConfig = provider.config();
 
         NetHttpTransport transport = new NetHttpTransport();
@@ -172,7 +174,7 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
                 Tokeninfo tokenInfo = oauth2.tokeninfo().setAccessToken(credential.getAccessToken()).execute();
                 Userinfoplus userInfo = oauth2.userinfo().get().execute();
 
-                OAuthInfo ret = new OAuthInfo();
+                OAuth2Info ret = new OAuth2Info();
                 ret.setUserId(tokenInfo.getUserId());
                 ret.setAvatar(userInfo.getPicture());
                 ret.setProfile(userInfo.getLink());
@@ -224,7 +226,7 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
                     infoResponse.disconnect();
                 }
                 log.info("ID: {}", infoData);
-                OAuthInfo ret = new OAuthInfo();
+                OAuth2Info ret = new OAuth2Info();
                 ret.setUserId(Objects.toString(Preconditions.checkNotNull(infoData.get("id"))));
                 ret.setProfile(Objects.toString(infoData.get("link")));
                 ret.setEmail(Objects.toString(infoData.get("email")));
@@ -236,51 +238,4 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
         return null;
     }
 
-    private static class OAuthInfo {
-        private String userId;
-        private String avatar;
-        private String profile;
-        private String email;
-        private String realName;
-
-        public String getUserId() {
-            return userId;
-        }
-
-        public void setUserId(String userId) {
-            this.userId = userId;
-        }
-
-        public String getAvatar() {
-            return avatar;
-        }
-
-        public void setAvatar(String avatar) {
-            this.avatar = avatar;
-        }
-
-        public String getProfile() {
-            return profile;
-        }
-
-        public void setProfile(String profile) {
-            this.profile = profile;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getRealName() {
-            return realName;
-        }
-
-        public void setRealName(String realName) {
-            this.realName = realName;
-        }
-    }
 }

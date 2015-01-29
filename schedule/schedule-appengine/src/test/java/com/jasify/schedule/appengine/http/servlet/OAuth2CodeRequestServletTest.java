@@ -2,7 +2,7 @@ package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.http.HttpUserSession;
-import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.servletunit.ServletRunner;
@@ -55,7 +55,7 @@ public class OAuth2CodeRequestServletTest {
         assertNotNull(parameters.get("state"));
         assertEquals(code, parameters.get("state"));
         assertEquals("code", parameters.get("response_type"));
-        assertEquals(OAuth2ProviderConfig.ProviderEnum.Google.config().getClientId(), parameters.get("client_id"));
+        assertEquals(OAuth2ProviderEnum.Google.config().getClientId(), parameters.get("client_id"));
         assertEquals("http://schedule.jasify.com/oauth2/callback/Google", parameters.get("redirect_uri"));
     }
 

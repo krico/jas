@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.http.GenericUrl;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 /**
  * Redirects the user to the oauth authentication request url
@@ -32,9 +32,9 @@ public class OAuth2CodeRequestServlet extends HttpServlet {
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
-        OAuth2ProviderConfig.ProviderEnum provider;
+        OAuth2ProviderEnum provider;
         try {
-            provider = OAuth2ProviderConfig.ProviderEnum.parsePathInfo(req.getPathInfo());
+            provider = OAuth2ProviderEnum.parsePathInfo(req.getPathInfo());
         } catch (Exception e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad provider: " + req.getPathInfo());
             return;
