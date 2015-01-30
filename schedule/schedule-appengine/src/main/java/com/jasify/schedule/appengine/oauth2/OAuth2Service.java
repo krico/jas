@@ -30,8 +30,10 @@ public interface OAuth2Service {
      *
      * @param codeRequestResponseUrl the full callback url including query parameters
      * @return the token received from the provider
-     * @throws OAuth2Exception in case any part of the operation fails.  Usually this will be one of the subclasses
-     * (e.g. {@link com.jasify.schedule.appengine.oauth2.OAuth2Exception.MissingStateException}
+     * @throws OAuth2Exception Usually this will be one of the subclasses
+     *                         (e.g. {@link com.jasify.schedule.appengine.oauth2.OAuth2Exception.MissingStateException}
      */
     OAuth2UserToken fetchUserToken(GenericUrl codeRequestResponseUrl) throws OAuth2Exception;
+
+    OAuth2Info fetchInfo(OAuth2UserToken token) throws OAuth2Exception;
 }

@@ -1,22 +1,26 @@
 package com.jasify.schedule.appengine.oauth2;
 
-import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
-import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
-import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
-import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.model.Tokeninfo;
+import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.client.http.HttpTransportFactory;
+import com.jasify.schedule.appengine.util.JSON;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,6 +62,31 @@ public enum OAuth2ProviderEnum {
                 return tokenRequest.execute();
             } catch (IOException e) {
                 throw new OAuth2Exception.TokenRequestException(e);
+            }
+        }
+
+        @Override
+        public OAuth2Info requestInfo(OAuth2UserToken token) throws OAuth2Exception {
+            Preconditions.checkNotNull(token);
+            TokenResponse tokenResponse = Preconditions.checkNotNull(token.getTokenResponse());
+
+            Credential credential = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
+                    .build().setFromTokenResponse(tokenResponse);
+
+            try {
+                Oauth2 oauth2 = new Oauth2.Builder(HttpTransportFactory.getHttpTransport(), JacksonFactory.getDefaultInstance(), credential).build();
+                Tokeninfo tokenInfo = oauth2.tokeninfo().setAccessToken(credential.getAccessToken()).execute();
+                Userinfoplus userInfo = oauth2.userinfo().get().execute();
+
+                OAuth2Info ret = new OAuth2Info();
+                ret.setUserId(tokenInfo.getUserId());
+                ret.setAvatar(userInfo.getPicture());
+                ret.setProfile(userInfo.getLink());
+                ret.setEmail(tokenInfo.getEmail());
+                ret.setRealName(userInfo.getName());
+                return ret;
+            } catch (IOException e) {
+                throw new OAuth2Exception.InfoException(e);
             }
         }
     },
@@ -121,6 +150,37 @@ public enum OAuth2ProviderEnum {
         }
 
         @Override
+        public OAuth2Info requestInfo(OAuth2UserToken token) throws OAuth2Exception {
+            Preconditions.checkNotNull(token);
+            TokenResponse tokenResponse = Preconditions.checkNotNull(token.getTokenResponse());
+            HttpRequestFactory requestFactory = HttpTransportFactory.getHttpTransport().createRequestFactory();
+
+            OAuth2ProviderConfig providerConfig = config();
+            GenericUrl infoRequestUrl = new GenericUrl(providerConfig.getUserInfoUrl());
+            infoRequestUrl.set("access_token", tokenResponse.getAccessToken());
+
+            Map infoData;
+            try {
+                HttpRequest infoRequest = requestFactory.buildGetRequest(infoRequestUrl);
+                HttpResponse infoResponse = infoRequest.execute();
+                try {
+                    String data = IOUtils.toString(infoResponse.getContent());
+                    infoData = JSON.fromJson(data, Map.class);
+                } finally {
+                    infoResponse.disconnect();
+                }
+            } catch (IOException e) {
+                throw new OAuth2Exception.InfoException(e);
+            }
+            OAuth2Info ret = new OAuth2Info();
+            ret.setUserId(Objects.toString(Preconditions.checkNotNull(infoData.get("id"))));
+            ret.setProfile(Objects.toString(infoData.get("link")));
+            ret.setEmail(Objects.toString(infoData.get("email")));
+            ret.setRealName(Objects.toString(infoData.get("name")));
+            return ret;
+        }
+
+        @Override
         public GenericUrl additionalParams(GenericUrl url) {
             return url.set("display", "popup");
         }
@@ -157,6 +217,8 @@ public enum OAuth2ProviderEnum {
     public abstract String authorizationUrl();
 
     public abstract TokenResponse requestToken(AuthorizationCodeResponseUrl authResponse) throws OAuth2Exception;
+
+    public abstract OAuth2Info requestInfo(OAuth2UserToken token) throws OAuth2Exception;
 
     public GenericUrl additionalParams(GenericUrl url) {
         //Maybe this should go into provider config one day

@@ -40,4 +40,9 @@ public class OAuth2Exception extends Exception {
             super(cause);
         }
     }
+    public static class InfoException extends OAuth2Exception {
+        public InfoException(Throwable cause) {
+            super(cause);
+        }
+    }
 }

@@ -8,6 +8,7 @@ import com.google.appengine.api.memcache.ErrorHandlers;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.oauth2.OAuth2Exception.CodeResponseException;
 import com.jasify.schedule.appengine.oauth2.OAuth2Exception.MissingStateException;
 import org.apache.commons.lang3.StringUtils;
@@ -73,6 +74,12 @@ class DefaultOAuth2Service implements OAuth2Service {
         Serializable state = restoreState(stateKey);
         TokenResponse tokenResponse = provider.requestToken(authResponse);
         return new OAuth2UserToken(provider, tokenResponse, state);
+    }
+
+    @Override
+    public OAuth2Info fetchInfo(OAuth2UserToken token) throws OAuth2Exception {
+        OAuth2ProviderEnum provider = Preconditions.checkNotNull(token.getProvider());
+        return provider.requestInfo(token);
     }
 
     private OAuth2ProviderEnum extractProvider(GenericUrl responseUrl) throws OAuth2Exception.BadProviderException {
