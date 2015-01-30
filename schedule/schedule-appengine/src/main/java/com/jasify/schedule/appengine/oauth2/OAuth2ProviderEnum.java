@@ -51,11 +51,14 @@ public enum OAuth2ProviderEnum {
             ClientParametersAuthentication clientAuthentication = new ClientParametersAuthentication(providerConfig.getClientId(),
                     providerConfig.getClientSecret());
 
+            GenericUrl redirectUrl = new GenericUrl(authResponse.toURI());
+            redirectUrl.clear();
+
             AuthorizationCodeTokenRequest tokenRequest = new AuthorizationCodeTokenRequest(HttpTransportFactory.getHttpTransport(),
                     JacksonFactory.getDefaultInstance(),
                     new GenericUrl(providerConfig.getTokenUrl()),
                     authResponse.getCode())
-                    .setRedirectUri(authResponse.build())
+                    .setRedirectUri(redirectUrl.build())
                     .setClientAuthentication(clientAuthentication);
 
             try {

@@ -17,13 +17,10 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.*;
-import com.jasify.schedule.appengine.oauth2.OAuth2Info;
-import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
-import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
+import com.jasify.schedule.appengine.oauth2.*;
 import com.jasify.schedule.appengine.util.JSON;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
@@ -55,45 +51,16 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
-        OAuth2ProviderEnum provider;
-        try {
-            provider = OAuth2ProviderEnum.parsePathInfo(req.getPathInfo());
-        } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad provider: " + req.getPathInfo());
-            return;
-        }
-
-
-        HttpSession session = req.getSession(false);
-        if (session == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No session");
-            return;
-        }
-        String state = (String) session.getAttribute(HttpUserSession.OAUTH_STATE_KEY);
-        if (StringUtils.isBlank(state)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No state");
-            return;
-        }
-        session.removeAttribute(HttpUserSession.OAUTH_STATE_KEY);
-
+        OAuth2Service service = OAuth2ServiceFactory.getOAuth2Service();
         StringBuffer fullUrlBuf = req.getRequestURL();
         if (req.getQueryString() != null) {
             fullUrlBuf.append('?').append(req.getQueryString());
         }
-        AuthorizationCodeResponseUrl authResponse = new AuthorizationCodeResponseUrl(fullUrlBuf.toString());
-        if (StringUtils.isNotBlank(authResponse.getError())) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, authResponse.getErrorDescription());
-            return;
-        }
-
-        if (!StringUtils.equals(state, authResponse.getState())) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bad state");
-            return;
-        }
 
         try {
-
-            OAuth2Info oAuth2Info = extractInfo(provider, authResponse, req);
+            OAuth2UserToken userToken = service.fetchUserToken(new GenericUrl(fullUrlBuf.toString()));
+            OAuth2ProviderEnum provider = userToken.getProvider();
+            OAuth2Info oAuth2Info = service.fetchInfo(userToken);
             JsonOAuthDetail detail = new JsonOAuthDetail();
             User existingUser = UserServiceFactory.getUserService().findByLogin(provider.name(), oAuth2Info.getUserId());
             if (existingUser == null) {
@@ -143,6 +110,9 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
             writer.append("<html><head><script type=\"application/json\" id=\"json-response\">");
             detail.toJson(writer);
             writer.append("</script></head><body></body></html>");
+        } catch (OAuth2Exception e) {
+            log.info("Failed to process", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.toString());
         } catch (TokenResponseException | UserLoginExistsException | EntityNotFoundException e) {
             log.info("Failed to process", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Failed to process");
