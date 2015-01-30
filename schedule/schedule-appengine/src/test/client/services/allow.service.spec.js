@@ -9,6 +9,7 @@ describe('AllowService', function () {
         Allow = _Allow_;
         Session = _Session_;
         AUTH_EVENTS = _AUTH_EVENTS_;
+        $rootScope.$apply(); //This is needed because Auth uses $location
     }));
 
     it("all: should promise true", function () {

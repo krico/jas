@@ -51,9 +51,7 @@ public class OAuth2CodeRequestServletTest {
         WebRequest request = new GetMethodWebRequest("http://schedule.jasify.com/oauth2/request/Google");
         expectResponse(client, request, HttpServletResponse.SC_FOUND);
 
-        String code = Objects.toString(client.getSession(false).getAttribute(HttpUserSession.OAUTH_STATE_KEY));
         assertNotNull(parameters.get("state"));
-        assertEquals(code, parameters.get("state"));
         assertEquals("code", parameters.get("response_type"));
         assertEquals(OAuth2ProviderEnum.Google.config().getClientId(), parameters.get("client_id"));
         assertEquals("http://schedule.jasify.com/oauth2/callback/Google", parameters.get("redirect_uri"));

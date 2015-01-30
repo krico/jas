@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.client.http.GenericUrl;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
@@ -15,11 +16,11 @@ import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.LoginFailedException;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
+import com.jasify.schedule.appengine.oauth2.OAuth2ServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
-import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginResponse;
+import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -105,6 +106,24 @@ public class AuthEndpoint {
             userSession.invalidate();
         }
         log.info("Logged out {}", caller);
+    }
+
+    @ApiMethod(name = "auth.providerAuthorize", path = "auth/provider-authorize", httpMethod = ApiMethod.HttpMethod.POST)
+    public JasProviderAuthorizeResponse providerAuthorize(JasProviderAuthorizeRequest request) {
+
+        OAuth2ProviderEnum provider = Preconditions.checkNotNull(request.getProvider());
+        GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(request.getBaseUrl()));
+        String data = StringUtils.trimToEmpty(request.getData());
+
+        JasProviderAuthorizeResponse response = new JasProviderAuthorizeResponse();
+
+        GenericUrl authorizeUrl = OAuth2ServiceFactory
+                .getOAuth2Service()
+                .createCodeRequestUrl(baseUrl, provider, data);
+
+        response.setAuthorizeUrl(authorizeUrl.build());
+
+        return response;
     }
 
 }

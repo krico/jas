@@ -16,12 +16,9 @@ public class TestOAuth2ServiceFactory extends OAuth2ServiceFactory {
 
     public void tearDown() {
         setInstance(null);
-        EasyMock.verify(oAuth2ServiceMock);
+        if (oAuth2ServiceMock != null)
+            EasyMock.verify(oAuth2ServiceMock);
         oAuth2ServiceMock = null;
-    }
-
-    public OAuth2Service getOAuth2ServiceMock() {
-        return oAuth2ServiceMock;
     }
 
     public void replay() {

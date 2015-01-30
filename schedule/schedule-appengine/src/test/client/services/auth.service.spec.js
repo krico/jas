@@ -1,11 +1,12 @@
 describe('AuthService', function () {
-    var Session, Auth, $cookies, Endpoint, $q, $httpBackend, $rootScope, $gapiMock;
+    var Session, Auth, $cookies, Endpoint, $q, $httpBackend, $rootScope, $gapiMock, $location;
 
     beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_$cookies_, _Session_, _Auth_, _Endpoint_, _$q_, _$httpBackend_, _$rootScope_, _$gapiMock_) {
+    beforeEach(inject(function (_$cookies_, _$location_, _Session_, _Auth_, _Endpoint_, _$q_, _$httpBackend_, _$rootScope_, _$gapiMock_) {
         $cookies = _$cookies_;
+        $location = _$location_;
         Session = _Session_;
         Auth = _Auth_;
         $q = _$q_;
@@ -153,6 +154,24 @@ describe('AuthService', function () {
             oldPassword: credentials.password,
             newPassword: 'newPw'
         });
+    });
+
+    it("should call call Auth backend for providerAuthorize", function () {
+        var url = "http://jasify.cool/path/to#!/Whatever";
+        spyOn($location, 'absUrl').and.returnValue(url);
+        spyOn($gapiMock.client.jasify.auth, 'providerAuthorize').and.returnValue($q.when({result: 'http://go'}));
+
+        var provider = "Provide";
+        Auth.providerAuthorize(provider);
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.auth.providerAuthorize).toHaveBeenCalledWith({
+            provider: provider,
+            data: url,
+            baseUrl: 'http://jasify.cool'
+        });
+
     });
 
     it("should restore an existing session", function () {

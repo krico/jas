@@ -2,7 +2,7 @@
 
     angular.module('jasifyComponents').factory('Auth', auth);
 
-    function auth($log, $http, $q, $cookies, Session, Endpoint) {
+    function auth($log, $http, $q, $cookies, $location, Session, Endpoint) {
 
         var Auth = {
             isAuthenticated: isAuthenticated,
@@ -10,6 +10,7 @@
             login: login,
             restore: restore,
             changePassword: changePassword,
+            providerAuthorize: providerAuthorize,
             logout: logout
         };
 
@@ -34,6 +35,7 @@
         function isAdmin() {
             return Session.admin;
         }
+
 
         function login(credentials) {
             $log.info("Logging in (name=" + credentials.name + ") ...");
@@ -130,6 +132,19 @@
                 });
         }
 
+        function providerAuthorize(provider) {
+            var data = $location.absUrl();
+            var matches = new RegExp('^([^:]+://[^/]+)(/.*)?$').exec(data);
+            var baseUrl = matches[1];
+
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.providerAuthorize({
+                    provider: provider,
+                    baseUrl: baseUrl,
+                    data: data
+                });
+            });
+        }
 
         if ($cookies.loggedIn) {
             Auth.restore().then(function (u) {
