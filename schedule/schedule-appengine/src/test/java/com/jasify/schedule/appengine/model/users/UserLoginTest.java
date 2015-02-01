@@ -2,6 +2,10 @@ package com.jasify.schedule.appengine.model.users;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.oauth2.OAuth2Info;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
+import com.jasify.schedule.appengine.util.TypeUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,5 +112,23 @@ public class UserLoginTest {
         Key key = Datastore.allocateId(UserLogin.class);
         UserLogin userLogin = new UserLogin(key);
         assertEquals(key, userLogin.getId());
+    }
+
+    @Test
+    public void testCreateFromOAuth2Info() {
+        OAuth2Info info = new OAuth2Info(OAuth2ProviderEnum.Google, "TEST");
+        info.setUserId(RandomStringUtils.randomAlphabetic(8));
+        info.setAvatar(RandomStringUtils.randomAlphabetic(20));
+        info.setProfile(RandomStringUtils.randomAlphabetic(20));
+        info.setEmail(RandomStringUtils.randomAlphabetic(6));
+        info.setRealName(RandomStringUtils.randomAlphabetic(18));
+
+        UserLogin userLogin = new UserLogin(info);
+        assertEquals(info.getProvider().name(), userLogin.getProvider());
+        assertEquals(info.getUserId(), userLogin.getUserId());
+        assertEquals(info.getAvatar(), TypeUtil.toString(userLogin.getAvatar()));
+        assertEquals(info.getProfile(), TypeUtil.toString(userLogin.getProfile()));
+        assertEquals(info.getEmail(), userLogin.getEmail());
+        assertEquals(info.getRealName(), userLogin.getRealName());
     }
 }

@@ -24,6 +24,12 @@ public class BeanUtilTest {
         TestHelper.cleanupDatastore();
     }
 
+    @Test
+    public void testAssertUtilityClassWellDefined() throws Exception {
+        TestHelper.assertUtilityClassWellDefined(BeanUtil.class);
+    }
+
+
 
     @Test
     public void testCopyProperties() {

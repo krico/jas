@@ -233,7 +233,9 @@ public class OAuth2ServiceTest {
     public void testFetchInfoFacebook() throws Exception {
         TokenResponse tokenResponse = new TokenResponse()
                 .setAccessToken(RandomStringUtils.randomAlphabetic(8));
-        OAuth2UserToken token = new OAuth2UserToken(OAuth2ProviderEnum.Facebook, tokenResponse, null);
+        OAuth2ProviderEnum provider = OAuth2ProviderEnum.Facebook;
+        State state = new State();
+        OAuth2UserToken token = new OAuth2UserToken(provider, tokenResponse, state);
 
         MockLowLevelHttpResponse mockResponse = new MockLowLevelHttpResponse();
 
@@ -249,7 +251,7 @@ public class OAuth2ServiceTest {
         data.put("name", name);
 
         mockResponse.setContent(JSON.toJson(data));
-        GenericUrl tokenInfoUrl = new GenericUrl(OAuth2ProviderEnum.Facebook.userInfoUrl())
+        GenericUrl tokenInfoUrl = new GenericUrl(provider.userInfoUrl())
                 .set("access_token", tokenResponse.getAccessToken());
         testHttpTransportFactory
                 .expect(HttpMethods.GET, tokenInfoUrl.build())
@@ -258,17 +260,21 @@ public class OAuth2ServiceTest {
         OAuth2Info oAuth2Info = service.fetchInfo(token);
 
         assertNotNull(oAuth2Info);
+        assertEquals(provider, oAuth2Info.getProvider());
         assertEquals(id, oAuth2Info.getUserId());
         assertEquals(email, oAuth2Info.getEmail());
         assertEquals(name, oAuth2Info.getRealName());
         assertEquals(profile, oAuth2Info.getProfile());
+        assertEquals(state, oAuth2Info.getState());
     }
 
     @Test
     public void testFetchInfoGoogle() throws Exception {
         TokenResponse tokenResponse = new TokenResponse()
                 .setAccessToken(RandomStringUtils.randomAlphabetic(8));
-        OAuth2UserToken token = new OAuth2UserToken(OAuth2ProviderEnum.Google, tokenResponse, null);
+        OAuth2ProviderEnum provider = OAuth2ProviderEnum.Google;
+        State state = new State();
+        OAuth2UserToken token = new OAuth2UserToken(provider, tokenResponse, state);
 
         GenericUrl tokenInfoUrl = new GenericUrl("https://www.googleapis.com/oauth2/v2/tokeninfo")
                 .set("access_token", tokenResponse.getAccessToken());
@@ -307,11 +313,13 @@ public class OAuth2ServiceTest {
         OAuth2Info oAuth2Info = service.fetchInfo(token);
 
         assertNotNull(oAuth2Info);
+        assertEquals(provider, oAuth2Info.getProvider());
         assertEquals(id, oAuth2Info.getUserId());
         assertEquals(email, oAuth2Info.getEmail());
         assertEquals(name, oAuth2Info.getRealName());
         assertEquals(avatar, oAuth2Info.getAvatar());
         assertEquals(profile, oAuth2Info.getProfile());
+        assertEquals(state, oAuth2Info.getState());
     }
 
     public static class State implements Serializable {

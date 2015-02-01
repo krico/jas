@@ -11,6 +11,7 @@
             restore: restore,
             changePassword: changePassword,
             providerAuthorize: providerAuthorize,
+            providerAuthenticate: providerAuthenticate,
             logout: logout
         };
 
@@ -133,15 +134,29 @@
         }
 
         function providerAuthorize(provider) {
-            var data = $location.absUrl();
-            var matches = new RegExp('^([^:]+://[^/]+)(/.*)?$').exec(data);
-            var baseUrl = matches[1];
+            var absUrl = $location.absUrl();
+            var ix = absUrl.indexOf('#');
+            var baseUrl;
+            if (ix == -1) {
+                baseUrl = absUrl;
+            } else {
+                baseUrl = absUrl.substring(0, ix);
+            }
+            var path = $location.path();
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.auth.providerAuthorize({
                     provider: provider,
                     baseUrl: baseUrl,
-                    data: data
+                    data: path
+                });
+            });
+        }
+
+        function providerAuthenticate(callbackUrl) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.providerAuthenticate({
+                    callbackUrl: callbackUrl
                 });
             });
         }

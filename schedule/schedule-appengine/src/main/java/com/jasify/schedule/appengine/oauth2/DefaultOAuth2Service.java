@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
@@ -43,9 +42,10 @@ class DefaultOAuth2Service implements OAuth2Service {
     public GenericUrl createCodeRequestUrl(GenericUrl baseUrl, OAuth2ProviderEnum provider, @Nonnull Serializable state) {
         MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
         syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
-        String stateKey = new BigInteger(130, random).toString(32);
+        String stateKey = OAuth2Util.createStateKey(baseUrl);
         //EXPIRE_MINUTES minutes is more than enough to authenticate
         syncCache.put(stateKey, state, Expiration.byDeltaSeconds((int) TimeUnit.MINUTES.toSeconds(EXPIRE_MINUTES)));
+
         GenericUrl redirectUrl = new GenericUrl(baseUrl.toURI());
         redirectUrl.setRawPath(CALLBACK_PATH_PREFIX + provider.name());
         OAuth2ProviderConfig providerConfig = provider.config();

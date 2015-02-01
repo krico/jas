@@ -81,7 +81,7 @@ public enum OAuth2ProviderEnum {
                 Tokeninfo tokenInfo = oauth2.tokeninfo().setAccessToken(credential.getAccessToken()).execute();
                 Userinfoplus userInfo = oauth2.userinfo().get().execute();
 
-                OAuth2Info ret = new OAuth2Info();
+                OAuth2Info ret = new OAuth2Info(this, token.getState());
                 ret.setUserId(tokenInfo.getUserId());
                 ret.setAvatar(userInfo.getPicture());
                 ret.setProfile(userInfo.getLink());
@@ -175,7 +175,7 @@ public enum OAuth2ProviderEnum {
             } catch (IOException e) {
                 throw new OAuth2Exception.InfoException(e);
             }
-            OAuth2Info ret = new OAuth2Info();
+            OAuth2Info ret = new OAuth2Info(this, token.getState());
             ret.setUserId(Objects.toString(Preconditions.checkNotNull(infoData.get("id"))));
             ret.setProfile(Objects.toString(infoData.get("link")));
             ret.setEmail(Objects.toString(infoData.get("email")));

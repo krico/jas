@@ -12,5 +12,7 @@ public interface UserSession {
 
     long getUserId();
 
+    String getSessionId();
+
     boolean isAdmin();
 }

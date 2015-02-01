@@ -159,6 +159,7 @@ describe('AuthService', function () {
     it("should call call Auth backend for providerAuthorize", function () {
         var url = "http://jasify.cool/path/to#!/Whatever";
         spyOn($location, 'absUrl').and.returnValue(url);
+        spyOn($location, 'path').and.returnValue("/Whatever");
         spyOn($gapiMock.client.jasify.auth, 'providerAuthorize').and.returnValue($q.when({result: 'http://go'}));
 
         var provider = "Provide";
@@ -168,8 +169,60 @@ describe('AuthService', function () {
 
         expect($gapiMock.client.jasify.auth.providerAuthorize).toHaveBeenCalledWith({
             provider: provider,
-            data: url,
-            baseUrl: 'http://jasify.cool'
+            data: "/Whatever",
+            baseUrl: 'http://jasify.cool/path/to'
+        });
+
+    });
+
+    it("should call call Auth backend for providerAuthorize with proper page.html", function () {
+        var url = "http://jasify.cool/book-it.html#/Whatever";
+        spyOn($location, 'absUrl').and.returnValue(url);
+        spyOn($location, 'path').and.returnValue("/Whatever");
+        spyOn($gapiMock.client.jasify.auth, 'providerAuthorize').and.returnValue($q.when({result: 'http://go'}));
+
+        var provider = "Provide";
+        Auth.providerAuthorize(provider);
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.auth.providerAuthorize).toHaveBeenCalledWith({
+            provider: provider,
+            data: '/Whatever',
+            baseUrl: 'http://jasify.cool/book-it.html'
+        });
+
+    });
+
+    it("should call call Auth backend for providerAuthorize with no path", function () {
+        var url = "http://jasify.cool/";
+        spyOn($location, 'absUrl').and.returnValue(url);
+        spyOn($location, 'path').and.returnValue("/");
+        spyOn($gapiMock.client.jasify.auth, 'providerAuthorize').and.returnValue($q.when({result: 'http://go'}));
+
+        var provider = "Provide";
+        Auth.providerAuthorize(provider);
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.auth.providerAuthorize).toHaveBeenCalledWith({
+            provider: provider,
+            data: '/',
+            baseUrl: 'http://jasify.cool/'
+        });
+
+    });
+
+    it("should call call Auth backend for callbackUrl", function () {
+        spyOn($gapiMock.client.jasify.auth, 'providerAuthenticate').and.returnValue($q.when({result: {}}));
+        var url = "http://jasify.cool/";
+
+        Auth.providerAuthenticate(url);
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.auth.providerAuthenticate).toHaveBeenCalledWith({
+            callbackUrl: url
         });
 
     });
