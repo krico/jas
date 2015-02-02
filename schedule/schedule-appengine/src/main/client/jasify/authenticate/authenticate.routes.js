@@ -29,6 +29,19 @@
                     }
                 }
             })
+            .when('/recover-password/:code?', {
+                templateUrl: 'authenticate/recover-password.html',
+                controller: 'RecoverPasswordController',
+                controllerAs: 'vm',
+                resolve: {
+                    allow: /*@ngInject*/ function (Allow) {
+                        return Allow.all();
+                    },
+                    endpoint: /*@ngInject*/ function (Endpoint) {
+                        return Endpoint.load();
+                    }
+                }
+            })
         ;
     }
 

@@ -2,20 +2,37 @@
 
     angular.module('jasify.authenticate').controller('RecoverPasswordController', RecoverPasswordController);
 
-    function RecoverPasswordController($log, $timeout) {
+    function RecoverPasswordController($log, $timeout, $routeParams) {
         var vm = this;
-        vm.email = '';
-        vm.recover = recover;
+        vm.setPassword = setPassword;
         vm.inProgress = false;
-        vm.passwordSent = false;
+        vm.passwordSet = false;
+        vm.hadCode = !!$routeParams.code;
+        vm.code = $routeParams.code || '';
         vm.forgotForm = {};
+        vm.passwordStrengthCallback = passwordStrengthCallback;
+        vm.popoverText = '';
 
-        function recover() {
+        function passwordStrengthCallback(s) {
+            if (s <= 0) {
+                vm.popoverText = 'Choose a password.';
+            } else if (s <= 15) {
+                vm.popoverText = 'Weak!';
+            } else if (s <= 40) {
+                vm.popoverText = 'Average...';
+            } else if (s <= 80) {
+                vm.popoverText = 'Good!';
+            } else {
+                vm.popoverText = 'Excellent!!!';
+            }
+        }
+
+        function setPassword() {
             vm.inProgress = true;
             $timeout(function () {
                 $log.debug("Timeout");
                 vm.inProgress = false;
-                vm.passwordSent = true;
+                vm.passwordSet = true;
             }, 1000);
         }
     }
