@@ -2,7 +2,7 @@
 
     angular.module('jasify.authenticate').controller('OAuth2Controller', OAuth2Controller);
 
-    function OAuth2Controller($routeParams, $location, $scope, Auth) {
+    function OAuth2Controller($routeParams, $location, $window, $scope, Auth) {
         var vm = this;
         vm.authenticate = authenticate;
         vm.status = 'Preparing authentication ...';
@@ -42,7 +42,7 @@
 
                 function fail(msg) {
                     vm.complete = true;
-                    vm.alert('danger', 'Failed to load credentials');
+                    $window.alert('Failed to load credentials');
                     //TODO: handle failure
                     $location.replace();
                     $location.path("/");
@@ -52,7 +52,7 @@
 
             function failed(reason) {
                 vm.complete = true;
-                vm.alert('danger', 'Failed to authenticate');
+                $window.alert('Failed to authenticate');
                 //TODO: handle failure
                 $location.replace();
                 $location.path("/");

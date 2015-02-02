@@ -185,7 +185,8 @@ public enum OAuth2ProviderEnum {
 
         @Override
         public GenericUrl additionalParams(GenericUrl url) {
-            return url.set("display", "popup");
+//            return url.set("display", "popup");
+            return url.set("display", "page");
         }
 
         @Override
