@@ -24,7 +24,6 @@ public class BeanUtilTest {
         TestHelper.cleanupDatastore();
     }
 
-
     @Test
     public void testCopyProperties() {
         E1 from = new E1();

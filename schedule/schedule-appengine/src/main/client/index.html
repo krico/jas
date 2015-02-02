@@ -68,17 +68,17 @@
                     </ul>
                 </li>
 
-                <li ng-hide="currentUser">
+                <li ng-hide="vm.isAuthenticated()">
                     <a ng-click="vm.createAccount()">Create Account</a>
                 </li>
-                <li ng-hide="currentUser">
+                <li ng-hide="vm.isAuthenticated()">
                     <a ng-click="vm.signIn()">Sign In</a>
                 </li>
 
-                <li ng-show="currentUser" ng-class="vm.menuActive('/profile')">
+                <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/profile')">
                     <a ng-click="vm.collapse()" href="#/profile">{{currentUser.name}}</a>
                 </li>
-                <li ng-show="currentUser" ng-class="vm.menuActive('/logout')">
+                <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/logout')">
                     <a ng-click="vm.collapse()" href="#/logout">log out</a>
                 </li>
             </ul>

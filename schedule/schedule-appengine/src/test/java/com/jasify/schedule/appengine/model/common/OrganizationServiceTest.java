@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.*;
 
 public class OrganizationServiceTest {
@@ -379,7 +378,7 @@ public class OrganizationServiceTest {
         assertEquals(id, fetched.getId());
     }
 
-    @Test (expected = UniqueConstraintException.class)
+    @Test(expected = UniqueConstraintException.class)
     public void testAddDuplicateGroupThrowsUniqueConstraintException() throws Exception {
         Group group = new Group(TEST_GROUP_NAME);
         Key groupId = Datastore.allocateId(Group.class);

@@ -1,6 +1,8 @@
 package com.jasify.schedule.appengine.spi.dm;
 
-import com.jasify.schedule.appengine.http.json.JsonUser;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.jasify.schedule.appengine.model.UserSession;
+import com.jasify.schedule.appengine.model.users.User;
 
 /**
  * @author krico
@@ -11,6 +13,16 @@ public class JasLoginResponse implements JasEndpointEntity {
     private String userId;
     private String name;
     private boolean admin;
+
+    public JasLoginResponse() {
+    }
+
+    public JasLoginResponse(User user, UserSession userSession) {
+        setUserId(KeyFactory.keyToString(user.getId()));
+        setSessionId(userSession.getSessionId());
+        setName(user.getName());
+        setAdmin(user.isAdmin());
+    }
 
     public String getSessionId() {
         return sessionId;

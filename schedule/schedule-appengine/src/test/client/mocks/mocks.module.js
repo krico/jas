@@ -44,7 +44,9 @@
             auth: {
                 login: nop,
                 changePassword: nop,
-                logout: nop
+                logout: nop,
+                providerAuthenticate: nop,
+                providerAuthorize: nop
             },
             organizations: {
                 query: nop,

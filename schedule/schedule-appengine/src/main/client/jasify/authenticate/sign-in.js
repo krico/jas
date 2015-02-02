@@ -2,7 +2,7 @@
 
     angular.module('jasify.authenticate').controller('SignInController', SignInController);
 
-    function SignInController($log, $cookies, $rootScope, AUTH_EVENTS, Auth, OAuthWindow) {
+    function SignInController($log, $cookies, $rootScope, $window, AUTH_EVENTS, Auth) {
         var vm = this;
         vm.user = {};
         vm.email = false;
@@ -24,19 +24,12 @@
         }
 
         function oauth(provider, cb) {
-            OAuthWindow.open('/oauth2/request/' + provider, provider)
-                .then(popupSuccess, popupFailed);
-
-            function popupSuccess(oauthDetail) {
-                $log.debug('OK: ' + angular.toJson(oauthDetail));
-                if (oauthDetail.loggedIn) {
-                    if (angular.isFunction(cb)) {
-                        cb();
-                    }
-                }
+            Auth.providerAuthorize(provider).then(redirect, fail);
+            function redirect(resp) {
+                $window.location.href = resp.result.authorizeUrl;
             }
 
-            function popupFailed(msg) {
+            function fail(reason) {
                 $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
             }
         }

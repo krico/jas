@@ -20,7 +20,6 @@ import java.util.UUID;
  * @since 10/11/14.
  */
 public class HttpUserSession implements UserSession, HttpSessionBindingListener, Serializable {
-    public static final String OAUTH_STATE_KEY = "oauth-request-state";
     public static final String OAUTH_USER_LOGIN_KEY = "oauth-user-login";
     static final String SESSION_KEY = "jus" /* jasify user session s*/;
     private static final Logger log = LoggerFactory.getLogger(HttpUserSession.class);

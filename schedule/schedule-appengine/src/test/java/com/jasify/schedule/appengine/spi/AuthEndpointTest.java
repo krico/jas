@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.client.http.GenericUrl;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
@@ -11,9 +12,10 @@ import com.jasify.schedule.appengine.model.users.LoginFailedException;
 import com.jasify.schedule.appengine.model.users.TestUserServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
-import com.jasify.schedule.appengine.spi.dm.JasChangePasswordRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginRequest;
-import com.jasify.schedule.appengine.spi.dm.JasLoginResponse;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
+import com.jasify.schedule.appengine.oauth2.OAuth2ServiceFactory;
+import com.jasify.schedule.appengine.oauth2.TestOAuth2ServiceFactory;
+import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -33,6 +35,7 @@ import static org.easymock.EasyMock.*;
 
 public class AuthEndpointTest {
     private TestUserServiceFactory testUserServiceFactory = new TestUserServiceFactory();
+    private TestOAuth2ServiceFactory testOAuth2ServiceFactory = new TestOAuth2ServiceFactory();
 
     private AuthEndpoint endpoint = new AuthEndpoint();
 
@@ -45,6 +48,7 @@ public class AuthEndpointTest {
 
     @After
     public void cleanupDatastore() {
+        testOAuth2ServiceFactory.tearDown();
         TestHelper.cleanupDatastore();
         UserContext.clearContext();
         testUserServiceFactory.tearDown();
@@ -166,6 +170,34 @@ public class AuthEndpointTest {
         UserContext.setContext(session, null, null);
         endpoint.logout(newCaller(1, false));
         verify(session);
+    }
+
+    @Test
+    public void testProviderAuthorize() {
+        testUserServiceFactory.replay();
+        testOAuth2ServiceFactory.setUp();
+
+        String baseUrl = "http://my.host";
+        OAuth2ProviderEnum provider = OAuth2ProviderEnum.Google;
+        String data = RandomStringUtils.randomAscii(128);
+
+        String authorizeUrl = "http://provider.com/authorize";
+
+        EasyMock.expect(OAuth2ServiceFactory
+                .getOAuth2Service()
+                .createCodeRequestUrl(new GenericUrl(baseUrl), provider, data))
+                .andReturn(new GenericUrl(authorizeUrl));
+
+        testOAuth2ServiceFactory.replay();
+
+        JasProviderAuthorizeRequest request = new JasProviderAuthorizeRequest();
+        request.setBaseUrl(baseUrl);
+        request.setProvider(provider);
+        request.setData(data);
+
+        JasProviderAuthorizeResponse response = endpoint.providerAuthorize(request);
+        assertNotNull(response);
+        assertEquals(authorizeUrl, response.getAuthorizeUrl());
     }
 
 }

@@ -7,9 +7,7 @@ import org.junit.Test;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertNull;
 
 public class UserContextTest {

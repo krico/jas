@@ -3,6 +3,8 @@ package com.jasify.schedule.appengine.model.users;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.oauth2.OAuth2Info;
+import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slim3.datastore.*;
 
@@ -49,6 +51,15 @@ public class UserLogin implements Serializable, Comparable<UserLogin> {
     public UserLogin(String provider, String userId) {
         this.provider = provider;
         this.userId = userId;
+    }
+
+    public UserLogin(OAuth2Info oAuth2Info) {
+        this(Preconditions.checkNotNull(oAuth2Info.getProvider(), "Null provider").name(), oAuth2Info.getUserId());
+        setAvatar(TypeUtil.toLink(oAuth2Info.getAvatar()));
+        setProfile(TypeUtil.toLink(oAuth2Info.getProfile()));
+        setEmail(oAuth2Info.getEmail());
+        setRealName(oAuth2Info.getRealName());
+
     }
 
     public UserLogin(User owner) {
