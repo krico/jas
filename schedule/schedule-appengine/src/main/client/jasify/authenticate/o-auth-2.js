@@ -2,7 +2,7 @@
 
     angular.module('jasify.authenticate').controller('OAuth2Controller', OAuth2Controller);
 
-    function OAuth2Controller($log, $routeParams, $location, Auth) {
+    function OAuth2Controller($routeParams, $location, $scope, Auth) {
         var vm = this;
         vm.authenticate = authenticate;
         vm.status = 'Preparing authentication ...';
@@ -28,10 +28,14 @@
                     path = "/" + path;
                 }
 
+                if (path.indexOf('/logout') === 0) {
+                    path = "/";
+                }
+
                 Auth.restore(true).then(ok, fail);
 
                 function ok(u) {
-                    alert('P: ' + path);
+                    if ($scope.setCurrentUser) $scope.setCurrentUser(u);
                     $location.replace();
                     $location.path(path);
                 }
@@ -40,6 +44,8 @@
                     vm.complete = true;
                     vm.alert('danger', 'Failed to load credentials');
                     //TODO: handle failure
+                    $location.replace();
+                    $location.path("/");
                 }
 
             }
@@ -47,6 +53,9 @@
             function failed(reason) {
                 vm.complete = true;
                 vm.alert('danger', 'Failed to authenticate');
+                //TODO: handle failure
+                $location.replace();
+                $location.path("/");
             }
         }
     }

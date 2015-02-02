@@ -25,13 +25,6 @@ public class BeanUtilTest {
     }
 
     @Test
-    public void testAssertUtilityClassWellDefined() throws Exception {
-        TestHelper.assertUtilityClassWellDefined(BeanUtil.class);
-    }
-
-
-
-    @Test
     public void testCopyProperties() {
         E1 from = new E1();
         String expected = RandomStringUtils.random(20);

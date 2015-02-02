@@ -10,9 +10,10 @@
         vm.toggleCollapse = toggleCollapse;
         vm.loginSucceeded = loginSucceeded;
         vm.logoutSucceeded = logoutSucceeded;
+        vm.isAuthenticated = isAuthenticated;
+        vm.isAdmin = isAdmin;
 
         vm.menuActive = menuActive;
-        vm.isAdmin = isAdmin;
         vm.collapse = collapse;
         vm.createAccount = createAccount;
         vm.signIn = signIn;
@@ -27,6 +28,10 @@
         $scope.$on(AUTH_EVENTS.loginSuccess, vm.loginSucceeded);
         $scope.$on(AUTH_EVENTS.logoutSuccess, vm.logoutSucceeded);
         $scope.$watch(pathWatch, onPathChanged);
+
+        function isAuthenticated() {
+            return Auth.isAuthenticated();
+        }
 
         function menuActive(path) {
             if (path == $location.path()) {

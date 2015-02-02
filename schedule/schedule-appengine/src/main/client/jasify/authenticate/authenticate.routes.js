@@ -8,8 +8,11 @@
                 controller: 'OAuth2Controller',
                 controllerAs: 'vm',
                 resolve: {
-                    allow: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+                    allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
+                    },
+                    endpoint: /*@ngInject*/ function (Endpoint) {
+                        return Endpoint.load();
                     }
                 }
             })

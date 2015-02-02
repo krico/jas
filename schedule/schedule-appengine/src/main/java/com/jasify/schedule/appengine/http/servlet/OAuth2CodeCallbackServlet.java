@@ -33,7 +33,6 @@ public class OAuth2CodeCallbackServlet extends HttpServlet {
         callBackUrl.append('?').append(req.getQueryString());
         redirect.setRawPath(OAuth2Util.appPath(state));
         String location = redirect.buildRelativeUrl() + "#/oauth/" + URLEncoder.encode(callBackUrl.toString(), "utf-8");
-        log.info("LOCATION: {}" , location);
         resp.sendRedirect(location);
     }
 

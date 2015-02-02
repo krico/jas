@@ -15,9 +15,9 @@
         };
 
         function all() {
-            var deferred = $q.defer();
-            deferred.resolve('ok');
-            return deferred.promise;
+            return Allow.restoreThen(function () {
+                return true;
+            });
         }
 
         function restoreThen(fn) {
