@@ -6,6 +6,7 @@ import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
+import com.jasify.schedule.appengine.meta.users.PasswordRecoveryMeta;
 import com.jasify.schedule.appengine.meta.users.UserLoginMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -22,9 +23,12 @@ import org.slim3.datastore.ModelQuery;
 import org.slim3.datastore.SortCriterion;
 
 import javax.annotation.Nonnull;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 /**
@@ -35,13 +39,17 @@ final class DefaultUserService implements UserService {
     private static final Logger log = LoggerFactory.getLogger(DefaultUserService.class);
     private final UserMeta userMeta;
     private final UserLoginMeta userLoginMeta;
+    private final PasswordRecoveryMeta passwordRecoveryMeta;
     private final UniqueConstraint uniqueName;
     private final UniqueConstraint uniqueEmail;
     private final UniqueConstraint uniqueLogin;
+    private final Random random;
 
     private DefaultUserService() {
+        random = new SecureRandom();
         userMeta = UserMeta.get();
         userLoginMeta = UserLoginMeta.get();
+        passwordRecoveryMeta = PasswordRecoveryMeta.get();
         uniqueName = UniqueConstraint.create(userMeta, userMeta.name);
         uniqueEmail = UniqueConstraint.createAllowingNullValues(userMeta, userMeta.email);
         uniqueLogin = UniqueConstraint.create(userLoginMeta, userLoginMeta.provider, userLoginMeta.userId);
@@ -302,6 +310,33 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
+    public PasswordRecovery registerPasswordRecovery(String email) throws EntityNotFoundException {
+        User user = findByEmail(email);
+        if (user == null) {
+            throw new EntityNotFoundException(email);
+        }
+
+        Key key;
+        Transaction tx = Datastore.beginTransaction();
+        do {
+            key = Datastore.createKey(passwordRecoveryMeta, new BigInteger(32, random).toString(32));
+            if (Datastore.getOrNull(tx, passwordRecoveryMeta, key) != null) {
+                //You know, random shit can repeat itself...  In that case, we generate a new key
+                key = null;
+            }
+        } while (key == null);
+
+        PasswordRecovery recovery = new PasswordRecovery();
+        recovery.setCode(key);
+        recovery.getUserRef().setModel(user);
+        Datastore.put(tx, recovery);
+        tx.commit();
+
+        log.info("Recovery for email={}, id={} registered", email, user.getId());
+        return recovery;
+    }
+
+    @Override
     public boolean usernameExists(String name) {
         return !Datastore.query(userMeta).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asKeyList().isEmpty();
     }
@@ -404,7 +439,7 @@ final class DefaultUserService implements UserService {
             query.sort(userMeta.email.asc);
         }
 
-            /* TODO: in memory search might be slow when we have millions of users :-) */
+        /* TODO: in memory search might be slow when we have millions of users :-) */
         query.filterInMemory(new InMemoryFilterCriterion() {
             @Override
             public boolean accept(Object model) {

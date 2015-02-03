@@ -44,6 +44,8 @@ public interface UserService {
 
     User findByEmail(String email);
 
+    PasswordRecovery registerPasswordRecovery(String email) throws EntityNotFoundException;
+
     boolean usernameExists(String username);
 
     boolean emailExists(String email);

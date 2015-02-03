@@ -359,6 +359,25 @@ public class UserServiceTest {
         assertNull(service.findByEmail(""));
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void registerPasswordRecoveryThrowsNotFound() throws Exception {
+        service.registerPasswordRecovery("mE@Foo.baR");
+    }
+
+    @Test
+    public void registerPasswordRecovery() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("mE@Foo.baR");
+        service.create(user1, "password");
+        PasswordRecovery passwordRecovery = service.registerPasswordRecovery("mE@Foo.baR".toUpperCase());
+        assertNotNull(passwordRecovery);
+        assertNotNull(passwordRecovery.getCode());
+        String code = passwordRecovery.getCode().getName();
+        assertNotNull(code);
+        assertTrue(code.length() > 3);
+    }
+
     @Test
     public void testFindUserByUserLogin() throws Exception {
         testCreateWithUserLogin();

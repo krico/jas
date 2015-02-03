@@ -19,11 +19,21 @@ import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.mail.Message;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
+import java.util.Properties;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrAdmin;
 
@@ -143,6 +153,7 @@ public class AuthEndpoint {
             }
 
             return new JasProviderAuthenticateResponse(Objects.toString(oAuth2Info.getState()));
+
         } else {
 
             com.jasify.schedule.appengine.model.users.User existingUser = userService.findByLogin(oAuth2Info.getProvider().name(), oAuth2Info.getUserId());
@@ -165,6 +176,86 @@ public class AuthEndpoint {
             HttpUserSession userSession = new HttpUserSession(existingUser).put(httpServletRequest);//todo: simulate log in
             return new JasProviderAuthenticateResponse(existingUser, userSession, Objects.toString(oAuth2Info.getState()));
         }
-
     }
+
+
+    @ApiMethod(name = "auth.forgotPassword", path = "auth/forgot-password", httpMethod = ApiMethod.HttpMethod.POST)
+    public void forgotPassword(JasForgotPasswordRequest request) throws BadRequestException, NotFoundException {
+        Preconditions.checkNotNull(request.getEmail(), "email");
+        Preconditions.checkNotNull(request.getUrl(), "url");
+        PasswordRecovery recovery;
+        try {
+            recovery = UserServiceFactory.getUserService().registerPasswordRecovery(request.getEmail());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
+        notify(recovery, request.getUrl());
+    }
+
+    /**
+     * TODO: SEND EMAIL TO USER, comment here to explain params
+     *
+     * @param recovery holding code and user
+     * @param siteUrl  this is so we know what url the user is accessing, to avoid hard-coding jasify-schedule.app...
+     */
+    private void notify(PasswordRecovery recovery, String siteUrl) {
+        /*
+            TODO: Whenever we fix #142 we should also replace this method
+            TODO: I wrote this method to avoid merge conflicts
+            TODO: It is completely wrong place should be in MailService
+            TODO: Remember to remove this comment
+         */
+        try {
+            com.jasify.schedule.appengine.model.users.User user = recovery.getUserRef().getModel();
+            String email = user.getEmail();
+            String code = recovery.getCode().getName();
+            GenericUrl recoverUrl = new GenericUrl(siteUrl);
+            //recoverUrl.setScheme("https");
+            recoverUrl.clear();
+            recoverUrl.setRawPath("/");
+            recoverUrl.setFragment("/recover-password/" + code);
+
+            String subject = String.format("[Jasify] Password assistance [%s]", user.getName());
+            String htmlBody = new StringBuilder()
+                    .append("<h1>User: ").append(user.getName()).append("</h1>")
+                    .append("<p>")
+                    .append("Code: ").append(code).append("<br/>")
+                    .append("Url: <a href=\"").append(recoverUrl.build()).append("\">")
+                    .append(recoverUrl.build()).append("</a>")
+                    .append("</p>")
+                    .append("<p>Regards,<br>Jasify</p>")
+                    .toString();
+
+            //TODO: this code was copy & pasted just to avoid merge conflicts
+            Session session = Session.getDefaultInstance(new Properties(), null);
+
+            InternetAddress senderAddress = new InternetAddress("DoNotReply@jasify-schedule.appspotmail.com", "Jasify (Do Not Reply)");
+
+            log.debug("Sent e-mail [{}] as [{}] to {}", subject, "krico@cwa.to", email);
+
+            Message msg = new MimeMessage(session);
+            msg.setFrom(senderAddress);
+            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail(), user.getName()));
+            msg.setSubject(subject);
+
+            Multipart mp = new MimeMultipart();
+
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlBody, "text/html");
+            mp.addBodyPart(htmlPart);
+
+            String textBody = Jsoup.parse(htmlBody).text();
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setContent(textBody, "text/plain");
+            mp.addBodyPart(textPart);
+
+            msg.setContent(mp);
+
+            Transport.send(msg);
+        } catch (Exception e) {
+            log.warn("Failed to notify", e);
+        }
+    }
+
+
 }
