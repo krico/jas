@@ -6,17 +6,23 @@
         var vm = this;
         vm.email = '';
         vm.recover = recover;
+        vm.again = again;
         vm.inProgress = false;
         vm.passwordSent = false;
+        vm.failed = false;
         vm.forgotForm = {};
 
         function recover() {
             vm.inProgress = true;
             $timeout(function () {
-                $log.debug("Timeout");
                 vm.inProgress = false;
-                vm.passwordSent = true;
+                vm.passwordSent = false;
+                vm.failed = true;
             }, 1000);
+        }
+
+        function again() {
+            vm.failed = false;
         }
     }
 })(angular);
