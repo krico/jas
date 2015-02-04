@@ -52,7 +52,7 @@ final class DefaultUserService implements UserService {
         passwordRecoveryMeta = PasswordRecoveryMeta.get();
         uniqueName = UniqueConstraint.create(userMeta, userMeta.name);
         uniqueEmail = UniqueConstraint.createAllowingNullValues(userMeta, userMeta.email);
-        uniqueLogin = UniqueConstraint.create(userLoginMeta, userLoginMeta.provider, userLoginMeta.userId);
+        uniqueLogin = UniqueConstraint.create(userLoginMeta, userLoginMeta.userId, userLoginMeta.provider);
     }
 
     static UserService instance() {
@@ -111,7 +111,7 @@ final class DefaultUserService implements UserService {
         user.setEmail(StringUtils.lowerCase(StringUtils.trimToNull(user.getEmail())));
 
         try {
-            uniqueLogin.reserve(login.getProvider(), login.getUserId());
+            uniqueLogin.reserve(login.getUserId(), login.getProvider());
         } catch (UniqueConstraintException e) {
             throw new UserLoginExistsException(e.getMessage());
         }
@@ -120,7 +120,7 @@ final class DefaultUserService implements UserService {
             uniqueName.reserve(user.getName());
         } catch (UniqueConstraintException e) {
             //release the reserved login
-            uniqueLogin.release(login.getProvider(), login.getUserId());
+            uniqueLogin.release(login.getUserId(), login.getProvider());
             throw new UsernameExistsException(e.getMessage());
         }
 
@@ -128,7 +128,7 @@ final class DefaultUserService implements UserService {
             try {
                 uniqueEmail.reserve(user.getEmail());
             } catch (UniqueConstraintException e) {
-                uniqueLogin.release(login.getProvider(), login.getUserId());
+                uniqueLogin.release(login.getUserId(), login.getProvider());
                 uniqueName.release(user.getName());
                 throw new EmailExistsException(e.getMessage());
             }
@@ -215,7 +215,7 @@ final class DefaultUserService implements UserService {
     @Override
     public UserLogin addLogin(User user, UserLogin login) throws EntityNotFoundException, UserLoginExistsException {
         try {
-            uniqueLogin.reserve(login.getProvider(), login.getUserId());
+            uniqueLogin.reserve(login.getUserId(), login.getProvider());
         } catch (UniqueConstraintException e) {
             throw new UserLoginExistsException(e.getMessage());
         }
@@ -224,7 +224,7 @@ final class DefaultUserService implements UserService {
         User db = Datastore.getOrNull(tx, userMeta, user.getId());
         if (db == null) {
             tx.rollback();
-            uniqueLogin.release(login.getProvider(), login.getUserId());
+            uniqueLogin.release(login.getUserId(), login.getProvider());
             throw new EntityNotFoundException();
         }
         login.setId(Datastore.allocateId(db.getId(), UserLogin.class));
@@ -246,7 +246,7 @@ final class DefaultUserService implements UserService {
         Datastore.delete(tx, dbLogin.getId());
         tx.commit();
 
-        uniqueLogin.release(dbLogin.getProvider(), dbLogin.getUserId());
+        uniqueLogin.release(dbLogin.getUserId(), dbLogin.getProvider());
 
     }
 
