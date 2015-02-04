@@ -265,6 +265,9 @@ public class AuthEndpoint {
             msg.setContent(mp);
 
             Transport.send(msg);
+
+            //TODO: DON"T LOG THE BODY
+            log.info("Message: {}", htmlBody);
         } catch (Exception e) {
             log.warn("Failed to notify", e);
         }

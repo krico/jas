@@ -345,4 +345,40 @@ describe('AuthService', function () {
         expect(failed).toBe(true);
     });
 
+    it('should call jasify.forgotPassword when Auth.forgotPassword is called', function () {
+        var url = "http://jasify.cool/";
+        spyOn($location, 'absUrl').and.returnValue(url);
+        spyOn($gapiMock.client.jasify.auth, 'forgotPassword').and.returnValue($q.when({result: true}));
+
+        var email = "x@com";
+        Auth.forgotPassword(email);
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.auth.forgotPassword).toHaveBeenCalledWith({
+            email: email,
+            url: url
+        });
+
+    });
+
+    it('should call jasify.recoverPassword when Auth.recoverPassword is called', function () {
+        var url = "http://jasify.cool/";
+        spyOn($location, 'absUrl').and.returnValue(url);
+        spyOn($gapiMock.client.jasify.auth, 'recoverPassword').and.returnValue($q.when({result: true}));
+
+        var code = "1234";
+        var pw = "4321";
+        Auth.recoverPassword(code, pw);
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.auth.recoverPassword).toHaveBeenCalledWith({
+            code: code,
+            newPassword: pw
+        });
+
+    });
+
+
 });

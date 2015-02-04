@@ -2,7 +2,7 @@
 
     angular.module('jasify.authenticate').controller('ForgotPasswordController', ForgotPasswordController);
 
-    function ForgotPasswordController($log, $timeout) {
+    function ForgotPasswordController(Auth) {
         var vm = this;
         vm.email = '';
         vm.recover = recover;
@@ -14,11 +14,17 @@
 
         function recover() {
             vm.inProgress = true;
-            $timeout(function () {
+            Auth.forgotPassword(vm.email).then(ok, fail);
+
+            function ok() {
                 vm.inProgress = false;
-                vm.passwordSent = false;
+                vm.passwordSent = true;
+            }
+
+            function fail() {
+                vm.inProgress = false;
                 vm.failed = true;
-            }, 1000);
+            }
         }
 
         function again() {

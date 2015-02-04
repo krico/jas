@@ -46,7 +46,9 @@
                 changePassword: nop,
                 logout: nop,
                 providerAuthenticate: nop,
-                providerAuthorize: nop
+                providerAuthorize: nop,
+                forgotPassword: nop,
+                recoverPassword: nop
             },
             organizations: {
                 query: nop,

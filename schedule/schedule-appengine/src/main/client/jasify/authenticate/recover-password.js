@@ -2,7 +2,7 @@
 
     angular.module('jasify.authenticate').controller('RecoverPasswordController', RecoverPasswordController);
 
-    function RecoverPasswordController($log, $timeout, $routeParams, $rootScope, AUTH_EVENTS) {
+    function RecoverPasswordController($log, $timeout, $routeParams, $rootScope, Auth, AUTH_EVENTS) {
         var vm = this;
         vm.setPassword = setPassword;
         vm.signIn = signIn;
@@ -40,11 +40,16 @@
 
         function setPassword() {
             vm.inProgress = true;
-            $timeout(function () {
-                $log.debug("Timeout");
+            Auth.recoverPassword(vm.code, vm.password).then(ok, fail);
+            function ok() {
                 vm.inProgress = false;
-                vm.failText = 'Invalid code';
-            }, 1000);
+                vm.passwordSet = true;
+            }
+
+            function fail(reason) {
+                vm.inProgress = false;
+                vm.failText = 'There was a problem recovering you password';
+            }
         }
     }
 })(angular);

@@ -12,6 +12,8 @@
             changePassword: changePassword,
             providerAuthorize: providerAuthorize,
             providerAuthenticate: providerAuthenticate,
+            forgotPassword: forgotPassword,
+            recoverPassword: recoverPassword,
             logout: logout
         };
 
@@ -21,6 +23,9 @@
             promise: null,
             data: null
         };
+
+        // Try to restore early (don't remember why anymore)
+        restoreOnInstantiation();
 
 
         function loggedIn(res) {
@@ -161,13 +166,37 @@
             });
         }
 
-        if ($cookies.loggedIn) {
-            Auth.restore().then(function (u) {
-                    $cookies.loggedIn = true;
-                },
-                function (data) {
-                    $cookies.loggedIn = false;
+        function forgotPassword(email) {
+            //This is for the e-mail to know which site it come from
+            //Could be www.jasify.com or www.agenda.com.br
+            var siteUrl = $location.absUrl();
+
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.forgotPassword({
+                    email: email,
+                    url: siteUrl
                 });
+            });
+        }
+
+        function recoverPassword(code, password) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.auth.recoverPassword({
+                    code: code,
+                    newPassword: password
+                });
+            });
+        }
+
+        function restoreOnInstantiation() {
+            if ($cookies.loggedIn) {
+                Auth.restore().then(function (u) {
+                        $cookies.loggedIn = true;
+                    },
+                    function (data) {
+                        $cookies.loggedIn = false;
+                    });
+            }
         }
 
         return Auth;
