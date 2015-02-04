@@ -1,20 +1,19 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.mail.MailServicePb;
+import com.google.appengine.api.mail.dev.LocalMailService;
+import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
-import com.jasify.schedule.appengine.model.users.LoginFailedException;
-import com.jasify.schedule.appengine.model.users.TestUserServiceFactory;
-import com.jasify.schedule.appengine.model.users.User;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
-import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
-import com.jasify.schedule.appengine.oauth2.OAuth2ServiceFactory;
-import com.jasify.schedule.appengine.oauth2.TestOAuth2ServiceFactory;
+import com.jasify.schedule.appengine.model.users.*;
+import com.jasify.schedule.appengine.oauth2.*;
 import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -27,10 +26,10 @@ import org.slim3.datastore.Datastore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
 
 public class AuthEndpointTest {
@@ -198,6 +197,79 @@ public class AuthEndpointTest {
         JasProviderAuthorizeResponse response = endpoint.providerAuthorize(request);
         assertNotNull(response);
         assertEquals(authorizeUrl, response.getAuthorizeUrl());
+    }
+
+    @Test
+    public void testProviderAuthenticate() throws Exception {
+        testOAuth2ServiceFactory.setUp();
+        UserService userService = UserServiceFactory.getUserService();
+        OAuth2Service oAuth2Service = OAuth2ServiceFactory.getOAuth2Service();
+
+        User user = new User();
+        user.setId(KeyFactory.createKey("User", 1));
+        HttpServletRequest httpServletRequest = EasyMock.createMock(HttpServletRequest.class);
+        HttpSession session = EasyMock.createMock(HttpSession.class);
+        EasyMock.expect(httpServletRequest.getSession(true)).andReturn(session);
+        session.setAttribute(EasyMock.anyString(), EasyMock.anyObject());
+        EasyMock.expectLastCall();
+
+        EasyMock.replay(session);
+        EasyMock.replay(httpServletRequest);
+
+        JasProviderAuthenticateRequest request = new JasProviderAuthenticateRequest();
+        request.setCallbackUrl("http://l.com/");
+
+        OAuth2UserToken token = new OAuth2UserToken(OAuth2ProviderEnum.Google, new TokenResponse(), "ST");
+        EasyMock.expect(oAuth2Service.fetchUserToken(new GenericUrl(request.getCallbackUrl())))
+                .andReturn(token);
+
+        OAuth2Info userInfo = new OAuth2Info(token.getProvider(), token.getState());
+        userInfo.setUserId("ABC");
+        EasyMock.expect(oAuth2Service.fetchInfo(token)).andReturn(userInfo);
+
+        EasyMock.expect(userService.findByLogin(token.getProvider().name(), userInfo.getUserId()))
+                .andReturn(user);
+
+        testOAuth2ServiceFactory.replay();
+        testUserServiceFactory.replay();
+
+        JasProviderAuthenticateResponse response = endpoint.providerAuthenticate(null, httpServletRequest, request);
+        assertNotNull(response);
+    }
+
+
+    @Test
+    public void testForgotPassword() throws Exception {
+        JasForgotPasswordRequest request = new JasForgotPasswordRequest();
+        request.setUrl("https://foo.com");
+        request.setEmail("a@com");
+        User model = new User();
+        model.setEmail(request.getEmail());
+        PasswordRecovery recovery = new PasswordRecovery();
+        recovery.setCode(Datastore.createKey(PasswordRecovery.class, "XYZ12"));
+        recovery.getUserRef().setModel(model);
+        EasyMock.expect(UserServiceFactory.getUserService().registerPasswordRecovery(request.getEmail()))
+                .andReturn(recovery);
+        testUserServiceFactory.replay();
+        endpoint.forgotPassword(request);
+        LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
+        List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
+        assertEquals(1, sentMessages.size());
+        MailServicePb.MailMessage mailMessage = sentMessages.get(0);
+        assertEquals(request.getEmail(), mailMessage.getTo(0));
+        assertTrue(mailMessage.getHtmlBody().contains(recovery.getCode().getName()));
+        assertTrue(mailMessage.getTextBody().contains(recovery.getCode().getName()));
+    }
+
+    @Test
+    public void testRecoverPassword() throws Exception {
+        JasRecoverPasswordRequest request = new JasRecoverPasswordRequest();
+        request.setCode("YAZ1");
+        request.setNewPassword("secret");
+        UserServiceFactory.getUserService().recoverPassword(request.getCode(), request.getNewPassword());
+        EasyMock.expectLastCall();
+        testUserServiceFactory.replay();
+        endpoint.recoverPassword(request);
     }
 
 }

@@ -359,6 +359,47 @@ public class UserServiceTest {
         assertNull(service.findByEmail(""));
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void registerPasswordRecoveryThrowsNotFound() throws Exception {
+        service.registerPasswordRecovery("mE@Foo.baR");
+    }
+
+    @Test
+    public void registerPasswordRecovery() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("mE@Foo.baR");
+        service.create(user1, "password");
+        PasswordRecovery passwordRecovery = service.registerPasswordRecovery("mE@Foo.baR".toUpperCase());
+        assertNotNull(passwordRecovery);
+        assertNotNull(passwordRecovery.getCode());
+        String code = passwordRecovery.getCode().getName();
+        assertNotNull(code);
+        assertTrue(code.length() > 3);
+    }
+
+    @Test
+    public void recoverPassword() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("mE@Foo.baR");
+        service.create(user1, "password");
+        PasswordRecovery passwordRecovery = service.registerPasswordRecovery("mE@Foo.baR".toUpperCase());
+        service.recoverPassword(passwordRecovery.getCode().getName(), "newPassword");
+        service.login(user1.getName(), "newPassword");
+    }
+
+    @Test(expected=EntityNotFoundException.class)
+    public void recoverPasswordTwiceFails() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("mE@Foo.baR");
+        service.create(user1, "password");
+        PasswordRecovery passwordRecovery = service.registerPasswordRecovery("mE@Foo.baR".toUpperCase());
+        service.recoverPassword(passwordRecovery.getCode().getName(), "newPassword");
+        service.recoverPassword(passwordRecovery.getCode().getName(), "newerPassword");
+    }
+
     @Test
     public void testFindUserByUserLogin() throws Exception {
         testCreateWithUserLogin();

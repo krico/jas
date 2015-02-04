@@ -2,7 +2,7 @@
 
     angular.module('jasify.authenticate').controller('SignInController', SignInController);
 
-    function SignInController($log, $cookies, $rootScope, $window, AUTH_EVENTS, Auth) {
+    function SignInController($log, $cookies, $rootScope, $window, $location, AUTH_EVENTS, Auth) {
         var vm = this;
         vm.user = {};
         vm.email = false;
@@ -17,10 +17,18 @@
         vm.hasError = hasError;
         vm.getTooltip = getTooltip;
         vm.oauth = oauth;
+        vm.forgot = forgot;
 
         if (vm.rememberMe) {
             $log.debug('REMEMBER');
             vm.user.email = $cookies.rememberMe;
+        }
+
+        function forgot(fn) {
+            $location.path('/forgot-password');
+            if (angular.isFunction(fn)) {
+                fn();
+            }
         }
 
         function oauth(provider, cb) {
