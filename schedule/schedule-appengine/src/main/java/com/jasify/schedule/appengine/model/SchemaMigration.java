@@ -1,9 +1,6 @@
 package com.jasify.schedule.appengine.model;
 
-import com.google.appengine.api.datastore.Category;
-import com.google.appengine.api.datastore.Email;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
@@ -27,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.jasify.schedule.appengine.Constants.SCHEMA_VERSION_NAME;
 
@@ -66,6 +64,14 @@ public final class SchemaMigration {
             executed = true;
         }
 
+        String userLoginUniqueConstraintKey = SchemaMigration.class.getName() + ".UserLoginUniqueConstraint";
+        Boolean userLoginUniqueConstraintMigrated = applicationData.getProperty(userLoginUniqueConstraintKey);
+        if (Boolean.TRUE != userLoginUniqueConstraintMigrated) {
+            migrateUserLoginUniqueConstraintKey(applicationData);
+            applicationData.setProperty(userLoginUniqueConstraintKey, true);
+            executed = true;
+        }
+
         if (EnvironmentUtil.isDevelopment()) {
             String devInitialize = SchemaMigration.class.getName() + ".DevInitialize";
             Boolean devInitialized = applicationData.getProperty(devInitialize);
@@ -81,6 +87,24 @@ public final class SchemaMigration {
         executed |= createOauthProviderConfig();
 
         return executed;
+    }
+
+    private void migrateUserLoginUniqueConstraintKey(ApplicationData applicationData) {
+        //This is the wrongly created constraint (the correct one is userId+provider and was fixed in DefaultUserService)
+        final String UC_NAME = "jasify.UniqueConstraint.UserLogin#provider+userId";
+        Object property = applicationData.getProperty(UC_NAME);
+        if (property == null) return;
+        String uniqueConstraint = (String) property;
+        if (!uniqueConstraint.startsWith("UC"))
+            throw new RuntimeException("Something went wrong! UC=" + uniqueConstraint);
+        Set<String> kinds = ModelMetadataUtil.queryKindsThatStartWith(uniqueConstraint);
+        for (String kind : kinds) {
+            if (!kind.startsWith("UC"))
+                throw new RuntimeException("Something went wrong! UC=" + kind);
+            List<Key> keys = Datastore.query(kind).asKeyList();
+            log.warn("Deleting {} ({} entries)", kind, keys.size());
+            Datastore.delete(keys);
+        }
     }
 
     private boolean createOauthProviderConfig() {

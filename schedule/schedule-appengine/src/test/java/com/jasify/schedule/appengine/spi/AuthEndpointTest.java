@@ -178,7 +178,7 @@ public class AuthEndpointTest {
 
         String baseUrl = "http://my.host";
         OAuth2ProviderEnum provider = OAuth2ProviderEnum.Google;
-        String data = RandomStringUtils.randomAscii(128);
+        String data = RandomStringUtils.randomAlphanumeric(128);
 
         String authorizeUrl = "http://provider.com/authorize";
 
