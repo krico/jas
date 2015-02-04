@@ -337,6 +337,22 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
+    public void recoverPassword(String passwordRecoveryCode, String newPassword) throws EntityNotFoundException {
+        Preconditions.checkNotNull(passwordRecoveryCode);
+        Preconditions.checkNotNull(newPassword);
+        Key recoveryKey = Datastore.createKey(passwordRecoveryMeta, passwordRecoveryCode);
+        PasswordRecovery recovery = Datastore.getOrNull(passwordRecoveryMeta, recoveryKey);
+        if (recovery == null) {
+            throw new EntityNotFoundException("PasswordRecovery");
+        }
+        User user = recovery.getUserRef().getModel();
+        user.setPassword(new ShortBlob(DigestUtil.encrypt(newPassword)));
+        Datastore.put(user);
+        Datastore.delete(recoveryKey);
+        log.info("Password recovered for user [{}] email [{}]", user.getName(), user.getEmail());
+    }
+
+    @Override
     public boolean usernameExists(String name) {
         return !Datastore.query(userMeta).filter(userMeta.name.equal(StringUtils.lowerCase(name))).asKeyList().isEmpty();
     }

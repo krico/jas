@@ -379,6 +379,28 @@ public class UserServiceTest {
     }
 
     @Test
+    public void recoverPassword() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("mE@Foo.baR");
+        service.create(user1, "password");
+        PasswordRecovery passwordRecovery = service.registerPasswordRecovery("mE@Foo.baR".toUpperCase());
+        service.recoverPassword(passwordRecovery.getCode().getName(), "newPassword");
+        service.login(user1.getName(), "newPassword");
+    }
+
+    @Test(expected=EntityNotFoundException.class)
+    public void recoverPasswordTwiceFails() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test");
+        user1.setEmail("mE@Foo.baR");
+        service.create(user1, "password");
+        PasswordRecovery passwordRecovery = service.registerPasswordRecovery("mE@Foo.baR".toUpperCase());
+        service.recoverPassword(passwordRecovery.getCode().getName(), "newPassword");
+        service.recoverPassword(passwordRecovery.getCode().getName(), "newerPassword");
+    }
+
+    @Test
     public void testFindUserByUserLogin() throws Exception {
         testCreateWithUserLogin();
         User user = createdUsers.get(0);

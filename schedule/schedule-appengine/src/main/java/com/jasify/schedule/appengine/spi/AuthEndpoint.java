@@ -192,8 +192,21 @@ public class AuthEndpoint {
         notify(recovery, request.getUrl());
     }
 
+    @ApiMethod(name = "auth.recoverPassword", path = "auth/recover-password", httpMethod = ApiMethod.HttpMethod.POST)
+    public void recoverPassword(JasRecoverPasswordRequest request) throws BadRequestException, NotFoundException {
+        String code = Preconditions.checkNotNull(request.getCode(), "code");
+        String newPassword = Preconditions.checkNotNull(request.getNewPassword(), "newPassword");
+        try {
+            UserServiceFactory.getUserService().recoverPassword(code, newPassword);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
+    }
+
+
     /**
      * TODO: SEND EMAIL TO USER, comment here to explain params
+     * TODO: wzsarmach!!!!  Move this away, it hurts my eyes :)
      *
      * @param recovery holding code and user
      * @param siteUrl  this is so we know what url the user is accessing, to avoid hard-coding jasify-schedule.app...

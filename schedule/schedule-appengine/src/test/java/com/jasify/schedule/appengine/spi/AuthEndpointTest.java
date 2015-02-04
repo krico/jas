@@ -29,9 +29,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
 
 public class AuthEndpointTest {
@@ -261,6 +259,17 @@ public class AuthEndpointTest {
         assertEquals(request.getEmail(), mailMessage.getTo(0));
         assertTrue(mailMessage.getHtmlBody().contains(recovery.getCode().getName()));
         assertTrue(mailMessage.getTextBody().contains(recovery.getCode().getName()));
+    }
+
+    @Test
+    public void testRecoverPassword() throws Exception {
+        JasRecoverPasswordRequest request = new JasRecoverPasswordRequest();
+        request.setCode("YAZ1");
+        request.setNewPassword("secret");
+        UserServiceFactory.getUserService().recoverPassword(request.getCode(), request.getNewPassword());
+        EasyMock.expectLastCall();
+        testUserServiceFactory.replay();
+        endpoint.recoverPassword(request);
     }
 
 }
