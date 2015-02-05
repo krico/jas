@@ -32,7 +32,7 @@
                     path = "/";
                 }
 
-                Auth.restore(true).then(ok, fail);
+                Auth.restore(resp.result).then(ok, fail);
 
                 function ok(u) {
                     if ($scope.setCurrentUser) $scope.setCurrentUser(u);

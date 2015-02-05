@@ -29,7 +29,8 @@
 
 
         function loggedIn(res) {
-            Session.create(res.data.id, res.data.userId, res.data.user.admin);
+            var sessionId = res.data.id || res.data.sessionId;
+            Session.create(sessionId, res.data.userId, res.data.user.admin);
             $cookies.loggedIn = true;
             return res.data.user;
         }
@@ -92,16 +93,23 @@
             }
             restoreData.invoked = true;
 
-            $log.debug("Restoring session...");
-            restoreData.promise = $http.get('/auth/restore')
-                .then(function (res) {
+            var p;
+            if (force && (force.id || force.sessionId) && force.userId) {
+                $log.debug("Restoring session (local)...");
+                p = $q.when({data: force});
+            } else {
+                $log.debug("Restoring session...");
+                p = $http.get('/auth/restore');
+            }
+
+            restoreData.promise = p.then(function (res) {
                     $log.info("Session restored! (userId=" + res.data.userId + ")");
                     restoreData.promise = null;
                     restoreData.data = loggedIn(res);
                     return restoreData.data;
                 },
                 function (reason) {
-                    $log.info("Session restore failed: " + reason);
+                    $log.info("Session restore failed: (" + reason.status + ') ' + reason.statusText);
                     restoreData.promise = null;
                     restoreData.failed = true;
                     restoreData.data = reason;
@@ -127,15 +135,18 @@
             $log.info("Logging out (" + Session.userId + ")!");
             return Endpoint.jasify(function (jasify) {
                 return jasify.auth.logout();
-            }).then(function (res) {
-                    $log.info("Logged out!");
-                    Session.destroy();
-                    $cookies.loggedIn = false;
-                },
-                function (message) {
-                    $log.warn("F: " + message);
-                    return $q.reject(message);
-                });
+            }).then(ok, fail);
+
+            function ok(res) {
+                $log.info("Logged out!");
+                Session.destroy();
+                $cookies.loggedIn = false;
+            }
+
+            function fail(message) {
+                $log.warn("F: " + message);
+                return $q.reject(message);
+            }
         }
 
         function providerAuthorize(provider) {

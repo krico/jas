@@ -248,6 +248,26 @@ describe('AuthService', function () {
         expect(Session.userId).toBe(user.id);
     });
 
+    it("should restore locally if data is provided", function () {
+
+        var restoreData = {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}};
+
+        var user = null;
+
+        $cookies.loggedIn = true;
+
+        Auth.restore(restoreData).then(function (u) {
+            user = u;
+        });
+
+        $rootScope.$apply();
+
+        expect(Auth.isAuthenticated()).toBe(true);
+        expect(user).not.toBe(null);
+        expect(user.id).toBe(555);
+        expect(Session.userId).toBe(user.id);
+    });
+
     it("should detect there is no session to restore", function () {
 
         $httpBackend.expectGET('/auth/restore').respond(401);
