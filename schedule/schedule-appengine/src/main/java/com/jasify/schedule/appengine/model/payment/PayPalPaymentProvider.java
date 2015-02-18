@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.payment;
 import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
+import com.google.gson.internal.StringMap;
 import com.jasify.schedule.appengine.oauth2.OAuth2Util;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -15,10 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static com.jasify.schedule.appengine.util.CurrencyUtil.formatCurrencyNumber;
 
@@ -30,6 +28,7 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
     private static final long MIN_REMAINING_LIFETIME = 120;
     private static final Logger log = LoggerFactory.getLogger(PayPalPaymentProvider.class);
     private OAuthTokenCredential oAuthTokenCredential;
+    private String profileId;
 
     private PayPalPaymentProvider() {
         Properties properties = new Properties();
@@ -47,10 +46,43 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         properties.setProperty(Constants.GOOGLE_APP_ENGINE, "true");
         log.info("Initializing PayPal with endpoint={}", properties.getProperty(Constants.ENDPOINT));
         oAuthTokenCredential = PayPalResource.initConfig(properties);
+
+        setupWebProfile();
     }
 
     public static PayPalPaymentProvider instance() {
         return Singleton.INSTANCE;
+    }
+
+    private void setupWebProfile() {
+        try {
+            String accessToken = oAuthTokenCredential.getAccessToken();
+//            WebProfile wp = new WebProfile().setId("XP-YCBZ-LGUJ-PR7B-QLYL");
+//            wp.delete(accessToken);
+            List<WebProfile> list = WebProfile.getList(accessToken);
+            if (list == null || list.isEmpty()) {
+                log.info("Creating new WebProfile");
+                WebProfile profile = new WebProfile("Jasify BookIT");
+//                profile.setFlowConfig(new FlowConfig().setLandingPageType("Billing"));
+                profile.setInputFields(new InputFields().setAllowNote(false).setNoShipping(1));
+//                profile.setPresentation(new Presentation().setBrandName("MyWayFit"));
+                CreateProfileResponse response = profile.create(accessToken);
+                profileId = response.getId();
+                log.info("Created profile id={}, data={}", profileId, response);
+            } else {
+                Object payPalSUX = list.get(0);
+                if (payPalSUX instanceof StringMap) {
+                    StringMap yesItReallySux = (StringMap) payPalSUX;
+                    Object payPalSuxSoBadItsNotEvenFunny = yesItReallySux.get("id");
+                    profileId = Objects.toString(payPalSuxSoBadItsNotEvenFunny);
+                } else {
+                    profileId = list.get(0).getId();
+                }
+                log.info("Retrieved profile id={}", profileId);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to setup WebProfile", e);
+        }
     }
 
     private OAuthTokenCredential getCredential() {
@@ -90,12 +122,15 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
 
         try {
 
-            com.paypal.api.payments.Payment createdPayment = new com.paypal.api.payments.Payment()
+            com.paypal.api.payments.Payment paymentToCreate = new com.paypal.api.payments.Payment();
+            paymentToCreate.setExperienceProfileId(profileId);
+            com.paypal.api.payments.Payment createdPayment = paymentToCreate
                     .setIntent("sale")
                     .setPayer(new Payer("paypal"))
                     .setRedirectUrls(createRedirectUrls(baseUrl))
                     .setTransactions(Collections.singletonList(transaction))
                     .create(getCredential().getAccessToken());
+
 
             payment.setExternalId(createdPayment.getId());
             payment.setExternalState(createdPayment.getState());
