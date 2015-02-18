@@ -27,7 +27,7 @@ import static com.jasify.schedule.appengine.util.CurrencyUtil.formatCurrencyNumb
 public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
     private static final long MIN_REMAINING_LIFETIME = 120;
     private static final Logger log = LoggerFactory.getLogger(PayPalPaymentProvider.class);
-    private OAuthTokenCredential oAuthTokenCredential;
+    private PayPalInterface payPalInterface;
     private String profileId;
 
     private PayPalPaymentProvider() {
@@ -45,30 +45,28 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         }
         properties.setProperty(Constants.GOOGLE_APP_ENGINE, "true");
         log.info("Initializing PayPal with endpoint={}", properties.getProperty(Constants.ENDPOINT));
-        oAuthTokenCredential = PayPalResource.initConfig(properties);
-
-        setupWebProfile();
+        PayPalResource.initConfig(properties);
     }
 
     public static PayPalPaymentProvider instance() {
         return Singleton.INSTANCE;
     }
 
-    private void setupWebProfile() {
+    private void needWebProfile() {
+        if (StringUtils.isNotBlank(profileId)) return;
+
+        PayPalInterface payPal = getPayPalInterface();
         try {
-            String accessToken = oAuthTokenCredential.getAccessToken();
 //            WebProfile wp = new WebProfile().setId("XP-YCBZ-LGUJ-PR7B-QLYL");
 //            wp.delete(accessToken);
-            List<WebProfile> list = WebProfile.getList(accessToken);
+            List<WebProfile> list = payPal.getWebProfiles();
             if (list == null || list.isEmpty()) {
                 log.info("Creating new WebProfile");
                 WebProfile profile = new WebProfile("Jasify BookIT");
 //                profile.setFlowConfig(new FlowConfig().setLandingPageType("Billing"));
-                profile.setInputFields(new InputFields().setAllowNote(false).setNoShipping(1));
 //                profile.setPresentation(new Presentation().setBrandName("MyWayFit"));
-                CreateProfileResponse response = profile.create(accessToken);
-                profileId = response.getId();
-                log.info("Created profile id={}, data={}", profileId, response);
+                profile.setInputFields(new InputFields().setAllowNote(false).setNoShipping(1));
+                profileId = payPal.create(profile);
             } else {
                 Object payPalSUX = list.get(0);
                 if (payPalSUX instanceof StringMap) {
@@ -85,17 +83,10 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         }
     }
 
-    private OAuthTokenCredential getCredential() {
-        if (oAuthTokenCredential.expiresIn() < MIN_REMAINING_LIFETIME) {
-            log.debug("oAuthTokenCredential will be re-initialized...");
-            oAuthTokenCredential = PayPalResource.getOAuthTokenCredential();
-        }
-        return oAuthTokenCredential;
-    }
-
     @Override
     public void createPayment(PayPalPayment payment, GenericUrl baseUrl) throws PaymentException {
         payment.validate();
+        needWebProfile();
 
         String currency = payment.getCurrency();
 
@@ -120,64 +111,62 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         transaction.setAmount(new Amount(currency, formatCurrencyNumber(currency, payment.getAmount())));
         transaction.setItemList(new ItemList().setItems(items));
 
-        try {
+        com.paypal.api.payments.Payment paymentToCreate = new com.paypal.api.payments.Payment()
+                .setIntent("sale")
+                .setPayer(new Payer("paypal"))
+                .setRedirectUrls(createRedirectUrls(baseUrl))
+                .setTransactions(Collections.singletonList(transaction));
 
-            com.paypal.api.payments.Payment paymentToCreate = new com.paypal.api.payments.Payment();
-            paymentToCreate.setExperienceProfileId(profileId);
-            com.paypal.api.payments.Payment createdPayment = paymentToCreate
-                    .setIntent("sale")
-                    .setPayer(new Payer("paypal"))
-                    .setRedirectUrls(createRedirectUrls(baseUrl))
-                    .setTransactions(Collections.singletonList(transaction))
-                    .create(getCredential().getAccessToken());
+        paymentToCreate.setExperienceProfileId(profileId);
+
+        PayPalInterface payPal = getPayPalInterface();
+        com.paypal.api.payments.Payment createdPayment = payPal.create(paymentToCreate);
 
 
-            payment.setExternalId(createdPayment.getId());
-            payment.setExternalState(createdPayment.getState());
-            Link approveUrl = extractUrl(createdPayment, "approval_url");
-            approveUrl = TypeUtil.toLink(approveUrl.getValue() + "&useraction=commit");
-            payment.setApproveUrl(approveUrl);
-            payment.setSelfUrl(extractUrl(createdPayment, "self"));
-            payment.setExecuteUrl(extractUrl(createdPayment, "execute"));
-            payment.setState(PaymentStateEnum.Created);
-            log.info("APPROVAL URL:\n\t{}", payment.getApproveUrl());
+        payment.setExternalId(createdPayment.getId());
+        payment.setExternalState(createdPayment.getState());
 
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
+        Link approveUrl = extractUrl(createdPayment, "approval_url");
+        approveUrl = TypeUtil.toLink(approveUrl.getValue() + "&useraction=commit");
+        payment.setApproveUrl(approveUrl);
+
+        payment.setSelfUrl(extractUrl(createdPayment, "self"));
+
+        payment.setExecuteUrl(extractUrl(createdPayment, "execute"));
+
+        payment.setState(PaymentStateEnum.Created);
+        log.info("APPROVAL URL:\n\t{}", payment.getApproveUrl());
 
     }
 
     @Override
     public void executePayment(PayPalPayment payment) throws PaymentException {
         String payerId = Preconditions.checkNotNull(payment.getPayerId(), "payment.PayerId");
-        com.paypal.api.payments.Payment paymentToExecute = new com.paypal.api.payments.Payment().setId(payment.getExternalId());
-        try {
-            com.paypal.api.payments.Payment executedPayment = paymentToExecute.execute(getCredential().getAccessToken(), new PaymentExecution(payerId));
-            payment.setExternalState(executedPayment.getState());
-            setPayerInfo(payment, executedPayment);
-            List<Transaction> transactions = executedPayment.getTransactions();
-            if (transactions != null) {
-                double fee = 0;
-                for (Transaction transaction : transactions) {
-                    Amount amount = transaction.getAmount();
-                    if (amount == null) continue;
-                    Details details = amount.getDetails();
-                    if (details == null || details.getFee() == null) continue;
-                    try {
-                        fee += Double.parseDouble(details.getFee());
-                    } catch (Exception e) {
-                        log.debug("Failed to parse fee:[{}]", details.getFee(), e);
-                    }
-                }
-                payment.setFee(fee);
-            }
-            payment.setState(PaymentStateEnum.Completed);
 
-            log.debug("Executed Payment: {}", executedPayment);
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
+        PayPalInterface payPal = getPayPalInterface();
+        com.paypal.api.payments.Payment executedPayment = payPal.execute(new com.paypal.api.payments.Payment().setId(payment.getExternalId()), new PaymentExecution(payerId));
+
+        payment.setExternalState(executedPayment.getState());
+        setPayerInfo(payment, executedPayment);
+        List<Transaction> transactions = executedPayment.getTransactions();
+        if (transactions != null) {
+            double fee = 0;
+            for (Transaction transaction : transactions) {
+                Amount amount = transaction.getAmount();
+                if (amount == null) continue;
+                Details details = amount.getDetails();
+                if (details == null || details.getFee() == null) continue;
+                try {
+                    fee += Double.parseDouble(details.getFee());
+                } catch (Exception e) {
+                    log.debug("Failed to parse fee:[{}]", details.getFee(), e);
+                }
+            }
+            payment.setFee(fee);
         }
+        payment.setState(PaymentStateEnum.Completed);
+
+        log.debug("Executed Payment: {}", executedPayment);
     }
 
     private void setPayerInfo(PayPalPayment payment, com.paypal.api.payments.Payment executedPayment) {
@@ -216,8 +205,91 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         throw new PaymentException("PayPal payment has no \"" + rel + "\": " + payPalPayment);
     }
 
+    PayPalInterface getPayPalInterface() {
+        if (payPalInterface == null)
+            payPalInterface = new DefaultPayPalInterface();
+        return payPalInterface;
+    }
+
+    void setPayPalInterface(PayPalInterface payPalInterface) {
+        this.payPalInterface = payPalInterface;
+        this.profileId = null;
+    }
+
+    /**
+     * This interface is used to allow testing with the PayPal SDK
+     * It is used to "delegate" every call that requires the PayPal services
+     */
+    static interface PayPalInterface {
+        List<WebProfile> getWebProfiles() throws PaymentException;
+
+        String create(WebProfile profile) throws PaymentException;
+
+        com.paypal.api.payments.Payment create(com.paypal.api.payments.Payment payment) throws PaymentException;
+
+        com.paypal.api.payments.Payment execute(com.paypal.api.payments.Payment payment, PaymentExecution execution) throws PaymentException;
+    }
 
     private static final class Singleton {
         private static final PayPalPaymentProvider INSTANCE = new PayPalPaymentProvider();
+    }
+
+    private static class DefaultPayPalInterface implements PayPalInterface {
+        private OAuthTokenCredential oAuthTokenCredential;
+
+        private OAuthTokenCredential getCredential() {
+            if (oAuthTokenCredential == null || oAuthTokenCredential.expiresIn() < MIN_REMAINING_LIFETIME) {
+                log.debug("oAuthTokenCredential will be re-initialized...");
+                oAuthTokenCredential = PayPalResource.getOAuthTokenCredential();
+            }
+            return oAuthTokenCredential;
+        }
+
+        private String getAccessToken() throws PaymentException {
+            try {
+                return getCredential().getAccessToken();
+            } catch (PayPalRESTException e) {
+                throw new PaymentException(e);
+            }
+        }
+
+        @Override
+        public List<WebProfile> getWebProfiles() throws PaymentException {
+            try {
+                return WebProfile.getList(getAccessToken());
+            } catch (PayPalRESTException e) {
+                throw new PaymentException(e);
+            }
+        }
+
+        @Override
+        public String create(WebProfile profile) throws PaymentException {
+            try {
+                CreateProfileResponse response = profile.create(getAccessToken());
+                String profileId = response.getId();
+                log.info("Created profile id={}, data={}", profileId, response);
+                return profileId;
+            } catch (PayPalRESTException e) {
+                throw new PaymentException(e);
+            }
+        }
+
+        @Override
+        public com.paypal.api.payments.Payment create(com.paypal.api.payments.Payment payment) throws PaymentException {
+            try {
+                return payment.create(getAccessToken());
+            } catch (PayPalRESTException e) {
+                throw new PaymentException(e);
+            }
+        }
+
+        @Override
+        public com.paypal.api.payments.Payment execute(com.paypal.api.payments.Payment payment, PaymentExecution execution) throws PaymentException {
+            try {
+                return payment.execute(getAccessToken(), execution);
+            } catch (PayPalRESTException e) {
+                throw new PaymentException(e);
+            }
+        }
     }
 }

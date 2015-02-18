@@ -148,7 +148,9 @@ public class Payment {
     }
 
     public void addItem(String description, int units, double price) {
+        if (amount == null) amount = 0d;
         validate();
+        amount += units * price;
         itemDescriptions.add(description);
         itemUnits.add(units);
         itemPrices.add(price);
@@ -178,6 +180,31 @@ public class Payment {
 
         Preconditions.checkState(itemDescriptions.size() == itemUnits.size() && itemUnits.size() == itemPrices.size(),
                 "Please use addItem method");
+
+        if (!itemDescriptions.isEmpty()) {
+            double amount = 0d;
+            for (int i = 0; i < itemDescriptions.size(); ++i) {
+                amount += itemUnits.get(i) * itemPrices.get(i);
+            }
+            Preconditions.checkState(getAmount() == amount, "Amount expected: " + amount + ", actual: " + getAmount());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "id=" + id +
+                ", created=" + created +
+                ", modified=" + modified +
+                ", type=" + type +
+                ", state=" + state +
+                ", currency='" + currency + '\'' +
+                ", amount=" + amount +
+                ", fee=" + fee +
+                ", itemDescriptions=" + itemDescriptions +
+                ", itemUnits=" + itemUnits +
+                ", itemPrices=" + itemPrices +
+                '}';
     }
 
     public class Item {
@@ -198,22 +225,5 @@ public class Payment {
         public double getPrice() {
             return itemPrices.get(index);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Payment{" +
-                "id=" + id +
-                ", created=" + created +
-                ", modified=" + modified +
-                ", type=" + type +
-                ", state=" + state +
-                ", currency='" + currency + '\'' +
-                ", amount=" + amount +
-                ", fee=" + fee +
-                ", itemDescriptions=" + itemDescriptions +
-                ", itemUnits=" + itemUnits +
-                ", itemPrices=" + itemPrices +
-                '}';
     }
 }
