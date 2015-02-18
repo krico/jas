@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.util;
 
+import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Link;
 import com.google.appengine.api.datastore.ShortBlob;
@@ -36,9 +37,11 @@ public class TypeUtilTest {
     @Test
     public void testLink() {
         assertNull(TypeUtil.toString((Link) null));
-        assertNull(TypeUtil.toLink(null));
+        assertNull(TypeUtil.toLink((String) null));
+        assertNull(TypeUtil.toLink((GenericUrl) null));
         assertEquals("http://foo.com/avatar.jpg", TypeUtil.toString(new Link("http://foo.com/avatar.jpg")));
         assertEquals(new Link("http://foo.com/avatar.jpg"), TypeUtil.toLink("http://foo.com/avatar.jpg"));
+        assertEquals(new Link("http://foo.com/avatar.jpg"), TypeUtil.toLink(new GenericUrl("http://foo.com/avatar.jpg")));
     }
 
     @Test
