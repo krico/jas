@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.payment;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-21 17:11:31")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-18 01:06:39")
 /** */
 public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment> {
 
@@ -21,6 +21,15 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, com.google.appengine.api.datastore.Link> executeUrl = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, com.google.appengine.api.datastore.Link>(this, "executeUrl", "executeUrl", com.google.appengine.api.datastore.Link.class);
+
+    /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment> payerEmail = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment>(this, "payerEmail", "payerEmail");
+
+    /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment> payerFirstName = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment>(this, "payerFirstName", "payerFirstName");
+
+    /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment> payerLastName = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment>(this, "payerLastName", "payerLastName");
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, com.google.appengine.api.datastore.Key> id = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, com.google.appengine.api.datastore.Key>(this, "__key__", "id", com.google.appengine.api.datastore.Key.class);
@@ -45,6 +54,15 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.lang.Double> fee = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.lang.Double>(this, "fee", "fee", java.lang.Double.class);
+
+    /** */
+    public final org.slim3.datastore.StringCollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.String>> itemDescriptions = new org.slim3.datastore.StringCollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.String>>(this, "itemDescriptions", "itemDescriptions", java.util.List.class);
+
+    /** */
+    public final org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.Integer>, java.lang.Integer> itemUnits = new org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.Integer>, java.lang.Integer>(this, "itemUnits", "itemUnits", java.util.List.class);
+
+    /** */
+    public final org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.Double>, java.lang.Double> itemPrices = new org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.Double>, java.lang.Double>(this, "itemPrices", "itemPrices", java.util.List.class);
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
@@ -73,6 +91,9 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         model.setSelfUrl((com.google.appengine.api.datastore.Link) entity.getProperty("selfUrl"));
         model.setApproveUrl((com.google.appengine.api.datastore.Link) entity.getProperty("approveUrl"));
         model.setExecuteUrl((com.google.appengine.api.datastore.Link) entity.getProperty("executeUrl"));
+        model.setPayerEmail((java.lang.String) entity.getProperty("payerEmail"));
+        model.setPayerFirstName((java.lang.String) entity.getProperty("payerFirstName"));
+        model.setPayerLastName((java.lang.String) entity.getProperty("payerLastName"));
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setModified((java.util.Date) entity.getProperty("modified"));
@@ -81,6 +102,9 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         model.setCurrency((java.lang.String) entity.getProperty("currency"));
         model.setAmount((java.lang.Double) entity.getProperty("amount"));
         model.setFee((java.lang.Double) entity.getProperty("fee"));
+        model.setItemDescriptions(toList(java.lang.String.class, entity.getProperty("itemDescriptions")));
+        model.setItemUnits(longListToIntegerList(entity.getProperty("itemUnits")));
+        model.setItemPrices(toList(java.lang.Double.class, entity.getProperty("itemPrices")));
         return model;
     }
 
@@ -99,6 +123,9 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         entity.setProperty("selfUrl", m.getSelfUrl());
         entity.setProperty("approveUrl", m.getApproveUrl());
         entity.setProperty("executeUrl", m.getExecuteUrl());
+        entity.setProperty("payerEmail", m.getPayerEmail());
+        entity.setProperty("payerFirstName", m.getPayerFirstName());
+        entity.setProperty("payerLastName", m.getPayerLastName());
         entity.setProperty("created", m.getCreated());
         entity.setProperty("modified", m.getModified());
         entity.setProperty("type", enumToString(m.getType()));
@@ -106,6 +133,9 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         entity.setProperty("currency", m.getCurrency());
         entity.setProperty("amount", m.getAmount());
         entity.setProperty("fee", m.getFee());
+        entity.setProperty("itemDescriptions", m.getItemDescriptions());
+        entity.setProperty("itemUnits", m.getItemUnits());
+        entity.setProperty("itemPrices", m.getItemPrices());
         entity.setProperty("slim3.classHierarchyList", classHierarchyList);
         return entity;
     }
@@ -191,6 +221,18 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
             writer.setNextPropertyName("executeUrl");
             encoder0.encode(writer, m.getExecuteUrl());
         }
+        if(m.getPayerEmail() != null){
+            writer.setNextPropertyName("payerEmail");
+            encoder0.encode(writer, m.getPayerEmail());
+        }
+        if(m.getPayerFirstName() != null){
+            writer.setNextPropertyName("payerFirstName");
+            encoder0.encode(writer, m.getPayerFirstName());
+        }
+        if(m.getPayerLastName() != null){
+            writer.setNextPropertyName("payerLastName");
+            encoder0.encode(writer, m.getPayerLastName());
+        }
         if(m.getId() != null){
             writer.setNextPropertyName("id");
             encoder0.encode(writer, m.getId());
@@ -223,6 +265,30 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
             writer.setNextPropertyName("fee");
             encoder0.encode(writer, m.getFee());
         }
+        if(m.getItemDescriptions() != null){
+            writer.setNextPropertyName("itemDescriptions");
+            writer.beginArray();
+            for(java.lang.String v : m.getItemDescriptions()){
+                encoder0.encode(writer, v);
+            }
+            writer.endArray();
+        }
+        if(m.getItemUnits() != null){
+            writer.setNextPropertyName("itemUnits");
+            writer.beginArray();
+            for(java.lang.Integer v : m.getItemUnits()){
+                encoder0.encode(writer, v);
+            }
+            writer.endArray();
+        }
+        if(m.getItemPrices() != null){
+            writer.setNextPropertyName("itemPrices");
+            writer.beginArray();
+            for(java.lang.Double v : m.getItemPrices()){
+                encoder0.encode(writer, v);
+            }
+            writer.endArray();
+        }
         writer.endObject();
     }
 
@@ -243,6 +309,12 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         m.setApproveUrl(decoder0.decode(reader, m.getApproveUrl()));
         reader = rootReader.newObjectReader("executeUrl");
         m.setExecuteUrl(decoder0.decode(reader, m.getExecuteUrl()));
+        reader = rootReader.newObjectReader("payerEmail");
+        m.setPayerEmail(decoder0.decode(reader, m.getPayerEmail()));
+        reader = rootReader.newObjectReader("payerFirstName");
+        m.setPayerFirstName(decoder0.decode(reader, m.getPayerFirstName()));
+        reader = rootReader.newObjectReader("payerLastName");
+        m.setPayerLastName(decoder0.decode(reader, m.getPayerLastName()));
         reader = rootReader.newObjectReader("id");
         m.setId(decoder0.decode(reader, m.getId()));
         reader = rootReader.newObjectReader("created");
@@ -259,6 +331,57 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         m.setAmount(decoder0.decode(reader, m.getAmount()));
         reader = rootReader.newObjectReader("fee");
         m.setFee(decoder0.decode(reader, m.getFee()));
+        reader = rootReader.newObjectReader("itemDescriptions");
+        {
+            java.util.ArrayList<java.lang.String> elements = new java.util.ArrayList<java.lang.String>();
+            org.slim3.datastore.json.JsonArrayReader r = rootReader.newArrayReader("itemDescriptions");
+            if(r != null){
+                reader = r;
+                int n = r.length();
+                for(int i = 0; i < n; i++){
+                    r.setIndex(i);
+                    java.lang.String v = decoder0.decode(reader, (java.lang.String)null)                    ;
+                    if(v != null){
+                        elements.add(v);
+                    }
+                }
+                m.setItemDescriptions(elements);
+            }
+        }
+        reader = rootReader.newObjectReader("itemUnits");
+        {
+            java.util.ArrayList<java.lang.Integer> elements = new java.util.ArrayList<java.lang.Integer>();
+            org.slim3.datastore.json.JsonArrayReader r = rootReader.newArrayReader("itemUnits");
+            if(r != null){
+                reader = r;
+                int n = r.length();
+                for(int i = 0; i < n; i++){
+                    r.setIndex(i);
+                    java.lang.Integer v = decoder0.decode(reader, (java.lang.Integer)null)                    ;
+                    if(v != null){
+                        elements.add(v);
+                    }
+                }
+                m.setItemUnits(elements);
+            }
+        }
+        reader = rootReader.newObjectReader("itemPrices");
+        {
+            java.util.ArrayList<java.lang.Double> elements = new java.util.ArrayList<java.lang.Double>();
+            org.slim3.datastore.json.JsonArrayReader r = rootReader.newArrayReader("itemPrices");
+            if(r != null){
+                reader = r;
+                int n = r.length();
+                for(int i = 0; i < n; i++){
+                    r.setIndex(i);
+                    java.lang.Double v = decoder0.decode(reader, (java.lang.Double)null)                    ;
+                    if(v != null){
+                        elements.add(v);
+                    }
+                }
+                m.setItemPrices(elements);
+            }
+        }
         return m;
     }
 }

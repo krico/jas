@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.payment;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-21 17:11:31")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-18 01:06:39")
 /** */
 public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.payment.Payment> {
 
@@ -27,6 +27,15 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.lang.Double> fee = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.lang.Double>(this, "fee", "fee", java.lang.Double.class);
+
+    /** */
+    public final org.slim3.datastore.StringCollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.String>> itemDescriptions = new org.slim3.datastore.StringCollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.String>>(this, "itemDescriptions", "itemDescriptions", java.util.List.class);
+
+    /** */
+    public final org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.Integer>, java.lang.Integer> itemUnits = new org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.Integer>, java.lang.Integer>(this, "itemUnits", "itemUnits", java.util.List.class);
+
+    /** */
+    public final org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.Double>, java.lang.Double> itemPrices = new org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.Double>, java.lang.Double>(this, "itemPrices", "itemPrices", java.util.List.class);
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
@@ -57,6 +66,9 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         model.setCurrency((java.lang.String) entity.getProperty("currency"));
         model.setAmount((java.lang.Double) entity.getProperty("amount"));
         model.setFee((java.lang.Double) entity.getProperty("fee"));
+        model.setItemDescriptions(toList(java.lang.String.class, entity.getProperty("itemDescriptions")));
+        model.setItemUnits(longListToIntegerList(entity.getProperty("itemUnits")));
+        model.setItemPrices(toList(java.lang.Double.class, entity.getProperty("itemPrices")));
         return model;
     }
 
@@ -76,6 +88,9 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         entity.setProperty("currency", m.getCurrency());
         entity.setProperty("amount", m.getAmount());
         entity.setProperty("fee", m.getFee());
+        entity.setProperty("itemDescriptions", m.getItemDescriptions());
+        entity.setProperty("itemUnits", m.getItemUnits());
+        entity.setProperty("itemPrices", m.getItemPrices());
         return entity;
     }
 
@@ -168,6 +183,30 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             writer.setNextPropertyName("fee");
             encoder0.encode(writer, m.getFee());
         }
+        if(m.getItemDescriptions() != null){
+            writer.setNextPropertyName("itemDescriptions");
+            writer.beginArray();
+            for(java.lang.String v : m.getItemDescriptions()){
+                encoder0.encode(writer, v);
+            }
+            writer.endArray();
+        }
+        if(m.getItemUnits() != null){
+            writer.setNextPropertyName("itemUnits");
+            writer.beginArray();
+            for(java.lang.Integer v : m.getItemUnits()){
+                encoder0.encode(writer, v);
+            }
+            writer.endArray();
+        }
+        if(m.getItemPrices() != null){
+            writer.setNextPropertyName("itemPrices");
+            writer.beginArray();
+            for(java.lang.Double v : m.getItemPrices()){
+                encoder0.encode(writer, v);
+            }
+            writer.endArray();
+        }
         writer.endObject();
     }
 
@@ -192,6 +231,57 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         m.setAmount(decoder0.decode(reader, m.getAmount()));
         reader = rootReader.newObjectReader("fee");
         m.setFee(decoder0.decode(reader, m.getFee()));
+        reader = rootReader.newObjectReader("itemDescriptions");
+        {
+            java.util.ArrayList<java.lang.String> elements = new java.util.ArrayList<java.lang.String>();
+            org.slim3.datastore.json.JsonArrayReader r = rootReader.newArrayReader("itemDescriptions");
+            if(r != null){
+                reader = r;
+                int n = r.length();
+                for(int i = 0; i < n; i++){
+                    r.setIndex(i);
+                    java.lang.String v = decoder0.decode(reader, (java.lang.String)null)                    ;
+                    if(v != null){
+                        elements.add(v);
+                    }
+                }
+                m.setItemDescriptions(elements);
+            }
+        }
+        reader = rootReader.newObjectReader("itemUnits");
+        {
+            java.util.ArrayList<java.lang.Integer> elements = new java.util.ArrayList<java.lang.Integer>();
+            org.slim3.datastore.json.JsonArrayReader r = rootReader.newArrayReader("itemUnits");
+            if(r != null){
+                reader = r;
+                int n = r.length();
+                for(int i = 0; i < n; i++){
+                    r.setIndex(i);
+                    java.lang.Integer v = decoder0.decode(reader, (java.lang.Integer)null)                    ;
+                    if(v != null){
+                        elements.add(v);
+                    }
+                }
+                m.setItemUnits(elements);
+            }
+        }
+        reader = rootReader.newObjectReader("itemPrices");
+        {
+            java.util.ArrayList<java.lang.Double> elements = new java.util.ArrayList<java.lang.Double>();
+            org.slim3.datastore.json.JsonArrayReader r = rootReader.newArrayReader("itemPrices");
+            if(r != null){
+                reader = r;
+                int n = r.length();
+                for(int i = 0; i < n; i++){
+                    r.setIndex(i);
+                    java.lang.Double v = decoder0.decode(reader, (java.lang.Double)null)                    ;
+                    if(v != null){
+                        elements.add(v);
+                    }
+                }
+                m.setItemPrices(elements);
+            }
+        }
         return m;
     }
 }
