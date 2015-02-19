@@ -1,6 +1,8 @@
 package com.jasify.schedule.appengine.model.payment;
 
+import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -37,6 +39,31 @@ class DefaultPaymentService implements PaymentService {
         } catch (EntityNotFoundRuntimeException e) {
             throw new EntityNotFoundException("Subscription id=" + id);
         }
+    }
+
+    @Nonnull
+    @Override
+    public <T extends Payment> Key newPayment(Key parentKey, T payment) throws PaymentException {
+        payment.validate();
+
+        payment.setId(Datastore.allocateId(parentKey, paymentMeta));
+
+        return Datastore.put(payment);
+    }
+
+    @Override
+    public <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws PaymentException {
+        Preconditions.checkNotNull(payment.getId(), "PaymentService.newPayment first");
+        Preconditions.checkNotNull(provider);
+        provider.createPayment(payment, baseUrl);
+        Datastore.put(payment);
+    }
+
+    @Override
+    public <T extends Payment> void executePayment(PaymentProvider<T> provider, T payment) throws PaymentException {
+        Preconditions.checkNotNull(provider);
+        provider.executePayment(payment);
+        Datastore.put(payment);
     }
 
     @Nonnull

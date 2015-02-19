@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.payment;
 
+import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
@@ -8,6 +9,7 @@ import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.TypeUtil;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +35,53 @@ public class PaymentServiceTest {
     @After
     public void cleanupDatastore() {
         TestHelper.cleanupDatastore();
+    }
+
+    @Test
+    public void testNewPayment() throws Exception {
+        newPayment();
+    }
+
+    private PayPalPayment newPayment() throws PaymentException {
+        PayPalPayment payment = new PayPalPayment();
+        payment.setCurrency("USD");
+        payment.setAmount(30.35);
+        Key key = paymentService.newPayment(Datastore.allocateId(User.class), payment);
+        assertNotNull(key);
+        return payment;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testCreatePayment() throws Exception {
+        PayPalPayment payment = newPayment();
+        GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
+
+        PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
+        mockProvider.createPayment(payment, baseUrl);
+        EasyMock.expectLastCall();
+        EasyMock.replay(mockProvider);
+
+
+        paymentService.createPayment(mockProvider, payment, baseUrl);
+
+        EasyMock.verify(mockProvider);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testExecutePayment() throws Exception {
+        PayPalPayment payment = newPayment();
+
+        PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
+        mockProvider.executePayment(payment);
+        EasyMock.expectLastCall();
+        EasyMock.replay(mockProvider);
+
+
+        paymentService.executePayment(mockProvider, payment);
+
+        EasyMock.verify(mockProvider);
     }
 
     @Test

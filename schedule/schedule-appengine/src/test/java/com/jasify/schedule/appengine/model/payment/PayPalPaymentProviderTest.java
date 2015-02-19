@@ -173,17 +173,4 @@ public class PayPalPaymentProviderTest {
         assertNotNull(jasPayment.getExecuteUrl());
         assertEquals(jasPayment.getExecuteUrl().getValue(), EXECUTE_URL);
     }
-
-    public void testCreatePaymentOld() throws Exception {
-        PayPalPayment jasPayment = new PayPalPayment();
-
-        jasPayment.setAmount(20d);
-        jasPayment.setCurrency("CHF");
-
-        provider.createPayment(jasPayment, new GenericUrl("http://localhost:1/"));
-        String payerId = "TODO";
-        jasPayment.setPayerId(payerId);
-        provider.executePayment(jasPayment);
-        System.err.println(jasPayment);
-    }
 }
