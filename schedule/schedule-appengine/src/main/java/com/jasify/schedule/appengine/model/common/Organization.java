@@ -33,9 +33,11 @@ public class Organization {
     private String lcName;
 
     private String description;
+
     @Attribute(persistent = false)
     private InverseModelListRef<OrganizationMember, Organization> organizationMemberListRef =
             new InverseModelListRef<>(OrganizationMember.class, OrganizationMemberMeta.get().organizationRef.getName(), this);
+
 
     public Organization() {
     }

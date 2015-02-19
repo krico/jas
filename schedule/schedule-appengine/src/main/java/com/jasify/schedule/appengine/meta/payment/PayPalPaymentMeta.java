@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.payment;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-18 01:06:39")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-19 22:16:35")
 /** */
 public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment> {
 
@@ -64,6 +64,9 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
     /** */
     public final org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.Double>, java.lang.Double> itemPrices = new org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, java.util.List<java.lang.Double>, java.lang.Double>(this, "itemPrices", "itemPrices", java.util.List.class);
 
+    /** */
+    public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer> transferRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.PayPalPayment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer>(this, "transferRef", "transferRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.balance.Transfer.class);
+
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
@@ -105,6 +108,10 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         model.setItemDescriptions(toList(java.lang.String.class, entity.getProperty("itemDescriptions")));
         model.setItemUnits(longListToIntegerList(entity.getProperty("itemUnits")));
         model.setItemPrices(toList(java.lang.Double.class, entity.getProperty("itemPrices")));
+        if (model.getTransferRef() == null) {
+            throw new NullPointerException("The property(transferRef) is null.");
+        }
+        model.getTransferRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("transferRef"));
         return model;
     }
 
@@ -136,6 +143,10 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
         entity.setProperty("itemDescriptions", m.getItemDescriptions());
         entity.setProperty("itemUnits", m.getItemUnits());
         entity.setProperty("itemPrices", m.getItemPrices());
+        if (m.getTransferRef() == null) {
+            throw new NullPointerException("The property(transferRef) must not be null.");
+        }
+        entity.setProperty("transferRef", m.getTransferRef().getKey());
         entity.setProperty("slim3.classHierarchyList", classHierarchyList);
         return entity;
     }
@@ -160,6 +171,11 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
 
     @Override
     protected void assignKeyToModelRefIfNecessary(com.google.appengine.api.datastore.AsyncDatastoreService ds, java.lang.Object model) {
+        com.jasify.schedule.appengine.model.payment.PayPalPayment m = (com.jasify.schedule.appengine.model.payment.PayPalPayment) model;
+        if (m.getTransferRef() == null) {
+            throw new NullPointerException("The property(transferRef) must not be null.");
+        }
+        m.getTransferRef().assignKeyIfNecessary(ds);
     }
 
     @Override
@@ -289,6 +305,10 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
             }
             writer.endArray();
         }
+        if(m.getTransferRef() != null && m.getTransferRef().getKey() != null){
+            writer.setNextPropertyName("transferRef");
+            encoder0.encode(writer, m.getTransferRef(), maxDepth, currentDepth);
+        }
         writer.endObject();
     }
 
@@ -382,6 +402,8 @@ public final class PayPalPaymentMeta extends org.slim3.datastore.ModelMeta<com.j
                 m.setItemPrices(elements);
             }
         }
+        reader = rootReader.newObjectReader("transferRef");
+        decoder0.decode(reader, m.getTransferRef(), maxDepth, currentDepth);
         return m;
     }
 }

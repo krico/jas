@@ -6,9 +6,7 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.activity.Subscription;
-import com.jasify.schedule.appengine.util.BeanUtil;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
@@ -68,48 +66,12 @@ class DefaultPaymentService implements PaymentService {
 
     @Nonnull
     @Override
-    public Key addPayment(Subscription subscription, Payment payment) throws EntityNotFoundException, FieldValueException {
-        Subscription dbSubscription = getSubscription(subscription.getId());
-        Key userId = dbSubscription.getUserRef().getKey();
-        if (userId == null)
-            throw new EntityNotFoundException("Subscription.User.Id=NULL");
-        if (dbSubscription.getPaymentRef().getKey() != null)
-            throw new FieldValueException("Subscription.Payment.Id != NULL");
-
-        payment.setId(Datastore.allocateId(userId, payment.getClass()));
-        dbSubscription.getPaymentRef().setModel(payment);
-
-        Datastore.put(payment, dbSubscription);
-
-        return payment.getId();
-    }
-
-    @Nonnull
-    @Override
     public Payment getPayment(Key id) throws EntityNotFoundException {
         try {
             return Datastore.get(paymentMeta, id);
         } catch (EntityNotFoundRuntimeException e) {
             throw new EntityNotFoundException("Payment id=" + id);
         }
-    }
-
-    @Nonnull
-    @Override
-    public Payment updatePayment(Payment payment) throws EntityNotFoundException, FieldValueException {
-        Payment dbPayment = getPayment(payment.getId());
-        BeanUtil.copyPropertiesExcluding(dbPayment, payment);
-        Datastore.put(dbPayment);
-        return dbPayment;
-    }
-
-    @Override
-    public void removePayment(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        Payment dbPayment = getPayment(id);
-        Subscription subscription = Datastore.query(subscriptionMeta).filter(subscriptionMeta.paymentRef.equal(id)).asSingle();
-        if (subscription != null) subscription.getPaymentRef().setKey(null);
-        Datastore.put(subscription);
-        Datastore.delete(dbPayment.getId());
     }
 
     private static class Singleton {

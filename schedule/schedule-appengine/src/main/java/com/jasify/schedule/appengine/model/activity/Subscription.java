@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.*;
@@ -26,7 +27,7 @@ public class Subscription {
 
     private ModelRef<User> userRef = new ModelRef<>(User.class);
 
-    private ModelRef<Payment> paymentRef = new ModelRef<>(Payment.class);
+    private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
 
     public Key getId() {
         return id;
@@ -60,7 +61,7 @@ public class Subscription {
         return userRef;
     }
 
-    public ModelRef<Payment> getPaymentRef() {
-        return paymentRef;
+    public ModelRef<Transfer> getTransferRef() {
+        return transferRef;
     }
 }

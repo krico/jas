@@ -2,10 +2,8 @@ package com.jasify.schedule.appengine.model.payment;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
-import org.slim3.datastore.Attribute;
-import org.slim3.datastore.CreationDate;
-import org.slim3.datastore.Model;
-import org.slim3.datastore.ModificationDate;
+import com.jasify.schedule.appengine.model.balance.Transfer;
+import org.slim3.datastore.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,6 +47,8 @@ public class Payment {
     private List<Integer> itemUnits = new ArrayList<>();
 
     private List<Double> itemPrices = new ArrayList<>();
+
+    private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
 
     public Payment() {
         state = PaymentStateEnum.New;
@@ -188,6 +188,10 @@ public class Payment {
             }
             Preconditions.checkState(getAmount() == amount, "Amount expected: " + amount + ", actual: " + getAmount());
         }
+    }
+
+    public ModelRef<Transfer> getTransferRef() {
+        return transferRef;
     }
 
     @Override
