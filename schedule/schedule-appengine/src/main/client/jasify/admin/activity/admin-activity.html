@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" xmlns="http://www.w3.org/1999/html">
     <div class="col-sm-1">
         <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
     </div>
@@ -85,6 +85,40 @@
                                 </button>
                             </span>
                         </p>
+                    </div>
+                </div>
+                <div class="form-group" ng-show="!vm.activity.id">
+                    <label class="col-sm-3 control-label">Repeat:</label>
+
+                    <div class="col-sm-8">
+                        <span class="input-group-btn">
+                            <select style="vertical-align:middle" ng-model="vm.repeatType" class="form-control">
+                                <option value="No">No</option>
+                                <option value="Weekly">Weekly</option>
+                            </select>
+                        </span>
+
+                        <p class="input-group" ng-show="vm.repeatType=='Weekly'">
+                            <input id="repeat" type="text" class="form-control" datetime-picker="{{vm.dateTimeFormat}}"
+                               ng-model="vm.repeatDate" is-open="vm.isRepeatOpen" show-weeks="false"
+                               ng-focus="vm.openRepeat($event)"
+                               close-text="Close"/>
+
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="vm.openRepeat($event)">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </button>
+                            </span>
+                        </p>
+                        <div class="btn-group" ng-show="vm.repeatType=='Weekly'">
+                            <label class="btn btn-primary" ng-model="vm.repeatDays[1]" btn-checkbox>M</label>
+                            <label class="btn btn-primary" ng-model="vm.repeatDays[2]" btn-checkbox>T</label>
+                            <label class="btn btn-primary" ng-model="vm.repeatDays[3]" btn-checkbox>W</label>
+                            <label class="btn btn-primary" ng-model="vm.repeatDays[4]" btn-checkbox>T</label>
+                            <label class="btn btn-primary" ng-model="vm.repeatDays[5]" btn-checkbox>F</label>
+                            <label class="btn btn-primary" ng-model="vm.repeatDays[6]" btn-checkbox>S</label>
+                            <label class="btn btn-primary" ng-model="vm.repeatDays[0]" btn-checkbox>S</label>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
