@@ -8,14 +8,8 @@ import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.Message;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.*;
+import javax.mail.internet.*;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -79,6 +73,7 @@ public final class DefaultMailService implements MailService {
                     log.warn("No senderAddress defined (key: {}) defaulting to: {}", applicationOwnersKey, applicationOwnersString);
                     applicationData.setProperty(applicationOwnersKey, applicationOwnersString);
                 }
+
                 for (String owner : StringUtils.split(applicationOwnersString, ',')) {
                     applicationOwners = ArrayUtils.add(applicationOwners, new InternetAddress(owner));
                 }
@@ -88,7 +83,6 @@ public final class DefaultMailService implements MailService {
 
                 log.debug("Initialized {}", getClass().getSimpleName());
                 Preconditions.checkState(stateTransition(StateEnum.INITIALIZING, StateEnum.INITIALIZED), "State changed during initialization");
-
             } catch (Exception e) {
                 log.debug("Initialization failed!", e);
                 if (!stateTransition(StateEnum.INITIALIZING, StateEnum.FAILED))
@@ -101,40 +95,63 @@ public final class DefaultMailService implements MailService {
     }
 
     @Override
-    public boolean sendToApplicationOwners(String subject, String htmlBody) {
+    public boolean sendToApplicationOwners(String subject, String htmlBody, String textBody) {
         initialize();
-        Preconditions.checkNotNull(senderAddress);
-        Preconditions.checkNotNull(applicationOwners);
+        return send(senderAddress, applicationOwners, subject, htmlBody, textBody);
+    }
 
+    @Override
+    public boolean send(String toEmail, String subject, String htmlBody, String textBody) throws Exception {
+        initialize();
+        InternetAddress[] toAddress = {new InternetAddress(toEmail)};
+        return send(senderAddress, toAddress, subject, htmlBody, textBody);
+    }
+
+    private boolean send(InternetAddress fromAddress, InternetAddress[] toAddress, String subject, String htmlBody, String textBody) {
+        Preconditions.checkNotNull(fromAddress);
+        Preconditions.checkNotNull(toAddress);
+        Preconditions.checkNotNull(subject);
+        Preconditions.checkNotNull(htmlBody);
+        Preconditions.checkNotNull(textBody);
         try {
-            log.debug("Sent e-mail [{}] as [{}] to {}", subject, senderAddress, Arrays.toString(applicationOwners));
-
-            Message msg = new MimeMessage(session);
-            msg.setFrom(senderAddress);
-            for (InternetAddress owner : applicationOwners) {
-                msg.addRecipient(Message.RecipientType.TO, owner);
-            }
-            msg.setSubject(subject);
-
-            Multipart mp = new MimeMultipart();
-
-            MimeBodyPart htmlPart = new MimeBodyPart();
-            htmlPart.setContent(htmlBody, "text/html");
-            mp.addBodyPart(htmlPart);
-
-            String textBody = Jsoup.parse(htmlBody).text();
-            MimeBodyPart textPart = new MimeBodyPart();
-            textPart.setContent(textBody, "text/plain");
-            mp.addBodyPart(textPart);
-
-            msg.setContent(mp);
-
-            Transport.send(msg);
+            log.debug("Sending e-mail [{}] as [{}] to {}", subject, fromAddress, Arrays.toString(toAddress));
+            Message message = createMessage(fromAddress, toAddress, subject, htmlBody, textBody);
+            Transport.send(message);
             return true;
         } catch (Exception e) {
             log.warn("Failed to send e-mail", e);
             return false;
         }
+    }
+
+    private Message createMessage(InternetAddress fromAddress, InternetAddress[] toAddress, String subject, String htmlBody, String textBody) throws MessagingException {
+
+        Message message = new MimeMessage(session);
+
+        message.setFrom(fromAddress);
+
+        for (InternetAddress owner : toAddress) {
+            message.addRecipient(Message.RecipientType.TO, owner);
+        }
+
+        message.setSubject(subject);
+
+        Multipart mp = new MimeMultipart();
+
+        if (htmlBody != null) {
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlBody, "text/html");
+            mp.addBodyPart(htmlPart);
+        }
+
+        if (textBody != null) {
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setContent(textBody, "text/plain");
+            mp.addBodyPart(textPart);
+        }
+
+        message.setContent(mp);
+        return message;
     }
 
     void reset() {

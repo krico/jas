@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.jasify.schedule.appengine.mail.MailParser;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
@@ -21,6 +22,7 @@ import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import javax.annotation.Nonnull;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -248,17 +250,9 @@ class DefaultActivityService implements ActivityService {
 
     private void notify(User user, Activity activity) {
         try {
-            //TODO: I guess this should come from some kind of template
             String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
-            StringBuilder body = new StringBuilder()
-                    .append("<h1>User: ").append(user.getEmail()).append("</h1>")
-                    .append("<p>")
-                    .append("Id: ").append(user.getId()).append("<br/>")
-                    .append("Subscribed: ").append(activity.getId()).append("<br/>")
-                    .append("</p>")
-                    .append("<p>Regards,<br>Jasify</p>");
-
-            MailServiceFactory.getMailService().sendToApplicationOwners(subject, body.toString());
+            MailParser mailParser = MailParser.createBookingEmail(activity.getName(), user.getName(), "TODO", "TODO", BigDecimal.valueOf(activity.getPrice()), BigDecimal.ZERO, "TODO");
+            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
             log.warn("Failed to notify", e);
         }

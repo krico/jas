@@ -5,6 +5,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.mail.MailParser;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.users.PasswordRecoveryMeta;
 import com.jasify.schedule.appengine.meta.users.UserLoginMeta;
@@ -149,17 +150,9 @@ final class DefaultUserService implements UserService {
 
     private void notify(User user) {
         try {
-            //TODO: I guess this should come from some kind of template
             String subject = String.format("[Jasify] SignUp [%s]", user.getName());
-            StringBuilder body = new StringBuilder()
-                    .append("<h1>User: ").append(user.getName()).append("</h1>")
-                    .append("<p>")
-                    .append("Id: ").append(user.getId()).append("<br/>")
-                    .append("Created: ").append(user.getCreated()).append("<br/>")
-                    .append("</p>")
-                    .append("<p>Regards,<br>Jasify</p>");
-
-            MailServiceFactory.getMailService().sendToApplicationOwners(subject, body.toString());
+            MailParser mailParser = MailParser.createUserSignUpEmail(user.getRealName(), user.getName());
+            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
             log.warn("Failed to notify", e);
         }
