@@ -16,6 +16,7 @@ import java.util.Date;
  */
 @Model
 public class Account {
+
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -28,6 +29,14 @@ public class Account {
     private Double balance;
 
     private String currency;
+
+    public Account() {
+    }
+
+    public Account(Key id) {
+        setId(id);
+        setBalance(0d);
+    }
 
     public Key getId() {
         return id;

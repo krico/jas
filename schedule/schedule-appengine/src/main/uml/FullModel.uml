@@ -2,12 +2,170 @@
 <Diagram>
   <ID>JAVA</ID>
   <OriginalElement />
-  <nodes />
+  <nodes>
+    <node x="574.0" y="330.0">com.jasify.schedule.appengine.model.payment.Payment</node>
+    <node x="238.0" y="170.0">com.jasify.schedule.appengine.model.users.PasswordRecovery</node>
+    <node x="431.8125" y="250.0">com.jasify.schedule.appengine.model.activity.Activity</node>
+    <node x="418.4374999999999" y="330.0">com.jasify.schedule.appengine.model.activity.Subscription</node>
+    <node x="408.0" y="170.0">com.jasify.schedule.appengine.model.balance.UserAccount</node>
+    <node x="239.0" y="80.0">com.jasify.schedule.appengine.model.users.User</node>
+    <node x="220.5" y="0.0">com.jasify.schedule.appengine.model.users.UserDetail</node>
+    <node x="554.5" y="410.0">com.jasify.schedule.appengine.model.payment.PayPalPayment</node>
+    <node x="120.0" y="170.0">com.jasify.schedule.appengine.model.users.UserLogin</node>
+    <node x="0.0" y="170.0">com.jasify.schedule.appengine.model.common.GroupUser</node>
+    <node x="553.0" y="80.0">com.jasify.schedule.appengine.model.balance.Account</node>
+    <node x="553.0" y="250.0">com.jasify.schedule.appengine.model.balance.Transfer</node>
+    <node x="542.0" y="170.0">com.jasify.schedule.appengine.model.balance.Transaction</node>
+    <node x="302.7499999999999" y="490.0">com.jasify.schedule.appengine.model.balance.OrganizationAccount</node>
+    <node x="79.87499999999989" y="410.0">com.jasify.schedule.appengine.model.common.Organization</node>
+    <node x="14.0" y="250.0">com.jasify.schedule.appengine.model.common.Group</node>
+    <node x="54.874999999999886" y="330.0">com.jasify.schedule.appengine.model.common.OrganizationMember</node>
+  </nodes>
   <notes />
-  <edges />
-  <settings layout="Hierarchic Group" zoom="1.0" x="0.0" y="0.0" />
+  <edges>
+    <edge source="com.jasify.schedule.appengine.model.balance.OrganizationAccount" target="com.jasify.schedule.appengine.model.balance.Account">
+      <point x="41.75" y="-15.0" />
+      <point x="427.9999999999999" y="465.0" />
+      <point x="691.0" y="465.0" />
+      <point x="691.0" y="150.0" />
+      <point x="624.6666666666667" y="150.0" />
+      <point x="28.666666666666742" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.common.OrganizationMember" target="com.jasify.schedule.appengine.model.users.User">
+      <point x="41.25" y="-15.0" />
+      <point x="178.6249999999999" y="305.0" />
+      <point x="227.5" y="305.0" />
+      <point x="227.5" y="150.0" />
+      <point x="264.83333333333337" y="150.0" />
+      <point x="-5.166666666666629" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.balance.Transfer" target="com.jasify.schedule.appengine.model.balance.Transaction">
+      <point x="-21.5" y="-15.0" />
+      <point x="574.5" y="225.0" />
+      <point x="569.0" y="225.0" />
+      <point x="-27.0" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.balance.UserAccount" target="com.jasify.schedule.appengine.model.balance.Account">
+      <point x="28.5" y="-15.0" />
+      <point x="493.5" y="150.0" />
+      <point x="567.3333333333333" y="150.0" />
+      <point x="-28.666666666666742" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.balance.Transaction" target="com.jasify.schedule.appengine.model.balance.Account">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.common.OrganizationMember" target="com.jasify.schedule.appengine.model.common.Organization">
+      <point x="41.25" y="15.0" />
+      <point x="178.6249999999999" y="385.0" />
+      <point x="166.1249999999999" y="385.0" />
+      <point x="28.75" y="-15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.payment.PayPalPayment" target="com.jasify.schedule.appengine.model.payment.Payment">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.users.PasswordRecovery" target="com.jasify.schedule.appengine.model.users.User">
+      <point x="0.0" y="-15.0" />
+      <point x="312.5" y="150.0" />
+      <point x="275.16666666666663" y="150.0" />
+      <point x="5.166666666666629" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.common.Group" target="com.jasify.schedule.appengine.model.common.GroupUser">
+      <point x="-18.0" y="-15.0" />
+      <point x="32.0" y="225.0" />
+      <point x="25.0" y="225.0" />
+      <point x="-25.0" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.common.OrganizationMember" target="com.jasify.schedule.appengine.model.common.Group">
+      <point x="-41.25" y="-15.0" />
+      <point x="96.12499999999989" y="305.0" />
+      <point x="50.0" y="305.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.users.User" target="com.jasify.schedule.appengine.model.users.UserDetail">
+      <point x="-15.5" y="-15.0" />
+      <point x="254.5" y="55.0" />
+      <point x="245.25" y="55.0" />
+      <point x="-24.75" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.common.GroupUser" target="com.jasify.schedule.appengine.model.common.Group">
+      <point x="25.0" y="15.0" />
+      <point x="75.0" y="225.0" />
+      <point x="68.0" y="225.0" />
+      <point x="18.0" y="-15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.users.UserLogin" target="com.jasify.schedule.appengine.model.users.User">
+      <point x="0.0" y="-15.0" />
+      <point x="168.5" y="140.0" />
+      <point x="254.5" y="140.0" />
+      <point x="-15.5" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.balance.OrganizationAccount" target="com.jasify.schedule.appengine.model.common.Organization">
+      <point x="-41.75" y="-15.0" />
+      <point x="344.4999999999999" y="465.0" />
+      <point x="137.3749999999999" y="465.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.balance.Transaction" target="com.jasify.schedule.appengine.model.balance.Transfer">
+      <point x="27.0" y="15.0" />
+      <point x="623.0" y="225.0" />
+      <point x="617.5" y="225.0" />
+      <point x="21.5" y="-15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.common.Organization" target="com.jasify.schedule.appengine.model.common.OrganizationMember">
+      <point x="-28.75" y="-15.0" />
+      <point x="108.62499999999989" y="385.0" />
+      <point x="96.12499999999989" y="385.0" />
+      <point x="-41.25" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.balance.UserAccount" target="com.jasify.schedule.appengine.model.users.User">
+      <point x="-28.5" y="-15.0" />
+      <point x="436.5" y="130.0" />
+      <point x="295.83333333333337" y="130.0" />
+      <point x="25.83333333333337" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.common.GroupUser" target="com.jasify.schedule.appengine.model.users.User">
+      <point x="0.0" y="-15.0" />
+      <point x="50.0" y="130.0" />
+      <point x="244.16666666666663" y="130.0" />
+      <point x="-25.83333333333337" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.activity.Activity" target="com.jasify.schedule.appengine.model.activity.Subscription">
+      <point x="20.5" y="15.0" />
+      <point x="493.3125" y="305.0" />
+      <point x="489.0624999999999" y="305.0" />
+      <point x="14.125" y="-15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.activity.Subscription" target="com.jasify.schedule.appengine.model.balance.Transfer">
+      <point x="42.375" y="-15.0" />
+      <point x="517.3124999999999" y="305.0" />
+      <point x="574.5" y="305.0" />
+      <point x="-21.5" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.activity.Subscription" target="com.jasify.schedule.appengine.model.users.User">
+      <point x="-42.375" y="-15.0" />
+      <point x="432.5624999999999" y="305.0" />
+      <point x="397.5" y="305.0" />
+      <point x="397.5" y="140.0" />
+      <point x="285.5" y="140.0" />
+      <point x="15.5" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.activity.Subscription" target="com.jasify.schedule.appengine.model.activity.Activity">
+      <point x="-14.125" y="-15.0" />
+      <point x="460.8124999999999" y="305.0" />
+      <point x="452.3125" y="305.0" />
+      <point x="-20.5" y="15.0" />
+    </edge>
+    <edge source="com.jasify.schedule.appengine.model.payment.Payment" target="com.jasify.schedule.appengine.model.balance.Transfer">
+      <point x="0.0" y="-15.0" />
+      <point x="21.5" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="345.5" y="260.0" />
   <SelectedNodes />
   <Categories />
   <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
 </Diagram>
 

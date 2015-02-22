@@ -3,11 +3,13 @@ package com.jasify.schedule.appengine.model.payment;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.balance.Transfer;
+import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.*;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author krico
@@ -49,6 +51,8 @@ public class Payment {
     private List<Double> itemPrices = new ArrayList<>();
 
     private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
+
+    private ModelRef<User> userRef = new ModelRef<>(User.class);
 
     public Payment() {
         state = PaymentStateEnum.New;
@@ -192,6 +196,22 @@ public class Payment {
 
     public ModelRef<Transfer> getTransferRef() {
         return transferRef;
+    }
+
+    public ModelRef<User> getUserRef() {
+        return userRef;
+    }
+
+    public String reference() {
+        return Objects.toString(id);
+    }
+
+    public String describe() {
+        StringBuilder builder = new StringBuilder();
+        for (String itemDescription : itemDescriptions) {
+            builder.append('[').append(itemDescription).append(']');
+        }
+        return builder.toString();
     }
 
     @Override

@@ -104,6 +104,15 @@ public class PayPalPayment extends Payment {
         this.payerLastName = payerLastName;
     }
 
+
+    public String reference() {
+        return super.reference() + "/" + externalId;
+    }
+
+    public String describe() {
+        return "PayPal ID=" + externalId + " " + super.describe();
+    }
+
     @Override
     public String toString() {
         return "PayPalPayment{" +

@@ -34,6 +34,24 @@ public class Transaction {
 
     private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
 
+    public Transaction() {
+
+    }
+
+    public Transaction(Transfer transfer) {
+        this(transfer, false);
+    }
+
+    public Transaction(Transfer transfer, boolean negate) {
+        currency = transfer.getCurrency();
+        amount = transfer.getAmount();
+        if (negate && amount != null)
+            amount = -1 * amount;
+        description = transfer.getDescription();
+        reference = transfer.getReference();
+        transferRef.setModel(transfer);
+    }
+
     public Key getId() {
         return id;
     }
