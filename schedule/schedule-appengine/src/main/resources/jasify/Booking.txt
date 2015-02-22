@@ -1,0 +1,17 @@
+Dear JASIFY team,
+
+A new booking has been created!
+
+Order Details:
+Publisher     : %PublisherName%
+Subscriber    : %SubscriberName%
+Activity      : %AvtivityName%
+
+Order        #: %OrderNumber%
+Price         : %ActivityPrice%
+Tax           : %Tax%
+
+Total         : %TotalPrice%
+Payment method: %PaymentMethod%
+
+Go team JASIFY!!!

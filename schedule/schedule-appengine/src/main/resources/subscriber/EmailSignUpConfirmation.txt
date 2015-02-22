@@ -1,0 +1,10 @@
+Dear %SubscriberName%,
+
+Welcome to Jasify and thank you very much for joining us.
+Your username is: %UserName%
+
+With your username or email and password you have access to your online bookings at any time.
+
+   >> Sign In at: %JasifyUrl% <<
+
+Thank you for signing up with Jasify!
