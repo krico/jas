@@ -47,10 +47,10 @@ public class MailServiceTest {
     }
 
     @Test
-    public void testNotifyApplicationOwners() {
+    public void testSendToApplicationOwners() {
         String subject = "Test: " + new Date();
         String body = "This e-mail is a test e-mail";
-        assertTrue(MailServiceFactory.getMailService().sendToApplicationOwners(subject, body));
+        assertTrue(MailServiceFactory.getMailService().sendToApplicationOwners(subject, body, body));
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
@@ -64,8 +64,43 @@ public class MailServiceTest {
         assertEquals(DefaultMailService.DEFAULT_OWNER, mailMessage.getTo(0));
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testSendToApplicationOwnersInvalidSubject() {
+        assertFalse(MailServiceFactory.getMailService().sendToApplicationOwners(null, "Html", "Text"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSendToApplicationOwnersInvalidHtmlBody() {
+        assertFalse(MailServiceFactory.getMailService().sendToApplicationOwners("Test", null, "Text"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSendToApplicationOwnersInvalidTextBody() {
+        assertFalse(MailServiceFactory.getMailService().sendToApplicationOwners("Test", "Html", null));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSendNullFromAddress() throws Exception {
+        assertFalse(MailServiceFactory.getMailService().send(null, null, null, null));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSendNullSubject() throws Exception {
+        assertFalse(MailServiceFactory.getMailService().send("from@jasify.com", null, null, null));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSendNullHtmlBody() throws Exception {
+        assertFalse(MailServiceFactory.getMailService().send("from@jasify.com", "subject", null, null));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testSendNullTextBody() throws Exception {
+        assertFalse(MailServiceFactory.getMailService().send("from@jasify.com", "subject", "html", null));
+    }
+
     @Test
-    public void testInvalidSenders() {
-        assertFalse(MailServiceFactory.getMailService().sendToApplicationOwners(null, null));
+    public void testSend() throws Exception {
+        assertTrue(MailServiceFactory.getMailService().send("from@jasify.com", "subject", "html", "text"));
     }
 }

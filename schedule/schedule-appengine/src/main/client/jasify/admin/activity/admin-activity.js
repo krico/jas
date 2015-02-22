@@ -18,6 +18,12 @@
         vm.isFinishOpen = false;
         vm.openFinish = openFinish;
 
+        vm.isRepeatOpen = false;
+        vm.openRepeat = openRepeat;
+        vm.repeatType = 'No';
+        vm.repeatDays = {};
+        vm.repeatDate = null;
+
         vm.organizations = organizations.items;
         vm.selectOrganization = selectOrganization;
         vm.selectActivityType = selectActivityType;
@@ -62,6 +68,13 @@
             $event.stopPropagation();
 
             vm.isFinishOpen = true;
+        }
+
+        function openRepeat($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+
+            vm.isRepeatOpen = true;
         }
 
         function hasActivityTypes() {
@@ -123,8 +136,20 @@
 
         function create() {
             Activity.add(vm.activity).then(ok, fail);
+
             function ok(r) {
                 vm.alert('info', 'Activity created!');
+                // TODO This should be server side work
+                if (vm.repeatType == "Weekly") {
+                    while (vm.repeatDate && vm.activity.start.getTime() < vm.repeatDate.getTime() && vm.activity.finish.getTime() < vm.repeatDate.getTime()) {
+                        vm.activity.start.setDate(vm.activity.start.getDate() + 1);
+                        vm.activity.finish.setDate(vm.activity.finish.getDate() + 1);
+                        if (vm.repeatDays[vm.activity.start.getDay()]) {
+                            Activity.add(vm.activity).then(ok, fail);
+                            return;
+                        }
+                    }
+                }
                 $location.path('/admin/activity/' + r.id);
             }
 
