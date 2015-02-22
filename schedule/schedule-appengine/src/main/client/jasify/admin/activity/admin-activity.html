@@ -1,4 +1,4 @@
-<div class="row" xmlns="http://www.w3.org/1999/html">
+<div class="row">
     <div class="col-sm-1">
         <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
     </div>
@@ -100,9 +100,9 @@
 
                         <p class="input-group" ng-show="vm.repeatType=='Weekly'">
                             <input id="repeat" type="text" class="form-control" datetime-picker="{{vm.dateTimeFormat}}"
-                               ng-model="vm.repeatDate" is-open="vm.isRepeatOpen" show-weeks="false"
-                               ng-focus="vm.openRepeat($event)"
-                               close-text="Close"/>
+                                   ng-model="vm.repeatDate" is-open="vm.isRepeatOpen" show-weeks="false"
+                                   ng-focus="vm.openRepeat($event)"
+                                   close-text="Close"/>
 
                             <span class="input-group-btn">
                                 <button type="button" class="btn btn-default" ng-click="vm.openRepeat($event)">
