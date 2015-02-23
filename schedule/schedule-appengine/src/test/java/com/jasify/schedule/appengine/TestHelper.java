@@ -37,13 +37,16 @@ public final class TestHelper {
                     .setLogMailBody(false)
                     .setLogMailLevel(Level.OFF)
     );
+
     private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
+
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig()
-                    .setNoIndexAutoGen(true)
+            new LocalDatastoreServiceTestConfig().setNoIndexAutoGen(true)
     );
+
     private static final LocalServiceTestHelper memcacheWithDatastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
             .setNoIndexAutoGen(true), new LocalMemcacheServiceTestConfig());
+
     private static ServletRunner servletRunner;
 
     private TestHelper() {
@@ -68,9 +71,13 @@ public final class TestHelper {
         }
     }
 
-    public static void initializeJasify() {
-        initializeDatastore();
+    public static void initializeJasify(LocalServiceTestHelper datastoreHelper) {
+        initializeDatastore(datastoreHelper);
         ApplicationData.instance().reload();
+    }
+
+    public static void initializeJasify() {
+        initializeJasify(datastoreHelper);
     }
 
     public static File baseDir() {
@@ -112,10 +119,18 @@ public final class TestHelper {
     }
 
     public static void initializeDatastore() {
+        initializeDatastore(datastoreHelper);
+    }
+
+    public static void initializeDatastore(LocalServiceTestHelper datastoreHelper) {
         datastoreHelper.setUp();
     }
 
     public static void cleanupDatastore() {
+        cleanupDatastore(datastoreHelper);
+    }
+
+    public static void cleanupDatastore(LocalServiceTestHelper datastoreHelper) {
         datastoreHelper.tearDown();
         DatastoreUtil.clearKeysCache();
         DatastoreUtil.clearActiveGlobalTransactions();

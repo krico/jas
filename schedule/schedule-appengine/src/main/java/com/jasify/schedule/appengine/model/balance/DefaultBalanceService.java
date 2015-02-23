@@ -1,10 +1,14 @@
 package com.jasify.schedule.appengine.model.balance;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.balance.*;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.balance.task.ApplySubscriptionCharges;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +51,12 @@ public class DefaultBalanceService implements BalanceService {
         //TODO: Validate balance is there before we start.
 
         linkToTransfer(subscription);
+
         Transfer transfer = createSubscriptionTransfer(subscription, payer, beneficiary);
-        applyTransferTransaction(transfer, true);
-        applyTransferTransaction(transfer, false);
+        applyTransfer(transfer);
+
+        Queue queue = QueueFactory.getQueue("balance-queue");
+        queue.add(TaskOptions.Builder.withPayload(new ApplySubscriptionCharges(subscription.getId())));
 
     }
 
@@ -67,6 +74,11 @@ public class DefaultBalanceService implements BalanceService {
 
         Transfer transfer = createPaymentTransfer(payment);
 
+        applyTransfer(transfer);
+    }
+
+    @Override
+    public void applyTransfer(Transfer transfer) {
         applyTransferTransaction(transfer, true);
         applyTransferTransaction(transfer, false);
     }
@@ -174,6 +186,29 @@ public class DefaultBalanceService implements BalanceService {
                 tx.rollback();
         }
         return transfer;
+    }
+
+    @Override
+    public Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount) {
+        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
+        try {
+            Transfer transfer = new Transfer();
+            transfer.setId(Datastore.allocateId(transferMeta));
+            transfer.setAmount(amount);
+            transfer.setCurrency(currency);
+            transfer.setDescription(description);
+            transfer.setReference(reference);
+            transfer.getPayerLegRef().setKey(Datastore.allocateId(payerAccount.getId(), transactionMeta));
+            transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiaryAccount.getId(), transactionMeta));
+
+            Datastore.put(tx, transfer);
+            tx.commit();
+
+            return transfer;
+        } finally {
+            if (tx.isActive())
+                tx.rollback();
+        }
     }
 
 

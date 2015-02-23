@@ -32,4 +32,8 @@ public interface BalanceService {
     void payment(Payment payment);
 
     void subscription(Subscription subscription, Account payer, Account beneficiary);
+
+    Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount);
+
+    void applyTransfer(Transfer transfer);
 }

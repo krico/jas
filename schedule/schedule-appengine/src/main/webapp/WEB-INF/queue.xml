@@ -1,0 +1,7 @@
+<queue-entries>
+    <!-- See: https://cloud.google.com/appengine/docs/java/config/queue -->
+    <queue>
+        <name>balance-queue</name>
+        <rate>20/s</rate>
+    </queue>
+</queue-entries>

@@ -42,6 +42,21 @@ public class AccountUtilTest {
     }
 
     @Test
+    public void testProfitAndLossAccountKey() {
+        Key key = AccountUtil.profitAndLossAccountKey();
+        assertNotNull(key);
+        assertEquals(AccountMeta.get().getKind(), key.getKind());
+        assertEquals(AccountUtil.PROFIT_AND_LOSS_ACCOUNT, key.getName());
+    }
+
+    @Test
+    public void testProfitAndLossAccount() {
+        Account account = AccountUtil.profitAndLossAccount();
+        assertNotNull(account);
+        assertEquals(AccountUtil.profitAndLossAccountKey(), account.getId());
+    }
+
+    @Test
     public void testMemberIdToAccountIdWithUser() {
         Key memberId = Datastore.allocateId(UserMeta.get());
         Key key = AccountUtil.memberIdToAccountId(memberId);

@@ -68,8 +68,8 @@ public class ModelMetadataUtilTest {
         assertTrue(allKinds.contains("K1"));
         assertTrue(allKinds.contains("K2"));
         assertTrue(allKinds.contains("M1"));
-
-        ModelMetadataUtil.dumpDb(System.out);
+        Appendable appendable = new StringBuilder();
+        assertEquals(appendable, ModelMetadataUtil.dumpDb(appendable));
     }
 
     @Test

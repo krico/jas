@@ -23,6 +23,7 @@ public final class AccountUtil {
      * fiduciary obligation to the beneficiary.
      */
     public static final String CUSTODIAL_ACCOUNT = "Custodian";
+    public static final String PROFIT_AND_LOSS_ACCOUNT = "P&L";
     public static final String USER_ACCOUNT_PREFIX = "u";
     public static final String ORGANIZATION_ACCOUNT_PREFIX = "o";
     private static final Logger log = LoggerFactory.getLogger(AccountUtil.class);
@@ -32,6 +33,31 @@ public final class AccountUtil {
 
     public static Key custodialAccountKey() {
         return Datastore.createKey(AccountMeta.get(), CUSTODIAL_ACCOUNT);
+    }
+
+    public static Key profitAndLossAccountKey() {
+        return Datastore.createKey(AccountMeta.get(), PROFIT_AND_LOSS_ACCOUNT);
+    }
+
+    public static Account profitAndLossAccount() {
+        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
+        try {
+            Key id = profitAndLossAccountKey();
+            Account account = Datastore.getOrNull(AccountMeta.get(), id);
+            if (account == null) {
+                account = new Account(id);
+                log.info("Created P&L account:{}", account);
+                Datastore.put(tx, account);
+            }
+
+            tx.commit();
+            return account;
+        } finally {
+
+            if (tx.isActive())
+                tx.rollback();
+
+        }
     }
 
     /**

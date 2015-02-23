@@ -184,6 +184,12 @@
         </dependency>
         <dependency>
             <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-tools-sdk</artifactId>
+            <version>${jasify.appengine.sdk.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-stubs</artifactId>
             <version>${jasify.appengine.sdk.version}</version>
             <scope>test</scope>

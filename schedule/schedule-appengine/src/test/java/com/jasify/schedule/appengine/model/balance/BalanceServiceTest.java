@@ -1,5 +1,8 @@
 package com.jasify.schedule.appengine.model.balance;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.ModelMetadataUtil;
 import com.jasify.schedule.appengine.model.activity.Activity;
@@ -12,25 +15,39 @@ import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.*;
 
 public class BalanceServiceTest {
+    private static final Logger log = LoggerFactory.getLogger(BalanceServiceTest.class);
+
+    private final LocalTaskQueueTestConfig.TaskCountDownLatch latch = new LocalTaskQueueTestConfig.TaskCountDownLatch(1);
+    private final LocalServiceTestHelper helper = new LocalServiceTestHelper(
+            new LocalDatastoreServiceTestConfig()
+                    .setNoIndexAutoGen(true),
+            new LocalTaskQueueTestConfig()
+                    .setDisableAutoTaskExecution(false)
+                    .setQueueXmlPath(TestHelper.relPath("src/main/webapp/WEB-INF/queue.xml").getPath())
+                    .setCallbackClass(LocalTaskQueueTestConfig.DeferredTaskCallback.class)
+                    .setTaskExecutionLatch(latch)
+    );
     private BalanceService balanceService;
 
     @Before
     public void initializeDatastore() {
-        TestHelper.initializeJasify();
+        TestHelper.initializeJasify(helper);
         balanceService = BalanceServiceFactory.getBalanceService();
     }
 
     @After
     public void cleanupDatastore() {
-        TestHelper.cleanupDatastore();
+        TestHelper.cleanupDatastore(helper);
+
     }
 
 
@@ -66,7 +83,7 @@ public class BalanceServiceTest {
     }
 
     @Test
-    public void testSubscription() throws IOException {
+    public void testSubscription() throws Exception {
         Activity activity = new Activity();
         activity.setPrice(18d);
         activity.setCurrency("CHF");
@@ -82,7 +99,8 @@ public class BalanceServiceTest {
 
 
         balanceService.subscription(subscription, userAccount, organizationAccount);
-        ModelMetadataUtil.dumpDb(System.out);
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        log.info("{}", ModelMetadataUtil.dumpDb(new StringBuilder("DB DUMP\n")));
 
         assertNotNull("Not linked", subscription.getTransferRef().getKey());
         Transfer transfer = subscription.getTransferRef().getModel();

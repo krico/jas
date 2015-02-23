@@ -1,5 +1,4 @@
 target/
-WEB-INF
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -11,3 +10,4 @@ node_modules
 log.txt
 npm-debug.log
 src/main/html/build
+local_db.bin

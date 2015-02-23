@@ -52,7 +52,7 @@ public final class ModelMetadataUtil {
         return ret;
     }
 
-    public static void dumpDb(Appendable out) throws IOException {
+    public static Appendable dumpDb(Appendable out) throws IOException {
         String line = "+==================================================\n";
         for (String kind : queryAllKinds()) {
             Iterable<Entity> entities = Datastore
@@ -85,5 +85,6 @@ public final class ModelMetadataUtil {
             }
         }
         out.append(line);
+        return out;
     }
 }
