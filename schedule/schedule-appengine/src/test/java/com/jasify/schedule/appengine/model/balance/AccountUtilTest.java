@@ -107,7 +107,7 @@ public class AccountUtilTest {
     public void testMemberAccountMustExistUser() {
         Key userId = Datastore.allocateId(UserMeta.get());
         assertNull(Datastore.getOrNull(UserAccountMeta.get(), AccountUtil.memberIdToAccountId(userId)));
-        Key accountId = AccountUtil.memberAccountMustExist(userId);
+        Key accountId = AccountUtil.memberAccountIdMustExist(userId);
         UserAccount userAccount = Datastore.get(UserAccountMeta.get(), accountId);
         assertEquals(accountId, userAccount.getId());
         assertEquals(AccountUtil.memberIdToAccountId(userId), userAccount.getId());
@@ -118,7 +118,7 @@ public class AccountUtilTest {
     public void testMemberAccountMustExistOrganization() {
         Key organizationId = Datastore.allocateId(OrganizationMeta.get());
         assertNull(Datastore.getOrNull(UserAccountMeta.get(), AccountUtil.memberIdToAccountId(organizationId)));
-        Key accountId = AccountUtil.memberAccountMustExist(organizationId);
+        Key accountId = AccountUtil.memberAccountIdMustExist(organizationId);
         OrganizationAccount organizationAccount = Datastore.get(OrganizationAccountMeta.get(), accountId);
         assertEquals(accountId, organizationAccount.getId());
         assertEquals(AccountUtil.memberIdToAccountId(organizationId), organizationAccount.getId());

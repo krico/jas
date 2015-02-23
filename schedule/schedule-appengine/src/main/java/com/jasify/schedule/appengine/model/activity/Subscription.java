@@ -1,8 +1,8 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.balance.HasTransfer;
 import com.jasify.schedule.appengine.model.balance.Transfer;
-import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.*;
 
@@ -13,7 +13,7 @@ import java.util.Date;
  * @since 11/01/15.
  */
 @Model
-public class Subscription {
+public class Subscription implements HasTransfer {
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -29,6 +29,7 @@ public class Subscription {
 
     private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
 
+    @Override
     public Key getId() {
         return id;
     }
@@ -61,6 +62,7 @@ public class Subscription {
         return userRef;
     }
 
+    @Override
     public ModelRef<Transfer> getTransferRef() {
         return transferRef;
     }

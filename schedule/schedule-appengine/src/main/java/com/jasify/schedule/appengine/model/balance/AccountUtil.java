@@ -88,13 +88,17 @@ public final class AccountUtil {
         throw new IllegalArgumentException("This should never happen!");
     }
 
-    public static Key memberAccountMustExist(Key memberId) {
+    public static Key memberAccountIdMustExist(Key memberId) {
+        return memberAccountMustExist(memberId).getId();
+    }
+
+    public static Account memberAccountMustExist(Key memberId) {
         Key memberAccountId = AccountUtil.memberIdToAccountId(memberId);
         com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-
+        Account account;
         try {
 
-            Account account = Datastore.getOrNull(AccountMeta.get(), memberAccountId);
+            account = Datastore.getOrNull(AccountMeta.get(), memberAccountId);
             if (account == null) {
                 account = AccountUtil.newMemberAccount(memberId);
                 log.info("Created member account:{} for member:{}", memberAccountId, memberId);
@@ -110,6 +114,6 @@ public final class AccountUtil {
 
         }
 
-        return memberAccountId;
+        return account;
     }
 }

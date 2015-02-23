@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.balance;
 
+import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.payment.Payment;
 
 /**
@@ -29,4 +30,6 @@ public interface BalanceService {
      * @param payment - a payment that has been executed and needs to be reflected on the balance
      */
     void payment(Payment payment);
+
+    void subscription(Subscription subscription, Account payer, Account beneficiary);
 }

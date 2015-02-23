@@ -3,11 +3,15 @@ package com.jasify.schedule.appengine.model.balance;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.balance.*;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelRef;
+
+import java.util.Objects;
 
 /**
  * @author krico
@@ -37,6 +41,18 @@ public class DefaultBalanceService implements BalanceService {
         return Singleton.INSTANCE;
     }
 
+    @Override
+    public void subscription(Subscription subscription, Account payer, Account beneficiary) {
+
+        //TODO: Validate balance is there before we start.
+
+        linkToTransfer(subscription);
+        Transfer transfer = createSubscriptionTransfer(subscription, payer, beneficiary);
+        applyTransferTransaction(transfer, true);
+        applyTransferTransaction(transfer, false);
+
+    }
+
     /**
      * And attempt to make an idempotent payment procedure composed of several transactions that can fail at any point
      * and is capable of detecting it and restoring itself.
@@ -47,8 +63,7 @@ public class DefaultBalanceService implements BalanceService {
     public void payment(Payment payment) {
         Preconditions.checkNotNull(payment.getUserRef().getKey(), "payment.UserRef");
 
-        //TODO: Fees!\
-        linkPaymentToTransfer(payment);
+        linkToTransfer(payment);
 
         Transfer transfer = createPaymentTransfer(payment);
 
@@ -57,28 +72,28 @@ public class DefaultBalanceService implements BalanceService {
     }
 
     /**
-     * Allocate a new transferId for the transfer linked to this payment <b>or</b>
+     * Allocate a new transferId for the transfer linked to this HasTransfer <b>or</b>
      * restore a previously allocated transferId
      *
-     * @param executedPayment that is to be credited to the user
+     * @param hasTransfer that is to be credited to the user
      * @return the newly allocated or restored transferId
      */
-    private Key linkPaymentToTransfer(Payment executedPayment) {
-        Key transferId = executedPayment.getTransferRef().getKey();
+    private Key linkToTransfer(HasTransfer hasTransfer) {
+        Key transferId = hasTransfer.getTransferRef().getKey();
         if (transferId == null) {
             transferId = Datastore.allocateId(transferMeta);
-            executedPayment.getTransferRef().setKey(transferId);
+            hasTransfer.getTransferRef().setKey(transferId);
 
             com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
             try {
-                Datastore.put(tx, executedPayment);
+                Datastore.put(tx, hasTransfer);
                 tx.commit();
             } finally {
                 if (tx.isActive())
                     tx.rollback();
             }
         } else {
-            log.warn("Payment was already linked to transfer, Payment.Id={}, Transfer.Id={}", executedPayment.getId(), transferId);
+            log.warn("{} was already linked to transfer, HasTransfer.Id={}, Transfer.Id={}", hasTransfer.getClass().getName(), hasTransfer.getId(), transferId);
         }
         return transferId;
     }
@@ -95,7 +110,7 @@ public class DefaultBalanceService implements BalanceService {
 
         Transfer transfer;
 
-        Key userAccountKey = AccountUtil.memberAccountMustExist(userKey);
+        Key userAccountKey = AccountUtil.memberAccountIdMustExist(userKey);
 
         com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
         try {
@@ -130,6 +145,37 @@ public class DefaultBalanceService implements BalanceService {
         }
         return transfer;
     }
+
+    private Transfer createSubscriptionTransfer(Subscription subscription, Account payer, Account beneficiary) {
+        Transfer transfer;
+        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
+        try {
+            transfer = Datastore.getOrNull(tx, transferMeta, subscription.getTransferRef().getKey());
+            if (transfer == null) {
+                Activity activity = subscription.getActivityRef().getModel();
+                Double amount = activity.getPrice();
+                transfer = new Transfer();
+                transfer.setId(subscription.getTransferRef().getKey());
+                transfer.setAmount(amount);
+                transfer.setCurrency(activity.getCurrency());
+                transfer.setDescription(activity.getName());
+                transfer.setReference(Objects.toString(subscription.getId()));
+                transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
+                transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));
+
+                Datastore.put(tx, transfer);
+
+            } else {
+                log.warn("Transfer already existed, Transfer.Id={}", subscription.getTransferRef().getKey());
+            }
+            tx.commit();
+        } finally {
+            if (tx.isActive())
+                tx.rollback();
+        }
+        return transfer;
+    }
+
 
     private void applyTransferTransaction(Transfer transfer, boolean debit) {
         ModelRef<Transaction> legRef = debit ? transfer.getPayerLegRef() : transfer.getBeneficiaryLegRef();

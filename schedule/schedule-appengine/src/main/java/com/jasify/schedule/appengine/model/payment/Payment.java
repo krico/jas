@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.payment;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.model.balance.HasTransfer;
 import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.*;
@@ -16,7 +17,7 @@ import java.util.Objects;
  * @since 11/01/15.
  */
 @Model
-public class Payment {
+public class Payment implements HasTransfer {
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -63,6 +64,7 @@ public class Payment {
         this.type = type;
     }
 
+    @Override
     public Key getId() {
         return id;
     }
@@ -194,6 +196,7 @@ public class Payment {
         }
     }
 
+    @Override
     public ModelRef<Transfer> getTransferRef() {
         return transferRef;
     }
