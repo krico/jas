@@ -162,6 +162,12 @@ public class Payment implements HasTransfer {
         itemPrices.add(price);
     }
 
+    public void addItemRaw(String description, int units, double price) {
+        itemDescriptions.add(description);
+        itemUnits.add(units);
+        itemPrices.add(price);
+    }
+
     public int getItemCount() {
         validate();
         return itemDescriptions.size();

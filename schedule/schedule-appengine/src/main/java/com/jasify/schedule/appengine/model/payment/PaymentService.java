@@ -14,6 +14,9 @@ import javax.annotation.Nonnull;
  */
 public interface PaymentService {
     @Nonnull
+    public <T extends Payment> Key newPayment(long userId, T payment) throws PaymentException;
+
+    @Nonnull
     public <T extends Payment> Key newPayment(Key parentKey, T payment) throws PaymentException;
 
     public <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws PaymentException;

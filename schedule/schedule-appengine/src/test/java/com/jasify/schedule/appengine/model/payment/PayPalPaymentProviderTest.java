@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.payment;
 
 import com.google.api.client.http.GenericUrl;
+import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.util.CurrencyUtil;
 import com.paypal.api.payments.*;
 import com.paypal.api.payments.Payment;
@@ -8,10 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.slim3.datastore.Datastore;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,8 +34,14 @@ public class PayPalPaymentProviderTest {
     private TestPayPalInterface testPayPalInterface = new TestPayPalInterface();
     private PayPalPaymentProvider provider;
 
+    @BeforeClass
+    public static void setup() {
+        TestHelper.initializeDatastore();
+    }
+
     @AfterClass
     public static void cleanup() {
+        TestHelper.cleanupDatastore();
         PayPalPaymentProvider.instance().setPayPalInterface(null);
     }
 
@@ -154,6 +159,7 @@ public class PayPalPaymentProviderTest {
         testPayPalInterface.replay();
 
         PayPalPayment jasPayment = new PayPalPayment();
+        jasPayment.setId(Datastore.allocateId(PayPalPayment.class));
         jasPayment.setCurrency(currency);
         jasPayment.addItem("Item", 1, price);
 

@@ -1,12 +1,13 @@
 package com.jasify.schedule.appengine.model.balance;
 
+import com.jasify.schedule.appengine.TestService;
 import org.easymock.EasyMock;
 
 /**
  * @author krico
  * @since 20/02/15.
  */
-public class TestBalanceServiceFactory extends BalanceServiceFactory {
+public class TestBalanceServiceFactory extends BalanceServiceFactory implements TestService{
     private BalanceService balanceServiceMock;
 
     public void setUp() {

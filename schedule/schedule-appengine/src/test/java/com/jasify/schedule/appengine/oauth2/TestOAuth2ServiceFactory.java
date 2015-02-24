@@ -1,12 +1,13 @@
 package com.jasify.schedule.appengine.oauth2;
 
+import com.jasify.schedule.appengine.TestService;
 import org.easymock.EasyMock;
 
 /**
  * @author krico
  * @since 27/01/15.
  */
-public class TestOAuth2ServiceFactory extends OAuth2ServiceFactory {
+public class TestOAuth2ServiceFactory extends OAuth2ServiceFactory implements TestService {
     private OAuth2Service oAuth2ServiceMock;
 
     public void setUp() {

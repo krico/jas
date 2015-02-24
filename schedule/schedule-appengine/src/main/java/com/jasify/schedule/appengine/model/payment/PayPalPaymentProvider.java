@@ -1,10 +1,10 @@
 package com.jasify.schedule.appengine.model.payment;
 
 import com.google.api.client.http.GenericUrl;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
 import com.google.gson.internal.StringMap;
-import com.jasify.schedule.appengine.oauth2.OAuth2Util;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.paypal.api.payments.*;
@@ -114,7 +114,7 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         com.paypal.api.payments.Payment paymentToCreate = new com.paypal.api.payments.Payment()
                 .setIntent("sale")
                 .setPayer(new Payer("paypal"))
-                .setRedirectUrls(createRedirectUrls(baseUrl))
+                .setRedirectUrls(createRedirectUrls(baseUrl, KeyFactory.keyToString(payment.getId())))
                 .setTransactions(Collections.singletonList(transaction));
 
         paymentToCreate.setExperienceProfileId(profileId);
@@ -135,8 +135,6 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         payment.setExecuteUrl(extractUrl(createdPayment, "execute"));
 
         payment.setState(PaymentStateEnum.Created);
-        log.info("APPROVAL URL:\n\t{}", payment.getApproveUrl());
-
     }
 
     @Override
@@ -181,8 +179,7 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         }
     }
 
-    private RedirectUrls createRedirectUrls(GenericUrl baseUrl) {
-        String stateKey = OAuth2Util.createStateKey(baseUrl);
+    private RedirectUrls createRedirectUrls(GenericUrl baseUrl, String stateKey) {
 
         GenericUrl cancelUrl = new GenericUrl(baseUrl.toURI());
         cancelUrl.setFragment("/paypal-cancel/" + stateKey);

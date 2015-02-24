@@ -5,8 +5,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
+import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.activity.Subscription;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
@@ -29,14 +29,12 @@ class DefaultPaymentService implements PaymentService {
         return Singleton.INSTANCE;
     }
 
-    private Subscription getSubscription(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("Subscription.id=NULL");
-
-        try {
-            return Datastore.get(subscriptionMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Subscription id=" + id);
-        }
+    @Nonnull
+    @Override
+    public <T extends Payment> Key newPayment(long userId, T payment) throws PaymentException {
+        Key userKey = Datastore.createKey(UserMeta.get(), userId);
+        payment.getUserRef().setKey(userKey);
+        return newPayment(userKey, payment);
     }
 
     @Nonnull
