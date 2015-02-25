@@ -90,6 +90,9 @@
             activitySubscriptions: {
                 add: nop,
                 query: nop
+            },
+            balance: {
+                createPayment: nop
             }
         };
 
