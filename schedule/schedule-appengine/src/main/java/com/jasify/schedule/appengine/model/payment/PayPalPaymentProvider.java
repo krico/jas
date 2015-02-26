@@ -4,7 +4,6 @@ import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
-import com.google.gson.internal.StringMap;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.paypal.api.payments.*;
@@ -16,7 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 import static com.jasify.schedule.appengine.util.CurrencyUtil.formatCurrencyNumber;
 
@@ -68,14 +70,7 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
                 profile.setInputFields(new InputFields().setAllowNote(false).setNoShipping(1));
                 profileId = payPal.create(profile);
             } else {
-                Object payPalSUX = list.get(0);
-                if (payPalSUX instanceof StringMap) {
-                    StringMap yesItReallySux = (StringMap) payPalSUX;
-                    Object payPalSuxSoBadItsNotEvenFunny = yesItReallySux.get("id");
-                    profileId = Objects.toString(payPalSuxSoBadItsNotEvenFunny);
-                } else {
-                    profileId = list.get(0).getId();
-                }
+                profileId = list.get(0).getId();
                 log.info("Retrieved profile id={}", profileId);
             }
         } catch (Exception e) {

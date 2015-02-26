@@ -75,6 +75,13 @@
                     <a ng-click="vm.signIn()">Sign In</a>
                 </li>
 
+                <li class="dropdown" ng-if="vm.isAuthenticated()" ng-class="vm.menuActive('/payment/')" dropdown>
+                    <a ng-href="#{{vm.path}}" class="dropdown-toggle" dropdown-toggle>balance <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-click="vm.collapse()" href="#/payment/make">make a payment</a></li>
+                    </ul>
+                </li>
                 <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/profile')">
                     <a ng-click="vm.collapse()" href="#/profile">{{currentUser.name}}</a>
                 </li>

@@ -1,12 +1,22 @@
 (function (angular) {
     angular.module('jasifyComponents').factory('Balance', balance);
 
-    function balance(Endpoint, $q, $log) {
+    function balance(Endpoint, $q, $location) {
         var Balance = {
             createPayment: createPayment
         };
 
         function createPayment(request) {
+            var absUrl = $location.absUrl();
+            var ix = absUrl.indexOf('#');
+            var baseUrl;
+            if (ix == -1) {
+                baseUrl = absUrl;
+            } else {
+                baseUrl = absUrl.substring(0, ix);
+            }
+            request.baseUrl = baseUrl;
+
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.createPayment(request)
                     .then(resultHandler, errorHandler);
