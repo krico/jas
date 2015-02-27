@@ -10,6 +10,7 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -75,6 +76,7 @@ public class BalanceEndpoint {
         PayPalPayment payPalPayment = (PayPalPayment) payment;
         payPalPayment.setPayerId(payerId);
         paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
+        BalanceServiceFactory.getBalanceService().payment(payPalPayment);
     }
 
     private Payment getPaymentCheckUser(Key paymentId, JasifyEndpointUser jasCaller, PaymentService paymentService) throws UnauthorizedException, ForbiddenException, NotFoundException {
