@@ -69,6 +69,8 @@ public class PaymentServiceTest {
     @Test
     public void testExecutePayment() throws Exception {
         PayPalPayment payment = newPayment();
+        payment.setState(PaymentStateEnum.Created);
+        Datastore.put(payment);
 
         PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
         mockProvider.executePayment(payment);

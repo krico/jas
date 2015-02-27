@@ -27,6 +27,8 @@ import static com.jasify.schedule.appengine.util.CurrencyUtil.formatCurrencyNumb
  * @since 05/02/15.
  */
 public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
+    public static final String CANCEL_PATH = "/payment/cancel/";
+    public static final String ACCEPT_PATH = "/payment/accept/";
     private static final long MIN_REMAINING_LIFETIME = 120;
     private static final Logger log = LoggerFactory.getLogger(PayPalPaymentProvider.class);
     private PayPalInterface payPalInterface;
@@ -177,10 +179,10 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
     private RedirectUrls createRedirectUrls(GenericUrl baseUrl, String stateKey) {
 
         GenericUrl cancelUrl = new GenericUrl(baseUrl.toURI());
-        cancelUrl.setFragment("/payment/cancel/" + stateKey);
+        cancelUrl.setFragment(CANCEL_PATH + stateKey);
 
         GenericUrl returnUrl = new GenericUrl(baseUrl.toURI());
-        returnUrl.setFragment("/payment/execute/" + stateKey);
+        returnUrl.setFragment(ACCEPT_PATH + stateKey);
 
         RedirectUrls redirectUrls = new RedirectUrls();
         redirectUrls.setCancelUrl(cancelUrl.build());

@@ -86,7 +86,7 @@ class DefaultPaymentService implements PaymentService {
             if (dbPayment == null) {
                 throw new PaymentException("Payment not found");
             }
-
+            
             if (dbPayment.getState() != PaymentStateEnum.Created) {
                 throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected Created)");
             }

@@ -34,7 +34,7 @@
 
         function executePayment(paymentId) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.balance.executePayment(cancelPayment)
+                return jasify.balance.executePayment(paymentId)
                     .then(resultHandler, errorHandler);
             });
         }

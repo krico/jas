@@ -66,10 +66,21 @@ public class BalanceEndpoint {
         }
     }
 
+    @ApiMethod(name = "balance.executePayment", path = "balance/execute-payment/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public void executePayment(User caller, @Named("id") Key paymentId, @Named("payerId") String payerId) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException, ForbiddenException {
+        JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
+        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
+        Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
+        Preconditions.checkArgument(payment.getType() == PaymentTypeEnum.PayPal, "Only PayPal payments supported");
+        PayPalPayment payPalPayment = (PayPalPayment) payment;
+        payPalPayment.setPayerId(payerId);
+        paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
+    }
+
     private Payment getPaymentCheckUser(Key paymentId, JasifyEndpointUser jasCaller, PaymentService paymentService) throws UnauthorizedException, ForbiddenException, NotFoundException {
         Payment payment;
         try {
-             payment = paymentService.getPayment(paymentId);
+            payment = paymentService.getPayment(paymentId);
             // Ensure the payment belongs to this user!
             mustBeSameUserOrAdmin(jasCaller, payment.getUserRef().getKey());
         } catch (EntityNotFoundException e) {

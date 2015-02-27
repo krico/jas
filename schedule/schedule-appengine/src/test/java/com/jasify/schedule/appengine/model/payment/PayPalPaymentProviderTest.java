@@ -140,8 +140,8 @@ public class PayPalPaymentProviderTest {
                 assertNotNull(redirectUrls.getReturnUrl());
                 assertNotNull(redirectUrls.getCancelUrl());
 
-                assertTrue(StringUtils.startsWith(redirectUrls.getReturnUrl(), BASE_URL + "#/paypal-accept/"));
-                assertTrue(StringUtils.startsWith(redirectUrls.getCancelUrl(), BASE_URL + "#/paypal-cancel/"));
+                assertTrue(StringUtils.startsWith(redirectUrls.getReturnUrl(), BASE_URL + "#" + PayPalPaymentProvider.ACCEPT_PATH));
+                assertTrue(StringUtils.startsWith(redirectUrls.getCancelUrl(), BASE_URL + "#" + PayPalPaymentProvider.CANCEL_PATH));
 
                 payment.setId(PAYMENT_ID);
                 payment.setState(CREATED_STATE);
