@@ -3,7 +3,9 @@
 
     function balance(Endpoint, $q, $location) {
         var Balance = {
-            createPayment: createPayment
+            createPayment: createPayment,
+            cancelPayment: cancelPayment,
+            executePayment: executePayment
         };
 
         function createPayment(request) {
@@ -19,6 +21,20 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.createPayment(request)
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function cancelPayment(paymentId) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.balance.cancelPayment({id: paymentId})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function executePayment(paymentId) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.balance.executePayment(cancelPayment)
                     .then(resultHandler, errorHandler);
             });
         }

@@ -16,7 +16,7 @@ describe('BalanceService', function () {
     it('should call createPayment', function () {
         var expected = [];
         spyOn($gapiMock.client.jasify.balance, 'createPayment').and.returnValue($q.when({result: {items: expected}}));
-        Balance.createPayment()
+        Balance.createPayment({})
             .then(function (res) {
                 expect(res.items).toBe(expected);
             },
@@ -27,5 +27,39 @@ describe('BalanceService', function () {
         $rootScope.$apply();
 
         expect($gapiMock.client.jasify.balance.createPayment).toHaveBeenCalled();
+    });
+
+    it('should call cancelPayment', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.balance, 'cancelPayment').and.returnValue($q.when({result: {items: expected}}));
+        var pid = 22;
+
+        Balance.cancelPayment(pid)
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.balance.cancelPayment).toHaveBeenCalledWith({id: pid});
+    });
+
+    it('should call executePayment', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.balance, 'executePayment').and.returnValue($q.when({result: {items: expected}}));
+        Balance.executePayment()
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.balance.executePayment).toHaveBeenCalled();
     });
 });

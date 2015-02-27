@@ -10,6 +10,7 @@
         'ui.bootstrap.datetimepicker',
         'jasifyComponents',
         'jasify.authenticate',
+        'jasify.payment',
         'jasify.templates'
     ]);
 

@@ -92,7 +92,9 @@
                 query: nop
             },
             balance: {
-                createPayment: nop
+                createPayment: nop,
+                cancelPayment: nop,
+                executePayment: nop
             }
         };
 

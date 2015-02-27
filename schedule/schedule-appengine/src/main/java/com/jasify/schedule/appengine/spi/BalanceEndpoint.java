@@ -4,8 +4,12 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.ForbiddenException;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -15,6 +19,7 @@ import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.TypeUtil;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
+import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrAdmin;
 
 /**
  * @author krico
@@ -47,5 +52,29 @@ public class BalanceEndpoint {
         paymentService.newPayment(jasCaller.getUserId(), payment);
         paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
         return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
+    }
+
+    @ApiMethod(name = "balance.cancelPayment", path = "balance/cancel-payment/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void cancelPayment(User caller, @Named("id") Key paymentId) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException, ForbiddenException {
+        JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
+        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
+        Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
+        try {
+            paymentService.cancelPayment(payment); //TODO: implement
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Payment (deleted after get?)");
+        }
+    }
+
+    private Payment getPaymentCheckUser(Key paymentId, JasifyEndpointUser jasCaller, PaymentService paymentService) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        Payment payment;
+        try {
+             payment = paymentService.getPayment(paymentId);
+            // Ensure the payment belongs to this user!
+            mustBeSameUserOrAdmin(jasCaller, payment.getUserRef().getKey());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Payment");
+        }
+        return payment;
     }
 }

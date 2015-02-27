@@ -1,0 +1,17 @@
+<div class="row">
+    <div class="col-sm-12">&nbsp;</div>
+    <div class="col-sm-12">
+        <div class="col-sm-1 col-sm-offset-2 h4">
+            <span ng-hide="vm.complete" us-spinner=""></span>&nbsp;
+        </div>
+        <div class="col-sm-6 h4 text-danger">
+            {{vm.status}}
+        </div>
+        <div class="col-sm-6 col-sm-offset-3">
+            Would you like to <a ng-click="vm.makePayment()">make another payment</a>?
+        </div>
+        <div class="col-sm-6 col-sm-offset-3">
+            <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+        </div>
+    </div>
+</div>

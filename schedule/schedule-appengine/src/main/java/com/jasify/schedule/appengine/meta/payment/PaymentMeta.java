@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.payment;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-19 22:16:35")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-27 20:40:13")
 /** */
 public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.payment.Payment> {
 
@@ -40,6 +40,9 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
     /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer> transferRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer>(this, "transferRef", "transferRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.balance.Transfer.class);
 
+    /** */
+    public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User> userRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User>(this, "userRef", "userRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.users.User.class);
+
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
@@ -76,6 +79,10 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             throw new NullPointerException("The property(transferRef) is null.");
         }
         model.getTransferRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("transferRef"));
+        if (model.getUserRef() == null) {
+            throw new NullPointerException("The property(userRef) is null.");
+        }
+        model.getUserRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("userRef"));
         return model;
     }
 
@@ -102,6 +109,10 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             throw new NullPointerException("The property(transferRef) must not be null.");
         }
         entity.setProperty("transferRef", m.getTransferRef().getKey());
+        if (m.getUserRef() == null) {
+            throw new NullPointerException("The property(userRef) must not be null.");
+        }
+        entity.setProperty("userRef", m.getUserRef().getKey());
         return entity;
     }
 
@@ -130,6 +141,10 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             throw new NullPointerException("The property(transferRef) must not be null.");
         }
         m.getTransferRef().assignKeyIfNecessary(ds);
+        if (m.getUserRef() == null) {
+            throw new NullPointerException("The property(userRef) must not be null.");
+        }
+        m.getUserRef().assignKeyIfNecessary(ds);
     }
 
     @Override
@@ -227,6 +242,10 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             writer.setNextPropertyName("transferRef");
             encoder0.encode(writer, m.getTransferRef(), maxDepth, currentDepth);
         }
+        if(m.getUserRef() != null && m.getUserRef().getKey() != null){
+            writer.setNextPropertyName("userRef");
+            encoder0.encode(writer, m.getUserRef(), maxDepth, currentDepth);
+        }
         writer.endObject();
     }
 
@@ -304,6 +323,8 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         }
         reader = rootReader.newObjectReader("transferRef");
         decoder0.decode(reader, m.getTransferRef(), maxDepth, currentDepth);
+        reader = rootReader.newObjectReader("userRef");
+        decoder0.decode(reader, m.getUserRef(), maxDepth, currentDepth);
         return m;
     }
 }

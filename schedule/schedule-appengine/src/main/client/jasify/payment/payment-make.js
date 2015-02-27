@@ -23,7 +23,7 @@
                 return;
             }
 
-            if (parseFloat(vm.payment.amount) == 0) {
+            if (parseFloat(vm.payment.amount) === 0) {
                 vm.alert('info', 'Amount cannot be zero.');
                 return;
             }

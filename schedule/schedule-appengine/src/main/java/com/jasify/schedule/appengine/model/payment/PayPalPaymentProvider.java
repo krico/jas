@@ -177,10 +177,10 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
     private RedirectUrls createRedirectUrls(GenericUrl baseUrl, String stateKey) {
 
         GenericUrl cancelUrl = new GenericUrl(baseUrl.toURI());
-        cancelUrl.setFragment("/paypal-cancel/" + stateKey);
+        cancelUrl.setFragment("/payment/cancel/" + stateKey);
 
         GenericUrl returnUrl = new GenericUrl(baseUrl.toURI());
-        returnUrl.setFragment("/paypal-accept/" + stateKey);
+        returnUrl.setFragment("/payment/execute/" + stateKey);
 
         RedirectUrls redirectUrls = new RedirectUrls();
         redirectUrls.setCancelUrl(cancelUrl.build());

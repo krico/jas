@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.balance.TestBalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.*;
+import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
@@ -91,5 +92,20 @@ public class BalanceEndpointTest {
 
         JasPaymentResponse response = endpoint.createPayment(user, request);
         assertNotNull(response);
+    }
+
+    @Test
+    public void testCancelPayment() throws Exception {
+        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
+        Key paymentId = Datastore.allocateId(Payment.class);
+        Payment p = new Payment();
+        p.setId(paymentId);
+        p.getUserRef().setKey(Datastore.createKey(User.class, user.getUserId()));
+        EasyMock.expect(PaymentServiceFactory.getPaymentService().getPayment(paymentId)).andReturn(p);
+        EasyMock.expect(PaymentServiceFactory.getPaymentService().cancelPayment(p)).andReturn(p);
+
+        testPaymentServiceFactory.replay();
+        testBalanceServiceFactory.replay();
+        endpoint.cancelPayment(user, paymentId);
     }
 }

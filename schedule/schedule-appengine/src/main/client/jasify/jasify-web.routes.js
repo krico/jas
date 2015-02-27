@@ -226,16 +226,6 @@
                     }
                 }
             })
-            .when('/payment/make/:amount?', {
-                templateUrl: 'payment/payment-make.html',
-                controller: 'PaymentMakeController',
-                controllerAs: 'vm',
-                resolve: {
-                    allow: /*@ngInject*/ function ($q, Allow) {
-                        return Allow.user();
-                    }
-                }
-            })
         ;
         /* END: Admin routes */
 
