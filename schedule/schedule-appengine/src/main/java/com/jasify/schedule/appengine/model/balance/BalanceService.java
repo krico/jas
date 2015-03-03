@@ -1,7 +1,13 @@
 package com.jasify.schedule.appengine.model.balance;
 
+import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
+import com.jasify.schedule.appengine.model.users.User;
+
+import java.util.List;
 
 /**
  * @author krico
@@ -36,4 +42,20 @@ public interface BalanceService {
     Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount);
 
     void applyTransfer(Transfer transfer);
+
+    UserAccount getUserAccount(Key userId) throws EntityNotFoundException;
+
+    UserAccount getUserAccount(User user) throws EntityNotFoundException;
+
+    OrganizationAccount getOrganizationAccount(Key organizationId) throws EntityNotFoundException;
+
+    OrganizationAccount getOrganizationAccount(Organization organization) throws EntityNotFoundException;
+
+    List<Transaction> listTransactions(Key accountId) throws EntityNotFoundException;
+
+    List<Transaction> listTransactions(Account account) throws EntityNotFoundException;
+
+    List<Transaction> listTransactions(Account account, int offset, int limit) throws EntityNotFoundException;
+
+    List<Transaction> listTransactions(Key accountId, int offset, int limit) throws EntityNotFoundException;
 }

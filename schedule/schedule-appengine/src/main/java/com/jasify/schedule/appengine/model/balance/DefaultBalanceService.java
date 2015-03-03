@@ -6,15 +6,20 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.balance.*;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.task.ApplySubscriptionCharges;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
+import com.jasify.schedule.appengine.model.users.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
+import org.slim3.datastore.ModelQuery;
 import org.slim3.datastore.ModelRef;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -246,6 +251,64 @@ public class DefaultBalanceService implements BalanceService {
             if (tx.isActive())
                 tx.rollback();
         }
+    }
+
+    @Override
+    public UserAccount getUserAccount(Key userId) throws EntityNotFoundException {
+        Key accountId = AccountUtil.memberIdToAccountId(userId);
+        UserAccount ret = Datastore.getOrNull(userAccountMeta, accountId);
+        if (ret == null) {
+            throw new EntityNotFoundException("UserAccount");
+        }
+        return ret;
+    }
+
+    @Override
+    public UserAccount getUserAccount(User user) throws EntityNotFoundException {
+        return getUserAccount(user.getId());
+    }
+
+    @Override
+    public OrganizationAccount getOrganizationAccount(Key organizationId) throws EntityNotFoundException {
+        Key accountId = AccountUtil.memberIdToAccountId(organizationId);
+        OrganizationAccount ret = Datastore.getOrNull(organizationAccountMeta, accountId);
+        if (ret == null) {
+            throw new EntityNotFoundException("OrganizationAccount");
+        }
+        return ret;
+    }
+
+    @Override
+    public OrganizationAccount getOrganizationAccount(Organization organization) throws EntityNotFoundException {
+        return getOrganizationAccount(organization.getId());
+    }
+
+    @Override
+    public List<Transaction> listTransactions(Key accountId) throws EntityNotFoundException {
+        return listTransactions(accountId, 0, 0);
+    }
+
+    @Override
+    public List<Transaction> listTransactions(Account account) throws EntityNotFoundException {
+        return listTransactions(account.getId(), 0, 0);
+    }
+
+    @Override
+    public List<Transaction> listTransactions(Account account, int offset, int limit) throws EntityNotFoundException {
+        return listTransactions(account.getId(), offset, limit);
+    }
+
+    public List<Transaction> listTransactions(Key accountId, int offset, int limit) throws EntityNotFoundException {
+        ModelQuery<Transaction> query = Datastore.query(transactionMeta, accountId)
+                .sort(transactionMeta.created.desc);
+
+        if (limit > 0)
+            query.limit(limit);
+
+        if (offset > 0)
+            query.offset(offset);
+
+        return query.asList();
     }
 
     private static class Singleton {

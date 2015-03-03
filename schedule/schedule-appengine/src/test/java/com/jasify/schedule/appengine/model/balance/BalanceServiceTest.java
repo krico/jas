@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.balance;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
@@ -19,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.*;
@@ -118,7 +121,135 @@ public class BalanceServiceTest {
         assertEquals(transfer.getCurrency(), payerTransaction.getCurrency());
         assertEquals(-18d, payerTransaction.getAmount());
         assertEquals(-18d, payerTransaction.getAccountRef().getModel().getBalance());
+    }
+
+    @Test
+    public void testGetUserAccountById() throws Exception {
+        User aUser = new User("who");
+        Datastore.put(aUser);
+        Account expected = AccountUtil.memberAccountMustExist(aUser.getId());
+        UserAccount userAccount = balanceService.getUserAccount(aUser.getId());
+        assertNotNull(userAccount);
+        assertEquals(expected.getId(), userAccount.getId());
+    }
+
+    @Test
+    public void testGetUserAccount() throws Exception {
+        User aUser = new User("who");
+        Datastore.put(aUser);
+        Account expected = AccountUtil.memberAccountMustExist(aUser.getId());
+        UserAccount userAccount = balanceService.getUserAccount(aUser);
+        assertNotNull(userAccount);
+        assertEquals(expected.getId(), userAccount.getId());
+    }
+
+    @Test
+    public void testGetOrganizationAccountById() throws Exception {
+        Organization anOrganization = new Organization("who");
+        Datastore.put(anOrganization);
+        Account expected = AccountUtil.memberAccountMustExist(anOrganization.getId());
+        OrganizationAccount organizationAccount = balanceService.getOrganizationAccount(anOrganization.getId());
+        assertNotNull(organizationAccount);
+        assertEquals(expected.getId(), organizationAccount.getId());
+    }
+
+    @Test
+    public void testGetOrganizationAccount() throws Exception {
+        Organization anOrganization = new Organization("who");
+        Datastore.put(anOrganization);
+        Account expected = AccountUtil.memberAccountMustExist(anOrganization.getId());
+        OrganizationAccount organizationAccount = balanceService.getOrganizationAccount(anOrganization);
+        assertNotNull(organizationAccount);
+        assertEquals(expected.getId(), organizationAccount.getId());
+    }
+
+    @Test
+    public void testListTransactions() throws Exception {
+        Key memberId = Datastore.allocateId(User.class);
+        Key otherId = Datastore.allocateId(Organization.class);
+        Account memberAccount = AccountUtil.memberAccountMustExist(memberId);
+        Account otherAccount = AccountUtil.memberAccountMustExist(otherId);
+
+        List<Transaction> transactions = balanceService.listTransactions(memberAccount);
+        assertNotNull(transactions);
+        assertTrue(transactions.isEmpty());
+
+        Transfer transfer = balanceService.createTransfer(5d, "CHF", "whatever", null, memberAccount, otherAccount);
+        balanceService.applyTransfer(transfer);
+
+        transactions = balanceService.listTransactions(memberAccount);
+        assertNotNull(transactions);
+        assertEquals(1, transactions.size());
+        Transaction transaction = transactions.get(0);
+        assertEquals(transaction.getAccountRef().getKey(), memberAccount.getId());
+        assertEquals(transfer.getId(), transaction.getTransferRef().getKey());
+
+        transactions = balanceService.listTransactions(otherAccount);
+        assertNotNull(transactions);
+        assertEquals(1, transactions.size());
+        transaction = transactions.get(0);
+        assertEquals(transaction.getAccountRef().getKey(), otherAccount.getId());
+        assertEquals(transfer.getId(), transaction.getTransferRef().getKey());
+    }
+
+    @Test
+    public void testListTransactionsMultiple() throws Exception {
+        Key memberId = Datastore.allocateId(User.class);
+        Key otherId = Datastore.allocateId(Organization.class);
+        Account memberAccount = AccountUtil.memberAccountMustExist(memberId);
+        Account otherAccount = AccountUtil.memberAccountMustExist(otherId);
 
 
+        List<Transfer> transfers = new ArrayList<>();
+
+        for (int i = 0; i < 10; ++i) {
+            Transfer transfer = balanceService.createTransfer(5d + i, "CHF", "whatever", null, memberAccount, otherAccount);
+            balanceService.applyTransfer(transfer);
+            Thread.sleep(10);
+            transfers.add(transfer);
+        }
+
+        List<Transaction> memberTransactions = balanceService.listTransactions(memberAccount.getId());
+        assertNotNull(memberTransactions);
+        assertEquals(transfers.size(), memberTransactions.size());
+
+        List<Transaction> otherTransactions = balanceService.listTransactions(otherAccount);
+        assertNotNull(otherTransactions);
+        assertEquals(transfers.size(), otherTransactions.size());
+
+        for (int i = 0; i < transfers.size(); ++i) {
+            Transfer transfer = transfers.get(transfers.size() - (i + 1));
+
+            Transaction memberTransaction = memberTransactions.get(i);
+            assertEquals(memberTransaction.getAccountRef().getKey(), memberAccount.getId());
+            assertEquals(transfer.getId(), memberTransaction.getTransferRef().getKey());
+
+            Transaction otherTransaction = otherTransactions.get(i);
+            assertEquals(otherTransaction.getAccountRef().getKey(), otherAccount.getId());
+            assertEquals(transfer.getId(), otherTransaction.getTransferRef().getKey());
+        }
+
+        List<Transaction> limited = balanceService.listTransactions(memberAccount, 0, 2);
+        assertNotNull(limited);
+        assertEquals(2, limited.size());
+        assertEquals(memberTransactions.get(0).getId(), limited.get(0).getId());
+        assertEquals(memberTransactions.get(1).getId(), limited.get(1).getId());
+
+        List<Transaction> offset = balanceService.listTransactions(otherAccount, 2, 3);
+        assertNotNull(offset);
+        assertEquals(3, offset.size());
+        assertEquals(otherTransactions.get(2).getId(), offset.get(0).getId());
+        assertEquals(otherTransactions.get(3).getId(), offset.get(1).getId());
+        assertEquals(otherTransactions.get(4).getId(), offset.get(2).getId());
+
+        otherTransactions.get(4).setCreated(null);
+        Datastore.put(otherTransactions.get(4));
+
+        List<Transaction> timed = balanceService.listTransactions(otherAccount.getId(), 2, 3);
+        assertNotNull(timed);
+        assertEquals(3, timed.size());
+        assertEquals(otherTransactions.get(1).getId(), timed.get(0).getId());
+        assertEquals(otherTransactions.get(2).getId(), timed.get(1).getId());
+        assertEquals(otherTransactions.get(3).getId(), timed.get(2).getId());
     }
 }

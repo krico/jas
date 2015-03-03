@@ -5,6 +5,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.jasify.schedule.appengine.Constants;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -52,7 +53,7 @@ public final class ModelMetadataUtil {
         return ret;
     }
 
-    public static Appendable dumpDb(Appendable out) throws IOException {
+    public static <T extends Appendable> T dumpDb(T out) throws IOException {
         String line = "+==================================================\n";
         for (String kind : queryAllKinds()) {
             Iterable<Entity> entities = Datastore
