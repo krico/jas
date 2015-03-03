@@ -10,7 +10,10 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.balance.Account;
+import com.jasify.schedule.appengine.model.balance.AccountUtil;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
+import com.jasify.schedule.appengine.model.balance.Transaction;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -18,6 +21,8 @@ import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.TypeUtil;
+
+import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrAdmin;
@@ -32,7 +37,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrA
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class, JasSubscriptionTransformer.class},
+        transformers = {JasAccountTransformer.class, JasTransactionTransformer.class, JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class, JasSubscriptionTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
@@ -77,6 +82,35 @@ public class BalanceEndpoint {
         payPalPayment.setPayerId(payerId);
         paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
         BalanceServiceFactory.getBalanceService().payment(payPalPayment);
+    }
+
+    @ApiMethod(name = "balance.getAccount", path = "balance/account", httpMethod = ApiMethod.HttpMethod.GET)
+    public Account getAccount(User caller) throws NotFoundException, UnauthorizedException {
+        JasifyEndpointUser jasUser = mustBeLoggedIn(caller);
+        try {
+            return BalanceServiceFactory.getBalanceService().getUserAccount(jasUser.getUserId());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Account");
+        }
+    }
+
+    @ApiMethod(name = "balance.listTransactions", path = "balance/transactions/{accountId}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Transaction> listTransactions(User caller, @Named("accountId") Key accountId,
+                                              @Nullable @Named("limit") Integer limit,
+                                              @Nullable @Named("offset") Integer offset)
+            throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeSameUserOrAdmin(caller, AccountUtil.accountIdToMemberId(accountId));
+
+        if (limit == null) limit = 0;
+        if (offset == null) offset = 0;
+
+        try {
+
+
+            return BalanceServiceFactory.getBalanceService().listTransactions(accountId, offset, limit);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Account");
+        }
     }
 
     private Payment getPaymentCheckUser(Key paymentId, JasifyEndpointUser jasCaller, PaymentService paymentService) throws UnauthorizedException, ForbiddenException, NotFoundException {

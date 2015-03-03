@@ -94,6 +94,8 @@
             balance: {
                 createPayment: nop,
                 cancelPayment: nop,
+                getAccount: nop,
+                listTransactions: nop,
                 executePayment: nop
             }
         };

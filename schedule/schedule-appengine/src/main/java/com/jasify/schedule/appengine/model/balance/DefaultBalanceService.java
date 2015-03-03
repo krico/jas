@@ -254,6 +254,11 @@ public class DefaultBalanceService implements BalanceService {
     }
 
     @Override
+    public UserAccount getUserAccount(long userId) throws EntityNotFoundException {
+        return getUserAccount(Datastore.createKey(User.class, userId));
+    }
+
+    @Override
     public UserAccount getUserAccount(Key userId) throws EntityNotFoundException {
         Key accountId = AccountUtil.memberIdToAccountId(userId);
         UserAccount ret = Datastore.getOrNull(userAccountMeta, accountId);

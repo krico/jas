@@ -32,7 +32,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrA
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class, JasSubscriptionTransformer.class, JasRepeatDetailsTransformer.class},
+        transformers = {JasRepeatDetailsTransformer.class, JasAccountTransformer.class, JasTransactionTransformer.class, JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class, JasSubscriptionTransformer.class},
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",

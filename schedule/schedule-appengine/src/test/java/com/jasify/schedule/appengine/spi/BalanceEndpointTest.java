@@ -4,7 +4,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UserContext;
-import com.jasify.schedule.appengine.model.balance.TestBalanceServiceFactory;
+import com.jasify.schedule.appengine.model.balance.*;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -17,6 +17,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static junit.framework.TestCase.*;
 
@@ -107,5 +110,30 @@ public class BalanceEndpointTest {
         testPaymentServiceFactory.replay();
         testBalanceServiceFactory.replay();
         endpoint.cancelPayment(user, paymentId);
+    }
+
+    @Test
+    public void testGetAccount() throws Exception {
+        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
+        UserAccount expected = new UserAccount();
+        EasyMock.expect(BalanceServiceFactory.getBalanceService().getUserAccount(user.getUserId())).andReturn(expected);
+        testPaymentServiceFactory.replay();
+        testBalanceServiceFactory.replay();
+        Account account = endpoint.getAccount(user);
+        assertTrue(expected == account);
+    }
+
+    @Test
+    public void testListTransactions() throws Exception {
+        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
+        Key accountId = AccountUtil.memberIdToAccountId(Datastore.createKey(User.class, user.getUserId()));
+        ArrayList<Transaction> expected = new ArrayList<>();
+        int limit = 20;
+        int offset = 10;
+        EasyMock.expect(BalanceServiceFactory.getBalanceService().listTransactions(accountId, offset, limit)).andReturn(expected);
+        testPaymentServiceFactory.replay();
+        testBalanceServiceFactory.replay();
+        List<Transaction> transactions = endpoint.listTransactions(user, accountId, limit, offset);
+        assertTrue(expected == transactions);
     }
 }

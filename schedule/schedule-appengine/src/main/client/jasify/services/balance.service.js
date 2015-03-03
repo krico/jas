@@ -5,6 +5,8 @@
         var Balance = {
             createPayment: createPayment,
             cancelPayment: cancelPayment,
+            getAccount: getAccount,
+            listTransactions: listTransactions,
             executePayment: executePayment
         };
 
@@ -35,6 +37,20 @@
         function executePayment(paymentId) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.executePayment(paymentId)
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function getAccount() {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.balance.getAccount()
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function listTransactions(accountId) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.balance.listTransactions({accountId: accountId})
                     .then(resultHandler, errorHandler);
             });
         }

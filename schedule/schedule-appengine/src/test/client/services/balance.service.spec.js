@@ -62,4 +62,37 @@ describe('BalanceService', function () {
 
         expect($gapiMock.client.jasify.balance.executePayment).toHaveBeenCalled();
     });
+
+    it('should call getAccount', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.balance, 'getAccount').and.returnValue($q.when({result: {items: expected}}));
+        Balance.getAccount()
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.balance.getAccount).toHaveBeenCalled();
+    });
+
+    it('should call listTransactions', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.balance, 'listTransactions').and.returnValue($q.when({result: {items: expected}}));
+        var id = 'abc';
+        Balance.listTransactions(id)
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.balance.listTransactions).toHaveBeenCalledWith({accountId: id});
+    });
 });

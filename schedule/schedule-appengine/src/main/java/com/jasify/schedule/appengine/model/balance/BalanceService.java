@@ -43,6 +43,8 @@ public interface BalanceService {
 
     void applyTransfer(Transfer transfer);
 
+    UserAccount getUserAccount(long userId) throws EntityNotFoundException;
+
     UserAccount getUserAccount(Key userId) throws EntityNotFoundException;
 
     UserAccount getUserAccount(User user) throws EntityNotFoundException;
