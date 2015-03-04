@@ -2,7 +2,7 @@
 
     angular.module('jasifyWeb').controller('PaymentAcceptController', PaymentAcceptController);
 
-    function PaymentAcceptController($location, $routeParams, Balance) {
+    function PaymentAcceptController($location, $routeParams, $sessionStorage, Balance) {
         var vm = this;
         vm.alert = alert;
         vm.alerts = [];
@@ -28,7 +28,7 @@
                 vm.alert('danger', 'Invalid paymentId');
                 return;
             }
-            vm.status = 'Confirming payment...';
+            vm.status = 'Processing payment...';
             var payerId = $location.search().PayerID;
 
             Balance.executePayment({id: paymentId, payerId: payerId}).then(ok, fail);
@@ -36,7 +36,11 @@
             function ok(resp) {
                 vm.complete = true;
                 vm.success = true;
-                vm.status = 'Payment confirmed!';
+                vm.status = 'Payment processed! You will be redirected...';
+                var redirect = $sessionStorage.paymentRedirect || '/balance/view';
+                $location.replace();
+                $location.search({paymentStatus: 'success'});
+                $location.path(redirect);
             }
 
             function fail(res) {

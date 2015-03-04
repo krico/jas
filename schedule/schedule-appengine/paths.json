@@ -33,6 +33,7 @@
         "angular-messages/angular-messages.min.js",
         "angular-cookies/angular-cookies.min.js",
         "angular-sanitize/angular-sanitize.min.js",
+        "ngstorage/ngStorage.min.js",
         "angular-bootstrap/ui-bootstrap-tpls.min.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.min.js",
         "spin.js/spin.js",

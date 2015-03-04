@@ -27,6 +27,7 @@ public final class AccountUtil {
     public static final String USER_ACCOUNT_PREFIX = "u";
     public static final String ORGANIZATION_ACCOUNT_PREFIX = "o";
     private static final Logger log = LoggerFactory.getLogger(AccountUtil.class);
+    public static final String DEFAULT_CURRENCY = "CHF";
 
     private AccountUtil() {
     }
@@ -46,6 +47,7 @@ public final class AccountUtil {
             Account account = Datastore.getOrNull(AccountMeta.get(), id);
             if (account == null) {
                 account = new Account(id);
+                account.setCurrency(DEFAULT_CURRENCY);
                 log.info("Created P&L account:{}", account);
                 Datastore.put(tx, account);
             }
@@ -101,12 +103,14 @@ public final class AccountUtil {
 
         if (UserMeta.get().getKind().equals(memberId.getKind())) {
             UserAccount ret = new UserAccount(accountId);
+            ret.setCurrency(DEFAULT_CURRENCY);
             ret.getUserRef().setKey(memberId);
             return ret;
         }
 
         if (OrganizationMeta.get().getKind().equals(memberId.getKind())) {
             OrganizationAccount ret = new OrganizationAccount(accountId);
+            ret.setCurrency(DEFAULT_CURRENCY);
             ret.getOrganizationRef().setKey(memberId);
             return ret;
         }
