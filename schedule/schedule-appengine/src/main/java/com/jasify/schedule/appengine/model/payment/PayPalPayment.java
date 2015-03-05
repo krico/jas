@@ -110,7 +110,7 @@ public class PayPalPayment extends Payment {
     }
 
     public String describe() {
-        return "PayPal ID=" + externalId + " " + super.describe();
+        return super.describe() + " (PayPal ID=" + externalId + ")";
     }
 
     @Override

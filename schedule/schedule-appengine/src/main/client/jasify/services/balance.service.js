@@ -6,7 +6,7 @@
             createPayment: createPayment,
             cancelPayment: cancelPayment,
             getAccount: getAccount,
-            listTransactions: listTransactions,
+            getTransactions: getTransactions,
             executePayment: executePayment
         };
 
@@ -48,9 +48,15 @@
             });
         }
 
-        function listTransactions(accountId) {
+        function getTransactions(accountId, limit, offset) {
+            var params = {accountId: accountId};
+
+            if(limit) params.limit = limit;
+
+            if(offset) params.offset = offset;
+
             return Endpoint.jasify(function (jasify) {
-                return jasify.balance.listTransactions({accountId: accountId})
+                return jasify.balance.getTransactions(params)
                     .then(resultHandler, errorHandler);
             });
         }

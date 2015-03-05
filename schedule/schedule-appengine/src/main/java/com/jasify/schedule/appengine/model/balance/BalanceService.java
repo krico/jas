@@ -60,4 +60,6 @@ public interface BalanceService {
     List<Transaction> listTransactions(Account account, int offset, int limit) throws EntityNotFoundException;
 
     List<Transaction> listTransactions(Key accountId, int offset, int limit) throws EntityNotFoundException;
+
+    int getTransactionCount(Key accountId);
 }

@@ -316,6 +316,11 @@ public class DefaultBalanceService implements BalanceService {
         return query.asList();
     }
 
+    @Override
+    public int getTransactionCount(Key accountId) {
+        return Datastore.query(transactionMeta, accountId).asKeyList().size();
+    }
+
     private static class Singleton {
         private static final BalanceService INSTANCE = new DefaultBalanceService();
     }

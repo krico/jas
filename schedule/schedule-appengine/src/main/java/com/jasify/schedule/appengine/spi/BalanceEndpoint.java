@@ -12,17 +12,16 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.AccountUtil;
+import com.jasify.schedule.appengine.model.balance.BalanceService;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
-import com.jasify.schedule.appengine.model.balance.Transaction;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
+import com.jasify.schedule.appengine.spi.dm.JasTransactionList;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.TypeUtil;
-
-import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrAdmin;
@@ -90,12 +89,12 @@ public class BalanceEndpoint {
         try {
             return BalanceServiceFactory.getBalanceService().getUserAccount(jasUser.getUserId());
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("Account");
+            return null;
         }
     }
 
-    @ApiMethod(name = "balance.listTransactions", path = "balance/transactions/{accountId}", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<Transaction> listTransactions(User caller, @Named("accountId") Key accountId,
+    @ApiMethod(name = "balance.getTransactions", path = "balance/transactions/{accountId}", httpMethod = ApiMethod.HttpMethod.GET)
+    public JasTransactionList getTransactions(User caller, @Named("accountId") Key accountId,
                                               @Nullable @Named("limit") Integer limit,
                                               @Nullable @Named("offset") Integer offset)
             throws NotFoundException, UnauthorizedException, ForbiddenException {
@@ -105,9 +104,15 @@ public class BalanceEndpoint {
         if (offset == null) offset = 0;
 
         try {
+            JasTransactionList transactions = new JasTransactionList();
 
+            BalanceService balanceService = BalanceServiceFactory.getBalanceService();
 
-            return BalanceServiceFactory.getBalanceService().listTransactions(accountId, offset, limit);
+            transactions.addAll(balanceService.listTransactions(accountId, offset, limit));
+
+            transactions.setTotal(balanceService.getTransactionCount(accountId));
+
+            return transactions;
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Account");
         }

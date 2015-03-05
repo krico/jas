@@ -7,10 +7,57 @@
             <span tooltip-html-unsafe="<small>Created: {{vm.account.created|date:'medium'}}<br/>Modified: {{vm.account.created|date:'medium'}}</small>"
                   tooltip-trigger="mouseenter"
                   class="h5">Account balance: </span>
-            <span class="small">{{vm.account.currency}} {{vm.account.balance|number:2}}</span>
+            <span class="strong text-primary">{{vm.account.currency}} {{vm.account.balance|number:2}}</span>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="col-sm-8">
+            <div class="table-responsive small">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>date</th>
+                        <th>description</th>
+                        <th class="text-right">amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="transaction in vm.transactions">
+                        <td>{{transaction.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                        <td>{{transaction.description }}</td>
+                        <td class="text-right">{{transaction.amount | number: 2 }} {{transaction.currency}}</td>
+                    </tr>
+                    <tr ng-show="vm.inProgress">
+                        <td colspan="3"><span us-spinner=""></span></td>
+                    </tr>
+                    <tr ng-show="!vm.inProgress && vm.transactions.length <= 0">
+                        <td colspan="3">No transactions...</td>
+                    </tr>
+                    </tbody>
+                    <tfoot ng-show="vm.transactions.length > 0">
+                    <tr>
+                        <td colspan="3" align="middle" class="small">
+                            <pagination class="pagination-sm"
+                                        ng-change="vm.pageChanged()"
+                                        total-items="vm.pagination.total"
+                                        ng-model="vm.pagination.page"
+                                        items-per-page="vm.pagination.itemsPerPage"
+                                        max-size="vm.pagination.maxSize"
+                                        num-pages="vm.pagination.numPages"
+                                        boundary-links="true"
+                                        previous-text="&lt;" next-text="&gt;" first-text="&laquo;" last-text="&raquo;"
+                                        ></pagination>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="form-group">
+            </div>
         </div>
     </div>
 </div>

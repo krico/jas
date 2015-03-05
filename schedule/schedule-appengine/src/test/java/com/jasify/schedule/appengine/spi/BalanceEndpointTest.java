@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
+import com.jasify.schedule.appengine.spi.dm.JasTransactionList;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -19,7 +20,6 @@ import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static junit.framework.TestCase.*;
 
@@ -124,16 +124,20 @@ public class BalanceEndpointTest {
     }
 
     @Test
-    public void testListTransactions() throws Exception {
+    public void testGetTransactions() throws Exception {
         final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
         Key accountId = AccountUtil.memberIdToAccountId(Datastore.createKey(User.class, user.getUserId()));
         ArrayList<Transaction> expected = new ArrayList<>();
+        expected.add(new Transaction());
         int limit = 20;
         int offset = 10;
         EasyMock.expect(BalanceServiceFactory.getBalanceService().listTransactions(accountId, offset, limit)).andReturn(expected);
+        EasyMock.expect(BalanceServiceFactory.getBalanceService().getTransactionCount(accountId)).andReturn(99);
         testPaymentServiceFactory.replay();
         testBalanceServiceFactory.replay();
-        List<Transaction> transactions = endpoint.listTransactions(user, accountId, limit, offset);
-        assertTrue(expected == transactions);
+        JasTransactionList transactions = endpoint.getTransactions(user, accountId, limit, offset);
+        assertEquals(1, transactions.size());
+        assertEquals(expected.get(0), transactions.get(0));
+        assertEquals(99, transactions.getTotal());
     }
 }
