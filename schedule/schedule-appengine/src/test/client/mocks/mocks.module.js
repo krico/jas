@@ -95,7 +95,7 @@
                 createPayment: nop,
                 cancelPayment: nop,
                 getAccount: nop,
-                listTransactions: nop,
+                getTransactions: nop,
                 executePayment: nop
             }
         };
