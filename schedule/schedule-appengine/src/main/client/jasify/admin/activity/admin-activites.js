@@ -7,6 +7,7 @@
 
         vm.organizations = organizations.items;
         vm.organization = {};
+        if (vm.organizations.length == 1) organizationSelected(vm.organizations[0]);
         vm.alerts = [];
         vm.activities = activities.items;
         vm.alert = alert;

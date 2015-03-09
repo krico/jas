@@ -45,7 +45,7 @@
                 <td></td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.activityType.name}}</td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.location}}</td>
-                <td ng-click="vm.viewActivity(activity.id)">{{activity.start | date:'dd.MM.yy HH:mm' }}</td>
+                <td ng-click="vm.viewActivity(activity.id)">{{activity.start | date:'yyyy-MM-dd HH:mm' }}</td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.finish | date:'yyyy-MM-dd HH:mm' }}</td>
                 <td ng-click="vm.viewActivity(activity.id)">
                     {{activity.subscriptions||0}} of {{activity.maxSubscriptions||0}}
