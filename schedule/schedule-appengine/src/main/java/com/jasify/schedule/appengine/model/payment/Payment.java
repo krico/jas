@@ -41,9 +41,14 @@ public class Payment implements HasTransfer {
     private Double amount;
 
     /**
-     * Fees charged on top of the amount
+     * Fees charged on top of the amount (calculated by jasify)
      */
     private Double fee;
+
+    /**
+     * Fees charged by the external system (e.g. payPal)
+     */
+    private Double realFee;
 
     private List<String> itemDescriptions = new ArrayList<>();
 
@@ -129,6 +134,14 @@ public class Payment implements HasTransfer {
         this.fee = fee;
     }
 
+    public Double getRealFee() {
+        return realFee;
+    }
+
+    public void setRealFee(Double realFee) {
+        this.realFee = realFee;
+    }
+
     public List<String> getItemDescriptions() {
         return itemDescriptions;
     }
@@ -198,6 +211,7 @@ public class Payment implements HasTransfer {
             for (int i = 0; i < itemDescriptions.size(); ++i) {
                 amount += itemUnits.get(i) * itemPrices.get(i);
             }
+            if (fee != null) amount += fee;
             Preconditions.checkState(getAmount() == amount, "Amount expected: " + amount + ", actual: " + getAmount());
         }
     }
@@ -234,6 +248,7 @@ public class Payment implements HasTransfer {
                 ", currency='" + currency + '\'' +
                 ", amount=" + amount +
                 ", fee=" + fee +
+                ", realFee=" + realFee +
                 ", itemDescriptions=" + itemDescriptions +
                 ", itemUnits=" + itemUnits +
                 ", itemPrices=" + itemPrices +

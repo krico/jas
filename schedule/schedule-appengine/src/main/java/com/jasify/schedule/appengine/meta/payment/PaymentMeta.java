@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.payment;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-27 20:40:13")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-17 08:59:54")
 /** */
 public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.payment.Payment> {
 
@@ -27,6 +27,9 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.lang.Double> fee = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.lang.Double>(this, "fee", "fee", java.lang.Double.class);
+
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.lang.Double> realFee = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.lang.Double>(this, "realFee", "realFee", java.lang.Double.class);
 
     /** */
     public final org.slim3.datastore.StringCollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.String>> itemDescriptions = new org.slim3.datastore.StringCollectionAttributeMeta<com.jasify.schedule.appengine.model.payment.Payment, java.util.List<java.lang.String>>(this, "itemDescriptions", "itemDescriptions", java.util.List.class);
@@ -72,6 +75,7 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         model.setCurrency((java.lang.String) entity.getProperty("currency"));
         model.setAmount((java.lang.Double) entity.getProperty("amount"));
         model.setFee((java.lang.Double) entity.getProperty("fee"));
+        model.setRealFee((java.lang.Double) entity.getProperty("realFee"));
         model.setItemDescriptions(toList(java.lang.String.class, entity.getProperty("itemDescriptions")));
         model.setItemUnits(longListToIntegerList(entity.getProperty("itemUnits")));
         model.setItemPrices(toList(java.lang.Double.class, entity.getProperty("itemPrices")));
@@ -102,6 +106,7 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         entity.setProperty("currency", m.getCurrency());
         entity.setProperty("amount", m.getAmount());
         entity.setProperty("fee", m.getFee());
+        entity.setProperty("realFee", m.getRealFee());
         entity.setProperty("itemDescriptions", m.getItemDescriptions());
         entity.setProperty("itemUnits", m.getItemUnits());
         entity.setProperty("itemPrices", m.getItemPrices());
@@ -214,6 +219,10 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             writer.setNextPropertyName("fee");
             encoder0.encode(writer, m.getFee());
         }
+        if(m.getRealFee() != null){
+            writer.setNextPropertyName("realFee");
+            encoder0.encode(writer, m.getRealFee());
+        }
         if(m.getItemDescriptions() != null){
             writer.setNextPropertyName("itemDescriptions");
             writer.beginArray();
@@ -270,6 +279,8 @@ public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         m.setAmount(decoder0.decode(reader, m.getAmount()));
         reader = rootReader.newObjectReader("fee");
         m.setFee(decoder0.decode(reader, m.getFee()));
+        reader = rootReader.newObjectReader("realFee");
+        m.setRealFee(decoder0.decode(reader, m.getRealFee()));
         reader = rootReader.newObjectReader("itemDescriptions");
         {
             java.util.ArrayList<java.lang.String> elements = new java.util.ArrayList<java.lang.String>();

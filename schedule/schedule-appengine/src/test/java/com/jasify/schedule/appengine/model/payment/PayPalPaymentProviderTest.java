@@ -73,7 +73,10 @@ public class PayPalPaymentProviderTest {
                 PaymentExecution execution = paymentExecutionCapture.getValue();
                 assertEquals(PAYER_ID, execution.getPayerId());
                 payment.setState(STATE_EXECUTED);
-                payment.setTransactions(Collections.singletonList((Transaction) new Transaction().setAmount(new Amount().setDetails(new Details().setFee(Double.toString(fee))))));
+                Transaction transaction = new Transaction();
+                transaction.setAmount(new Amount());
+                transaction.setRelatedResources(Collections.singletonList(new RelatedResources().setSale(new Sale().setTransactionFee(new Currency("CHF", Double.toString(fee))))));
+                payment.setTransactions(Collections.singletonList(transaction));
 
                 payment.setPayer(new Payer().setPayerInfo(new PayerInfo().setEmail(PAYER_EMAIL).setFirstName(PAYER_FIRST_NAME).setLastName(PAYER_LAST_NAME)));
 
@@ -91,8 +94,8 @@ public class PayPalPaymentProviderTest {
 
         assertEquals(PaymentStateEnum.Completed, jasPayment.getState());
         assertEquals(STATE_EXECUTED, jasPayment.getExternalState());
-        assertNotNull(jasPayment.getFee());
-        assertEquals(fee, jasPayment.getFee());
+        assertNotNull(jasPayment.getRealFee());
+        assertEquals(fee, jasPayment.getRealFee());
         assertEquals(PAYER_EMAIL, jasPayment.getPayerEmail());
         assertEquals(PAYER_FIRST_NAME, jasPayment.getPayerFirstName());
         assertEquals(PAYER_LAST_NAME, jasPayment.getPayerLastName());
@@ -162,6 +165,8 @@ public class PayPalPaymentProviderTest {
         jasPayment.setId(Datastore.allocateId(PayPalPayment.class));
         jasPayment.setCurrency(currency);
         jasPayment.addItem("Item", 1, price);
+
+        jasPayment.setFee(0d); //force fee to be 0
 
         provider.createPayment(jasPayment, new GenericUrl(BASE_URL));
 

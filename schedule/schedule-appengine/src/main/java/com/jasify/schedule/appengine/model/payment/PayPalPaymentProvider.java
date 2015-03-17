@@ -8,13 +8,18 @@ import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.paypal.api.payments.*;
 import com.paypal.base.Constants;
+import com.paypal.base.SDKVersion;
 import com.paypal.base.rest.OAuthTokenCredential;
 import com.paypal.base.rest.PayPalRESTException;
 import com.paypal.base.rest.PayPalResource;
+import com.paypal.base.sdk.info.SDKVersionImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +34,10 @@ import static com.jasify.schedule.appengine.util.CurrencyUtil.formatCurrencyNumb
 public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
     public static final String CANCEL_PATH = "/payment/cancel/";
     public static final String ACCEPT_PATH = "/payment/accept/";
+    public static final BigDecimal PAY_PAL_FEE_MULTIPLIER = new BigDecimal("0.035");
+    public static final BigDecimal ONE_MINUS_PAY_PAL_FEE_MULTIPLIER = BigDecimal.ONE.subtract(PAY_PAL_FEE_MULTIPLIER);
+    public static final BigDecimal PAY_PAL_FEE_FLAT = new BigDecimal("0.55");
+    public static final MathContext FEE_CONTEXT = new MathContext(2, RoundingMode.UP);
     private static final long MIN_REMAINING_LIFETIME = 120;
     private static final Logger log = LoggerFactory.getLogger(PayPalPaymentProvider.class);
     private PayPalInterface payPalInterface;
@@ -80,6 +89,28 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         }
     }
 
+    /**
+     * From: https://www.paypal.com/ch/webapps/mpp/paypal-fees
+     * <p/>
+     * 3.4% + 0.55CHF
+     * <p/>
+     * So,
+     * p = amount paid to PayPal
+     * m = cash received in jasify
+     * <p/>
+     * m = p - "fee" = p - (0.034p + 0.55) = p - 0.034p - 0.55
+     * <p/>
+     * I want to isolate "p"
+     * <p/>
+     * m  = p - 0.034p - 0.55
+     * p - 0.034p  = m + 0.55
+     * (1 - 0.034)p  = m + 0.55
+     * 0.966p  = m + 0.55
+     * p  = (m + 0.55)/0.966
+     * <p/>
+     * So, to make a payment of CHF 20.-
+     * p = (20 + 0.55)/0.966 = 20.55/0.966 = 21.27329192546584
+     */
     @Override
     public void createPayment(PayPalPayment payment, GenericUrl baseUrl) throws PaymentException {
         payment.validate();
@@ -87,13 +118,34 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
 
         String currency = payment.getCurrency();
 
+        /*
+         * amountToBePaid = (paymentAmount + FLAT_FEE)/(1 - FEE_MULTIPLIER)
+         */
+        if (payment.getFee() == null) {
+            BigDecimal paymentAmount = new BigDecimal(payment.getAmount()).setScale(2, BigDecimal.ROUND_CEILING);
+            log.info("paymentAmount: {}", paymentAmount);
+            BigDecimal amountToBePaid = paymentAmount.add(PAY_PAL_FEE_FLAT);
+            log.info("paymentAmount + flat_fee: {}", amountToBePaid);
+            amountToBePaid = amountToBePaid.divide(ONE_MINUS_PAY_PAL_FEE_MULTIPLIER, BigDecimal.ROUND_CEILING);
+            log.info("(1-fee_multiplier): {}", ONE_MINUS_PAY_PAL_FEE_MULTIPLIER);
+            log.info("(paymentAmount + flat_fee)/(1-fee_multiplier): {}", amountToBePaid);
+            amountToBePaid = amountToBePaid.setScale(2, BigDecimal.ROUND_CEILING);
+            log.info("amountToBePaid(rounded): {}", amountToBePaid);
+            BigDecimal fee = amountToBePaid.subtract(paymentAmount);
+            log.info("fee: {}", fee);
+            payment.setFee(fee.doubleValue());
+            payment.setAmount(amountToBePaid.doubleValue());
+        }
+        payment.validate(); //re-validate fees
+
 
         List<Item> items = new ArrayList<>();
 
         int itemCount = payment.getItemCount();
+
         if (itemCount == 0) {
             log.warn("Payment with zero items");
-            items.add(new Item("1", "Deposit", formatCurrencyNumber(currency, payment.getAmount()), currency));
+            items.add(new Item("1", "Credits", formatCurrencyNumber(currency, payment.getAmount()), currency));
         } else {
             for (int i = 0; i < itemCount; ++i) {
                 Payment.Item item = payment.getItem(i);
@@ -103,6 +155,13 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
                         currency));
             }
         }
+        if (payment.getFee() > 0d) {
+            items.add(new Item("1",
+                    "Transaction fee",
+                    formatCurrencyNumber(currency, payment.getFee()),
+                    currency));
+        }
+
 
         Transaction transaction = new Transaction();
         transaction.setAmount(new Amount(currency, formatCurrencyNumber(currency, payment.getAmount())));
@@ -145,19 +204,38 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         setPayerInfo(payment, executedPayment);
         List<Transaction> transactions = executedPayment.getTransactions();
         if (transactions != null) {
-            double fee = 0;
+            double realFee = 0;
             for (Transaction transaction : transactions) {
                 Amount amount = transaction.getAmount();
                 if (amount == null) continue;
-                Details details = amount.getDetails();
-                if (details == null || details.getFee() == null) continue;
-                try {
-                    fee += Double.parseDouble(details.getFee());
-                } catch (Exception e) {
-                    log.debug("Failed to parse fee:[{}]", details.getFee(), e);
+                List<RelatedResources> relatedResources = transaction.getRelatedResources();
+                if (relatedResources != null) {
+                    for (RelatedResources relatedResource : relatedResources) {
+                        Sale sale = relatedResource.getSale();
+                        if (sale == null) continue;
+                        Currency transactionFee = sale.getTransactionFee();
+                        if (transactionFee == null) continue;
+                        String currency = transactionFee.getCurrency();
+                        String value = transactionFee.getValue();
+                        try {
+                            realFee += Double.parseDouble(value);
+                        } catch (Exception e) {
+                            log.debug("Failed to parse realFee:[{}]", value, e);
+                        }
+                        if (!StringUtils.equalsIgnoreCase(payment.getCurrency(), currency)) {
+                            log.warn("Currency on transaction realFee ({}) differs from payment ({})", currency, payment.getCurrency());
+                        }
+                    }
                 }
             }
-            payment.setFee(fee);
+            Double fee = payment.getFee();
+            fee = fee == null ? 0d : fee;
+            if (fee != realFee) {
+                log.warn("Payment[{}] realFee:{} fee: {} error: {}", executedPayment.getId(), realFee, fee, fee - realFee);
+            } else {
+                log.debug("Payment[{}] realFee:{} fee: {}", executedPayment.getId(), realFee, fee);
+            }
+            payment.setRealFee(realFee);
         }
         payment.setState(PaymentStateEnum.Completed);
 
@@ -230,6 +308,11 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
 
     private static class DefaultPayPalInterface implements PayPalInterface {
         private OAuthTokenCredential oAuthTokenCredential;
+
+        private DefaultPayPalInterface() {
+            SDKVersion version = new SDKVersionImpl();
+            log.info("Running with PayPal SDK id={} (version {})", version.getSDKId(), version.getSDKVersion());
+        }
 
         private OAuthTokenCredential getCredential() {
             if (oAuthTokenCredential == null || oAuthTokenCredential.expiresIn() < MIN_REMAINING_LIFETIME) {

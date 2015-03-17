@@ -2,7 +2,7 @@
 
     angular.module('jasifyWeb').controller('PaymentMakeController', PaymentMakeController);
 
-    function PaymentMakeController($filter, $routeParams, $window, Balance) {
+    function PaymentMakeController($log, $scope, $filter, $routeParams, $window, Balance) {
         var vm = this;
         vm.alert = alert;
         vm.createPayment = createPayment;
@@ -10,11 +10,30 @@
         vm.redirecting = false;
         vm.paymentForm = {};
         vm.alerts = [];
+        vm.calculateEffectiveAmount = calculateEffectiveAmount;
         vm.payment = {
             currency: 'CHF',
             type: 'PayPal',
             amount: formatNumber($routeParams.amount)
         };
+        vm.effectiveAmount = vm.calculateEffectiveAmount(vm.payment.amount);
+
+        $scope.$watch('vm.payment.amount', function (newValue, oldValue) {
+            if (newValue) {
+                vm.effectiveAmount = vm.calculateEffectiveAmount(newValue);
+            }
+        });
+
+        /*
+         * amountToBePaid = (paymentAmount + FLAT_FEE)/(1 - FEE_MULTIPLIER)
+         */
+        function calculateEffectiveAmount(value) {
+            if (!value) return 0;
+            value = Number(value);
+            var v = value + 0.55;
+            var diff = 1 - 0.035;
+            return Math.ceil((v / diff) * Math.pow(10, 2)) / Math.pow(10, 2);
+        }
 
         function createPayment() {
 
