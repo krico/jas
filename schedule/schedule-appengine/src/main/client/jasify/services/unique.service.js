@@ -15,9 +15,9 @@
             });
         }
 
-        function email(email) {
+        function email(value) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.unique.email({email: email});
+                return jasify.unique.email({email: value});
             });
         }
 
