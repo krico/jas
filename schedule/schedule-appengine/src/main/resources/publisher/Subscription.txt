@@ -1,0 +1,12 @@
+Dear %PublisherName%,
+
+A new booking has been created!
+
+Order Details:
+Subscriber    : %SubscriberName%
+Activity      : %ActivityName%
+
+Order        #: %OrderNumber%
+Price         : %ActivityPrice%
+
+Go team JASIFY!!!

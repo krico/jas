@@ -17,6 +17,7 @@ import com.jasify.schedule.appengine.model.common.OrganizationService;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.common.TestOrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.UserLogin;
+import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -27,10 +28,7 @@ import org.junit.Test;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
 import static junit.framework.TestCase.assertEquals;
@@ -38,7 +36,8 @@ import static junit.framework.TestCase.assertTrue;
 import static org.easymock.EasyMock.*;
 
 /**
- * Created by wszarmach on 19/01/15.
+ * @author wszarmach
+ * @since 19/01/15.
  */
 public class ActivityEndpointTest {
 
@@ -847,18 +846,20 @@ public class ActivityEndpointTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testAddActivityNoActivityTHrowsNullPointerException() throws Exception {
+    public void testAddActivityNoActivityThrowsNullPointerException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.addActivity(newCaller(1, true), null);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
     }
 
     @Test(expected = NotFoundException.class)
     public void testAddActivityNoActivityTypeRefKeyThrowsNotFoundException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        Activity activity = new Activity();
-        endpoint.addActivity(newCaller(1, true), activity);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(new Activity());
+        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
     }
 
     @Test(expected = EntityNotFoundRuntimeException.class)
@@ -867,7 +868,9 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
         Activity activity = new Activity();
         activity.getActivityTypeRef().setKey(Datastore.allocateId(ActivityType.class));
-        endpoint.addActivity(newCaller(1, true), activity);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
     }
 
     @Test(expected = BadRequestException.class)
@@ -877,10 +880,12 @@ public class ActivityEndpointTest {
         ActivityType activityType = new ActivityType("TEST");
         activityType.setId(Datastore.allocateId(ActivityType.class));
         Activity activity = new Activity(activityType);
-        service.addActivity(activity);
+        service.addActivity(activity, null);
         expectLastCall().andThrow(new FieldValueException(""));
         testActivityServiceFactory.replay();
-        endpoint.addActivity(newCaller(1, true), activity);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
     }
 
     @Test(expected = NotFoundException.class)
@@ -890,10 +895,12 @@ public class ActivityEndpointTest {
         ActivityType activityType = new ActivityType("TEST");
         activityType.setId(Datastore.allocateId(ActivityType.class));
         Activity activity = new Activity(activityType);
-        service.addActivity(activity);
+        service.addActivity(activity, null);
         expectLastCall().andThrow(new EntityNotFoundException(""));
         testActivityServiceFactory.replay();
-        endpoint.addActivity(newCaller(1, true), activity);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
     }
 
     @Test
@@ -903,10 +910,40 @@ public class ActivityEndpointTest {
         ActivityType activityType = new ActivityType("TEST");
         activityType.setId(Datastore.allocateId(ActivityType.class));
         Activity activity = new Activity(activityType);
-        expect(service.addActivity(activity)).andReturn(Datastore.allocateId(Activity.class));
+        Key id = Datastore.allocateId(Activity.class);
+        expect(service.addActivity(activity, null)).andReturn(Arrays.asList(id));
+        expect(service.getActivity(id)).andReturn(activity);
         expectLastCall().once();
         testActivityServiceFactory.replay();
-        assertEquals(activity, endpoint.addActivity(newCaller(1, true), activity));
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        assertEquals(activity, endpoint.addActivity(newCaller(1, true), jasAddActivityRequest).get(0));
+    }
+
+    @Test
+    public void testAddRepeatingActivity() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        ActivityType activityType = new ActivityType("TEST");
+        activityType.setId(Datastore.allocateId(ActivityType.class));
+        RepeatDetails repeatDetails = new RepeatDetails();
+        Activity activity = new Activity(activityType);
+        Activity activity1 = new Activity(activityType);
+        Activity activity2 = new Activity(activityType);
+        Key id1 = Datastore.allocateId(Activity.class);
+        Key id2 = Datastore.allocateId(Activity.class);
+        expect(service.addActivity(activity, repeatDetails)).andReturn(Arrays.asList(id1, id2));
+        expect(service.getActivity(id1)).andReturn(activity1);
+        expect(service.getActivity(id2)).andReturn(activity2);
+        expectLastCall().once();
+        testActivityServiceFactory.replay();
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
+        assertEquals(2, result.size());
+        assertEquals(activity1, result.get(0));
+        assertEquals(activity2, result.get(1));
     }
 
     @Test(expected = ForbiddenException.class)

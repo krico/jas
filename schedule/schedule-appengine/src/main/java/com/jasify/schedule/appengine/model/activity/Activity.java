@@ -31,6 +31,8 @@ public class Activity {
 
     private ModelRef<ActivityType> activityTypeRef = new ModelRef<>(ActivityType.class);
 
+    private ModelRef<RepeatDetails> repeatDetailsRef = new ModelRef<>(RepeatDetails.class);
+
     private String location;
 
     private int maxSubscriptions;
@@ -114,6 +116,12 @@ public class Activity {
         return activityTypeRef;
     }
 
+    public void setRepeatDetailsRef(RepeatDetails repeatDetails) { repeatDetailsRef.setModel(repeatDetails); }
+
+    public ModelRef<RepeatDetails> getRepeatDetailsRef() {
+        return repeatDetailsRef;
+    }
+
     public String getLocation() {
         return location;
     }
@@ -157,6 +165,4 @@ public class Activity {
     public InverseModelListRef<Subscription, Activity> getSubscriptionListRef() {
         return subscriptionListRef;
     }
-
-
 }

@@ -33,9 +33,14 @@
             });
         }
 
-        function add(activity) {
+        function add(activity, repeatDetails) {
+            var req = {activity: activity};
+            if(repeatDetails) {
+                req.repeatDetails = repeatDetails;
+            }
+
             return Endpoint.jasify(function (jasify) {
-                return jasify.activities.add(activity)
+                return jasify.activities.add(req)
                     .then(resultHandler, errorHandler);
             });
         }

@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.activity;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-01-11 10:28:29")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-21 17:11:31")
 /** */
 public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.activity.Activity> {
 
@@ -27,6 +27,9 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
 
     /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.activity.ActivityType>, com.jasify.schedule.appengine.model.activity.ActivityType> activityTypeRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.activity.ActivityType>, com.jasify.schedule.appengine.model.activity.ActivityType>(this, "activityTypeRef", "activityTypeRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.activity.ActivityType.class);
+
+    /** */
+    public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.activity.RepeatDetails>, com.jasify.schedule.appengine.model.activity.RepeatDetails> repeatDetailsRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.activity.RepeatDetails>, com.jasify.schedule.appengine.model.activity.RepeatDetails>(this, "repeatDetailsRef", "repeatDetailsRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.activity.RepeatDetails.class);
 
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity> location = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity>(this, "location", "location");
@@ -75,6 +78,10 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
             throw new NullPointerException("The property(activityTypeRef) is null.");
         }
         model.getActivityTypeRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("activityTypeRef"));
+        if (model.getRepeatDetailsRef() == null) {
+            throw new NullPointerException("The property(repeatDetailsRef) is null.");
+        }
+        model.getRepeatDetailsRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("repeatDetailsRef"));
         model.setLocation((java.lang.String) entity.getProperty("location"));
         model.setMaxSubscriptions(longToPrimitiveInt((java.lang.Long) entity.getProperty("maxSubscriptions")));
         model.setSubscriptionCount(longToPrimitiveInt((java.lang.Long) entity.getProperty("subscriptionCount")));
@@ -102,6 +109,10 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
             throw new NullPointerException("The property(activityTypeRef) must not be null.");
         }
         entity.setProperty("activityTypeRef", m.getActivityTypeRef().getKey());
+        if (m.getRepeatDetailsRef() == null) {
+            throw new NullPointerException("The property(repeatDetailsRef) must not be null.");
+        }
+        entity.setProperty("repeatDetailsRef", m.getRepeatDetailsRef().getKey());
         entity.setProperty("location", m.getLocation());
         entity.setProperty("maxSubscriptions", m.getMaxSubscriptions());
         entity.setProperty("subscriptionCount", m.getSubscriptionCount());
@@ -135,6 +146,10 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
             throw new NullPointerException("The property(activityTypeRef) must not be null.");
         }
         m.getActivityTypeRef().assignKeyIfNecessary(ds);
+        if (m.getRepeatDetailsRef() == null) {
+            throw new NullPointerException("The property(repeatDetailsRef) must not be null.");
+        }
+        m.getRepeatDetailsRef().assignKeyIfNecessary(ds);
     }
 
     @Override
@@ -204,6 +219,10 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
             writer.setNextPropertyName("activityTypeRef");
             encoder0.encode(writer, m.getActivityTypeRef(), maxDepth, currentDepth);
         }
+        if(m.getRepeatDetailsRef() != null && m.getRepeatDetailsRef().getKey() != null){
+            writer.setNextPropertyName("repeatDetailsRef");
+            encoder0.encode(writer, m.getRepeatDetailsRef(), maxDepth, currentDepth);
+        }
         if(m.getLocation() != null){
             writer.setNextPropertyName("location");
             encoder0.encode(writer, m.getLocation());
@@ -244,6 +263,8 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         m.setCurrency(decoder0.decode(reader, m.getCurrency()));
         reader = rootReader.newObjectReader("activityTypeRef");
         decoder0.decode(reader, m.getActivityTypeRef(), maxDepth, currentDepth);
+        reader = rootReader.newObjectReader("repeatDetailsRef");
+        decoder0.decode(reader, m.getRepeatDetailsRef(), maxDepth, currentDepth);
         reader = rootReader.newObjectReader("location");
         m.setLocation(decoder0.decode(reader, m.getLocation()));
         reader = rootReader.newObjectReader("maxSubscriptions");

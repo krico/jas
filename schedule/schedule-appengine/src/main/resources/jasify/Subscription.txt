@@ -1,6 +1,6 @@
 Dear JASIFY team,
 
-A new booking has been created!
+A new subscription has been created!
 
 Order Details:
 Publisher     : %PublisherName%
@@ -9,6 +9,7 @@ Activity      : %AvtivityName%
 
 Order        #: %OrderNumber%
 Price         : %ActivityPrice%
+Fees          : %Fees%
 Tax           : %Tax%
 
 Total         : %TotalPrice%

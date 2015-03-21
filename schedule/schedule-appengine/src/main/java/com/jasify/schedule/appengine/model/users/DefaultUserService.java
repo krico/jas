@@ -149,12 +149,12 @@ final class DefaultUserService implements UserService {
     }
 
     private void notify(User user) {
+        String subject = String.format("[Jasify] SignUp [%s]", user.getName());
         try {
-            String subject = String.format("[Jasify] SignUp [%s]", user.getName());
-            MailParser mailParser = MailParser.createUserSignUpEmail(user.getRealName(), user.getName());
+            MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user.getRealName(), user.getName());
             MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
-            log.warn("Failed to notify", e);
+            log.warn("Failed to notify jasify", e);
         }
     }
 

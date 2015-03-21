@@ -2,10 +2,21 @@
 
     angular.module('jasifyWeb').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($location, ActivityType, Activity, activity, organizations) {
+    angular.module('jasifyWeb').directive('datepickerPopup', function () {
+        return {
+            restrict: 'EAC',
+            require: 'ngModel',
+            link: function (scope, element, attr, controller) {
+                //remove the default formatter from the input directive to prevent conflict
+                controller.$formatters.shift();
+            }
+        };
+    });
+
+    function AdminActivityController($location, $scope, ActivityType, Activity, activity, organizations) {
         var vm = this;
 
-        vm.dateTimeFormat = 'dd MMM yyyy HH:mm';
+        vm.dateFormat = 'dd MMM yyyy HH:mm';
         vm.alerts = [];
         vm.organization = {};
         vm.activity = activity;
@@ -20,9 +31,10 @@
 
         vm.isRepeatOpen = false;
         vm.openRepeat = openRepeat;
-        vm.repeatType = 'No';
-        vm.repeatDays = {};
-        vm.repeatDate = null;
+        vm.repeatDetails = {};
+        vm.repeatTypes = ["No", "Daily", "Weekly"];
+        vm.repeatUntilTypes = ["Count", "Date"];
+        vm.minStartDate = new Date(); // this seems wrong?
 
         vm.organizations = organizations.items;
         vm.selectOrganization = selectOrganization;
@@ -34,8 +46,23 @@
         vm.create = create;
         vm.reset = reset;
         vm.back = back;
+        vm.init = init;
 
         vm.selectOrganization(vm.organizations, vm.activity, $location.search().organizationId);
+
+        vm.init();
+
+        function init() {
+            vm.activity.start = new Date();
+            vm.activity.start.setMinutes(0, 0, 0);
+            vm.activity.start.setHours(vm.activity.start.getHours() + 1);
+            vm.activity.finish = new Date(vm.activity.start.getTime() + 60 * 60 * 1000);
+            vm.repeatDetails.repeatType = vm.repeatTypes[0];
+            vm.repeatDetails.repeatUntilType = vm.repeatUntilTypes[0];
+            vm.repeatDetails.untilCount = 1;
+            vm.repeatDetails.repeatEvery = 1;
+            vm.repeatDetails.untilDate = new Date(vm.activity.finish);
+        }
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -95,6 +122,10 @@
             function ok(r) {
                 vm.loadingActivityTypes = false;
                 vm.activityTypes = r.items;
+                if (vm.activityTypes.length == 1) {
+                    vm.activity.activityType = vm.activityTypes[0];
+                    vm.activity.description = vm.activityTypes[0].description;
+                }
                 vm.selectActivityType(vm.activityTypes, vm.activity);
             }
 
@@ -135,22 +166,14 @@
         }
 
         function create() {
-            Activity.add(vm.activity).then(ok, fail);
+            Activity.add(vm.activity, vm.repeatDetails).then(ok, fail);
 
             function ok(r) {
-                vm.alert('info', 'Activity created!');
-                // TODO This should be server side work
-                if (vm.repeatType == "Weekly") {
-                    while (vm.repeatDate && vm.activity.start.getTime() < vm.repeatDate.getTime() && vm.activity.finish.getTime() < vm.repeatDate.getTime()) {
-                        vm.activity.start.setDate(vm.activity.start.getDate() + 1);
-                        vm.activity.finish.setDate(vm.activity.finish.getDate() + 1);
-                        if (vm.repeatDays[vm.activity.start.getDay()]) {
-                            Activity.add(vm.activity).then(ok, fail);
-                            return;
-                        }
-                    }
+                if (r.items.length == 1) {
+                    $location.path('/admin/activity/' + r.items[0].id);
+                } else {
+                    $location.path("/admin/activities");
                 }
-                $location.path('/admin/activity/' + r.id);
             }
 
             function fail(r) {
@@ -183,6 +206,46 @@
                 vm.alert('danger', 'Failed: ' + r.statusText);
             }
         }
+
+        $scope.$watch(
+            // This function returns the value being watched.
+            function () {
+                return vm.activity.start;
+            },
+            // This is the change listener, called when the value returned from the above function changes
+            function (newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    var offset = newValue.getTime() - oldValue.getTime();
+                    vm.activity.finish = new Date(vm.activity.finish.getTime() + offset);
+                }
+            }
+        );
+
+        $scope.$watch(
+            // This function returns the value being watched.
+            function () {
+                return vm.activity.finish;
+            },
+            // This is the change listener, called when the value returned from the above function changes
+            function (newValue, oldValue) {
+                if (newValue !== oldValue && vm.activity.finish.getTime() > vm.repeatDetails.untilDate.getTime()) {
+                    vm.repeatDetails.untilDate = new Date(vm.activity.finish);
+                }
+            }
+        );
+
+        $scope.$watch(
+            // This function returns the value being watched.
+            function () {
+                return vm.repeatType;
+            },
+            // This is the change listener, called when the value returned from the above function changes
+            function (newValue, oldValue) {
+                if (newValue !== oldValue && oldValue == "No") {
+                    vm.repeatDetails.untilDate = new Date(vm.activity.finish.getTime());
+                }
+            }
+        );
     }
 
 })(angular);

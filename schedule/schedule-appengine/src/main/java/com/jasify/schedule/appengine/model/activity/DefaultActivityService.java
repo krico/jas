@@ -2,16 +2,17 @@ package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.repackaged.org.joda.time.DateTime;
+import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.jasify.schedule.appengine.mail.MailParser;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
+import com.jasify.schedule.appengine.meta.activity.RepeatDetailsMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
@@ -20,10 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
+import com.jasify.schedule.appengine.model.activity.RepeatDetails.*;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author krico
@@ -34,6 +36,7 @@ class DefaultActivityService implements ActivityService {
 
     private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
+    private final RepeatDetailsMeta repeatDetailsMeta;
     private final OrganizationMeta organizationMeta;
     private final UserMeta userMeta;
     private final SubscriptionMeta subscriptionMeta;
@@ -41,6 +44,7 @@ class DefaultActivityService implements ActivityService {
     private DefaultActivityService() {
         activityTypeMeta = ActivityTypeMeta.get();
         activityMeta = ActivityMeta.get();
+        repeatDetailsMeta = RepeatDetailsMeta.get();
         organizationMeta = OrganizationMeta.get();
         userMeta = UserMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
@@ -86,6 +90,32 @@ class DefaultActivityService implements ActivityService {
                 .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
                 .asKeyList()
                 .isEmpty();
+    }
+
+    private void validateActivity(Activity activity) throws FieldValueException {
+        if (activity.getStart() == null) throw new FieldValueException("Activity.start");
+        if (activity.getStart().getTime() < System.currentTimeMillis()) throw new FieldValueException("Activity.start");
+        if (activity.getFinish() == null) throw new FieldValueException("Activity.finish");
+        if (activity.getFinish().getTime() < activity.getStart().getTime()) throw new FieldValueException("Activity.finish");
+        if (activity.getPrice() != null && activity.getPrice() < 0) throw new FieldValueException("Activity.price");
+        if (activity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
+    }
+
+    private void validateRepeatDetails(RepeatDetails repeatDetails) throws FieldValueException {
+        if (repeatDetails.getRepeatType() == null) throw new FieldValueException("RepeatDetails.repeatType");
+        if (repeatDetails.getRepeatType() != RepeatType.No) {
+            if (repeatDetails.getRepeatEvery() <= 0) throw new FieldValueException("RepeatDetails.repeatEvery");
+            if (repeatDetails.getRepeatUntilType() == null)
+                throw new FieldValueException("RepeatDetails.repeatUntilType");
+            if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && repeatDetails.getUntilCount() <= 0)
+                throw new FieldValueException("RepeatDetails.untilCount");
+            if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date) {
+                if (repeatDetails.getUntilDate() == null)
+                    throw new FieldValueException("RepeatDetails.untilDate");
+                if (repeatDetails.getUntilDate().getTime() < System.currentTimeMillis())
+                    throw new FieldValueException("RepeatDetails.untilDate");
+            }
+        }
     }
 
     @Nonnull
@@ -188,15 +218,146 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Key addActivity(Activity activity) throws EntityNotFoundException, FieldValueException {
+    public List<Key> addActivity(Activity activity, RepeatDetails repeatDetails) throws EntityNotFoundException, FieldValueException {
         Key activityTypeId = activity.getActivityTypeRef().getKey();
+        validateActivity(activity);
         if (activityTypeId == null) throw new FieldValueException("Activity.activityType");
+        if (repeatDetails == null) {
+            repeatDetails = new RepeatDetails();
+        } else {
+            validateRepeatDetails(repeatDetails);
+        }
 
-        getActivityType(activityTypeId);
+        ActivityType activityType = getActivityType(activityTypeId);
 
-        activity.setId(Datastore.allocateId(activityTypeId.getParent(), activityMeta));
+        switch (repeatDetails.getRepeatType()) {
+            case Daily:
+                return addActivityRepeatTypeDaily(activity, repeatDetails, activityType);
+            case Weekly:
+                return addActivityRepeatTypeWeekly(activity, repeatDetails, activityType);
+            case No:
+                activity.setId(Datastore.allocateId(activityType.getId().getParent(), activityMeta));
+                return Arrays.asList(Datastore.put(activity));
+            default: // Safety check in case someone adds a new RepeatType but forgets to update this method
+                throw new FieldValueException("activity.repeatDetails.repeatType");
+        }
+    }
 
-        return Datastore.put(activity);
+    private List<Key> addActivityRepeatTypeDaily(Activity activity, RepeatDetails repeatDetails, ActivityType activityType) throws EntityNotFoundException, FieldValueException {
+        DateTime start = new DateTime(activity.getStart());
+        DateTime finish = new DateTime(activity.getFinish());
+
+        List<Key> result = null;
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            repeatDetails.setId(Datastore.allocateId(activityType.getId().getParent(), repeatDetailsMeta));
+            Datastore.put(tx, repeatDetails);
+            activity.setRepeatDetailsRef(repeatDetails);
+            List<Activity> activities = new ArrayList<>();
+            while (activities.size() < MaximumRepeatCounter) {
+                Activity newActivity = new Activity(activityType);
+                BeanUtil.copyProperties(newActivity, activity);
+                newActivity.setId(Datastore.allocateId(activityType.getId().getParent(), activityMeta));
+                newActivity.setStart(start.toDate());
+                newActivity.setFinish(finish.toDate());
+                activities.add(newActivity);
+
+                start = start.plusDays(repeatDetails.getRepeatEvery());
+                finish = finish.plusDays(repeatDetails.getRepeatEvery());
+
+                if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
+                    break;
+                if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
+                    break;
+            }
+
+            if (!activities.isEmpty()) {
+                result = Datastore.put(tx, activities);
+                tx.commit();
+            }
+        } finally {
+            if (tx.isActive()) tx.rollback();
+        }
+
+        return result;
+    }
+
+    private Set<Integer> getRepeatDays(RepeatDetails repeatDetails) {
+        Set<Integer> result = new HashSet<>();
+        if (repeatDetails.isMondayEnabled()) result.add(DateTimeConstants.MONDAY);
+        if (repeatDetails.isTuesdayEnabled()) result.add(DateTimeConstants.TUESDAY);
+        if (repeatDetails.isWednesdayEnabled()) result.add(DateTimeConstants.WEDNESDAY);
+        if (repeatDetails.isThursdayEnabled()) result.add(DateTimeConstants.THURSDAY);
+        if (repeatDetails.isFridayEnabled()) result.add(DateTimeConstants.FRIDAY);
+        if (repeatDetails.isSaturdayEnabled()) result.add(DateTimeConstants.SATURDAY);
+        if (repeatDetails.isSundayEnabled()) result.add(DateTimeConstants.SUNDAY);
+        return result;
+    }
+
+    private List<Key> addActivityRepeatTypeWeekly(Activity activity, RepeatDetails repeatDetails, ActivityType activityType) throws EntityNotFoundException, FieldValueException {
+        Set<Integer> repeatDays = getRepeatDays(repeatDetails);
+        if (repeatDays.isEmpty()) throw new FieldValueException("RepeatDetails.repeatDays");
+
+        int repeatEvery = 0;
+        if (repeatDetails.getRepeatEvery() > 1) {
+            repeatEvery = (repeatDetails.getRepeatEvery() - 1) * 7;
+        }
+
+        DateTime start = new DateTime(activity.getStart());
+        DateTime finish = new DateTime(activity.getFinish());
+
+        // Find the next chosen day
+        for (int day = 0; day < 7; day++) {
+            if (repeatDays.contains(start.getDayOfWeek())) {
+                break;
+            }
+            start = start.plusDays(1);
+            finish = finish.plusDays(1);
+        }
+
+        List<Key> result = null;
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            repeatDetails.setId(Datastore.allocateId(activityType.getId().getParent(), repeatDetailsMeta));
+            Datastore.put(tx, repeatDetails);
+            activity.setRepeatDetailsRef(repeatDetails);
+
+            List<Activity> activities = new ArrayList<>();
+            boolean repeatCompleted = false;
+            while (!repeatCompleted && activities.size() < MaximumRepeatCounter) {
+                // Run through 7 days per week
+                for (int day = 0; day < 7 && !repeatCompleted; day++) {
+                    // Its one of the chosen days
+                    if (repeatDays.contains(start.getDayOfWeek())) {
+                        Activity newActivity = new Activity(activityType);
+                        BeanUtil.copyProperties(newActivity, activity);
+                        newActivity.setId(Datastore.allocateId(activityType.getId().getParent(), activityMeta));
+                        newActivity.setStart(start.toDate());
+                        newActivity.setFinish(finish.toDate());
+                        activities.add(newActivity);
+                    }
+                    // Move to the next day
+                    start = start.plusDays(1);
+                    finish = finish.plusDays(1);
+
+                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount()) repeatCompleted = true;
+                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime()) repeatCompleted = true;
+                }
+                // Jump to next period
+                if (repeatEvery > 0) {
+                    start = start.plusDays(repeatEvery);
+                    finish = finish.plusDays(repeatEvery);
+                }
+            }
+
+            if (!activities.isEmpty()) {
+                result = Datastore.put(tx, activities);
+                tx.commit();
+            }
+        } finally {
+            if (tx.isActive()) tx.rollback();
+        }
+        return result;
     }
 
     @Nonnull
@@ -228,6 +389,7 @@ class DefaultActivityService implements ActivityService {
     @Nonnull
     @Override
     public Activity updateActivity(Activity activity) throws EntityNotFoundException, FieldValueException {
+        validateActivity(activity);
         Activity dbActivity = getActivity(activity.getId());
         BeanUtil.copyPropertiesExcluding(dbActivity, activity, "created", "modified", "id", "activityTypeRef");
         Datastore.put(dbActivity);
@@ -242,25 +404,42 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException {
+    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException, OperationException {
         Subscription subscription = subscribe(user.getId(), activity.getId());
         activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
         return subscription;
     }
 
-    private void notify(User user, Activity activity) {
+    private void notify(Organization organization, User user, Activity activity) {
+        String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
+        String orderNumber = new Date().toString();
         try {
-            String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
-            MailParser mailParser = MailParser.createBookingEmail(activity.getName(), user.getName(), "TODO", "TODO", BigDecimal.valueOf(activity.getPrice()), BigDecimal.ZERO, "TODO");
+            MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(activity.getName(), user.getName(), organization.getName(), orderNumber, activity.getPrice());
+            MailServiceFactory.getMailService().send(user.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
+        } catch (Exception e) {
+            log.error("Failed to notify subscriber", e);
+        }
+
+        try {
+            MailParser mailParser = MailParser.createPublisherSubscriptionEmail(activity.getName(), user.getName(), organization.getName(), orderNumber, activity.getPrice());
+            for (User orgUser : organization.getUsers()) {
+                MailServiceFactory.getMailService().send(orgUser.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
+            }
+        } catch (Exception e) {
+            log.error("Failed to notify publisher", e);
+        }
+
+        try {
+            MailParser mailParser = MailParser.createJasifySubscriptionEmail(activity.getName(), user.getName(), organization.getName(), orderNumber, activity.getPrice(), 0d, 0d, "?");
             MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
-            log.warn("Failed to notify", e);
+            log.error("Failed to notify jasify", e);
         }
     }
 
     @Nonnull
     @Override
-    public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, UniqueConstraintException {
+    public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, UniqueConstraintException, OperationException {
         User dbUser = getUser(userId);
         Activity dbActivity = getActivity(activityId);
 
@@ -270,6 +449,11 @@ class DefaultActivityService implements ActivityService {
                 throw new UniqueConstraintException("User already subscribed");
             }
         }
+
+        if (dbActivity.getMaxSubscriptions() > 0 && dbActivity.getSubscriptionCount() >= dbActivity.getMaxSubscriptions()) {
+            throw new OperationException("Activity fully subscribed");
+        }
+
         Subscription subscription = new Subscription();
 
         subscription.setId(Datastore.allocateId(dbUser.getId(), subscriptionMeta));
@@ -282,7 +466,9 @@ class DefaultActivityService implements ActivityService {
         Datastore.put(dbActivity);
         Datastore.put(subscription);
 
-        notify(dbUser, dbActivity);
+        ActivityType activityType = dbActivity.getActivityTypeRef().getModel();
+        Organization organization = getOrganization(activityType.getId().getParent());
+        notify(organization, dbUser, dbActivity);
 
         return subscription;
     }

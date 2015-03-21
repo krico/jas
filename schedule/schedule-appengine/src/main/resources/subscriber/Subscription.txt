@@ -7,9 +7,5 @@ Purchased From: %PublisherName%
 
 Order        #: %OrderNumber%
 Price         : %ActivityPrice%
-Tax           : %Tax%
-
-Total         : %TotalPrice%
-Payment method: %PaymentMethod%
 
 Thank you again for booking with Jasify

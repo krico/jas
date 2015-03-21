@@ -16,7 +16,7 @@ public class JasSubscriptionTransformerTest {
     private JasSubscriptionTransformer transformer = new JasSubscriptionTransformer();
 
     @BeforeClass
-    public static void datastore() {
+    public static void initialise() {
         TestHelper.initializeDatastore();
     }
 

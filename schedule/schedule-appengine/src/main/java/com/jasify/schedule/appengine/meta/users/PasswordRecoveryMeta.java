@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.users;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-03 22:08:25")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-21 17:11:31")
 /** */
 public final class PasswordRecoveryMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.users.PasswordRecovery> {
 

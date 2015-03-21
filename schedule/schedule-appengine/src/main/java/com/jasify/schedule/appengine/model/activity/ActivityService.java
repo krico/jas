@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.activity;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
@@ -15,7 +16,11 @@ import java.util.List;
  * @since 09/01/15.
  */
 public interface ActivityService {
-
+    /**
+     * Maximum number of activities that can be added in one addActivity call
+     */
+    public static final int MaximumRepeatCounter = 25;
+    
     /**
      * Add an activityType to and organization
      *
@@ -76,12 +81,13 @@ public interface ActivityService {
 
     /**
      * @param activity to add
-     * @return the id
+     * @param repeatDetails information on adding repeat activities
+     * @return list of ids of the added activities
      * @throws EntityNotFoundException if not found
      * @throws FieldValueException     if any fields are invalid
      */
     @Nonnull
-    public Key addActivity(Activity activity) throws EntityNotFoundException, FieldValueException;
+    public List<Key> addActivity(Activity activity, RepeatDetails repeatDetails) throws EntityNotFoundException, FieldValueException;
 
     /**
      * @param id to fetch
@@ -134,9 +140,10 @@ public interface ActivityService {
      * @return a newly created Subscription for this user to this activity
      * @throws EntityNotFoundException if any of the entities don't exist
      * @throws UniqueConstraintException user was already subscribed to this activity
+     * @throws OperationException if activity is fully subscribed
      */
     @Nonnull
-    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException;
+    public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException, OperationException;
 
     /**
      * Subscribe a user for an activity
@@ -147,9 +154,10 @@ public interface ActivityService {
      * @throws EntityNotFoundException  if any of the entities don't exist
      * @throws IllegalArgumentException if any key is invalid
      * @throws UniqueConstraintException user was already subscribed to this activity
+     * @throws OperationException if activity is fully subscribed
      */
     @Nonnull
-    public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, IllegalArgumentException, UniqueConstraintException;
+    public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, IllegalArgumentException, UniqueConstraintException, OperationException;
 
     /**
      * List subscriptions for an activity
