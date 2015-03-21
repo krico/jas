@@ -2,11 +2,11 @@
 
     angular.module('jasify.authenticate').controller('SignInController', SignInController);
 
-    function SignInController($log, $cookies, $rootScope, $window, $location, AUTH_EVENTS, Auth) {
+    function SignInController($log, $rootScope, $window, $location, AUTH_EVENTS, Auth, BrowserData) {
         var vm = this;
         vm.user = {};
         vm.email = false;
-        vm.rememberMe = !!$cookies.rememberMe;
+        vm.rememberMe = !!BrowserData.getRememberUser();
         vm.inProgress = false;
         vm.showErrors = false;
         vm.withEmail = withEmail;
@@ -21,7 +21,7 @@
 
         if (vm.rememberMe) {
             $log.debug('REMEMBER');
-            vm.user.email = $cookies.rememberMe;
+            vm.user.email = BrowserData.getRememberUser();
         }
 
         function forgot(fn) {
@@ -72,9 +72,9 @@
             function ok(session) {
 
                 if (vm.rememberMe) {
-                    $cookies.rememberMe = cred.name;
+                    BrowserData.setRememberUser(cred.name);
                 } else {
-                    delete $cookies.rememberMe;
+                    BrowserData.clearRememberUser();
                 }
 
                 vm.inProgress = false;

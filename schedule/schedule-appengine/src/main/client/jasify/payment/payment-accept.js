@@ -2,7 +2,7 @@
 
     angular.module('jasifyWeb').controller('PaymentAcceptController', PaymentAcceptController);
 
-    function PaymentAcceptController($location, $routeParams, $sessionStorage, Balance) {
+    function PaymentAcceptController($location, $routeParams, BrowserData, Balance) {
         var vm = this;
         vm.alert = alert;
         vm.alerts = [];
@@ -37,10 +37,9 @@
                 vm.complete = true;
                 vm.success = true;
                 vm.status = 'Payment processed! You will be redirected...';
-                var redirect = $sessionStorage.paymentRedirect || '/balance/view';
                 $location.replace();
                 $location.search({paymentStatus: 'success'});
-                $location.path(redirect);
+                $location.path(BrowserData.getPaymentAcceptRedirect());
             }
 
             function fail(res) {

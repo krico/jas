@@ -14,6 +14,19 @@
             $provide.decorator('$modal', function ($modalMock) {
                 return $modalMock;
             });
+
+            /**
+             * Return a standard object for $sessionStorage
+             */
+            $provide.decorator('$sessionStorage', function () {
+                return {};
+            });
+            /**
+             * Return a standard object for $localStorage
+             */
+            $provide.decorator('$localStorage', function () {
+                return {};
+            });
         });
 
     ng.module('jasify.mocks').factory('$gapiMock', $gapiMock);
@@ -124,6 +137,8 @@
 
     function $windowMock() {
         var mock = {
+            // These two remove the warnings from ngstorage
+            localStorage: {}, sessionStorage: {},
             innerHeight: 400,
             innerWidth: 500
         };

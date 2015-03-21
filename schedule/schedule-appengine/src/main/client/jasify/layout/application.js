@@ -2,7 +2,7 @@
 
     angular.module('jasifyWeb').controller('ApplicationController', ApplicationController);
 
-    function ApplicationController($route, $scope, $rootScope, $modal, $log, $location, $cookies, Auth, AUTH_EVENTS) {
+    function ApplicationController($route, $scope, $rootScope, $modal, $log, $location, Auth, AUTH_EVENTS, BrowserData) {
         var appVm = this;
 
         $scope.currentUser = null;
@@ -38,7 +38,7 @@
         }
 
         function restore() {
-            if ($cookies.loggedIn) {
+            if (BrowserData.getLoggedIn()) {
                 Auth.restore().then(function (u) {
                     $scope.setCurrentUser(u);
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
@@ -47,7 +47,7 @@
         }
 
         function notAuthenticated() {
-            appVm.authenticate(true);
+            appVm.authenticate(!BrowserData.getFirstAccess());
         }
 
         function createAccount() {

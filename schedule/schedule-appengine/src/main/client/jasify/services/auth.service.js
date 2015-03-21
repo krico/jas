@@ -2,8 +2,7 @@
 
     angular.module('jasifyComponents').factory('Auth', auth);
 
-    function auth($log, $http, $q, $cookies, $location, Session, Endpoint) {
-
+    function auth($log, $http, $q, $location, Session, Endpoint, BrowserData) {
         var Auth = {
             isAuthenticated: isAuthenticated,
             isAdmin: isAdmin,
@@ -31,7 +30,8 @@
         function loggedIn(res) {
             var sessionId = res.data.id || res.data.sessionId;
             Session.create(sessionId, res.data.userId, res.data.user.admin);
-            $cookies.loggedIn = true;
+            BrowserData.setFirstAccess(false);
+            BrowserData.setLoggedIn(true);
             return res.data.user;
         }
 
@@ -54,7 +54,8 @@
             }).then(function (resp) {
                 $log.info("Logged in! (userId=" + resp.result.userId + ")");
                 Session.create(resp.result.sessionId, resp.result.userId, resp.result.admin);
-                $cookies.loggedIn = true;
+                BrowserData.setLoggedIn(true);
+                BrowserData.setFirstAccess(false);
                 return resp.result;
             });
         }
@@ -66,7 +67,7 @@
                 restoreData.promise = null;
                 restoreData.data = null;
             } else {
-                if (!$cookies.loggedIn) {
+                if (!BrowserData.getLoggedIn()) {
                     restoreData.invoked = true;
                     restoreData.failed = true;
                     restoreData.data = 'Not logged in';
@@ -140,7 +141,7 @@
             function ok(res) {
                 $log.info("Logged out!");
                 Session.destroy();
-                $cookies.loggedIn = false;
+                BrowserData.setLoggedIn(false);
             }
 
             function fail(message) {
@@ -200,12 +201,13 @@
         }
 
         function restoreOnInstantiation() {
-            if ($cookies.loggedIn) {
+            if (BrowserData.getLoggedIn()) {
                 Auth.restore().then(function (u) {
-                        $cookies.loggedIn = true;
+                        BrowserData.setLoggedIn(true);
+                        BrowserData.setFirstAccess(false);
                     },
                     function (data) {
-                        $cookies.loggedIn = false;
+                        BrowserData.setLoggedIn(false);
                     });
             }
         }

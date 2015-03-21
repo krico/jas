@@ -2,7 +2,7 @@
 
     angular.module('jasify.bookIt').controller('BookItController', BookItController);
 
-    function BookItController($rootScope, $route, $cookies, $modal, AUTH_EVENTS, Auth) {
+    function BookItController($rootScope, $route, $modal, AUTH_EVENTS, Auth, BrowserData) {
         var appVm = this;
 
         appVm.restore = restore;
@@ -37,7 +37,7 @@
 
 
         function restore() {
-            if ($cookies.loggedIn) {
+            if (BrowserData.getLoggedIn()) {
                 Auth.restore().then(function (u) {
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess, u.user);
                 });
@@ -62,7 +62,8 @@
         }
 
         function notAuthenticated() {
-            appVm.authenticate($cookies.loggedIn);
+            console.log('BrowserData.FirstAccess: ' + BrowserData.getFirstAccess());
+            appVm.authenticate(!BrowserData.getFirstAccess());
         }
 
         function authenticate(isSignIn) {

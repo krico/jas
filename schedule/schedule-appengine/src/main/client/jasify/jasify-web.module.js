@@ -8,7 +8,6 @@
         'ui.bootstrap',
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
-        'ngStorage',
         'jasifyComponents',
         'jasify.authenticate',
         'jasify.payment',
