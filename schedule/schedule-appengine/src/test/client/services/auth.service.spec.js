@@ -1,11 +1,10 @@
 describe('AuthService', function () {
-    var Session, Auth, $cookies, Endpoint, $q, $httpBackend, $rootScope, $gapiMock, $location;
-
+    var Session, Auth, BrowserData, Endpoint, $q, $httpBackend, $rootScope, $gapiMock, $location;
     beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_$cookies_, _$location_, _Session_, _Auth_, _Endpoint_, _$q_, _$httpBackend_, _$rootScope_, _$gapiMock_) {
-        $cookies = _$cookies_;
+    beforeEach(inject(function (_BrowserData_, _$location_, _Session_, _Auth_, _Endpoint_, _$q_, _$httpBackend_, _$rootScope_, _$gapiMock_) {
+        BrowserData = _BrowserData_;
         $location = _$location_;
         Session = _Session_;
         Auth = _Auth_;
@@ -234,7 +233,7 @@ describe('AuthService', function () {
 
         var user = null;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
             user = u;
@@ -254,7 +253,7 @@ describe('AuthService', function () {
 
         var user = null;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore(restoreData).then(function (u) {
             user = u;
@@ -275,7 +274,7 @@ describe('AuthService', function () {
         var user = null;
         var failed = false;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
                 user = u;
@@ -298,7 +297,7 @@ describe('AuthService', function () {
 
         var user = null;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
             user = u;
@@ -334,7 +333,7 @@ describe('AuthService', function () {
         var user = null;
         var failed = false;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
                 user = u;
