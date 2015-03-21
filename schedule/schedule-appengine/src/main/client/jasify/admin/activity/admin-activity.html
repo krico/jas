@@ -85,51 +85,51 @@
                     </div>
                 </div>
                 <div class="form-group" ng-show="!vm.activity.id">
-                    <label for class="col-sm-3 control-label" tooltip="Maximum {{vm.repeatMaximum}} allowed">Repeat:</label>
+                    <label for class="col-sm-3 control-label">Repeat:</label>
 
                     <div class="col-sm-8">
                         <span class="input-group-btn">
-                            <select style="vertical-align:middle" ng-model="vm.repeatType" class="form-control">
+                            <select style="vertical-align:middle" ng-model="vm.repeatDetails.repeatType" class="form-control">
                                 <option ng-repeat="rt in vm.repeatTypes" value="{{rt}}">{{rt}}</option>
                             </select>
                         </span>
                     </div>
                 </div>
-                <div class="form-group" ng-show="vm.repeatType=='Weekly'">
+                <div class="form-group" ng-show="vm.repeatDetails.repeatType=='Weekly'">
                     <label for class="control-label col-sm-5">Days:</label>
 
                     <div class="btn-group col-sm-6">
-                        <label class="btn btn-primary" ng-model="vm.repeatDays[1]" btn-checkbox>M</label>
-                        <label class="btn btn-primary" ng-model="vm.repeatDays[2]" btn-checkbox>T</label>
-                        <label class="btn btn-primary" ng-model="vm.repeatDays[3]" btn-checkbox>W</label>
-                        <label class="btn btn-primary" ng-model="vm.repeatDays[4]" btn-checkbox>T</label>
-                        <label class="btn btn-primary" ng-model="vm.repeatDays[5]" btn-checkbox>F</label>
-                        <label class="btn btn-primary" ng-model="vm.repeatDays[6]" btn-checkbox>S</label>
-                        <label class="btn btn-primary" ng-model="vm.repeatDays[0]" btn-checkbox>S</label>
+                        <label class="btn btn-primary" ng-model="vm.repeatDetails.mondayEnabled" btn-checkbox>M</label>
+                        <label class="btn btn-primary" ng-model="vm.repeatDetails.tuesdayEnabled" btn-checkbox>T</label>
+                        <label class="btn btn-primary" ng-model="vm.repeatDetails.wednesdayEnabled" btn-checkbox>W</label>
+                        <label class="btn btn-primary" ng-model="vm.repeatDetails.thursdayEnabled" btn-checkbox>T</label>
+                        <label class="btn btn-primary" ng-model="vm.repeatDetails.fridayEnabled" btn-checkbox>F</label>
+                        <label class="btn btn-primary" ng-model="vm.repeatDetails.saturdayEnabled" btn-checkbox>S</label>
+                        <label class="btn btn-primary" ng-model="vm.repeatDetails.sundayEnabled" btn-checkbox>S</label>
                     </div>
                 </div>
-                <div class="form-group" ng-show="vm.repeatType!='No'">
+                <div class="form-group" ng-show="vm.repeatDetails.repeatType!='No'">
                     <label for class="control-label col-sm-5">Every:</label>
 
                     <div class="col-sm-6">
-                        <input type="number" min="1" class="form-control" ng-model="vm.repeatEvery"/>
+                        <input type="number" min="1" class="form-control" ng-model="vm.repeatDetails.repeatEvery"/>
                     </div>
                 </div>
-                <div class="form-group" ng-show="vm.repeatType!='No'">
+                <div class="form-group" ng-show="vm.repeatDetails.repeatType!='No'">
                     <label for class="control-label col-sm-5">Until:</label>
 
                     <div class="col-sm-6">
-                        <select style="vertical-align:middle" ng-model="vm.repeatEndType" class="form-control">
-                            <option ng-repeat="rt in vm.repeatEndTypes" value="{{rt}}">{{rt}}</option>
+                        <select style="vertical-align:middle" ng-model="vm.repeatDetails.repeatUntilType" class="form-control">
+                            <option ng-repeat="rt in vm.repeatUntilTypes" value="{{rt}}">{{rt}}</option>
                         </select>
 
-                        <div ng-show="vm.repeatEndType=='Count'">
-                            <input type="number" min="1" class="form-control" ng-model="vm.repeatCount"/>
+                        <div ng-show="vm.repeatDetails.repeatUntilType=='Count'">
+                            <input type="number" min="1" class="form-control" ng-model="vm.repeatDetails.untilCount"/>
                         </div>
-                        <div class="input-group" ng-show="vm.repeatEndType=='Date'">
+                        <div class="input-group" ng-show="vm.repeatDetails.repeatUntilType=='Date'">
                             <input id="repeat" name="repeat" type="text" class="form-control"
                                    datepicker-popup="{{vm.dateFormat}}"
-                                   ng-model="vm.repeatDate" is-open="vm.isRepeatOpen" min-date="vm.activity.finish"
+                                   ng-model="vm.repeatDetails.untilDate" is-open="vm.isRepeatOpen" min-date="vm.activity.finish"
                                    ng-focus="vm.openRepeat($event)" close-text="Close"/>
                             <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="vm.openRepeat($event)"><i

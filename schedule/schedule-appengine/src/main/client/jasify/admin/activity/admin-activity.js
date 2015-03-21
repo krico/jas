@@ -31,16 +31,9 @@
 
         vm.isRepeatOpen = false;
         vm.openRepeat = openRepeat;
+        vm.repeatDetails = {};
         vm.repeatTypes = ["No", "Daily", "Weekly"];
-        vm.repeatType = vm.repeatTypes[0];
-        vm.repeatEndTypes = ["Count", "Date"];
-        vm.repeatEndType = vm.repeatEndTypes[0];
-        vm.repeatDays = {};
-        vm.repeatDate = null;
-        vm.repeatCount = 1;
-        vm.repeatMaximum = 10;
-        vm.repeatCounter = null;
-        vm.repeatEvery = 1;
+        vm.repeatUntilTypes = ["Count", "Date"];
         vm.minStartDate = new Date(); // this seems wrong?
 
         vm.organizations = organizations.items;
@@ -53,15 +46,23 @@
         vm.create = create;
         vm.reset = reset;
         vm.back = back;
+        vm.init = init;
 
         vm.selectOrganization(vm.organizations, vm.activity, $location.search().organizationId);
 
-        var init = function () {
+        vm.init();
+
+        function init() {
             vm.activity.start = new Date();
             vm.activity.start.setMinutes(0, 0, 0);
+            vm.activity.start.setHours(vm.activity.start.getHours() + 1);
             vm.activity.finish = new Date(vm.activity.start.getTime() + 60 * 60 * 1000);
-            vm.repeatDate = new Date(vm.activity.finish);
-        };
+            vm.repeatDetails.repeatType = vm.repeatTypes[0];
+            vm.repeatDetails.repeatUntilType = vm.repeatUntilTypes[0];
+            vm.repeatDetails.untilCount = 1;
+            vm.repeatDetails.repeatEvery = 1;
+            vm.repeatDetails.untilDate = new Date(vm.activity.finish);
+        }
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -165,67 +166,14 @@
         }
 
         function create() {
-            if (vm.repeatType == "Weekly") {
-                // Find the next chosen day
-                for (var day = 0; day < 7; day++) {
-                    if (vm.repeatDays[vm.activity.start.getDay()]) {
-                        break;
-                    }
-                    vm.activity.start.setDate(vm.activity.start.getDate() + 1);
-                    vm.activity.finish.setDate(vm.activity.finish.getDate() + 1);
-                    // Check if we have skipped past the repeatDate
-                    if (vm.repeatEndType == "Date" && vm.activity.finish.getTime() > vm.repeatDate.getTime()) {
-                        vm.alert('danger', 'Correct the Repeat Until Date');
-                        return;
-                    }
-                }
+            Activity.add(vm.activity, vm.repeatDetails).then(ok, fail);
 
-            }
-            Activity.add(vm.activity).then(ok, fail);
-
-            vm.repeatCounter = 0;
             function ok(r) {
-                // TODO This should be server side work
-                if (vm.repeatCounter < vm.repeatMaximum) {
-                    vm.repeatCounter++;
-                    if (vm.repeatType == "Daily") {
-                        vm.activity.start.setDate(vm.activity.start.getDate() + vm.repeatEvery);
-                        vm.activity.finish.setDate(vm.activity.finish.getDate() + vm.repeatEvery);
-                        if (vm.repeatEndType == "Count" && vm.repeatCounter < vm.repeatCount) {
-                            Activity.add(vm.activity).then(ok, fail);
-                            return;
-                        } else if (vm.repeatEndType == "Date" && vm.activity.finish.getTime() <= vm.repeatDate.getTime()) {
-                            Activity.add(vm.activity).then(ok, fail);
-                            return;
-                        }
-                    } else if (vm.repeatType == "Weekly") {
-                        // Use Sunday as the repeatEvery switch. Check if we just did a Sunday add
-                        if (vm.activity.start.getDay() === 0 && vm.repeatEvery > 1) {
-                            vm.activity.start.setDate(vm.activity.start.getDate() + (vm.repeatEvery - 1) * 7);
-                            vm.activity.finish.setDate(vm.activity.finish.getDate() + (vm.repeatEvery - 1) * 7);
-                        }
-                        for (var day = 0; day < 7; day++) {
-                            vm.activity.start.setDate(vm.activity.start.getDate() + 1);
-                            vm.activity.finish.setDate(vm.activity.finish.getDate() + 1);
-                            if (vm.repeatDays[vm.activity.start.getDay()]) {
-                                if (vm.repeatEndType == "Count" && vm.repeatCounter < vm.repeatCount) {
-                                    Activity.add(vm.activity).then(ok, fail);
-                                    return;
-                                } else if (vm.repeatEndType == "Date" && vm.activity.finish.getTime() < vm.repeatDate.getTime()) {
-                                    Activity.add(vm.activity).then(ok, fail);
-                                    return;
-                                }
-                            }
-                            // Use Sunday as the repeatEvery switch.
-                            if (vm.activity.start.getDay() === 0 && vm.repeatEvery > 1) {
-                                vm.activity.start.setDate(vm.activity.start.getDate() + (vm.repeatEvery - 1) * 7);
-                                vm.activity.finish.setDate(vm.activity.finish.getDate() + (vm.repeatEvery - 1) * 7);
-                            }
-                        }
-                    }
+                if (r.items.length == 1) {
+                    $location.path('/admin/activity/' + r.items[0].id);
+                } else {
+                    $location.path("/admin/activities");
                 }
-
-                $location.path('/admin/activity/' + r.id);
             }
 
             function fail(r) {
@@ -280,8 +228,8 @@
             },
             // This is the change listener, called when the value returned from the above function changes
             function (newValue, oldValue) {
-                if (newValue !== oldValue && vm.activity.finish.getTime() > vm.repeatDate.getTime()) {
-                    vm.repeatDate = new Date(vm.activity.finish);
+                if (newValue !== oldValue && vm.activity.finish.getTime() > vm.repeatDetails.untilDate.getTime()) {
+                    vm.repeatDetails.untilDate = new Date(vm.activity.finish);
                 }
             }
         );
@@ -294,12 +242,10 @@
             // This is the change listener, called when the value returned from the above function changes
             function (newValue, oldValue) {
                 if (newValue !== oldValue && oldValue == "No") {
-                    vm.repeatDate = new Date(vm.activity.finish.getTime());
+                    vm.repeatDetails.untilDate = new Date(vm.activity.finish.getTime());
                 }
             }
         );
-
-        init();
     }
 
 })(angular);

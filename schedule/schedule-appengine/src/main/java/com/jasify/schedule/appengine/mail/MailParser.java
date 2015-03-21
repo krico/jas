@@ -16,6 +16,7 @@ public class MailParser {
     private enum SubstituteKey {
         ActivityName("%ActivityName%"),
         ActivityPrice("%ActivityPrice%"),
+        Fees("%Fees%"),
         JasifyUrl("%JasifyUrl%"),
         OrderNumber("%OrderNumber%"),
         PaymentMethod("%PaymentMethod%"),
@@ -33,46 +34,57 @@ public class MailParser {
         }
     }
 
-    public static MailParser createUserSignUpEmail(String subscriberName, String userName) throws Exception {
+    public static MailParser createJasifyUserSignUpEmail(String subscriberName, String userName) throws Exception {
         MailParser mailParser = new MailParser("/jasify/UserSignUp");
         mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
         mailParser.substitute(SubstituteKey.UserName, userName);
         return mailParser;
     }
 
-    public static MailParser createBookingEmail(String activityName, String subscriberName, String publisherName, String orderNumber, BigDecimal activityPrice, BigDecimal tax, String paymentMethod) throws Exception {
-        MailParser mailParser = new MailParser("/jasify/Booking");
+    public static MailParser createJasifySubscriptionEmail(String activityName, String subscriberName, String publisherName, String orderNumber, Double activityPrice, Double fees, Double tax, String paymentMethod) throws Exception {
+        BigDecimal bdActivityPrice = convert(activityPrice);
+        BigDecimal bdFees = convert(fees);
+        BigDecimal bdTax = convert(tax);
+        MailParser mailParser = new MailParser("/jasify/Subscription");
         mailParser.substitute(SubstituteKey.ActivityName, activityName);
         mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
         mailParser.substitute(SubstituteKey.PublisherName, publisherName);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
-        mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(activityPrice));
-        mailParser.substitute(SubstituteKey.Tax, formatPrice(tax));
+        mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(bdActivityPrice));
+        mailParser.substitute(SubstituteKey.Fees, formatPrice(bdFees));
+        mailParser.substitute(SubstituteKey.Tax, formatPrice(bdTax));
+        BigDecimal bdTotalPrice = convert(bdActivityPrice.add(bdFees).add(bdTax).doubleValue());
+        mailParser.substitute(SubstituteKey.TotalPrice, formatPrice(bdTotalPrice));
         mailParser.substitute(SubstituteKey.PaymentMethod, paymentMethod);
-        BigDecimal totalPrice = activityPrice.add(tax);
-        mailParser.substitute(SubstituteKey.TotalPrice, formatPrice(totalPrice));
-        mailParser.substitute(SubstituteKey.PaymentMethod, paymentMethod);
+        return mailParser;
+
+    }
+
+    public static MailParser createPublisherSubscriptionEmail(String activityName, String subscriberName, String publisherName, String orderNumber, Double activityPrice) throws Exception {
+        BigDecimal bdActivityPrice = convert(activityPrice);
+        MailParser mailParser = new MailParser("/publisher/Subscription");
+        mailParser.substitute(SubstituteKey.ActivityName, activityName);
+        mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
+        mailParser.substitute(SubstituteKey.PublisherName, publisherName);
+        mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
+        mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(bdActivityPrice));
+        return mailParser;
+    }
+
+    public static MailParser createSubscriberSubscriptionEmail(String activityName, String subscriberName, String publisherName, String orderNumber, Double activityPrice) throws Exception {
+        BigDecimal bdActivityPrice = convert(activityPrice);
+        MailParser mailParser = new MailParser("/subscriber/Subscription");
+        mailParser.substitute(SubstituteKey.ActivityName, activityName);
+        mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
+        mailParser.substitute(SubstituteKey.PublisherName, publisherName);
+        mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
+        mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(bdActivityPrice));
         return mailParser;
     }
 
     public static MailParser createSubscriberPasswordRecoveryEmail(String passwordUrl) throws Exception {
         MailParser mailParser = new MailParser("/subscriber/PasswordRecovery");
         mailParser.substitute(SubstituteKey.PasswordUrl, passwordUrl);
-        return mailParser;
-    }
-
-    public static MailParser createSubscriberBookingConfirmationEmail(String activityName, String subscriberName, String publisherName, String orderNumber, BigDecimal activityPrice, BigDecimal tax, String paymentMethod) throws Exception {
-        MailParser mailParser = new MailParser("/subscriber/BookingConfirmation");
-        mailParser.substitute(SubstituteKey.ActivityName, activityName);
-        mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
-        mailParser.substitute(SubstituteKey.PublisherName, publisherName);
-        mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
-        mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(activityPrice));
-        mailParser.substitute(SubstituteKey.Tax, formatPrice(tax));
-        mailParser.substitute(SubstituteKey.PaymentMethod, paymentMethod);
-        BigDecimal totalPrice = activityPrice.add(tax);
-        mailParser.substitute(SubstituteKey.TotalPrice, formatPrice(totalPrice));
-        mailParser.substitute(SubstituteKey.PaymentMethod, paymentMethod);
         return mailParser;
     }
 
@@ -99,12 +111,17 @@ public class MailParser {
         return mailParser;
     }
 
+    private static BigDecimal convert(Double input) {
+        BigDecimal output = BigDecimal.ZERO;
+        if (input != null) output = BigDecimal.valueOf(input);
+        return output.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+    }
+
     private static String formatPrice(BigDecimal price) {
         DecimalFormat decimalFormat = new DecimalFormat();
         decimalFormat.setMaximumFractionDigits(2);
         decimalFormat.setMinimumFractionDigits(2);
         decimalFormat.setGroupingUsed(false);
-        price = price.setScale(2, BigDecimal.ROUND_HALF_EVEN);
         return decimalFormat.format(price);
     }
 
