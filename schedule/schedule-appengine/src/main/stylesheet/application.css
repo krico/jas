@@ -1,5 +1,37 @@
-body {
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+    position: relative;
+    min-height: 100%;
 }
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 25px;
+}
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 25px;
+    /*background-color: #f5f5f5;*/
+}
+
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+.container {
+    width: auto;
+    /*max-width: 680px;*/
+    padding: 0 15px;
+}
+.container .text-muted {
+    margin: 5px 0;
+    text-align: right;
+}
+
 
 /*
   Allow angular.js to be loaded in body, hiding cloaked elements until
@@ -194,4 +226,11 @@ body {
 
 .height-30 {
     top: 20%;
+}
+
+.server-version {
+    color: #004444;
+}
+.client-version {
+    color: #442b40;
 }

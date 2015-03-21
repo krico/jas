@@ -2,6 +2,8 @@
 
 var argv = require('yargs').argv,
     gulp = require('gulp'),
+    file = require('gulp-file'),
+    replace= require('gulp-replace'),
     merge = require('merge-stream'),
     print = require('gulp-print'),
     gutil = require('gulp-util'),
@@ -106,9 +108,23 @@ function clientTpl(cb) {
         .pipe(gulp.dest(paths.build + '/js'));
 }
 
+
 function clientJs(cb) {
+    var versionInfo = {number: 'unknown', branch: 'none', timestamp: new Date().getTime(), version: '0.0-DEV'};
+    if (argv.buildNumber) {
+        versionInfo.number = argv.buildNumber;
+        versionInfo.branch = argv.buildBranch;
+        versionInfo.timestamp = argv.buildTimestamp;
+        versionInfo.version = argv.buildVersion;
+    }
+    gutil.log('Replacing version information\n' + gutil.colors.cyan(require('util').inspect(versionInfo)));
+
     return gulp.src(paths.js)
         .pipe(sourcemaps.init())
+        .pipe(replace('@NUMBER@',versionInfo.number))
+        .pipe(replace('@BRANCH@',versionInfo.branch))
+        .pipe(replace('@TIMESTAMP@',versionInfo.timestamp))
+        .pipe(replace('@VERSION@',versionInfo.version))
         .pipe(plumber())
         .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))

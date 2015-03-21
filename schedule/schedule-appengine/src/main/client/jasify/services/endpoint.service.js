@@ -94,15 +94,6 @@
             if (Endpoint.deferred) Endpoint.deferred.resolve('loaded');
             Endpoint.deferred = null;
             $log.debug('Endpoint.initialized');
-
-            /*
-             //TODO: REMOVE THIS
-             Endpoint.jasify(function (jasify) {
-             return jasify.users.query({limit:1});
-             }).then(function (r) {
-             $log.info("OK("  + r.result.total+"): " + angular.toJson(r));
-             }, Endpoint.errorHandler);
-             */
         }
 
         return Endpoint;

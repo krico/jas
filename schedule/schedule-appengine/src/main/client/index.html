@@ -99,5 +99,15 @@
 </div>
 <!-- /container -->
 
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted small">
+            <span ng-bind-html="appVm.versionString()"></span>
+            <span ng-bind-html="appVm.serverVersionString()"></span>
+            (<a tooltip="more details" ng-click="appVm.toggleVersion()">+</a>)
+        </p>
+    </div>
+</footer>
+
 </body>
 </html>

@@ -5,6 +5,7 @@
         'ngResource',
         'ngMessages',
         'ngCookies',
+        'ngSanitize',
         'ui.bootstrap',
         'angularSpinner',
         'ui.bootstrap.datetimepicker',

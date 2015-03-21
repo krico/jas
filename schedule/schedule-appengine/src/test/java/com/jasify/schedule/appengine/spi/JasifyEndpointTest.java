@@ -52,7 +52,7 @@ public class JasifyEndpointTest {
         replay(userService);
         JasApiInfo info = endpoint.getApiInfo(null);
         assertNotNull(info);
-        assertNotNull(info.getVersion());
+        assertNotNull(info.getApiVersion());
         assertFalse(info.isAuthenticated());
     }
 
@@ -61,7 +61,7 @@ public class JasifyEndpointTest {
         replay(userService);
         JasApiInfo info = endpoint.getApiInfo(newCaller(1, false));
         assertNotNull(info);
-        assertNotNull(info.getVersion());
+        assertNotNull(info.getApiVersion());
         assertTrue(info.isAuthenticated());
         assertFalse(info.isAdmin());
     }
@@ -71,7 +71,7 @@ public class JasifyEndpointTest {
         replay(userService);
         JasApiInfo info = endpoint.getApiInfo(newCaller(1, true));
         assertNotNull(info);
-        assertNotNull(info.getVersion());
+        assertNotNull(info.getApiVersion());
         assertTrue(info.isAuthenticated());
         assertTrue(info.isAdmin());
     }
