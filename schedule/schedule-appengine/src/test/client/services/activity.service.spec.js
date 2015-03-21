@@ -87,7 +87,25 @@ describe('ActivityService', function () {
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.activities.add).toHaveBeenCalledWith(expectedActivity);
+        expect($gapiMock.client.jasify.activities.add).toHaveBeenCalledWith({activity:expectedActivity});
+    });
+
+    it('should add activity with repeatDetails', function () {
+        var expectedActivity = {name: "Activity"};
+        var expectedRepeatDetails = {name: "RepeatDetails"};
+        spyOn($gapiMock.client.jasify.activities, 'add').and.returnValue($q.when({result: expectedActivity}));
+
+        Activity.add(expectedActivity, expectedRepeatDetails)
+            .then(function (at) {
+                expect(at).toBe(expectedActivity);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.activities.add).toHaveBeenCalledWith({activity:expectedActivity, repeatDetails:expectedRepeatDetails});
     });
 
     it('should remove activity by id', function () {

@@ -13,7 +13,6 @@
                         return $q.when();
                     }
 
-                    var def = $q.defer();
 
                     return Unique.email(modelValue);
                 };
