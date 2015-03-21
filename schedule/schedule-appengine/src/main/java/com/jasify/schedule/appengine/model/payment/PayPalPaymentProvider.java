@@ -123,16 +123,10 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
          */
         if (payment.getFee() == null) {
             BigDecimal paymentAmount = new BigDecimal(payment.getAmount()).setScale(2, BigDecimal.ROUND_CEILING);
-            log.info("paymentAmount: {}", paymentAmount);
             BigDecimal amountToBePaid = paymentAmount.add(PAY_PAL_FEE_FLAT);
-            log.info("paymentAmount + flat_fee: {}", amountToBePaid);
             amountToBePaid = amountToBePaid.divide(ONE_MINUS_PAY_PAL_FEE_MULTIPLIER, BigDecimal.ROUND_CEILING);
-            log.info("(1-fee_multiplier): {}", ONE_MINUS_PAY_PAL_FEE_MULTIPLIER);
-            log.info("(paymentAmount + flat_fee)/(1-fee_multiplier): {}", amountToBePaid);
             amountToBePaid = amountToBePaid.setScale(2, BigDecimal.ROUND_CEILING);
-            log.info("amountToBePaid(rounded): {}", amountToBePaid);
             BigDecimal fee = amountToBePaid.subtract(paymentAmount);
-            log.info("fee: {}", fee);
             payment.setFee(fee.doubleValue());
             payment.setAmount(amountToBePaid.doubleValue());
         }
@@ -157,7 +151,7 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         }
         if (payment.getFee() > 0d) {
             items.add(new Item("1",
-                    "Transaction fee",
+                    "Handling fee",
                     formatCurrencyNumber(currency, payment.getFee()),
                     currency));
         }

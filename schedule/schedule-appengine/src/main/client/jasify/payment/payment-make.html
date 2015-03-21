@@ -29,7 +29,9 @@
                 <label class="sr-only" for="amount">PayPal</label>
 
                 <div class="input-group input-group-sm">
-                    <p class="form-control-static">PayPal payment value: <span class="text-primary">CHF {{vm.effectiveAmount|number:2}}</span>
+                    <p class="form-control-static">
+                        PayPal payment: <span class="text-primary">CHF {{vm.effectiveAmount|number:2}}</span>
+                        <small>(CHF {{( vm.effectiveAmount - vm.payment.amount )|number:2}} handling fee)</small>
                     </p>
                 </div>
             </div>
@@ -38,8 +40,7 @@
     </div>
     <div class="col-md-8"></div>
     <div class="col-md-4 col-md-offset-1">
-        <div class="small">For PayPal payment the additional fees are <b>0.35%</b> plus an absolute fee of <b>CHF
-            0.55</b>.
+        <div class="small">For PayPal payments there is a handling fee of <b>0.35%</b> plus <b><nobr>CHF 0.55</nobr></b>.
         </div>
     </div>
 </div>
