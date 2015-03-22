@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.payment;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-17 08:59:54")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-22 13:08:07")
 /** */
 public final class PaymentMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.payment.Payment> {
 

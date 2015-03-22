@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.balance;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-02-19 22:16:35")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-22 13:08:07")
 /** */
 public final class OrganizationAccountMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount> {
 
