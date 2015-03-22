@@ -16,22 +16,36 @@ public class MailParser {
     private enum SubstituteKey {
         ActivityName("%ActivityName%"),
         ActivityPrice("%ActivityPrice%"),
+        Branch("%Branch%"),
         Fees("%Fees%"),
         JasifyUrl("%JasifyUrl%"),
+        Number("%Number%"),
         OrderNumber("%OrderNumber%"),
         PaymentMethod("%PaymentMethod%"),
         PasswordUrl("%PasswordUrl%"),
         PublisherName("%PublisherName%"),
         SubscriberName("%SubscriberName%"),
         Tax("%Tax%"),
+        Timestamp("%Timestamp%"),
         TotalPrice("%TotalPrice%"),
-        UserName("%UserName%");
+        UserName("%UserName%"),
+        Version("%Version%");
 
         private final String key;
 
         SubstituteKey(String key) {
             this.key = key;
         }
+    }
+
+    public static MailParser createNewVersionEmail(String version, String timestamp, String branch, String number, String jasifyUrl) throws Exception {
+        MailParser mailParser = new MailParser("/jasify/NewVersion");
+        mailParser.substitute(SubstituteKey.Version, version);
+        mailParser.substitute(SubstituteKey.Timestamp, timestamp);
+        mailParser.substitute(SubstituteKey.Branch, branch);
+        mailParser.substitute(SubstituteKey.Number, number);
+        mailParser.substitute(SubstituteKey.JasifyUrl, jasifyUrl);
+        return mailParser;
     }
 
     public static MailParser createJasifyUserSignUpEmail(String subscriberName, String userName) throws Exception {

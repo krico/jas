@@ -80,6 +80,10 @@ public final class Version {
         return failed;
     }
 
+    public static String toShortVersionString() {
+        return getVersion() + " (" + getTimestampVersion() + ")";
+    }
+
     public static String toVersionString() {
         return getVersion() + " #" + getNumber() + "/" + getBranch() + " @" + getTimestampVersion();
     }
