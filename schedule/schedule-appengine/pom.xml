@@ -213,6 +213,12 @@
             <version>3.3.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.9</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -346,7 +352,9 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <arguments>--no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch} --buildTimestamp=${timestamp} --buildVersion=${project.version} build</arguments>
+                            <arguments>--no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch}
+                                --buildTimestamp=${timestamp} --buildVersion=${project.version} build
+                            </arguments>
                         </configuration>
                     </execution>
 
