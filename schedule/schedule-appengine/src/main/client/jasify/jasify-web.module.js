@@ -5,11 +5,14 @@
         'ngResource',
         'ngMessages',
         'ngCookies',
+        'ngSanitize',
         'ui.bootstrap',
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
         'jasifyComponents',
         'jasify.authenticate',
+        'jasify.payment',
+        'jasify.balance',
         'jasify.templates'
     ]);
 

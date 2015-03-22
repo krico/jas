@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.activity;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-21 17:11:31")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-22 13:08:07")
 /** */
 public final class SubscriptionMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.activity.Subscription> {
 
@@ -20,7 +20,7 @@ public final class SubscriptionMeta extends org.slim3.datastore.ModelMeta<com.ja
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Subscription, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User> userRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Subscription, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User>(this, "userRef", "userRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.users.User.class);
 
     /** */
-    public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Subscription, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.payment.Payment>, com.jasify.schedule.appengine.model.payment.Payment> paymentRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Subscription, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.payment.Payment>, com.jasify.schedule.appengine.model.payment.Payment>(this, "paymentRef", "paymentRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.payment.Payment.class);
+    public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Subscription, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer> transferRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.Subscription, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer>(this, "transferRef", "transferRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.balance.Transfer.class);
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
@@ -54,10 +54,10 @@ public final class SubscriptionMeta extends org.slim3.datastore.ModelMeta<com.ja
             throw new NullPointerException("The property(userRef) is null.");
         }
         model.getUserRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("userRef"));
-        if (model.getPaymentRef() == null) {
-            throw new NullPointerException("The property(paymentRef) is null.");
+        if (model.getTransferRef() == null) {
+            throw new NullPointerException("The property(transferRef) is null.");
         }
-        model.getPaymentRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("paymentRef"));
+        model.getTransferRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("transferRef"));
         return model;
     }
 
@@ -80,10 +80,10 @@ public final class SubscriptionMeta extends org.slim3.datastore.ModelMeta<com.ja
             throw new NullPointerException("The property(userRef) must not be null.");
         }
         entity.setProperty("userRef", m.getUserRef().getKey());
-        if (m.getPaymentRef() == null) {
-            throw new NullPointerException("The property(paymentRef) must not be null.");
+        if (m.getTransferRef() == null) {
+            throw new NullPointerException("The property(transferRef) must not be null.");
         }
-        entity.setProperty("paymentRef", m.getPaymentRef().getKey());
+        entity.setProperty("transferRef", m.getTransferRef().getKey());
         return entity;
     }
 
@@ -116,10 +116,10 @@ public final class SubscriptionMeta extends org.slim3.datastore.ModelMeta<com.ja
             throw new NullPointerException("The property(userRef) must not be null.");
         }
         m.getUserRef().assignKeyIfNecessary(ds);
-        if (m.getPaymentRef() == null) {
-            throw new NullPointerException("The property(paymentRef) must not be null.");
+        if (m.getTransferRef() == null) {
+            throw new NullPointerException("The property(transferRef) must not be null.");
         }
-        m.getPaymentRef().assignKeyIfNecessary(ds);
+        m.getTransferRef().assignKeyIfNecessary(ds);
     }
 
     @Override
@@ -177,9 +177,9 @@ public final class SubscriptionMeta extends org.slim3.datastore.ModelMeta<com.ja
             writer.setNextPropertyName("userRef");
             encoder0.encode(writer, m.getUserRef(), maxDepth, currentDepth);
         }
-        if(m.getPaymentRef() != null && m.getPaymentRef().getKey() != null){
-            writer.setNextPropertyName("paymentRef");
-            encoder0.encode(writer, m.getPaymentRef(), maxDepth, currentDepth);
+        if(m.getTransferRef() != null && m.getTransferRef().getKey() != null){
+            writer.setNextPropertyName("transferRef");
+            encoder0.encode(writer, m.getTransferRef(), maxDepth, currentDepth);
         }
         writer.endObject();
     }
@@ -199,8 +199,8 @@ public final class SubscriptionMeta extends org.slim3.datastore.ModelMeta<com.ja
         decoder0.decode(reader, m.getActivityRef(), maxDepth, currentDepth);
         reader = rootReader.newObjectReader("userRef");
         decoder0.decode(reader, m.getUserRef(), maxDepth, currentDepth);
-        reader = rootReader.newObjectReader("paymentRef");
-        decoder0.decode(reader, m.getPaymentRef(), maxDepth, currentDepth);
+        reader = rootReader.newObjectReader("transferRef");
+        decoder0.decode(reader, m.getTransferRef(), maxDepth, currentDepth);
         return m;
     }
 }

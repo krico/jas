@@ -10,6 +10,7 @@ import com.google.appengine.api.mail.MailServicePb;
 import com.google.appengine.api.mail.dev.LocalMailService;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.*;
@@ -272,4 +273,28 @@ public class AuthEndpointTest {
         endpoint.recoverPassword(request);
     }
 
+    @Test(expected = UnauthorizedException.class)
+    public void testRestoreUnauthorized() throws Exception {
+        testUserServiceFactory.replay();
+        endpoint.restore();
+    }
+
+    @Test
+    public void testRestore() throws Exception {
+        User user = new User();
+        int userId = 1;
+        user.setId(Datastore.createKey(User.class, userId));
+
+        expect(testUserServiceFactory.getUserServiceMock().get(userId)).andReturn(user);
+
+        testUserServiceFactory.replay();
+
+        HttpUserSession userSession = new HttpUserSession(user);
+
+        UserContext.setCurrentUser(userSession);
+
+        JasLoginResponse response = endpoint.restore();
+        assertNotNull(response);
+        assertEquals(user, response.getUser());
+    }
 }

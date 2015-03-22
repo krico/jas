@@ -10,9 +10,6 @@ import com.jasify.schedule.appengine.model.users.User;
 public class JasProviderAuthenticateResponse extends JasLoginResponse {
     private String data;
 
-    public JasProviderAuthenticateResponse() {
-    }
-
     public JasProviderAuthenticateResponse(String data) {
         this.data = data;
     }

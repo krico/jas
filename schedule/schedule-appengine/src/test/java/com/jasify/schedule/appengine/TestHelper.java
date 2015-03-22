@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine;
 
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.tools.development.testing.*;
+import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -11,6 +12,8 @@ import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.meterware.servletunit.ServletRunner;
 import junit.framework.AssertionFailedError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.DatastoreUtil;
 
@@ -31,19 +34,23 @@ import static junit.framework.TestCase.*;
  * @since 09/11/14.
  */
 public final class TestHelper {
+    private static final Logger log = LoggerFactory.getLogger(TestHelper.class);
 
     private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(
             new LocalMailServiceTestConfig()
                     .setLogMailBody(false)
                     .setLogMailLevel(Level.OFF)
     );
+
     private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
+
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig()
-                    .setNoIndexAutoGen(true)
+            new LocalDatastoreServiceTestConfig().setNoIndexAutoGen(true)
     );
+
     private static final LocalServiceTestHelper memcacheWithDatastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
             .setNoIndexAutoGen(true), new LocalMemcacheServiceTestConfig());
+
     private static ServletRunner servletRunner;
 
     private TestHelper() {
@@ -68,9 +75,13 @@ public final class TestHelper {
         }
     }
 
-    public static void initializeJasify() {
-        initializeDatastore();
+    public static void initializeJasify(LocalServiceTestHelper datastoreHelper) {
+        initializeDatastore(datastoreHelper);
         ApplicationData.instance().reload();
+    }
+
+    public static void initializeJasify() {
+        initializeJasify(datastoreHelper);
     }
 
     public static File baseDir() {
@@ -112,10 +123,18 @@ public final class TestHelper {
     }
 
     public static void initializeDatastore() {
+        initializeDatastore(datastoreHelper);
+    }
+
+    public static void initializeDatastore(LocalServiceTestHelper datastoreHelper) {
         datastoreHelper.setUp();
     }
 
     public static void cleanupDatastore() {
+        cleanupDatastore(datastoreHelper);
+    }
+
+    public static void cleanupDatastore(LocalServiceTestHelper datastoreHelper) {
         datastoreHelper.tearDown();
         DatastoreUtil.clearKeysCache();
         DatastoreUtil.clearActiveGlobalTransactions();
@@ -179,6 +198,25 @@ public final class TestHelper {
         } catch (RuntimeException e) {
             System.err.println("ERR i=" + i);
             throw e;
+        }
+    }
+
+    public static void tearDown(TestService... testServices) {
+        List<Exception> exceptions = new ArrayList<>();
+        for (TestService testService : testServices) {
+            try {
+                testService.tearDown();
+            } catch (Exception e) {
+                log.debug("Exception during tearDown of " + testService, e);
+                exceptions.add(e);
+            }
+        }
+        if (!exceptions.isEmpty()) {
+            StringBuilder builder = new StringBuilder("Exceptions(").append(exceptions.size()).append(") during tearDown:\n\n");
+            for (Exception exception : exceptions) {
+                builder.append(Throwables.getStackTraceAsString(exception)).append("\n");
+            }
+            throw new AssertionFailedError(builder.toString());
         }
     }
 }

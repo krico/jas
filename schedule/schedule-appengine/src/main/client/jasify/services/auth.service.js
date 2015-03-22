@@ -2,8 +2,7 @@
 
     angular.module('jasifyComponents').factory('Auth', auth);
 
-    function auth($log, $http, $q, $cookies, $location, Session, Endpoint) {
-
+    function auth($log, $http, $q, $location, Session, Endpoint, BrowserData) {
         var Auth = {
             isAuthenticated: isAuthenticated,
             isAdmin: isAdmin,
@@ -28,12 +27,6 @@
         restoreOnInstantiation();
 
 
-        function loggedIn(res) {
-            Session.create(res.data.id, res.data.userId, res.data.user.admin);
-            $cookies.loggedIn = true;
-            return res.data.user;
-        }
-
         function isAuthenticated() {
             return !!Session.id;
         }
@@ -53,7 +46,8 @@
             }).then(function (resp) {
                 $log.info("Logged in! (userId=" + resp.result.userId + ")");
                 Session.create(resp.result.sessionId, resp.result.userId, resp.result.admin);
-                $cookies.loggedIn = true;
+                BrowserData.setLoggedIn(true);
+                BrowserData.setFirstAccess(false);
                 return resp.result;
             });
         }
@@ -65,7 +59,7 @@
                 restoreData.promise = null;
                 restoreData.data = null;
             } else {
-                if (!$cookies.loggedIn) {
+                if (!BrowserData.getLoggedIn()) {
                     restoreData.invoked = true;
                     restoreData.failed = true;
                     restoreData.data = 'Not logged in';
@@ -92,16 +86,31 @@
             }
             restoreData.invoked = true;
 
-            $log.debug("Restoring session...");
-            restoreData.promise = $http.get('/auth/restore')
-                .then(function (res) {
-                    $log.info("Session restored! (userId=" + res.data.userId + ")");
+            var p;
+            if (force && (force.id || force.sessionId) && force.userId) {
+                $log.debug("Restoring session (local)...");
+                p = $q.when({result: force});
+            } else {
+                $log.debug("Restoring session...");
+                p = Endpoint.jasify(function (jasify) {
+                    return jasify.auth.restore();
+                });
+            }
+
+            restoreData.promise = p.then(function (res) {
+                    $log.info("Session restored! (userId=" + res.result.user.numericId + ")");
                     restoreData.promise = null;
-                    restoreData.data = loggedIn(res);
+
+                    var sessionId = res.result.id || res.result.sessionId;
+                    Session.create(sessionId, res.result.userId, res.result.user.admin);
+                    BrowserData.setFirstAccess(false);
+                    BrowserData.setLoggedIn(true);
+                    restoreData.data = res.result.user;
+
                     return restoreData.data;
                 },
                 function (reason) {
-                    $log.info("Session restore failed: " + reason);
+                    $log.info("Session restore failed: (" + reason.status + ') ' + reason.statusText);
                     restoreData.promise = null;
                     restoreData.failed = true;
                     restoreData.data = reason;
@@ -127,15 +136,18 @@
             $log.info("Logging out (" + Session.userId + ")!");
             return Endpoint.jasify(function (jasify) {
                 return jasify.auth.logout();
-            }).then(function (res) {
-                    $log.info("Logged out!");
-                    Session.destroy();
-                    $cookies.loggedIn = false;
-                },
-                function (message) {
-                    $log.warn("F: " + message);
-                    return $q.reject(message);
-                });
+            }).then(ok, fail);
+
+            function ok(res) {
+                $log.info("Logged out!");
+                Session.destroy();
+                BrowserData.setLoggedIn(false);
+            }
+
+            function fail(message) {
+                $log.warn("F: " + message);
+                return $q.reject(message);
+            }
         }
 
         function providerAuthorize(provider) {
@@ -189,12 +201,13 @@
         }
 
         function restoreOnInstantiation() {
-            if ($cookies.loggedIn) {
+            if (BrowserData.getLoggedIn()) {
                 Auth.restore().then(function (u) {
-                        $cookies.loggedIn = true;
+                        BrowserData.setLoggedIn(true);
+                        BrowserData.setFirstAccess(false);
                     },
                     function (data) {
-                        $cookies.loggedIn = false;
+                        BrowserData.setLoggedIn(false);
                     });
             }
         }

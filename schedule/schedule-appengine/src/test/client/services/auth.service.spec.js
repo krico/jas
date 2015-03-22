@@ -1,26 +1,19 @@
 describe('AuthService', function () {
-    var Session, Auth, $cookies, Endpoint, $q, $httpBackend, $rootScope, $gapiMock, $location;
-
+    var Session, Auth, BrowserData, Endpoint, $q, $rootScope, $gapiMock, $location;
     beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_$cookies_, _$location_, _Session_, _Auth_, _Endpoint_, _$q_, _$httpBackend_, _$rootScope_, _$gapiMock_) {
-        $cookies = _$cookies_;
+    beforeEach(inject(function (_BrowserData_, _$location_, _Session_, _Auth_, _Endpoint_, _$q_, _$rootScope_, _$gapiMock_) {
+        BrowserData = _BrowserData_;
         $location = _$location_;
         Session = _Session_;
         Auth = _Auth_;
         $q = _$q_;
-        $httpBackend = _$httpBackend_;
         $rootScope = _$rootScope_;
         Endpoint = _Endpoint_;
         $gapiMock = _$gapiMock_;
         Endpoint.jasifyLoaded();
     }));
-
-    afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-    });
 
     it("should not be authenticated before login", function () {
 
@@ -228,34 +221,58 @@ describe('AuthService', function () {
     });
 
     it("should restore an existing session", function () {
-
-        $httpBackend.expectGET('/auth/restore')
-            .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}});
+        spyOn($gapiMock.client.jasify.auth, 'restore').and
+            .returnValue($q.when({result: {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}}}));
 
         var user = null;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
             user = u;
         });
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(Auth.isAuthenticated()).toBe(true);
         expect(user).not.toBe(null);
         expect(user.id).toBe(555);
         expect(Session.userId).toBe(user.id);
+
+        expect($gapiMock.client.jasify.auth.restore).toHaveBeenCalled();
+    });
+
+    it("should restore locally if data is provided", function () {
+        spyOn($gapiMock.client.jasify.auth, 'restore');
+
+        var restoreData = {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}};
+
+        var user = null;
+
+        BrowserData.setLoggedIn(true);
+
+        Auth.restore(restoreData).then(function (u) {
+            user = u;
+        });
+
+        $rootScope.$apply();
+
+        expect(Auth.isAuthenticated()).toBe(true);
+        expect(user).not.toBe(null);
+        expect(user.id).toBe(555);
+        expect(Session.userId).toBe(user.id);
+
+        expect($gapiMock.client.jasify.auth.restore).not.toHaveBeenCalled();
     });
 
     it("should detect there is no session to restore", function () {
 
-        $httpBackend.expectGET('/auth/restore').respond(401);
+        spyOn($gapiMock.client.jasify.auth, 'restore').and.returnValue($q.reject({}));
 
         var user = null;
         var failed = false;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
                 user = u;
@@ -264,27 +281,29 @@ describe('AuthService', function () {
                 failed = true;
             });
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(Auth.isAuthenticated()).toBe(false);
         expect(user).toBe(null);
         expect(failed).toBe(true);
+
+        expect($gapiMock.client.jasify.auth.restore).toHaveBeenCalled();
     });
 
     it("should not restore again when session existed", function () {
 
-        $httpBackend.expectGET('/auth/restore')
-            .respond(200, {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}});
+        spyOn($gapiMock.client.jasify.auth, 'restore').and
+            .returnValue($q.when({result: {id: 'someSessionId', userId: 555, user: {id: 555, name: 'test'}}}));
 
         var user = null;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
             user = u;
         });
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(Auth.isAuthenticated()).toBe(true);
         expect(user).not.toBe(null);
@@ -297,7 +316,6 @@ describe('AuthService', function () {
             user = u;
         });
 
-        //propagate promise resolution (damn I lost a lot of time on this one!)
         $rootScope.$apply();
 
         expect(Auth.isAuthenticated()).toBe(true);
@@ -305,16 +323,20 @@ describe('AuthService', function () {
         expect(user.id).toBe(555);
         expect(Session.userId).toBe(user.id);
 
+        expect($gapiMock.client.jasify.auth.restore).toHaveBeenCalled();
+        expect($gapiMock.client.jasify.auth.restore.calls.count()).toEqual(1);
+
     });
 
     it("should not restore again when session is not available", function () {
 
-        $httpBackend.expectGET('/auth/restore').respond(401);
+        spyOn($gapiMock.client.jasify.auth, 'restore').and.returnValue($q.reject({}));
+
 
         var user = null;
         var failed = false;
 
-        $cookies.loggedIn = true;
+        BrowserData.setLoggedIn(true);
 
         Auth.restore().then(function (u) {
                 user = u;
@@ -323,7 +345,7 @@ describe('AuthService', function () {
                 failed = true;
             });
 
-        $httpBackend.flush();
+        $rootScope.$apply();
 
         expect(Auth.isAuthenticated()).toBe(false);
         expect(user).toBe(null);
@@ -343,6 +365,9 @@ describe('AuthService', function () {
         expect(Auth.isAuthenticated()).toBe(false);
         expect(user).toBe(null);
         expect(failed).toBe(true);
+
+        expect($gapiMock.client.jasify.auth.restore).toHaveBeenCalled();
+
     });
 
     it('should call jasify.forgotPassword when Auth.forgotPassword is called', function () {

@@ -1,12 +1,15 @@
 package com.jasify.schedule.appengine.model.payment;
 
+import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Transaction;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
+import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.activity.Subscription;
-import com.jasify.schedule.appengine.util.BeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
@@ -17,6 +20,8 @@ import javax.annotation.Nonnull;
  * @since 11/01/15.
  */
 class DefaultPaymentService implements PaymentService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultPaymentService.class);
+
     private final PaymentMeta paymentMeta;
     private final SubscriptionMeta subscriptionMeta;
 
@@ -29,32 +34,71 @@ class DefaultPaymentService implements PaymentService {
         return Singleton.INSTANCE;
     }
 
-    private Subscription getSubscription(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("Subscription.id=NULL");
-
-        try {
-            return Datastore.get(subscriptionMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Subscription id=" + id);
-        }
+    @Nonnull
+    @Override
+    public <T extends Payment> Key newPayment(long userId, T payment) throws PaymentException {
+        Key userKey = Datastore.createKey(UserMeta.get(), userId);
+        payment.getUserRef().setKey(userKey);
+        return newPayment(userKey, payment);
     }
 
     @Nonnull
     @Override
-    public Key addPayment(Subscription subscription, Payment payment) throws EntityNotFoundException, FieldValueException {
-        Subscription dbSubscription = getSubscription(subscription.getId());
-        Key userId = dbSubscription.getUserRef().getKey();
-        if (userId == null)
-            throw new EntityNotFoundException("Subscription.User.Id=NULL");
-        if (dbSubscription.getPaymentRef().getKey() != null)
-            throw new FieldValueException("Subscription.Payment.Id != NULL");
+    public <T extends Payment> Key newPayment(Key parentKey, T payment) throws PaymentException {
+        Preconditions.checkArgument(payment.getId() == null, "newPayment cannot have an id");
+        payment.validate();
 
-        payment.setId(Datastore.allocateId(userId, payment.getClass()));
-        dbSubscription.getPaymentRef().setModel(payment);
+        payment.setId(Datastore.allocateId(parentKey, paymentMeta));
+        return Datastore.put(payment);
+    }
 
-        Datastore.put(payment, dbSubscription);
+    @Override
+    public <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws PaymentException {
+        Preconditions.checkNotNull(payment.getId(), "PaymentService.newPayment first");
+        Preconditions.checkNotNull(provider);
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
+            if (dbPayment == null) {
+                throw new PaymentException("Payment not found");
+            }
+            if (dbPayment.getState() != PaymentStateEnum.New) {
+                throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected New)");
+            }
+            provider.createPayment(payment, baseUrl);
+            Datastore.put(tx, payment);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+        }
+    }
 
-        return payment.getId();
+    @Override
+    public <T extends Payment> void executePayment(PaymentProvider<T> provider, T payment) throws PaymentException {
+        Preconditions.checkNotNull(provider);
+        Preconditions.checkNotNull(payment.getId());
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
+
+            if (dbPayment == null) {
+                throw new PaymentException("Payment not found");
+            }
+            
+            if (dbPayment.getState() != PaymentStateEnum.Created) {
+                throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected Created)");
+            }
+
+            provider.executePayment(payment);
+            Datastore.put(tx, payment);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+        }
     }
 
     @Nonnull
@@ -67,22 +111,36 @@ class DefaultPaymentService implements PaymentService {
         }
     }
 
-    @Nonnull
     @Override
-    public Payment updatePayment(Payment payment) throws EntityNotFoundException, FieldValueException {
-        Payment dbPayment = getPayment(payment.getId());
-        BeanUtil.copyPropertiesExcluding(dbPayment, payment);
-        Datastore.put(dbPayment);
-        return dbPayment;
-    }
+    public Payment cancelPayment(Payment payment) throws EntityNotFoundException, PaymentException {
+        Preconditions.checkNotNull(payment.getId());
 
-    @Override
-    public void removePayment(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        Payment dbPayment = getPayment(id);
-        Subscription subscription = Datastore.query(subscriptionMeta).filter(subscriptionMeta.paymentRef.equal(id)).asSingle();
-        if (subscription != null) subscription.getPaymentRef().setKey(null);
-        Datastore.put(subscription);
-        Datastore.delete(dbPayment.getId());
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
+
+            if (dbPayment == null) {
+                throw new PaymentException("Payment not found");
+            }
+
+            if (dbPayment.getState() == PaymentStateEnum.Canceled) {
+                return dbPayment;
+            }
+
+            if (dbPayment.getState() != null && dbPayment.getState().isFinal()) {
+                throw new IllegalStateException("Payment[" + dbPayment.getId() + "] is already in a final state: " + dbPayment.getState());
+            }
+            dbPayment.setState(PaymentStateEnum.Canceled);
+            Datastore.put(tx, dbPayment);
+            tx.commit();
+
+            log.info("Payment canceled id={}", dbPayment.getId());
+            return dbPayment;
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+        }
     }
 
     private static class Singleton {

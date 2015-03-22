@@ -21,6 +21,13 @@ public class PayPalPayment extends Payment {
 
     private Link executeUrl;
 
+    private String payerEmail;
+
+    private String payerFirstName;
+
+    private String payerLastName;
+
+
     public PayPalPayment() {
         super(PaymentTypeEnum.PayPal);
     }
@@ -71,5 +78,54 @@ public class PayPalPayment extends Payment {
 
     public void setExecuteUrl(Link executeUrl) {
         this.executeUrl = executeUrl;
+    }
+
+    public String getPayerEmail() {
+        return payerEmail;
+    }
+
+    public void setPayerEmail(String payerEmail) {
+        this.payerEmail = payerEmail;
+    }
+
+    public String getPayerFirstName() {
+        return payerFirstName;
+    }
+
+    public void setPayerFirstName(String payerFirstName) {
+        this.payerFirstName = payerFirstName;
+    }
+
+    public String getPayerLastName() {
+        return payerLastName;
+    }
+
+    public void setPayerLastName(String payerLastName) {
+        this.payerLastName = payerLastName;
+    }
+
+
+    public String reference() {
+        return super.reference() + "/" + externalId;
+    }
+
+    public String describe() {
+        return super.describe() + " (PayPal ID=" + externalId + ")";
+    }
+
+    @Override
+    public String toString() {
+        return "PayPalPayment{" +
+                super.toString() +
+                ", externalId='" + externalId + '\'' +
+                ", externalState='" + externalState + '\'' +
+                ", payerId='" + payerId + '\'' +
+                ", selfUrl=" + selfUrl +
+                ", approveUrl=" + approveUrl +
+                ", executeUrl=" + executeUrl +
+                ", payerEmail='" + payerEmail + '\'' +
+                ", payerFirstName='" + payerFirstName + '\'' +
+                ", payerLastName='" + payerLastName + '\'' +
+                '}';
     }
 }

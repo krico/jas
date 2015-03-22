@@ -20,6 +20,7 @@ Features:
 
 Changes:
 
+  - added ngStorage `bower install ngstorage -S` to use browser local storage
   - added plumber `npm i gulp-plumber -S` so that gulp won't barf when fails to compile
   - added gulp-angular-templatecache `npm install gulp-angular-templatecache --save-dev` so that our partials get loaded into the .js files
   - added angular-ui-datetime-picker-popup `bower install git@github.com:krico/bootstrap-ui-datetime-picker`

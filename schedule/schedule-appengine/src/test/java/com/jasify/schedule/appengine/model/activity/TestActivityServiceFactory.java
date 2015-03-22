@@ -1,12 +1,13 @@
 package com.jasify.schedule.appengine.model.activity;
 
+import com.jasify.schedule.appengine.TestService;
 import org.easymock.EasyMock;
 
 /**
  * @author krico
  * @since 09/01/15.
  */
-public class TestActivityServiceFactory extends ActivityServiceFactory {
+public class TestActivityServiceFactory extends ActivityServiceFactory implements TestService {
     private ActivityService activityServiceMock;
 
     public void setUp() {

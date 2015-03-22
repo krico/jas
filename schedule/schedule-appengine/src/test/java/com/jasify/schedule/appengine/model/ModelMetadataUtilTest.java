@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class ModelMetadataUtilTest {
     }
 
     @Test
-    public void testQueryAllKinds() {
+    public void testQueryAllKinds() throws IOException {
         Set<String> allKinds = ModelMetadataUtil.queryAllKinds();
         assertTrue(allKinds.isEmpty());
         List<Entity> toPut = new ArrayList<>();
@@ -67,10 +68,12 @@ public class ModelMetadataUtilTest {
         assertTrue(allKinds.contains("K1"));
         assertTrue(allKinds.contains("K2"));
         assertTrue(allKinds.contains("M1"));
+        Appendable appendable = new StringBuilder();
+        assertEquals(appendable, ModelMetadataUtil.dumpDb(appendable));
     }
 
     @Test
-    public void testQueryKindsByPrefix() {
+    public void testQueryKindsByPrefix() throws IOException {
         testQueryAllKinds();
         Set<String> keys = ModelMetadataUtil.queryKindsThatStartWith("K");
         assertEquals(2, keys.size());

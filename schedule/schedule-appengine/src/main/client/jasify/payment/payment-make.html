@@ -1,0 +1,51 @@
+<div ng-hide="vm.redirecting" class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+    </div>
+    <div class="col-md-4 col-md-offset-1">
+        <span class="h4">Payment</span>
+
+        <p class="small">
+            When you click "Make Payment", you will be redirected to the PayPal site where you will be asked to approve
+            the payment.
+        </p>
+    </div>
+    <div class="col-md-8"></div>
+    <div class="col-md-4 col-md-offset-1">
+        <form class="form-inline" name="vm.paymentForm" novalidate>
+            <div class="form-group">
+                <label class="sr-only" for="amount">Amount (in CHF)</label>
+
+                <div class="input-group input-group-sm">
+                    <div class="input-group-addon">CHF</div>
+                    <input type="text" class="form-control" id="amount" ng-model="vm.payment.amount"
+                           placeholder="Amount" pattern="^[0-9]+(.[0-9]{2})?$">
+                </div>
+            </div>
+            <button ng-disabled="vm.inProgress" ng-click="vm.createPayment()" class="btn btn-primary btn-sm">
+                Make Payment
+            </button>
+            <div class="form-group">
+                <label class="sr-only" for="amount">PayPal</label>
+
+                <div class="input-group input-group-sm">
+                    <p class="form-control-static">
+                        PayPal payment: <span class="text-primary">CHF {{vm.effectiveAmount|number:2}}</span>
+                        <small>(CHF {{( vm.effectiveAmount - vm.payment.amount )|number:2}} handling fee)</small>
+                    </p>
+                </div>
+            </div>
+            <span ng-show="vm.inProgress" us-spinner=""></span>
+        </form>
+    </div>
+    <div class="col-md-8"></div>
+    <div class="col-md-4 col-md-offset-1">
+        <div class="small">For PayPal payments there is a handling fee of <b>0.35%</b> plus <b><nobr>CHF 0.55</nobr></b>.
+        </div>
+    </div>
+</div>
+<div ng-show="vm.redirecting" class="row">
+    <div class="col-md-6 col-lg-offset-3">
+        <alert type="info">You are being redirected to PayPal to approve the payment...</alert>
+    </div>
+</div>

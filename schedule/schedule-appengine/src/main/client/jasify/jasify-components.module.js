@@ -7,6 +7,7 @@
         'ngCookies',
         'ui.bootstrap',
         'angularSpinner',
+        'ngStorage',
         'ui.bootstrap.datetimepicker'
     ]);
 

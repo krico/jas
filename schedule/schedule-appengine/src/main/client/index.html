@@ -75,6 +75,14 @@
                     <a ng-click="vm.signIn()">Sign In</a>
                 </li>
 
+                <li class="dropdown" ng-if="vm.isAuthenticated()" ng-class="vm.menuActive('/balance/')" dropdown>
+                    <a ng-href="#{{vm.path}}" class="dropdown-toggle" dropdown-toggle>balance <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-click="vm.collapse()" href="#/payment/make">make a payment</a></li>
+                        <li><a ng-click="vm.collapse()" href="#/balance/view">view balance</a></li>
+                    </ul>
+                </li>
                 <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/profile')">
                     <a ng-click="vm.collapse()" href="#/profile">{{currentUser.name}}</a>
                 </li>
@@ -90,6 +98,16 @@
 <div class="container" ng-view="">
 </div>
 <!-- /container -->
+
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted small">
+            <span ng-bind-html="appVm.versionString()"></span>
+            <span ng-bind-html="appVm.serverVersionString()"></span>
+            (<a tooltip="more details" ng-click="appVm.toggleVersion()">+</a>)
+        </p>
+    </div>
+</footer>
 
 </body>
 </html>

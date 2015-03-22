@@ -14,6 +14,19 @@
             $provide.decorator('$modal', function ($modalMock) {
                 return $modalMock;
             });
+
+            /**
+             * Return a standard object for $sessionStorage
+             */
+            $provide.decorator('$sessionStorage', function () {
+                return {};
+            });
+            /**
+             * Return a standard object for $localStorage
+             */
+            $provide.decorator('$localStorage', function () {
+                return {};
+            });
         });
 
     ng.module('jasify.mocks').factory('$gapiMock', $gapiMock);
@@ -43,6 +56,7 @@
             },
             auth: {
                 login: nop,
+                restore: nop,
                 changePassword: nop,
                 logout: nop,
                 providerAuthenticate: nop,
@@ -90,6 +104,13 @@
             activitySubscriptions: {
                 add: nop,
                 query: nop
+            },
+            balance: {
+                createPayment: nop,
+                cancelPayment: nop,
+                getAccount: nop,
+                getTransactions: nop,
+                executePayment: nop
             }
         };
 
@@ -117,6 +138,8 @@
 
     function $windowMock() {
         var mock = {
+            // These two remove the warnings from ngstorage
+            localStorage: {}, sessionStorage: {},
             innerHeight: 400,
             innerWidth: 500
         };

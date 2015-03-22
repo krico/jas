@@ -37,3 +37,4 @@ Information on how to get started as a developer id described on [DEVELOPER.md](
  - I followed the [cloud endpoints tutorial](https://cloud.google.com/appengine/docs/java/endpoints/getstarted/backend/) and checked in the [cloud-endpoints-tutorial](sandbox/sandbox-endpoints/), the resulting module of following that tutorial step by step.
  - I added a parent pom.xml so that you can import the entire project at once...
 
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/krico/jas/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

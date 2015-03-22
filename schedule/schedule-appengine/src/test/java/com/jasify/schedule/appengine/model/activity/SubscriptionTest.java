@@ -63,10 +63,4 @@ public class SubscriptionTest {
         Subscription subscription = new Subscription();
         assertNotNull(subscription.getUserRef());
     }
-
-    @Test
-    public void testPaymentRef() {
-        Subscription subscription = new Subscription();
-        assertNotNull(subscription.getPaymentRef());
-    }
 }

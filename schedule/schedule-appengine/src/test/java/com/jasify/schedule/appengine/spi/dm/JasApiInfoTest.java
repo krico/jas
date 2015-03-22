@@ -10,6 +10,6 @@ public class JasApiInfoTest {
     @Test
     public void testGetVersion() throws Exception {
         JasApiInfo apiInfo = new JasApiInfo(new JasifyEndpoint());
-        assertEquals("v1", apiInfo.getVersion());
+        assertEquals("v1", apiInfo.getApiVersion());
     }
 }

@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.meta.activity;
 
-//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-21 17:11:31")
+//@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2015-03-22 13:08:07")
 /** */
 public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.activity.ActivityType> {
 

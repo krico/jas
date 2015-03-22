@@ -5,13 +5,15 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.jasify.schedule.appengine.Constants;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityQuery;
+import org.slim3.datastore.Sort;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author krico
@@ -49,5 +51,41 @@ public final class ModelMetadataUtil {
             }
         }
         return ret;
+    }
+
+    public static <T extends Appendable> T dumpDb(T out) throws IOException {
+        String line = "+==================================================\n";
+        for (String kind : queryAllKinds()) {
+            Iterable<Entity> entities = Datastore
+                    .query(kind)
+                    .sort(new Sort(Entity.KEY_RESERVED_PROPERTY))
+                    .asIterable();
+            boolean first = true;
+            List<String> knownProperties = new ArrayList<>();
+            for (Entity entity : entities) {
+                if (first) {
+                    out.append(line);
+                    first = false;
+                }
+                out.append("| ").append(entity.getKind()).append("[key=").append(Objects.toString(entity.getKey())).append(']');
+
+
+                Map<String, Object> properties = new HashMap<>(entity.getProperties());
+                for (String knownProperty : knownProperties) {
+                    Object property = properties.remove(knownProperty);
+                    out.append('[').append(knownProperty).append('=').append(Objects.toString(property)).append(']');
+                }
+                TreeSet<String> newProperties = new TreeSet<String>(properties.keySet());
+                for (String newProperty : newProperties) {
+                    Object property = properties.remove(newProperty);
+                    out.append('[').append(newProperty).append('=').append(Objects.toString(property)).append(']');
+                }
+                knownProperties.addAll(newProperties);
+
+                out.append("\n");
+            }
+        }
+        out.append(line);
+        return out;
     }
 }

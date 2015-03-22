@@ -1,12 +1,13 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.jasify.schedule.appengine.TestService;
 import org.easymock.EasyMock;
 
 /**
  * @author krico
  * @since 08/01/15.
  */
-public class TestUserServiceFactory extends UserServiceFactory {
+public class TestUserServiceFactory extends UserServiceFactory implements TestService {
 
     private UserService userServiceMock;
 
