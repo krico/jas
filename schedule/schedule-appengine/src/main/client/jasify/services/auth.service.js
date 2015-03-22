@@ -27,14 +27,6 @@
         restoreOnInstantiation();
 
 
-        function loggedIn(res) {
-            var sessionId = res.data.id || res.data.sessionId;
-            Session.create(sessionId, res.data.userId, res.data.user.admin);
-            BrowserData.setFirstAccess(false);
-            BrowserData.setLoggedIn(true);
-            return res.data.user;
-        }
-
         function isAuthenticated() {
             return !!Session.id;
         }
@@ -97,16 +89,24 @@
             var p;
             if (force && (force.id || force.sessionId) && force.userId) {
                 $log.debug("Restoring session (local)...");
-                p = $q.when({data: force});
+                p = $q.when({result: force});
             } else {
                 $log.debug("Restoring session...");
-                p = $http.get('/auth/restore');
+                p = Endpoint.jasify(function (jasify) {
+                    return jasify.auth.restore();
+                });
             }
 
             restoreData.promise = p.then(function (res) {
-                    $log.info("Session restored! (userId=" + res.data.userId + ")");
+                    $log.info("Session restored! (userId=" + res.result.user.numericId + ")");
                     restoreData.promise = null;
-                    restoreData.data = loggedIn(res);
+
+                    var sessionId = res.result.id || res.result.sessionId;
+                    Session.create(sessionId, res.result.userId, res.result.user.admin);
+                    BrowserData.setFirstAccess(false);
+                    BrowserData.setLoggedIn(true);
+                    restoreData.data = res.result.user;
+
                     return restoreData.data;
                 },
                 function (reason) {

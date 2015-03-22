@@ -41,20 +41,12 @@
     <!-- END: Google Cloud Endpoints -->
 
     <servlet>
-        <servlet-name>restore</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.RestoreSessionServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>oauth2-callback</servlet-name>
         <servlet-class>com.jasify.schedule.appengine.http.servlet.OAuth2CodeCallbackServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>oauth2-callback</servlet-name>
         <url-pattern>/oauth2/callback/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>restore</servlet-name>
-        <url-pattern>/auth/restore</url-pattern>
     </servlet-mapping>
 
     <!-- BEGIN: Incoming mail handling -->

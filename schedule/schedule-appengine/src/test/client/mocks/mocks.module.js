@@ -56,6 +56,7 @@
             },
             auth: {
                 login: nop,
+                restore: nop,
                 changePassword: nop,
                 logout: nop,
                 providerAuthenticate: nop,

@@ -47,7 +47,20 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrA
         description = "Jasify Schedule",
         authenticators = {JasifyAuthenticator.class},
         authLevel = AuthLevel.NONE,
-        transformers = {JasRepeatDetailsTransformer.class, JasAccountTransformer.class, JasTransactionTransformer.class, JasUserLoginTransformer.class, JasUserTransformer.class, JasKeyTransformer.class, JasActivityTypeTransformer.class, JasActivityTransformer.class, JasOrganizationTransformer.class, JasGroupTransformer.class, JasSubscriptionTransformer.class},
+        transformers = {
+                /* one per line in alphabetical order to avoid merge conflicts */
+                JasAccountTransformer.class,
+                JasActivityTransformer.class,
+                JasActivityTypeTransformer.class,
+                JasGroupTransformer.class,
+                JasKeyTransformer.class,
+                JasOrganizationTransformer.class,
+                JasRepeatDetailsTransformer.class,
+                JasSubscriptionTransformer.class,
+                JasTransactionTransformer.class,
+                JasUserLoginTransformer.class,
+                JasUserTransformer.class
+        },
         auth = @ApiAuth(allowCookieAuth = AnnotationBoolean.TRUE /* todo: I don't know another way :-( */),
         namespace = @ApiNamespace(ownerDomain = "jasify.com",
                 ownerName = "Jasify",
@@ -97,6 +110,17 @@ public class AuthEndpoint {
             log.info("[{}] user={} login failed!", httpServletRequest.getRemoteAddr(), request.getUsername(), e);
             throw new UnauthorizedException("Login failed");
         }
+    }
+
+    @ApiMethod(name = "auth.restore", path = "auth/restore", httpMethod = ApiMethod.HttpMethod.GET)
+    public JasLoginResponse restore() throws UnauthorizedException, BadRequestException {
+        UserSession userSession = UserContext.getCurrentUser();
+        if (userSession instanceof HttpUserSession) {
+            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(userSession.getUserId());
+            return new JasLoginResponse(user, userSession);
+        }
+
+        throw new UnauthorizedException("No session present");
     }
 
     @ApiMethod(name = "auth.logout", path = "auth/logout", httpMethod = ApiMethod.HttpMethod.POST)
