@@ -346,7 +346,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <arguments>--no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch} --buildTimestamp=${timestamp} --buildVersion=${version} build</arguments>
+                            <arguments>--no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch} --buildTimestamp=${timestamp} --buildVersion=${project.version} build</arguments>
                         </configuration>
                     </execution>
 
