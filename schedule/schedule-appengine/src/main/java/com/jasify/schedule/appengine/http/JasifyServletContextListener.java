@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.http;
 
 import com.jasify.schedule.appengine.model.SchemaMigration;
+import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ public class JasifyServletContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         log.debug("Context initialized...");
         SchemaMigration.instance().executePendingMigrations();
+        SchemaMigration.instance().notifyOfNewVersion();
     }
 
     /**

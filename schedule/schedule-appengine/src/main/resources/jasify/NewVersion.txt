@@ -1,0 +1,12 @@
+Dear JASIFY Team,
+
+A new version has been started in prod!
+
+Version    : %Version%
+Timestamp  : %Timestamp%
+Branch     : %Branch%
+Number     : %Number%
+
+Try it out at: %JasifyUrl%
+
+Go team JASIFY!!!

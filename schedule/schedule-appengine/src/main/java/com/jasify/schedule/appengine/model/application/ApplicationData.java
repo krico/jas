@@ -40,10 +40,9 @@ public final class ApplicationData {
             log.debug("Upd AppProp[{}] = [{}] -> [{}]", keyName, property.getValue(), value);
             property.setValue(value);
         }
-        Datastore.put(property);
-        Datastore.put(application);
-        log.debug("Wrote: {}", property);
+        Datastore.put(tx, property, application);
         tx.commit();
+        log.debug("Wrote: {}", property);
         //Poor man's concurrency
         TreeMap<String, Object> replace = new TreeMap<>(application.getProperties());
         replace.put(keyName, property.getValue());

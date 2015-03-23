@@ -38,6 +38,11 @@ public final class EnvironmentUtil {
         return Objects.toString(currentEnvironment().getAttributes().get("com.google.appengine.runtime.default_version_hostname"));
     }
 
+    public static String defaultVersionUrl() {
+        if (isDevelopment()) return "http://" + defaultVersionHostname();
+        return "https://" + defaultVersionHostname();
+    }
+
     public static boolean isDevelopment() {
         return !isProduction();
     }

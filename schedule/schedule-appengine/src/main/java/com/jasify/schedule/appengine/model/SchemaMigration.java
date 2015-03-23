@@ -3,6 +3,9 @@ package com.jasify.schedule.appengine.model;
 import com.google.appengine.api.datastore.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.jasify.schedule.appengine.Version;
+import com.jasify.schedule.appengine.mail.MailParser;
+import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.meta.users.User_v0Meta;
@@ -42,6 +45,27 @@ public final class SchemaMigration {
 
     public static SchemaMigration instance() {
         return Singleton.INSTANCE;
+    }
+
+    public boolean notifyOfNewVersion() {
+        String currentVersion = Version.toVersionString();
+        ApplicationData applicationData = ApplicationData.instance();
+        String propertyName = Version.class.getName();
+        String version = applicationData.getProperty(propertyName);
+        if (StringUtils.equals(currentVersion, version)) {
+            return false;
+        }
+        log.info("New version installed: {}", currentVersion);
+        String subject = String.format("[Jasify] New Version In Prod [%s]", Version.toShortVersionString());
+        try {
+            MailParser mailParser = MailParser.createNewVersionEmail(Version.getVersion(), Version.getTimestampVersion(),
+                    Version.getBranch(), Version.getNumber(), EnvironmentUtil.defaultVersionUrl());
+            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
+        } catch (Exception e) {
+            log.warn("Failed to notify jasify", e);
+        }
+        applicationData.setProperty(propertyName, currentVersion);
+        return true;
     }
 
     public boolean executePendingMigrations() {
