@@ -4,14 +4,12 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.GenericUrl;
-import com.google.appengine.api.memcache.ErrorHandlers;
 import com.google.appengine.api.memcache.Expiration;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.oauth2.OAuth2Exception.CodeResponseException;
 import com.jasify.schedule.appengine.oauth2.OAuth2Exception.MissingStateException;
 import org.apache.commons.lang3.StringUtils;
+import org.slim3.memcache.Memcache;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
@@ -19,7 +17,6 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 /**
  * @author krico
@@ -40,11 +37,10 @@ class DefaultOAuth2Service implements OAuth2Service {
 
     @Override
     public GenericUrl createCodeRequestUrl(GenericUrl baseUrl, OAuth2ProviderEnum provider, @Nonnull Serializable state) {
-        MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
-        syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
+
         String stateKey = OAuth2Util.createStateKey(baseUrl);
         //EXPIRE_MINUTES minutes is more than enough to authenticate
-        syncCache.put(stateKey, state, Expiration.byDeltaSeconds((int) TimeUnit.MINUTES.toSeconds(EXPIRE_MINUTES)));
+        Memcache.put(stateKey, state, Expiration.byDeltaSeconds((int) TimeUnit.MINUTES.toSeconds(EXPIRE_MINUTES)));
 
         GenericUrl redirectUrl = new GenericUrl(baseUrl.toURI());
         redirectUrl.setRawPath(CALLBACK_PATH_PREFIX + provider.name());
@@ -92,11 +88,10 @@ class DefaultOAuth2Service implements OAuth2Service {
     }
 
     private Serializable restoreState(String stateKey) throws OAuth2Exception.InconsistentStateException {
-        MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
-        syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
-        Object o = syncCache.get(stateKey);
+
+        Object o = Memcache.get(stateKey);
         if (o instanceof Serializable) {
-            syncCache.delete(stateKey);
+            Memcache.delete(stateKey);
             return (Serializable) o;
         } else {
             throw new OAuth2Exception.InconsistentStateException();
