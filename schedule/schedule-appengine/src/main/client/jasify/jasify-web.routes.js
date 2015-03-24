@@ -226,9 +226,31 @@
                     }
                 }
             })
+            .when('/admin/activities/:activityId/subscribers', {
+                templateUrl: 'admin/activity/admin-subscribers.html',
+                controller: 'AdminSubscribersController',
+                controllerAs: 'vm',
+                resolve: {
+                    subscriptions: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.activityId) {
+                                return Activity.getSubscribers($route.current.params.activityId);
+                            } else {
+                                return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
         ;
         /* END: Admin routes */
-
     }
 
 })(angular);

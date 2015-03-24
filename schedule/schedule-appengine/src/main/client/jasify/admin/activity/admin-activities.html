@@ -54,6 +54,12 @@
                     {{activity.price | currency:activity.currency}}
                 </td>
                 <td>
+                    <button type="button" class="btn btn-danger btn-xs" ng-show="activity.subscriptionCount > 0"
+                            ng-click="vm.viewSubscribers(activity.id)"><span
+                            class="glyphicon glyphicon-user" tooltip="Subscribers"></span>
+                    </button>
+                </td>
+                <td>
                     <button type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(activity.id)"><span
                             class="glyphicon glyphicon-remove"></span>
                     </button>

@@ -103,7 +103,8 @@
             },
             activitySubscriptions: {
                 add: nop,
-                query: nop
+                query: nop,
+                subscribers: nop
             },
             balance: {
                 createPayment: nop,

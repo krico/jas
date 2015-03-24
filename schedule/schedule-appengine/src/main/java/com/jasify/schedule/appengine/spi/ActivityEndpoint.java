@@ -267,4 +267,14 @@ public class ActivityEndpoint {
         }
         throw new NotFoundException("No such subscription");
     }
+
+    @ApiMethod(name = "activitySubscriptions.subscribers", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Subscription> getSubscriptions(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        mustBeAdmin(caller);
+        try {
+            return ActivityServiceFactory.getActivityService().getSubscriptions(activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
 }
