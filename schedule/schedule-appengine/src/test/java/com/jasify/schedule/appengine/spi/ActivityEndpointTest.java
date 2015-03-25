@@ -31,8 +31,7 @@ import org.slim3.datastore.EntityNotFoundRuntimeException;
 import java.util.*;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
 
 /**
@@ -791,6 +790,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         ActivityService service = ActivityServiceFactory.getActivityService();
         Activity activity = new Activity();
+        activity.setName("Test");
         Key key = Datastore.allocateId(Activity.class);
         service.updateActivity(activity);
         expectLastCall().andThrow(new EntityNotFoundException());
@@ -803,6 +803,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         ActivityService service = ActivityServiceFactory.getActivityService();
         Activity activity = new Activity();
+        activity.setName("Test");
         Key key = Datastore.allocateId(Activity.class);
         service.updateActivity(activity);
         expectLastCall().andThrow(new FieldValueException(""));
@@ -815,6 +816,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         ActivityService service = ActivityServiceFactory.getActivityService();
         Activity activity = new Activity();
+        activity.setName("Test");
         final Key key = Datastore.allocateId(Activity.class);
         final Capture<Activity> capture = newCapture();
 
@@ -829,6 +831,31 @@ public class ActivityEndpointTest {
 
         Activity result = endpoint.updateActivity(newCaller(55, true), key, activity);
         assertEquals(result, activity);
+    }
+
+    @Test
+    public void testUpdateActivityWithNoName() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        ActivityType activityType = new ActivityType("Test");
+        Activity activity = new Activity();
+        activity.getActivityTypeRef().setModel(activityType);
+        final Key key = Datastore.allocateId(Activity.class);
+        final Capture<Activity> capture = newCapture();
+
+        expect(service.updateActivity(EasyMock.capture(capture))).andAnswer(new IAnswer<Activity>() {
+            public Activity answer() throws Throwable {
+                assertEquals(key, capture.getValue().getId());
+                return capture.getValue();
+            }
+        });
+
+        testActivityServiceFactory.replay();
+
+        assertNull(activity.getName());
+        Activity result = endpoint.updateActivity(newCaller(55, true), key, activity);
+        assertEquals(result, activity);
+        assertEquals(activityType.getName(), activity.getName());
     }
 
     @Test(expected = ForbiddenException.class)
@@ -918,6 +945,26 @@ public class ActivityEndpointTest {
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
         assertEquals(activity, endpoint.addActivity(newCaller(1, true), jasAddActivityRequest).get(0));
+    }
+
+    @Test
+    public void testAddActivityWithNoName() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        ActivityType activityType = new ActivityType("TEST");
+        activityType.setId(Datastore.allocateId(ActivityType.class));
+        Activity activity = new Activity();
+        activity.getActivityTypeRef().setModel(activityType);
+        Key id = Datastore.allocateId(Activity.class);
+        assertNull(activity.getName());
+        expect(service.addActivity(activity, null)).andReturn(Arrays.asList(id));
+        expect(service.getActivity(id)).andReturn(activity);
+        expectLastCall().once();
+        testActivityServiceFactory.replay();
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        assertEquals(activity, endpoint.addActivity(newCaller(1, true), jasAddActivityRequest).get(0));
+        assertEquals(activityType.getName(), activity.getName());
     }
 
     @Test

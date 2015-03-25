@@ -198,6 +198,10 @@ public class ActivityEndpoint {
         mustBeAdmin(caller);
         checkFound(id);
         activity.setId(id);
+        // In case client does not set the Name field we force the set here
+        if (activity.getName() == null) {
+            activity.setName(activity.getActivityTypeRef().getModel().getName());
+        }
         try {
             return ActivityServiceFactory.getActivityService().updateActivity(activity);
         } catch (EntityNotFoundException e) {
