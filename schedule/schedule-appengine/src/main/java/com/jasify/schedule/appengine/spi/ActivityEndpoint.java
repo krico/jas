@@ -213,6 +213,10 @@ public class ActivityEndpoint {
         checkFound(request.getActivity().getActivityTypeRef());
         checkFound(request.getActivity().getActivityTypeRef().getKey());
         checkFound(request.getActivity().getActivityTypeRef().getModel());
+        // In case client does not set the Name field we force the set here
+        if (request.getActivity().getName() == null) {
+            request.getActivity().setName(request.getActivity().getActivityTypeRef().getModel().getName());
+        }
         try {
             List<Key> keys = ActivityServiceFactory.getActivityService().addActivity(request.getActivity(), request.getRepeatDetails());
             List<Activity> result = new ArrayList<>();
