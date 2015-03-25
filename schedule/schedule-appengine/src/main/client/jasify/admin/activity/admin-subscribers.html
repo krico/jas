@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col-sm-1">
+        <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-10">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Created</th>
+                <th>Real Name</th>
+                <th>Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="subscription in vm.subscriptions">
+                <td>{{subscription.user.created | date:'yyyy-MM-dd HH:mm'}}</td>
+                <td>{{subscription.user.realName}}</td>
+                <td>{{subscription.user.name}}</td>
+            </tr>
+            <tr ng-if="vm.activities.length == 0">
+                <td colspan="8">No activities...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

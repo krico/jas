@@ -15,6 +15,7 @@
         vm.organizationSelected = organizationSelected;
         vm.viewActivity = viewActivity;
         vm.viewOrganization = viewOrganization;
+        vm.viewSubscribers = viewSubscribers;
         vm.addActivity = addActivity;
         vm.remove = remove;
 
@@ -54,6 +55,10 @@
 
         function addActivity() {
             $location.path('/admin/activity').search('organizationId', vm.organization.id);
+        }
+
+        function viewSubscribers(id) {
+            $location.path('/admin/activities/' + id + '/subscribers');
         }
 
         function remove(id) {

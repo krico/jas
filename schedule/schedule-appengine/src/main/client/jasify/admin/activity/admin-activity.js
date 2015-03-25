@@ -2,17 +2,6 @@
 
     angular.module('jasifyWeb').controller('AdminActivityController', AdminActivityController);
 
-    angular.module('jasifyWeb').directive('datepickerPopup', function () {
-        return {
-            restrict: 'EAC',
-            require: 'ngModel',
-            link: function (scope, element, attr, controller) {
-                //remove the default formatter from the input directive to prevent conflict
-                controller.$formatters.shift();
-            }
-        };
-    });
-
     function AdminActivityController($location, $scope, ActivityType, Activity, activity, organizations) {
         var vm = this;
 
@@ -47,6 +36,7 @@
         vm.reset = reset;
         vm.back = back;
         vm.init = init;
+        vm.setRepeatDayOfWeek = setRepeatDayOfWeek;
 
         vm.selectOrganization(vm.organizations, vm.activity, $location.search().organizationId);
 
@@ -194,6 +184,18 @@
             }
         }
 
+        function setRepeatDayOfWeek(day, enabled) {
+            switch (day.getDay()) {
+                case 0: vm.repeatDetails.sundayEnabled = enabled; break;
+                case 1: vm.repeatDetails.mondayEnabled = enabled; break;
+                case 2: vm.repeatDetails.tuesdayEnabled = enabled; break;
+                case 3: vm.repeatDetails.wednesdayEnabled = enabled; break;
+                case 4: vm.repeatDetails.thursdayEnabled = enabled; break;
+                case 5: vm.repeatDetails.fridayEnabled = enabled; break;
+                case 6: vm.repeatDetails.saturdayEnabled = enabled; break;
+            }
+        }
+
         function reset() {
             Activity.get(vm.activity.id).then(ok, fail);
             vm.activity = {};
@@ -217,6 +219,10 @@
                 if (newValue !== oldValue) {
                     var offset = newValue.getTime() - oldValue.getTime();
                     vm.activity.finish = new Date(vm.activity.finish.getTime() + offset);
+                    if (vm.repeatDetails.repeatType == "Weekly") {
+                        vm.setRepeatDayOfWeek(oldValue, false);
+                        vm.setRepeatDayOfWeek(newValue, true);
+                    }
                 }
             }
         );
@@ -237,12 +243,19 @@
         $scope.$watch(
             // This function returns the value being watched.
             function () {
-                return vm.repeatType;
+                return vm.repeatDetails.repeatType;
             },
             // This is the change listener, called when the value returned from the above function changes
             function (newValue, oldValue) {
-                if (newValue !== oldValue && oldValue == "No") {
-                    vm.repeatDetails.untilDate = new Date(vm.activity.finish.getTime());
+                if (newValue !== oldValue) {
+                    if (oldValue == "No") {
+                        vm.repeatDetails.untilDate = new Date(vm.activity.finish.getTime());
+                    }
+                    if (newValue == "Weekly") {
+                        vm.setRepeatDayOfWeek(vm.activity.start, true);
+                    } else {
+                        vm.setRepeatDayOfWeek(vm.activity.start, false);
+                    }
                 }
             }
         );

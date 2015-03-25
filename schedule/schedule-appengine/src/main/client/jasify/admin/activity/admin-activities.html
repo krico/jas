@@ -48,10 +48,16 @@
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.start | date:'yyyy-MM-dd HH:mm' }}</td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.finish | date:'yyyy-MM-dd HH:mm' }}</td>
                 <td ng-click="vm.viewActivity(activity.id)">
-                    {{activity.subscriptions||0}} of {{activity.maxSubscriptions||0}}
+                    {{activity.subscriptionCount||0}} of {{activity.maxSubscriptions||0}}
                 </td>
                 <td ng-click="vm.viewActivity(activity.id)">
                     {{activity.price | currency:activity.currency}}
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-xs" ng-show="activity.subscriptionCount > 0"
+                            ng-click="vm.viewSubscribers(activity.id)"><span
+                            class="glyphicon glyphicon-user" tooltip="Subscribers"></span>
+                    </button>
                 </td>
                 <td>
                     <button type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(activity.id)"><span

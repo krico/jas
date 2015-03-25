@@ -9,7 +9,8 @@
             add: add,
             remove: remove,
             subscribe: subscribe,
-            isSubscribed: isSubscribed
+            isSubscribed: isSubscribed,
+            getSubscribers: getSubscribers
         };
 
         function query(param) {
@@ -62,6 +63,13 @@
         function isSubscribed(user, activity) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.activitySubscriptions.query({userId: fetchId(user), activityId: fetchId(activity)})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function getSubscribers(id) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.activitySubscriptions.subscribers({activityId: id})
                     .then(resultHandler, errorHandler);
             });
         }

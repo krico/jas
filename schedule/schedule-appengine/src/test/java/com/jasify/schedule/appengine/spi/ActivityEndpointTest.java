@@ -1119,4 +1119,34 @@ public class ActivityEndpointTest {
         Subscription result = endpoint.getSubscription(newCaller(userId.getId(), false), userId, activityId);
         assertEquals(subscription, result);
     }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testGetSubscriptionsNoUserThrowsNotFoundException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getSubscriptions(null, null);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testGetSubscriptionsNotAdminThrowsForbiddenException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getSubscriptions(newCaller(1, false), null);
+    }
+
+    @Test
+    public void testGetSubscriptions() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(com.jasify.schedule.appengine.model.users.User.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        Subscription subscription = new Subscription();
+        subscription.getUserRef().setKey(userId);
+        List<Subscription> subscriptionList = new ArrayList<>();
+        subscriptionList.add(subscription);
+        expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
+        testActivityServiceFactory.replay();
+        List<Subscription> result = endpoint.getSubscriptions(newCaller(userId.getId(), true), activityId);
+        assertEquals(1, result.size());
+    }
 }
