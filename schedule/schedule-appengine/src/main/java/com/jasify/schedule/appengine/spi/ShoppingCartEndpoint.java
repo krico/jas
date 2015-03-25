@@ -5,7 +5,9 @@ import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
+import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
+import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
 
 /**
@@ -38,8 +40,9 @@ import com.jasify.schedule.appengine.spi.transform.*;
                 packagePath = ""))
 public class ShoppingCartEndpoint {
 
-    @ApiMethod(name = "carts.get", path = "carts/{id}", httpMethod = ApiMethod.HttpMethod.GET)
-    public ShoppingCart getCart(User caller, @Nullable @Named("id") String id) throws UnauthorizedException, ForbiddenException {
-        throw new IllegalArgumentException("NOT IMPLEMENTED");
+    @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
+    public ShoppingCart getUserCart(User caller) throws UnauthorizedException, ForbiddenException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        return ShoppingCartServiceFactory.getShoppingCartService().getUserCart(jasUser.getUserId());
     }
 }

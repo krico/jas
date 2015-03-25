@@ -10,6 +10,7 @@
         'jasifyComponents',
         'jasify.authenticate',
         'jasify.payment',
+        'jasify.checkout',
         'jasify.templates'
     ]);
 })(angular);

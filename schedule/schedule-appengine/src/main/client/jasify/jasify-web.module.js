@@ -13,6 +13,7 @@
         'jasify.authenticate',
         'jasify.payment',
         'jasify.balance',
+        'jasify.checkout',
         'jasify.templates'
     ]);
 

@@ -1,0 +1,82 @@
+<div class="row">
+    <div class="col-md-2 col-md-offset-7">
+        <button class="btn btn-primary btn-block">Continue to PayPal</button>
+    </div>
+    <div class="col-md-6 col-md-offset-3">
+        <table class="table checkout-table">
+            <thead>
+            <tr class="checkout-title">
+                <th class="h3">Your Shopping Cart</th>
+            </tr>
+            <tr>
+                <td align="center">
+                    <table class="checkout-items">
+                        <thead>
+                        <tr class="checkout-header">
+                            <th>Description</th>
+                            <th>Price</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in vm.cart.items">
+                            <td>{{item.description}}</td>
+                            <td>
+                                <nobr>{{vm.cart.currency}} {{item.price | number: 2}}</nobr>
+                            </td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        <tr class="checkout-header">
+                            <th>Total</th>
+                            <th>
+                                <nobr>{{vm.cart.currency}} {{vm.cart.total|number: 2}}</nobr>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td>
+                                Handling Fee
+                                <sup>
+                                    <span class="text-info ion-information-circled"
+                                          tooltip-html-unsafe="<nobr>For PayPal payments there</nobr> is a handling fee of <b>0.35%</b> plus <b><nobr>CHF 0.55</nobr></b>.">
+                                </span>
+                                </sup>
+                            </td>
+                            <td>
+                                <nobr>{{vm.cart.currency}} {{vm.cart.grandTotal-vm.cart.total|number: 2}}</nobr>
+                            </td>
+                        </tr>
+                        <tr class="checkout-grand-total h4">
+                            <th>Grand Total</th>
+                            <th>
+                                <nobr>{{vm.cart.currency}} {{vm.cart.grandTotal|number: 2}}</nobr>
+                            </th>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <!-- PayPal Logo -->
+                    <table border="0" cellpadding="10" cellspacing="0" align="center">
+                        <tr>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td align="center"><a href="https://www.paypal.com/uk/webapps/mpp/paypal-popup"
+                                                  title="How PayPal Works"
+                                                  onclick="javascript:window.open('https://www.paypal.com/uk/webapps/mpp/paypal-popup','WIPaypal','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700'); return false;"><img
+                                    src="https://www.paypalobjects.com/webstatic/mktg/Logo/AM_mc_vs_ms_ae_UK.png"
+                                    border="0" alt="PayPal Acceptance Mark"></a></td>
+                        </tr>
+                    </table>
+                    <!-- PayPal Logo -->
+                </td>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="col-md-2 col-md-offset-7">
+        <button class="btn btn-primary btn-block">Continue to PayPal</button>
+    </div>
+</div>
