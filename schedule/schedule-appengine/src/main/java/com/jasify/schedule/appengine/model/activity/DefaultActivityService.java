@@ -16,6 +16,7 @@ import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import org.slim3.datastore.EntityNotFoundRuntimeException;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.*;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -410,9 +410,9 @@ class DefaultActivityService implements ActivityService {
         return subscription;
     }
 
-    private void notify(Organization organization, User user, Activity activity) {
+    private void notify(Organization organization, User user, Activity activity, Subscription subscription) {
         String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
-        String orderNumber = new Date().toString();
+        String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
         try {
             MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(activity.getName(), user.getName(), organization.getName(), orderNumber, activity.getPrice());
             MailServiceFactory.getMailService().send(user.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
@@ -468,7 +468,7 @@ class DefaultActivityService implements ActivityService {
 
         ActivityType activityType = dbActivity.getActivityTypeRef().getModel();
         Organization organization = getOrganization(activityType.getId().getParent());
-        notify(organization, dbUser, dbActivity);
+        notify(organization, dbUser, dbActivity, subscription);
 
         return subscription;
     }
