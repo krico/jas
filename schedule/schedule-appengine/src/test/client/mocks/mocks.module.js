@@ -15,17 +15,21 @@
                 return $modalMock;
             });
 
-            /**
-             * Return a standard object for $sessionStorage
-             */
-            $provide.decorator('$sessionStorage', function () {
-                return {};
-            });
-            /**
-             * Return a standard object for $localStorage
-             */
-            $provide.decorator('$localStorage', function () {
-                return {};
+            $provide.decorator('localStorageService', function () {
+                var mock = {data: {}};
+                mock.set = function (k, v) {
+                    mock.data[k] = v;
+                };
+                mock.get = function (k) {
+                    if (typeof mock.data[k] === 'undefined') {
+                        return null;
+                    }
+                    return mock.data[k];
+                };
+                mock.remove = function (k, v) {
+                    delete mock.data[k];
+                };
+                return mock;
             });
         });
 
