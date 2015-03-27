@@ -11,7 +11,9 @@
                 <tr valign="top">
 
                     <td bgcolor="#FFFFFF"><font face="verdana,arial,helvetica" size="-1">
-                        <p><b>Dear %PublisherName%,</b></p>
+                        <b>
+                            <p>Dear %PublisherName%,</p>
+                        </b>
 
                         <p>A new booking has been created!</p>
 
@@ -20,41 +22,64 @@
                         <table cellpadding="4" cellspacing="0" border="0" width="100%">
                             <tr>
                                 <td colspan="2" bgcolor="21415A">
-                                    <font color="#ffffff" face="verdana,arial,helvetica" size="-1"><b>Order Details:</b>
-                                    </font>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td bgcolor=#EEEEEE>
-                                    <font face="verdana,arial,helvetica" size="-1" color="21415A"><b>
-                                        Subscriber: %SubscriberName%</b>
-                                    </font>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td bgcolor=#EEEEEE>
-                                    <font face="verdana,arial,helvetica" size="-1" color="21415A"><b>
-                                        Activity: %ActivityName%</b>
+                                    <font color="#ffffff" face="verdana,arial,helvetica" size="-1"><b>Order Details</b>
                                     </font>
                                 </td>
                             </tr>
                             <tr>
                                 <td height="148">
-                                    <table border="0" cellpadding="1" cellspacing="0" width="100%">
+                                    <table border="0" cellpadding="1" cellspacing="0" width="30%" align="left">
                                         <tr>
                                             <td>
-                                                <p align="right">Order #: &nbsp;</p>
+                                                <p>Order # &nbsp;</p>
                                             </td>
                                             <td>
-                                                <p>%OrderNumber%</p>
+                                                <p>: %OrderNumber%</p>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
-                                                <p align="right">Price: &nbsp;</p>
+                                                <p>Subscriber &nbsp;</p>
                                             </td>
                                             <td>
-                                                <p>%ActivityPrice%</p>
+                                                <p>: %SubscriberName%</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <br>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p>Activity &nbsp;</p>
+                                            </td>
+                                            <td>
+                                                <p>: %ActivityName%</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p>Start &nbsp;</p>
+                                            </td>
+                                            <td>
+                                                <p>: %ActivityStart%</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p>Finish &nbsp;</p>
+                                            </td>
+                                            <td>
+                                                <p>: %ActivityFinish%</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p>Price &nbsp;</p>
+                                            </td>
+                                            <td>
+                                                <p>: %ActivityPrice%</p>
                                             </td>
                                         </tr>
                                     </table>

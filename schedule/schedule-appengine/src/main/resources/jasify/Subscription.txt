@@ -2,13 +2,16 @@ Dear JASIFY team,
 
 A new subscription has been created!
 
-Order Details:
+Order Details
+Order        #: %OrderNumber%
 Publisher     : %PublisherName%
 Subscriber    : %SubscriberName%
-Activity      : %AvtivityName%
 
-Order        #: %OrderNumber%
+Activity      : %ActivityName%
+Start         : %ActivityStart%
+Finish        : %ActivityFinish%
 Price         : %ActivityPrice%
+
 Fees          : %Fees%
 Tax           : %Tax%
 

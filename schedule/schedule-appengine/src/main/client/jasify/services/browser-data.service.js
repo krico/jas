@@ -3,24 +3,23 @@
 
     angular.module('jasifyComponents').factory('BrowserData', browserData);
 
-    /**
-     * This service centralizes all access to data stored on the browser.
-     * The idea is that users don't need to know what key is used for what value, but rather have a more structured
-     * way of accessing it.
-     *
-     *
-     * @param $localStorage permanent storage on browser (even if closed)
-     * @param $sessionStorage temporary storage on browser (deleted if browser is closed)
-     */
-    function browserData($localStorage, $sessionStorage) {
+    function browserData($rootScope, $log, localStorageService) {
         var BrowserData = {
             DEFAULTS: {}
         };
 
-        addProperty('paymentAcceptRedirect', '/balance/view', true);
+        $rootScope.$on('LocalStorageModule.notification.warning', function (m) {
+            $log.warn('LocalStorageModule warning: ' + m);
+        });
+
+        $rootScope.$on('LocalStorageModule.notification.error', function (m) {
+            $log.warn('LocalStorageModule error: ' + m);
+        });
+
+        addProperty('paymentAcceptRedirect', '/balance/view');
         addProperty('firstAccess', true);
         addProperty('rememberUser');
-        addProperty('loggedIn', false, true);
+        addProperty('loggedIn', false);
 
         /**
          * Creates the accessor/functions for handling a property.
@@ -29,16 +28,12 @@
          *  - creates BrowserData.get${PropertyName} function that returns the set value or default
          *  - creates BrowserData.set${PropertyName} function that sets value
          *  - creates BrowserData.is${PropertyName}Set function returns true or false if the storage value is set
-         *  - creates BrowserData.is${PropertyName}SessionOnly function returns true or false if the storage is session only or not
          *  - creates BrowserData.clear${PropertyName} function that resets the value
          *
          * @param propertyName
          * @param defaultValue
-         * @param sessionOnly
          */
-        function addProperty(propertyName, defaultValue, sessionOnly) {
-            sessionOnly = !!sessionOnly;
-            var storage = sessionOnly ? $sessionStorage : $localStorage;
+        function addProperty(propertyName, defaultValue) {
 
             if (typeof defaultValue !== 'undefined') {
                 BrowserData.DEFAULTS[propertyName] = defaultValue;
@@ -49,26 +44,22 @@
             var beanName = angular.uppercase(propertyName.substring(0, 1)) + propertyName.substring(1);
 
             BrowserData['set' + beanName] = function (value) {
-                storage[propertyName] = value;
+                localStorageService.set(propertyName, value);
             };
 
             BrowserData['get' + beanName] = function () {
                 if (BrowserData['is' + beanName + 'Set']()) {
-                    return storage[propertyName];
+                    return localStorageService.get(propertyName);
                 }
                 return BrowserData.DEFAULTS[propertyName];
             };
 
             BrowserData['is' + beanName + 'Set'] = function () {
-                return typeof storage[propertyName] !== 'undefined';
-            };
-
-            BrowserData['is' + beanName + 'SessionOnly'] = function () {
-                return sessionOnly;
+                return localStorageService.get(propertyName) !== null;
             };
 
             BrowserData['clear' + beanName] = function () {
-                delete storage[propertyName];
+                localStorageService.remove(propertyName);
             };
 
         }

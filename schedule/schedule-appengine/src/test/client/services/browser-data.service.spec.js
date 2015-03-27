@@ -13,16 +13,8 @@ describe('BrowserDataService', function () {
         expect(typeof BrowserData.DEFAULTS).toBe('object');
     });
 
-    it('should store paymentAcceptRedirect as sessionOnly', function () {
-        expect(BrowserData.isPaymentAcceptRedirectSessionOnly()).toBe(true);
-    });
-
     it('should return true for getFirstAccess', function () {
         expect(BrowserData.getFirstAccess()).toBe(true);
-    });
-
-    it('should save firstAccess on session', function () {
-        expect(BrowserData.isFirstAccessSessionOnly()).toBe(false);
     });
 
     it('should return undefined for rememberUser', function () {
@@ -33,19 +25,12 @@ describe('BrowserDataService', function () {
         expect(BrowserData.getLoggedIn()).toBe(false);
     });
 
-    it('should store loggedIn on session only', function () {
-        expect(BrowserData.isLoggedInSessionOnly()).toBe(true);
-    });
-
 
     /**
      * Since the functions in BrowserData are generated, we can test them once with one property
      * and this works for all
      */
     describe('selectedPropertyChecks', function () {
-        it('should store paymentAcceptRedirect as sessionOnly', function () {
-            expect(BrowserData.isPaymentAcceptRedirectSessionOnly()).toBe(true);
-        });
 
         it('should return default for getPaymentAcceptRedirect', function () {
             expect(BrowserData.getPaymentAcceptRedirect()).toBe(BrowserData.DEFAULTS.paymentAcceptRedirect);

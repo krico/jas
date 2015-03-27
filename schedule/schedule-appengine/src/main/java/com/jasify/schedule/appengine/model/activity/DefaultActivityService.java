@@ -16,7 +16,6 @@ import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -410,18 +409,23 @@ class DefaultActivityService implements ActivityService {
         return subscription;
     }
 
-    private void notify(Organization organization, User user, Activity activity, Subscription subscription) {
+    private void notify(Subscription subscription) throws EntityNotFoundException {
+        Activity activity = subscription.getActivityRef().getModel();
+        ActivityType activityType = activity.getActivityTypeRef().getModel();
+        Organization organization = getOrganization(activityType.getId().getParent());
+        User user = subscription.getUserRef().getModel();
+
         String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
-        String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
+
         try {
-            MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(activity.getName(), user.getName(), organization.getName(), orderNumber, activity.getPrice());
+            MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscription, organization);
             MailServiceFactory.getMailService().send(user.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
             log.error("Failed to notify subscriber", e);
         }
 
         try {
-            MailParser mailParser = MailParser.createPublisherSubscriptionEmail(activity.getName(), user.getName(), organization.getName(), orderNumber, activity.getPrice());
+            MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription, organization);
             for (User orgUser : organization.getUsers()) {
                 MailServiceFactory.getMailService().send(orgUser.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
             }
@@ -430,7 +434,7 @@ class DefaultActivityService implements ActivityService {
         }
 
         try {
-            MailParser mailParser = MailParser.createJasifySubscriptionEmail(activity.getName(), user.getName(), organization.getName(), orderNumber, activity.getPrice(), 0d, 0d, "?");
+            MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscription, organization);
             MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
             log.error("Failed to notify jasify", e);
@@ -466,16 +470,19 @@ class DefaultActivityService implements ActivityService {
         Datastore.put(dbActivity);
         Datastore.put(subscription);
 
-        ActivityType activityType = dbActivity.getActivityTypeRef().getModel();
-        Organization organization = getOrganization(activityType.getId().getParent());
-        notify(organization, dbUser, dbActivity, subscription);
+        notify(subscription);
 
         return subscription;
     }
 
     @Override
     public void cancel(Subscription subscription) throws EntityNotFoundException {
-        Subscription dbSubscription = getSubscription(subscription.getId());
+        cancel(subscription.getId());
+    }
+
+    @Override
+    public void cancel(Key subscriptionId) throws EntityNotFoundException {
+        Subscription dbSubscription = getSubscription(subscriptionId);
         Activity dbActivity = getActivity(dbSubscription.getActivityRef().getKey());
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
         Datastore.put(dbActivity);
