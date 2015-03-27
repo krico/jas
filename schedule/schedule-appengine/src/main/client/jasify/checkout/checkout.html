@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-2 col-md-offset-7">
-        <button class="btn btn-primary btn-block">Continue to PayPal</button>
+        <button ng-disabled="vm.isEmpty()" class="btn btn-primary btn-block">Continue to PayPal</button>
     </div>
     <div class="col-md-6 col-md-offset-3">
         <table class="table checkout-table">
@@ -10,16 +10,18 @@
             </tr>
             <tr>
                 <td align="center">
-                    <table class="checkout-items">
+                    <table ng-if="!vm.isEmpty()" class="checkout-items">
                         <thead>
                         <tr class="checkout-header">
                             <th>Description</th>
+                            <th>Units</th>
                             <th>Price</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr ng-repeat="item in vm.cart.items">
                             <td>{{item.description}}</td>
+                            <td class="small">{{item.units}}</td>
                             <td>
                                 <nobr>{{vm.cart.currency}} {{item.price | number: 2}}</nobr>
                             </td>
@@ -28,6 +30,7 @@
                         <tfoot>
                         <tr class="checkout-header">
                             <th>Total</th>
+                            <th></th>
                             <th>
                                 <nobr>{{vm.cart.currency}} {{vm.cart.total|number: 2}}</nobr>
                             </th>
@@ -41,18 +44,21 @@
                                 </span>
                                 </sup>
                             </td>
+                            <td></td>
                             <td>
                                 <nobr>{{vm.cart.currency}} {{vm.cart.grandTotal-vm.cart.total|number: 2}}</nobr>
                             </td>
                         </tr>
                         <tr class="checkout-grand-total h4">
                             <th>Grand Total</th>
+                            <th></th>
                             <th>
                                 <nobr>{{vm.cart.currency}} {{vm.cart.grandTotal|number: 2}}</nobr>
                             </th>
                         </tr>
                         </tfoot>
                     </table>
+                    <h3 ng-if="vm.isEmpty()" class="text-danger"><span class="ion-information-circled"></span> There are no items in your cart</h3>
                 </td>
             </tr>
             <tr>
@@ -77,6 +83,6 @@
         </table>
     </div>
     <div class="col-md-2 col-md-offset-7">
-        <button class="btn btn-primary btn-block">Continue to PayPal</button>
+        <button ng-disabled="vm.isEmpty()" class="btn btn-primary btn-block">Continue to PayPal</button>
     </div>
 </div>

@@ -65,6 +65,37 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         return Singleton.INSTANCE;
     }
 
+    /**
+     * From: https://www.paypal.com/ch/webapps/mpp/paypal-fees
+     * <p/>
+     * 3.4% + 0.55CHF
+     * <p/>
+     * So,
+     * p = amount paid to PayPal
+     * m = cash received in jasify
+     * <p/>
+     * m = p - "fee" = p - (0.034p + 0.55) = p - 0.034p - 0.55
+     * <p/>
+     * I want to isolate "p"
+     * <p/>
+     * m  = p - 0.034p - 0.55
+     * p - 0.034p  = m + 0.55
+     * (1 - 0.034)p  = m + 0.55
+     * 0.966p  = m + 0.55
+     * p  = (m + 0.55)/0.966
+     * <p/>
+     * So, to make a payment of CHF 20.-
+     * p = (20 + 0.55)/0.966 = 20.55/0.966 = 21.27329192546584
+     */
+    public static double calculateHandlingFee(double amount) {
+        BigDecimal paymentAmount = new BigDecimal(amount).setScale(2, BigDecimal.ROUND_CEILING);
+        BigDecimal amountToBePaid = paymentAmount.add(PAY_PAL_FEE_FLAT);
+        amountToBePaid = amountToBePaid.divide(ONE_MINUS_PAY_PAL_FEE_MULTIPLIER, BigDecimal.ROUND_CEILING);
+        amountToBePaid = amountToBePaid.setScale(2, BigDecimal.ROUND_CEILING);
+        BigDecimal fee = amountToBePaid.subtract(paymentAmount);
+        return fee.doubleValue();
+    }
+
     private void needWebProfile() {
         if (StringUtils.isNotBlank(profileId)) return;
 
@@ -89,28 +120,6 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         }
     }
 
-    /**
-     * From: https://www.paypal.com/ch/webapps/mpp/paypal-fees
-     * <p/>
-     * 3.4% + 0.55CHF
-     * <p/>
-     * So,
-     * p = amount paid to PayPal
-     * m = cash received in jasify
-     * <p/>
-     * m = p - "fee" = p - (0.034p + 0.55) = p - 0.034p - 0.55
-     * <p/>
-     * I want to isolate "p"
-     * <p/>
-     * m  = p - 0.034p - 0.55
-     * p - 0.034p  = m + 0.55
-     * (1 - 0.034)p  = m + 0.55
-     * 0.966p  = m + 0.55
-     * p  = (m + 0.55)/0.966
-     * <p/>
-     * So, to make a payment of CHF 20.-
-     * p = (20 + 0.55)/0.966 = 20.55/0.966 = 21.27329192546584
-     */
     @Override
     public void createPayment(PayPalPayment payment, GenericUrl baseUrl) throws PaymentException {
         payment.validate();
@@ -122,13 +131,9 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
          * amountToBePaid = (paymentAmount + FLAT_FEE)/(1 - FEE_MULTIPLIER)
          */
         if (payment.getFee() == null) {
-            BigDecimal paymentAmount = new BigDecimal(payment.getAmount()).setScale(2, BigDecimal.ROUND_CEILING);
-            BigDecimal amountToBePaid = paymentAmount.add(PAY_PAL_FEE_FLAT);
-            amountToBePaid = amountToBePaid.divide(ONE_MINUS_PAY_PAL_FEE_MULTIPLIER, BigDecimal.ROUND_CEILING);
-            amountToBePaid = amountToBePaid.setScale(2, BigDecimal.ROUND_CEILING);
-            BigDecimal fee = amountToBePaid.subtract(paymentAmount);
-            payment.setFee(fee.doubleValue());
-            payment.setAmount(amountToBePaid.doubleValue());
+            double fee = calculateHandlingFee(payment.getAmount());
+            payment.setFee(fee);
+            payment.setAmount(payment.getAmount() + fee);
         }
         payment.validate(); //re-validate fees
 

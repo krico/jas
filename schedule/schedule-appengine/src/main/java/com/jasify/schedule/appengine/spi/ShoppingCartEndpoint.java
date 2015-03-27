@@ -43,6 +43,8 @@ public class ShoppingCartEndpoint {
     @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
     public ShoppingCart getUserCart(User caller) throws UnauthorizedException, ForbiddenException {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
-        return ShoppingCartServiceFactory.getShoppingCartService().getUserCart(jasUser.getUserId());
+        ShoppingCart cart = ShoppingCartServiceFactory.getShoppingCartService().getUserCart(jasUser.getUserId());
+        cart.calculate();
+        return cart;
     }
 }

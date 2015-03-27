@@ -10,6 +10,9 @@
                 resolve: {
                     allow: /*@ngInject*/ function ($q, Allow) {
                         return Allow.user();
+                    },
+                    cart: /*@ngInject*/ function ($q, ShoppingCart) {
+                        return ShoppingCart.getUserCart();
                     }
                 }
             })

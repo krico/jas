@@ -22,6 +22,8 @@ public class ShoppingCartTest {
     @Test
     public void testIsSerializable() throws Exception {
         ShoppingCart cart = new ShoppingCart();
+        cart.getItems().add(new ShoppingCart.Item("My desc", 1, 1.33d));
+        cart.calculate();
         new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(cart);
     }
 }

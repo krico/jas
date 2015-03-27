@@ -3,8 +3,16 @@
 
     function shoppingCart(Endpoint, $q, $log) {
         var ShoppingCart = {
-            get: get
+            get: get,
+            getUserCart: getUserCart
         };
+
+        function getUserCart() {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.carts.getUserCart()
+                    .then(resultHandler, errorHandler);
+            });
+        }
 
         function get(id) {
             var req = {};

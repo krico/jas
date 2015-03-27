@@ -2,23 +2,20 @@
 
     angular.module('jasifyWeb').controller('CheckoutController', CheckoutController);
 
-    function CheckoutController() {
+    function CheckoutController($log, cart) {
         var vm = this;
+        vm.isEmpty = isEmpty;
         vm.alert = alert;
         vm.alerts = [];
 
-        vm.cart = {
-            currency: "CHF",
-            total: 120,
-            grandTotal: 125.23,
-            items: [
-                {description: "MetaFit ipsum lorem", units: 1, price: 20},
-                {description: "Spint ipsum lorem", units: 2, price: 100}
-            ]
-        };
+        vm.cart = cart;
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
+        }
+
+        function isEmpty() {
+            return !(vm.cart && vm.cart.items && vm.cart.items.length > 0);
         }
     }
 })(angular);

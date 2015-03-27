@@ -30,10 +30,10 @@ describe('ShoppingCartService', function () {
         expect($gapiMock.client.jasify.carts.get).toHaveBeenCalledWith({id: id});
     });
 
-    it('should get shopping cart with no id', function () {
+    it('should get user shopping cart ', function () {
         var expected = {};
-        spyOn($gapiMock.client.jasify.carts, 'get').and.returnValue($q.when({result: expected}));
-        ShoppingCart.get()
+        spyOn($gapiMock.client.jasify.carts, 'getUserCart').and.returnValue($q.when({result: expected}));
+        ShoppingCart.getUserCart()
             .then(function (res) {
                 expect(res).toBe(expected);
             },
@@ -43,7 +43,7 @@ describe('ShoppingCartService', function () {
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.carts.get).toHaveBeenCalledWith({});
+        expect($gapiMock.client.jasify.carts.getUserCart).toHaveBeenCalled();
     });
 
 });

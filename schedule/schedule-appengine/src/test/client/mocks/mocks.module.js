@@ -49,7 +49,8 @@
                 remove: nop
             },
             carts: {
-                get: nop
+                get: nop,
+                getUserCart: nop
             },
             users: {
                 query: nop,
