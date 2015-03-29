@@ -10,7 +10,12 @@
     ],
     "karmaConfig": "src/test/client/karma.conf.ci.js"
   },
-  "css": ["src/main/stylesheet/**/*.css"],
+  "css": [
+    "src/main/stylesheet/styles.less"
+  ],
+  "watchCss": [
+    "src/main/stylesheet/**/*.*"
+  ],
   "html": [
     "src/main/client/*.html"
   ],
@@ -45,7 +50,6 @@
     },
     "css": {
       "main": [
-        "bootstrap/dist/css/bootstrap.min.css",
         "ionicons/css/ionicons.min.css",
         "font-awesome/css/font-awesome.min.css"
       ]
