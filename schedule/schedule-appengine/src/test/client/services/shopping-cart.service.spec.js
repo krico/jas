@@ -46,4 +46,76 @@ describe('ShoppingCartService', function () {
         expect($gapiMock.client.jasify.carts.getUserCart).toHaveBeenCalled();
     });
 
+    it('should remove item from cart by id (objects)', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'removeItem').and.returnValue($q.when({result: expected}));
+        var cart = {id: "foo"};
+        var item = {ordinal: "bar"};
+        ShoppingCart.removeItem(cart, item)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.removeItem).toHaveBeenCalledWith({cartId: cart.id, ordinal: item.ordinal});
+    });
+
+    it('should remove item from cart by id (ids)', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'removeItem').and.returnValue($q.when({result: expected}));
+        var cart = {id: "foo"};
+        var item = {ordinal: "bar"};
+        ShoppingCart.removeItem(cart.id, item.ordinal)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.removeItem).toHaveBeenCalledWith({cartId: cart.id, ordinal: item.ordinal});
+    });
+
+    it('should remove item from cart by id (ids zero ordinal)', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'removeItem').and.returnValue($q.when({result: expected}));
+        var cart = {id: 1};
+        var item = {ordinal: 0};
+        ShoppingCart.removeItem(cart.id, item.ordinal)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.removeItem).toHaveBeenCalledWith({cartId: 1, ordinal: 0});
+    });
+
+    it('should remove item from cart by id (ids zero cart)', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'removeItem').and.returnValue($q.when({result: expected}));
+        var cart = {id: 0};
+        var item = {ordinal: 1};
+        ShoppingCart.removeItem(cart.id, item.ordinal)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.removeItem).toHaveBeenCalledWith({cartId: 0, ordinal: 1});
+    });
+
 });

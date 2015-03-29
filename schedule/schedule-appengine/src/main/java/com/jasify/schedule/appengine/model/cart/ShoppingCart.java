@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.cart;
 
+import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.payment.PayPalPaymentProvider;
 
 import java.io.Serializable;
@@ -66,9 +67,11 @@ public class ShoppingCart implements Serializable {
     }
 
     public void calculate() {
-        BigDecimal total = BigDecimal.ZERO.setScale(2);
-        for (Item item : items) {
-            BigDecimal itemPrice = new BigDecimal(item.getPrice()).setScale(2, BigDecimal.ROUND_CEILING);
+        BigDecimal total = BigDecimal.ZERO;
+        for (int i = 0; i < items.size(); ++i) {
+            Item item = items.get(i);
+            item.setOrdinal(i);
+            BigDecimal itemPrice = new BigDecimal(item.getPrice());
             itemPrice = itemPrice.multiply(new BigDecimal(item.getUnits()));
             total = total.add(itemPrice);
         }
@@ -77,7 +80,9 @@ public class ShoppingCart implements Serializable {
         setGrandTotal(getTotal() + fee);
     }
 
-    public static class Item implements Serializable{
+    public static class Item implements Serializable {
+        private int ordinal;
+        private Key itemId;
         private String description;
         private int units;
         private double price;
@@ -89,6 +94,14 @@ public class ShoppingCart implements Serializable {
             this.description = description;
             this.units = units;
             this.price = price;
+        }
+
+        public int getOrdinal() {
+            return ordinal;
+        }
+
+        public void setOrdinal(int ordinal) {
+            this.ordinal = ordinal;
         }
 
         public String getDescription() {
@@ -113,6 +126,14 @@ public class ShoppingCart implements Serializable {
 
         public void setPrice(double price) {
             this.price = price;
+        }
+
+        public Key getItemId() {
+            return itemId;
+        }
+
+        public void setItemId(Key itemId) {
+            this.itemId = itemId;
         }
     }
 }

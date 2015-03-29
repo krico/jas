@@ -2,10 +2,11 @@
 
     angular.module('jasifyWeb').controller('CheckoutController', CheckoutController);
 
-    function CheckoutController($log, cart) {
+    function CheckoutController($log, $rootScope, $modal, ShoppingCart, cart) {
         var vm = this;
         vm.isEmpty = isEmpty;
         vm.alert = alert;
+        vm.removeItem = removeItem;
         vm.alerts = [];
 
         vm.cart = cart;
@@ -16,6 +17,34 @@
 
         function isEmpty() {
             return !(vm.cart && vm.cart.items && vm.cart.items.length > 0);
+        }
+
+        function removeItem(item) {
+            var scope = $rootScope.$new();
+            scope.item = item;
+            var modalInstance = $modal.open({
+                //TODO: should bring up login.html some how
+                templateUrl: 'checkout/checkout-remove-item-modal.html',
+                size: 'sm',
+                scope: scope
+            });
+
+            modalInstance.result.then(yes, no);
+
+            function yes(item) {
+                ShoppingCart.removeItem(vm.cart, item).then(ok, fail);
+                function ok(resp) {
+                    vm.cart = resp;
+                }
+
+                function fail() {
+                    alert('danger', 'Failed to remove item');
+                }
+            }
+
+            function no() {
+                $log.info('Modal dismissed at: ' + new Date());
+            }
         }
     }
 })(angular);

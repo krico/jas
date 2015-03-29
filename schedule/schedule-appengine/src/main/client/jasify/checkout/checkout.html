@@ -13,17 +13,23 @@
                     <table ng-if="!vm.isEmpty()" class="checkout-items">
                         <thead>
                         <tr class="checkout-header">
-                            <th>Description</th>
-                            <th>Units</th>
-                            <th>Price</th>
+                            <th class="checkout-description-header">Description</th>
+                            <th class="checkout-units-header">Units</th>
+                            <th class="checkout-price-header">Price ({{vm.cart.currency}})</th>
+                            <th class="checkout-buttons-header">&nbsp;</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr ng-repeat="item in vm.cart.items">
-                            <td>{{item.description}}</td>
-                            <td class="small">{{item.units}}</td>
-                            <td>
-                                <nobr>{{vm.cart.currency}} {{item.price | number: 2}}</nobr>
+                            <td class="checkout-description">{{item.description}}</td>
+                            <td class="checkout-units">{{item.units}}</td>
+                            <td class="checkout-price">
+                                <nobr>{{item.price | number: 2}}&nbsp;</nobr>
+                            </td>
+                            <td class="checkout-buttons">
+                                <a class="checkout-remove-item" ng-click="vm.removeItem(item)">
+                                    <i class="fa fa-times-circle"></i>
+                                </a>
                             </td>
                         </tr>
                         </tbody>
@@ -31,9 +37,10 @@
                         <tr class="checkout-header">
                             <th>Total</th>
                             <th></th>
-                            <th>
-                                <nobr>{{vm.cart.currency}} {{vm.cart.total|number: 2}}</nobr>
+                            <th class="checkout-price">
+                                <nobr>{{vm.cart.total|number: 2}}</nobr>
                             </th>
+                            <td>&nbsp;</td>
                         </tr>
                         <tr>
                             <td>
@@ -45,20 +52,23 @@
                                 </sup>
                             </td>
                             <td></td>
-                            <td>
-                                <nobr>{{vm.cart.currency}} {{vm.cart.grandTotal-vm.cart.total|number: 2}}</nobr>
+                            <td class="checkout-price">
+                                <nobr>{{vm.cart.grandTotal-vm.cart.total|number: 2}}</nobr>
                             </td>
+                            <td>&nbsp;</td>
                         </tr>
                         <tr class="checkout-grand-total h4">
                             <th>Grand Total</th>
                             <th></th>
-                            <th>
+                            <th class="checkout-price">
                                 <nobr>{{vm.cart.currency}} {{vm.cart.grandTotal|number: 2}}</nobr>
                             </th>
+                            <td>&nbsp;</td>
                         </tr>
                         </tfoot>
                     </table>
-                    <h3 ng-if="vm.isEmpty()" class="text-danger"><span class="ion-information-circled"></span> There are no items in your cart</h3>
+                    <h3 ng-if="vm.isEmpty()" class="text-danger"><span class="ion-information-circled"></span> There are
+                        no items in your cart</h3>
                 </td>
             </tr>
             <tr>

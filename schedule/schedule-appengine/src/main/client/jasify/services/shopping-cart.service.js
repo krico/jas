@@ -4,7 +4,8 @@
     function shoppingCart(Endpoint, $q, $log) {
         var ShoppingCart = {
             get: get,
-            getUserCart: getUserCart
+            getUserCart: getUserCart,
+            removeItem: removeItem
         };
 
         function getUserCart() {
@@ -24,6 +25,18 @@
             });
         }
 
+        function removeItem(cart, item) {
+            var req = {
+                cartId: fetchId(cart),
+                ordinal: fetchId(item)
+            };
+
+            return Endpoint.jasify(function (jasify) {
+                return jasify.carts.removeItem(req)
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
         function errorHandler(e) {
             return $q.reject(e);
         }
@@ -33,7 +46,11 @@
         }
 
         function fetchId(o) {
-            if (angular.isObject(o)) return o.id;
+            if (angular.isObject(o)) {
+                if (!angular.isUndefined(o.ordinal))
+                    return o.ordinal;
+                return o.id;
+            }
             return o;
         }
 

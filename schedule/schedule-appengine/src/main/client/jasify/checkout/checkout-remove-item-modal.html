@@ -1,0 +1,28 @@
+<div class="modal-header">
+    <h5 class="modal-title">Remove Item?</h5>
+</div>
+<div class="modal-body">
+    <p>
+        <small>The following will be removed from your shopping cart</small>
+    </p>
+    <table class="table small table-condensed table-bordered">
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Units</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{item.description}}</td>
+            <td>{{item.units}}</td>
+            <td>{{item.price|number:2}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="$close(item)">ok</button>
+    <button class="btn btn-warning" ng-click="$dismiss('Cancel')">cancel</button>
+</div>

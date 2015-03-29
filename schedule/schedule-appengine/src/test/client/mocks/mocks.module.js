@@ -50,6 +50,7 @@
             },
             carts: {
                 get: nop,
+                removeItem: nop,
                 getUserCart: nop
             },
             users: {

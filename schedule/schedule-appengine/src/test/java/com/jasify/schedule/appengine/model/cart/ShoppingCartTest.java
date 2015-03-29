@@ -4,6 +4,7 @@ import com.jasify.schedule.appengine.TestHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slim3.datastore.Datastore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -22,7 +23,9 @@ public class ShoppingCartTest {
     @Test
     public void testIsSerializable() throws Exception {
         ShoppingCart cart = new ShoppingCart();
-        cart.getItems().add(new ShoppingCart.Item("My desc", 1, 1.33d));
+        ShoppingCart.Item item = new ShoppingCart.Item("My desc", 1, 1.33d);
+        item.setItemId(Datastore.allocateId("Foo"));
+        cart.getItems().add(item);
         cart.calculate();
         new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(cart);
     }
