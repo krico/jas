@@ -10,8 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.*;
 
 public class ShoppingCartEndpointTest {
     private TestShoppingCartServiceFactory testShoppingCartServiceFactory = new TestShoppingCartServiceFactory();
@@ -47,5 +46,23 @@ public class ShoppingCartEndpointTest {
         ShoppingCart userCart = endpoint.getUserCart(caller);
         assertNotNull(userCart);
         assertEquals(value, userCart);
+    }
+
+    @Test
+    public void testRemoveItem() throws Exception {
+        JasifyEndpointUser caller = new JasifyEndpointUser("foo@bar", 22, false);
+        ShoppingCart cart = new ShoppingCart();
+        cart.setId("FF");
+        cart.getItems().add(new ShoppingCart.Item());
+        EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().getCart(cart.getId()))
+                .andReturn(cart);
+        EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().putCart(cart))
+                .andReturn(cart.getId());
+
+        testShoppingCartServiceFactory.replay();
+        ShoppingCart userCart = endpoint.removeItem(caller, cart.getId(), 0);
+        assertNotNull(userCart);
+        assertEquals(cart, userCart);
+        assertTrue(cart.getItems().isEmpty());
     }
 }

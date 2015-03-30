@@ -66,7 +66,7 @@ public class ShoppingCart implements Serializable {
         this.items = items;
     }
 
-    public void calculate() {
+    public ShoppingCart calculate() {
         BigDecimal total = BigDecimal.ZERO;
         for (int i = 0; i < items.size(); ++i) {
             Item item = items.get(i);
@@ -78,6 +78,7 @@ public class ShoppingCart implements Serializable {
         setTotal(total.doubleValue());
         double fee = PayPalPaymentProvider.calculateHandlingFee(getTotal());
         setGrandTotal(getTotal() + fee);
+        return this;
     }
 
     public static class Item implements Serializable {
