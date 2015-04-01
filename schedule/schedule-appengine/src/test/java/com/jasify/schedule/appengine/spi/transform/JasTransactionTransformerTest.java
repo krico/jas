@@ -51,7 +51,8 @@ public class JasTransactionTransformerTest {
         assertEquals("USD", external.getCurrency());
         assertEquals(new Date(1000), external.getCreated());
         assertEquals("A transaction", external.getDescription());
-        assertEquals(KeyFactory.keyToString(accountId), external.getAccountRef());
-        assertEquals(KeyFactory.keyToString(transferId), external.getTransferRef());
+        JasKeyTransformer keyTransformer = new JasKeyTransformer();
+        assertEquals(keyTransformer.transformTo(accountId), external.getAccountRef());
+        assertEquals(keyTransformer.transformTo(transferId), external.getTransferRef());
     }
 }

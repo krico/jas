@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
 import com.jasify.schedule.appengine.meta.MailMessageMeta;
@@ -22,6 +23,8 @@ import com.jasify.schedule.appengine.meta.users.PasswordRecoveryMeta;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserLoginMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
 /**
@@ -30,9 +33,8 @@ import org.slim3.datastore.Datastore;
  */
 public final class KeyUtil {
     public static final char PARENT_SEPARATOR_CHAR = '-';
-
     /* I USE lowercase PREFIXES FOR MODELS THAT SHOULD PROBABLY NEVER BE PUBLIC */
-    private static final ImmutableBiMap<String, String> PREFIXES = new ImmutableBiMap.Builder<String, String>()
+    public static final ImmutableBiMap<String, String> PREFIXES = new ImmutableBiMap.Builder<String, String>()
             .put(AccountMeta.get().getKind(), "$") //Account
 //                    .put(OrganizationAccountMeta.get().getKind(), "A") //Account
 //                    .put(UserAccountMeta.get().getKind(), "A") //Account
@@ -58,8 +60,48 @@ public final class KeyUtil {
             .put(UserDetailMeta.get().getKind(), "UD") //UserDetail
             .put(UserLoginMeta.get().getKind(), "UL") //UserLogin
             .build();
+    private static final Logger log = LoggerFactory.getLogger(KeyUtil.class);
 
     private KeyUtil() {
+    }
+
+    /**
+     * This is a safe method that tries human readable and falls back to KeyFactory.keyToString to provide backward
+     * compatibility.
+     *
+     * @param internal a key
+     * @return a string representation of the key
+     */
+    public static String keyToString(Key internal) {
+        if (internal == null) return null;
+        try {
+            return KeyUtil.toHumanReadableString(internal);
+        } catch (IllegalArgumentException e) {
+            log.warn("Failed to encode in human readable, falling back to KeyFactory.  Key={}", internal);
+            return KeyFactory.keyToString(internal);
+        }
+    }
+
+    /**
+     * This is a safe method that tries human readable and falls back to KeyFactory.stringToKey to provide backward
+     * compatibility.
+     *
+     * @param external a string representation of the key
+     * @return the key
+     */
+    public static Key stringToKey(String external) {
+        if (external == null) return null;
+        try {
+            return KeyUtil.parseHumanReadableString(external);
+        } catch (Exception e) {
+            log.warn("Failed to parse key as human readable, will fall back to KeyFactory.  Key={}", external, e);
+        }
+        try {
+            return KeyFactory.stringToKey(external);
+        } catch (Exception e) {
+            log.debug("Failed to parse key: {}", external, e);
+            return null;
+        }
     }
 
     public static String toHumanReadableString(Key key) throws IllegalArgumentException {

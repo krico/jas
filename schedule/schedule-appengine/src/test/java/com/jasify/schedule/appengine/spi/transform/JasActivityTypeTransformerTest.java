@@ -43,7 +43,7 @@ public class JasActivityTypeTransformerTest {
         assertEquals("Desc", external.getDescription());
         assertEquals(id, KeyFactory.stringToKey(external.getId()));
         assertNotNull(external.getOrganizationId());
-        assertEquals(orgId, KeyFactory.stringToKey(external.getOrganizationId()));
+        assertEquals(orgId, new JasKeyTransformer().transformFrom(external.getOrganizationId()));
     }
 
     @Test
