@@ -5,6 +5,7 @@
         var ShoppingCart = {
             get: get,
             getUserCart: getUserCart,
+            addUserActivity: addUserActivity,
             removeItem: removeItem
         };
 
@@ -33,6 +34,17 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.removeItem(req)
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function addUserActivity(activity) {
+            var req = {
+                activityId: fetchId(activity)
+            };
+
+            return Endpoint.jasify(function (jasify) {
+                return jasify.carts.addUserActivity(req)
                     .then(resultHandler, errorHandler);
             });
         }

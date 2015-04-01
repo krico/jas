@@ -51,6 +51,7 @@
             carts: {
                 get: nop,
                 removeItem: nop,
+                addUserActivity: nop,
                 getUserCart: nop
             },
             users: {

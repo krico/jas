@@ -118,4 +118,38 @@ describe('ShoppingCartService', function () {
         expect($gapiMock.client.jasify.carts.removeItem).toHaveBeenCalledWith({cartId: 0, ordinal: 1});
     });
 
+    it('should add user activity to cart', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'addUserActivity').and.returnValue($q.when({result: expected}));
+        var activity = {id: 0};
+        ShoppingCart.addUserActivity(activity)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.addUserActivity).toHaveBeenCalledWith({activityId: activity.id});
+    });
+
+    it('should add user activity to cart by id', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'addUserActivity').and.returnValue($q.when({result: expected}));
+        var activity = {id: 0};
+        ShoppingCart.addUserActivity(activity.id)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.addUserActivity).toHaveBeenCalledWith({activityId: activity.id});
+    });
+
 });

@@ -2,7 +2,7 @@
 
     angular.module('jasify.bookIt').controller('BookItSubscribeController', BookItSubscribeController);
 
-    function BookItSubscribeController(Session, Activity, activity) {
+    function BookItSubscribeController($location, Session, Activity, ShoppingCart, activity) {
         var vm = this;
         vm.activity = activity;
         vm.bookIt = bookIt;
@@ -39,11 +39,11 @@
 
         function bookIt() {
             vm.inProgress = true;
-            Activity.subscribe(Session.userId, vm.activity).then(subscribed, failed);
-
-            function subscribed(subscription) {
+            ShoppingCart.addUserActivity(vm.activity).then(added, failed);
+            function added(cart) {
                 vm.inProgress = false;
-                vm.subscription = subscription;
+
+                $location.path('/checkout');
             }
 
             function failed() {

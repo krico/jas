@@ -20,7 +20,7 @@
     /**
      * Listen to route changes and check
      */
-    angular.module('jasifyWeb').run(jasifyWebRun);
+    angular.module('jasify.bookIt').run(jasifyWebRun);
 
     function jasifyWebRun($rootScope, $log) {
         $rootScope.$on('$routeChangeError', function (event, next, current) {

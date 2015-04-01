@@ -2,14 +2,21 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
+import com.jasify.schedule.appengine.model.cart.ShoppingCartService;
 import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -48,6 +55,30 @@ public class ShoppingCartEndpoint {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
         ShoppingCart cart = ShoppingCartServiceFactory.getShoppingCartService().getUserCart(jasUser.getUserId());
         cart.calculate();
+        return cart;
+    }
+
+    @ApiMethod(name = "carts.addUserActivity", path = "carts/user/activity/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public ShoppingCart addUserActivity(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
+        ShoppingCart cart = cartService.getUserCart(jasUser.getUserId());
+        Activity activity;
+        try {
+            activity = ActivityServiceFactory.getActivityService().getActivity(activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("activityId=" + activityId);
+        }
+        if (StringUtils.isBlank(activity.getName())) {
+            throw new BadRequestException("Cannot add activity with no name to cart, id=" + activityId);
+        }
+        if (activity.getPrice() == null) {
+            throw new BadRequestException("Cannot add activity with no price to cart, id=" + activityId);
+        }
+        ShoppingCart.Item activityItem = new ShoppingCart.Item("Subscription \"" + activity.getName() + "\"", 1, activity.getPrice());
+        activityItem.setItemId(activity.getId());
+        cart.getItems().add(activityItem);
+        cartService.putCart(cart);
         return cart;
     }
 
