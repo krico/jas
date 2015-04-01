@@ -23,7 +23,6 @@
     angular.module('jasifyWeb').run(jasifyWebRun);
 
     function jasifyWebRun($rootScope, $log) {
-        //TODO: its just an example to know how its done.
         $rootScope.$on('$routeChangeError', function (event, next, current) {
             $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
         });

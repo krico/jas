@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyWeb').controller('BalanceViewController', BalanceViewController);
+    angular.module('jasify.balance').controller('BalanceViewController', BalanceViewController);
 
     function BalanceViewController($location, Balance, account) {
         var vm = this;

@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyWeb').controller('PaymentCancelController', PaymentCancelController);
+    angular.module('jasify.payment').controller('PaymentCancelController', PaymentCancelController);
 
     function PaymentCancelController($location, $routeParams, Balance) {
         var vm = this;

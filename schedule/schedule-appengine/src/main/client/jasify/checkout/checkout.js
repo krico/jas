@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyWeb').controller('CheckoutController', CheckoutController);
+    angular.module('jasify.checkout').controller('CheckoutController', CheckoutController);
 
     function CheckoutController($log, $rootScope, $modal, ShoppingCart, cart) {
         var vm = this;

@@ -1,5 +1,5 @@
 (function (angular) {
-    angular.module('jasify.payment').config(jasifyRoutes);
+    angular.module('jasify.checkout').config(jasifyRoutes);
 
     function jasifyRoutes($routeProvider) {
         $routeProvider
