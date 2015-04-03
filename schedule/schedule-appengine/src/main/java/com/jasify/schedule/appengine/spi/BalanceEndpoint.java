@@ -14,14 +14,21 @@ import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.AccountUtil;
 import com.jasify.schedule.appengine.model.balance.BalanceService;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
+import com.jasify.schedule.appengine.model.cart.ShoppingCart;
+import com.jasify.schedule.appengine.model.cart.ShoppingCartService;
+import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.spi.dm.JasCheckoutPaymentRequest;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
 import com.jasify.schedule.appengine.spi.dm.JasTransactionList;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.TypeUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrAdmin;
@@ -67,6 +74,35 @@ public class BalanceEndpoint {
         PayPalPayment payment = new PayPalPayment();
         payment.setCurrency(paymentRequest.getCurrency());
         payment.addItem("Jasify Credits", 1, paymentRequest.getAmount());
+        paymentService.newPayment(jasCaller.getUserId(), payment);
+        paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
+        return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
+    }
+
+    @ApiMethod(name = "balance.createCheckoutPayment", path = "balance/create-checkout-payment", httpMethod = ApiMethod.HttpMethod.POST)
+    public JasPaymentResponse createCheckoutPayment(User caller, JasCheckoutPaymentRequest paymentRequest) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException {
+        JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
+        GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(paymentRequest.getBaseUrl()));
+        if (paymentRequest.getType() != PaymentTypeEnum.PayPal) {
+            throw new BadRequestException("Only PayPal payment is supported at this time.");
+        }
+        String cartId = Preconditions.checkNotNull(StringUtils.trimToNull(paymentRequest.getCartId()));
+
+        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
+        ShoppingCart cart = cartService.getCart(cartId);
+        if (cart == null) {
+            throw new NotFoundException("Cart id: [" + cartId + "] not found.");
+        }
+        List<ShoppingCart.Item> items = Preconditions.checkNotNull(cart.getItems());
+        Preconditions.checkState(!items.isEmpty());
+        String currency = Preconditions.checkNotNull(StringUtils.trimToNull(cart.getCurrency()));
+
+        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
+        PayPalPayment payment = new PayPalPayment();
+        payment.setCurrency(currency);
+        for (ShoppingCart.Item item : items) {
+            payment.addItem(item.getDescription(), item.getUnits(), item.getPrice());
+        }
         paymentService.newPayment(jasCaller.getUserId(), payment);
         paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
         return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));

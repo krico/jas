@@ -2,6 +2,8 @@ package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.users.User;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -135,5 +137,57 @@ public class KeyUtilTest {
             assertEquals(key, parsedKey);
 //            System.out.println(encoded + " " + key);
         }
+    }
+
+    @Test
+    public void testToHumanReadableNegative1digit() throws Exception {
+        Key key = Datastore.createKey(User.class, -1);
+        String encoded = KeyUtil.toHumanReadableString(key);
+        assertEquals(key, KeyUtil.parseHumanReadableString(encoded));
+    }
+
+    @Test
+    public void testToHumanReadableNegative() throws Exception {
+        Key key = Datastore.createKey(User.class, -5018);
+        String encoded = KeyUtil.toHumanReadableString(key);
+        assertEquals(key, KeyUtil.parseHumanReadableString(encoded));
+    }
+
+    @Test
+    public void testNonNumericKey() throws Exception {
+        Key key = Datastore.createKey(User.class, "level1");
+        String encoded = KeyUtil.toHumanReadableString(key);
+        assertEquals(key, KeyUtil.parseHumanReadableString(encoded));
+    }
+
+    @Test
+    public void testNonNumericKeyRandomDepth() throws Exception {
+        Random random = new Random(19760715);
+        for (ModelMeta<?> model : allModels) {
+            int depth = random.nextInt(6) + 1;
+            Key parent = null;
+            for (int i = 0; i < depth; ++i) {
+                ModelMeta<?> parentModel = allModels.get(random.nextInt(allModels.size()));
+                if (parent == null) {
+                    parent = Datastore.createKey(parentModel, randomString(random));
+                } else {
+                    if (random.nextBoolean()) {
+                        parent = Datastore.createKey(parent, parentModel, random.nextInt(1000000));
+                    } else {
+                        parent = Datastore.createKey(parent, parentModel, randomString(random));
+                    }
+                }
+            }
+            Key key = Datastore.createKey(parent, model, randomString(random));
+            String encoded = KeyUtil.toHumanReadableString(key);
+            Key parsedKey = KeyUtil.parseHumanReadableString(encoded);
+            assertNotNull(parsedKey);
+            assertEquals(key, parsedKey);
+            System.out.println(encoded + "\n\t" + key);
+        }
+    }
+
+    private String randomString(Random random) {
+        return RandomStringUtils.randomAscii(random.nextInt(32) + 1);
     }
 }

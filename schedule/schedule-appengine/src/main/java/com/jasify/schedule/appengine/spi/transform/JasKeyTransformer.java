@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine.spi.transform;
 
 import com.google.api.server.spi.config.Transformer;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

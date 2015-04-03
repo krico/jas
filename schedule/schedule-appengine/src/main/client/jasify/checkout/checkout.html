@@ -1,8 +1,11 @@
 <div class="row">
     <div class="col-md-2 col-md-offset-7">
-        <button ng-disabled="vm.isEmpty()" class="btn btn-primary btn-block">Continue to PayPal</button>
+        <button ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting" ng-click="vm.createPayment()" class="btn btn-primary btn-block">
+            Continue to PayPal
+        </button>
     </div>
     <div class="col-md-6 col-md-offset-3">
+        <span ng-show="vm.inProgress || vm.redirecting" us-spinner="{radius:30, width:8, length: 16}"></span>
         <table class="table checkout-table">
             <thead>
             <tr class="checkout-title">
@@ -93,6 +96,8 @@
         </table>
     </div>
     <div class="col-md-2 col-md-offset-7">
-        <button ng-disabled="vm.isEmpty()" class="btn btn-primary btn-block">Continue to PayPal</button>
+        <button ng-disabled="vm.isEmpty() || vm.inProgress" ng-click="vm.createPayment()" class="btn btn-primary btn-block">
+            Continue to PayPal
+        </button>
     </div>
 </div>

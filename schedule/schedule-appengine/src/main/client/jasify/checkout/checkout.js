@@ -2,14 +2,16 @@
 
     angular.module('jasify.checkout').controller('CheckoutController', CheckoutController);
 
-    function CheckoutController($log, $rootScope, $modal, ShoppingCart, cart) {
+    function CheckoutController($log, $rootScope, $window, $modal, ShoppingCart, Balance, cart) {
         var vm = this;
         vm.isEmpty = isEmpty;
         vm.alert = alert;
         vm.removeItem = removeItem;
         vm.alerts = [];
-
+        vm.createPayment = createPayment;
         vm.cart = cart;
+        vm.inProgress = false;
+        vm.redirecting = false;
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -17,6 +19,25 @@
 
         function isEmpty() {
             return !(vm.cart && vm.cart.items && vm.cart.items.length > 0);
+        }
+
+        function createPayment() {
+            vm.inProgress = true;
+            Balance.createCheckoutPayment({
+                cartId: cart.id,
+                type: 'PayPal'
+            }).then(ok, fail);
+
+            function ok(resp) {
+                vm.redirecting = true;
+                $log.debug("Redirecting: " + resp.approveUrl);
+                $window.location.href = resp.approveUrl;
+            }
+
+            function fail(res) {
+                vm.inProgress = false;
+                alert('danger', 'Failed: ' + res.statusText);
+            }
         }
 
         function removeItem(item) {

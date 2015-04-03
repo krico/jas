@@ -122,6 +122,8 @@
                 cancelPayment: nop,
                 getAccount: nop,
                 getTransactions: nop,
+                createPayment: nop,
+                createCheckoutPayment: nop,
                 executePayment: nop
             }
         };

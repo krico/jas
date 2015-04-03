@@ -1,11 +1,11 @@
 package com.jasify.schedule.appengine.spi.transform;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.spi.dm.JasActivityType;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class JasActivityTypeTransformerTest {
         assertNotNull(external);
         assertEquals("activity", external.getName());
         assertEquals("Desc", external.getDescription());
-        assertEquals(id, KeyFactory.stringToKey(external.getId()));
+        assertEquals(id, KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getOrganizationId());
         assertEquals(orgId, new JasKeyTransformer().transformFrom(external.getOrganizationId()));
     }
@@ -50,7 +50,7 @@ public class JasActivityTypeTransformerTest {
     public void testTransformFrom() throws Exception {
         JasActivityType external = new JasActivityType();
         Key id = Datastore.createKey(ActivityType.class, 1);
-        external.setId(KeyFactory.keyToString(id));
+        external.setId(KeyUtil.keyToString(id));
         external.setName("activity");
         external.setDescription("Desc");
         ActivityType internal = transformer.transformFrom(external);

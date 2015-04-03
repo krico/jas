@@ -1,10 +1,10 @@
 package com.jasify.schedule.appengine.model.payment;
 
 import com.google.api.client.http.GenericUrl;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import com.paypal.api.payments.*;
 import com.paypal.base.Constants;
@@ -169,7 +169,7 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         com.paypal.api.payments.Payment paymentToCreate = new com.paypal.api.payments.Payment()
                 .setIntent("sale")
                 .setPayer(new Payer("paypal"))
-                .setRedirectUrls(createRedirectUrls(baseUrl, KeyFactory.keyToString(payment.getId())))
+                .setRedirectUrls(createRedirectUrls(baseUrl, KeyUtil.keyToString(payment.getId())))
                 .setTransactions(Collections.singletonList(transaction));
 
         paymentToCreate.setExperienceProfileId(profileId);

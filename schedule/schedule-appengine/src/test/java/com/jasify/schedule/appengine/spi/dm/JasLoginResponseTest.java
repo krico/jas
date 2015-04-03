@@ -5,6 +5,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.easymock.EasyMock;
 import org.junit.AfterClass;
@@ -80,7 +81,7 @@ public class JasLoginResponseTest {
 
         JasLoginResponse response = new JasLoginResponse(user, userSession);
 
-        assertEquals(KeyFactory.keyToString(userId), response.getUserId());
+        assertEquals(KeyUtil.keyToString(userId), response.getUserId());
         assertEquals(sessionId, response.getSessionId());
         assertEquals(name, response.getName());
         assertEquals(admin, response.isAdmin());
