@@ -1,10 +1,14 @@
 package com.jasify.schedule.appengine.model.cart;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.payment.PayPalPaymentProvider;
+import com.jasify.schedule.appengine.util.KeyUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +83,44 @@ public class ShoppingCart implements Serializable {
         double fee = PayPalPaymentProvider.calculateHandlingFee(getTotal());
         setGrandTotal(getTotal() + fee);
         return this;
+    }
+
+    public static class ItemBuilder {
+        private static final ThreadLocal<SimpleDateFormat> START_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+            @Override
+            protected SimpleDateFormat initialValue() {
+                return new SimpleDateFormat(" [EEE, d MMM HH:mm");
+            }
+        };
+        private static final ThreadLocal<SimpleDateFormat> FINISH_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+            @Override
+            protected SimpleDateFormat initialValue() {
+                return new SimpleDateFormat(" - HH:mm]");
+            }
+        };
+
+        private Key itemId;
+        private String description;
+        private int units;
+        private double price;
+
+        public ItemBuilder activity(Activity activity) {
+            String name = StringUtils.trimToEmpty(activity.getName());
+            if (StringUtils.isBlank(name)) {
+                name = "Activity: " + KeyUtil.toHumanReadableString(activity.getId());
+            }
+            description = name + START_FORMAT.get().format(activity.getStart()) + FINISH_FORMAT.get().format(activity.getFinish());
+            units = 1;
+            price = activity.getPrice();
+            itemId = activity.getId();
+            return this;
+        }
+
+        public Item build() {
+            Item item = new Item(description, units, price);
+            item.setItemId(itemId);
+            return item;
+        }
     }
 
     public static class Item implements Serializable {

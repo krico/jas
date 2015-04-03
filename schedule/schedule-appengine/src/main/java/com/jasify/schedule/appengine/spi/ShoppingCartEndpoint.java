@@ -16,8 +16,10 @@ import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -75,9 +77,8 @@ public class ShoppingCartEndpoint {
         if (activity.getPrice() == null) {
             throw new BadRequestException("Cannot add activity with no price to cart, id=" + activityId);
         }
-        ShoppingCart.Item activityItem = new ShoppingCart.Item("Subscription \"" + activity.getName() + "\"", 1, activity.getPrice());
-        activityItem.setItemId(activity.getId());
-        cart.getItems().add(activityItem);
+
+        cart.getItems().add(new ShoppingCart.ItemBuilder().activity(activity).build());
         cartService.putCart(cart);
         return cart;
     }

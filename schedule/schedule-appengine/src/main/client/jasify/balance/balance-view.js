@@ -38,7 +38,6 @@
             vm.inProgress = true;
             vm.transactions = [];
             // http://localhost:8080/#/balance/view?page=2
-            window.alert('Aid: ' +account.id);
             return Balance.getTransactions(account.id, limit, offset).then(ok, fail);
 
             function ok(resp) {
