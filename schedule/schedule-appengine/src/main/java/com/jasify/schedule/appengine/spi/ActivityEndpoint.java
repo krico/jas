@@ -279,8 +279,20 @@ public class ActivityEndpoint {
     @ApiMethod(name = "activitySubscriptions.subscribers", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Subscription> getSubscriptions(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
         mustBeAdmin(caller);
+        checkFound(activityId);
         try {
             return ActivityServiceFactory.getActivityService().getSubscriptions(activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void cancelSubscription(User caller, @Named("subscriptionId") Key subscriptionId) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        mustBeAdmin(caller);
+        checkFound(subscriptionId);
+        try {
+            ActivityServiceFactory.getActivityService().cancel(subscriptionId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
