@@ -10,7 +10,8 @@
             remove: remove,
             subscribe: subscribe,
             isSubscribed: isSubscribed,
-            getSubscribers: getSubscribers
+            getSubscribers: getSubscribers,
+            cancelSubscription: cancelSubscription
         };
 
         function query(param) {
@@ -70,6 +71,13 @@
         function getSubscribers(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.activitySubscriptions.subscribers({activityId: id})
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function cancelSubscription(id) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.activitySubscriptions.cancel({subscriptionId: id})
                     .then(resultHandler, errorHandler);
             });
         }
