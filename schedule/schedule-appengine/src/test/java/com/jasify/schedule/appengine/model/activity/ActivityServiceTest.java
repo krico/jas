@@ -52,6 +52,7 @@ public class ActivityServiceTest {
     private User createUser(String name) {
         User user = new User(name);
         user.setEmail(name + "@test.com");
+        user.setRealName("Real " + name);
         return user;
     }
 

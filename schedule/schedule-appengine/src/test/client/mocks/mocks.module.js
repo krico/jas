@@ -108,7 +108,8 @@
             activitySubscriptions: {
                 add: nop,
                 query: nop,
-                subscribers: nop
+                subscribers: nop,
+                cancel: nop
             },
             balance: {
                 createPayment: nop,

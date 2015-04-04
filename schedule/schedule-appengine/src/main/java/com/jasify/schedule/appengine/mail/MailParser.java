@@ -1,6 +1,14 @@
 package com.jasify.schedule.appengine.mail;
 
+import com.google.appengine.repackaged.org.joda.time.DateTime;
+import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormat;
+import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormatter;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.util.KeyUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,14 +16,19 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 /**
- * Created by wszarmach on 14/02/15.
+ * @author wszarmach
+ * @since 14/02/15.
  * Temporary class to create html emails
  */
 public class MailParser {
 
+    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm");
+
     private enum SubstituteKey {
+        ActivityFinish("%ActivityFinish%"),
         ActivityName("%ActivityName%"),
         ActivityPrice("%ActivityPrice%"),
+        ActivityStart("%ActivityStart%"),
         Branch("%Branch%"),
         Fees("%Fees%"),
         JasifyUrl("%JasifyUrl%"),
@@ -48,50 +61,70 @@ public class MailParser {
         return mailParser;
     }
 
-    public static MailParser createJasifyUserSignUpEmail(String subscriberName, String userName) throws Exception {
+    public static MailParser createJasifyUserSignUpEmail(User user) throws Exception {
         MailParser mailParser = new MailParser("/jasify/UserSignUp");
-        mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
-        mailParser.substitute(SubstituteKey.UserName, userName);
+        mailParser.substitute(SubstituteKey.SubscriberName, user.getRealName());
+        mailParser.substitute(SubstituteKey.UserName, user.getName());
         return mailParser;
     }
 
-    public static MailParser createJasifySubscriptionEmail(String activityName, String subscriberName, String publisherName, String orderNumber, Double activityPrice, Double fees, Double tax, String paymentMethod) throws Exception {
-        BigDecimal bdActivityPrice = convert(activityPrice);
-        BigDecimal bdFees = convert(fees);
-        BigDecimal bdTax = convert(tax);
+    public static MailParser createJasifySubscriptionEmail(Subscription subscription, Organization organization) throws Exception {
+        String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
+        User user = subscription.getUserRef().getModel();
+        Activity activity = subscription.getActivityRef().getModel();
+        BigDecimal bdActivityPrice = convert(activity.getPrice());
+        BigDecimal bdFees = convert(0.0);
+        BigDecimal bdTax = convert(0.0);
+        DateTime start = new DateTime(activity.getStart());
+        DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser("/jasify/Subscription");
-        mailParser.substitute(SubstituteKey.ActivityName, activityName);
-        mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
-        mailParser.substitute(SubstituteKey.PublisherName, publisherName);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
+        mailParser.substitute(SubstituteKey.SubscriberName, user.getRealName());
+        mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
+        mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
+        mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
+        mailParser.substitute(SubstituteKey.ActivityFinish, finish.toString(dtf));
         mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(bdActivityPrice));
         mailParser.substitute(SubstituteKey.Fees, formatPrice(bdFees));
         mailParser.substitute(SubstituteKey.Tax, formatPrice(bdTax));
         BigDecimal bdTotalPrice = convert(bdActivityPrice.add(bdFees).add(bdTax).doubleValue());
         mailParser.substitute(SubstituteKey.TotalPrice, formatPrice(bdTotalPrice));
-        mailParser.substitute(SubstituteKey.PaymentMethod, paymentMethod);
+        mailParser.substitute(SubstituteKey.PaymentMethod, "Unknown");
         return mailParser;
-
     }
 
-    public static MailParser createPublisherSubscriptionEmail(String activityName, String subscriberName, String publisherName, String orderNumber, Double activityPrice) throws Exception {
-        BigDecimal bdActivityPrice = convert(activityPrice);
+    public static MailParser createPublisherSubscriptionEmail(Subscription subscription, Organization organization) throws Exception {
+        String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
+        User user = subscription.getUserRef().getModel();
+        Activity activity = subscription.getActivityRef().getModel();
+        BigDecimal bdActivityPrice = convert(activity.getPrice());
+        DateTime start = new DateTime(activity.getStart());
+        DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser("/publisher/Subscription");
-        mailParser.substitute(SubstituteKey.ActivityName, activityName);
-        mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
-        mailParser.substitute(SubstituteKey.PublisherName, publisherName);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
+        mailParser.substitute(SubstituteKey.SubscriberName, user.getRealName());
+        mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
+        mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
+        mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
+        mailParser.substitute(SubstituteKey.ActivityFinish, finish.toString(dtf));
         mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(bdActivityPrice));
         return mailParser;
     }
 
-    public static MailParser createSubscriberSubscriptionEmail(String activityName, String subscriberName, String publisherName, String orderNumber, Double activityPrice) throws Exception {
-        BigDecimal bdActivityPrice = convert(activityPrice);
+    public static MailParser createSubscriberSubscriptionEmail(Subscription subscription, Organization organization) throws Exception {
+        String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
+        User user = subscription.getUserRef().getModel();
+        Activity activity = subscription.getActivityRef().getModel();
+        BigDecimal bdActivityPrice = convert(activity.getPrice());
+        DateTime start = new DateTime(activity.getStart());
+        DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser("/subscriber/Subscription");
-        mailParser.substitute(SubstituteKey.ActivityName, activityName);
-        mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
-        mailParser.substitute(SubstituteKey.PublisherName, publisherName);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
+        mailParser.substitute(SubstituteKey.SubscriberName, user.getRealName());
+        mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
+        mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
+        mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
+        mailParser.substitute(SubstituteKey.ActivityFinish, finish.toString(dtf));
         mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(bdActivityPrice));
         return mailParser;
     }

@@ -1,11 +1,14 @@
 Dear %SubscriberName%,
 
-Thank you for your order, %ActivityName%!
+Thank you for your order!
 
-Order Details:
+Order Details
+Order        #: %OrderNumber%
 Purchased From: %PublisherName%
 
-Order        #: %OrderNumber%
+Activity      : %ActivityName%
+Start         : %ActivityStart%
+Finish        : %ActivityFinish%
 Price         : %ActivityPrice%
 
 Thank you again for booking with Jasify
