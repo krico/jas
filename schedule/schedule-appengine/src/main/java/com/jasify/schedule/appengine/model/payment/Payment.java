@@ -2,8 +2,10 @@ package com.jasify.schedule.appengine.model.payment;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.meta.payment.workflow.PaymentWorkflowMeta;
 import com.jasify.schedule.appengine.model.balance.HasTransfer;
 import com.jasify.schedule.appengine.model.balance.Transfer;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.*;
 
@@ -59,6 +61,11 @@ public class Payment implements HasTransfer {
     private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
 
     private ModelRef<User> userRef = new ModelRef<>(User.class);
+
+    @Attribute(persistent = false)
+    private InverseModelListRef<PaymentWorkflow, Payment> workflowListRef =
+            new InverseModelListRef<>(PaymentWorkflow.class, PaymentWorkflowMeta.get().paymentRef.getName(), this);
+
 
     public Payment() {
         state = PaymentStateEnum.New;
@@ -219,6 +226,10 @@ public class Payment implements HasTransfer {
     @Override
     public ModelRef<Transfer> getTransferRef() {
         return transferRef;
+    }
+
+    public InverseModelListRef<PaymentWorkflow, Payment> getWorkflowListRef() {
+        return workflowListRef;
     }
 
     public ModelRef<User> getUserRef() {

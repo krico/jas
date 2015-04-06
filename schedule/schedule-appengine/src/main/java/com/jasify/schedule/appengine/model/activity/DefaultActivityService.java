@@ -12,7 +12,12 @@ import com.jasify.schedule.appengine.meta.activity.RepeatDetailsMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
-import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.OperationException;
+import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
+import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
@@ -21,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
-import com.jasify.schedule.appengine.model.activity.RepeatDetails.*;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -95,7 +99,8 @@ class DefaultActivityService implements ActivityService {
         if (activity.getStart() == null) throw new FieldValueException("Activity.start");
         if (activity.getStart().getTime() < System.currentTimeMillis()) throw new FieldValueException("Activity.start");
         if (activity.getFinish() == null) throw new FieldValueException("Activity.finish");
-        if (activity.getFinish().getTime() < activity.getStart().getTime()) throw new FieldValueException("Activity.finish");
+        if (activity.getFinish().getTime() < activity.getStart().getTime())
+            throw new FieldValueException("Activity.finish");
         if (activity.getPrice() != null && activity.getPrice() < 0) throw new FieldValueException("Activity.price");
         if (activity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
     }
@@ -134,6 +139,9 @@ class DefaultActivityService implements ActivityService {
                 throw new UniqueConstraintException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
             }
             activityType.setId(Datastore.allocateId(organizationId, activityTypeMeta));
+
+            activityType.getOrganizationRef().setKey(organizationId);
+
             Key ret = Datastore.put(tx, activityType);
             tx.commit();
             return ret;
@@ -194,7 +202,7 @@ class DefaultActivityService implements ActivityService {
         try {
             if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), name)) {
                 dbActivityType.setName(name);
-                if (!isActivityTypeNameUnique(tx, activityType.getId().getParent(), name)) {
+                if (!isActivityTypeNameUnique(tx, dbActivityType.getOrganizationRef().getKey(), name)) {
                     throw new UniqueConstraintException("ActivityType.name=" + name);
                 }
             }
@@ -235,7 +243,7 @@ class DefaultActivityService implements ActivityService {
             case Weekly:
                 return addActivityRepeatTypeWeekly(activity, repeatDetails, activityType);
             case No:
-                activity.setId(Datastore.allocateId(activityType.getId().getParent(), activityMeta));
+                activity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
                 return Arrays.asList(Datastore.put(activity));
             default: // Safety check in case someone adds a new RepeatType but forgets to update this method
                 throw new FieldValueException("activity.repeatDetails.repeatType");
@@ -249,14 +257,14 @@ class DefaultActivityService implements ActivityService {
         List<Key> result = null;
         Transaction tx = Datastore.beginTransaction();
         try {
-            repeatDetails.setId(Datastore.allocateId(activityType.getId().getParent(), repeatDetailsMeta));
+            repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
             Datastore.put(tx, repeatDetails);
             activity.setRepeatDetailsRef(repeatDetails);
             List<Activity> activities = new ArrayList<>();
             while (activities.size() < MaximumRepeatCounter) {
                 Activity newActivity = new Activity(activityType);
                 BeanUtil.copyProperties(newActivity, activity);
-                newActivity.setId(Datastore.allocateId(activityType.getId().getParent(), activityMeta));
+                newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
                 newActivity.setStart(start.toDate());
                 newActivity.setFinish(finish.toDate());
                 activities.add(newActivity);
@@ -317,7 +325,7 @@ class DefaultActivityService implements ActivityService {
         List<Key> result = null;
         Transaction tx = Datastore.beginTransaction();
         try {
-            repeatDetails.setId(Datastore.allocateId(activityType.getId().getParent(), repeatDetailsMeta));
+            repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
             Datastore.put(tx, repeatDetails);
             activity.setRepeatDetailsRef(repeatDetails);
 
@@ -330,7 +338,7 @@ class DefaultActivityService implements ActivityService {
                     if (repeatDays.contains(start.getDayOfWeek())) {
                         Activity newActivity = new Activity(activityType);
                         BeanUtil.copyProperties(newActivity, activity);
-                        newActivity.setId(Datastore.allocateId(activityType.getId().getParent(), activityMeta));
+                        newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
                         newActivity.setStart(start.toDate());
                         newActivity.setFinish(finish.toDate());
                         activities.add(newActivity);
@@ -339,8 +347,10 @@ class DefaultActivityService implements ActivityService {
                     start = start.plusDays(1);
                     finish = finish.plusDays(1);
 
-                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount()) repeatCompleted = true;
-                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime()) repeatCompleted = true;
+                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
+                        repeatCompleted = true;
+                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
+                        repeatCompleted = true;
                 }
                 // Jump to next period
                 if (repeatEvery > 0) {
@@ -412,7 +422,7 @@ class DefaultActivityService implements ActivityService {
     private void notify(Subscription subscription) throws EntityNotFoundException {
         Activity activity = subscription.getActivityRef().getModel();
         ActivityType activityType = activity.getActivityTypeRef().getModel();
-        Organization organization = getOrganization(activityType.getId().getParent());
+        Organization organization = getOrganization(activityType.getOrganizationRef().getKey());
         User user = subscription.getUserRef().getModel();
 
         String subject = String.format("[Jasify] Subscribe [%s]", user.getName());

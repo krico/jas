@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.spi.transform;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.Transaction;
@@ -51,7 +50,8 @@ public class JasTransactionTransformerTest {
         assertEquals("USD", external.getCurrency());
         assertEquals(new Date(1000), external.getCreated());
         assertEquals("A transaction", external.getDescription());
-        assertEquals(KeyFactory.keyToString(accountId), external.getAccountRef());
-        assertEquals(KeyFactory.keyToString(transferId), external.getTransferRef());
+        JasKeyTransformer keyTransformer = new JasKeyTransformer();
+        assertEquals(keyTransformer.transformTo(accountId), external.getAccountRef());
+        assertEquals(keyTransformer.transformTo(transferId), external.getTransferRef());
     }
 }

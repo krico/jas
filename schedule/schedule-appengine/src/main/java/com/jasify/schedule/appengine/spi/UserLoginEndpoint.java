@@ -7,13 +7,13 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.transform.*;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +63,7 @@ public class UserLoginEndpoint {
     public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException, EntityNotFoundException {
         caller = mustBeLoggedIn(caller);
 
-        Key loginKey = KeyFactory.stringToKey(Preconditions.checkNotNull(loginId));
+        Key loginKey = KeyUtil.stringToKey(Preconditions.checkNotNull(loginId));
         UserLogin login = UserServiceFactory.getUserService().getLogin(loginKey);
         if (login == null) {
             //nothing to do

@@ -84,7 +84,9 @@ public class ActivityServiceTest {
         activityType1OfOrganization1 = new ActivityType("AT1");
         activityType2OfOrganization1 = new ActivityType("AT2");
         activityType1OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
+        activityType1OfOrganization1.getOrganizationRef().setKey(organization1.getId());
         activityType2OfOrganization1.setId(Datastore.allocateId(organization1.getId(), ActivityTypeMeta.get()));
+        activityType2OfOrganization1.getOrganizationRef().setKey(organization1.getId());
         Datastore.put(activityType1OfOrganization1, activityType2OfOrganization1);
         activity1Organization1 = createActivity(activityType1OfOrganization1);
         activity2Organization1 = createActivity(activityType2OfOrganization1);

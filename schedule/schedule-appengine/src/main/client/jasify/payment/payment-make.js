@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyWeb').controller('PaymentMakeController', PaymentMakeController);
+    angular.module('jasify.payment').controller('PaymentMakeController', PaymentMakeController);
 
     function PaymentMakeController($log, $scope, $filter, $routeParams, $window, Balance) {
         var vm = this;

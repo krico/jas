@@ -1,11 +1,11 @@
 package com.jasify.schedule.appengine.spi.transform;
 
-import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.spi.dm.JasRepeatDetails;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class JasRepeatDetailsTransformerTest {
 
         JasRepeatDetails external = transformer.transformTo(internal);
 
-        assertEquals(internal.getId(), KeyFactory.stringToKey(external.getId()));
+        assertEquals(internal.getId(), KeyUtil.stringToKey(external.getId()));
         assertEquals(internal.isMondayEnabled(), external.isMondayEnabled());
         assertEquals(internal.isTuesdayEnabled(), external.isTuesdayEnabled());
         assertEquals(internal.isWednesdayEnabled(), external.isWednesdayEnabled());
@@ -64,7 +64,7 @@ public class JasRepeatDetailsTransformerTest {
     @Test
     public void testTransformFrom() throws Exception {
         JasRepeatDetails external = new JasRepeatDetails();
-        external.setId(KeyFactory.keyToString(Datastore.allocateId(RepeatDetails.class)));
+        external.setId(KeyUtil.keyToString(Datastore.allocateId(RepeatDetails.class)));
         external.setRepeatEvery(5);
         external.setFridayEnabled(true);
         external.setRepeatType(RepeatType.Daily);
@@ -74,7 +74,7 @@ public class JasRepeatDetailsTransformerTest {
 
         RepeatDetails internal = transformer.transformFrom(external);
 
-        assertEquals(KeyFactory.stringToKey(external.getId()), internal.getId());
+        assertEquals(KeyUtil.stringToKey(external.getId()), internal.getId());
         assertEquals(external.isMondayEnabled(), internal.isMondayEnabled());
         assertEquals(external.isTuesdayEnabled(), internal.isTuesdayEnabled());
         assertEquals(external.isWednesdayEnabled(), internal.isWednesdayEnabled());

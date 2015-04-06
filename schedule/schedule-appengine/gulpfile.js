@@ -1,12 +1,14 @@
 'use strict';
 
 var argv = require('yargs').argv,
+    path = require('path'),
     gulp = require('gulp'),
     file = require('gulp-file'),
-    replace= require('gulp-replace'),
+    replace = require('gulp-replace'),
     merge = require('merge-stream'),
     print = require('gulp-print'),
     gutil = require('gulp-util'),
+    less = require('gulp-less'),
     sourcemaps = require('gulp-sourcemaps'),
     ngAnnotate = require('gulp-ng-annotate'),
     uglify = require('gulp-uglify'),
@@ -63,7 +65,7 @@ function rebuild() {
     gulp.watch(paths.js, ['lint-after-client-js']);
     gulp.watch(paths.partials, ['client-tpl']);
     gulp.watch(paths.test.js, ['lint-test-js']);
-    gulp.watch(paths.css, ['client-css']);
+    gulp.watch(paths.watchCss, ['client-css']);
     gulp.watch(paths.html, ['html']);
     gulp.watch(paths.staticHtml, ['static-html']);
 }
@@ -121,10 +123,10 @@ function clientJs(cb) {
 
     return gulp.src(paths.js)
         .pipe(sourcemaps.init())
-        .pipe(replace('@NUMBER@',versionInfo.number))
-        .pipe(replace('@BRANCH@',versionInfo.branch))
-        .pipe(replace('@TIMESTAMP@',versionInfo.timestamp))
-        .pipe(replace('@VERSION@',versionInfo.version))
+        .pipe(replace('@NUMBER@', versionInfo.number))
+        .pipe(replace('@BRANCH@', versionInfo.branch))
+        .pipe(replace('@TIMESTAMP@', versionInfo.timestamp))
+        .pipe(replace('@VERSION@', versionInfo.version))
         .pipe(plumber())
         .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))
@@ -169,7 +171,12 @@ function lintJs(cb) {
 function clientCss(cb) {
     return gulp.src(paths.css)
         .pipe(sourcemaps.init())
-        //.pipe(less())
+        .pipe(plumber())
+        .pipe(less({
+            paths: [
+                path.join(paths.bower, 'bootstrap', 'less')
+            ]
+        }))
         .pipe(concat('jasify.css'))
         .pipe(gulp.dest(paths.build + '/css'))
         .pipe(minifyCSS())
@@ -182,7 +189,7 @@ function clientDependenciesCssFun(key) {
     var src = [];
     var fonts = [];
     for (var i = 0; i < paths.dependencies.css[key].length; ++i) {
-        var items = paths.bower + '/' + paths.dependencies.css[key][i];
+        var items = path.join(paths.bower, paths.dependencies.css[key][i]);
         src.push(items);
         fonts.push(items.replace(/\/css\/[^\/]+$/, "/fonts/**/*.*"));
     }

@@ -5,14 +5,17 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.balance.*;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.task.ApplySubscriptionCharges;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.util.FormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -34,6 +37,7 @@ public class DefaultBalanceService implements BalanceService {
     private final OrganizationAccountMeta organizationAccountMeta;
     private final TransferMeta transferMeta;
     private final TransactionMeta transactionMeta;
+    private final SubscriptionMeta subscriptionMeta;
     private final Key custodialAccountKey;
 
     private DefaultBalanceService() {
@@ -42,12 +46,28 @@ public class DefaultBalanceService implements BalanceService {
         organizationAccountMeta = OrganizationAccountMeta.get();
         transferMeta = TransferMeta.get();
         transactionMeta = TransactionMeta.get();
-
+        subscriptionMeta = SubscriptionMeta.get();
         custodialAccountKey = Datastore.createKey(accountMeta, AccountUtil.CUSTODIAL_ACCOUNT);
     }
 
     static BalanceService instance() {
         return Singleton.INSTANCE;
+    }
+
+
+    @Override
+    public void subscription(Key subscriptionId) throws EntityNotFoundException {
+        subscription(Datastore.get(subscriptionMeta, subscriptionId));
+    }
+
+    @Override
+    public void subscription(Subscription subscription) throws EntityNotFoundException {
+        Activity activity = subscription.getActivityRef().getModel();
+        ActivityType activityType = activity.getActivityTypeRef().getModel();
+        Key organizationId = activityType.getOrganizationRef().getKey();
+        Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
+        Account payer = AccountUtil.memberAccountMustExist(subscription.getUserRef().getKey());
+        subscription(subscription, payer, beneficiary);
     }
 
     @Override
@@ -175,7 +195,7 @@ public class DefaultBalanceService implements BalanceService {
                 transfer.setId(subscription.getTransferRef().getKey());
                 transfer.setAmount(amount);
                 transfer.setCurrency(activity.getCurrency());
-                transfer.setDescription(activity.getName());
+                transfer.setDescription(FormatUtil.toString(activity));
                 transfer.setReference(Objects.toString(subscription.getId()));
                 transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
                 transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));

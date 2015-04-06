@@ -17,6 +17,7 @@ import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.oauth2.*;
 import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.util.DigestUtil;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.easymock.EasyMock;
@@ -113,7 +114,7 @@ public class AuthEndpointTest {
         JasLoginResponse response = endpoint.login(httpServletRequest, new JasLoginRequest(loginName, password));
         assertNotNull(response);
         assertEquals(loginName.toLowerCase(), response.getName());
-        assertEquals(KeyFactory.keyToString(user.getId()), response.getUserId());
+        assertEquals(KeyUtil.keyToString(user.getId()), response.getUserId());
 
 
         verify(httpServletRequest);

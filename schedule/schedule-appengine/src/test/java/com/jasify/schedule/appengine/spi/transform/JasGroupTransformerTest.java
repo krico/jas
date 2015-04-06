@@ -1,10 +1,10 @@
 package com.jasify.schedule.appengine.spi.transform;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.spi.dm.JasGroup;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class JasGroupTransformerTest {
 
         assertEquals("Some Name", external.getName());
         assertEquals("Some description", external.getDescription());
-        assertEquals(id, KeyFactory.stringToKey(external.getId()));
+        assertEquals(id, KeyUtil.stringToKey(external.getId()));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class JasGroupTransformerTest {
         JasGroup external = new JasGroup();
         external.setName("Some Name");
         external.setDescription("Some description");
-        external.setId(KeyFactory.keyToString(id));
+        external.setId(KeyUtil.keyToString(id));
 
         Group internal = transformer.transformFrom(external);
 

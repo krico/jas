@@ -29,6 +29,24 @@ describe('BalanceService', function () {
         expect($gapiMock.client.jasify.balance.createPayment).toHaveBeenCalled();
     });
 
+    it('should call createCheckoutPayment', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.balance, 'createCheckoutPayment').and.returnValue($q.when({result: {items: expected}}));
+        var req = {cartId: 'abc'};
+        Balance.createCheckoutPayment(req)
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.balance.createCheckoutPayment).toHaveBeenCalledWith(req);
+        expect(req.baseUrl).toBeDefined();
+    });
+
     it('should call cancelPayment', function () {
         var expected = [];
         spyOn($gapiMock.client.jasify.balance, 'cancelPayment').and.returnValue($q.when({result: {items: expected}}));

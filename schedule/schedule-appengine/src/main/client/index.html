@@ -86,6 +86,9 @@
                 <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/profile')">
                     <a ng-click="vm.collapse()" href="#/profile">{{currentUser.name}}</a>
                 </li>
+                <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/checkout')">
+                    <a ng-click="vm.collapse()" href="#/checkout">checkout</a>
+                </li>
                 <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/logout')">
                     <a ng-click="vm.collapse()" href="#/logout">log out</a>
                 </li>

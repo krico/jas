@@ -1,5 +1,3 @@
 (function (angular) {
-    angular.module('jasify.payment', [
-        'jasify.templates'
-    ]);
+    angular.module('jasify.payment', ['jasify.templates']);
 })(angular);

@@ -15,6 +15,7 @@
         <jasify.appengine.sdk.version>1.9.18</jasify.appengine.sdk.version>
         <jasify.googleapi.version>1.19.1</jasify.googleapi.version>
         <jasify.slf4j.version>1.7.10</jasify.slf4j.version>
+        <jasify.repository>${project.basedir}</jasify.repository>
     </properties>
 
     <repositories>
@@ -23,6 +24,11 @@
             <id>maven.seasar.org</id>
             <name>The Seasar Foundation Maven2 Repository</name>
             <url>https://www.seasar.org/maven/maven2</url>
+        </repository>
+        <repository>
+            <id>jas</id>
+            <name>Local files that shouldn't really be here ;-)</name>
+            <url>file://${jasify.repository}/repo</url>
         </repository>
     </repositories>
 

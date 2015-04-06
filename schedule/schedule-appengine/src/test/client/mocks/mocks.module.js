@@ -48,6 +48,12 @@
                 list: nop,
                 remove: nop
             },
+            carts: {
+                get: nop,
+                removeItem: nop,
+                addUserActivity: nop,
+                getUserCart: nop
+            },
             users: {
                 query: nop,
                 get: nop,
@@ -116,6 +122,8 @@
                 cancelPayment: nop,
                 getAccount: nop,
                 getTransactions: nop,
+                createPayment: nop,
+                createCheckoutPayment: nop,
                 executePayment: nop
             }
         };

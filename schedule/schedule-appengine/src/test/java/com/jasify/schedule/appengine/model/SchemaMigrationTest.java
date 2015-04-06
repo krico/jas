@@ -3,9 +3,12 @@ package com.jasify.schedule.appengine.model;
 import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.Entity;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.meta.users.User_v1Meta;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserDetail;
 import com.jasify.schedule.appengine.model.users.User_v0;
@@ -37,6 +40,31 @@ public class SchemaMigrationTest {
     public void testExecutePendingMigrations() throws Exception {
         assertTrue(SchemaMigration.instance().executePendingMigrations());
         assertFalse(SchemaMigration.instance().executePendingMigrations());
+    }
+
+    @Test
+    public void testMigrateActivityType_v0_to_ActivityType_v1() throws Exception {
+        Organization o1 = new Organization("Org1");
+        o1.setId(Datastore.allocateId(Organization.class));
+        ActivityType at1 = new ActivityType("Test1");
+        at1.setId(Datastore.allocateId(o1.getId(), ActivityType.class));
+        Entity entity = ActivityTypeMeta.get().modelToEntity(at1);
+        entity.removeProperty("SV");
+        entity.removeProperty(ActivityTypeMeta.get().organizationRef.getName());
+        Datastore.put(o1, entity);
+
+        ActivityType at1Fetched = Datastore.get(ActivityTypeMeta.get(), at1.getId());
+        assertNotNull(at1Fetched);
+        assertNull(at1Fetched.getOrganizationRef().getKey());
+
+        assertEquals(1, SchemaMigration.instance().migrateActivityType_v0_to_ActivityType_v1());
+
+        at1Fetched = Datastore.get(ActivityTypeMeta.get(), at1.getId());
+        assertNotNull(at1Fetched);
+        assertNotNull(at1Fetched.getOrganizationRef().getKey());
+        assertEquals(o1.getId(), at1Fetched.getOrganizationRef().getKey());
+
+        assertEquals(0, SchemaMigration.instance().migrateActivityType_v0_to_ActivityType_v1());
     }
 
     @Test

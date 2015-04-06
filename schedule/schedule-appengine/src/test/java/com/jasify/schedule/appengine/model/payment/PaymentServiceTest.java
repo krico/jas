@@ -5,12 +5,15 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.users.User;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
+
+import java.util.Collections;
 
 import static junit.framework.TestCase.assertNotNull;
 
@@ -43,7 +46,7 @@ public class PaymentServiceTest {
         PayPalPayment payment = new PayPalPayment();
         payment.setCurrency("USD");
         payment.setAmount(30.35);
-        Key key = paymentService.newPayment(Datastore.allocateId(User.class), payment);
+        Key key = paymentService.newPayment(Datastore.allocateId(User.class), payment, Collections.<PaymentWorkflow>emptyList());
         assertNotNull(key);
         return payment;
     }

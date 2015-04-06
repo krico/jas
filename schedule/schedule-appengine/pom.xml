@@ -26,6 +26,7 @@
     <properties>
         <appengine.app.version>1</appengine.app.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jasify.repository>${project.basedir}/../..</jasify.repository>
     </properties>
 
     <dependencies>
@@ -151,7 +152,7 @@
         <dependency>
             <groupId>org.slim3</groupId>
             <artifactId>slim3-gen</artifactId>
-            <version>1.0.16</version>
+            <version>1.0.16-jas</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -264,6 +265,7 @@
                 <configuration>
                     <factory>org.slim3.gen.processor.ModelProcessorFactory</factory>
                     <sourceOutputDirectory>${project.build.sourceDirectory}</sourceOutputDirectory>
+                    <testSourceOutputDirectory>${project.build.testSourceDirectory}</testSourceOutputDirectory>
                 </configuration>
             </plugin>
 
@@ -367,7 +369,8 @@
                         <configuration>
                             <arguments>test --no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch}
                                 --buildTimestamp=${timestamp} --buildVersion=${project.version}
-                                --skiptests${skipTests}</arguments>
+                                --skiptests${skipTests}
+                            </arguments>
                         </configuration>
                     </execution>
 

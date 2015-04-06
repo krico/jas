@@ -3,8 +3,10 @@ package com.jasify.schedule.appengine.model.payment;
 import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author krico
@@ -12,15 +14,16 @@ import javax.annotation.Nonnull;
  */
 public interface PaymentService {
     @Nonnull
-    <T extends Payment> Key newPayment(long userId, T payment) throws PaymentException;
+    <T extends Payment> Key newPayment(long userId, T payment, List<PaymentWorkflow> workflowList) throws PaymentException;
 
     @Nonnull
-    <T extends Payment> Key newPayment(Key parentKey, T payment) throws PaymentException;
+    <T extends Payment> Key newPayment(Key parentKey, T payment, List<PaymentWorkflow> workflowList) throws PaymentException;
 
     <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws PaymentException;
 
     <T extends Payment> void executePayment(PaymentProvider<T> provider, T payment) throws PaymentException;
 
+    <T extends Payment> void cancelPayment(T payment) throws EntityNotFoundException, PaymentException;
 
     /**
      * @param id for the payment
@@ -31,5 +34,4 @@ public interface PaymentService {
     @Nonnull
     Payment getPayment(Key id) throws EntityNotFoundException, IllegalArgumentException;
 
-    Payment cancelPayment(Payment payment) throws EntityNotFoundException, PaymentException;
 }

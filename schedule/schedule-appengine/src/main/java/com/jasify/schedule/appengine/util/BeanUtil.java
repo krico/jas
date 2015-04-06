@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine.util;
 
 import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.beanutils.*;
 
@@ -24,9 +23,9 @@ public final class BeanUtil {
             if (value == null) return null;
 
             if (targetType == Key.class && value instanceof String) {
-                return (T) KeyFactory.stringToKey((String) value);
+                return (T) KeyUtil.stringToKey((String) value);
             } else if (targetType == String.class && value instanceof Key) {
-                return (T) KeyFactory.keyToString((Key) value);
+                return (T) KeyUtil.keyToString((Key) value);
             } else if (targetType == Key.class && value instanceof Key) {
                 return (T) value;
             }

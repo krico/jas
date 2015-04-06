@@ -8,12 +8,17 @@ import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowEngine;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author krico
@@ -36,20 +41,54 @@ class DefaultPaymentService implements PaymentService {
 
     @Nonnull
     @Override
-    public <T extends Payment> Key newPayment(long userId, T payment) throws PaymentException {
+    public <T extends Payment> Key newPayment(long userId, T payment, List<PaymentWorkflow> workflowList) throws PaymentException {
         Key userKey = Datastore.createKey(UserMeta.get(), userId);
         payment.getUserRef().setKey(userKey);
-        return newPayment(userKey, payment);
+        return newPayment(userKey, payment, workflowList);
     }
 
     @Nonnull
     @Override
-    public <T extends Payment> Key newPayment(Key parentKey, T payment) throws PaymentException {
+    public <T extends Payment> Key newPayment(Key parentKey, T payment, List<PaymentWorkflow> workflowList) throws PaymentException {
         Preconditions.checkArgument(payment.getId() == null, "newPayment cannot have an id");
         payment.validate();
 
-        payment.setId(Datastore.allocateId(parentKey, paymentMeta));
-        return Datastore.put(payment);
+        Key paymentId = Datastore.allocateId(parentKey, paymentMeta);
+        payment.setId(paymentId);
+
+        for (PaymentWorkflow paymentWorkflow : workflowList) {
+            paymentWorkflow.getPaymentRef().setKey(paymentId);
+        }
+
+        ArrayList<Object> all = new ArrayList<>();
+        all.addAll(workflowList);
+        all.add(payment);
+        List<Key> keys = Datastore.put(all);
+        return keys.get(keys.size() - 1);
+    }
+
+    private <T extends Payment> void transitionWorkflowList(T payment) throws PaymentException {
+        //force blank
+        payment.getWorkflowListRef().clear();
+
+        StringBuilder exceptions = new StringBuilder();
+        List<PaymentWorkflow> modelList = payment.getWorkflowListRef().getModelList();
+
+        if (modelList.isEmpty()) return;
+
+        for (PaymentWorkflow workflow : modelList) {
+            try {
+                PaymentWorkflowEngine.transition(workflow, payment.getState());
+            } catch (PaymentWorkflowException e) {
+                log.error("Failed to transition workflow for payment: {}", payment.getId(), e);
+                //TODO: What are we supposed to do here?
+                exceptions.append(e).append('\n');
+            }
+        }
+
+        if (exceptions.length() != 0) {
+            throw new PaymentException(exceptions.toString());
+        }
     }
 
     @Override
@@ -73,6 +112,9 @@ class DefaultPaymentService implements PaymentService {
                 tx.rollback();
             }
         }
+
+        transitionWorkflowList(payment);
+
     }
 
     @Override
@@ -86,7 +128,7 @@ class DefaultPaymentService implements PaymentService {
             if (dbPayment == null) {
                 throw new PaymentException("Payment not found");
             }
-            
+
             if (dbPayment.getState() != PaymentStateEnum.Created) {
                 throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected Created)");
             }
@@ -99,20 +141,13 @@ class DefaultPaymentService implements PaymentService {
                 tx.rollback();
             }
         }
-    }
 
-    @Nonnull
-    @Override
-    public Payment getPayment(Key id) throws EntityNotFoundException {
-        try {
-            return Datastore.get(paymentMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Payment id=" + id);
-        }
+        transitionWorkflowList(payment);
+
     }
 
     @Override
-    public Payment cancelPayment(Payment payment) throws EntityNotFoundException, PaymentException {
+    public <T extends Payment> void cancelPayment(T payment) throws EntityNotFoundException, PaymentException {
         Preconditions.checkNotNull(payment.getId());
 
         Transaction tx = Datastore.beginTransaction();
@@ -124,7 +159,7 @@ class DefaultPaymentService implements PaymentService {
             }
 
             if (dbPayment.getState() == PaymentStateEnum.Canceled) {
-                return dbPayment;
+                return;
             }
 
             if (dbPayment.getState() != null && dbPayment.getState().isFinal()) {
@@ -135,11 +170,23 @@ class DefaultPaymentService implements PaymentService {
             tx.commit();
 
             log.info("Payment canceled id={}", dbPayment.getId());
-            return dbPayment;
         } finally {
             if (tx.isActive()) {
                 tx.rollback();
             }
+        }
+
+        transitionWorkflowList(payment);
+
+    }
+
+    @Nonnull
+    @Override
+    public Payment getPayment(Key id) throws EntityNotFoundException {
+        try {
+            return Datastore.get(paymentMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("Payment id=" + id);
         }
     }
 

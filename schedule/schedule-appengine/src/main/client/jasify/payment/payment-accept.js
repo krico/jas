@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyWeb').controller('PaymentAcceptController', PaymentAcceptController);
+    angular.module('jasify.payment').controller('PaymentAcceptController', PaymentAcceptController);
 
     function PaymentAcceptController($location, $routeParams, BrowserData, Balance) {
         var vm = this;
@@ -40,6 +40,7 @@
                 $location.replace();
                 $location.search({paymentStatus: 'success'});
                 $location.path(BrowserData.getPaymentAcceptRedirect());
+                BrowserData.clearPaymentAcceptRedirect();
             }
 
             function fail(res) {
