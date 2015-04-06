@@ -63,7 +63,7 @@ public class DefaultBalanceService implements BalanceService {
     public void subscription(Subscription subscription) throws EntityNotFoundException {
         Activity activity = subscription.getActivityRef().getModel();
         ActivityType activityType = activity.getActivityTypeRef().getModel();
-        Key organizationId = activityType.getId().getParent();
+        Key organizationId = activityType.getOrganizationRef().getKey();
         Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
         Account payer = AccountUtil.memberAccountMustExist(subscription.getUserRef().getKey());
         subscription(subscription, payer, beneficiary);

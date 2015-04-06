@@ -22,6 +22,9 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType>(this, "description", "description");
 
+    /** */
+    public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.common.Organization>, com.jasify.schedule.appengine.model.common.Organization> organizationRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.common.Organization>, com.jasify.schedule.appengine.model.common.Organization>(this, "organizationRef", "organizationRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.common.Organization.class);
+
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
@@ -51,6 +54,10 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         model.setName((java.lang.String) entity.getProperty("name"));
         model.setLcName((java.lang.String) entity.getProperty("lcName"));
         model.setDescription((java.lang.String) entity.getProperty("description"));
+        if (model.getOrganizationRef() == null) {
+            throw new NullPointerException("The property(organizationRef) is null.");
+        }
+        model.getOrganizationRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("organizationRef"));
         return model;
     }
 
@@ -68,6 +75,11 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         entity.setProperty("name", m.getName());
         entity.setProperty("lcName", m.getLcName());
         entity.setProperty("description", m.getDescription());
+        if (m.getOrganizationRef() == null) {
+            throw new NullPointerException("The property(organizationRef) must not be null.");
+        }
+        entity.setProperty("organizationRef", m.getOrganizationRef().getKey());
+        entity.setProperty("SV", 1);
         return entity;
     }
 
@@ -91,6 +103,11 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
 
     @Override
     protected void assignKeyToModelRefIfNecessary(com.google.appengine.api.datastore.AsyncDatastoreService ds, java.lang.Object model) {
+        com.jasify.schedule.appengine.model.activity.ActivityType m = (com.jasify.schedule.appengine.model.activity.ActivityType) model;
+        if (m.getOrganizationRef() == null) {
+            throw new NullPointerException("The property(organizationRef) must not be null.");
+        }
+        m.getOrganizationRef().assignKeyIfNecessary(ds);
     }
 
     @Override
@@ -111,7 +128,7 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
 
     @Override
     public String getSchemaVersionName() {
-        return "slim3.schemaVersion";
+        return "SV";
     }
 
     @Override
@@ -153,6 +170,10 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
         }
+        if(m.getOrganizationRef() != null && m.getOrganizationRef().getKey() != null){
+            writer.setNextPropertyName("organizationRef");
+            encoder0.encode(writer, m.getOrganizationRef(), maxDepth, currentDepth);
+        }
         writer.endObject();
     }
 
@@ -173,6 +194,8 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         m.setLcName(decoder0.decode(reader, m.getLcName()));
         reader = rootReader.newObjectReader("description");
         m.setDescription(decoder0.decode(reader, m.getDescription()));
+        reader = rootReader.newObjectReader("organizationRef");
+        decoder0.decode(reader, m.getOrganizationRef(), maxDepth, currentDepth);
         return m;
     }
 }

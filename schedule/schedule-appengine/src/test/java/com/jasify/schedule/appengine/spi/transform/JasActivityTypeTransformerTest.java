@@ -35,6 +35,7 @@ public class JasActivityTypeTransformerTest {
         Key orgId = Datastore.allocateId(Organization.class);
         Key id = Datastore.allocateId(orgId, ActivityType.class);
         internal.setId(id);
+        internal.getOrganizationRef().setKey(orgId);
         internal.setName("activity");
         internal.setDescription("Desc");
         JasActivityType external = transformer.transformTo(internal);

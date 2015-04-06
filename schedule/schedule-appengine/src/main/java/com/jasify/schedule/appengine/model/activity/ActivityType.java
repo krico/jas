@@ -1,11 +1,10 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
-import org.slim3.datastore.Attribute;
-import org.slim3.datastore.CreationDate;
-import org.slim3.datastore.Model;
-import org.slim3.datastore.ModificationDate;
+import com.jasify.schedule.appengine.model.common.Organization;
+import org.slim3.datastore.*;
 
 import java.util.Date;
 
@@ -13,7 +12,7 @@ import java.util.Date;
  * @author krico
  * @since 07/01/15.
  */
-@Model
+@Model(schemaVersionName = Constants.SCHEMA_VERSION_NAME, schemaVersion = 1)
 public class ActivityType {
     @Attribute(primaryKey = true)
     private Key id;
@@ -30,6 +29,8 @@ public class ActivityType {
     private String lcName;
 
     private String description;
+
+    private ModelRef<Organization> organizationRef = new ModelRef<>(Organization.class);
 
     public ActivityType() {
     }
@@ -85,5 +86,9 @@ public class ActivityType {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public ModelRef<Organization> getOrganizationRef() {
+        return organizationRef;
     }
 }

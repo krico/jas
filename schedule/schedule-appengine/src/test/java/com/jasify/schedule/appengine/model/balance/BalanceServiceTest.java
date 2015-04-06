@@ -137,6 +137,7 @@ public class BalanceServiceTest {
         Account userAccount = AccountUtil.memberAccountMustExist(userId);
         ActivityType activityType = new ActivityType();
         activityType.setId(Datastore.allocateId(organizationId, ActivityType.class));
+        activityType.getOrganizationRef().setKey(organizationId);
         activity.getActivityTypeRef().setModel(activityType);
 
         Account organizationAccount = AccountUtil.memberAccountMustExist(organizationId);

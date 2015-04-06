@@ -6,6 +6,7 @@ import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.Version;
 import com.jasify.schedule.appengine.mail.MailParser;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
+import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.meta.users.User_v0Meta;
@@ -71,6 +72,14 @@ public final class SchemaMigration {
     public boolean executePendingMigrations() {
         ApplicationData applicationData = ApplicationData.instance();
         boolean executed = false;
+
+        String activityType_v0_key = SchemaMigration.class.getName() + ".ActivityType_v0";
+        Boolean activityType_v0_migrated = applicationData.getProperty(activityType_v0_key);
+        if (Boolean.TRUE != activityType_v0_migrated) {
+            migrateActivityType_v0_to_ActivityType_v1();
+            applicationData.setProperty(activityType_v0_key, true);
+            executed = true;
+        }
 
         String user_v0_key = SchemaMigration.class.getName() + ".User_v0";
         Boolean user_v0_migrated = applicationData.getProperty(user_v0_key);
@@ -183,6 +192,38 @@ public final class SchemaMigration {
                 throw Throwables.propagate(e);
             }
         }
+    }
+
+    /**
+     * Upgrade ActivityType to have organizationRef (v0 had only the parent key)
+     *
+     * @return
+     */
+    int migrateActivityType_v0_to_ActivityType_v1() {
+        log.warn("Starting schema migration ActivityType_v0 to ActivityType_v1");
+        final ActivityTypeMeta activityTypeMeta = ActivityTypeMeta.get();
+        List<Entity> entities = Datastore.query(activityTypeMeta.getKind()).asList();
+        List<Entity> activityTypesToUpgrade = new ArrayList<>();
+        for (Entity e : entities) {
+            Object schemaVersion = e.getProperty(SCHEMA_VERSION_NAME);
+            if (schemaVersion != null) {
+                log.debug("Skipping {} since it has {} = {}", e.getKey(), SCHEMA_VERSION_NAME, schemaVersion);
+                continue;
+            }
+
+            activityTypesToUpgrade.add(e);
+            Key organizationId = e.getKey().getParent();
+            e.setProperty(activityTypeMeta.organizationRef.getName(), organizationId);
+            e.setProperty("SV", 1);
+            log.info("Upgrading {}/{} to schema version 1 (organizationRef={})",
+                    e.getKey(), e.getProperty(activityTypeMeta.name.getName()),
+                    organizationId);
+        }
+
+
+        Datastore.put(activityTypesToUpgrade);
+
+        return activityTypesToUpgrade.size();
     }
 
     int migrateUser_v0_to_User_v1() {
