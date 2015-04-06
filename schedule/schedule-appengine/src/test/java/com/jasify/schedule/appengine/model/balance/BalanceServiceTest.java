@@ -5,8 +5,10 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.ModelMetadataUtil;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.PayPalPayment;
@@ -86,7 +88,36 @@ public class BalanceServiceTest {
     }
 
     @Test
-    public void testSubscription() throws Exception {
+    public void testSubscriptionWithSubscriptionId() throws Exception {
+        assertSubscription(new DoSubscription() {
+            @Override
+            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
+                balanceService.subscription(subscription.getId());
+            }
+        });
+    }
+
+    @Test
+    public void testSubscriptionWithSubscription() throws Exception {
+        assertSubscription(new DoSubscription() {
+            @Override
+            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
+                balanceService.subscription(subscription);
+            }
+        });
+    }
+
+    @Test
+    public void testSubscriptionWithAccounts() throws Exception {
+        assertSubscription(new DoSubscription() {
+            @Override
+            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
+                balanceService.subscription(subscription, payer, beneficiary);
+            }
+        });
+    }
+
+    private void assertSubscription(DoSubscription doer) throws Exception {
         Activity activity = new Activity();
         activity.setPrice(18d);
         activity.setCurrency("CHF");
@@ -95,16 +126,29 @@ public class BalanceServiceTest {
         Subscription subscription = new Subscription();
         subscription.getActivityRef().setModel(activity);
 
-        Account userAccount = AccountUtil.memberAccountMustExist(Datastore.allocateId(User.class));
-        Account organizationAccount = AccountUtil.memberAccountMustExist(Datastore.allocateId(Organization.class));
+        Key userId = Datastore.allocateId(User.class);
+        Key organizationId = Datastore.allocateId(Organization.class);
 
-        Datastore.put(activity, subscription);
+        User user = new User();
+        user.setId(userId);
+        Organization org = new Organization();
+        org.setId(organizationId);
+        subscription.getUserRef().setKey(userId);
+        Account userAccount = AccountUtil.memberAccountMustExist(userId);
+        ActivityType activityType = new ActivityType();
+        activityType.setId(Datastore.allocateId(organizationId, ActivityType.class));
+        activity.getActivityTypeRef().setModel(activityType);
+
+        Account organizationAccount = AccountUtil.memberAccountMustExist(organizationId);
+
+        Datastore.put(activity, activityType, subscription, user, org);
 
 
-        balanceService.subscription(subscription, userAccount, organizationAccount);
-        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        doer.subscription(subscription, userAccount, organizationAccount);
+
+        assertTrue(latch.await(50, TimeUnit.SECONDS));
         log.info("{}", ModelMetadataUtil.dumpDb(new StringBuilder("DB DUMP\n")));
-
+        subscription = Datastore.get(Subscription.class, subscription.getId());
         assertNotNull("Not linked", subscription.getTransferRef().getKey());
         Transfer transfer = subscription.getTransferRef().getModel();
         assertNotNull(transfer);
@@ -251,5 +295,9 @@ public class BalanceServiceTest {
         assertEquals(otherTransactions.get(1).getId(), timed.get(0).getId());
         assertEquals(otherTransactions.get(2).getId(), timed.get(1).getId());
         assertEquals(otherTransactions.get(3).getId(), timed.get(2).getId());
+    }
+
+    private static interface DoSubscription {
+        void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException;
     }
 }

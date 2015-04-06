@@ -18,6 +18,8 @@ import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.cart.ShoppingCartService;
 import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.model.payment.*;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasCheckoutPaymentRequest;
@@ -28,6 +30,8 @@ import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
@@ -74,13 +78,14 @@ public class BalanceEndpoint {
         PayPalPayment payment = new PayPalPayment();
         payment.setCurrency(paymentRequest.getCurrency());
         payment.addItem("Jasify Credits", 1, paymentRequest.getAmount());
-        paymentService.newPayment(jasCaller.getUserId(), payment);
+        paymentService.newPayment(jasCaller.getUserId(), payment, Collections.<PaymentWorkflow>emptyList());
         paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
         return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
     }
 
     @ApiMethod(name = "balance.createCheckoutPayment", path = "balance/create-checkout-payment", httpMethod = ApiMethod.HttpMethod.POST)
     public JasPaymentResponse createCheckoutPayment(User caller, JasCheckoutPaymentRequest paymentRequest) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException {
+        //TODO: I had a real hard time (and gave up) writing a test for this method.  Indicates it's too complex?
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(paymentRequest.getBaseUrl()));
         if (paymentRequest.getType() != PaymentTypeEnum.PayPal) {
@@ -100,10 +105,14 @@ public class BalanceEndpoint {
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         PayPalPayment payment = new PayPalPayment();
         payment.setCurrency(currency);
+        List<PaymentWorkflow> workflowList = new ArrayList<>();
         for (ShoppingCart.Item item : items) {
             payment.addItem(item.getDescription(), item.getUnits(), item.getPrice());
+            if (item.getItemId() != null) {
+                workflowList.add(PaymentWorkflowFactory.workflowFor(item.getItemId()));
+            }
         }
-        paymentService.newPayment(jasCaller.getUserId(), payment);
+        paymentService.newPayment(jasCaller.getUserId(), payment, workflowList);
         paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
         return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
     }

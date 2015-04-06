@@ -265,6 +265,7 @@
                 <configuration>
                     <factory>org.slim3.gen.processor.ModelProcessorFactory</factory>
                     <sourceOutputDirectory>${project.build.sourceDirectory}</sourceOutputDirectory>
+                    <testSourceOutputDirectory>${project.build.testSourceDirectory}</testSourceOutputDirectory>
                 </configuration>
             </plugin>
 

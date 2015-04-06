@@ -19,6 +19,7 @@ import com.jasify.schedule.appengine.meta.common.GroupUserMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
+import com.jasify.schedule.appengine.meta.payment.workflow.PaymentWorkflowMeta;
 import com.jasify.schedule.appengine.meta.users.PasswordRecoveryMeta;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserLoginMeta;
@@ -50,6 +51,7 @@ public final class KeyUtil {
             .put(PasswordRecoveryMeta.get().getKind(), "pr") //PasswordRecovery
 //                    .put(PayPalPaymentMeta.get().getKind(), "P") //Payment
             .put(PaymentMeta.get().getKind(), "P") //Payment
+            .put(PaymentWorkflowMeta.get().getKind(), "pw") //PaymentWorkflow
             .put(RepeatDetailsMeta.get().getKind(), "R") //RepeatDetails
             .put(SubscriptionMeta.get().getKind(), "S") //Subscription
             .put(TransactionMeta.get().getKind(), "T") //Transaction

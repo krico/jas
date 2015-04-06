@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.balance.*;
 import com.jasify.schedule.appengine.model.payment.*;
+import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static junit.framework.TestCase.*;
 
@@ -61,7 +63,7 @@ public class BalanceEndpointTest {
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         final Capture<Long> userIdCapture = EasyMock.newCapture();
         final Capture<PayPalPayment> paymentCapture = EasyMock.newCapture();
-        EasyMock.expect(paymentService.newPayment(EasyMock.captureLong(userIdCapture), EasyMock.capture(paymentCapture)))
+        EasyMock.expect(paymentService.newPayment(EasyMock.captureLong(userIdCapture), EasyMock.capture(paymentCapture), EasyMock.<List<PaymentWorkflow>>anyObject()))
                 .andAnswer(new IAnswer<Key>() {
                     @Override
                     public Key answer() throws Throwable {
@@ -105,7 +107,8 @@ public class BalanceEndpointTest {
         p.setId(paymentId);
         p.getUserRef().setKey(Datastore.createKey(User.class, user.getUserId()));
         EasyMock.expect(PaymentServiceFactory.getPaymentService().getPayment(paymentId)).andReturn(p);
-        EasyMock.expect(PaymentServiceFactory.getPaymentService().cancelPayment(p)).andReturn(p);
+        PaymentServiceFactory.getPaymentService().cancelPayment(p);
+        EasyMock.expectLastCall();
 
         testPaymentServiceFactory.replay();
         testBalanceServiceFactory.replay();

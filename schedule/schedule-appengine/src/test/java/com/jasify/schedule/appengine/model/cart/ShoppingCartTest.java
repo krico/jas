@@ -6,9 +6,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-
 public class ShoppingCartTest {
     @BeforeClass
     public static void initializeDatastore() {
@@ -27,6 +24,7 @@ public class ShoppingCartTest {
         item.setItemId(Datastore.allocateId("Foo"));
         cart.getItems().add(item);
         cart.calculate();
-        new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(cart);
+        TestHelper.assertSerializable(cart);
     }
+
 }

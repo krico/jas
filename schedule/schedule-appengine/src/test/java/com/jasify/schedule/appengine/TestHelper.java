@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.DatastoreUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -217,6 +220,15 @@ public final class TestHelper {
                 builder.append(Throwables.getStackTraceAsString(exception)).append("\n");
             }
             throw new AssertionFailedError(builder.toString());
+        }
+    }
+
+    public static void assertSerializable(Object anyObject) throws IOException {
+        assertNotNull(anyObject);
+        try {
+            new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(anyObject);
+        } catch (Exception e) {
+            fail("NOT SERIALIZABLE [" + anyObject.getClass().getName() + "]: " + e);
         }
     }
 }
