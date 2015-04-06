@@ -76,8 +76,9 @@ public interface ActivityService {
      * @param id of the activityType
      * @throws EntityNotFoundException  if the activityType doesn't exist
      * @throws IllegalArgumentException if the id is not of an ActivityType
+     * @throws OperationException if the activityType has activities
      */
-    public void removeActivityType(Key id) throws EntityNotFoundException, IllegalArgumentException;
+    public void removeActivityType(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
 
     /**
      * @param activity to add
@@ -129,8 +130,9 @@ public interface ActivityService {
      * @param id of the activity to remove
      * @throws EntityNotFoundException  if the activity doesn't exist
      * @throws IllegalArgumentException if the id is not of an Activity
+     * @throws OperationException if activity has subscritpions
      */
-    public void removeActivity(Key id) throws EntityNotFoundException, IllegalArgumentException;
+    public void removeActivity(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
 
     /**
      * Subscribe a user for an activity

@@ -7,10 +7,7 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
-import com.jasify.schedule.appengine.model.UserContext;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationService;
@@ -319,6 +316,17 @@ public class ActivityEndpointTest {
         Key key = Datastore.allocateId(ActivityType.class);
         service.removeActivityType(key);
         expectLastCall().andThrow(new EntityNotFoundException());
+        testActivityServiceFactory.replay();
+        endpoint.removeActivityType(newCaller(55, true), key);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testRemoveActivityTypeThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key key = Datastore.allocateId(ActivityType.class);
+        service.removeActivityType(key);
+        expectLastCall().andThrow(new OperationException(""));
         testActivityServiceFactory.replay();
         endpoint.removeActivityType(newCaller(55, true), key);
     }
@@ -1014,6 +1022,17 @@ public class ActivityEndpointTest {
         Key key = Datastore.allocateId(Activity.class);
         service.removeActivity(key);
         expectLastCall().andThrow(new EntityNotFoundException(""));
+        testActivityServiceFactory.replay();
+        endpoint.removeActivity(newCaller(1, true), key);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testRemoveActivityNoActivityThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key key = Datastore.allocateId(Activity.class);
+        service.removeActivity(key);
+        expectLastCall().andThrow(new OperationException(""));
         testActivityServiceFactory.replay();
         endpoint.removeActivity(newCaller(1, true), key);
     }

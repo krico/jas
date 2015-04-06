@@ -45,8 +45,7 @@ public class ActivityServiceTest {
     }
 
     private Organization createOrganization(String name) {
-        Organization organization = new Organization(name);
-        return organization;
+        return new Organization(name);
     }
 
     private User createUser(String name) {
@@ -260,6 +259,28 @@ public class ActivityServiceTest {
         Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
         activityService.removeActivityType(id);
         assertNull(Datastore.getOrNull(id));
+    }
+
+    @Test
+    public void testRemoveActivityTypeThrowsNullPointerException() throws Exception {
+        thrown.expect(NullPointerException.class);
+        activityService.removeActivityType(null);
+    }
+
+    @Test
+    public void testRemoveActivityTypeThrowsEntityNotFoundException() throws Exception {
+        thrown.expect(EntityNotFoundException.class);
+        Key key = Datastore.allocateId(ActivityType.class);
+        thrown.expectMessage("ActivityType.id=" + key);
+        activityService.removeActivityType(key);
+    }
+
+    @Test
+    public void testRemoveActivityTypeThrowsOperationException() throws Exception {
+        thrown.expect(OperationException.class);
+        thrown.expectMessage("ActivityType has activities");
+        activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.removeActivityType(activityType1OfOrganization1.getId());
     }
 
     @Test
@@ -763,6 +784,15 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
         activityService.removeActivity(ids.get(0));
         assertNull(Datastore.getOrNull(ids.get(0)));
+    }
+
+    @Test
+    public void testRemoveActivityThrowsOperationException() throws Exception {
+        thrown.expect(OperationException.class);
+        thrown.expectMessage("Activity has subscriptions");
+        List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.subscribe(testUser1, activity1Organization1);
+        activityService.removeActivity(ids.get(0));
     }
 
     @Test

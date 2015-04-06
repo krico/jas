@@ -114,13 +114,15 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityTypes.remove", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public void removeActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdmin(caller);
         checkFound(id);
         try {
             ActivityServiceFactory.getActivityService().removeActivityType(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (OperationException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -236,13 +238,15 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activities.remove", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public void removeActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdmin(caller);
         checkFound(id);
         try {
             ActivityServiceFactory.getActivityService().removeActivity(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (OperationException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
