@@ -68,6 +68,13 @@ public class DefaultShoppingCartService implements ShoppingCartService {
         return Memcache.get(cartId);
     }
 
+    @Override
+    public ShoppingCart clearCart(@Nonnull String cartId) {
+        ShoppingCart value = new ShoppingCart(cartId);
+        Memcache.put(cartId, value);
+        return value;
+    }
+
     private static class Singleton {
         private static final ShoppingCartService INSTANCE = new DefaultShoppingCartService();
     }

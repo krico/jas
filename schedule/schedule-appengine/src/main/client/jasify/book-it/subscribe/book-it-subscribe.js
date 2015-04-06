@@ -2,7 +2,7 @@
 
     angular.module('jasify.bookIt').controller('BookItSubscribeController', BookItSubscribeController);
 
-    function BookItSubscribeController($location, Session, Activity, ShoppingCart, activity) {
+    function BookItSubscribeController($location, Session, Activity, ShoppingCart, BrowserData, activity) {
         var vm = this;
         vm.activity = activity;
         vm.bookIt = bookIt;
@@ -42,7 +42,7 @@
             ShoppingCart.addUserActivity(vm.activity).then(added, failed);
             function added(cart) {
                 vm.inProgress = false;
-
+                BrowserData.setPaymentAcceptRedirect($location.path());
                 $location.path('/checkout');
             }
 

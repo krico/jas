@@ -45,4 +45,12 @@ public interface ShoppingCartService {
      */
     ShoppingCart getCart(@Nonnull String cartId);
 
+    /**
+     * Clear the cart with id <code>cartId</code>
+     *
+     * @param cartId the id
+     * @return the empty cart
+     */
+    ShoppingCart clearCart(@Nonnull String cartId);
+
 }

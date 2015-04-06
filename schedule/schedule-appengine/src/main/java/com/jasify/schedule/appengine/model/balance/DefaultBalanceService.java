@@ -15,6 +15,7 @@ import com.jasify.schedule.appengine.model.balance.task.ApplySubscriptionCharges
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.util.FormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -194,7 +195,7 @@ public class DefaultBalanceService implements BalanceService {
                 transfer.setId(subscription.getTransferRef().getKey());
                 transfer.setAmount(amount);
                 transfer.setCurrency(activity.getCurrency());
-                transfer.setDescription(activity.getName());
+                transfer.setDescription(FormatUtil.toString(activity));
                 transfer.setReference(Objects.toString(subscription.getId()));
                 transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
                 transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));

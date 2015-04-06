@@ -87,5 +87,20 @@ public class ShoppingCartServiceTest {
         assertEquals(expected.getId(), cart.getId());
     }
 
+    @Test
+    public void getClearCart() {
+        ShoppingCart expected = shoppingCartService.getUserCart(109);
+        expected.setCurrency("USD");
+        expected.setTotal(20d);
+        expected.getItems().add(new ShoppingCart.Item("To rem", 1, 20d));
+        shoppingCartService.putCart(expected);
+        shoppingCartService.clearCart(expected.getId());
+        ShoppingCart cart = shoppingCartService.getCart(expected.getId());
+        assertNotNull(cart);
+        assertEquals(expected.getId(), cart.getId());
+        assertTrue(cart.getItems().isEmpty());
+        assertNull(cart.getTotal());
+    }
+
 
 }
