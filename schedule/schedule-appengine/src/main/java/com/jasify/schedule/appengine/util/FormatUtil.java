@@ -32,6 +32,7 @@ public final class FormatUtil {
         if (StringUtils.isBlank(name)) {
             name = "Activity: " + KeyUtil.toHumanReadableString(activity.getId());
         }
+        if (activity.getStart() == null || activity.getFinish() == null) return name;
         return name + START_FORMAT.get().format(activity.getStart()) + FINISH_FORMAT.get().format(activity.getFinish());
     }
 }

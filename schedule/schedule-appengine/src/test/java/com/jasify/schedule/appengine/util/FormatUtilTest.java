@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -22,6 +23,7 @@ public class FormatUtilTest {
         Activity activity = new Activity();
         activity.setName("The Activity");
         GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTimeZone(TimeZone.getDefault());
         calendar.set(1976, Calendar.JULY, 15, 22, 10);
         activity.setStart(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
@@ -29,5 +31,14 @@ public class FormatUtilTest {
         String formatted = FormatUtil.toString(activity);
         assertNotNull(formatted);
         assertEquals("The Activity [Thu, 15 Jul 22:10 - 23:10]", formatted);
+    }
+
+    @Test
+    public void testToStringActivityNoDates() throws Exception {
+        Activity activity = new Activity();
+        activity.setName("The Activity");
+        String formatted = FormatUtil.toString(activity);
+        assertNotNull(formatted);
+        assertEquals("The Activity", formatted);
     }
 }
