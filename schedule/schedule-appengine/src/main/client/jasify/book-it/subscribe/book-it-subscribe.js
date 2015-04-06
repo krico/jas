@@ -2,7 +2,7 @@
 
     angular.module('jasify.bookIt').controller('BookItSubscribeController', BookItSubscribeController);
 
-    function BookItSubscribeController($location, Session, Activity, ShoppingCart, BrowserData, activity) {
+    function BookItSubscribeController($location, $log, Session, Activity, ShoppingCart, BrowserData, activity) {
         var vm = this;
         vm.activity = activity;
         vm.bookIt = bookIt;
@@ -10,6 +10,7 @@
         vm.inProgress = false;
         vm.subscription = null;
         vm.showBookIt = showBookIt;
+        vm.showFullyBooked = showFullyBooked;
 
         vm.checkSubscribed();
 
@@ -21,7 +22,16 @@
 
         }
 
+        function showFullyBooked() {
+            if (vm.showBookIt()) {
+                return (activity.maxSubscriptions - activity.subscriptionCount) <= 0;
+            } else {
+                return false;
+            }
+        }
+
         function checkSubscribed() {
+            $log.debug(angular.toJson(activity));
             if (vm.activity.id) {
                 vm.inProgress = true;
                 Activity.isSubscribed(Session.userId, vm.activity).then(subscribed, notSubscribed);

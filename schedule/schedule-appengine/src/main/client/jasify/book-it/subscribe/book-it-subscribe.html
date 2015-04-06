@@ -36,12 +36,17 @@
                         {{vm.activity.description}}
                     </p>
                 </div>
-                <button class="btn btn-primary" ng-show="vm.showBookIt()" ng-disabled="vm.inProgress"
+                <button class="btn btn-primary"
+                        ng-show="vm.showBookIt()"
+                        ng-disabled="vm.inProgress||vm.showFullyBooked()"
                         ng-click="vm.bookIt()">
                     <i class="fa fa-shopping-cart"></i> Book it!
                 </button>
                 <span ng-hide="vm.showBookIt()" class="book-it-subscribed">
                     <i class="fa fa-check"></i> Subscribed <small>(An e-mail confirmation was sent)</small>
+                </span>
+                <span ng-show="vm.showFullyBooked()" class="book-it-fully-booked">
+                    <i class="fa fa-ban"></i> We're sorry but this activity is fully booked.
                 </span>
             </div>
         </div>
