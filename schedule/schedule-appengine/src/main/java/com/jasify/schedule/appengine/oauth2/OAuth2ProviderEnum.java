@@ -193,6 +193,32 @@ public enum OAuth2ProviderEnum {
         public Collection<String> scopes() {
             return Arrays.asList("email", "public_profile");
         }
+    },
+    PayPal {
+        @Override
+        public String tokenUrl() {
+            return null; //todo
+        }
+
+        @Override
+        public String userInfoUrl() {
+            return null; //todo
+        }
+
+        @Override
+        public String authorizationUrl() {
+            return null; //todo
+        }
+
+        @Override
+        public TokenResponse requestToken(AuthorizationCodeResponseUrl authResponse) throws OAuth2Exception {
+            return null; //todo
+        }
+
+        @Override
+        public OAuth2Info requestInfo(OAuth2UserToken token) throws OAuth2Exception {
+            return null;//todo
+        }
     };
 
     public static OAuth2ProviderEnum parsePathInfo(String pathInfo) {
