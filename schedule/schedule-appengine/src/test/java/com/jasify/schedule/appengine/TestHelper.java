@@ -9,6 +9,7 @@ import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.meterware.servletunit.ServletRunner;
 import junit.framework.AssertionFailedError;
@@ -85,6 +86,15 @@ public final class TestHelper {
 
     public static void initializeJasify() {
         initializeJasify(datastoreHelper);
+    }
+
+    public static void initializeJasifyWithOAuthProviderData() {
+        initializeJasify(datastoreHelper);
+        for (OAuth2ProviderEnum provider : OAuth2ProviderEnum.values()) {
+            ApplicationData.instance().setProperty(provider.clientIdKey(), provider + "ID");
+            ApplicationData.instance().setProperty(provider.clientSecretKey(), provider + "Secret");
+        }
+
     }
 
     public static File baseDir() {

@@ -12,6 +12,7 @@ import com.google.api.services.oauth2.model.Tokeninfo;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.client.http.HttpTransportFactory;
+import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.JSON;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -195,19 +196,27 @@ public enum OAuth2ProviderEnum {
         }
     },
     PayPal {
+        private final String TEST_URL = "https://api.sandbox.paypal.com/v1";
+        private final String PROD_URL = "https://api.paypal.com/v1";
+
+        private String baseUrl() {
+            if (EnvironmentUtil.isProduction()) return PROD_URL;
+            return TEST_URL;
+        }
+
         @Override
         public String tokenUrl() {
-            return null; //todo
+            return baseUrl() + "/oauth2/token";
         }
 
         @Override
         public String userInfoUrl() {
-            return null; //todo
+            return baseUrl() + "/oauth2/user-info";
         }
 
         @Override
         public String authorizationUrl() {
-            return null; //todo
+            return baseUrl() + "/oauth2/authorize";
         }
 
         @Override
