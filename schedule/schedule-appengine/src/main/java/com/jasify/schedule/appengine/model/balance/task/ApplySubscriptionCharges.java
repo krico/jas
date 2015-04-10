@@ -5,6 +5,7 @@ import com.google.appengine.api.taskqueue.DeferredTask;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.*;
+import com.jasify.schedule.appengine.util.FormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -42,7 +43,7 @@ public class ApplySubscriptionCharges implements DeferredTask {
         Account payerAccount = beneficiaryTransaction.getAccountRef().getModel();
         Account beneficiaryAccount = AccountUtil.profitAndLossAccount();
         BalanceService balanceService = BalanceServiceFactory.getBalanceService();
-        Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), "Subscription charge",
+        Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), "Subscription charge " + FormatUtil.toString(subscription),
                 Objects.toString(subscription.getId()), payerAccount, beneficiaryAccount);
         balanceService.applyTransfer(chargeTransfer);
     }

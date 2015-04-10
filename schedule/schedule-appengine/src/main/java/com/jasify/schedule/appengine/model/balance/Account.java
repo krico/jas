@@ -7,6 +7,7 @@ import org.slim3.datastore.Model;
 import org.slim3.datastore.ModificationDate;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Source or target of money transfers.
@@ -76,5 +77,9 @@ public class Account {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String toString() {
+        return getClass().getSimpleName() + '[' + Objects.toString(id) + ']';
     }
 }

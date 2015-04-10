@@ -1,5 +1,3 @@
 (function (angular) {
-    angular.module('jasify.admin', [
-
-    ]);
+    angular.module('jasify.admin', []);
 })(angular);

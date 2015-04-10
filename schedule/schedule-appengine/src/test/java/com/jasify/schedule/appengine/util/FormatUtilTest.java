@@ -2,10 +2,14 @@ package com.jasify.schedule.appengine.util;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.balance.Account;
+import com.jasify.schedule.appengine.model.balance.OrganizationAccount;
+import com.jasify.schedule.appengine.model.balance.UserAccount;
 import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
@@ -40,5 +44,15 @@ public class FormatUtilTest {
         String formatted = FormatUtil.toString(activity);
         assertNotNull(formatted);
         assertEquals("The Activity", formatted);
+    }
+
+    @Test
+    public void testToStringAccount() throws Exception {
+        Account account = new Account();
+        assertEquals(Objects.toString(account), FormatUtil.toString(account));
+        UserAccount userAccount = new UserAccount();
+        assertEquals(FormatUtil.toString(userAccount), FormatUtil.toString((Account) userAccount));
+        OrganizationAccount organizationAccount = new OrganizationAccount();
+        assertEquals(FormatUtil.toString(organizationAccount), FormatUtil.toString((Account) organizationAccount));
     }
 }

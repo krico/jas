@@ -34,6 +34,8 @@ import org.slim3.datastore.Datastore;
  */
 public final class KeyUtil {
     public static final char PARENT_SEPARATOR_CHAR = '-';
+    public static final char STR_LEN_BEGIN = '(';
+    public static final char STR_LEN_END = ')';
     /* I USE lowercase PREFIXES FOR MODELS THAT SHOULD PROBABLY NEVER BE PUBLIC */
     public static final ImmutableBiMap<String, String> PREFIXES = new ImmutableBiMap.Builder<String, String>()
             .put(AccountMeta.get().getKind(), "$") //Account
@@ -121,7 +123,7 @@ public final class KeyUtil {
             ret.append(key.getId());
         } else {
             String name = key.getName();
-            ret.append('{').append(name.length()).append('}').append(name);
+            ret.append(STR_LEN_BEGIN).append(name.length()).append(STR_LEN_END).append(name);
         }
 
         if (key.getParent() != null) {
@@ -166,7 +168,7 @@ public final class KeyUtil {
                             state = ParseState.Id;
                         }
                         id += current;
-                    } else if (current == '{') {
+                    } else if (current == STR_LEN_BEGIN) {
                         kind = PREFIXES.inverse().get(prefix);
 
                         if (kind == null) {
@@ -181,7 +183,7 @@ public final class KeyUtil {
                 case StringLength:
                     if (Character.isDigit(current)) {
                         lenStr += current;
-                    } else if (current == '}') {
+                    } else if (current == STR_LEN_END) {
                         len = Integer.parseInt(lenStr);
                         state = ParseState.StringData;
                     } else {

@@ -121,8 +121,8 @@
                 createPayment: nop,
                 cancelPayment: nop,
                 getAccount: nop,
+                getAccounts: nop,
                 getTransactions: nop,
-                createPayment: nop,
                 createCheckoutPayment: nop,
                 executePayment: nop
             }

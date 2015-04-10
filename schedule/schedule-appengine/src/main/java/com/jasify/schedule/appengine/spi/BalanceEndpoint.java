@@ -35,8 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
-import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrAdmin;
+import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
 
 /**
  * @author krico
@@ -179,6 +178,12 @@ public class BalanceEndpoint {
         }
     }
 
+    @ApiMethod(name = "balance.getAccounts", path = "balance/accounts", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Account> getAccounts(User caller) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        return BalanceServiceFactory.getBalanceService().listAccounts();
+    }
+
     @ApiMethod(name = "balance.getAccount", path = "balance/account", httpMethod = ApiMethod.HttpMethod.GET)
     public Account getAccount(User caller) throws NotFoundException, UnauthorizedException {
         JasifyEndpointUser jasUser = mustBeLoggedIn(caller);
@@ -194,8 +199,18 @@ public class BalanceEndpoint {
                                               @Nullable @Named("limit") Integer limit,
                                               @Nullable @Named("offset") Integer offset)
             throws NotFoundException, UnauthorizedException, ForbiddenException {
-        mustBeSameUserOrAdmin(caller, AccountUtil.accountIdToMemberId(accountId));
 
+        Key userId = null;
+        try {
+            userId = AccountUtil.accountIdToMemberId(accountId);
+        } catch (IllegalArgumentException e) {
+            //no op
+        }
+        if (userId == null) {
+            mustBeAdmin(caller);
+        } else {
+            mustBeSameUserOrAdmin(caller, userId);
+        }
         if (limit == null) limit = 0;
         if (offset == null) offset = 0;
 

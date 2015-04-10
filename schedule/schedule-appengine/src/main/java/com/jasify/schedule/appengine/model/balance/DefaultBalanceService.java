@@ -309,6 +309,11 @@ public class DefaultBalanceService implements BalanceService {
     }
 
     @Override
+    public List<Account> listAccounts() {
+        return Datastore.query(accountMeta).sort(accountMeta.id.desc).asList();
+    }
+
+    @Override
     public List<Transaction> listTransactions(Key accountId) throws EntityNotFoundException {
         return listTransactions(accountId, 0, 0);
     }

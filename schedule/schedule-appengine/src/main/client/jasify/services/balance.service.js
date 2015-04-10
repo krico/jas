@@ -7,6 +7,7 @@
             createCheckoutPayment: createCheckoutPayment,
             cancelPayment: cancelPayment,
             getAccount: getAccount,
+            getAccounts: getAccounts,
             getTransactions: getTransactions,
             executePayment: executePayment
         };
@@ -66,6 +67,13 @@
             });
         }
 
+        function getAccounts() {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.balance.getAccounts()
+                    .then(arrayHandler, errorHandler);
+            });
+        }
+
         function getTransactions(accountId, limit, offset) {
             var params = {accountId: accountId};
 
@@ -83,6 +91,9 @@
             return $q.reject(e);
         }
 
+        function arrayHandler(resp) {
+            return resp.result.items;
+        }
         function resultHandler(resp) {
             return resp.result;
         }
