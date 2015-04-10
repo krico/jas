@@ -1,6 +1,8 @@
 package com.jasify.schedule.appengine.model.payment;
 
+import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.TestService;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.easymock.EasyMock;
 
 /**
@@ -12,6 +14,7 @@ public class TestPayPalInterface implements TestService {
 
     public void setUp() {
         payPalMock = EasyMock.createMock(PayPalPaymentProvider.PayPalInterface.class);
+        TestHelper.initializeOAuthProviderProperties();
         PayPalPaymentProvider.instance().setPayPalInterface(payPalMock);
     }
 

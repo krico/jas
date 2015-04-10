@@ -90,11 +90,15 @@ public final class TestHelper {
 
     public static void initializeJasifyWithOAuthProviderData() {
         initializeJasify(datastoreHelper);
+        initializeOAuthProviderProperties();
+
+    }
+
+    public static void initializeOAuthProviderProperties() {
         for (OAuth2ProviderEnum provider : OAuth2ProviderEnum.values()) {
             ApplicationData.instance().setProperty(provider.clientIdKey(), provider + "ID");
             ApplicationData.instance().setProperty(provider.clientSecretKey(), provider + "Secret");
         }
-
     }
 
     public static File baseDir() {
