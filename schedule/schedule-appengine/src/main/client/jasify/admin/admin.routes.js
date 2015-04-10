@@ -191,7 +191,7 @@
                 controller: 'AdminBalancesController',
                 controllerAs: 'vm',
                 resolve: {
-                    accounts: /*@ngInject*/ function (Allow, Balance) {
+                    accounts: /*@ngInject*/ function ($q, Allow, Balance) {
 
                         return Allow.admin().then(allowed, forbidden);
 

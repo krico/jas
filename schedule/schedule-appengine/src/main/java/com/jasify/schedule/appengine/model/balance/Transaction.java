@@ -34,6 +34,8 @@ public class Transaction {
 
     private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
 
+    private boolean debit;
+
     public Transaction() {
 
     }
@@ -42,14 +44,15 @@ public class Transaction {
         this(transfer, false);
     }
 
-    public Transaction(Transfer transfer, boolean negate) {
+    public Transaction(Transfer transfer, boolean debit) {
         currency = transfer.getCurrency();
         amount = transfer.getAmount();
-        if (negate && amount != null)
+        if (debit && amount != null)
             amount = -1 * amount;
         description = transfer.getDescription();
         reference = transfer.getReference();
         transferRef.setModel(transfer);
+        this.debit = debit;
     }
 
     public Key getId() {
@@ -106,5 +109,13 @@ public class Transaction {
 
     public ModelRef<Transfer> getTransferRef() {
         return transferRef;
+    }
+
+    public boolean isDebit() {
+        return debit;
+    }
+
+    public void setDebit(boolean debit) {
+        this.debit = debit;
     }
 }

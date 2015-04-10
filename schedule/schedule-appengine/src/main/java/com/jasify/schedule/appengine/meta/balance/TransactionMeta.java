@@ -28,6 +28,9 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
     /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer> transferRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.balance.Transfer>, com.jasify.schedule.appengine.model.balance.Transfer>(this, "transferRef", "transferRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.balance.Transfer.class);
 
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Boolean> debit = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Boolean>(this, "debit", "debit", boolean.class);
+
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final TransactionMeta slim3_singleton = new TransactionMeta();
@@ -61,6 +64,7 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
             throw new NullPointerException("The property(transferRef) is null.");
         }
         model.getTransferRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("transferRef"));
+        model.setDebit(booleanToPrimitiveBoolean((java.lang.Boolean) entity.getProperty("debit")));
         return model;
     }
 
@@ -86,6 +90,7 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
             throw new NullPointerException("The property(transferRef) must not be null.");
         }
         entity.setProperty("transferRef", m.getTransferRef().getKey());
+        entity.setProperty("debit", m.isDebit());
         return entity;
     }
 
@@ -186,6 +191,8 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
             writer.setNextPropertyName("transferRef");
             encoder0.encode(writer, m.getTransferRef(), maxDepth, currentDepth);
         }
+        writer.setNextPropertyName("debit");
+        encoder0.encode(writer, m.isDebit());
         writer.endObject();
     }
 
@@ -210,6 +217,8 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
         decoder0.decode(reader, m.getAccountRef(), maxDepth, currentDepth);
         reader = rootReader.newObjectReader("transferRef");
         decoder0.decode(reader, m.getTransferRef(), maxDepth, currentDepth);
+        reader = rootReader.newObjectReader("debit");
+        m.setDebit(decoder0.decode(reader, m.isDebit()));
         return m;
     }
 }

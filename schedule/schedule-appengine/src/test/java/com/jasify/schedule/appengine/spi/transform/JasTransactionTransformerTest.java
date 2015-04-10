@@ -43,6 +43,7 @@ public class JasTransactionTransformerTest {
         internal.getAccountRef().setKey(accountId);
         Key transferId = Datastore.createKey(Transfer.class, 105);
         internal.getTransferRef().setKey(transferId);
+        internal.setDebit(true);
 
         JasTransaction external = transformer.transformTo(internal);
         assertNotNull(external);
@@ -53,5 +54,6 @@ public class JasTransactionTransformerTest {
         JasKeyTransformer keyTransformer = new JasKeyTransformer();
         assertEquals(keyTransformer.transformTo(accountId), external.getAccountRef());
         assertEquals(keyTransformer.transformTo(transferId), external.getTransferRef());
+        assertEquals(true, external.isDebit());
     }
 }

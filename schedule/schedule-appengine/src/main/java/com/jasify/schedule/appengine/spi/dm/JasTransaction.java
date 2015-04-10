@@ -23,6 +23,8 @@ public class JasTransaction implements JasEndpointEntity {
 
     private String transferRef;
 
+    private boolean debit;
+
     public String getId() {
         return id;
     }
@@ -85,5 +87,13 @@ public class JasTransaction implements JasEndpointEntity {
 
     public void setTransferRef(String transferRef) {
         this.transferRef = transferRef;
+    }
+
+    public boolean isDebit() {
+        return debit;
+    }
+
+    public void setDebit(boolean debit) {
+        this.debit = debit;
     }
 }

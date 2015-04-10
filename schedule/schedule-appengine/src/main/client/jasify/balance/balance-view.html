@@ -14,7 +14,7 @@
         </div>
     </div>
     <div class="col-sm-12">
-        <div class="col-sm-8">
+        <div class="col-sm-9">
             <div class="table-responsive small">
                 <table class="table table-striped">
                     <thead>
@@ -22,24 +22,32 @@
                         <th>date</th>
                         <th>description</th>
                         <th class="text-right">amount</th>
+                        <th>&nbsp;</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="transaction in vm.transactions">
                         <td>{{transaction.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
                         <td>{{transaction.description }}</td>
-                        <td class="text-right">{{transaction.amount | number: 2 }} {{transaction.currency}}</td>
+                        <td class="text-right">
+                            <nobr>{{transaction.amount | number: 2 }} {{transaction.currency}}</nobr>
+                        </td>
+                        <td>
+                            <i class="fa"
+                               ng-class="{'fa-minus-square': transaction.debit, 'transaction-debit' : transaction.debit,
+                               'fa-plus-square' : !transaction.debit, 'transaction-credit' : !transaction.debit}"></i>
+                        </td>
                     </tr>
                     <tr ng-show="vm.inProgress">
-                        <td colspan="3"><span us-spinner=""></span></td>
+                        <td colspan="4"><span us-spinner=""></span></td>
                     </tr>
                     <tr ng-show="!vm.inProgress && vm.transactions.length <= 0">
-                        <td colspan="3">No transactions...</td>
+                        <td colspan="4">No transactions...</td>
                     </tr>
                     </tbody>
                     <tfoot ng-show="vm.transactions.length > 0">
                     <tr>
-                        <td colspan="3" align="middle" class="small">
+                        <td colspan="4" align="middle" class="small">
                             <pagination class="pagination-sm"
                                         ng-change="vm.pageChanged()"
                                         total-items="vm.pagination.total"

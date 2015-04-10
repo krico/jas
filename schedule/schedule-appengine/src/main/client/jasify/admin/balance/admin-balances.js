@@ -61,7 +61,6 @@
         }
 
         function pageChanged() {
-            $log.info("pageChanged")
             vm.getTransactions();
         }
 
