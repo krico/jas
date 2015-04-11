@@ -36,11 +36,18 @@ public final class FormatUtil {
     }
 
     public static String toString(Subscription subscription) {
-        Key key = subscription.getActivityRef().getKey();
-        if (key == null) {
+        if (subscription.getActivityRef().getKey() == null) {
             return toShortString(subscription.getId());
         }
-        return toString(subscription.getActivityRef().getModel());
+
+        StringBuilder builder = new StringBuilder()
+                .append(toString(subscription.getActivityRef().getModel()));
+
+        if (subscription.getUserRef().getKey() != null) {
+            builder.append(" (").append(toString(subscription.getUserRef().getModel())).append(')');
+        }
+
+        return builder.toString();
     }
 
     public static String toString(Activity activity) {
@@ -56,8 +63,11 @@ public final class FormatUtil {
         if (account.getUserRef().getKey() == null) {
             return toShortString(account.getId());
         }
-        User user = account.getUserRef().getModel();
-        return toShortString(account.getId()) + " - " + StringUtils.defaultIfBlank(user.getRealName(), user.getName());
+        return toString(account.getUserRef().getModel()) + " (" + toShortString(account.getId()) + ")";
+    }
+
+    public static String toString(User user) {
+        return StringUtils.defaultIfBlank(user.getRealName(), user.getName());
     }
 
     public static String toString(OrganizationAccount account) {
@@ -65,7 +75,7 @@ public final class FormatUtil {
             return toShortString(account.getId());
         }
         Organization organization = account.getOrganizationRef().getModel();
-        return toShortString(account.getId()) + " - " + organization.getName();
+        return organization.getName() + " (" + toShortString(account.getId()) + ")";
     }
 
     public static String toString(Account account) {
@@ -74,7 +84,7 @@ public final class FormatUtil {
         } else if (account instanceof OrganizationAccount) {
             return toString((OrganizationAccount) account);
         }
-        return toShortString(account.getId()) + " - account";
+        return toShortString(account.getId());
     }
 
     private static String toShortString(Key id) {
@@ -83,4 +93,7 @@ public final class FormatUtil {
         return id.getName();
     }
 
+    public static String toTransactionFeeString(Subscription subscription) {
+        return "Transaction Fee " + toString(subscription);
+    }
 }

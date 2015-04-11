@@ -43,8 +43,12 @@ public class ApplySubscriptionCharges implements DeferredTask {
         Account payerAccount = beneficiaryTransaction.getAccountRef().getModel();
         Account beneficiaryAccount = AccountUtil.profitAndLossAccount();
         BalanceService balanceService = BalanceServiceFactory.getBalanceService();
-        Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), "Subscription charge " + FormatUtil.toString(subscription),
+
+        String description = FormatUtil.toTransactionFeeString(subscription);
+
+        Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), description,
                 Objects.toString(subscription.getId()), payerAccount, beneficiaryAccount);
+
         balanceService.applyTransfer(chargeTransfer);
     }
 }
