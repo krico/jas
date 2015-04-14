@@ -17,7 +17,10 @@ public final class OrganizationAccountMeta extends org.slim3.datastore.ModelMeta
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.util.Date> modified = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.util.Date>(this, "modified", "modified", java.util.Date.class);
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.lang.Double> balance = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.lang.Double>(this, "balance", "balance", java.lang.Double.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.lang.Double> balance = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.lang.Double>(this, "balance", "balance", double.class);
+
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.lang.Double> unpaid = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount, java.lang.Double>(this, "unpaid", "unpaid", double.class);
 
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount> currency = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.OrganizationAccount>(this, "currency", "currency");
@@ -50,7 +53,8 @@ public final class OrganizationAccountMeta extends org.slim3.datastore.ModelMeta
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setModified((java.util.Date) entity.getProperty("modified"));
-        model.setBalance((java.lang.Double) entity.getProperty("balance"));
+        model.setBalance(doubleToPrimitiveDouble((java.lang.Double) entity.getProperty("balance")));
+        model.setUnpaid(doubleToPrimitiveDouble((java.lang.Double) entity.getProperty("unpaid")));
         model.setCurrency((java.lang.String) entity.getProperty("currency"));
         return model;
     }
@@ -71,6 +75,7 @@ public final class OrganizationAccountMeta extends org.slim3.datastore.ModelMeta
         entity.setProperty("created", m.getCreated());
         entity.setProperty("modified", m.getModified());
         entity.setProperty("balance", m.getBalance());
+        entity.setProperty("unpaid", m.getUnpaid());
         entity.setProperty("currency", m.getCurrency());
         entity.setProperty("slim3.classHierarchyList", classHierarchyList);
         return entity;
@@ -154,10 +159,10 @@ public final class OrganizationAccountMeta extends org.slim3.datastore.ModelMeta
             writer.setNextPropertyName("modified");
             encoder0.encode(writer, m.getModified());
         }
-        if(m.getBalance() != null){
-            writer.setNextPropertyName("balance");
-            encoder0.encode(writer, m.getBalance());
-        }
+        writer.setNextPropertyName("balance");
+        encoder0.encode(writer, m.getBalance());
+        writer.setNextPropertyName("unpaid");
+        encoder0.encode(writer, m.getUnpaid());
         if(m.getCurrency() != null){
             writer.setNextPropertyName("currency");
             encoder0.encode(writer, m.getCurrency());
@@ -180,6 +185,8 @@ public final class OrganizationAccountMeta extends org.slim3.datastore.ModelMeta
         m.setModified(decoder0.decode(reader, m.getModified()));
         reader = rootReader.newObjectReader("balance");
         m.setBalance(decoder0.decode(reader, m.getBalance()));
+        reader = rootReader.newObjectReader("unpaid");
+        m.setUnpaid(decoder0.decode(reader, m.getUnpaid()));
         reader = rootReader.newObjectReader("currency");
         m.setCurrency(decoder0.decode(reader, m.getCurrency()));
         return m;

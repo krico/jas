@@ -8,6 +8,7 @@ import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.Payment;
+import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import org.slim3.datastore.Model;
 
 /**
@@ -68,10 +69,19 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
     @Override
     public void onCompleted() throws PaymentWorkflowException {
         if (subscriptionId != null) {
-            try {
-                BalanceServiceFactory.getBalanceService().subscription(subscriptionId);
-            } catch (EntityNotFoundException e) {
-                throw new PaymentWorkflowException(e);
+            Payment payment = getPaymentRef().getModel();
+            if (payment.getType() == PaymentTypeEnum.Cash) {
+                try {
+                    BalanceServiceFactory.getBalanceService().unpaidSubscription(subscriptionId);
+                } catch (EntityNotFoundException e) {
+                    throw new PaymentWorkflowException(e);
+                }
+            } else {
+                try {
+                    BalanceServiceFactory.getBalanceService().subscription(subscriptionId);
+                } catch (EntityNotFoundException e) {
+                    throw new PaymentWorkflowException(e);
+                }
             }
         }
 

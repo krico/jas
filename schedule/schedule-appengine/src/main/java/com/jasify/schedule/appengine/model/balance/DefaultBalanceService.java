@@ -56,6 +56,16 @@ public class DefaultBalanceService implements BalanceService {
 
 
     @Override
+    public void unpaidSubscription(Key subscriptionId) throws EntityNotFoundException {
+        Subscription subscription = Datastore.get(subscriptionMeta, subscriptionId);
+        Activity activity = subscription.getActivityRef().getModel();
+        ActivityType activityType = activity.getActivityTypeRef().getModel();
+        Key organizationId = activityType.getOrganizationRef().getKey();
+        Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
+        Account payer = AccountUtil.memberAccountMustExist(subscription.getUserRef().getKey());
+        subscription(subscription, payer, beneficiary, true);
+    }
+
     public void subscription(Key subscriptionId) throws EntityNotFoundException {
         subscription(Datastore.get(subscriptionMeta, subscriptionId));
     }
@@ -67,17 +77,16 @@ public class DefaultBalanceService implements BalanceService {
         Key organizationId = activityType.getOrganizationRef().getKey();
         Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
         Account payer = AccountUtil.memberAccountMustExist(subscription.getUserRef().getKey());
-        subscription(subscription, payer, beneficiary);
+        subscription(subscription, payer, beneficiary, false);
     }
 
-    @Override
-    public void subscription(Subscription subscription, Account payer, Account beneficiary) {
+    private void subscription(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) {
 
         //TODO: Validate balance is there before we start.
 
         linkToTransfer(subscription);
 
-        Transfer transfer = createSubscriptionTransfer(subscription, payer, beneficiary);
+        Transfer transfer = createSubscriptionTransfer(subscription, payer, beneficiary, unpaid);
         applyTransfer(transfer);
 
         Queue queue = QueueFactory.getQueue("balance-queue");
@@ -170,6 +179,8 @@ public class DefaultBalanceService implements BalanceService {
                 transfer.getPayerLegRef().setKey(Datastore.allocateId(custodialAccountKey, transactionMeta));
                 transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(userAccountKey, transactionMeta));
 
+                executedPayment.onCreateTransfer(transfer);
+
                 Datastore.put(tx, transfer);
 
             } else {
@@ -183,7 +194,7 @@ public class DefaultBalanceService implements BalanceService {
         return transfer;
     }
 
-    private Transfer createSubscriptionTransfer(Subscription subscription, Account payer, Account beneficiary) {
+    private Transfer createSubscriptionTransfer(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) {
         Transfer transfer;
         com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
         try {
@@ -194,6 +205,9 @@ public class DefaultBalanceService implements BalanceService {
                 transfer = new Transfer();
                 transfer.setId(subscription.getTransferRef().getKey());
                 transfer.setAmount(amount);
+                if (unpaid) { //cash payments are marked as unpaid
+                    transfer.setUnpaid(amount);
+                }
                 transfer.setCurrency(activity.getCurrency());
                 transfer.setDescription(FormatUtil.toString(activity));
                 transfer.setReference(Objects.toString(subscription.getId()));
@@ -259,7 +273,8 @@ public class DefaultBalanceService implements BalanceService {
                     account.setCurrency(transaction.getCurrency()); //TODO: multiple currencies?
                 }
 
-                account.setBalance(account.getBalance() + transaction.getAmount());
+                account.setBalance(account.getBalance() + transaction.getBalanceAmount());
+                account.setUnpaid(account.getUnpaid() + transaction.getUnpaid());
 
                 Datastore.put(tx, account, transaction);
 
@@ -306,6 +321,11 @@ public class DefaultBalanceService implements BalanceService {
     @Override
     public OrganizationAccount getOrganizationAccount(Organization organization) throws EntityNotFoundException {
         return getOrganizationAccount(organization.getId());
+    }
+
+    @Override
+    public List<Account> listAccounts() {
+        return Datastore.query(accountMeta).sort(accountMeta.id.desc).asList();
     }
 
     @Override

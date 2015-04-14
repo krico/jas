@@ -11,7 +11,10 @@ public final class TransferMeta extends org.slim3.datastore.ModelMeta<com.jasify
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.util.Date> created = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.util.Date>(this, "created", "created", java.util.Date.class);
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.lang.Double> amount = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.lang.Double>(this, "amount", "amount", java.lang.Double.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.lang.Double> amount = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.lang.Double>(this, "amount", "amount", double.class);
+
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.lang.Double> unpaid = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer, java.lang.Double>(this, "unpaid", "unpaid", double.class);
 
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer> currency = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.Transfer>(this, "currency", "currency");
@@ -49,7 +52,8 @@ public final class TransferMeta extends org.slim3.datastore.ModelMeta<com.jasify
         com.jasify.schedule.appengine.model.balance.Transfer model = new com.jasify.schedule.appengine.model.balance.Transfer();
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
-        model.setAmount((java.lang.Double) entity.getProperty("amount"));
+        model.setAmount(doubleToPrimitiveDouble((java.lang.Double) entity.getProperty("amount")));
+        model.setUnpaid(doubleToPrimitiveDouble((java.lang.Double) entity.getProperty("unpaid")));
         model.setCurrency((java.lang.String) entity.getProperty("currency"));
         model.setDescription((java.lang.String) entity.getProperty("description"));
         model.setReference((java.lang.String) entity.getProperty("reference"));
@@ -75,6 +79,7 @@ public final class TransferMeta extends org.slim3.datastore.ModelMeta<com.jasify
         }
         entity.setProperty("created", m.getCreated());
         entity.setProperty("amount", m.getAmount());
+        entity.setProperty("unpaid", m.getUnpaid());
         entity.setProperty("currency", m.getCurrency());
         entity.setProperty("description", m.getDescription());
         entity.setProperty("reference", m.getReference());
@@ -162,10 +167,10 @@ public final class TransferMeta extends org.slim3.datastore.ModelMeta<com.jasify
             writer.setNextPropertyName("created");
             encoder0.encode(writer, m.getCreated());
         }
-        if(m.getAmount() != null){
-            writer.setNextPropertyName("amount");
-            encoder0.encode(writer, m.getAmount());
-        }
+        writer.setNextPropertyName("amount");
+        encoder0.encode(writer, m.getAmount());
+        writer.setNextPropertyName("unpaid");
+        encoder0.encode(writer, m.getUnpaid());
         if(m.getCurrency() != null){
             writer.setNextPropertyName("currency");
             encoder0.encode(writer, m.getCurrency());
@@ -200,6 +205,8 @@ public final class TransferMeta extends org.slim3.datastore.ModelMeta<com.jasify
         m.setCreated(decoder0.decode(reader, m.getCreated()));
         reader = rootReader.newObjectReader("amount");
         m.setAmount(decoder0.decode(reader, m.getAmount()));
+        reader = rootReader.newObjectReader("unpaid");
+        m.setUnpaid(decoder0.decode(reader, m.getUnpaid()));
         reader = rootReader.newObjectReader("currency");
         m.setCurrency(decoder0.decode(reader, m.getCurrency()));
         reader = rootReader.newObjectReader("description");

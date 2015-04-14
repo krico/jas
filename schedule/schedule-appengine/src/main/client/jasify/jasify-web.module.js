@@ -10,6 +10,7 @@
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
         'jasifyComponents',
+        'jasify.admin',
         'jasify.authenticate',
         'jasify.payment',
         'jasify.balance',

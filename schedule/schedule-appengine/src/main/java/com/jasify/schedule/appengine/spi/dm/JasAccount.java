@@ -23,6 +23,8 @@ public class JasAccount implements JasEndpointEntity {
 
     private String currency;
 
+    private String description;
+
     public String getId() {
         return id;
     }
@@ -69,5 +71,13 @@ public class JasAccount implements JasEndpointEntity {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

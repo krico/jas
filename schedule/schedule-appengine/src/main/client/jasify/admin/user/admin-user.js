@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyWeb').controller('AdminUserController', AdminUserController);
+    angular.module('jasify.admin').controller('AdminUserController', AdminUserController);
 
     function AdminUserController($routeParams, User, Auth) {
         var vm = this;

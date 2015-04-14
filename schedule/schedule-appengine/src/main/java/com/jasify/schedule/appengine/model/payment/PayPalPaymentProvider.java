@@ -3,6 +3,8 @@ package com.jasify.schedule.appengine.model.payment;
 import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Link;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderConfig;
+import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -18,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,12 +32,9 @@ import static com.jasify.schedule.appengine.util.CurrencyUtil.formatCurrencyNumb
  * @since 05/02/15.
  */
 public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
-    public static final String CANCEL_PATH = "/payment/cancel/";
-    public static final String ACCEPT_PATH = "/payment/accept/";
     public static final BigDecimal PAY_PAL_FEE_MULTIPLIER = new BigDecimal("0.035");
     public static final BigDecimal ONE_MINUS_PAY_PAL_FEE_MULTIPLIER = BigDecimal.ONE.subtract(PAY_PAL_FEE_MULTIPLIER);
     public static final BigDecimal PAY_PAL_FEE_FLAT = new BigDecimal("0.55");
-    public static final MathContext FEE_CONTEXT = new MathContext(2, RoundingMode.UP);
     private static final long MIN_REMAINING_LIFETIME = 120;
     private static final Logger log = LoggerFactory.getLogger(PayPalPaymentProvider.class);
     private PayPalInterface payPalInterface;
@@ -49,8 +46,9 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         properties.setProperty(Constants.HTTP_CONNECTION_RETRY, "1");
         properties.setProperty(Constants.HTTP_CONNECTION_READ_TIMEOUT, "30000");
         properties.setProperty(Constants.HTTP_CONNECTION_MAX_CONNECTION, "100");
-        properties.setProperty(Constants.CLIENT_ID, "AT7appfb0qGgJa6iXV2MWTOglyRPfxcBAHsd5amklFv_2X46UIxnwqxitk0dTFdJBazitOfmKDlyDA33");
-        properties.setProperty(Constants.CLIENT_SECRET, "EI4_bm74PNvG5O7VapNbdJzLeP7E4_0IBQ_wwV06oD9yYAIKe7eD9RSiRWJ6QW9h9IutMtuOTyPMY5P3");
+        OAuth2ProviderConfig providerConfig = OAuth2ProviderEnum.PayPal.config();
+        properties.setProperty(Constants.CLIENT_ID, providerConfig.getClientId());
+        properties.setProperty(Constants.CLIENT_SECRET, providerConfig.getClientSecret());
         if (EnvironmentUtil.isProduction()) {
             properties.setProperty(Constants.ENDPOINT, Constants.REST_LIVE_ENDPOINT);
         } else {
@@ -94,6 +92,11 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         amountToBePaid = amountToBePaid.setScale(2, BigDecimal.ROUND_CEILING);
         BigDecimal fee = amountToBePaid.subtract(paymentAmount);
         return fee.doubleValue();
+    }
+
+    @Override
+    public PayPalPayment newPayment() {
+        return new PayPalPayment();
     }
 
     private void needWebProfile() {

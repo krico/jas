@@ -23,4 +23,9 @@ public final class PaymentWorkflowFactory {
         }
         throw new IllegalArgumentException("Unsupported kind: [" + id.getKind() + "]");
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends PaymentWorkflow> T workflowForCartId(String cartId) {
+        return (T) new ShoppingCartPaymentWorkflow(cartId);
+    }
 }

@@ -24,7 +24,9 @@ public class Transaction {
 
     private String currency;
 
-    private Double amount;
+    private double amount;
+
+    private double unpaid;
 
     private String description;
 
@@ -34,6 +36,8 @@ public class Transaction {
 
     private ModelRef<Transfer> transferRef = new ModelRef<>(Transfer.class);
 
+    private boolean debit;
+
     public Transaction() {
 
     }
@@ -42,14 +46,18 @@ public class Transaction {
         this(transfer, false);
     }
 
-    public Transaction(Transfer transfer, boolean negate) {
+    public Transaction(Transfer transfer, boolean debit) {
         currency = transfer.getCurrency();
         amount = transfer.getAmount();
-        if (negate && amount != null)
+        unpaid = transfer.getUnpaid();
+        if (debit) {
             amount = -1 * amount;
+            unpaid = -1 * unpaid;
+        }
         description = transfer.getDescription();
         reference = transfer.getReference();
         transferRef.setModel(transfer);
+        this.debit = debit;
     }
 
     public Key getId() {
@@ -76,12 +84,20 @@ public class Transaction {
         this.currency = currency;
     }
 
-    public Double getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public double getUnpaid() {
+        return unpaid;
+    }
+
+    public void setUnpaid(double unpaid) {
+        this.unpaid = unpaid;
     }
 
     public ModelRef<Account> getAccountRef() {
@@ -106,5 +122,17 @@ public class Transaction {
 
     public ModelRef<Transfer> getTransferRef() {
         return transferRef;
+    }
+
+    public boolean isDebit() {
+        return debit;
+    }
+
+    public void setDebit(boolean debit) {
+        this.debit = debit;
+    }
+
+    public double getBalanceAmount() {
+        return amount - unpaid;
     }
 }

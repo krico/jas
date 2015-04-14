@@ -36,7 +36,7 @@ public class PayPalPaymentProviderTest {
 
     @BeforeClass
     public static void setup() {
-        TestHelper.initializeDatastore();
+        TestHelper.initializeJasifyWithOAuthProviderData();
     }
 
     @AfterClass

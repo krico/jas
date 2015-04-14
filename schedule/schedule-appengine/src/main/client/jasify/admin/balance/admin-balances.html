@@ -1,12 +1,24 @@
 <div class="row">
-    <div class="col-sm-12">&nbsp;</div>
+    <div class="col-sm-12">
+        <div class="col-sm-4">
+            <form class="form-inline" name="PaymentTypeForm">
+                <div class="form-group form-group-sm">
+                    <select ng-options="item as item.description for item in vm.accounts"
+                            ng-model="vm.account" ng-selected="vm.accountChanged()"
+                            class="form-control">
+                        <option value="" disabled selected>-- select account --</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-<div class="row">
+<div class="row" ng-show="vm.account.id">
     <div class="col-sm-12">
         <div class="col-sm-4">
             <span tooltip-html-unsafe="<small>Created: {{vm.account.created|date:'medium'}}<br/>Modified: {{vm.account.created|date:'medium'}}</small>"
                   tooltip-trigger="mouseenter"
-                  class="h5">Account balance: </span>
+                  class="h5">balance: </span>
             <span class="strong text-primary">{{vm.account.currency}} {{vm.account.balance|number:2}}</span>
         </div>
         <div class="col-sm-4">
@@ -57,7 +69,7 @@
                                         num-pages="vm.pagination.numPages"
                                         boundary-links="true"
                                         previous-text="&lt;" next-text="&gt;" first-text="&laquo;" last-text="&raquo;"
-                                        ></pagination>
+                                    ></pagination>
                         </td>
                     </tr>
                     </tfoot>

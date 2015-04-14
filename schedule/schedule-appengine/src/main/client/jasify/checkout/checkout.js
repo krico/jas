@@ -12,6 +12,11 @@
         vm.cart = cart;
         vm.inProgress = false;
         vm.redirecting = false;
+        vm.paymentType = 'PayPal';
+        vm.paymentTypes = [
+            {label: 'PayPal', id: 'PayPal'},
+            {label: 'Pay at the door (cash)', id: 'Cash'}
+        ];
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -25,7 +30,7 @@
             vm.inProgress = true;
             Balance.createCheckoutPayment({
                 cartId: cart.id,
-                type: 'PayPal'
+                type: vm.paymentType
             }).then(ok, fail);
 
             function ok(resp) {

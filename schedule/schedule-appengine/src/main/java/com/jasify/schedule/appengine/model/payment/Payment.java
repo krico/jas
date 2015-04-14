@@ -248,6 +248,23 @@ public class Payment implements HasTransfer {
         return builder.toString();
     }
 
+    /**
+     * Called before a transfer for this payment is persisted
+     *
+     * @param transfer that will be persisted
+     */
+    public void onCreateTransfer(Transfer transfer) {
+    }
+
+    /**
+     * Called once per workflow before this payment and all related workflow items are persisted.
+     *
+     * @param paymentWorkflow to link
+     */
+    public void linkWorkflow(PaymentWorkflow paymentWorkflow) {
+        paymentWorkflow.getPaymentRef().setModel(this);
+    }
+
     @Override
     public String toString() {
         return "Payment{" +

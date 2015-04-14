@@ -15,6 +15,8 @@ public class JasTransaction implements JasEndpointEntity {
 
     private Double amount;
 
+    private Double unpaid;
+
     private String description;
 
     private String reference;
@@ -22,6 +24,8 @@ public class JasTransaction implements JasEndpointEntity {
     private String accountRef;
 
     private String transferRef;
+
+    private boolean debit;
 
     public String getId() {
         return id;
@@ -55,6 +59,14 @@ public class JasTransaction implements JasEndpointEntity {
         this.amount = amount;
     }
 
+    public Double getUnpaid() {
+        return unpaid;
+    }
+
+    public void setUnpaid(Double unpaid) {
+        this.unpaid = unpaid;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -85,5 +97,13 @@ public class JasTransaction implements JasEndpointEntity {
 
     public void setTransferRef(String transferRef) {
         this.transferRef = transferRef;
+    }
+
+    public boolean isDebit() {
+        return debit;
+    }
+
+    public void setDebit(boolean debit) {
+        this.debit = debit;
     }
 }

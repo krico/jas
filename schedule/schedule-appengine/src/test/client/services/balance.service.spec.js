@@ -97,6 +97,22 @@ describe('BalanceService', function () {
         expect($gapiMock.client.jasify.balance.getAccount).toHaveBeenCalled();
     });
 
+    it('should call getAccounts', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.balance, 'getAccounts').and.returnValue($q.when({result: {items: expected}}));
+        Balance.getAccounts()
+            .then(function (ret) {
+                expect(ret).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.balance.getAccounts).toHaveBeenCalled();
+    });
+
     it('should call getTransactions', function () {
         var expected = [];
         spyOn($gapiMock.client.jasify.balance, 'getTransactions').and.returnValue($q.when({result: {items: expected}}));

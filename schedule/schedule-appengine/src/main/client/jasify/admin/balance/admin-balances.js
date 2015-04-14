@@ -1,17 +1,18 @@
 (function (angular) {
 
-    angular.module('jasify.balance').controller('BalanceViewController', BalanceViewController);
+    angular.module('jasify.admin').controller('AdminBalancesController', BalanceViewController);
 
-    function BalanceViewController($location, Balance, account) {
+    function BalanceViewController($log, $location, Balance, $routeParams, accounts) {
         var vm = this;
         vm.alert = alert;
         vm.alerts = [];
-        vm.account = account || {balance: 0};
-        vm.paymentStatus = paymentStatus;
+        vm.accounts = accounts;
+        vm.account = {};
         vm.getTransactions = getTransactions;
         vm.transactions = [];
         vm.inProgress = false;
         vm.pageChanged = pageChanged;
+        vm.accountChanged = accountChanged;
         vm.pagination = {
             total: 0,
             page: 1,
@@ -19,10 +20,16 @@
             numPages: 1,
             maxSize: 5
         };
+        vm.selectedId = '';
 
-        vm.paymentStatus();
-        vm.pageChanged();
-
+        function accountChanged() {
+            if (vm.account.id && vm.selectedId != vm.account.id) {
+                vm.selectedId = vm.account.id;
+                vm.pagination.total = 0;
+                vm.pagination.page = 1;
+                vm.pageChanged();
+            }
+        }
 
         function getTransactions() {
             if (vm.inProgress) {
@@ -54,14 +61,6 @@
 
         function pageChanged() {
             vm.getTransactions();
-        }
-
-        function paymentStatus() {
-            //If we are the callback from payment-make
-            var ps = $location.search().paymentStatus;
-            if (ps && ps == 'success') {
-                vm.alert('success', 'Payment successfully processed!');
-            }
         }
 
         function alert(t, m) {

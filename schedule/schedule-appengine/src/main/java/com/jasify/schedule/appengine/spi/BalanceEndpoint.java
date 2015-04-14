@@ -27,6 +27,7 @@ import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
 import com.jasify.schedule.appengine.spi.dm.JasTransactionList;
 import com.jasify.schedule.appengine.spi.transform.*;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,8 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeLoggedIn;
-import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrAdmin;
+import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
 
 /**
  * @author krico
@@ -87,23 +87,43 @@ public class BalanceEndpoint {
     public JasPaymentResponse createCheckoutPayment(User caller, JasCheckoutPaymentRequest paymentRequest) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException {
         //TODO: I had a real hard time (and gave up) writing a test for this method.  Indicates it's too complex?
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
-        GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(paymentRequest.getBaseUrl()));
-        if (paymentRequest.getType() != PaymentTypeEnum.PayPal) {
-            throw new BadRequestException("Only PayPal payment is supported at this time.");
+        Preconditions.checkNotNull(paymentRequest.getType());
+
+        switch (paymentRequest.getType()) {
+            case PayPal: {
+                PayPalPayment payment = createPaymentInternal(jasCaller, PayPalPaymentProvider.instance(), paymentRequest);
+                return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
+            }
+            case Cash: {
+                CashPayment payment = createPaymentInternal(jasCaller, CashPaymentProvider.instance(), paymentRequest);
+                GenericUrl url = new GenericUrl(paymentRequest.getBaseUrl());
+                url.setFragment(CashPaymentProvider.ACCEPT_PATH + KeyUtil.keyToString(payment.getId()));
+                return new JasPaymentResponse(url.build());
+            }
+            default:
+                throw new BadRequestException("Unsupported payment type: " + paymentRequest.getType());
         }
-        String cartId = Preconditions.checkNotNull(StringUtils.trimToNull(paymentRequest.getCartId()));
+
+    }
+
+    private <T extends Payment> T createPaymentInternal(JasifyEndpointUser jasCaller, PaymentProvider<T> provider,
+                                                        JasCheckoutPaymentRequest request) throws PaymentException, NotFoundException {
+        GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(request.getBaseUrl()));
+        String cartId = Preconditions.checkNotNull(StringUtils.trimToNull(request.getCartId()));
 
         ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
         ShoppingCart cart = cartService.getCart(cartId);
         if (cart == null) {
             throw new NotFoundException("Cart id: [" + cartId + "] not found.");
         }
+
+        String currency = Preconditions.checkNotNull(StringUtils.trimToNull(cart.getCurrency()));
         List<ShoppingCart.Item> items = Preconditions.checkNotNull(cart.getItems());
         Preconditions.checkState(!items.isEmpty());
-        String currency = Preconditions.checkNotNull(StringUtils.trimToNull(cart.getCurrency()));
+
+        T payment = provider.newPayment();
 
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
-        PayPalPayment payment = new PayPalPayment();
         payment.setCurrency(currency);
         List<PaymentWorkflow> workflowList = new ArrayList<>();
         for (ShoppingCart.Item item : items) {
@@ -112,9 +132,12 @@ public class BalanceEndpoint {
                 workflowList.add(PaymentWorkflowFactory.workflowFor(item.getItemId()));
             }
         }
+
+        workflowList.add(PaymentWorkflowFactory.workflowForCartId(cartId));
+
         paymentService.newPayment(jasCaller.getUserId(), payment, workflowList);
-        paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
-        return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
+        paymentService.createPayment(provider, payment, baseUrl);
+        return payment;
     }
 
     @ApiMethod(name = "balance.cancelPayment", path = "balance/cancel-payment/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
@@ -134,11 +157,31 @@ public class BalanceEndpoint {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
-        Preconditions.checkArgument(payment.getType() == PaymentTypeEnum.PayPal, "Only PayPal payments supported");
-        PayPalPayment payPalPayment = (PayPalPayment) payment;
-        payPalPayment.setPayerId(payerId);
-        paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
-        BalanceServiceFactory.getBalanceService().payment(payPalPayment);
+        Preconditions.checkNotNull(payment.getType(), "No PaymentType");
+        switch (payment.getType()) {
+            case PayPal: {
+                PayPalPayment payPalPayment = (PayPalPayment) payment;
+                payPalPayment.setPayerId(payerId);
+                paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
+                BalanceServiceFactory.getBalanceService().payment(payPalPayment);
+            }
+            break;
+            case Cash: {
+                CashPayment cashPayment = (CashPayment) payment;
+                paymentService.executePayment(CashPaymentProvider.instance(), cashPayment);
+                //TODO: how do we handle this now?
+                BalanceServiceFactory.getBalanceService().payment(cashPayment);
+            }
+            break;
+            default:
+                throw new BadRequestException("Unsupported payment type: " + payment.getType());
+        }
+    }
+
+    @ApiMethod(name = "balance.getAccounts", path = "balance/accounts", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Account> getAccounts(User caller) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        return BalanceServiceFactory.getBalanceService().listAccounts();
     }
 
     @ApiMethod(name = "balance.getAccount", path = "balance/account", httpMethod = ApiMethod.HttpMethod.GET)
@@ -156,8 +199,18 @@ public class BalanceEndpoint {
                                               @Nullable @Named("limit") Integer limit,
                                               @Nullable @Named("offset") Integer offset)
             throws NotFoundException, UnauthorizedException, ForbiddenException {
-        mustBeSameUserOrAdmin(caller, AccountUtil.accountIdToMemberId(accountId));
 
+        Key userId = null;
+        try {
+            userId = AccountUtil.accountIdToMemberId(accountId);
+        } catch (IllegalArgumentException e) {
+            //no op
+        }
+        if (userId == null) {
+            mustBeAdmin(caller);
+        } else {
+            mustBeSameUserOrAdmin(caller, userId);
+        }
         if (limit == null) limit = 0;
         if (offset == null) offset = 0;
 
