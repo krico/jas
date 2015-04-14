@@ -37,11 +37,11 @@ public interface BalanceService {
      */
     void payment(Payment payment);
 
+    void unpaidSubscription(Key subscriptionId) throws EntityNotFoundException;
+
     void subscription(Key subscriptionId) throws EntityNotFoundException;
 
     void subscription(Subscription subscription) throws EntityNotFoundException;
-
-    void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException;
 
     Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount);
 

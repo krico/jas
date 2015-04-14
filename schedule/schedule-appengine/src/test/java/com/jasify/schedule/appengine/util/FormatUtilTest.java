@@ -49,7 +49,7 @@ public class FormatUtilTest {
     @Test
     public void testToStringAccount() throws Exception {
         Account account = new Account();
-        assertEquals("NULL - account", FormatUtil.toString(account));
+        assertEquals("NULL", FormatUtil.toString(account));
         UserAccount userAccount = new UserAccount();
         assertEquals(FormatUtil.toString(userAccount), FormatUtil.toString((Account) userAccount));
         OrganizationAccount organizationAccount = new OrganizationAccount();

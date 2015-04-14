@@ -11,6 +11,7 @@ import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.payment.CashPayment;
 import com.jasify.schedule.appengine.model.payment.PayPalPayment;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
@@ -57,7 +58,42 @@ public class BalanceServiceTest {
 
 
     @Test
-    public void testPayment() throws Exception {
+    public void testPaymentCash() throws Exception {
+        Payment payment = new CashPayment();
+        payment.setAmount(25d);
+        payment.setFee(1d);
+        payment.setCurrency("CHF");
+        payment.setState(PaymentStateEnum.Completed);
+
+        User user = new User("lehman");
+        payment.getUserRef().setModel(user);
+        Datastore.put(payment, user);
+        balanceService.payment(payment);
+        assertNotNull("Transfer not linked", payment.getTransferRef().getKey());
+        Transfer transfer = payment.getTransferRef().getModel();
+        assertNotNull(transfer);
+        assertEquals(payment.getCurrency(), transfer.getCurrency());
+
+        Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();
+        assertNotNull(beneficiaryTransaction);
+        assertEquals(transfer.getCurrency(), beneficiaryTransaction.getCurrency());
+        assertEquals(24d, beneficiaryTransaction.getAmount());
+        assertEquals(24d, beneficiaryTransaction.getUnpaid());
+        assertEquals(0d, beneficiaryTransaction.getAccountRef().getModel().getBalance());
+        assertEquals(24d, beneficiaryTransaction.getAccountRef().getModel().getUnpaid());
+
+        Transaction payerTransaction = transfer.getPayerLegRef().getModel();
+        assertNotNull(payerTransaction);
+        assertEquals(transfer.getCurrency(), payerTransaction.getCurrency());
+        assertEquals(-24d, payerTransaction.getAmount());
+        assertEquals(-24d, payerTransaction.getUnpaid());
+        assertEquals(0d, payerTransaction.getAccountRef().getModel().getBalance());
+        assertEquals(-24d, payerTransaction.getAccountRef().getModel().getUnpaid());
+
+    }
+
+    @Test
+    public void testPaymentPayPal() throws Exception {
         Payment payment = new PayPalPayment();
         payment.setAmount(25d);
         payment.setFee(1d);
@@ -77,13 +113,17 @@ public class BalanceServiceTest {
         assertNotNull(beneficiaryTransaction);
         assertEquals(transfer.getCurrency(), beneficiaryTransaction.getCurrency());
         assertEquals(24d, beneficiaryTransaction.getAmount());
+        assertEquals(0d, beneficiaryTransaction.getUnpaid());
         assertEquals(24d, beneficiaryTransaction.getAccountRef().getModel().getBalance());
+        assertEquals(0d, beneficiaryTransaction.getAccountRef().getModel().getUnpaid());
 
         Transaction payerTransaction = transfer.getPayerLegRef().getModel();
         assertNotNull(payerTransaction);
         assertEquals(transfer.getCurrency(), payerTransaction.getCurrency());
         assertEquals(-24d, payerTransaction.getAmount());
+        assertEquals(-0d, payerTransaction.getUnpaid());
         assertEquals(-24d, payerTransaction.getAccountRef().getModel().getBalance());
+        assertEquals(0d, payerTransaction.getAccountRef().getModel().getUnpaid());
 
     }
 
@@ -94,7 +134,7 @@ public class BalanceServiceTest {
             public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
                 balanceService.subscription(subscription.getId());
             }
-        });
+        }, false);
     }
 
     @Test
@@ -104,20 +144,20 @@ public class BalanceServiceTest {
             public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
                 balanceService.subscription(subscription);
             }
-        });
+        }, false);
     }
 
     @Test
-    public void testSubscriptionWithAccounts() throws Exception {
+    public void testUnpaidSubscriptionWithSubscriptionId() throws Exception {
         assertSubscription(new DoSubscription() {
             @Override
             public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
-                balanceService.subscription(subscription, payer, beneficiary);
+                balanceService.unpaidSubscription(subscription.getId());
             }
-        });
+        }, true);
     }
 
-    private void assertSubscription(DoSubscription doer) throws Exception {
+    private void assertSubscription(DoSubscription doer, boolean unpaid) throws Exception {
         Activity activity = new Activity();
         activity.setPrice(18d);
         activity.setCurrency("CHF");
@@ -159,13 +199,29 @@ public class BalanceServiceTest {
         assertNotNull(beneficiaryTransaction);
         assertEquals(transfer.getCurrency(), beneficiaryTransaction.getCurrency());
         assertEquals(18d, beneficiaryTransaction.getAmount());
-        assertEquals(18d, beneficiaryTransaction.getAccountRef().getModel().getBalance());
+        if (unpaid) {
+            assertEquals(18d, beneficiaryTransaction.getUnpaid());
+            assertEquals(0d, beneficiaryTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(18d, beneficiaryTransaction.getAccountRef().getModel().getUnpaid());
+        } else {
+            assertEquals(0d, beneficiaryTransaction.getUnpaid());
+            assertEquals(18d, beneficiaryTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(0d, beneficiaryTransaction.getAccountRef().getModel().getUnpaid());
+        }
 
         Transaction payerTransaction = transfer.getPayerLegRef().getModel();
         assertNotNull(payerTransaction);
         assertEquals(transfer.getCurrency(), payerTransaction.getCurrency());
         assertEquals(-18d, payerTransaction.getAmount());
-        assertEquals(-18d, payerTransaction.getAccountRef().getModel().getBalance());
+        if (unpaid) {
+            assertEquals(-18d, payerTransaction.getUnpaid());
+            assertEquals(0d, payerTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(-18d, payerTransaction.getAccountRef().getModel().getUnpaid());
+        } else {
+            assertEquals(-0d, payerTransaction.getUnpaid());
+            assertEquals(-18d, payerTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(0d, payerTransaction.getAccountRef().getModel().getUnpaid());
+        }
     }
 
     @Test

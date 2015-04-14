@@ -14,7 +14,10 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction> currency = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction>(this, "currency", "currency");
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Double> amount = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Double>(this, "amount", "amount", java.lang.Double.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Double> amount = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Double>(this, "amount", "amount", double.class);
+
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Double> unpaid = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction, java.lang.Double>(this, "unpaid", "unpaid", double.class);
 
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.balance.Transaction>(this, "description", "description");
@@ -53,7 +56,8 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setCurrency((java.lang.String) entity.getProperty("currency"));
-        model.setAmount((java.lang.Double) entity.getProperty("amount"));
+        model.setAmount(doubleToPrimitiveDouble((java.lang.Double) entity.getProperty("amount")));
+        model.setUnpaid(doubleToPrimitiveDouble((java.lang.Double) entity.getProperty("unpaid")));
         model.setDescription((java.lang.String) entity.getProperty("description"));
         model.setReference((java.lang.String) entity.getProperty("reference"));
         if (model.getAccountRef() == null) {
@@ -80,6 +84,7 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
         entity.setProperty("created", m.getCreated());
         entity.setProperty("currency", m.getCurrency());
         entity.setProperty("amount", m.getAmount());
+        entity.setProperty("unpaid", m.getUnpaid());
         entity.setProperty("description", m.getDescription());
         entity.setProperty("reference", m.getReference());
         if (m.getAccountRef() == null) {
@@ -171,10 +176,10 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
             writer.setNextPropertyName("currency");
             encoder0.encode(writer, m.getCurrency());
         }
-        if(m.getAmount() != null){
-            writer.setNextPropertyName("amount");
-            encoder0.encode(writer, m.getAmount());
-        }
+        writer.setNextPropertyName("amount");
+        encoder0.encode(writer, m.getAmount());
+        writer.setNextPropertyName("unpaid");
+        encoder0.encode(writer, m.getUnpaid());
         if(m.getDescription() != null){
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
@@ -209,6 +214,8 @@ public final class TransactionMeta extends org.slim3.datastore.ModelMeta<com.jas
         m.setCurrency(decoder0.decode(reader, m.getCurrency()));
         reader = rootReader.newObjectReader("amount");
         m.setAmount(decoder0.decode(reader, m.getAmount()));
+        reader = rootReader.newObjectReader("unpaid");
+        m.setUnpaid(decoder0.decode(reader, m.getUnpaid()));
         reader = rootReader.newObjectReader("description");
         m.setDescription(decoder0.decode(reader, m.getDescription()));
         reader = rootReader.newObjectReader("reference");

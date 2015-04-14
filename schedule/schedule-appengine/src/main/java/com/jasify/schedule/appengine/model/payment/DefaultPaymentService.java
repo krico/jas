@@ -57,7 +57,7 @@ class DefaultPaymentService implements PaymentService {
         payment.setId(paymentId);
 
         for (PaymentWorkflow paymentWorkflow : workflowList) {
-            paymentWorkflow.getPaymentRef().setKey(paymentId);
+            payment.linkWorkflow(paymentWorkflow);
         }
 
         ArrayList<Object> all = new ArrayList<>();

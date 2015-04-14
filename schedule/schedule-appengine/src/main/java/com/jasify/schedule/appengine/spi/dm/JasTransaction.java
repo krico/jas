@@ -15,6 +15,8 @@ public class JasTransaction implements JasEndpointEntity {
 
     private Double amount;
 
+    private Double unpaid;
+
     private String description;
 
     private String reference;
@@ -55,6 +57,14 @@ public class JasTransaction implements JasEndpointEntity {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public Double getUnpaid() {
+        return unpaid;
+    }
+
+    public void setUnpaid(Double unpaid) {
+        this.unpaid = unpaid;
     }
 
     public String getDescription() {

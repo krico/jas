@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.payment;
 
+import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.Model;
 import org.slim3.datastore.ModelRef;
@@ -18,6 +19,11 @@ public class CashPayment extends Payment {
 
     public CashPayment() {
         super(PaymentTypeEnum.Cash);
+    }
+
+    @Override
+    public void onCreateTransfer(Transfer transfer) {
+        transfer.setUnpaid(transfer.getAmount()); //CashPayment always fully unpaid
     }
 
     public boolean isConfirmed() {
@@ -41,7 +47,7 @@ public class CashPayment extends Payment {
     }
 
     public String describe() {
-        return super.describe() + " (cash)";
+        return super.describe() + " (At the door)";
     }
 
 }

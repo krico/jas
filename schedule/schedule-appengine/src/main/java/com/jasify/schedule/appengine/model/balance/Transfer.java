@@ -62,7 +62,9 @@ public class Transfer {
     @Attribute(listener = CreationDate.class)
     private Date created;
 
-    private Double amount;
+    private double amount;
+
+    private double unpaid;
 
     private String currency;
 
@@ -90,12 +92,20 @@ public class Transfer {
         this.created = created;
     }
 
-    public Double getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public double getUnpaid() {
+        return unpaid;
+    }
+
+    public void setUnpaid(double unpaid) {
+        this.unpaid = unpaid;
     }
 
     public String getCurrency() {

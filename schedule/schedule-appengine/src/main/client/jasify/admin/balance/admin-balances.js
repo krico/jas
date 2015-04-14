@@ -25,7 +25,6 @@
         function accountChanged() {
             if (vm.account.id && vm.selectedId != vm.account.id) {
                 vm.selectedId = vm.account.id;
-                $log.debug("Fetched: " + vm.account.id);
                 vm.pagination.total = 0;
                 vm.pagination.page = 1;
                 vm.pageChanged();

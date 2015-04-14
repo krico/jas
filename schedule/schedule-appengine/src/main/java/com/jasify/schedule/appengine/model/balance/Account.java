@@ -27,7 +27,9 @@ public class Account {
     @Attribute(listener = ModificationDate.class)
     private Date modified;
 
-    private Double balance;
+    private double balance;
+
+    private double unpaid;
 
     private String currency;
 
@@ -36,7 +38,6 @@ public class Account {
 
     public Account(Key id) {
         setId(id);
-        setBalance(0d);
     }
 
     public Key getId() {
@@ -63,12 +64,20 @@ public class Account {
         this.modified = modified;
     }
 
-    public Double getBalance() {
+    public double getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(double balance) {
         this.balance = balance;
+    }
+
+    public double getUnpaid() {
+        return unpaid;
+    }
+
+    public void setUnpaid(double unpaid) {
+        this.unpaid = unpaid;
     }
 
     public String getCurrency() {

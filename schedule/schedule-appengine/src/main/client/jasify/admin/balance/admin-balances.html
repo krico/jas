@@ -44,10 +44,10 @@
                         <td class="text-right">
                             <nobr>{{transaction.amount | number: 2 }} {{transaction.currency}}</nobr>
                         </td>
-                        <td>
+                        <td ng-class="{'transaction-debit' : transaction.debit, 'transaction-credit' : !transaction.debit}">
                             <i class="fa"
-                               ng-class="{'fa-minus-square': transaction.debit, 'transaction-debit' : transaction.debit,
-                               'fa-plus-square' : !transaction.debit, 'transaction-credit' : !transaction.debit}"></i>
+                               ng-class="{'fa-minus-square': transaction.debit, 'fa-plus-square' : !transaction.debit}"></i>
+                            <i ng-if="transaction.unpaid" class="fa fa-question-circle"></i>
                         </td>
                     </tr>
                     <tr ng-show="vm.inProgress">
