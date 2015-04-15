@@ -26,33 +26,8 @@ var argv = require('yargs').argv,
     templateCache = require('gulp-angular-templatecache'),
     plumber = require('gulp-plumber');
 
-var xml2json = require('xml-to-json');
-
-function mavenVersion() {
-    //This is so ugly, I'm embarrassed ;-)
-    var gotIt = {err: null, result: null};
-
-    xml2json({
-        input: './pom.xml',
-        output: null
-    }, function (err, result) {
-        gotIt.err = err;
-        gotIt.result = result;
-    });
-    var uvrun = require("uvrun");
-    while (gotIt.err === null && gotIt.result === null)
-        uvrun.runOnce();
-
-    if (gotIt.err)
-        throw gotIt.err;
-
-    return gotIt.result.project.version;
-}
-
-var pomVersion = mavenVersion();
-gutil.log('Project version: ' + gutil.colors.cyan(pomVersion));
-var paths = require('./paths.json');
-var target = paths.buildTemplate.replace('@VERSION@', pomVersion);
+var paths = require('./dynamic-paths.js');
+gutil.log('Project version: ' + gutil.colors.cyan(paths.projectVersion));
 
 gulp.task('clean', clean);
 gulp.task('sym', ['build'], sym);
@@ -99,12 +74,12 @@ function rebuild() {
 
 
 function clean(cb) {
-    del([target, paths.symBuild], cb);
+    del([paths.build, paths.symBuild], cb);
 }
 
 function sym(cb) {
     return gulp
-        .src(target)
+        .src(paths.build)
         .pipe(symlink(paths.symBuild, {force: true, relative: true}));
 }
 
@@ -129,12 +104,12 @@ function clientTpl(cb) {
             footer: '})(angular);'
         }))
         .pipe(sourcemaps.init())
-        .pipe(gulp.dest(target + '/js'))
+        .pipe(gulp.dest(paths.build + '/js'))
         .pipe(ngAnnotate())
         .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(target + '/js'));
+        .pipe(gulp.dest(paths.build + '/js'));
 }
 
 
@@ -156,12 +131,12 @@ function clientJs(cb) {
         .pipe(replace('@VERSION@', versionInfo.version))
         .pipe(plumber())
         .pipe(concat('jasify.js'))
-        .pipe(gulp.dest(target + '/js'))
+        .pipe(gulp.dest(paths.build + '/js'))
         .pipe(ngAnnotate())
         .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(target + '/js'));
+        .pipe(gulp.dest(paths.build + '/js'));
 }
 
 function clientDependenciesJsFun(key) {
@@ -174,12 +149,12 @@ function clientDependenciesJsFun(key) {
             .pipe(sourcemaps.init())
             .pipe(plumber())
             .pipe(concat('dep-' + key + '.js'))
-            .pipe(gulp.dest(target + '/js'))
+            .pipe(gulp.dest(paths.build + '/js'))
             .pipe(ngAnnotate())
             .pipe(uglify())
             .pipe(rename({extname: '.min.js'}))
             .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest(target + '/js'));
+            .pipe(gulp.dest(paths.build + '/js'));
     };
 }
 
@@ -205,11 +180,11 @@ function clientCss(cb) {
             ]
         }))
         .pipe(concat('jasify.css'))
-        .pipe(gulp.dest(target + '/css'))
+        .pipe(gulp.dest(paths.build + '/css'))
         .pipe(minifyCSS())
         .pipe(rename({extname: '.min.css'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(target + '/css'));
+        .pipe(gulp.dest(paths.build + '/css'));
 }
 
 function clientDependenciesCssFun(key) {
@@ -223,14 +198,14 @@ function clientDependenciesCssFun(key) {
     return function (cb) {
 
         gulp.src(fonts)
-            .pipe(gulp.dest(target + '/fonts'));
+            .pipe(gulp.dest(paths.build + '/fonts'));
 
         return gulp.src(src)
             .pipe(concat('dep-' + key + '.css'))
-            .pipe(gulp.dest(target + '/css'))
+            .pipe(gulp.dest(paths.build + '/css'))
             .pipe(minifyCSS())
             .pipe(rename({extname: '.min.css'}))
-            .pipe(gulp.dest(target + '/css'));
+            .pipe(gulp.dest(paths.build + '/css'));
     };
 }
 
@@ -238,12 +213,12 @@ function clientDependenciesCssFun(key) {
 function html(cb) {
     return gulp.src(paths.html)
         .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
-        .pipe(gulp.dest(target + '/../'))
+        .pipe(gulp.dest(paths.build + '/../'))
 }
 
 function staticHtml(cb) {
     return gulp.src(paths.staticHtml)
-        .pipe(gulp.dest(target + '/../'))
+        .pipe(gulp.dest(paths.build + '/../'))
 }
 
 
