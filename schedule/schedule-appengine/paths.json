@@ -55,7 +55,7 @@
       ]
     }
   },
-  "build": "target/schedule-appengine-@VERSION@/build",
+  "buildTemplate": "target/schedule-appengine-@VERSION@/build",
   "bower": "target/bower_components",
   "symBuild": "src/main/html/build"
 }

@@ -24,8 +24,7 @@ var argv = require('yargs').argv,
     karma = require('gulp-karma'),
     gulpif = require('gulp-if'),
     templateCache = require('gulp-angular-templatecache'),
-    plumber = require('gulp-plumber'),
-    paths = require('./paths.json');
+    plumber = require('gulp-plumber');
 
 var xml2json = require('xml-to-json');
 
@@ -52,7 +51,9 @@ function mavenVersion() {
 
 var pomVersion = mavenVersion();
 gutil.log('Project version: ' + gutil.colors.cyan(pomVersion));
-paths.build = paths.build.replace('@VERSION@', pomVersion);
+var paths = require('./paths.json');
+var target = paths.buildTemplate.replace('@VERSION@', pomVersion);
+
 gulp.task('clean', clean);
 gulp.task('sym', ['build'], sym);
 gulp.task('bower-install', bowerInstall);
@@ -98,12 +99,12 @@ function rebuild() {
 
 
 function clean(cb) {
-    del([paths.build, paths.symBuild], cb);
+    del([target, paths.symBuild], cb);
 }
 
 function sym(cb) {
     return gulp
-        .src(paths.build)
+        .src(target)
         .pipe(symlink(paths.symBuild, {force: true, relative: true}));
 }
 
@@ -128,12 +129,12 @@ function clientTpl(cb) {
             footer: '})(angular);'
         }))
         .pipe(sourcemaps.init())
-        .pipe(gulp.dest(paths.build + '/js'))
+        .pipe(gulp.dest(target + '/js'))
         .pipe(ngAnnotate())
         .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(paths.build + '/js'));
+        .pipe(gulp.dest(target + '/js'));
 }
 
 
@@ -155,12 +156,12 @@ function clientJs(cb) {
         .pipe(replace('@VERSION@', versionInfo.version))
         .pipe(plumber())
         .pipe(concat('jasify.js'))
-        .pipe(gulp.dest(paths.build + '/js'))
+        .pipe(gulp.dest(target + '/js'))
         .pipe(ngAnnotate())
         .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(paths.build + '/js'));
+        .pipe(gulp.dest(target + '/js'));
 }
 
 function clientDependenciesJsFun(key) {
@@ -173,12 +174,12 @@ function clientDependenciesJsFun(key) {
             .pipe(sourcemaps.init())
             .pipe(plumber())
             .pipe(concat('dep-' + key + '.js'))
-            .pipe(gulp.dest(paths.build + '/js'))
+            .pipe(gulp.dest(target + '/js'))
             .pipe(ngAnnotate())
             .pipe(uglify())
             .pipe(rename({extname: '.min.js'}))
             .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest(paths.build + '/js'));
+            .pipe(gulp.dest(target + '/js'));
     };
 }
 
@@ -204,11 +205,11 @@ function clientCss(cb) {
             ]
         }))
         .pipe(concat('jasify.css'))
-        .pipe(gulp.dest(paths.build + '/css'))
+        .pipe(gulp.dest(target + '/css'))
         .pipe(minifyCSS())
         .pipe(rename({extname: '.min.css'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(paths.build + '/css'));
+        .pipe(gulp.dest(target + '/css'));
 }
 
 function clientDependenciesCssFun(key) {
@@ -222,14 +223,14 @@ function clientDependenciesCssFun(key) {
     return function (cb) {
 
         gulp.src(fonts)
-            .pipe(gulp.dest(paths.build + '/fonts'));
+            .pipe(gulp.dest(target + '/fonts'));
 
         return gulp.src(src)
             .pipe(concat('dep-' + key + '.css'))
-            .pipe(gulp.dest(paths.build + '/css'))
+            .pipe(gulp.dest(target + '/css'))
             .pipe(minifyCSS())
             .pipe(rename({extname: '.min.css'}))
-            .pipe(gulp.dest(paths.build + '/css'));
+            .pipe(gulp.dest(target + '/css'));
     };
 }
 
@@ -237,12 +238,12 @@ function clientDependenciesCssFun(key) {
 function html(cb) {
     return gulp.src(paths.html)
         .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
-        .pipe(gulp.dest(paths.build + '/../'))
+        .pipe(gulp.dest(target + '/../'))
 }
 
 function staticHtml(cb) {
     return gulp.src(paths.staticHtml)
-        .pipe(gulp.dest(paths.build + '/../'))
+        .pipe(gulp.dest(target + '/../'))
 }
 
 
