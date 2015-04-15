@@ -15,4 +15,6 @@ public interface UserSession {
     String getSessionId();
 
     boolean isAdmin();
+
+    boolean isOrgMember();
 }

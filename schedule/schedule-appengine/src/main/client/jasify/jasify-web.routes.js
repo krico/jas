@@ -129,7 +129,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     organizations: /*@ngInject*/ function ($q, Allow, Organization) {
-                        return Allow.admin().then(
+                        return Allow.adminOrOrgMember().then(
                             function () {
                                 return Organization.query();
                             },
@@ -146,7 +146,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     organization: /*@ngInject*/ function ($q, $route, Allow, Organization) {
-                        return Allow.admin().then(
+                        return Allow.adminOrOrgMember().then(
                             function () {
                                 if ($route.current.params.id)
                                     return Organization.get($route.current.params.id);
@@ -166,7 +166,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     organizations: /*@ngInject*/ function ($q, Allow, Organization) {
-                        return Allow.admin().then(
+                        return Allow.adminOrOrgMember().then(
                             function () {
                                 return Organization.query();
                             },
@@ -177,7 +177,7 @@
                     },
                     activities: /*@ngInject*/ function ($q, $route, Allow, Activity) {
 
-                        return Allow.admin().then(allowed, forbidden);
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
 
                         function allowed() {
                             if ($route.current.params.organizationId) {
@@ -199,7 +199,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     organizations: /*@ngInject*/ function ($q, Allow, Organization) {
-                        return Allow.admin().then(
+                        return Allow.adminOrOrgMember().then(
                             function () {
                                 return Organization.query();
                             },
@@ -210,7 +210,7 @@
                     },
                     activity: /*@ngInject*/ function ($q, $route, Allow, Activity) {
 
-                        return Allow.admin().then(allowed, forbidden);
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
 
                         function allowed() {
                             if ($route.current.params.id) {
@@ -233,7 +233,7 @@
                 resolve: {
                     subscriptions: /*@ngInject*/ function ($q, $route, Allow, Activity) {
 
-                        return Allow.admin().then(allowed, forbidden);
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
 
                         function allowed() {
                             if ($route.current.params.activityId) {

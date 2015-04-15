@@ -3,7 +3,7 @@
 
     angular.module('jasifyWeb').controller('AdminOrganizationsController', AdminOrganizationsController);
 
-    function AdminOrganizationsController($location, Organization, organizations) {
+    function AdminOrganizationsController($location, Organization, Auth, organizations) {
         var vm = this;
         vm.organizations = organizations.items;
         vm.organization = {};
@@ -14,6 +14,7 @@
         vm.add = add;
         vm.viewOrganization = viewOrganization;
         vm.alert = alert;
+        vm.isAdmin = isAdmin;
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -58,6 +59,10 @@
             Organization.query().then(function (r) {
                 vm.organizations = r.items;
             }, errorHandler);
+        }
+
+        function isAdmin() {
+            return Auth.isAdmin();
         }
     }
 

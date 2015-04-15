@@ -26,10 +26,12 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener,
     private final String sessionId = UUID.randomUUID().toString().replaceAll("-", "");
     private final Key userId;
     private final boolean admin;
+    private final boolean orgMember;
 
-    public HttpUserSession(User user) {
+    public HttpUserSession(User user, boolean orgMember) {
         this.userId = user.getId();
         this.admin = user.isAdmin();
+        this.orgMember = orgMember;
     }
 
     public static UserSession get(ServletRequest req) {
@@ -85,6 +87,10 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener,
         return admin;
     }
 
+    @Override
+    public boolean isOrgMember() { return orgMember; }
+
+    @Override
     public String getSessionId() {
         return sessionId;
     }

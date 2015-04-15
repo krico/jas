@@ -24,6 +24,7 @@ import org.slim3.datastore.Datastore;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
 import static junit.framework.TestCase.assertEquals;
 import static org.easymock.EasyMock.*;
@@ -101,49 +102,49 @@ public class GroupEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testGetGroupsNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.getGroups(newCaller(1, false));
+        endpoint.getGroups(newCaller(1));
     }
 
     @Test(expected = ForbiddenException.class)
     public void testGetGroupNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.getGroup(newCaller(1, false), new Group().getId());
+        endpoint.getGroup(newCaller(1), new Group().getId());
     }
 
     @Test(expected = ForbiddenException.class)
     public void testAddGroupNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.addGroup(newCaller(1, false), new Group());
+        endpoint.addGroup(newCaller(1), new Group());
     }
 
     @Test(expected = ForbiddenException.class)
     public void testUpdateGroupNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.updateGroup(newCaller(1, false), null, null);
+        endpoint.updateGroup(newCaller(1), null, null);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testRemoveGroupNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.removeGroup(newCaller(1, false), new Group().getId());
+        endpoint.removeGroup(newCaller(1), new Group().getId());
     }
 
     @Test(expected = ForbiddenException.class)
     public void testAddUserToGroupNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.addUserToGroup(newCaller(1, false), null, null);
+        endpoint.addUserToGroup(newCaller(1), null, null);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testRemoveUserFromGroupNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.removeUserFromGroup(newCaller(1, false), null, null);
+        endpoint.removeUserFromGroup(newCaller(1), null, null);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testGroupUsersNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.getGroupUsers(newCaller(1, false), null);
+        endpoint.getGroupUsers(newCaller(1), null);
     }
 
     @Test
@@ -152,7 +153,7 @@ public class GroupEndpointTest {
         ArrayList<Group> expected = new ArrayList<>();
         expect(service.getGroups()).andReturn(expected);
         testOrganizationServiceFactory.replay();
-        List<Group> result = endpoint.getGroups(newCaller(55, true));
+        List<Group> result = endpoint.getGroups(newAdminCaller(55));
         assertEquals(expected, result);
     }
 
@@ -162,14 +163,14 @@ public class GroupEndpointTest {
         Group group = new Group();
         expect(service.getGroup(group.getId())).andReturn(group);
         testOrganizationServiceFactory.replay();
-        Group result = endpoint.getGroup(newCaller(55, true), group.getId());
+        Group result = endpoint.getGroup(newAdminCaller(55), group.getId());
         assertEquals(group, result);
     }
 
     @Test(expected = NotFoundException.class)
     public void testUpdateGroupCheckNotFound() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.updateGroup(newCaller(55, true), null, new Group());
+        endpoint.updateGroup(newAdminCaller(55), null, new Group());
     }
 
     @Test
@@ -188,7 +189,7 @@ public class GroupEndpointTest {
 
         testOrganizationServiceFactory.replay();
 
-        Group result = endpoint.updateGroup(newCaller(55, true), key, group);
+        Group result = endpoint.updateGroup(newAdminCaller(55), key, group);
         assertEquals(result, group);
     }
 
@@ -201,7 +202,7 @@ public class GroupEndpointTest {
         expect(service.getGroup(group.getId())).andReturn(group);
         testOrganizationServiceFactory.replay();
 
-        Group result = endpoint.addGroup(newCaller(55, true), group);
+        Group result = endpoint.addGroup(newAdminCaller(55), group);
 
         assertEquals(group, result);
     }
@@ -213,13 +214,13 @@ public class GroupEndpointTest {
         service.removeGroup(key);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.removeGroup(newCaller(55, true), key);
+        endpoint.removeGroup(newAdminCaller(55), key);
     }
 
     @Test(expected = NotFoundException.class)
     public void testRemoveGroupCheckNotFound() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.removeGroup(newCaller(55, true), null);
+        endpoint.removeGroup(newAdminCaller(55), null);
     }
 
     @Test(expected = NotFoundException.class)
@@ -229,7 +230,7 @@ public class GroupEndpointTest {
         service.getGroup(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.getGroup(newCaller(55, true), key);
+        endpoint.getGroup(newAdminCaller(55), key);
     }
 
     @Test(expected = NotFoundException.class)
@@ -240,7 +241,7 @@ public class GroupEndpointTest {
         service.updateGroup(group);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.updateGroup(newCaller(55, true), key, group);
+        endpoint.updateGroup(newAdminCaller(55), key, group);
     }
 
     @Test(expected = BadRequestException.class)
@@ -251,7 +252,7 @@ public class GroupEndpointTest {
         service.updateGroup(group);
         expectLastCall().andThrow(new FieldValueException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.updateGroup(newCaller(55, true), key, group);
+        endpoint.updateGroup(newAdminCaller(55), key, group);
     }
 
     @Test(expected = NotFoundException.class)
@@ -264,7 +265,7 @@ public class GroupEndpointTest {
         service.getGroup(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.addGroup(newCaller(55, true), group);
+        endpoint.addGroup(newAdminCaller(55), group);
     }
 
     @Test(expected = BadRequestException.class)
@@ -274,7 +275,7 @@ public class GroupEndpointTest {
         service.addGroup(group);
         expectLastCall().andThrow(new FieldValueException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.addGroup(newCaller(55, true), group);
+        endpoint.addGroup(newAdminCaller(55), group);
     }
 
     @Test(expected = NotFoundException.class)
@@ -284,7 +285,7 @@ public class GroupEndpointTest {
         service.getGroup(key);
         expectLastCall().andThrow(new EntityNotFoundException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.getGroupUsers(newCaller(55, true), key);
+        endpoint.getGroupUsers(newAdminCaller(55), key);
     }
 
     @Test(expected = NotFoundException.class)
@@ -295,7 +296,7 @@ public class GroupEndpointTest {
         service.addUserToGroup(groupId, userId);
         expectLastCall().andThrow(new EntityNotFoundException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.addUserToGroup(newCaller(55, true), groupId, userId);
+        endpoint.addUserToGroup(newAdminCaller(55), groupId, userId);
     }
 
     @Test(expected = NotFoundException.class)
@@ -305,7 +306,7 @@ public class GroupEndpointTest {
         service.removeGroup(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.removeGroup(newCaller(55, true), key);
+        endpoint.removeGroup(newAdminCaller(55), key);
     }
 
     @Test(expected = NotFoundException.class)
@@ -316,7 +317,7 @@ public class GroupEndpointTest {
         service.removeUserFromGroup(groupId, userId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.removeUserFromGroup(newCaller(55, true), groupId, userId);
+        endpoint.removeUserFromGroup(newAdminCaller(55), groupId, userId);
     }
 
     @Test
@@ -327,7 +328,7 @@ public class GroupEndpointTest {
         service.addUserToGroup(groupId, userId);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.addUserToGroup(newCaller(55, true), groupId, userId);
+        endpoint.addUserToGroup(newAdminCaller(55), groupId, userId);
     }
 
     @Test
@@ -338,7 +339,7 @@ public class GroupEndpointTest {
         service.removeUserFromGroup(groupId, userId);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.removeUserFromGroup(newCaller(55, true), groupId, userId);
+        endpoint.removeUserFromGroup(newAdminCaller(55), groupId, userId);
     }
 
     @Test
@@ -356,7 +357,7 @@ public class GroupEndpointTest {
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
 
-        List<User> result = endpoint.getGroupUsers(newCaller(55, true), key);
+        List<User> result = endpoint.getGroupUsers(newAdminCaller(55), key);
 
         assertEquals(userList, result);
     }

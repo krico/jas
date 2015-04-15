@@ -69,7 +69,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.get", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public ActivityType getActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
         checkFound(id);
         try {
             return ActivityServiceFactory.getActivityService().getActivityType(id);
@@ -80,7 +80,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.update", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public ActivityType updateActivityType(User caller, @Named("id") Key id, ActivityType activityType) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
         checkFound(id);
         activityType.setId(id);
         try {
@@ -94,7 +94,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.add", path = "activity-types", httpMethod = ApiMethod.HttpMethod.POST)
     public ActivityType addActivityType(User caller, JasAddActivityTypeRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromOrganizationId(request.getOrganizationId()));
         checkFound(request.getActivityType());
         checkFound(request.getOrganizationId());
         Key id;
@@ -106,6 +106,7 @@ public class ActivityEndpoint {
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
+
         try {
             return ActivityServiceFactory.getActivityService().getActivityType(id);
         } catch (EntityNotFoundException e) {
@@ -115,7 +116,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.remove", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
         checkFound(id);
         try {
             ActivityServiceFactory.getActivityService().removeActivityType(id);
@@ -197,7 +198,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.update", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public Activity updateActivity(User caller, @Named("id") Key id, Activity activity) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromActivityId(activity.getId()));
         checkFound(id);
         activity.setId(id);
         // In case client does not set the Name field we force the set here
@@ -215,7 +216,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.add", path = "activities", httpMethod = ApiMethod.HttpMethod.POST)
     public List<Activity> addActivity(User caller, JasAddActivityRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(request.getActivity().getActivityTypeRef().getKey()));
         checkFound(request.getActivity().getActivityTypeRef());
         checkFound(request.getActivity().getActivityTypeRef().getKey());
         checkFound(request.getActivity().getActivityTypeRef().getModel());
@@ -239,7 +240,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.remove", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromActivityId(id));
         checkFound(id);
         try {
             ActivityServiceFactory.getActivityService().removeActivity(id);
@@ -266,7 +267,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.query", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.GET)
     public Subscription getSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
-        mustBeSameUserOrAdmin(caller, userId);
+        mustBeSameUserOrAdminOrOrgMember(caller, userId, createFromActivityId(activityId));
         try {
             List<Subscription> subscriptions = ActivityServiceFactory.getActivityService().getSubscriptions(activityId);
             for (Subscription subscription : subscriptions) {
@@ -282,7 +283,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.subscribers", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Subscription> getSubscriptions(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromActivityId(activityId));
         checkFound(activityId);
         try {
             return ActivityServiceFactory.getActivityService().getSubscriptions(activityId);
@@ -293,7 +294,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void cancelSubscription(User caller, @Named("subscriptionId") Key subscriptionId) throws UnauthorizedException, ForbiddenException, NotFoundException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller, createFromSubscriptionId(subscriptionId));
         checkFound(subscriptionId);
         try {
             ActivityServiceFactory.getActivityService().cancel(subscriptionId);

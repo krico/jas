@@ -183,6 +183,15 @@ public interface ActivityService {
     public List<Subscription> getSubscriptions(Key activityId) throws EntityNotFoundException, IllegalArgumentException;
 
     /**
+     *
+     * @param id of Subscription to get
+     * @return Subscription
+     * @throws EntityNotFoundException if subscription with id could be found
+     */
+    @Nonnull
+    public Subscription getSubscription(Key id) throws EntityNotFoundException;
+
+    /**
      * Cancel a subscription, effectively doing the reverse of {@link #subscribe}
      *
      * @param subscription to cancel

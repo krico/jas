@@ -11,6 +11,7 @@ import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.*;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
@@ -808,27 +809,29 @@ public class ActivityServiceTest {
         assertEquals(subscription.getId(), modelList.get(0).getId());
     }
 
-    @Test // TODO: This test should also notify the organisation users
+    @Test
     public void testSubscribeNotifies() throws Exception {
         activity1Organization1.setPrice(12.2);
+        OrganizationServiceFactory.getOrganizationService().addUserToOrganization(organization1, testUser2);
         activityService.addActivity(activity1Organization1, new RepeatDetails());
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
         activityService.subscribe(testUser1, activity1Organization1);
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
-        assertEquals(2, sentMessages.size());
+        assertEquals(3, sentMessages.size());
     }
 
-    @Test // TODO: This test should also notify the organisation users
+    @Test
     public void testSubscribeNotifiesIfPriceIsNull() throws Exception {
+        OrganizationServiceFactory.getOrganizationService().addUserToOrganization(organization1, testUser2);
         activityService.addActivity(activity1Organization1, new RepeatDetails());
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
         activityService.subscribe(testUser1, activity1Organization1);
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
-        assertEquals(2, sentMessages.size());
+        assertEquals(3, sentMessages.size());
     }
 
     @Test

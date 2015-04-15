@@ -6,6 +6,7 @@
         var Auth = {
             isAuthenticated: isAuthenticated,
             isAdmin: isAdmin,
+            isOrgMember: isOrgMember,
             login: login,
             restore: restore,
             changePassword: changePassword,
@@ -35,6 +36,9 @@
             return Session.admin;
         }
 
+        function isOrgMember() {
+            return Session.orgMember;
+        }
 
         function login(credentials) {
             $log.info("Logging in (name=" + credentials.name + ") ...");
@@ -45,7 +49,7 @@
                 });
             }).then(function (resp) {
                 $log.info("Logged in! (userId=" + resp.result.userId + ")");
-                Session.create(resp.result.sessionId, resp.result.userId, resp.result.admin);
+                Session.create(resp.result.sessionId, resp.result.userId, resp.result.admin, resp.result.orgMember);
                 BrowserData.setLoggedIn(true);
                 BrowserData.setFirstAccess(false);
                 return resp.result;
@@ -102,7 +106,7 @@
                     restoreData.promise = null;
 
                     var sessionId = res.result.id || res.result.sessionId;
-                    Session.create(sessionId, res.result.userId, res.result.user.admin);
+                    Session.create(sessionId, res.result.userId, res.result.user.admin, res.result.orgMember);
                     BrowserData.setFirstAccess(false);
                     BrowserData.setLoggedIn(true);
                     restoreData.data = res.result.user;

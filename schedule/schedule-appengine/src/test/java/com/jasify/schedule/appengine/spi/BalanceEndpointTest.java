@@ -50,7 +50,7 @@ public class BalanceEndpointTest {
 
     @Test
     public void testCreatePayment() throws Exception {
-        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
+        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false, false);
 
         final JasPaymentRequest request = new JasPaymentRequest();
         request.setAmount(25d);
@@ -101,7 +101,7 @@ public class BalanceEndpointTest {
 
     @Test
     public void testCancelPayment() throws Exception {
-        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
+        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false, false);
         Key paymentId = Datastore.allocateId(Payment.class);
         Payment p = new Payment();
         p.setId(paymentId);
@@ -117,7 +117,7 @@ public class BalanceEndpointTest {
 
     @Test
     public void testGetAccount() throws Exception {
-        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
+        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false, false);
         UserAccount expected = new UserAccount();
         EasyMock.expect(BalanceServiceFactory.getBalanceService().getUserAccount(user.getUserId())).andReturn(expected);
         testPaymentServiceFactory.replay();
@@ -128,7 +128,7 @@ public class BalanceEndpointTest {
 
     @Test
     public void testGetTransactions() throws Exception {
-        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false);
+        final JasifyEndpointUser user = new JasifyEndpointUser("foo", 25, false, false);
         Key accountId = AccountUtil.memberIdToAccountId(Datastore.createKey(User.class, user.getUserId()));
         ArrayList<Transaction> expected = new ArrayList<>();
         expected.add(new Transaction());

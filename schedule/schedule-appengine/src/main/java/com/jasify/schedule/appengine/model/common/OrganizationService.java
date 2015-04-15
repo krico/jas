@@ -44,8 +44,19 @@ public interface OrganizationService {
     /**
      * @return all organizations
      */
-    @Nonnull
     public List<Organization> getOrganizations();
+
+    /**
+     * @param user to check for
+     * @return true if user is part of one or more organizations
+     */
+    public boolean isOrganizationMember(User user);
+
+    /**
+     * @param user to check for
+     * @return all organizations that have the userId as a member
+     */
+    public List<Organization> getOrganizationsForMember(User user) throws EntityNotFoundException;
 
     /**
      * @param organization to update

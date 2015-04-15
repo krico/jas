@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
 import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
@@ -58,7 +59,7 @@ public class AuthEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testChangePasswordCheckAuthentication() throws Exception {
         testUserServiceFactory.replay();
-        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(Datastore.createKey(User.class, 2), "abc", "def"));
+        endpoint.changePassword(newCaller(1), new JasChangePasswordRequest(Datastore.createKey(User.class, 2), "abc", "def"));
     }
 
     @Test
@@ -71,9 +72,9 @@ public class AuthEndpointTest {
         expect(UserServiceFactory.getUserService().setPassword(user, "def")).andReturn(user).times(2);
         testUserServiceFactory.replay();
 
-        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw, "def"));
+        endpoint.changePassword(newCaller(1), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw, "def"));
         //admin
-        endpoint.changePassword(newCaller(2, true), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), "", "def"));
+        endpoint.changePassword(newAdminCaller(2), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), "", "def"));
     }
 
     @Test(expected = ForbiddenException.class)
@@ -85,7 +86,7 @@ public class AuthEndpointTest {
         expect(UserServiceFactory.getUserService().get(user.getId())).andReturn(user);
         testUserServiceFactory.replay();
 
-        endpoint.changePassword(newCaller(1, false), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw + "x", "def"));
+        endpoint.changePassword(newCaller(1), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw + "x", "def"));
     }
 
     @Test
@@ -169,7 +170,7 @@ public class AuthEndpointTest {
         expectLastCall();
         replay(session);
         UserContext.setContext(session, null, null);
-        endpoint.logout(newCaller(1, false));
+        endpoint.logout(newCaller(1));
         verify(session);
     }
 
@@ -290,7 +291,7 @@ public class AuthEndpointTest {
 
         testUserServiceFactory.replay();
 
-        HttpUserSession userSession = new HttpUserSession(user);
+        HttpUserSession userSession = new HttpUserSession(user, false);
 
         UserContext.setCurrentUser(userSession);
 

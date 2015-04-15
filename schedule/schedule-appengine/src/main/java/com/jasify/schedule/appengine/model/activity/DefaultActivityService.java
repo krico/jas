@@ -78,16 +78,6 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
-    private Subscription getSubscription(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("Subscription id=NULL");
-
-        try {
-            return Datastore.get(subscriptionMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Subscription id=" + id);
-        }
-    }
-
     private boolean isActivityTypeNameUnique(Transaction tx, Key organizationId, String name) {
         return Datastore.query(tx, activityTypeMeta, organizationId)
                 .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
@@ -506,6 +496,17 @@ class DefaultActivityService implements ActivityService {
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
         Datastore.put(dbActivity);
         Datastore.delete(dbSubscription.getId());
+    }
+
+    @Nonnull
+    @Override
+    public Subscription getSubscription(Key id) throws EntityNotFoundException {
+        if (id == null) throw new EntityNotFoundException("Subscription id=NULL");
+        try {
+            return Datastore.get(subscriptionMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("Subscription id=" + id);
+        }
     }
 
     @Nonnull
