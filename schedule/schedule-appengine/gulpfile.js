@@ -27,6 +27,32 @@ var argv = require('yargs').argv,
     plumber = require('gulp-plumber'),
     paths = require('./paths.json');
 
+var xml2json = require('xml-to-json');
+
+function mavenVersion() {
+    //This is so ugly, I'm embarrassed ;-)
+    var gotIt = {err: null, result: null};
+
+    xml2json({
+        input: './pom.xml',
+        output: null
+    }, function (err, result) {
+        gotIt.err = err;
+        gotIt.result = result;
+    });
+    var uvrun = require("uvrun");
+    while (gotIt.err === null && gotIt.result === null)
+        uvrun.runOnce();
+
+    if (gotIt.err)
+        throw gotIt.err;
+
+    return gotIt.result.project.version;
+}
+
+var pomVersion = mavenVersion();
+gutil.log('Project version: ' + gutil.colors.cyan(pomVersion));
+paths.build = paths.build.replace('@VERSION@', pomVersion);
 gulp.task('clean', clean);
 gulp.task('sym', ['build'], sym);
 gulp.task('bower-install', bowerInstall);
