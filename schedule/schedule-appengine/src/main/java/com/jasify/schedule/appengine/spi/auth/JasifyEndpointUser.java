@@ -10,17 +10,20 @@ import com.jasify.schedule.appengine.model.UserSession;
 public class JasifyEndpointUser extends User {
     private final long userId;
     private final boolean admin;
+    private final boolean orgMember;
 
-    public JasifyEndpointUser(String email, long userId, boolean admin) {
+    public JasifyEndpointUser(String email, long userId, boolean admin, boolean orgMember) {
         super(email);
         this.userId = userId;
         this.admin = admin;
+        this.orgMember = orgMember;
     }
 
     public JasifyEndpointUser(UserSession userSession) {
         super(userSession.getUserId() + "@jasify.com");
         this.userId = userSession.getUserId();
         this.admin = userSession.isAdmin();
+        this.orgMember = userSession.isOrgMember();
     }
 
     public long getUserId() {
@@ -29,6 +32,10 @@ public class JasifyEndpointUser extends User {
 
     public boolean isAdmin() {
         return admin;
+    }
+
+    public boolean isOrgMember() {
+        return orgMember;
     }
 
     @Override

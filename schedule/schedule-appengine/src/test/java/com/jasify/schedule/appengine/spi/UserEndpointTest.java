@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
 import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
@@ -54,7 +55,7 @@ public class UserEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testGetUsersMustBeAdmin() throws UnauthorizedException, ForbiddenException {
         testUserServiceFactory.replay();
-        endpoint.getUsers(newCaller(1, false), null, null, null, null, null, null);
+        endpoint.getUsers(newCaller(1), null, null, null, null, null, null);
     }
 
     @Test
@@ -70,7 +71,7 @@ public class UserEndpointTest {
         expect(UserServiceFactory.getUserService().list(order, offset, limit)).andReturn(expectedUsers);
         testUserServiceFactory.replay();
 
-        JasUserList users = endpoint.getUsers(newCaller(1, true), null, null, null, null, null, null);
+        JasUserList users = endpoint.getUsers(newAdminCaller(1), null, null, null, null, null, null);
         assertNotNull(users);
         assertEquals(expectedUsers.size(), users.size());
         assertEquals(expectedUsers.get(0), users.get(0));
@@ -90,7 +91,7 @@ public class UserEndpointTest {
         expect(UserServiceFactory.getUserService().list(order, offset, limit)).andReturn(expectedUsers);
         testUserServiceFactory.replay();
 
-        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, null, null, null, order);
+        JasUserList users = endpoint.getUsers(newAdminCaller(1), offset, limit, null, null, null, order);
         assertNotNull(users);
         assertEquals(expectedUsers.size(), users.size());
         assertEquals(expectedUsers.get(0), users.get(0));
@@ -110,7 +111,7 @@ public class UserEndpointTest {
         expect(UserServiceFactory.getUserService().searchByEmail((Pattern) null, order, offset, limit)).andReturn(expectedUsers);
         testUserServiceFactory.replay();
 
-        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, null, "email", null, order);
+        JasUserList users = endpoint.getUsers(newAdminCaller(1), offset, limit, null, "email", null, order);
         assertNotNull(users);
         assertEquals(expectedUsers.size(), users.size());
         assertEquals(expectedUsers.get(0), users.get(0));
@@ -130,7 +131,7 @@ public class UserEndpointTest {
         expect(UserServiceFactory.getUserService().searchByName((Pattern) null, order, offset, limit)).andReturn(expectedUsers);
         testUserServiceFactory.replay();
 
-        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, null, "name", null, order);
+        JasUserList users = endpoint.getUsers(newAdminCaller(1), offset, limit, null, "name", null, order);
         assertNotNull(users);
         assertEquals(expectedUsers.size(), users.size());
         assertEquals(expectedUsers.get(0), users.get(0));
@@ -152,7 +153,7 @@ public class UserEndpointTest {
         expect(UserServiceFactory.getUserService().searchByName(capture(captured), anyObject(Query.SortDirection.class), anyInt(), anyInt())).andReturn(expectedUsers);
         testUserServiceFactory.replay();
 
-        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, query, "name", null, order);
+        JasUserList users = endpoint.getUsers(newAdminCaller(1), offset, limit, query, "name", null, order);
         assertNotNull(users);
         assertEquals(expectedUsers.size(), users.size());
         assertEquals(expectedUsers.get(0), users.get(0));
@@ -176,7 +177,7 @@ public class UserEndpointTest {
         expect(UserServiceFactory.getUserService().searchByEmail(capture(captured), anyObject(Query.SortDirection.class), anyInt(), anyInt())).andReturn(expectedUsers);
         testUserServiceFactory.replay();
 
-        JasUserList users = endpoint.getUsers(newCaller(1, true), offset, limit, query, "email", null, order);
+        JasUserList users = endpoint.getUsers(newAdminCaller(1), offset, limit, query, "email", null, order);
         assertNotNull(users);
         assertEquals(expectedUsers.size(), users.size());
         assertEquals(expectedUsers.get(0), users.get(0));
@@ -188,13 +189,13 @@ public class UserEndpointTest {
     @Test(expected = NotFoundException.class)
     public void testGetUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException {
         testUserServiceFactory.replay();
-        endpoint.getUser(newCaller(1, false), null);
+        endpoint.getUser(newCaller(1), null);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testGetUserNotSameUSer() throws NotFoundException, UnauthorizedException, ForbiddenException {
         testUserServiceFactory.replay();
-        endpoint.getUser(newCaller(1, false), KeyFactory.createKey("K", 5));
+        endpoint.getUser(newCaller(1), KeyFactory.createKey("K", 5));
     }
 
     @Test
@@ -204,7 +205,7 @@ public class UserEndpointTest {
         User expectedUser = new User();
         expect(UserServiceFactory.getUserService().get(key)).andReturn(expectedUser);
         testUserServiceFactory.replay();
-        User user = endpoint.getUser(newCaller(expectedId, false), key);
+        User user = endpoint.getUser(newCaller(expectedId), key);
         assertNotNull(user);
         assertTrue(expectedUser == user);
     }
@@ -215,7 +216,7 @@ public class UserEndpointTest {
         Key key = Datastore.createKey(User.class, expectedId);
         expect(UserServiceFactory.getUserService().get(key)).andReturn(null);
         testUserServiceFactory.replay();
-        endpoint.getUser(newCaller(expectedId, false), key);
+        endpoint.getUser(newCaller(expectedId), key);
     }
 
     @Test
@@ -225,7 +226,7 @@ public class UserEndpointTest {
         User expectedUser = new User();
         expect(UserServiceFactory.getUserService().get(key)).andReturn(expectedUser);
         testUserServiceFactory.replay();
-        User user = endpoint.getUser(newCaller(expectedId + 100, true), key);
+        User user = endpoint.getUser(newAdminCaller(expectedId + 100), key);
         assertNotNull(user);
         assertTrue(expectedUser == user);
     }
@@ -233,13 +234,13 @@ public class UserEndpointTest {
     @Test(expected = NotFoundException.class)
     public void testUpdateUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
         testUserServiceFactory.replay();
-        endpoint.updateUser(newCaller(1, false), null, new User());
+        endpoint.updateUser(newCaller(1), null, new User());
     }
 
     @Test(expected = ForbiddenException.class)
     public void testUpdateUserNotSameUser() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
         testUserServiceFactory.replay();
-        endpoint.updateUser(newCaller(1, false), KeyFactory.createKey("u", 2), new User());
+        endpoint.updateUser(newCaller(1), KeyFactory.createKey("u", 2), new User());
     }
 
     @Test
@@ -247,7 +248,7 @@ public class UserEndpointTest {
         User expected = new User();
         expect(UserServiceFactory.getUserService().save(expected)).andReturn(expected);
         testUserServiceFactory.replay();
-        User user = endpoint.updateUser(newCaller(1, true), KeyFactory.createKey("u", 2), expected);
+        User user = endpoint.updateUser(newAdminCaller(1), KeyFactory.createKey("u", 2), expected);
         assertTrue(expected == user);
     }
 
@@ -257,7 +258,7 @@ public class UserEndpointTest {
         UserServiceFactory.getUserService().save(user);
         expectLastCall().andThrow(new EntityNotFoundException());
         testUserServiceFactory.replay();
-        endpoint.updateUser(newCaller(1, true), KeyFactory.createKey("u", 2), user);
+        endpoint.updateUser(newAdminCaller(1), KeyFactory.createKey("u", 2), user);
     }
 
     @Test

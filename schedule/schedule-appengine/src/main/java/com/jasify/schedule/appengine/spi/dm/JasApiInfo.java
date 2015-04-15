@@ -12,6 +12,7 @@ public class JasApiInfo {
     private String apiVersion;
     private boolean authenticated;
     private boolean admin;
+    private boolean orgMember;
     private String number = Version.getNumber();
     private String branch = Version.getBranch();
     private long timestamp = Version.getTimestamp();
@@ -45,6 +46,14 @@ public class JasApiInfo {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public boolean isOrgMember() {
+        return orgMember;
+    }
+
+    public void setOrgMember(boolean orgMember) {
+        this.orgMember = orgMember;
     }
 
     public String getNumber() {

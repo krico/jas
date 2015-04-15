@@ -12,6 +12,7 @@
         vm.logoutSucceeded = logoutSucceeded;
         vm.isAuthenticated = isAuthenticated;
         vm.isAdmin = isAdmin;
+        vm.isAdminOrOrgMember = isAdminOrOrgMember;
 
         vm.menuActive = menuActive;
         vm.collapse = collapse;
@@ -53,6 +54,9 @@
             return Auth.isAdmin();
         }
 
+        function isAdminOrOrgMember() {
+            return isAdmin || Auth.isOrgMember();
+        }
 
         function toggleCollapse() {
             vm.navbarCollapsed = !vm.navbarCollapsed;

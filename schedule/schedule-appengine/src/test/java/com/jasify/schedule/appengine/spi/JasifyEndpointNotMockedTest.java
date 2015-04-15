@@ -6,6 +6,8 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -13,7 +15,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newOrgMemberCaller;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
@@ -43,7 +47,7 @@ public class JasifyEndpointNotMockedTest {
 
     @Test
     public void testMustBeLoggedIn() throws UnauthorizedException {
-        JasifyEndpointUser user = newCaller(1, false);
+        JasifyEndpointUser user = newCaller(1);
         assertEquals(user, JasifyEndpoint.mustBeLoggedIn(user));
     }
 
@@ -54,13 +58,13 @@ public class JasifyEndpointNotMockedTest {
 
     @Test(expected = ForbiddenException.class)
     public void testMustBeSameUserOrAdminThrowsForbiddenWhenNotSameUser() throws UnauthorizedException, ForbiddenException {
-        JasifyEndpointUser user = newCaller(1, false);
+        JasifyEndpointUser user = newCaller(1);
         JasifyEndpoint.mustBeSameUserOrAdmin(user, 2);
     }
 
     @Test
     public void testMustBeSameUserSameUser() throws UnauthorizedException, ForbiddenException {
-        JasifyEndpointUser user = newCaller(1, false);
+        JasifyEndpointUser user = newCaller(1);
         assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 1));
     }
 
@@ -71,19 +75,19 @@ public class JasifyEndpointNotMockedTest {
 
     @Test(expected = ForbiddenException.class)
     public void testMustBeAdminThrowsForbiddenWhenNotSameUser() throws UnauthorizedException, ForbiddenException {
-        JasifyEndpointUser user = newCaller(1, false);
+        JasifyEndpointUser user = newCaller(1);
         JasifyEndpoint.mustBeAdmin(user);
     }
 
     @Test
     public void testMustBeAdmin() throws UnauthorizedException, ForbiddenException {
-        JasifyEndpointUser user = newCaller(1, true);
+        JasifyEndpointUser user = newAdminCaller(1);
         assertEquals(user, JasifyEndpoint.mustBeAdmin(user));
     }
 
     @Test
     public void testMustBeSameUserOrAdminWithAdmin() throws UnauthorizedException, ForbiddenException {
-        JasifyEndpointUser user = newCaller(1, true);
+        JasifyEndpointUser user = newAdminCaller(1);
         assertEquals(user, JasifyEndpoint.mustBeSameUserOrAdmin(user, 2));
     }
 
@@ -100,11 +104,46 @@ public class JasifyEndpointNotMockedTest {
 
     @Test(expected = NotFoundException.class)
     public void mustBeSameUserOrAdminWithNullKey() throws NotFoundException, UnauthorizedException, ForbiddenException {
-        JasifyEndpoint.mustBeSameUserOrAdmin(newCaller(1, true), null);
+        JasifyEndpoint.mustBeSameUserOrAdmin(newAdminCaller(1), null);
     }
 
     @Test(expected = ForbiddenException.class)
     public void mustBeSameUserOrAdminWithKeyNotAdmin() throws NotFoundException, UnauthorizedException, ForbiddenException {
-        JasifyEndpoint.mustBeSameUserOrAdmin(newCaller(1, false), KeyFactory.createKey("K", 2));
+        JasifyEndpoint.mustBeSameUserOrAdmin(newCaller(1), KeyFactory.createKey("K", 2));
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void mustBeAdminOrOrgMemberThrowsForbiddenException() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        JasifyEndpoint.mustBeAdminOrOrgMember(newCaller(1), new JasifyEndpoint.OrgMemberChecker(null) {
+            @Override
+            Organization getOrganization() throws EntityNotFoundException {
+                return null;
+            }
+            @Override
+            public boolean isOrgMember(long userId) throws EntityNotFoundException {
+                return false;
+            }
+        });
+    }
+
+
+    @Test(expected = NotFoundException.class)
+    public void mustBeAdminOrOrgMemberThrowsNotFoundException() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        JasifyEndpoint.mustBeAdminOrOrgMember(newOrgMemberCaller(1), new JasifyEndpoint.OrgMemberChecker(null) {
+            @Override
+            Organization getOrganization() throws EntityNotFoundException {
+                throw new EntityNotFoundException();
+            }
+        });
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void mustBeSameUserOrAdminOrOrgMemberThrowsNotFoundException() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        JasifyEndpoint.mustBeSameUserOrAdminOrOrgMember(null, null, null);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void mustBeSameUserOrAdminOrOrgMemberThrowsForbiddenException() throws NotFoundException, UnauthorizedException, ForbiddenException {
+        JasifyEndpoint.mustBeSameUserOrAdminOrOrgMember(newCaller(1), 2, null);
     }
 }

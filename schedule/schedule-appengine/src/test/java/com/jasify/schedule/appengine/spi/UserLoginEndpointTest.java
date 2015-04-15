@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -36,7 +37,6 @@ public class UserLoginEndpointTest {
     public void datastore() {
         TestHelper.initializeDatastore();
         testUserServiceFactory.setUp();
-
     }
 
     @After
@@ -45,7 +45,6 @@ public class UserLoginEndpointTest {
         UserContext.clearContext();
         testUserServiceFactory.tearDown();
     }
-
 
     @Test(expected = UnauthorizedException.class)
     public void testListLoginsNoUserThrows() throws Exception {
@@ -56,7 +55,7 @@ public class UserLoginEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testListLoginsOtherUserThrows() throws Exception {
         testUserServiceFactory.replay();
-        JasifyEndpointUser user = newCaller(5, false);
+        JasifyEndpointUser user = newCaller(5);
         endpoint.listLogins(user, Datastore.createKey(User.class, 1));
     }
 
@@ -64,7 +63,7 @@ public class UserLoginEndpointTest {
     public void testListLoginsSame() throws Exception {
         expect(UserServiceFactory.getUserService().getUserLogins(Datastore.createKey(User.class, 5))).andReturn(Collections.<UserLogin>emptyList());
         testUserServiceFactory.replay();
-        JasifyEndpointUser user = newCaller(5, false);
+        JasifyEndpointUser user = newCaller(5);
         assertNotNull(endpoint.listLogins(user, Datastore.createKey(User.class, 5)));
     }
 
@@ -72,7 +71,7 @@ public class UserLoginEndpointTest {
     public void testListLoginsOtherAdmin() throws Exception {
         expect(UserServiceFactory.getUserService().getUserLogins(Datastore.createKey(User.class, 5))).andReturn(Collections.<UserLogin>emptyList());
         testUserServiceFactory.replay();
-        JasifyEndpointUser user = newCaller(2, true);
+        JasifyEndpointUser user = newAdminCaller(2);
         assertNotNull(endpoint.listLogins(user, Datastore.createKey(User.class, 5)));
     }
 
@@ -86,7 +85,7 @@ public class UserLoginEndpointTest {
         testUserServiceFactory.replay();
         User u1 = new User();
         u1.setId(Datastore.createKey(User.class, 23));
-        JasifyEndpointUser user = newCaller(u1.getId().getId(), false);
+        JasifyEndpointUser user = newCaller(u1.getId().getId());
         List<UserLogin> logins = endpoint.listLogins(user, u1.getId());
         assertNotNull(logins);
         assertEquals(1, logins.size());
@@ -105,7 +104,7 @@ public class UserLoginEndpointTest {
     public void testRemoveLoginThatDoesNotExist() throws Exception {
         expect(UserServiceFactory.getUserService().getLogin(EasyMock.<Key>anyObject())).andReturn(null);
         testUserServiceFactory.replay();
-        endpoint.removeLogin(newCaller(1, false), KeyFactory.keyToString(Datastore.createKey(UserLogin.class, 23)));
+        endpoint.removeLogin(newCaller(1), KeyFactory.keyToString(Datastore.createKey(UserLogin.class, 23)));
     }
 
     @Test
@@ -117,7 +116,7 @@ public class UserLoginEndpointTest {
         UserServiceFactory.getUserService().removeLogin(login.getId());
         expectLastCall();
         testUserServiceFactory.replay();
-        endpoint.removeLogin(newCaller(1, false), KeyFactory.keyToString(login.getId()));
+        endpoint.removeLogin(newCaller(1), KeyFactory.keyToString(login.getId()));
     }
 
     @Test(expected = ForbiddenException.class)
@@ -127,7 +126,7 @@ public class UserLoginEndpointTest {
         login.getUserRef().setKey(Datastore.createKey(User.class, 2));
         expect(UserServiceFactory.getUserService().getLogin(login.getId())).andReturn(login);
         testUserServiceFactory.replay();
-        endpoint.removeLogin(newCaller(1, false), KeyFactory.keyToString(login.getId()));
+        endpoint.removeLogin(newCaller(1), KeyFactory.keyToString(login.getId()));
     }
 
     @Test
@@ -139,7 +138,6 @@ public class UserLoginEndpointTest {
         UserServiceFactory.getUserService().removeLogin(login.getId());
         expectLastCall();
         testUserServiceFactory.replay();
-        endpoint.removeLogin(newCaller(1, true), KeyFactory.keyToString(login.getId()));
+        endpoint.removeLogin(newCaller(1), KeyFactory.keyToString(login.getId()));
     }
-
 }

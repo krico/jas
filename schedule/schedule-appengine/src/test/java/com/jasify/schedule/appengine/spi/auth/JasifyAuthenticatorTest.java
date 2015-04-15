@@ -43,6 +43,7 @@ public class JasifyAuthenticatorTest {
         long userId = 1l;
         expect(session.getUserId()).andReturn(userId).anyTimes();
         expect(session.isAdmin()).andReturn(true).anyTimes();
+        expect(session.isOrgMember()).andReturn(true).anyTimes();
         replay(session);
         replay(request);
         assertNull(authenticator.authenticate(request));
@@ -51,6 +52,7 @@ public class JasifyAuthenticatorTest {
         assertTrue(user instanceof JasifyEndpointUser);
         JasifyEndpointUser jas = (JasifyEndpointUser) user;
         assertEquals(userId, jas.getUserId());
-        assertEquals(true, jas.isAdmin());
+        assertTrue(jas.isAdmin());
+        assertTrue(jas.isOrgMember());
     }
 }

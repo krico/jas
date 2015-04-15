@@ -6,6 +6,14 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasApiInfo;
@@ -40,6 +48,61 @@ import com.jasify.schedule.appengine.spi.transform.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class JasifyEndpoint {
+    abstract static class OrgMemberChecker {
+        protected final Key id;
+        protected OrgMemberChecker(Key id) {
+            this.id = id;
+        }
+        public boolean isOrgMember(long userId) throws EntityNotFoundException {
+            Organization organization = getOrganization();
+            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(userId);
+            return organization.getUsers().contains(user);
+        }
+        abstract Organization getOrganization() throws EntityNotFoundException;
+    }
+
+    static OrgMemberChecker createFromActivityId(Key id) {
+        return new OrgMemberChecker(id) {
+            @Override
+            Organization getOrganization() throws EntityNotFoundException {
+                Activity activity = ActivityServiceFactory.getActivityService().getActivity(this.id);
+                ActivityType activityType = activity.getActivityTypeRef().getModel();
+                return activityType.getOrganizationRef().getModel();
+            }
+        };
+    }
+
+    static OrgMemberChecker createFromActivityTypeId(Key id) {
+        return new OrgMemberChecker(id) {
+            @Override
+            Organization getOrganization() throws EntityNotFoundException {
+                ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(this.id);
+                return activityType.getOrganizationRef().getModel();
+            }
+        };
+    }
+
+    static OrgMemberChecker createFromSubscriptionId(Key id) {
+        return new OrgMemberChecker(id) {
+            @Override
+            Organization getOrganization() throws EntityNotFoundException {
+                Subscription subscription = ActivityServiceFactory.getActivityService().getSubscription(this.id);
+                Activity activity = subscription.getActivityRef().getModel();
+                ActivityType activityType = activity.getActivityTypeRef().getModel();
+                return activityType.getOrganizationRef().getModel();
+            }
+        };
+    }
+
+    static OrgMemberChecker createFromOrganizationId(Key id) {
+        return new OrgMemberChecker(id) {
+            @Override
+            Organization getOrganization() throws EntityNotFoundException {
+                return OrganizationServiceFactory.getOrganizationService().getOrganization(this.id);
+            }
+        };
+    }
+
     static JasifyEndpointUser mustBeLoggedIn(User caller) throws UnauthorizedException {
         if (caller instanceof JasifyEndpointUser) return (JasifyEndpointUser) caller;
         throw new UnauthorizedException("Only authenticated users can call this method");
@@ -51,14 +114,36 @@ public class JasifyEndpoint {
         throw new ForbiddenException("Must be admin");
     }
 
+    static JasifyEndpointUser mustBeAdminOrOrgMember(User caller, OrgMemberChecker orgMemberChecker) throws ForbiddenException, UnauthorizedException, NotFoundException {
+        JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
+        if (jasifyEndpointUser.isAdmin()) return jasifyEndpointUser;
+        try {
+            if (jasifyEndpointUser.isOrgMember() && orgMemberChecker.isOrgMember(jasifyEndpointUser.getUserId())) return jasifyEndpointUser;
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+        throw new ForbiddenException("Must be admin");
+    }
+
     static JasifyEndpointUser mustBeSameUserOrAdmin(User caller, Key userId) throws UnauthorizedException, ForbiddenException, NotFoundException {
         checkFound(userId);
         return mustBeSameUserOrAdmin(caller, userId.getId());
     }
 
+    static JasifyEndpointUser mustBeSameUserOrAdminOrOrgMember(User caller, Key userId, OrgMemberChecker orgMemberChecker) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        checkFound(userId);
+        return mustBeSameUserOrAdminOrOrgMember(caller, userId.getId(), orgMemberChecker);
+    }
+
     static JasifyEndpointUser mustBeSameUserOrAdmin(User caller, long userId) throws UnauthorizedException, ForbiddenException {
         JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
         if (jasifyEndpointUser.getUserId() != userId) return mustBeAdmin(caller);
+        return jasifyEndpointUser;
+    }
+
+    static JasifyEndpointUser mustBeSameUserOrAdminOrOrgMember(User caller, long userId, OrgMemberChecker orgMemberChecker) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
+        if (jasifyEndpointUser.getUserId() != userId) return mustBeAdminOrOrgMember(caller, orgMemberChecker);
         return jasifyEndpointUser;
     }
 
@@ -77,6 +162,7 @@ public class JasifyEndpoint {
         if (caller instanceof JasifyEndpointUser) {
             info.setAuthenticated(true);
             info.setAdmin(((JasifyEndpointUser) caller).isAdmin());
+            info.setOrgMember(((JasifyEndpointUser) caller).isOrgMember());
         }
         return info;
     }

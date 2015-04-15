@@ -38,7 +38,7 @@ public class ShoppingCartEndpointTest {
 
     @Test
     public void testGetCart() throws Exception {
-        JasifyEndpointUser caller = new JasifyEndpointUser("foo@bar", 22, false);
+        JasifyEndpointUser caller = new JasifyEndpointUser("foo@bar", 22, false, false);
         ShoppingCart value = new ShoppingCart();
         EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().getUserCart(caller.getUserId()))
                 .andReturn(value);
@@ -50,7 +50,7 @@ public class ShoppingCartEndpointTest {
 
     @Test
     public void testRemoveItem() throws Exception {
-        JasifyEndpointUser caller = new JasifyEndpointUser("foo@bar", 22, false);
+        JasifyEndpointUser caller = new JasifyEndpointUser("foo@bar", 22, false, false);
         ShoppingCart cart = new ShoppingCart();
         cart.setId("FF");
         cart.getItems().add(new ShoppingCart.Item());

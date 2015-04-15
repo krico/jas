@@ -36,7 +36,7 @@
                     <td ng-click="vm.viewOrganization(organization.id)">{{organization.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
                     <td ng-click="vm.viewOrganization(organization.id)">{{organization.modified | date:'yyyy-MM-dd HH:mm:ss' }}</td>
                     <td>
-                        <button type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(organization.id)"><span
+                        <button ng-show="vm.isAdmin()" type="button" class="btn btn-danger btn-xs" ng-click="vm.remove(organization.id)"><span
                                 class="glyphicon glyphicon-remove"></span>
                         </button>
                     </td>
