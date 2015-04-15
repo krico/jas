@@ -32,6 +32,7 @@ Information on how to get started as a developer id described on [DEVELOPER.md](
 
 ## Change log
 
+ - github site!!!  [http://krico.github.io/jas](http://krico.github.io/jas/)
  - Created [Jasify Schedule App Engine](schedule/schedule-appengine)
  - I followed the [app engine tutorial](https://cloud.google.com/appengine/docs/java/gettingstarted/introduction) and checked in the [app-engine-tutorial](sandbox/sandbox-appengine/), the resulting module of following that tutorial step by step. The app is [in production here](https://krico-test.appspot.com).
  - I followed the [cloud endpoints tutorial](https://cloud.google.com/appengine/docs/java/endpoints/getstarted/backend/) and checked in the [cloud-endpoints-tutorial](sandbox/sandbox-endpoints/), the resulting module of following that tutorial step by step.
