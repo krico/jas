@@ -11,7 +11,7 @@
     </parent>
 
     <packaging>war</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
 
     <groupId>com.jasify.schedule</groupId>
     <artifactId>schedule-appengine</artifactId>
