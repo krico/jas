@@ -362,10 +362,6 @@ class DefaultActivityService implements ActivityService {
         return result;
     }
 
-    private List<Activity> getActivitiesByActivityTypeId(Key id) throws EntityNotFoundException {
-        return Datastore.query(activityMeta).filter(activityMeta.activityTypeRef.equal(id)).asList();
-    }
-
     @Nonnull
     @Override
     public Activity getActivity(Key id) throws EntityNotFoundException, IllegalArgumentException {
