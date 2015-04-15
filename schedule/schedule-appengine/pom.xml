@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.jasify</groupId>
         <artifactId>jasify</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <packaging>war</packaging>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
 
     <groupId>com.jasify.schedule</groupId>
     <artifactId>schedule-appengine</artifactId>
@@ -19,7 +19,7 @@
         <connection>scm:git:git@github.com:krico/jas</connection>
         <developerConnection>scm:git:git@github.com:krico/jas</developerConnection>
         <url>https://github.com/krico/jas</url>
-      <tag>jasify-1.0.2</tag>
+      <tag>HEAD</tag>
   </scm>
     <properties>
         <appengine.app.version>1</appengine.app.version>
