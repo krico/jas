@@ -11,6 +11,7 @@ import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.*;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
@@ -45,8 +46,7 @@ public class ActivityServiceTest {
     }
 
     private Organization createOrganization(String name) {
-        Organization organization = new Organization(name);
-        return organization;
+        return new Organization(name);
     }
 
     private User createUser(String name) {
@@ -260,6 +260,28 @@ public class ActivityServiceTest {
         Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
         activityService.removeActivityType(id);
         assertNull(Datastore.getOrNull(id));
+    }
+
+    @Test
+    public void testRemoveActivityTypeThrowsNullPointerException() throws Exception {
+        thrown.expect(NullPointerException.class);
+        activityService.removeActivityType(null);
+    }
+
+    @Test
+    public void testRemoveActivityTypeThrowsEntityNotFoundException() throws Exception {
+        thrown.expect(EntityNotFoundException.class);
+        Key key = Datastore.allocateId(ActivityType.class);
+        thrown.expectMessage("ActivityType.id=" + key);
+        activityService.removeActivityType(key);
+    }
+
+    @Test
+    public void testRemoveActivityTypeThrowsOperationException() throws Exception {
+        thrown.expect(OperationException.class);
+        thrown.expectMessage("ActivityType has activities");
+        activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.removeActivityType(activityType1OfOrganization1.getId());
     }
 
     @Test
@@ -766,6 +788,15 @@ public class ActivityServiceTest {
     }
 
     @Test
+    public void testRemoveActivityThrowsOperationException() throws Exception {
+        thrown.expect(OperationException.class);
+        thrown.expectMessage("Activity has subscriptions");
+        List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.subscribe(testUser1, activity1Organization1);
+        activityService.removeActivity(ids.get(0));
+    }
+
+    @Test
     public void testSubscribe() throws Exception {
         activityService.addActivity(activity1Organization1, new RepeatDetails());
         Subscription subscription = activityService.subscribe(testUser1, activity1Organization1);
@@ -778,27 +809,29 @@ public class ActivityServiceTest {
         assertEquals(subscription.getId(), modelList.get(0).getId());
     }
 
-    @Test // TODO: This test should also notify the organisation users
+    @Test
     public void testSubscribeNotifies() throws Exception {
         activity1Organization1.setPrice(12.2);
+        OrganizationServiceFactory.getOrganizationService().addUserToOrganization(organization1, testUser2);
         activityService.addActivity(activity1Organization1, new RepeatDetails());
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
         activityService.subscribe(testUser1, activity1Organization1);
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
-        assertEquals(2, sentMessages.size());
+        assertEquals(3, sentMessages.size());
     }
 
-    @Test // TODO: This test should also notify the organisation users
+    @Test
     public void testSubscribeNotifiesIfPriceIsNull() throws Exception {
+        OrganizationServiceFactory.getOrganizationService().addUserToOrganization(organization1, testUser2);
         activityService.addActivity(activity1Organization1, new RepeatDetails());
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
         activityService.subscribe(testUser1, activity1Organization1);
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
-        assertEquals(2, sentMessages.size());
+        assertEquals(3, sentMessages.size());
     }
 
     @Test

@@ -7,10 +7,7 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
-import com.jasify.schedule.appengine.model.UserContext;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationService;
@@ -30,6 +27,7 @@ import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import java.util.*;
 
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
 import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
@@ -58,7 +56,6 @@ public class ActivityEndpointTest {
         UserContext.clearContext();
         testActivityServiceFactory.tearDown();
         testOrganizationServiceFactory.tearDown();
-
     }
 
     @Test
@@ -90,7 +87,7 @@ public class ActivityEndpointTest {
     public void testGetActivityTypeNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.getActivityType(newCaller(1, false), null);
+        endpoint.getActivityType(newCaller(1), null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -108,7 +105,7 @@ public class ActivityEndpointTest {
         ActivityType activityType = new ActivityType();
         expect(service.getActivityType(key)).andReturn(activityType);
         testActivityServiceFactory.replay();
-        assertEquals(activityType, endpoint.getActivityType(newCaller(55, true), key));
+        assertEquals(activityType, endpoint.getActivityType(newAdminCaller(55), key));
     }
 
     @Test(expected = NotFoundException.class)
@@ -119,14 +116,14 @@ public class ActivityEndpointTest {
         service.getActivityType(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
-        endpoint.getActivityType(newCaller(55, true), key);
+        endpoint.getActivityType(newAdminCaller(55), key);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testUpdateActivityTypeNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.updateActivityType(newCaller(1, false), null, null);
+        endpoint.updateActivityType(newCaller(1), null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -153,7 +150,7 @@ public class ActivityEndpointTest {
 
         testActivityServiceFactory.replay();
 
-        ActivityType result = endpoint.updateActivityType(newCaller(55, true), key, activityType);
+        ActivityType result = endpoint.updateActivityType(newAdminCaller(55), key, activityType);
         assertEquals(result, activityType);
     }
 
@@ -166,7 +163,7 @@ public class ActivityEndpointTest {
         service.updateActivityType(activityType);
         expectLastCall().andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
-        endpoint.updateActivityType(newCaller(55, true), key, activityType);
+        endpoint.updateActivityType(newAdminCaller(55), key, activityType);
     }
 
     @Test(expected = BadRequestException.class)
@@ -178,28 +175,32 @@ public class ActivityEndpointTest {
         service.updateActivityType(activityType);
         expectLastCall().andThrow(new FieldValueException(""));
         testActivityServiceFactory.replay();
-        endpoint.updateActivityType(newCaller(55, true), key, activityType);
+        endpoint.updateActivityType(newAdminCaller(55), key, activityType);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testAddActivityTypeNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.addActivityType(newCaller(1, false), null);
+        JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
+        jasAddActivityTypeRequest.setActivityType(new ActivityType());
+        endpoint.addActivityType(newCaller(1), jasAddActivityTypeRequest);
     }
 
     @Test(expected = UnauthorizedException.class)
     public void testAddActivityTypeNoUserThrowsUnauthorizedException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.addActivityType(null, null);
+        JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
+        jasAddActivityTypeRequest.setActivityType(new ActivityType());
+        endpoint.addActivityType(null, jasAddActivityTypeRequest);
     }
 
     @Test(expected = NullPointerException.class)
     public void testAddActivityTypeNoActivityTypeRequestThrowsNullPointerException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.addActivityType(newCaller(1, true), null);
+        endpoint.addActivityType(newAdminCaller(1), null);
     }
 
     @Test(expected = NotFoundException.class)
@@ -207,7 +208,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
-        endpoint.addActivityType(newCaller(1, true), jasAddActivityTypeRequest);
+        endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
     }
 
     @Test(expected = NotFoundException.class)
@@ -216,7 +217,7 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
         JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
         jasAddActivityTypeRequest.setActivityType(new ActivityType());
-        endpoint.addActivityType(newCaller(1, true), jasAddActivityTypeRequest);
+        endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
     }
 
     @Test(expected = NotFoundException.class)
@@ -232,7 +233,7 @@ public class ActivityEndpointTest {
         jasAddActivityTypeRequest.setActivityType(new ActivityType());
         jasAddActivityTypeRequest.setOrganizationId(organizationKey);
 
-        endpoint.addActivityType(newCaller(55, true), jasAddActivityTypeRequest);
+        endpoint.addActivityType(newAdminCaller(55), jasAddActivityTypeRequest);
     }
 
     @Test(expected = BadRequestException.class)
@@ -252,7 +253,7 @@ public class ActivityEndpointTest {
         expectLastCall().andThrow(new FieldValueException(""));
         testActivityServiceFactory.replay();
 
-        endpoint.addActivityType(newCaller(55, true), jasAddActivityTypeRequest);
+        endpoint.addActivityType(newAdminCaller(55), jasAddActivityTypeRequest);
     }
 
     @Test(expected = NotFoundException.class)
@@ -273,7 +274,7 @@ public class ActivityEndpointTest {
         expect(activityService.getActivityType(organizationKey)).andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
 
-        endpoint.addActivityType(newCaller(55, true), jasAddActivityTypeRequest);
+        endpoint.addActivityType(newAdminCaller(55), jasAddActivityTypeRequest);
     }
 
     @Test
@@ -294,7 +295,7 @@ public class ActivityEndpointTest {
         expect(activityService.getActivityType(organizationKey)).andReturn(activityType);
         testActivityServiceFactory.replay();
 
-        ActivityType result = endpoint.addActivityType(newCaller(55, true), jasAddActivityTypeRequest);
+        ActivityType result = endpoint.addActivityType(newAdminCaller(55), jasAddActivityTypeRequest);
         assertEquals(result, activityType);
     }
 
@@ -302,7 +303,7 @@ public class ActivityEndpointTest {
     public void testRemoveActivityTypeNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.removeActivityType(newCaller(1, false), null);
+        endpoint.removeActivityType(newCaller(1), null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -320,7 +321,18 @@ public class ActivityEndpointTest {
         service.removeActivityType(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
-        endpoint.removeActivityType(newCaller(55, true), key);
+        endpoint.removeActivityType(newAdminCaller(55), key);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testRemoveActivityTypeThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key key = Datastore.allocateId(ActivityType.class);
+        service.removeActivityType(key);
+        expectLastCall().andThrow(new OperationException(""));
+        testActivityServiceFactory.replay();
+        endpoint.removeActivityType(newAdminCaller(55), key);
     }
 
     @Test
@@ -331,7 +343,7 @@ public class ActivityEndpointTest {
         service.removeActivityType(key);
         expectLastCall().once();
         testActivityServiceFactory.replay();
-        endpoint.removeActivityType(newCaller(55, true), key);
+        endpoint.removeActivityType(newAdminCaller(55), key);
     }
 
     @Test(expected = BadRequestException.class)
@@ -749,7 +761,7 @@ public class ActivityEndpointTest {
         service.getActivity(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
-        endpoint.getActivity(newCaller(55, true), key);
+        endpoint.getActivity(newAdminCaller(55), key);
     }
 
     @Test
@@ -760,21 +772,21 @@ public class ActivityEndpointTest {
         Activity activity = new Activity();
         expect(service.getActivity(key)).andReturn(activity);
         testActivityServiceFactory.replay();
-        assertEquals(activity, endpoint.getActivity(newCaller(55, true), key));
+        assertEquals(activity, endpoint.getActivity(newAdminCaller(55), key));
     }
 
     @Test(expected = ForbiddenException.class)
     public void testUpdateActivityNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.updateActivity(newCaller(1, false), null, null);
+        endpoint.updateActivity(newCaller(1), null, new Activity());
     }
 
     @Test(expected = UnauthorizedException.class)
     public void testUpdateActivityNoUserThrowsUnauthorizedException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.updateActivity(null, null, null);
+        endpoint.updateActivity(null, null, new Activity());
     }
 
     @Test(expected = NullPointerException.class)
@@ -782,7 +794,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         Key key = Datastore.allocateId(Activity.class);
-        endpoint.updateActivity(newCaller(1, true), key, null);
+        endpoint.updateActivity(newAdminCaller(1), key, null);
     }
 
     @Test(expected = NotFoundException.class)
@@ -795,7 +807,7 @@ public class ActivityEndpointTest {
         service.updateActivity(activity);
         expectLastCall().andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
-        endpoint.updateActivity(newCaller(55, true), key, activity);
+        endpoint.updateActivity(newAdminCaller(55), key, activity);
     }
 
     @Test(expected = BadRequestException.class)
@@ -808,7 +820,7 @@ public class ActivityEndpointTest {
         service.updateActivity(activity);
         expectLastCall().andThrow(new FieldValueException(""));
         testActivityServiceFactory.replay();
-        endpoint.updateActivity(newCaller(55, true), key, activity);
+        endpoint.updateActivity(newAdminCaller(55), key, activity);
     }
 
     @Test
@@ -829,7 +841,7 @@ public class ActivityEndpointTest {
 
         testActivityServiceFactory.replay();
 
-        Activity result = endpoint.updateActivity(newCaller(55, true), key, activity);
+        Activity result = endpoint.updateActivity(newAdminCaller(55), key, activity);
         assertEquals(result, activity);
     }
 
@@ -853,7 +865,7 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
 
         assertNull(activity.getName());
-        Activity result = endpoint.updateActivity(newCaller(55, true), key, activity);
+        Activity result = endpoint.updateActivity(newAdminCaller(55), key, activity);
         assertEquals(result, activity);
         assertEquals(activityType.getName(), activity.getName());
     }
@@ -862,14 +874,18 @@ public class ActivityEndpointTest {
     public void testAddActivityNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.addActivity(newCaller(1, false), null);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(new Activity());
+        endpoint.addActivity(newCaller(1), jasAddActivityRequest);
     }
 
     @Test(expected = UnauthorizedException.class)
     public void testAddActivityNoUserThrowsUnauthorizedException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.addActivity(null, null);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(new Activity());
+        endpoint.addActivity(null, jasAddActivityRequest);
     }
 
     @Test(expected = NullPointerException.class)
@@ -877,7 +893,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
 
     @Test(expected = NotFoundException.class)
@@ -886,7 +902,7 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(new Activity());
-        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
 
     @Test(expected = EntityNotFoundRuntimeException.class)
@@ -897,7 +913,7 @@ public class ActivityEndpointTest {
         activity.getActivityTypeRef().setKey(Datastore.allocateId(ActivityType.class));
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
-        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
 
     @Test(expected = BadRequestException.class)
@@ -912,7 +928,7 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
-        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
 
     @Test(expected = NotFoundException.class)
@@ -927,7 +943,7 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
-        endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
 
     @Test
@@ -944,7 +960,7 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
-        assertEquals(activity, endpoint.addActivity(newCaller(1, true), jasAddActivityRequest).get(0));
+        assertEquals(activity, endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest).get(0));
     }
 
     @Test
@@ -963,7 +979,7 @@ public class ActivityEndpointTest {
         testActivityServiceFactory.replay();
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
-        assertEquals(activity, endpoint.addActivity(newCaller(1, true), jasAddActivityRequest).get(0));
+        assertEquals(activity, endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest).get(0));
         assertEquals(activityType.getName(), activity.getName());
     }
 
@@ -987,7 +1003,7 @@ public class ActivityEndpointTest {
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
-        List<Activity> result = endpoint.addActivity(newCaller(1, true), jasAddActivityRequest);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
         assertEquals(2, result.size());
         assertEquals(activity1, result.get(0));
         assertEquals(activity2, result.get(1));
@@ -997,7 +1013,7 @@ public class ActivityEndpointTest {
     public void testRemoveActivityNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.removeActivity(newCaller(1, false), null);
+        endpoint.removeActivity(newCaller(1), null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -1015,7 +1031,18 @@ public class ActivityEndpointTest {
         service.removeActivity(key);
         expectLastCall().andThrow(new EntityNotFoundException(""));
         testActivityServiceFactory.replay();
-        endpoint.removeActivity(newCaller(1, true), key);
+        endpoint.removeActivity(newAdminCaller(1), key);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testRemoveActivityNoActivityThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key key = Datastore.allocateId(Activity.class);
+        service.removeActivity(key);
+        expectLastCall().andThrow(new OperationException(""));
+        testActivityServiceFactory.replay();
+        endpoint.removeActivity(newAdminCaller(1), key);
     }
 
     @Test
@@ -1026,7 +1053,7 @@ public class ActivityEndpointTest {
         service.removeActivity(key);
         expectLastCall().once();
         testActivityServiceFactory.replay();
-        endpoint.removeActivity(newCaller(1, true), key);
+        endpoint.removeActivity(newAdminCaller(1), key);
     }
 
     @Test(expected = NotFoundException.class)
@@ -1053,7 +1080,7 @@ public class ActivityEndpointTest {
         Key activityId = Datastore.allocateId(Activity.class);
         expect(service.subscribe(userId, activityId)).andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
-        endpoint.addSubscription(newCaller(1, true), userId, activityId);
+        endpoint.addSubscription(newAdminCaller(1), userId, activityId);
     }
 
     @Test(expected = BadRequestException.class)
@@ -1064,7 +1091,18 @@ public class ActivityEndpointTest {
         Key activityId = Datastore.allocateId(Activity.class);
         expect(service.subscribe(userId, activityId)).andThrow(new UniqueConstraintException(""));
         testActivityServiceFactory.replay();
-        endpoint.addSubscription(newCaller(1, true), userId, activityId);
+        endpoint.addSubscription(newAdminCaller(1), userId, activityId);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testAddSubscriptionOverSubscribeThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key userId = Datastore.allocateId(UserLogin.class);
+        Key activityId = Datastore.allocateId(Activity.class);
+        expect(service.subscribe(userId, activityId)).andThrow(new OperationException(""));
+        testActivityServiceFactory.replay();
+        endpoint.addSubscription(newAdminCaller(1), userId, activityId);
     }
 
     @Test
@@ -1076,7 +1114,7 @@ public class ActivityEndpointTest {
         Subscription subscription = new Subscription();
         expect(service.subscribe(userId, activityId)).andReturn(subscription);
         testActivityServiceFactory.replay();
-        Subscription result = endpoint.addSubscription(newCaller(1, true), userId, activityId);
+        Subscription result = endpoint.addSubscription(newAdminCaller(1), userId, activityId);
         assertEquals(subscription, result);
     }
 
@@ -1089,7 +1127,7 @@ public class ActivityEndpointTest {
         Subscription subscription = new Subscription();
         expect(service.subscribe(userId, activityId)).andReturn(subscription);
         testActivityServiceFactory.replay();
-        Subscription result = endpoint.addSubscription(newCaller(userId.getId(), false), userId, activityId);
+        Subscription result = endpoint.addSubscription(newCaller(userId.getId()), userId, activityId);
         assertEquals(subscription, result);
     }
 
@@ -1118,7 +1156,7 @@ public class ActivityEndpointTest {
         Key activityId = Datastore.allocateId(Activity.class);
         expect(service.getSubscriptions(activityId)).andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
-        endpoint.getSubscription(newCaller(1, true), userId, activityId);
+        endpoint.getSubscription(newAdminCaller(1), userId, activityId);
     }
 
     @Test(expected = NotFoundException.class)
@@ -1132,7 +1170,7 @@ public class ActivityEndpointTest {
         subscriptionList.add(subscription);
         expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
         testActivityServiceFactory.replay();
-        endpoint.getSubscription(newCaller(1, true), userId, activityId);
+        endpoint.getSubscription(newAdminCaller(1), userId, activityId);
     }
 
     @Test
@@ -1147,7 +1185,7 @@ public class ActivityEndpointTest {
         subscriptionList.add(subscription);
         expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
         testActivityServiceFactory.replay();
-        Subscription result = endpoint.getSubscription(newCaller(1, true), userId, activityId);
+        Subscription result = endpoint.getSubscription(newAdminCaller(1), userId, activityId);
         assertEquals(subscription, result);
     }
 
@@ -1163,7 +1201,7 @@ public class ActivityEndpointTest {
         subscriptionList.add(subscription);
         expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
         testActivityServiceFactory.replay();
-        Subscription result = endpoint.getSubscription(newCaller(userId.getId(), false), userId, activityId);
+        Subscription result = endpoint.getSubscription(newCaller(userId.getId()), userId, activityId);
         assertEquals(subscription, result);
     }
 
@@ -1178,7 +1216,17 @@ public class ActivityEndpointTest {
     public void testGetSubscriptionsNotAdminThrowsForbiddenException() throws Exception{
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
-        endpoint.getSubscriptions(newCaller(1, false), null);
+        endpoint.getSubscriptions(newCaller(1), null);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetSubscriptionsThrowsNotFoundException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key activityId = Datastore.allocateId(Activity.class);
+        expect(service.getSubscriptions(activityId)).andThrow(new EntityNotFoundException());
+        testActivityServiceFactory.replay();
+        endpoint.getSubscriptions(newAdminCaller(1), activityId);
     }
 
     @Test
@@ -1193,7 +1241,43 @@ public class ActivityEndpointTest {
         subscriptionList.add(subscription);
         expect(service.getSubscriptions(activityId)).andReturn(subscriptionList);
         testActivityServiceFactory.replay();
-        List<Subscription> result = endpoint.getSubscriptions(newCaller(userId.getId(), true), activityId);
+        List<Subscription> result = endpoint.getSubscriptions(newAdminCaller(userId.getId()), activityId);
         assertEquals(1, result.size());
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void testCancelSubscriptionsNoUserThrowsNotFoundException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.cancelSubscription(null, null);
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void testCancelSubscriptionsNotAdminThrowsForbiddenException() throws Exception{
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.cancelSubscription(newCaller(1), null);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testCancelSubscriptionThrowsNotFoundException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key subscriptionId = Datastore.allocateId(Subscription.class);
+        service.cancel(subscriptionId);
+        expectLastCall().andThrow(new EntityNotFoundException());
+        testActivityServiceFactory.replay();
+        endpoint.cancelSubscription(newAdminCaller(1), subscriptionId);
+    }
+
+    @Test
+    public void testCancelSubscription() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityService service = ActivityServiceFactory.getActivityService();
+        Key subscriptionId = Datastore.allocateId(Subscription.class);
+        service.cancel(subscriptionId);
+        expectLastCall();
+        testActivityServiceFactory.replay();
+        endpoint.cancelSubscription(newAdminCaller(1), subscriptionId);
     }
 }

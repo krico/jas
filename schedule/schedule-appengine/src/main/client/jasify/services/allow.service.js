@@ -11,7 +11,8 @@
             restoreThen: restoreThen,
             guest: guest,
             user: user,
-            admin: admin
+            admin: admin,
+            adminOrOrgMember: adminOrOrgMember
         };
 
         function all() {
@@ -57,6 +58,20 @@
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
                     return $q.reject('admins only');
                 } else if (!Auth.isAdmin()) {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+                    return $q.reject('admins only');
+                } else {
+                    return true;
+                }
+            });
+        }
+
+        function adminOrOrgMember() {
+            return Allow.restoreThen(function () {
+                if (!Auth.isAuthenticated()) {
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                    return $q.reject('admins only');
+                } else if (!(Auth.isAdmin() || Auth.isOrgMember())) {
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
                     return $q.reject('admins only');
                 } else {

@@ -64,9 +64,8 @@
                         );
                     }
                 }
-            })
-        ;
-        /* END: Admin routes */
+            });
+
     }
 
 })(angular);

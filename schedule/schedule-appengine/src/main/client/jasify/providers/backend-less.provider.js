@@ -40,7 +40,8 @@
                     id: 1,
                     name: 'krico',
                     password: 'krico',
-                    admin: true
+                    admin: true,
+                    orgMember: false
                 }
             }
         };

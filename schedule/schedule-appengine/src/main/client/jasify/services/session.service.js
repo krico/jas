@@ -7,16 +7,18 @@
 
     function session() {
 
-        this.create = function (sessionId, userId, admin) {
+        this.create = function (sessionId, userId, admin, orgMember) {
             this.id = sessionId;
             this.userId = userId;
             this.admin = admin === true;
+            this.orgMember = orgMember === true;
         };
 
         this.destroy = function () {
             this.id = null;
             this.userId = null;
             this.admin = false;
+            this.orgMember = false;
         };
 
         this.destroy();

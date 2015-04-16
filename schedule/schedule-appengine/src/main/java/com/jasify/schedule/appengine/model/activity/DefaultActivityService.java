@@ -78,16 +78,6 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
-    private Subscription getSubscription(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("Subscription id=NULL");
-
-        try {
-            return Datastore.get(subscriptionMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Subscription id=" + id);
-        }
-    }
-
     private boolean isActivityTypeNameUnique(Transaction tx, Key organizationId, String name) {
         return Datastore.query(tx, activityTypeMeta, organizationId)
                 .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
@@ -218,8 +208,10 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public void removeActivityType(Key id) throws EntityNotFoundException, IllegalArgumentException {
+    public void removeActivityType(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException {
         ActivityType activityType = getActivityType(id);
+        if (!getActivitiesByActivityTypeId(id).isEmpty())
+            throw new OperationException("ActivityType has activities");
         Datastore.delete(activityType.getId());
     }
 
@@ -301,6 +293,7 @@ class DefaultActivityService implements ActivityService {
         return result;
     }
 
+    // TODO: Computer says this is too complex so should get broken up
     private List<Key> addActivityRepeatTypeWeekly(Activity activity, RepeatDetails repeatDetails, ActivityType activityType) throws EntityNotFoundException, FieldValueException {
         Set<Integer> repeatDays = getRepeatDays(repeatDetails);
         if (repeatDays.isEmpty()) throw new FieldValueException("RepeatDetails.repeatDays");
@@ -390,8 +383,12 @@ class DefaultActivityService implements ActivityService {
     @Override
     public List<Activity> getActivities(ActivityType activityType) throws EntityNotFoundException {
         getActivityType(activityType.getId());
+        return getActivitiesByActivityTypeId(activityType.getId());
+    }
+
+    private List<Activity> getActivitiesByActivityTypeId(Key id) throws EntityNotFoundException {
         return Datastore.query(activityMeta)
-                .filter(activityMeta.activityTypeRef.equal(activityType.getId()))
+                .filter(activityMeta.activityTypeRef.equal(id))
                 .asList();
     }
 
@@ -406,8 +403,10 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public void removeActivity(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        getActivity(id);
+    public void removeActivity(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException {
+        Activity dbActivity = getActivity(id);
+        if (!dbActivity.getSubscriptionListRef().getModelList().isEmpty())
+            throw new OperationException("Activity has subscriptions");
         Datastore.delete(id);
     }
 
@@ -497,6 +496,17 @@ class DefaultActivityService implements ActivityService {
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
         Datastore.put(dbActivity);
         Datastore.delete(dbSubscription.getId());
+    }
+
+    @Nonnull
+    @Override
+    public Subscription getSubscription(Key id) throws EntityNotFoundException {
+        if (id == null) throw new EntityNotFoundException("Subscription id=NULL");
+        try {
+            return Datastore.get(subscriptionMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("Subscription id=" + id);
+        }
     }
 
     @Nonnull

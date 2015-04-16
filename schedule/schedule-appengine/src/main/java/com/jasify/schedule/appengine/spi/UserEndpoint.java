@@ -12,6 +12,7 @@ import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -129,26 +130,24 @@ public class UserEndpoint {
             request.getUser().setAdmin(false); //Only admin can create an admin
         }
 
-        com.jasify.schedule.appengine.model.users.User ret;
+        com.jasify.schedule.appengine.model.users.User user;
 
         HttpSession session = servletRequest.getSession();
         if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
-
             UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
             session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
-            ret = UserServiceFactory.getUserService().create(request.getUser(), login);
-
+            user = UserServiceFactory.getUserService().create(request.getUser(), login);
         } else {
-
             String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
-            ret = UserServiceFactory.getUserService().create(request.getUser(), pw);
-
+            user = UserServiceFactory.getUserService().create(request.getUser(), pw);
         }
 
-        if (caller == null)
-            new HttpUserSession(ret).put(servletRequest); //login
+        if (caller == null) {
+            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(user);
+            new HttpUserSession(user, isOrgMember).put(servletRequest); //login
+        }
 
-        return ret;
+        return user;
 
     }
 }

@@ -65,11 +65,19 @@ public class JasLoginResponseTest {
     }
 
     @Test
+    public void testOrgMember() {
+        JasLoginResponse jasLoginResponse = new JasLoginResponse();
+        jasLoginResponse.setOrgMember(true);
+        assertTrue(jasLoginResponse.isOrgMember());
+    }
+
+    @Test
     public void testUserConstructor() {
         String sessionId = RandomStringUtils.randomAscii(10);
         Key userId = KeyFactory.createKey("User", 98);
         String name = RandomStringUtils.randomAscii(18);
         boolean admin = new Random().nextBoolean();
+        boolean orgMember = new Random().nextBoolean();
         User user = new User();
         user.setName(name);
         user.setAdmin(admin);
@@ -77,6 +85,7 @@ public class JasLoginResponseTest {
 
         UserSession userSession = EasyMock.createMock(UserSession.class);
         EasyMock.expect(userSession.getSessionId()).andReturn(sessionId).anyTimes();
+        EasyMock.expect(userSession.isOrgMember()).andReturn(orgMember);
         EasyMock.replay(userSession);
 
         JasLoginResponse response = new JasLoginResponse(user, userSession);
@@ -85,5 +94,6 @@ public class JasLoginResponseTest {
         assertEquals(sessionId, response.getSessionId());
         assertEquals(name, response.getName());
         assertEquals(admin, response.isAdmin());
+        assertEquals(orgMember, response.isOrgMember());
     }
 }

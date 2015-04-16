@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.oauth2.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
@@ -102,7 +103,8 @@ public class AuthEndpoint {
 
         try {
             com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().login(request.getUsername(), request.getPassword());
-            HttpUserSession userSession = new HttpUserSession(user).put(httpServletRequest);
+            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(user);
+            HttpUserSession userSession = new HttpUserSession(user, isOrgMember).put(httpServletRequest);
             log.info("[{}] user={} logged in!", httpServletRequest.getRemoteAddr(), user.getName());
 
             return new JasLoginResponse(user, userSession);
@@ -166,7 +168,6 @@ public class AuthEndpoint {
         UserService userService = UserServiceFactory.getUserService();
 
         if (authenticatedUser != null) {
-
             JasifyEndpointUser jasifyUser = (JasifyEndpointUser) authenticatedUser;
             try {
                 userService.addLogin(userService.get(jasifyUser.getUserId()), new UserLogin(oAuth2Info));
@@ -177,9 +178,7 @@ public class AuthEndpoint {
             }
 
             return new JasProviderAuthenticateResponse(Objects.toString(oAuth2Info.getState()));
-
         } else {
-
             com.jasify.schedule.appengine.model.users.User existingUser = userService.findByLogin(oAuth2Info.getProvider().name(), oAuth2Info.getUserId());
             if (existingUser == null) {
                 UserLogin userLogin = new UserLogin(oAuth2Info);
@@ -196,8 +195,9 @@ public class AuthEndpoint {
                 }
             }
 
+            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(existingUser);
             //LOGIN!
-            HttpUserSession userSession = new HttpUserSession(existingUser).put(httpServletRequest);//todo: simulate log in
+            HttpUserSession userSession = new HttpUserSession(existingUser, isOrgMember).put(httpServletRequest);//todo: simulate log in
             return new JasProviderAuthenticateResponse(existingUser, userSession, Objects.toString(oAuth2Info.getState()));
         }
     }

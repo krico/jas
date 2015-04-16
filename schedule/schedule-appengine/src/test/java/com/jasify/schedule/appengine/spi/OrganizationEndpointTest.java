@@ -23,7 +23,9 @@ import org.slim3.datastore.Datastore;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newOrgMemberCaller;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static org.easymock.EasyMock.*;
@@ -83,7 +85,7 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testGetOrganizationsNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.getOrganizations(newCaller(1, false));
+        endpoint.getOrganizations(newCaller(1));
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -95,13 +97,13 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testAddOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.addOrganization(newCaller(1, false), null);
+        endpoint.addOrganization(newCaller(1), null);
     }
 
     @Test(expected = ForbiddenException.class)
     public void testRemoveOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.removeOrganization(newCaller(1, false), null);
+        endpoint.removeOrganization(newCaller(1), null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -113,7 +115,7 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testGetOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.getOrganization(newCaller(1, false), null);
+        endpoint.getOrganization(newCaller(1), null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -125,7 +127,7 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testAddUserToOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.addUserToOrganization(newCaller(1, false), null, null);
+        endpoint.addUserToOrganization(newCaller(1), null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -137,7 +139,7 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testRemoveUserFromOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.removeUserFromOrganization(newCaller(1, false), null, null);
+        endpoint.removeUserFromOrganization(newCaller(1), null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -149,7 +151,7 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testAddGroupToOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.addGroupToOrganization(newCaller(1, false), null, null);
+        endpoint.addGroupToOrganization(newCaller(1), null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -161,7 +163,7 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testRemoveGroupFromOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.removeGroupFromOrganization(newCaller(1, false), null, null);
+        endpoint.removeGroupFromOrganization(newCaller(1), null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -173,7 +175,7 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testGetOrganizationUsersNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.getOrganizationUsers(newCaller(1, false), null);
+        endpoint.getOrganizationUsers(newCaller(1), null);
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -185,31 +187,31 @@ public class OrganizationEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testGetOrganizationGroupsNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.getOrganizationGroups(newCaller(1, false), null);
+        endpoint.getOrganizationGroups(newCaller(1), null);
     }
 
     @Test(expected = UnauthorizedException.class)
     public void testUpdateOrganizationNoUser() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(null, null, null);
+        endpoint.updateOrganization(null, null, new Organization());
     }
 
     @Test(expected = ForbiddenException.class)
     public void testUpdateOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newCaller(1, false), null, null);
+        endpoint.updateOrganization(newCaller(1), null, new Organization());
     }
 
     @Test(expected = NotFoundException.class)
     public void testUpdateOrganizationCheckNotFound() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newCaller(1, true), null, null);
+        endpoint.updateOrganization(newAdminCaller(1), null, new Organization());
     }
 
     @Test(expected = NotFoundException.class)
     public void testRemoveOrganizationCheckNotFound() throws Exception {
         testOrganizationServiceFactory.replay();
-        endpoint.removeOrganization(newCaller(1, true), null);
+        endpoint.removeOrganization(newAdminCaller(1), null);
     }
 
     @Test(expected = NotFoundException.class)
@@ -219,7 +221,7 @@ public class OrganizationEndpointTest {
         service.removeOrganization(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.removeOrganization(newCaller(55, true), key);
+        endpoint.removeOrganization(newAdminCaller(55), key);
     }
 
     @Test(expected = NotFoundException.class)
@@ -229,7 +231,7 @@ public class OrganizationEndpointTest {
         service.getOrganization(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.getOrganization(newCaller(55, true), key);
+        endpoint.getOrganization(newAdminCaller(55), key);
     }
 
 
@@ -241,7 +243,7 @@ public class OrganizationEndpointTest {
         service.updateOrganization(organization);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newCaller(55, true), key, organization);
+        endpoint.updateOrganization(newAdminCaller(55), key, organization);
     }
 
     @Test(expected = BadRequestException.class)
@@ -252,7 +254,7 @@ public class OrganizationEndpointTest {
         service.updateOrganization(organization);
         expectLastCall().andThrow(new FieldValueException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newCaller(55, true), key, organization);
+        endpoint.updateOrganization(newAdminCaller(55), key, organization);
     }
 
     @Test(expected = BadRequestException.class)
@@ -263,7 +265,7 @@ public class OrganizationEndpointTest {
         service.updateOrganization(organization);
         expectLastCall().andThrow(new UniqueConstraintException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newCaller(55, true), key, organization);
+        endpoint.updateOrganization(newAdminCaller(55), key, organization);
     }
 
     @Test(expected = NotFoundException.class)
@@ -275,7 +277,7 @@ public class OrganizationEndpointTest {
         service.getOrganization(key);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.addOrganization(newCaller(55, true), organization);
+        endpoint.addOrganization(newAdminCaller(55), organization);
     }
 
     @Test(expected = BadRequestException.class)
@@ -285,7 +287,7 @@ public class OrganizationEndpointTest {
         service.addOrganization(organization);
         expectLastCall().andThrow(new FieldValueException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.addOrganization(newCaller(55, true), organization);
+        endpoint.addOrganization(newAdminCaller(55), organization);
     }
 
     @Test(expected = BadRequestException.class)
@@ -295,7 +297,7 @@ public class OrganizationEndpointTest {
         service.addOrganization(organization);
         expectLastCall().andThrow(new UniqueConstraintException(null));
         testOrganizationServiceFactory.replay();
-        endpoint.addOrganization(newCaller(55, true), organization);
+        endpoint.addOrganization(newAdminCaller(55), organization);
     }
 
     @Test
@@ -314,18 +316,32 @@ public class OrganizationEndpointTest {
 
         testOrganizationServiceFactory.replay();
 
-        Organization result = endpoint.updateOrganization(newCaller(55, true), key, organization);
+        Organization result = endpoint.updateOrganization(newAdminCaller(55), key, organization);
         assertEquals(result, organization);
     }
 
     @Test
-    public void testGetOrganizations() throws Exception {
+    public void testGetOrganizationsForAdmin() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
         ArrayList<Organization> expected = new ArrayList<>();
         expect(service.getOrganizations()).andReturn(expected);
         testOrganizationServiceFactory.replay(); //recording finished
 
-        JasifyEndpointUser caller = newCaller(55, true); //Helper method to create a fake caller (true means admin)
+        JasifyEndpointUser caller = newAdminCaller(55); //Helper method to create a fake caller (true means admin)
+
+        List<Organization> organizations = endpoint.getOrganizations(caller);
+        // I use == here since I know the method returns it directly
+        assertNotNull(organizations == expected);
+    }
+
+    @Test
+    public void testGetOrganizationsForOrgMember() throws Exception {
+        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
+        ArrayList<Organization> expected = new ArrayList<>();
+        expect(service.getOrganizationsForMember(null)).andReturn(expected);
+        testOrganizationServiceFactory.replay(); //recording finished
+
+        JasifyEndpointUser caller = newOrgMemberCaller(55); //Helper method to create a fake caller (true means admin)
 
         List<Organization> organizations = endpoint.getOrganizations(caller);
         // I use == here since I know the method returns it directly
@@ -338,7 +354,7 @@ public class OrganizationEndpointTest {
         Organization organization = new Organization();
         expect(service.getOrganization(organization.getId())).andReturn(organization);
         testOrganizationServiceFactory.replay();
-        Organization result = endpoint.getOrganization(newCaller(55, true), organization.getId());
+        Organization result = endpoint.getOrganization(newAdminCaller(55), organization.getId());
         assertEquals(organization, result);
     }
 
@@ -349,7 +365,7 @@ public class OrganizationEndpointTest {
         expect(service.addOrganization(organization)).andReturn(organization.getId());
         expect(service.getOrganization(organization.getId())).andReturn(organization);
         testOrganizationServiceFactory.replay();
-        Organization result = endpoint.addOrganization(newCaller(55, true), organization);
+        Organization result = endpoint.addOrganization(newAdminCaller(55), organization);
         assertEquals(organization, result);
     }
 
@@ -360,7 +376,7 @@ public class OrganizationEndpointTest {
         service.removeOrganization(key);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.removeOrganization(newCaller(55, true), key);
+        endpoint.removeOrganization(newAdminCaller(55), key);
     }
 
     @Test
@@ -371,7 +387,7 @@ public class OrganizationEndpointTest {
         service.addUserToOrganization(organizationId, userId);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.addUserToOrganization(newCaller(55, true), organizationId, userId);
+        endpoint.addUserToOrganization(newAdminCaller(55), organizationId, userId);
     }
 
     @Test(expected = NotFoundException.class)
@@ -382,7 +398,7 @@ public class OrganizationEndpointTest {
         service.addUserToOrganization(organizationId, userId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.addUserToOrganization(newCaller(55, true), organizationId, userId);
+        endpoint.addUserToOrganization(newAdminCaller(55), organizationId, userId);
     }
 
     @Test
@@ -393,7 +409,7 @@ public class OrganizationEndpointTest {
         service.removeUserFromOrganization(organizationId, userId);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.removeUserFromOrganization(newCaller(55, true), organizationId, userId);
+        endpoint.removeUserFromOrganization(newAdminCaller(55), organizationId, userId);
     }
 
     @Test(expected = NotFoundException.class)
@@ -404,7 +420,7 @@ public class OrganizationEndpointTest {
         service.removeUserFromOrganization(organizationId, userId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.removeUserFromOrganization(newCaller(55, true), organizationId, userId);
+        endpoint.removeUserFromOrganization(newAdminCaller(55), organizationId, userId);
     }
 
     @Test
@@ -415,7 +431,7 @@ public class OrganizationEndpointTest {
         service.addGroupToOrganization(organizationId, groupId);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.addGroupToOrganization(newCaller(55, true), organizationId, groupId);
+        endpoint.addGroupToOrganization(newAdminCaller(55), organizationId, groupId);
     }
 
     @Test(expected = NotFoundException.class)
@@ -426,7 +442,7 @@ public class OrganizationEndpointTest {
         service.addGroupToOrganization(organizationId, groupId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.addGroupToOrganization(newCaller(55, true), organizationId, groupId);
+        endpoint.addGroupToOrganization(newAdminCaller(55), organizationId, groupId);
     }
 
     @Test
@@ -437,7 +453,7 @@ public class OrganizationEndpointTest {
         service.removeGroupFromOrganization(organizationId, groupId);
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
-        endpoint.removeGroupFromOrganization(newCaller(55, true), organizationId, groupId);
+        endpoint.removeGroupFromOrganization(newAdminCaller(55), organizationId, groupId);
     }
 
     @Test(expected = NotFoundException.class)
@@ -448,7 +464,7 @@ public class OrganizationEndpointTest {
         service.removeGroupFromOrganization(organizationId, groupId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.removeGroupFromOrganization(newCaller(55, true), organizationId, groupId);
+        endpoint.removeGroupFromOrganization(newAdminCaller(55), organizationId, groupId);
     }
 
     @Test
@@ -466,7 +482,7 @@ public class OrganizationEndpointTest {
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
 
-        List<User> result = endpoint.getOrganizationUsers(newCaller(55, true), organizationId);
+        List<User> result = endpoint.getOrganizationUsers(newAdminCaller(55), organizationId);
 
         assertEquals(userList, result);
     }
@@ -478,7 +494,7 @@ public class OrganizationEndpointTest {
         service.getOrganization(organizationId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.getOrganizationUsers(newCaller(55, true), organizationId);
+        endpoint.getOrganizationUsers(newAdminCaller(55), organizationId);
     }
 
     @Test
@@ -496,7 +512,7 @@ public class OrganizationEndpointTest {
         expectLastCall().once();
         testOrganizationServiceFactory.replay();
 
-        List<Group> result = endpoint.getOrganizationGroups(newCaller(55, true), organizationId);
+        List<Group> result = endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
 
         assertEquals(groupList, result);
     }
@@ -508,6 +524,6 @@ public class OrganizationEndpointTest {
         service.getOrganization(organizationId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
-        endpoint.getOrganizationGroups(newCaller(55, true), organizationId);
+        endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
     }
 }

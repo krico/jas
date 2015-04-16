@@ -83,6 +83,26 @@ final class DefaultOrganizationService implements OrganizationService {
         }
     }
 
+    @Override
+    public boolean isOrganizationMember(User user) {
+        for (Organization organization : getOrganizations()) {
+            if (organization.getUsers().contains(user))
+                return true;
+        }
+        return false;
+    }
+
+    @Nonnull
+    @Override
+    public List<Organization> getOrganizationsForMember(User user) throws EntityNotFoundException {
+        List<Organization> result = new ArrayList<>();
+        for (Organization organization : getOrganizations()) {
+            if (organization.getUsers().contains(user))
+                result.add(organization);
+        }
+        return result;
+    }
+
     @Nonnull
     @Override
     public Organization getOrganization(String name) throws EntityNotFoundException {
@@ -91,7 +111,6 @@ final class DefaultOrganizationService implements OrganizationService {
         return ret;
     }
 
-    @Nonnull
     @Override
     public List<Organization> getOrganizations() {
         return Datastore.query(organizationMeta).asList();

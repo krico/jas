@@ -14,6 +14,7 @@ public class JasLoginResponse implements JasEndpointEntity {
     private String name;
     private boolean admin;
     private User user;
+    private boolean orgMember;
 
     public JasLoginResponse() {
     }
@@ -24,6 +25,7 @@ public class JasLoginResponse implements JasEndpointEntity {
         setName(user.getName());
         setAdmin(user.isAdmin());
         setUser(user);
+        setOrgMember(userSession.isOrgMember());
     }
 
     public User getUser() {
@@ -64,5 +66,13 @@ public class JasLoginResponse implements JasEndpointEntity {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public boolean isOrgMember() {
+        return orgMember;
+    }
+
+    public void setOrgMember(boolean orgMember) {
+        this.orgMember = orgMember;
     }
 }
