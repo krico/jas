@@ -56,7 +56,7 @@ public interface OrganizationService {
      * @param userId to check for
      * @return all organizations that have the userId as a member
      */
-    public List<Organization> getOrganizationsForMember(Key userId) throws EntityNotFoundException;
+    public List<Organization> getOrganizationsForUser(Key userId) throws EntityNotFoundException;
 
     /**
      * @param organization to update
