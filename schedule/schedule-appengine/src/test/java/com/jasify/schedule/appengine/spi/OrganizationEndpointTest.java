@@ -339,8 +339,7 @@ public class OrganizationEndpointTest {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
         JasifyEndpointUser caller = newOrgMemberCaller(55);
         ArrayList<Organization> expected = new ArrayList<>();
-        Key userId = Datastore.createKey(User.class, caller.getUserId());
-        expect(service.getOrganizationsForUser(userId)).andReturn(expected);
+        expect(service.getOrganizationsForUser(caller.getUserId())).andReturn(expected);
         testOrganizationServiceFactory.replay(); //recording finished
         List<Organization> organizations = endpoint.getOrganizations(caller);
         // I use == here since I know the method returns it directly

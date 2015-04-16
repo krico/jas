@@ -58,8 +58,7 @@ public class OrganizationEndpoint {
         // Admin sees all
         if (jasUser.isAdmin()) return OrganizationServiceFactory.getOrganizationService().getOrganizations();
         if (jasUser.isOrgMember()) {
-            Key userId = Datastore.createKey(com.jasify.schedule.appengine.model.users.User.class, jasUser.getUserId());
-            return OrganizationServiceFactory.getOrganizationService().getOrganizationsForUser(userId);
+            return OrganizationServiceFactory.getOrganizationService().getOrganizationsForUser(jasUser.getUserId());
         }
         throw new ForbiddenException("Must be admin");
 

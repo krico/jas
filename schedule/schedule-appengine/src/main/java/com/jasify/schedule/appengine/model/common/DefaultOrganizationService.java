@@ -91,6 +91,12 @@ final class DefaultOrganizationService implements OrganizationService {
         return !result.isEmpty();
     }
 
+    @Override
+    public List<Organization> getOrganizationsForUser(long userId) throws EntityNotFoundException {
+        Key key = Datastore.createKey(com.jasify.schedule.appengine.model.users.User.class, userId);
+        return getOrganizationsForUser(key);
+    }
+
     @Nonnull
     @Override
     public List<Organization> getOrganizationsForUser(Key userId) throws EntityNotFoundException {
