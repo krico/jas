@@ -24,8 +24,10 @@ var argv = require('yargs').argv,
     karma = require('gulp-karma'),
     gulpif = require('gulp-if'),
     templateCache = require('gulp-angular-templatecache'),
-    plumber = require('gulp-plumber'),
-    paths = require('./paths.json');
+    plumber = require('gulp-plumber');
+
+var paths = require('./dynamic-paths.js');
+gutil.log('Project version: ' + gutil.colors.cyan(paths.projectVersion));
 
 gulp.task('clean', clean);
 gulp.task('sym', ['build'], sym);

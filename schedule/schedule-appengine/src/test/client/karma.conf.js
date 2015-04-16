@@ -1,5 +1,5 @@
 module.exports = function (config, min) {
-    var paths = require('../../../paths.json');
+    var paths = require('../../../dynamic-paths.js');
     var files = [
         paths.build + '/js/dep-boot.js',
         paths.build + '/js/dep-main.js',

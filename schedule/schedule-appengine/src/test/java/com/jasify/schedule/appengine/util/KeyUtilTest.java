@@ -135,7 +135,6 @@ public class KeyUtilTest {
             Key parsedKey = KeyUtil.parseHumanReadableString(encoded);
             assertNotNull(parsedKey);
             assertEquals(key, parsedKey);
-//            System.out.println(encoded + " " + key);
         }
     }
 
@@ -183,7 +182,6 @@ public class KeyUtilTest {
             Key parsedKey = KeyUtil.parseHumanReadableString(encoded);
             assertNotNull(parsedKey);
             assertEquals(key, parsedKey);
-            System.out.println(encoded + "\n\t" + key);
         }
     }
 

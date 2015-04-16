@@ -106,3 +106,17 @@ are not using oauth with google, you can put any value there:
  * [Unit Testing Google Cloud](https://cloud.google.com/appengine/docs/java/tools/localunittesting) unit tests for AppEngine
  * [ServletUnit](http://httpunit.sourceforge.net/doc/servletunit-intro.html) part of HttpUnit to unit test servlets
  * [Boostrap columns of same height](http://www.minimit.com/articles/solutions-tutorials/bootstrap-3-responsive-columns-of-same-height)
+
+
+## GitHub Maven plugins
+
+ * Edit ~/.m2/settings.xml (to find out the real path, run `mvn -X` and check the first few lines to see where your settings come from.
+ * To use the GitHub plugins, add this to the settings.xml
+```xml
+<servers>
+  <server>
+    <id>github</id>
+    <password>OAUTH2TOKEN</password>
+  </server>
+</servers>
+```

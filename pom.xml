@@ -1,22 +1,47 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.jasify</groupId>
     <artifactId>jasify</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.3-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <name>Jasify</name>
+    <url>https://github.com/krico/jas</url>
 
     <properties>
         <jasify.appengine.sdk.version>1.9.18</jasify.appengine.sdk.version>
         <jasify.googleapi.version>1.19.1</jasify.googleapi.version>
         <jasify.slf4j.version>1.7.10</jasify.slf4j.version>
         <jasify.repository>${project.basedir}</jasify.repository>
+        <github.global.server>github</github.global.server>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <issueManagement>
+        <url>https://github.com/krico/jas/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <scm>
+        <url>https://github.com/krico/jas</url>
+        <connection>scm:git:git://github.com/krico/jas.git</connection>
+        <developerConnection>scm:git:git@github.com:krico/jas.git</developerConnection>
+      <tag>HEAD</tag>
+  </scm>
+
+    <developers>
+        <developer>
+            <name>Christian Asmussen</name>
+            <url>https://github.com/krico</url>
+            <id>krico</id>
+        </developer>
+        <developer>
+            <name>Waldemar Szarmach</name>
+            <url>https://github.com/wszarmach</url>
+            <id>wszarmach</id>
+        </developer>
+    </developers>
 
     <repositories>
         <!-- For slim3 -->
@@ -41,10 +66,37 @@
         <module>schedule/schedule-appengine</module>
     </modules>
 
-    <dependencies/>
+    <dependencies />
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.github</groupId>
+                <artifactId>site-maven-plugin</artifactId>
+                <version>0.11</version>
+                <configuration>
+                    <message>Site generated ${project.version}</message>
+                    <server>github</server>
+                    <merge>true</merge>
+                    <dryRun>false</dryRun>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <phase>site</phase>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
