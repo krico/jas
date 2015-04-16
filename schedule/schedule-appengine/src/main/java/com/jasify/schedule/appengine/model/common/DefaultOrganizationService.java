@@ -102,15 +102,13 @@ final class DefaultOrganizationService implements OrganizationService {
     @Nonnull
     @Override
     public List<Organization> getOrganizationsForMember(Key userId) throws EntityNotFoundException {
-        List<Key> keys = Datastore.query(organizationMemberMeta)
+        List<OrganizationMember> organizationMembers = Datastore.query(organizationMemberMeta)
                 .filter(organizationMemberMeta.userRef.equal(userId))
-                .asKeyList();
+                .asList();
 
         List<Organization> result = new ArrayList<>();
-
-        for (Key key : keys) {
-            Organization organization = getOrganizationMember(key).getOrganizationRef().getModel();
-            result.add(organization);
+        for (OrganizationMember organizationMember : organizationMembers) {
+            result.add(organizationMember.getOrganizationRef().getModel());
         }
         return result;
     }
