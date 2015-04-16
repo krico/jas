@@ -83,22 +83,34 @@ final class DefaultOrganizationService implements OrganizationService {
         }
     }
 
-    @Override
-    public boolean isOrganizationMember(User user) {
-        for (Organization organization : getOrganizations()) {
-            if (organization.getUsers().contains(user))
-                return true;
+    public OrganizationMember getOrganizationMember(Key id) throws EntityNotFoundException, IllegalArgumentException {
+        try {
+            return Datastore.get(organizationMemberMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("OrganizationMember id=" + id);
         }
-        return false;
+    }
+
+    @Override
+    public boolean isOrganizationMember(Key userId) {
+        List<Key> result = Datastore.query(organizationMemberMeta)
+                .filter(organizationMemberMeta.userRef.equal(userId))
+                .asKeyList();
+        return !result.isEmpty();
     }
 
     @Nonnull
     @Override
-    public List<Organization> getOrganizationsForMember(User user) throws EntityNotFoundException {
+    public List<Organization> getOrganizationsForMember(Key userId) throws EntityNotFoundException {
+        List<Key> keys = Datastore.query(organizationMemberMeta)
+                .filter(organizationMemberMeta.userRef.equal(userId))
+                .asKeyList();
+
         List<Organization> result = new ArrayList<>();
-        for (Organization organization : getOrganizations()) {
-            if (organization.getUsers().contains(user))
-                result.add(organization);
+
+        for (Key key : keys) {
+            Organization organization = getOrganizationMember(key).getOrganizationRef().getModel();
+            result.add(organization);
         }
         return result;
     }

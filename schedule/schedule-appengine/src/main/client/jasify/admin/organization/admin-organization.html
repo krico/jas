@@ -81,7 +81,7 @@
             </table>
         </div>
     </div>
-    <div class="col-sm-3" ng-show="vm.isAdmin()">
+    <div class="col-sm-3" ng-if="vm.isAdmin()">
         <form class="form col-md-12" role="form" name="vm.usersForm" novalidate>
             <fieldset>
                 <legend class="h4">Users</legend>
@@ -113,7 +113,7 @@
             </fieldset>
         </form>
     </div>
-    <div class="col-sm-3" ng-show="vm.isAdmin()">
+    <div class="col-sm-3" ng-if="vm.isAdmin()">
         <form class="form col-md-12" role="form" name="vm.groupsForm" novalidate>
             <fieldset>
                 <legend class="h4">Groups</legend>

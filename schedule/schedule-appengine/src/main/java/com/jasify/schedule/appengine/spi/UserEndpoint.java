@@ -143,7 +143,7 @@ public class UserEndpoint {
         }
 
         if (caller == null) {
-            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(user);
+            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(user.getId());
             new HttpUserSession(user, isOrgMember).put(servletRequest); //login
         }
 
