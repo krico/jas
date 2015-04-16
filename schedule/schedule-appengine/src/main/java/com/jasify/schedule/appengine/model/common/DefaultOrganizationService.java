@@ -83,14 +83,6 @@ final class DefaultOrganizationService implements OrganizationService {
         }
     }
 
-    public OrganizationMember getOrganizationMember(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        try {
-            return Datastore.get(organizationMemberMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("OrganizationMember id=" + id);
-        }
-    }
-
     @Override
     public boolean isOrganizationMember(Key userId) {
         List<Key> result = Datastore.query(organizationMemberMeta)
