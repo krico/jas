@@ -61,11 +61,11 @@
                 <li class="dropdown" ng-if="vm.isAdminOrOrgMember()" ng-class="vm.menuActive('/admin/')" dropdown>
                     <a ng-href="#{{vm.path}}" class="dropdown-toggle" dropdown-toggle>admin <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a ng-click="vm.collapse()" ng-show="vm.isAdmin()" href="#/admin/users">users</a></li>
-                        <li><a ng-click="vm.collapse()" ng-show="vm.isAdmin()" href="#/admin/groups">groups</a></li>
+                        <li ng-if="vm.isAdmin()"><a ng-click="vm.collapse()" href="#/admin/users">users</a></li>
+                        <li ng-if="vm.isAdmin()"><a ng-click="vm.collapse()" href="#/admin/groups">groups</a></li>
                         <li><a ng-click="vm.collapse()" href="#/admin/organizations">organizations</a></li>
                         <li><a ng-click="vm.collapse()" href="#/admin/activities">activities</a></li>
-                        <li><a ng-click="vm.collapse()" ng-show="vm.isAdmin()" href="#/admin/balances">balances</a></li>
+                        <li ng-if="vm.isAdmin()"><a ng-click="vm.collapse()" href="#/admin/balances">balances</a></li>
                     </ul>
                 </li>
 

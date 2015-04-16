@@ -84,21 +84,29 @@ final class DefaultOrganizationService implements OrganizationService {
     }
 
     @Override
-    public boolean isOrganizationMember(User user) {
-        for (Organization organization : getOrganizations()) {
-            if (organization.getUsers().contains(user))
-                return true;
-        }
-        return false;
+    public boolean isOrganizationMember(Key userId) {
+        List<Key> result = Datastore.query(organizationMemberMeta)
+                .filter(organizationMemberMeta.userRef.equal(userId))
+                .asKeyList();
+        return !result.isEmpty();
+    }
+
+    @Override
+    public List<Organization> getOrganizationsForUser(long userId) throws EntityNotFoundException {
+        Key key = Datastore.createKey(com.jasify.schedule.appengine.model.users.User.class, userId);
+        return getOrganizationsForUser(key);
     }
 
     @Nonnull
     @Override
-    public List<Organization> getOrganizationsForMember(User user) throws EntityNotFoundException {
+    public List<Organization> getOrganizationsForUser(Key userId) throws EntityNotFoundException {
+        List<OrganizationMember> organizationMembers = Datastore.query(organizationMemberMeta)
+                .filter(organizationMemberMeta.userRef.equal(userId))
+                .asList();
+
         List<Organization> result = new ArrayList<>();
-        for (Organization organization : getOrganizations()) {
-            if (organization.getUsers().contains(user))
-                result.add(organization);
+        for (OrganizationMember organizationMember : organizationMembers) {
+            result.add(organizationMember.getOrganizationRef().getModel());
         }
         return result;
     }

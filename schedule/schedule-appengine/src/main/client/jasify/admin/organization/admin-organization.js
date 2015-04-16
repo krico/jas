@@ -41,11 +41,11 @@
         vm.addActivityType = addActivityType;
         vm.removeActivityType = removeActivityType;
 
+        vm.isAdmin = isAdmin;
+
         vm.loadUsers();
         vm.loadGroups();
         vm.loadActivityTypes();
-
-        vm.isAdmin = isAdmin;
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});

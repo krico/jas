@@ -13,10 +13,10 @@ import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
+import org.slim3.datastore.Datastore;
 
 import java.util.List;
 
@@ -58,8 +58,7 @@ public class OrganizationEndpoint {
         // Admin sees all
         if (jasUser.isAdmin()) return OrganizationServiceFactory.getOrganizationService().getOrganizations();
         if (jasUser.isOrgMember()) {
-            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(jasUser.getUserId());
-            return OrganizationServiceFactory.getOrganizationService().getOrganizationsForMember(user);
+            return OrganizationServiceFactory.getOrganizationService().getOrganizationsForUser(jasUser.getUserId());
         }
         throw new ForbiddenException("Must be admin");
 

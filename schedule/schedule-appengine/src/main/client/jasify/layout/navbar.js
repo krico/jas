@@ -55,7 +55,7 @@
         }
 
         function isAdminOrOrgMember() {
-            return isAdmin || Auth.isOrgMember();
+            return vm.isAdmin() || Auth.isOrgMember();
         }
 
         function toggleCollapse() {
