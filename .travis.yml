@@ -1,6 +1,6 @@
 language: java
 jdk: oraclejdk7
-env: ENV_IS_CI=true bower_storage__cache=$HOME/.bower
+env: ENV_IS_CI=true bower_storage_cache=$HOME/.bower
 sudo: false
 cache:
   directories:
@@ -10,4 +10,3 @@ cache:
 before_cache:
   - ls $HOME/.m2
   - ls $HOME/.bower
-  - ls $HOME/.npm
