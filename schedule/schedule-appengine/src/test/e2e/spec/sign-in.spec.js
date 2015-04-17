@@ -1,28 +1,30 @@
-function endsWith(str, suffix) {
-    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
+var util = require('../lib/util');
 
 describe('Jasify Schedule', function () {
-    var username = 'protractor_dspkqpy_user@tfbnw.net';
-    var pass = 'protractor';
+
+    var username = browser.params.logins.facebook.user;
+    var pass = browser.params.logins.facebook.pass;
+
     it('should login with facebook', function () {
 
         browser.manage().deleteAllCookies();
 
-        browser.get('http://localhost:8080/');
-
+        browser.get('/');
+        browser.waitForAngular();
 
         expect(browser.getTitle()).toEqual('Jasify Schedule');
 
-        element(by.linkText('Create Account')).click();
+        element(by.linkText('Sign In')).click();
+
+        util.screenShot('home');
 
         browser.waitForAngular();
 
         var modalTitle = element(by.css('.modal-title'));
         var modalTitleText = modalTitle.getText();
-        expect(modalTitleText).toEqual('Create Account');
+        expect(modalTitleText).toEqual('Sign In');
 
-        element(by.partialButtonText('Create Account with Facebook')).click().then(function () {
+        element(by.partialButtonText('Sign In with Facebook')).click().then(function () {
             browser.ignoreSynchronization = true;
             browser.sleep(1000);
             expect(element(by.id('email')).isPresent()).toBeTruthy();

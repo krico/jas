@@ -17,6 +17,7 @@
             errorHandler: errorHandler,
             jasify: jasify,
             jasifyLoaded: jasifyLoaded,
+            isLoaded: isLoaded,
             loaded: false,
             promise: null,
             deferred: null,
@@ -30,6 +31,10 @@
         $window.endpointInitialize = function () {
             Endpoint.init();
         };
+
+        function isLoaded() {
+            return Endpoint.loaded;
+        }
 
 
         function errorHandler(resp) {

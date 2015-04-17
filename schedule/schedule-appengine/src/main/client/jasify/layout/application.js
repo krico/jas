@@ -2,7 +2,8 @@
 
     angular.module('jasifyWeb').controller('ApplicationController', ApplicationController);
 
-    function ApplicationController($scope, $rootScope, $modal, $log, $location, $filter, Auth, ApiSettings, BrowserData, AUTH_EVENTS, VERSION) {
+    function ApplicationController($scope, $rootScope, $modal, $log, $location, $filter, Auth, ApiSettings, BrowserData,
+                                   Endpoint, AUTH_EVENTS, VERSION) {
         var appVm = this;
 
         $scope.currentUser = null;
@@ -22,6 +23,7 @@
         appVm.toggleVersion = toggleVersion;
         appVm.serverVersion = serverVersion;
         appVm.serverVersionString = serverVersionString;
+        appVm.isLoaded = isLoaded;
         appVm.SERVER_VERSION = null;
 
         $scope.$on(AUTH_EVENTS.notAuthenticated, appVm.notAuthenticated);
@@ -31,6 +33,10 @@
         $scope.$on(AUTH_EVENTS.notAuthorized, appVm.notAuthorized);
 
         appVm.restore();
+
+        function isLoaded(){
+            return Endpoint.isLoaded();
+        }
 
         function setCurrentUser(u) {
             $scope.currentUser = u;

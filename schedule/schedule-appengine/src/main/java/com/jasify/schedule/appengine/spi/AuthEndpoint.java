@@ -169,12 +169,24 @@ public class AuthEndpoint {
 
         if (authenticatedUser != null) {
             JasifyEndpointUser jasifyUser = (JasifyEndpointUser) authenticatedUser;
+            UserLogin userLogin = new UserLogin(oAuth2Info);
             try {
-                userService.addLogin(userService.get(jasifyUser.getUserId()), new UserLogin(oAuth2Info));
+                userService.addLogin(userService.get(jasifyUser.getUserId()), userLogin);
             } catch (EntityNotFoundException e) {
                 throw new NotFoundException(e);
             } catch (UserLoginExistsException e) {
-                throw new ConflictException("UserLogin exists");
+                /* Maybe it's this user?
+                   This seems to happen if the browser didn't reload but the session still existed, in this case the
+                   logged in user could be the owner of this user login. See #245
+                 */
+                boolean found = false;
+                for (UserLogin login : userService.getUserLogins(jasifyUser.getUserId())) {
+                    found = StringUtils.equals(login.getProvider(), userLogin.getProvider()) &&
+                            StringUtils.equals(login.getUserId(), userLogin.getUserId());
+                    if (found) break;
+                }
+                if (!found)
+                    throw new ConflictException("UserLogin exists");
             }
 
             return new JasProviderAuthenticateResponse(Objects.toString(oAuth2Info.getState()));
