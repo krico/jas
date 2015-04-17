@@ -91,6 +91,20 @@ are not using oauth with google, you can put any value there:
    and run your tests in the browser.  Then you can simply reload the browser to test again.  For this, run `mvn jasmine:bdd`.
  * Checkout [Jasmine Documentation](http://jasmine.github.io/2.0/introduction.html)
 
+## Protractor (end to end testing)
+
+ * To get protractor going, have a look at the [tutorial](http://angular.github.io/protractor/#/tutorial).
+ If you don't want to install anything and rely only on jasify, you can do
+```
+# download selenium binaries
+./node_modules/.bin/webdriver-manager update
+# start selenium server (http://localhost:4444/wd/hub)
+./node_modules/.bin/webdriver-manager start
+
+# on another terminal, run
+./node_modules/.bin/protractor src/test/e2e/protractor.cfg.js
+```
+
 ## Links
 
  * [PayPal WebCheckout dev](https://developer.paypal.com/docs/integration/web/web-checkout/)
