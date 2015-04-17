@@ -153,7 +153,7 @@ public class BalanceEndpoint {
     }
 
     @ApiMethod(name = "balance.executePayment", path = "balance/execute-payment/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public void executePayment(User caller, @Named("id") Key paymentId, @Named("payerId") String payerId) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException, ForbiddenException {
+    public void executePayment(User caller, @Named("id") Key paymentId, @Nullable @Named("payerId") String payerId) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException, ForbiddenException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
@@ -161,7 +161,7 @@ public class BalanceEndpoint {
         switch (payment.getType()) {
             case PayPal: {
                 PayPalPayment payPalPayment = (PayPalPayment) payment;
-                payPalPayment.setPayerId(payerId);
+                payPalPayment.setPayerId(Preconditions.checkNotNull(payerId, "payerID == NULL"));
                 paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
                 BalanceServiceFactory.getBalanceService().payment(payPalPayment);
             }
