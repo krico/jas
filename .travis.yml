@@ -7,3 +7,7 @@ cache:
   - $HOME/.m2
   - $HOME/.bower
   - $HOME/.npm
+before_cache:
+  - ls $HOME/.m2
+  - ls $HOME/.bower
+  - ls $HOME/.npm
