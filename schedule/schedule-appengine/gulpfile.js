@@ -195,6 +195,7 @@ function clientDependenciesCssFun(key) {
         src.push(items);
         fonts.push(items.replace(/\/css\/[^\/]+$/, "/fonts/**/*.*"));
     }
+    fonts.push(path.join(paths.bower, 'bootstrap', 'fonts') + '/**/*.*');
     return function (cb) {
 
         gulp.src(fonts)
