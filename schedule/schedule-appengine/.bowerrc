@@ -1,3 +1,7 @@
 {
-  "directory": "target/bower_components"
+  "directory": "target/bower_components",
+  "storage": {
+    "packages": "~/.bower/packages",
+    "registry": "~/.bower/registry"
+  }
 }
