@@ -13,28 +13,50 @@ function AuthenticatePage() {
 inherits(AuthenticatePage, JasifyPage);
 
 AuthenticatePage.prototype.logout = function (credentials) {
-    expect(this.logOutMenu.isPresent()).toBeTruthy();
-    this.logOutMenu.click();
-    expect(this.logOutConfirmation.isPresent()).toBeTruthy();
+    var that = this;
+    return this.logOutMenu.isDisplayed()
+        .then(function (displayed) {
+            if (!displayed) throw 'log out menu not displayed';
+            return that.logOutMenu.click();
+        })
+        .then(function () {
+            browser.sleep(1000);
+            return that.logOutConfirmation.isDisplayed();
+        });
 };
 
 AuthenticatePage.prototype.signInWithEmail = function (credentials) {
-    expect(this.signInMenu.isPresent()).toBeTruthy();
-    this.signInMenu.click();
+    var that = this;
+    return this.signInMenu.isPresent()
+        .then(clickMenu)
+        .then(clickButton)
+        .then(submitForm)
+        .then(function () {
+            browser.sleep(1000);
+            return that.getAuthName();
+        });
 
-    expect(this.signInWithEmailButton.isPresent()).toBeTruthy();
-    this.signInWithEmailButton.click();
+    function clickMenu(p) {
+        if (!p) throw 'signIn menu not there';
+        return that.signInMenu.click();
+    }
 
-    var userField = element(by.model('vm.user.email'));
-    var passField = element(by.model('vm.user.password'));
+    function clickButton() {
+        return that.signInWithEmailButton.isPresent().then(function (p) {
+            if (!p) throw 'signInWithEmailButton not present';
+            return that.signInWithEmailButton.click();
+        });
+    }
 
-    var signInButton = element(by.css('.modal-body')).element(by.css('[ng-click="vm.withEmail()"]'));
-    expect(userField.isDisplayed()).toBeTruthy();
-    userField.sendKeys(credentials.user);
-    passField.sendKeys(credentials.pass);
-    signInButton.click();
-    browser.sleep(5000);
-    return this.getAuthName();
+    function submitForm() {
+        var userField = element(by.model('vm.user.email'));
+        var passField = element(by.model('vm.user.password'));
+        var signInButton = element(by.css('[ng-click="vm.signIn($close)"]'));
+
+        userField.sendKeys(credentials.user);
+        passField.sendKeys(credentials.pass);
+        return signInButton.click();
+    }
 };
 
 AuthenticatePage.prototype.signInWithFacebook = function (credentials) {
@@ -65,17 +87,14 @@ AuthenticatePage.prototype.signInWithFacebook = function (credentials) {
 
 AuthenticatePage.prototype.isLoggedIn = function () {
     var that = this;
-    browser.waitForAngular();
-
-    return this.authStatus.isPresent().then(function (present) {
-        if (!present) {
-            console.log('auth status not present');
-            return false;
-        }
-        return that.authStatus.getAttribute('value').then(function (value) {
-            return value == 'authenticated';
+    return this.authStatus.isPresent()
+        .then(function (p) {
+            if (!p) throw 'Auth status not present';
+            return that.getAuthStatus();
+        })
+        .then(function (status) {
+            return status == 'authenticated';
         });
-    });
 };
 
 module.exports = AuthenticatePage;

@@ -4,7 +4,7 @@ describe('Sign In with Facebook', function () {
     var AuthenticatePage = require('./authenticate.page');
     var credentials = util.credentials('facebook');
 
-    it('should authenticate using facebook', function () {if(true)return;
+    it('should authenticate using facebook', function () {
         var page = new AuthenticatePage();
         page.go();
         expect(page.isLoggedIn()).not.toBeTruthy();
@@ -13,10 +13,10 @@ describe('Sign In with Facebook', function () {
         expect(page.getAuthName()).toEqual(credentials.user)
     });
 
-    it('should logout after authenticating', function () {if(true)return;
+    it('should logout after authenticating', function () {
         var page = new AuthenticatePage();
         page.go();
-        browser.waitForAngular();
+        browser.sleep(500);
         expect(page.isLoggedIn()).toBeTruthy();
         expect(page.getAuthName()).toEqual(credentials.user);
         page.logout();

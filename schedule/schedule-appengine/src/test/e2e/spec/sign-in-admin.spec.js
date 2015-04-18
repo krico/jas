@@ -8,18 +8,17 @@ describe('Sign In with Email', function () {
         var page = new AuthenticatePage();
         page.go();
         expect(page.isLoggedIn()).not.toBeTruthy();
-        page.signInWithEmail(credentials);
+        expect(page.signInWithEmail(credentials)).toEqual(credentials.user);
         expect(page.isLoggedIn()).toBeTruthy();
-        expect(page.getAuthName()).toEqual(credentials.user)
     });
 
     it('should logout after authenticating as admin', function () {
         var page = new AuthenticatePage();
         page.go();
-        browser.waitForAngular();
+        browser.sleep(500); //we need to wait for the API, protractor doesn't know about google endpoints :-(
         expect(page.isLoggedIn()).toBeTruthy();
         expect(page.getAuthName()).toEqual(credentials.user);
-        page.logout();
+        expect(page.logout()).toBeTruthy();
         expect(page.isLoggedIn()).not.toBeTruthy();
     });
 });

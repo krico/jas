@@ -2,6 +2,8 @@ exports.config = {
     seleniumAddress: 'http://localhost:4444/wd/hub',
     baseUrl: 'http://localhost:8080',
     suites: {
+        admin: 'spec/*-admin.spec.js',
+        facebook: 'spec/*-facebook.spec.js',
         full: 'spec/*.spec.js'
     },
     framework: 'jasmine2',
