@@ -8,14 +8,17 @@ describe('Sign In with Facebook', function () {
         var page = new AuthenticatePage();
         page.go();
         expect(page.isLoggedIn()).not.toBeTruthy();
-        page.signInWithFacebook(util.credentials('facebook'));
+        page.signInWithFacebook(credentials);
         expect(page.isLoggedIn()).toBeTruthy();
+        expect(page.getAuthName()).toEqual(credentials.user)
     });
 
     it('should logout after authenticating', function () {
         var page = new AuthenticatePage();
         page.go();
+        browser.waitForAngular();
         expect(page.isLoggedIn()).toBeTruthy();
+        expect(page.getAuthName()).toEqual(credentials.user)
         page.logout();
         expect(page.isLoggedIn()).not.toBeTruthy();
     });

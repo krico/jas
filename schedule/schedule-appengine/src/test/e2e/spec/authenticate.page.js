@@ -7,8 +7,6 @@ function AuthenticatePage() {
     this.logOutMenu = this.menuItem('log out');
     this.logOutConfirmation = element(by.css('.glyphicon-log-out'));
     this.signInWithFacebookButton = element(by.partialButtonText('Sign In with Facebook'));
-    this.authStatus = element(by.id('auth.status'));
-    this.currentUser = element.all(by.binding('currentUser.name')).first();
 }
 
 inherits(AuthenticatePage, JasifyPage);
@@ -42,9 +40,9 @@ AuthenticatePage.prototype.signInWithFacebook = function (credentials) {
         browser.ignoreSynchronization = true;
     });
 
-    browser.wait(this.EC.textToBePresentInElement(this.currentUser, credentials.user), this.externalTimeout);
+    browser.wait(this.EC.textToBePresentInElementValue(this.authName, credentials.user), this.externalTimeout);
 };
-var COUNTER = 0;
+
 AuthenticatePage.prototype.isLoggedIn = function () {
     var that = this;
     browser.waitForAngular();

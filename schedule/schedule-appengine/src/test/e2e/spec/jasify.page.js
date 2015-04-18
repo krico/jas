@@ -22,6 +22,9 @@
  */
 function JasifyPage(path) {
     this.path = path || '/';
+    this.authStatus = element(by.id('auth.status'));
+    this.authName = element(by.id('auth.name'));
+    this.authId = element(by.id('auth.id'));
     this.EC = protractor.ExpectedConditions;
     this.externalTimeout = browser.params.externalTimeout;
 }
@@ -40,6 +43,18 @@ JasifyPage.prototype.title = function () {
 
 JasifyPage.prototype.menuItem = function (linkText) {
     return element(by.tagName('nav')).all(by.linkText(linkText)).first();
+};
+
+JasifyPage.prototype.getAuthStatus = function () {
+    return this.authStatus.getAttribute('value');
+};
+
+JasifyPage.prototype.getAuthName = function () {
+    return this.authName.getAttribute('value');
+};
+
+JasifyPage.prototype.getAuthId = function () {
+    return this.authId.getAttribute('value');
 };
 
 module.exports = JasifyPage;
