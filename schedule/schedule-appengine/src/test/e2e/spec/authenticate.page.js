@@ -7,6 +7,7 @@ function AuthenticatePage() {
     this.logOutMenu = this.menuItem('log out');
     this.logOutConfirmation = element(by.css('.glyphicon-log-out'));
     this.signInWithFacebookButton = element(by.partialButtonText('Sign In with Facebook'));
+    this.signInWithEmailButton = element(by.partialButtonText('Sign In with Email'));
 }
 
 inherits(AuthenticatePage, JasifyPage);
@@ -15,6 +16,25 @@ AuthenticatePage.prototype.logout = function (credentials) {
     expect(this.logOutMenu.isPresent()).toBeTruthy();
     this.logOutMenu.click();
     expect(this.logOutConfirmation.isPresent()).toBeTruthy();
+};
+
+AuthenticatePage.prototype.signInWithEmail = function (credentials) {
+    expect(this.signInMenu.isPresent()).toBeTruthy();
+    this.signInMenu.click();
+
+    expect(this.signInWithEmailButton.isPresent()).toBeTruthy();
+    this.signInWithEmailButton.click();
+
+    var userField = element(by.model('vm.user.email'));
+    var passField = element(by.model('vm.user.password'));
+
+    var signInButton = element(by.css('.modal-body')).element(by.css('[ng-click="vm.withEmail()"]'));
+    expect(userField.isDisplayed()).toBeTruthy();
+    userField.sendKeys(credentials.user);
+    passField.sendKeys(credentials.pass);
+    signInButton.click();
+    browser.sleep(5000);
+    return this.getAuthName();
 };
 
 AuthenticatePage.prototype.signInWithFacebook = function (credentials) {
@@ -49,6 +69,7 @@ AuthenticatePage.prototype.isLoggedIn = function () {
 
     return this.authStatus.isPresent().then(function (present) {
         if (!present) {
+            console.log('auth status not present');
             return false;
         }
         return that.authStatus.getAttribute('value').then(function (value) {

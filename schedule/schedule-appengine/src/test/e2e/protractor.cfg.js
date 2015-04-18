@@ -11,13 +11,19 @@ exports.config = {
             facebook: {
                 user: 'protractor_dspkqpy_user@tfbnw.net',
                 pass: 'protractor'
+            },
+            admin: {
+                user: 'admin',
+                pass: 'admin'
             }
         }
     },
     capabilities: {
         //ref: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
+        name: 'Jasify(chrome)',
         browserName: 'chrome',
-        name: 'Jasify(chrome)'
+        maxInstances: 1,
+        shardTestFiles: false
     },
     beforeLaunch: function () {
         // protractor not available here
