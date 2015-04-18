@@ -1,6 +1,9 @@
 var fs = require('fs');
+var assert = require('assert');
+
 var util = module.exports = {
-    screenShot: screenShot
+    screenShot: screenShot,
+    credentials: credentials
 };
 
 function screenShot(name) {
@@ -14,4 +17,9 @@ function screenShot(name) {
     browser.takeScreenshot().then(function (png) {
         writeScreenShot(png, name + '.png');
     });
+}
+
+function credentials(type) {
+    assert(typeof(browser.params.logins[type]) == 'object');
+    return browser.params.logins[type];
 }
