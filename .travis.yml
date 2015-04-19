@@ -17,3 +17,5 @@ cache:
   - $HOME/.npm
 addons:
   sauce_connect: true
+
+script: scripts/build-runner.sh
