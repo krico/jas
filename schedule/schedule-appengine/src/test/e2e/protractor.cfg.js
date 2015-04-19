@@ -42,6 +42,7 @@ if (process.env.TRAVIS_BUILD_NUMBER) {
     config.sauceKey = process.env.SAUCE_ACCESS_KEY;
     config.capabilities['tunnel-identifier'] = process.env.TRAVIS_JOB_NUMBER;
     config.capabilities['build'] = process.env.TRAVIS_BUILD_NUMBER;
+    config.capabilities['tags'] = [process.env.TRAVIS_BRANCH];
     config.capabilities['name'] = 'Jasify Tests on ' + process.env.TRAVIS_BRANCH;
 }
 
