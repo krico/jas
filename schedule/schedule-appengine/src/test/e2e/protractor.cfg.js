@@ -1,5 +1,5 @@
 var config = {
-    seleniumAddress: 'http://localhost:4444/wd/hub',
+    //seleniumAddress: 'http://localhost:4444/wd/hub',
     baseUrl: 'http://localhost:8080',
     suites: {
         admin: 'spec/*-admin.spec.js',
@@ -40,12 +40,9 @@ var config = {
 if (process.env.TRAVIS_BUILD_NUMBER) {
     config.sauceUser = process.env.SAUCE_USERNAME;
     config.sauceKey = process.env.SAUCE_ACCESS_KEY;
-    config.capabilities = {
-        'browserName': 'chrome',
-        'tunnel-identifier': process.env.TRAVIS_JOB_NUMBER,
-        'build': process.env.TRAVIS_BUILD_NUMBER,
-        'name': 'Jasify Tests'
-    };
+    config.capabilities['tunnel-identifier'] = process.env.TRAVIS_JOB_NUMBER;
+    config.capabilities['build'] = process.env.TRAVIS_BUILD_NUMBER;
+    config.capabilities['name'] = 'Jasify Tests on ' + process.env.TRAVIS_BRANCH;
 }
 
 exports.config = config;
