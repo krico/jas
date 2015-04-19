@@ -52,10 +52,15 @@ AuthenticatePage.prototype.signInWithEmail = function (credentials) {
         var userField = element(by.model('vm.user.email'));
         var passField = element(by.model('vm.user.password'));
         var signInButton = element(by.css('[ng-click="vm.signIn($close)"]'));
+        return signInButton.isDisplayed().then(
+            function (d) {
+                if (!d) throw 'signInButton not displayed';
+                userField.sendKeys(credentials.user);
+                passField.sendKeys(credentials.pass);
+                return signInButton.click();
+            }
+        );
 
-        userField.sendKeys(credentials.user);
-        passField.sendKeys(credentials.pass);
-        return signInButton.click();
     }
 };
 
@@ -87,7 +92,10 @@ AuthenticatePage.prototype.signInWithFacebook = function (credentials) {
 
 AuthenticatePage.prototype.isLoggedIn = function () {
     var that = this;
-    return this.authStatus.isPresent()
+    return browser.waitForAngular()
+        .then(function () {
+            return that.authStatus.isPresent()
+        })
         .then(function (p) {
             if (!p) throw 'Auth status not present';
             return that.getAuthStatus();
