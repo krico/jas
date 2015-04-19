@@ -2,6 +2,8 @@ language: java
 sudo: false
 jdk: oraclejdk7
 env:
+  - JAS_BUILD_MODE=ci
+  - JAS_BUILD_MODE=e2e
   global:
     - ENV_IS_CI=true
     - bower_storage__cache=$HOME/.bower
