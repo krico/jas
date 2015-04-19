@@ -104,6 +104,14 @@ are not using oauth with google, you can put any value there:
 # on another terminal, run
 ./node_modules/.bin/protractor src/test/e2e/protractor.cfg.js
 ```
+ * I've also setup a run configuration on intellij, for that you need to install the "NodeJS" plugin. Then it's quite
+ simple:
+   1. Edit Configurations -> Click on the "+" and choose run type "Node.js"
+   2. Name: Jasify Protractor
+   3. Working Dir: PATH_TO_CHECKOUT/schedule/schedule-appengine
+   4. Javascript file: node_modules/protractor/lib/cli.js
+   5. Application: src/test/e2e/protractor.cfg.js
+   
 
 ## Links
 
