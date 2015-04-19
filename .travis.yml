@@ -4,6 +4,7 @@ jdk: oraclejdk7
 env:
   - JAS_BUILD_MODE=ci
   - JAS_BUILD_MODE=e2e
+env:
   global:
     - ENV_IS_CI=true
     - bower_storage__cache=$HOME/.bower
