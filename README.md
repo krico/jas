@@ -1,5 +1,5 @@
 # jasify [![Build Status](https://travis-ci.org/krico/jas.svg?branch=master)](https://travis-ci.org/krico/jas)
-
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/krico.svg)](https://saucelabs.com/u/krico)
 Janes Asmussen Szarmach
 
 Development should be focused on [Jasify Schedule App Engine](schedule/schedule-appengine)
