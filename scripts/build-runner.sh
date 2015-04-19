@@ -1,19 +1,21 @@
 #!/bin/bash
 set -ev
-case "$JAS_BUILD_MODE" in
-  ci)
-  mvn test
-  ;;
-  e2e)
-  exit 0
-  ;;
-  *)
-    echo "Unknown build mode [$JAS_BUILD_MODE]";
-    exit 1;
-  ;;
-esac
 
-
-if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then
-  echo "NOT PULL"
+if [ "${JAS_BUILD_MODE}" = "ci" ];
+then
+  exec mvn test
 fi
+
+if [ "${JAS_BUILD_MODE}" = "e2e" ];
+then
+  if [ "${TRAVIS_PULL_REQUEST}" = "false" ];
+  then
+    exec ./node_modules/.bin/protractor src/test/e2e/protractor.cfg.js --suite ci
+  else
+    echo "Cannot run e2e tests on pull requests...";
+    exit 0
+  fi
+fi
+
+echo "UNKNOWN BUILD MODE: [${JAS_BUILD_MODE}]"
+exit 1

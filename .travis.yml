@@ -18,4 +18,5 @@ cache:
 addons:
   sauce_connect: true
 
+before_script: scripts/build-setup.sh
 script: scripts/build-runner.sh
