@@ -103,7 +103,7 @@
                 <version>2.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <!--<phase>compile</phase>-->
                         <goals>
                             <goal>display-dependency-updates</goal>
                             <goal>display-plugin-updates</goal>
