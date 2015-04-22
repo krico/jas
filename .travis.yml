@@ -20,3 +20,4 @@ addons:
 install: scripts/build-install.sh
 before_script: scripts/build-setup.sh
 script: scripts/build-runner.sh
+before_cache: scripts/build-before-cache.sh

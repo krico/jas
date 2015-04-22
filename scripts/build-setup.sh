@@ -11,13 +11,13 @@ then
   count=0
   while [ ! -e "${logfile}" ];
   do
-    if [[ $count > 10 ]];
+    if [[ $count -gt 10 ]];
     then
-      echo "Waited to long for logfile, giving up...";
+      echo "[$count] Waited to long for logfile, giving up...";
       exit 1;
     fi
-    let count++
-    echo "Waiting for logfile..."
+    let ++count
+    echo "[$count] Waiting for logfile..."
     sleep 1;
   done
 
@@ -26,9 +26,9 @@ then
   sleepTime=30
   maxCount=30 # We give up after 15min
 
-  while [[ $count < $maxCount ]];
+  while [[ $count -lt $maxCount ]];
   do
-    let count++
+    let ++count
     echo "[$count] Waiting $sleepTime seconds for appengine:devserver to start"
     sleep $sleepTime;
     if grep "com.google.appengine.tools.development.DevAppServerImpl doStart" "${logfile}" >/dev/null 2>&1;
