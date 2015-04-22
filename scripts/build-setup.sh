@@ -7,11 +7,18 @@ then
 
   logfile="$(pwd)/build-logs/devserver.$(date +%s).$$.log"
   (mvn -f schedule/schedule-appengine/pom.xml -DskipTests=true appengine:devserver >"${logfile}" 2>&1 &)
-  if [ ! -e "${logfile}" ];
-  then
-    echo "FAILED TO START DEVSERVER, missing [$logfile]" >&2
-    exit 1
-  fi
+  count=0
+  while [ ! -e "${logfile}" ];
+  do
+    if [[ $count > 10 ]];
+    then
+      echo "Waited to long for logfile, giving up...";
+      exit 1;
+    fi
+    let count++
+    echo "Waiting for logfile..."
+    sleep 1;
+  done
 
   # Now wait for it to start
   count=0
@@ -37,4 +44,6 @@ then
       exit 1;
     fi
   done
+  echo "Took too long, giving up";
+  exit 1;
 fi
