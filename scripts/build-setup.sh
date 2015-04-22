@@ -45,6 +45,7 @@ then
       exit 1;
     fi
   done
+  cat "$logfile";
   echo "Took too long, giving up";
   exit 1;
 fi

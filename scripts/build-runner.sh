@@ -11,7 +11,9 @@ then
   if [ "${TRAVIS_PULL_REQUEST}" = "false" ];
   then
     cd schedule/schedule-appengine;
-    exec ./node_modules/.bin/protractor src/test/e2e/protractor.cfg.js --suite ci
+    ./node_modules/.bin/protractor src/test/e2e/protractor.cfg.js --suite ci
+    cat ../../build-logs/devserver*.log
+    exit 0;
   else
     echo "Cannot run e2e tests on pull requests...";
     exit 0
