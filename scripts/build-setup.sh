@@ -3,9 +3,10 @@ set -ev
 
 if [ "${JAS_BUILD_MODE}" = "e2e" -a "${TRAVIS_PULL_REQUEST}" = "false" ];
 then
-  mvn -f schedule/schedule-appengine/pom.xml -DskipTests=true compile
+  #mvn -f schedule/schedule-appengine/pom.xml -DskipTests=true compile
 
   logfile="$(pwd)/build-logs/devserver.$(date +%s).$$.log"
+  mkdir -pv "$(dirname "$logfile")"
   (mvn -f schedule/schedule-appengine/pom.xml -DskipTests=true appengine:devserver >"${logfile}" 2>&1 &)
   count=0
   while [ ! -e "${logfile}" ];
