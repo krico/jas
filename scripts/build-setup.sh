@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 if [ "${JAS_BUILD_MODE}" = "e2e" -a "${TRAVIS_PULL_REQUEST}" = "false" ];
 then
