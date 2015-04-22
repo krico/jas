@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 if [ "${JAS_BUILD_MODE}" = "e2e" -a "${TRAVIS_PULL_REQUEST}" = "false" ];
 then
@@ -7,7 +7,7 @@ then
 
   logfile="$(pwd)/build-logs/devserver.$(date +%s).$$.log"
   mkdir -pv "$(dirname $logfile)"
-  (mvn -f schedule/schedule-appengine/pom.xml -DskipTests=true appengine:devserver >"${logfile}" 2>&1 &)
+  (mvn -f schedule/schedule-appengine/pom.xml -DskipTests=true appengine:devserver >"${logfile}" 2>&1 ) &
   count=0
   while [ ! -e "${logfile}" ];
   do
