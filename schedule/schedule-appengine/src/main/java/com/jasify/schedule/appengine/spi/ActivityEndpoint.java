@@ -297,7 +297,7 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, createFromSubscriptionId(subscriptionId));
         checkFound(subscriptionId);
         try {
-            ActivityServiceFactory.getActivityService().cancel(subscriptionId);
+            ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

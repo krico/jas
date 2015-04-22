@@ -571,11 +571,11 @@ class DefaultActivityService implements ActivityService {
 
     @Override
     public void cancel(Subscription subscription) throws EntityNotFoundException {
-        cancel(subscription.getId());
+        cancelSubscription(subscription.getId());
     }
 
     @Override
-    public void cancel(Key subscriptionId) throws EntityNotFoundException {
+    public void cancelSubscription(Key subscriptionId) throws EntityNotFoundException {
         Subscription dbSubscription = getSubscription(subscriptionId);
         Activity dbActivity = getActivity(dbSubscription.getActivityRef().getKey());
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);

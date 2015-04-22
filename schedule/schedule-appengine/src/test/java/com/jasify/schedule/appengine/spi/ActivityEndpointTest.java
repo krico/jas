@@ -1264,7 +1264,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         ActivityService service = ActivityServiceFactory.getActivityService();
         Key subscriptionId = Datastore.allocateId(Subscription.class);
-        service.cancel(subscriptionId);
+        service.cancelSubscription(subscriptionId);
         expectLastCall().andThrow(new EntityNotFoundException());
         testActivityServiceFactory.replay();
         endpoint.cancelSubscription(newAdminCaller(1), subscriptionId);
@@ -1275,7 +1275,7 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         ActivityService service = ActivityServiceFactory.getActivityService();
         Key subscriptionId = Datastore.allocateId(Subscription.class);
-        service.cancel(subscriptionId);
+        service.cancelSubscription(subscriptionId);
         expectLastCall();
         testActivityServiceFactory.replay();
         endpoint.cancelSubscription(newAdminCaller(1), subscriptionId);

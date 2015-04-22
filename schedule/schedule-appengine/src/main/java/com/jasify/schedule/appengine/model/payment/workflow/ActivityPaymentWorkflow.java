@@ -59,7 +59,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
     public void onCanceled() throws PaymentWorkflowException {
         if (subscriptionId != null) {
             try {
-                ActivityServiceFactory.getActivityService().cancel(subscriptionId);
+                ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
             } catch (EntityNotFoundException e) {
                 throw new PaymentWorkflowException(e);
             }

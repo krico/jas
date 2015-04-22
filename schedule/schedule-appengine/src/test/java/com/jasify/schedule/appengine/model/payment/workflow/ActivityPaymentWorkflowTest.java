@@ -6,7 +6,6 @@ import com.jasify.schedule.appengine.meta.payment.workflow.ActivityPaymentWorkfl
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.activity.TestActivityServiceFactory;
-import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.balance.TestBalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
@@ -86,7 +85,7 @@ public class ActivityPaymentWorkflowTest {
         TestActivityServiceFactory testActivityServiceFactory = new TestActivityServiceFactory();
         testActivityServiceFactory.setUp();
         try {
-            testActivityServiceFactory.getActivityServiceMock().cancel(subscriptionId);
+            testActivityServiceFactory.getActivityServiceMock().cancelSubscription(subscriptionId);
             EasyMock.expectLastCall();
             testActivityServiceFactory.replay();
             ActivityPaymentWorkflow transition = PaymentWorkflowEngine.transition(workflowId, PaymentStateEnum.Canceled);

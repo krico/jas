@@ -254,5 +254,5 @@ public interface ActivityService {
      * @param subscriptionId to cancel
      * @throws EntityNotFoundException if any of the involved entities don't exist
      */
-    public void cancel(Key subscriptionId) throws EntityNotFoundException;
+    public void cancelSubscription(Key subscriptionId) throws EntityNotFoundException;
 }
