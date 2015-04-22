@@ -15,6 +15,8 @@ cache:
   - $HOME/.m2
   - $HOME/.bower
   - $HOME/.npm
+  - schedule/schedule-appengine/node
+  - schedule/schedule-appengine/node_modules
 addons:
   sauce_connect: true
 install: scripts/build-install.sh
