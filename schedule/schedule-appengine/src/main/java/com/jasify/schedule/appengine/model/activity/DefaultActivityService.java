@@ -1,13 +1,14 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
-import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
-import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
-import com.jasify.schedule.appengine.meta.activity.RepeatDetailsMeta;
-import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -20,10 +21,14 @@ import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slim3.datastore.CompositeCriterion;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -31,6 +36,22 @@ import java.util.*;
  * @since 09/01/15.
  */
 class DefaultActivityService implements ActivityService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultActivityService.class);
+    private static final Function<Activity, Key> ACTIVITY_TO_KEY_FUNCTION = new Function<Activity, Key>() {
+        @Nullable
+        @Override
+        public Key apply(Activity activity) {
+            return activity.getId();
+        }
+    };
+
+    private static final Function<ActivityPackageActivity, Key> APA_TO_ACTIVITY_KEY_FUNCTION = new Function<ActivityPackageActivity, Key>() {
+        @Nullable
+        @Override
+        public Key apply(ActivityPackageActivity activity) {
+            return activity.getActivityRef().getKey();
+        }
+    };
 
     private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
@@ -38,6 +59,9 @@ class DefaultActivityService implements ActivityService {
     private final OrganizationMeta organizationMeta;
     private final UserMeta userMeta;
     private final SubscriptionMeta subscriptionMeta;
+    private final ActivityPackageMeta activityPackageMeta;
+    private final ActivityPackageActivityMeta activityPackageActivityMeta;
+    private final ActivityPackageExecutionMeta activityPackageExecutionMeta;
 
     private DefaultActivityService() {
         activityTypeMeta = ActivityTypeMeta.get();
@@ -46,6 +70,9 @@ class DefaultActivityService implements ActivityService {
         organizationMeta = OrganizationMeta.get();
         userMeta = UserMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
+        activityPackageMeta = ActivityPackageMeta.get();
+        activityPackageActivityMeta = ActivityPackageActivityMeta.get();
+        activityPackageExecutionMeta = ActivityPackageExecutionMeta.get();
     }
 
     static ActivityService instance() {
@@ -450,6 +477,99 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
+    public ActivityPackageExecution subscribe(User user, ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
+        return subscribe(user.getId(), activityPackage.getId(), Lists.transform(activities, ACTIVITY_TO_KEY_FUNCTION));
+    }
+
+    @Override
+    public ActivityPackageExecution subscribe(Key userId, Key activityPackageId, List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
+        Preconditions.checkState(!activityIds.isEmpty(), "Need at least 1 activity to subscribe");
+        User user = getUser(userId);
+        List<ActivityPackageSubscription> subscriptions = new ArrayList<>(activityIds.size());
+
+        ActivityPackageExecution execution = new ActivityPackageExecution();
+
+        //I will implement this method with transactions, so we can use it as a reference for the other subscribe
+
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
+            if (activityPackage.getItemCount() < activityIds.size()) {
+                throw new OperationException("ActivityPackage[" + activityPackage.getId() + "] itemCount=" +
+                        activityPackage.getItemCount() + ", activities.size=" + activityIds.size());
+            }
+            int executionCount = activityPackage.getExecutionCount();
+            if (activityPackage.getMaxExecutions() > 0 && executionCount >= activityPackage.getMaxExecutions()) {
+                throw new OperationException("ActivityPackage[" + activityPackage.getId() + "] has reached maxExecutions=" + executionCount);
+            }
+            activityPackage.setExecutionCount(executionCount + 1);
+
+            execution.setId(Datastore.allocateId(userId, activityPackageExecutionMeta));
+            execution.getUserRef().setKey(userId);
+            execution.getActivityPackageRef().setKey(activityPackageId);
+
+            Datastore.put(tx, activityPackage, execution);
+
+            Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
+
+            List<Key> packageActivityKeys = Lists.transform(Datastore
+                    .query(tx, activityPackageActivityMeta, organizationId)
+                    .filter(activityPackageActivityMeta.activityPackageRef.equal(activityPackageId))
+                    .asList(), APA_TO_ACTIVITY_KEY_FUNCTION);
+
+            for (Key activityId : activityIds) {
+                Preconditions.checkArgument(packageActivityKeys.contains(activityId));
+            }
+
+            List<Activity> activities = getActivities(tx, activityIds);
+            for (Activity activity : activities) {
+                int subscriptionCount = activity.getSubscriptionCount();
+                if (activity.getMaxSubscriptions() > 0 && subscriptionCount >= activity.getMaxSubscriptions()) {
+                    throw new OperationException("Activity[" + activity.getId() + "] fully subscribed");
+                }
+                activity.setSubscriptionCount(subscriptionCount + 1);
+
+                if (isSubscribed(tx, user, activity)) {
+                    throw new UniqueConstraintException("User already subscribed to activity: " + activity.getId());
+                }
+
+                ActivityPackageSubscription subscription = new ActivityPackageSubscription();
+                subscription.setId(Datastore.allocateId(userId, subscriptionMeta));
+                subscription.getActivityPackageExecutionRef().setKey(execution.getId());
+                subscription.getActivityRef().setKey(activity.getId());
+                subscription.getUserRef().setKey(userId);
+
+                Datastore.put(tx, activity, subscription);
+                subscriptions.add(subscription);
+            }
+
+            tx.commit();
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("Not found", e);
+        } finally {
+            if (tx.isActive()) tx.rollback();
+        }
+
+        return execution;
+    }
+
+    private boolean isSubscribed(Transaction tx, User user, Activity activity) {
+        return !Datastore.query(tx, subscriptionMeta, user.getId())
+                .filter(subscriptionMeta.activityRef.equal(activity.getId()))
+                .asKeyList().isEmpty();
+    }
+
+    public List<Activity> getActivities(Transaction tx, List<Key> activityIds) throws EntityNotFoundException {
+        List<Activity> activities;
+        try {
+            activities = Datastore.get(tx, activityMeta, activityIds);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("ActivityIds: " + activityIds, e);
+        }
+        return activities;
+    }
+
+    @Override
     public void cancel(Subscription subscription) throws EntityNotFoundException {
         cancel(subscription.getId());
     }
@@ -485,6 +605,97 @@ class DefaultActivityService implements ActivityService {
     public List<Subscription> getSubscriptions(Key activityId) throws EntityNotFoundException, IllegalArgumentException {
         Activity dbActivity = getActivity(activityId);
         return dbActivity.getSubscriptionListRef().getModelList();
+    }
+
+    @Override
+    public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException {
+        Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
+        activities = Preconditions.checkNotNull(activities);
+
+        activityPackage.setId(Datastore.allocateId(organizationId, activityPackageMeta));
+        List<Object> models = new ArrayList<>();
+        models.add(activityPackage);
+        for (Activity activity : activities) {
+            ActivityPackageActivity junction = new ActivityPackageActivity(activityPackage, activity);
+            junction.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
+            models.add(junction);
+        }
+
+        Transaction tx = Datastore.beginTransaction();
+        try {
+            Datastore.put(tx, models);
+            tx.commit();
+        } finally {
+            if (tx.isActive())
+                tx.rollback();
+        }
+        activityPackage.getActivityPackageActivityListRef().clear();
+        return activityPackage.getId();
+    }
+
+    @Nonnull
+    @Override
+    public ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException, IllegalArgumentException {
+        try {
+            return Datastore.get(activityPackageMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("ActivityPackage.id=" + id);
+        }
+    }
+
+    @Override
+    public void addActivityToActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException {
+        Transaction tx = Datastore.beginTransaction();
+        try {
+
+            Key organizationId = activityPackage.getOrganizationRef().getKey();
+            ActivityPackageActivity activityPackageActivity = Datastore
+                    .query(tx, activityPackageActivityMeta, organizationId)
+                    .filter(new CompositeCriterion(activityPackageActivityMeta,
+                            Query.CompositeFilterOperator.AND,
+                            activityPackageActivityMeta.activityPackageRef.equal(activityPackage.getId()),
+                            activityPackageActivityMeta.activityRef.equal(activity.getId())))
+                    .asSingle();
+
+            if (activityPackageActivity == null) {
+                activityPackageActivity = new ActivityPackageActivity(activityPackage, activity);
+                activityPackageActivity.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
+                Datastore.put(tx, activityPackageActivity);
+            } else {
+                log.warn("Tried to add already existent ap: {} / a: {}", activityPackage.getId(), activity.getId());
+            }
+
+            tx.commit();
+        } finally {
+            if (tx.isActive())
+                tx.rollback();
+        }
+    }
+
+    @Override
+    public void removeActivityFromActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException {
+        Transaction tx = Datastore.beginTransaction();
+        try {
+
+            ActivityPackageActivity activityPackageActivity = Datastore
+                    .query(tx, activityPackageActivityMeta, activityPackage.getOrganizationRef().getKey())
+                    .filter(new CompositeCriterion(activityPackageActivityMeta,
+                            Query.CompositeFilterOperator.AND,
+                            activityPackageActivityMeta.activityPackageRef.equal(activityPackage.getId()),
+                            activityPackageActivityMeta.activityRef.equal(activity.getId())))
+                    .asSingle();
+
+            if (activityPackageActivity == null) {
+                log.warn("Tried to remove non existent ap: {} / a: {}", activityPackage.getId(), activity.getId());
+            } else {
+                Datastore.delete(tx, activityPackageActivity.getId());
+            }
+
+            tx.commit();
+        } finally {
+            if (tx.isActive())
+                tx.rollback();
+        }
     }
 
     private static class Singleton {
