@@ -13,6 +13,12 @@ rm -rf schedule/schedule-appengine/node_modules
 [ -d "$JAS_CACHE/schedule/schedule-appengine/node_modules" ] || mkdir -p "$JAS_CACHE/schedule/schedule-appengine/node_modules"
 ln -s "$JAS_CACHE/schedule/schedule-appengine/node_modules" schedule/schedule-appengine/node_modules
 
+echo "Setting up links for schedule/schedule-appengine/target/bower_components"
+mkdir -p schedule/schedule-appengine/target/bower_components
+rm -rf schedule/schedule-appengine/target/bower_components
+[ -d "$JAS_CACHE/schedule/schedule-appengine/target/bower_components" ] || mkdir -p "$JAS_CACHE/schedule/schedule-appengine/target/bower_components"
+ln -s "$JAS_CACHE/schedule/schedule-appengine/target/bower_components" schedule/schedule-appengine/target/bower_components
+
 echo "Setting up links for $HOME/.m2"
 rm -rf $HOME/.m2
 mkdir -p "$JAS_CACHE/HOME.m2"

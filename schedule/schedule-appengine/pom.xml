@@ -353,7 +353,7 @@
                             <goal>npm</goal>
                         </goals>
                         <configuration>
-                            <arguments>bower</arguments>
+                            <arguments>run bower</arguments>
                         </configuration>
                     </execution>
 

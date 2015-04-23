@@ -4,9 +4,10 @@
   "description": "Jasify Schedule",
   "main": "jasify.js",
   "scripts": {
+    "prebower": "bower prune",
+    "bower": "bower install",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-dev": "karma start src/test/client/karma.conf.js",
-    "bower": "bower install"
+    "test-dev": "karma start src/test/client/karma.conf.js"
   },
   "repository": {
     "type": "git",
