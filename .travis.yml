@@ -6,8 +6,8 @@ env:
   - ENV_IS_CI=true
   - JAS_CACHE=$HOME/cache
   - bower_storage__cache=$HOME/.bower
-  - secure: jOL+A+mMryevQJIyr7Aj5YPZeZDnNq7J3isH4QNEYHGui+leE1Wv8z5exBI5ufoZvihgPz1B01TCjnCQXyRl9WCRLNwHgVn3jgluoW85Hm/e0oFN7xHCZku9yZl8YxwHx9pGVDEiswu4sha5OTCsz5jmCqxQPDbGq9E0HpMt3zw=
-  - secure: mExJgrdFjD05gULWcOjF+wroe95YLpIQUuN3nF0BLh0GMxeHV0SOsuqLdzbkJVzBo4yl/fs8FmD/Z25ebk8qnnVGWMKQKqJW28m8LSfBj9UWjbtyTGr90vi7okv8ZDfKw28iWJhud0ftV7SOAu8/DEBblPQjhfyE8UZxbLZlk7Y=
+  - secure: A5dIYYAok4DjMpiSrO7Ys08tPcwwn+wSJGWlLHAiinve9brgpvapVZ3KSksRA6ly7XkTFx7UHcp17wa6gXkFyq6EERCeLKfDGcOG6eI3I+YrFn2l0guVppw7ggMIKlCdaqXjz8/0Z7RgXeUV0d1z4WgWFOLkcH+R8uorhXFb4vg=
+  - secure: WA+4zfk6DJLxuocm3cpG/SDtOyi0YCqAL0DaRxDUW/SIijfBBT6Jl1Cy4Pavlq/FeVrTRtjSvOWs35BN/+CA23NbckkbxPUWRUBbgZrkUmO73mH72l82p2Lw748s0jydvI9magvdP6aVhcK4SXLtDZnKt2N+R8EmNzLIx9+djFA=
   matrix:
   - JAS_BUILD_MODE=ci
   - JAS_BUILD_MODE=e2e
