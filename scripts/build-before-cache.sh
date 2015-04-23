@@ -4,5 +4,4 @@ rm -rf $HOME/.m2/repository/com/jasify
 echo "Checking cache sizes"
 du -hs $JAS_CACHE
 du -hs $JAS_CACHE/*
-du -hs $JAS_CACHE/*/*
 exit 0

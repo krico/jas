@@ -23,8 +23,8 @@ then
 
   # Now wait for it to start
   count=0
-  sleepTime=30
-  maxCount=30 # We give up after 15min
+  sleepTime=10
+  maxCount=90 # We give up after 15min
 
   while [[ $count -lt $maxCount ]];
   do
