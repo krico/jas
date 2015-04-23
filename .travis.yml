@@ -5,9 +5,6 @@ env:
   global:
   - ENV_IS_CI=true
   - JAS_CACHE=$HOME/cache
-  - NPM_CONFIG_CACHE=$JAS_CACHE/npm
-  - MAVEN_REPOSITORY=$JAS_CACHE/maven-repository
-  - MAVEN_OPTS=-Dmaven.repo.local=$MAVEN_REPOSITORY
   - bower_storage__cache=$JAS_CACHE/bower
   - secure: jOL+A+mMryevQJIyr7Aj5YPZeZDnNq7J3isH4QNEYHGui+leE1Wv8z5exBI5ufoZvihgPz1B01TCjnCQXyRl9WCRLNwHgVn3jgluoW85Hm/e0oFN7xHCZku9yZl8YxwHx9pGVDEiswu4sha5OTCsz5jmCqxQPDbGq9E0HpMt3zw=
   - secure: mExJgrdFjD05gULWcOjF+wroe95YLpIQUuN3nF0BLh0GMxeHV0SOsuqLdzbkJVzBo4yl/fs8FmD/Z25ebk8qnnVGWMKQKqJW28m8LSfBj9UWjbtyTGr90vi7okv8ZDfKw28iWJhud0ftV7SOAu8/DEBblPQjhfyE8UZxbLZlk7Y=

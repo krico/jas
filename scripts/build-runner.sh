@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ev
+set -e
 
 if [ "${JAS_BUILD_MODE}" = "ci" ];
 then
