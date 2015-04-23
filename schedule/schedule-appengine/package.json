@@ -5,7 +5,8 @@
   "main": "jasify.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-dev": "karma start src/test/client/karma.conf.js"
+    "test-dev": "karma start src/test/client/karma.conf.js",
+    "bower": "bower install"
   },
   "repository": {
     "type": "git",

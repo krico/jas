@@ -348,6 +348,16 @@
                     </execution>
 
                     <execution>
+                        <id>bower install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>bower</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
                         <id>gulp build</id>
                         <goals>
                             <goal>gulp</goal>
