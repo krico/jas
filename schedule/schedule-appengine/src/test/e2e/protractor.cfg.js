@@ -22,6 +22,7 @@ var config = {
         }
     },
     //ref: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
+    maxSessions: 1,
     multiCapabilities: [
         {browserName: 'chrome'}
     ],
@@ -47,9 +48,9 @@ if (process.env.TRAVIS_BUILD_NUMBER) {
         {browserName: 'safari', platform: 'OS X 10.10', version: '8.0'},
         {browserName: 'safari', platform: 'OS X 10.9', version: '7.0'},
         {browserName: 'chrome', platform: 'Linux', version: '26.0'},
-        {browserName: 'chrome', platform: 'Linux', version: '42.0'},
-        {browserName: 'chrome', platform: 'OS X 10.10', version: '42.0'},
-        {browserName: 'chrome', platform: 'Windows 8.1', version: '42.0'},
+        {browserName: 'chrome', platform: 'Linux', version: '41.0'},
+        {browserName: 'chrome', platform: 'OS X 10.10', version: '41.0'},
+        {browserName: 'chrome', platform: 'Windows 8.1', version: '41.0'},
         {browserName: 'firefox'}
     );
 
