@@ -37,7 +37,7 @@ then
       echo "APPENGINE DEVSERVER STARTED";
       exit 0;
     fi
-    if grep "[INFO] BUILD FAILURE" "${logfile}" >/dev/null 2>&1;
+    if grep "xBUILD FAILURE" "${logfile}" >/dev/null 2>&1;
     then
       # matched
       cat "$logfile";
