@@ -32,7 +32,7 @@ AuthenticatePage.prototype.signInWithEmail = function (credentials) {
         .then(clickButton)
         .then(submitForm)
         .then(function () {
-            browser.sleep(1000);
+            browser.sleep(5000);
             return that.getAuthName();
         });
 

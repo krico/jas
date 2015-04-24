@@ -45,7 +45,7 @@ gulp.task('client-dependencies', ['client-dependencies-js', 'client-dependencies
 gulp.task('client-tpl', clientTpl);
 gulp.task('client-js', clientJs);
 
-gulp.task('client-css', clientCss);
+gulp.task('client-css', ['bower-install'], clientCss);
 
 gulp.task('client', ['client-tpl', 'client-js', 'client-dependencies', 'client-css']);
 
