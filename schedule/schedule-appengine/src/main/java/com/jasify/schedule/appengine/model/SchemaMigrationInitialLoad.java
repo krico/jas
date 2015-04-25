@@ -91,17 +91,31 @@ class SchemaMigrationInitialLoad {
         }
 
         ActivityService activityService = ActivityServiceFactory.getActivityService();
+        int count = 0;
         for (Organization organization : organizations) {
-            ActivityType activityType = new ActivityType(String.format(organization.getName() + " ActivityType"));
+            ++count;
+            ActivityType activityType = new ActivityType(String.format(organization.getName() + " ActivityType " + count));
+            if ((count % 5) != 0) {
+                activityType.setDescription("This is the activity " + count);
+            }
+
             activityService.addActivityType(organization, activityType);
 
             Activity activity = new Activity(activityType);
+            activity.setName(activityType.getName());
+            activity.setDescription(activityType.getDescription());
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTime(new Date());
             calendar.set(Calendar.MILLISECOND, 0);
             calendar.set(Calendar.MINUTE, 15);
             calendar.set(Calendar.HOUR, 10);
+
+            if (calendar.getTimeInMillis() <= (System.currentTimeMillis() + 10000)) {
+                calendar.add(Calendar.DAY_OF_YEAR, 1);
+            }
+
             activity.setStart(calendar.getTime());
+
             calendar.set(Calendar.MINUTE, 45);
             activity.setFinish(calendar.getTime());
 

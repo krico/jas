@@ -224,7 +224,7 @@
                             }
                         );
                     },
-                    activity: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+                    activityPackage: /*@ngInject*/ function ($q, $route, Allow, Activity) {
 
                         return Allow.adminOrOrgMember().then(allowed, forbidden);
 
