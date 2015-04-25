@@ -62,15 +62,26 @@ It should look something like (*you need to replace REAL_CLIENT_ID and REAL_CLIE
 are not using oauth with google, you can put any value there:
 
 ```javascript
-
 {
   "ApplicationConfig" : {
     "OAuth2ProviderConfig.Google.ClientId" : "REAL_CLIENT_ID",
-    "OAuth2ProviderConfig.Google.ClientSecret" : "REAL_CLIENT_SECRET"
+    "OAuth2ProviderConfig.Google.ClientSecret" : "REAL_CLIENT_SECRET",
+    "com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType": null
   }
 }
+```
 
+If you want the dev system to be initialized with some values to ease your testing (organizations, etc) you can control
+that with `com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType`.  The types are implemented in
+`com.jasify.schedule.appengine.model.SchemaMigrationInitialLoad`.  For example, set it to
 
+```javascript
+{
+  "ApplicationConfig" : {
+    ...
+    "com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType": "samples"
+  }
+}
 ```
 ## Style
 

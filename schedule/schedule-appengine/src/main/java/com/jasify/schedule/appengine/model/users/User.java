@@ -49,6 +49,12 @@ public class User {
         this.name = name;
     }
 
+    public User(String name, String email, String realName) {
+        setName(name);
+        setEmail(email);
+        setRealName(realName);
+    }
+
     public User(UserLogin userLogin) {
         readFrom(userLogin);
     }

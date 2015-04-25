@@ -115,6 +115,25 @@ public final class SchemaMigration {
             } else {
                 log.debug("No dev initialization pending...");
             }
+
+            String initialLoadTypeKey = SchemaMigration.class.getName() + ".InitialLoadType";
+            String initialLoadType = applicationData.getProperty(initialLoadTypeKey);
+            log.info("[{}] = [{}]", initialLoadTypeKey, initialLoadType);
+            if (StringUtils.isNotBlank(initialLoadType)) {
+                String initialLoadTypeExecuted = initialLoadTypeKey + "." + initialLoadType;
+                Boolean initialLoadExecuted = applicationData.getProperty(initialLoadTypeExecuted);
+                log.info("[{}] = [{}]", initialLoadTypeExecuted, initialLoadExecuted);
+                if (Boolean.TRUE != initialLoadExecuted) {
+                    try {
+                        SchemaMigrationInitialLoad.instance().createInitialLoad(initialLoadType);
+                    } catch (Exception e) {
+                        log.error("Failed to create initial load [{}]", initialLoadType, e);
+                        throw Throwables.propagate(e);
+                    }
+                    applicationData.setProperty(initialLoadTypeExecuted, true);
+                    executed = true;
+                }
+            }
         }
 
         executed |= createOauthProviderConfig();
@@ -162,6 +181,7 @@ public final class SchemaMigration {
         Preconditions.checkState(!EnvironmentUtil.isProduction(), "Cannot initializeDev in prod!");
         User admin = new User();
         admin.setName("admin");
+        admin.setEmail("admin@jasify.com");
         admin.setAdmin(true);
         try {
             UserServiceFactory.getUserService().create(admin, "admin");
@@ -174,6 +194,7 @@ public final class SchemaMigration {
                 ApplicationData.instance().setProperty(provider.clientIdKey(), RandomStringUtils.randomAscii(16));
                 ApplicationData.instance().setProperty(provider.clientSecretKey(), RandomStringUtils.randomAscii(32));
             }
+            ApplicationData.instance().setProperty(SchemaMigration.class.getName() + ".InitialLoadType", "e2e");
         } else {
             File jasifyLocalConfig = new File(System.getProperty("user.home"), "jasify.json");
             if (!jasifyLocalConfig.exists()) {

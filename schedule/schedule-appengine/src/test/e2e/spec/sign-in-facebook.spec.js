@@ -2,7 +2,12 @@ var util = require('../lib/util');
 
 describe('Sign In with Facebook', function () {
     var AuthenticatePage = require('./authenticate.page');
-    var credentials = util.credentials('facebook');
+    var credentials;
+    beforeEach(function(){
+        util.credentials('facebook').then(function(c){
+            credentials = c;
+        })
+    });
 
     it('should authenticate using facebook', function () {
         var page = new AuthenticatePage();

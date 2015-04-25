@@ -22,7 +22,7 @@ var config = {
         }
     },
     //ref: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
-    maxSessions: 1,
+    //maxSessions: 1,
     multiCapabilities: [
         {browserName: 'chrome'}
     ],
@@ -41,16 +41,22 @@ if (process.env.TRAVIS_BUILD_NUMBER) {
 
     // we add some browsers when for sauce labs
     // ref: https://docs.saucelabs.com/reference/platforms-configurator
+    config.multiCapabilities = [];
+
     config.multiCapabilities.push(
         {browserName: 'internet explorer', platform: 'Windows 8.1', version: '11.0'},
         {browserName: 'internet explorer', platform: 'Windows 8', version: '10.0'},
-        {browserName: 'internet explorer', platform: 'Windows 7', version: '9.0'},
+        // MSIE9 not working at the moment
+        //{browserName: 'internet explorer', platform: 'Windows 7', version: '9.0'},
+
         {browserName: 'safari', platform: 'OS X 10.10', version: '8.0'},
         {browserName: 'safari', platform: 'OS X 10.9', version: '7.0'},
+
         {browserName: 'chrome', platform: 'Linux', version: '26.0'},
         {browserName: 'chrome', platform: 'Linux', version: '41.0'},
         {browserName: 'chrome', platform: 'OS X 10.10', version: '41.0'},
         {browserName: 'chrome', platform: 'Windows 8.1', version: '41.0'},
+
         {browserName: 'firefox'}
     );
 
@@ -66,6 +72,7 @@ config.multiCapabilities.forEach(function (value, index) {
     value['name'] = 'Jasify(chrome)';
     value['maxInstances'] = 1;
     value['shardTestFiles'] = false;
+    value['logins'] = {admin: {user: 'sample' + index, pass: 'secret' + index}};
 });
 
 exports.config = config;

@@ -2,7 +2,12 @@ var util = require('../lib/util');
 
 describe('Sign In with Email', function () {
     var AuthenticatePage = require('./authenticate.page');
-    var credentials = util.credentials('admin');
+    var credentials;
+    beforeEach(function(){
+        util.credentials('admin').then(function(c){
+            credentials = c;
+        })
+    });
 
     it('should authenticate as admin', function () {
         var page = new AuthenticatePage();

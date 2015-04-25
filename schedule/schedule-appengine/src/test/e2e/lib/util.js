@@ -20,6 +20,15 @@ function screenShot(name) {
 }
 
 function credentials(type) {
-    assert(typeof(browser.params.logins[type]) == 'object');
-    return browser.params.logins[type];
+    return browser.getProcessedConfig().then(cred);
+    function cred(config) {
+        console.log(config);
+        var cap = config.capabilities;
+        if (cap.logins && typeof(cap.logins[type]) == 'object') {
+            console.log(cap.logins[type]);
+            return cap.logins[type];
+        }
+        assert(typeof(browser.params.logins[type]) == 'object');
+        return browser.params.logins[type];
+    }
 }
