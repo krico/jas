@@ -82,7 +82,7 @@ public class MailParser {
 
     public static MailParser createJasifyUserSignUpEmail(User user) throws Exception {
         MailParser mailParser = new MailParser("/jasify/UserSignUp");
-        mailParser.substitute(SubstituteKey.SubscriberName, user.getDisplayName());
+        mailParser.substitute(SubstituteKey.SubscriberName, user.getRealName());
         mailParser.substitute(SubstituteKey.UserName, user.getName());
         return mailParser;
     }
@@ -115,7 +115,11 @@ public class MailParser {
             activityDetails.add(MailParser.createSubscriptionActivityDetails(multiSubscription, subscription));
             if (subscriberName == null) {
                 User user = subscription.getUserRef().getModel();
-                subscriberName = user.getDisplayName();
+                if (user.getRealName() != null) {
+                    subscriberName = user.getRealName();
+                } else {
+                    subscriberName = user.getName();
+                }
             }
         }
 
@@ -152,7 +156,7 @@ public class MailParser {
         DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser("/publisher/Subscription");
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
-        mailParser.substitute(SubstituteKey.SubscriberName, user.getDisplayName());
+        mailParser.substitute(SubstituteKey.SubscriberName, user.getRealName());
         mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
         mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));

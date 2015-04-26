@@ -101,7 +101,7 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
             ActivityType activityType = activity.getActivityTypeRef().getModel();
             Organization organization = activityType.getOrganizationRef().getModel();
 
-            String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
+            String subject = String.format("[Jasify] Subscribe [%s]", user.getDisplayName());
 
             try {
                 MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription);

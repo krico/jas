@@ -102,8 +102,12 @@ public class ShoppingCartPaymentWorkflowTest {
         TestShoppingCartServiceFactory testShoppingCartServiceFactory = new TestShoppingCartServiceFactory();
         try {
             testShoppingCartServiceFactory.setUp();
-            EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().clearCart(SOME_CART)).andReturn(new ShoppingCart(SOME_CART));
+
+            EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().clearCart(SOME_CART))
+                    .andReturn(new ShoppingCart(SOME_CART));
+
             testShoppingCartServiceFactory.replay();
+
             PaymentWorkflowEngine.transition(workflow.getId(), PaymentStateEnum.Completed);
         } finally {
             testShoppingCartServiceFactory.tearDown();
@@ -112,7 +116,6 @@ public class ShoppingCartPaymentWorkflowTest {
 
     @Test
     public void testOnCompletedSendsEmails() throws Exception {
-        // This test looks too big :(
         ActivityPaymentWorkflow activityPaymentWorkflow1 = createActivityPaymentWorkflow();
         Subscription subscription1 = createSubscription();
         activityPaymentWorkflow1.setSubscriptionId(subscription1.getId());
@@ -140,7 +143,9 @@ public class ShoppingCartPaymentWorkflowTest {
 
             EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().getSubscription(subscription1.getId())).andReturn(subscription1);
             EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().getSubscription(subscription2.getId())).andReturn(subscription2);
-            EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().clearCart(SOME_CART)).andReturn(new ShoppingCart(SOME_CART));
+
+            EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().clearCart(SOME_CART))
+                    .andReturn(new ShoppingCart(SOME_CART));
 
             testShoppingCartServiceFactory.replay();
             testActivityServiceFactory.replay();
