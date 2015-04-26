@@ -427,14 +427,14 @@ class DefaultActivityService implements ActivityService {
         String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
 
         try {
-            MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscription, organization);
+            MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscription);
             MailServiceFactory.getMailService().send(user.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
             log.error("Failed to notify subscriber", e);
         }
 
         try {
-            MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription, organization);
+            MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription);
             for (User orgUser : organization.getUsers()) {
                 MailServiceFactory.getMailService().send(orgUser.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
             }
@@ -443,7 +443,7 @@ class DefaultActivityService implements ActivityService {
         }
 
         try {
-            MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscription, organization);
+            MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscription);
             MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
             log.error("Failed to notify jasify", e);
