@@ -194,7 +194,6 @@ public class MailParserTest {
         assert(text.contains(": " + activity2.getPrice()));
 
         assert(text.contains(": " + MailParser.formatPrice(activity1.getPrice() + activity2.getPrice())));
-
     }
 
     @Test
