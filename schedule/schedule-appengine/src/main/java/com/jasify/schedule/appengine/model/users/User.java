@@ -150,6 +150,13 @@ public class User {
         return detailRef;
     }
 
+    public String getDisplayName() {
+        if (getRealName() != null) {
+            return getRealName();
+        }
+        return getName();
+    }
+
     private void readFrom(UserLogin userLogin) {
         setName(userLogin.getEmail());
         setEmail(userLogin.getEmail());
