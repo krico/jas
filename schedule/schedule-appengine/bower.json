@@ -16,22 +16,23 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "~1.3.1",
-    "bootstrap": "~3.3.0",
+    "jquery": "2.1.x",
+    "angular": "1.3.x",
+    "angular-route": "~1.3.x",
+    "angular-mocks": "~1.3.x",
+    "angular-resource": "~1.3.x",
+    "angular-messages": "~1.3.x",
+    "angular-cookies": "~1.3.x",
+    "angular-sanitize": "~1.3.x",
+    "angular-local-storage": "~0.1.5",
+    "angular-bootstrap": "~0.12.0",
+    "angular-spinner": "~0.5.1",
+    "bootstrap": "3.3.4",
+    "ui-bootstrap-datetime-picker": "*",
     "html5shiv": "~3.7.2",
     "respond": "~1.4.2",
-    "angular-route": "~1.3.1",
-    "angular-mocks": "~1.3.1",
-    "angular-spinner": "~0.5.1",
-    "angular-resource": "~1.3.1",
-    "angular-bootstrap": "~0.12.0",
-    "angular-messages": "~1.3.3",
-    "angular-cookies": "~1.3.7",
-    "ionicons": "~2.0.0",
-    "ui-bootstrap-datetime-picker": "*",
-    "angular-sanitize": "~1.3.10",
     "font-awesome": "~4.3.0",
-    "angular-local-storage": "~0.1.5"
+    "ionicons": "~2.0.0"
   },
   "resolutions": {
     "angular": "~1.3.1"
