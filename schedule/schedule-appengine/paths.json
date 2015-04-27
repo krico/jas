@@ -11,7 +11,9 @@
     "karmaConfig": "src/test/client/karma.conf.ci.js"
   },
   "css": [
-    "src/main/stylesheet/styles.less"
+    "src/main/stylesheet/angular-material.css",
+    "src/main/stylesheet/styles.less",
+    "src/main/stylesheet/angular-material-theme.css"
   ],
   "watchCss": [
     "src/main/stylesheet/**/*.*"
@@ -32,17 +34,20 @@
         "respond/dest/respond.min.js"
       ],
       "main": [
-        "angular/angular.min.js",
-        "angular-route/angular-route.min.js",
-        "angular-resource/angular-resource.min.js",
-        "angular-messages/angular-messages.min.js",
-        "angular-cookies/angular-cookies.min.js",
-        "angular-sanitize/angular-sanitize.min.js",
-        "angular-local-storage/dist/angular-local-storage.min.js",
-        "angular-bootstrap/ui-bootstrap-tpls.min.js",
-        "ui-bootstrap-datetime-picker/dist/datetime-picker.min.js",
+        "jquery/dist/jquery.js",
+        "angular/angular.js",
+        "angular-aria/angular-aria.js",
+        "angular-animate/angular-animate.js",
+        "angular-route/angular-route.js",
+        "angular-resource/angular-resource.js",
+        "angular-messages/angular-messages.js",
+        "angular-cookies/angular-cookies.js",
+        "angular-sanitize/angular-sanitize.js",
+        "angular-local-storage/dist/angular-local-storage.js",
+        "angular-bootstrap/ui-bootstrap-tpls.js",
+        "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
         "spin.js/spin.js",
-        "angular-spinner/angular-spinner.min.js"
+        "angular-spinner/angular-spinner.js"
       ],
       "test": [
         "angular-mocks/angular-mocks.js"
