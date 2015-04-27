@@ -6,6 +6,7 @@
         'ngMessages',
         'ngCookies',
         'ngSanitize',
+        'ngMaterial',
         'ui.bootstrap',
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
@@ -15,7 +16,8 @@
         'jasify.payment',
         'jasify.balance',
         'jasify.checkout',
-        'jasify.templates'
+        'jasify.templates',
+        'jasify.directives.form'
     ]);
 
     /**
