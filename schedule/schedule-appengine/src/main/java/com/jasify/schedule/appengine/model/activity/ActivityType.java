@@ -30,6 +30,14 @@ public class ActivityType {
 
     private String description;
 
+    private Double price;
+
+    private String currency;
+
+    private String location;
+
+    private int maxSubscriptions;
+
     private ModelRef<Organization> organizationRef = new ModelRef<>(Organization.class);
 
     public ActivityType() {
@@ -90,5 +98,37 @@ public class ActivityType {
 
     public ModelRef<Organization> getOrganizationRef() {
         return organizationRef;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public int getMaxSubscriptions() {
+        return maxSubscriptions;
+    }
+
+    public void setMaxSubscriptions(int maxSubscriptions) {
+        this.maxSubscriptions = maxSubscriptions;
     }
 }
