@@ -2,9 +2,10 @@
 
     angular.module('jasifyWeb').controller('LogoutController', LogoutController);
 
-    function LogoutController($scope, $rootScope, $log, AUTH_EVENTS, Auth) {
+    function LogoutController($location, $scope, $rootScope, $log, AUTH_EVENTS, Auth) {
         var vm = this;
         vm.logout = logout;
+        vm.logout();
 
         function logout() {
             if (!Auth.isAuthenticated()) return;
@@ -13,12 +14,13 @@
             function logoutSuccess() {
                 $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
                 $scope.setCurrentUser(null);
+                $location.path('');
             }
 
             function logoutFailed(msg) {
                 $log.debug("Failed to logout: " + msg);
             }
-        }
+        };
     }
 
 })(angular);

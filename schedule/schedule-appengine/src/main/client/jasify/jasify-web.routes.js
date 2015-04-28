@@ -29,7 +29,6 @@
                 }
             })
             .when('/logout', {
-                templateUrl: 'logout/logout.html',
                 controller: 'LogoutController',
                 controllerAs: 'vm',
                 resolve: {
