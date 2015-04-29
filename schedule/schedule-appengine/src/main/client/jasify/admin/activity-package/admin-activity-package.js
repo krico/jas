@@ -17,11 +17,24 @@
         vm.deselectActivity = deselectActivity;
         vm.selectActivity = selectActivity;
         vm.filterSelected = filterSelected;
-        vm.sortActivityArray =sortActivityArray;
+        vm.sortActivityArray = sortActivityArray;
+
+        vm.update = update;
+        vm.create = create;
+        vm.reset = reset;
 
         vm.selectOrganization(vm.organizations, vm.activityPackage, $location.search().organizationId);
 
-        function sortActivityArray(array){
+        function update() {
+        }
+
+        function create() {
+        }
+
+        function reset() {
+        }
+
+        function sortActivityArray(array) {
             array.sort(cmp);
 
             function cmp(activity1, activity2) {
