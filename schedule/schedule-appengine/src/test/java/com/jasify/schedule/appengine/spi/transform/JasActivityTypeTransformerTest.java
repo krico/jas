@@ -38,10 +38,18 @@ public class JasActivityTypeTransformerTest {
         internal.getOrganizationRef().setKey(orgId);
         internal.setName("activity");
         internal.setDescription("Desc");
+        internal.setPrice(12.0);
+        internal.setCurrency("NZD");
+        internal.setLocation("Location");
+        internal.setMaxSubscriptions(5);
         JasActivityType external = transformer.transformTo(internal);
         assertNotNull(external);
         assertEquals("activity", external.getName());
         assertEquals("Desc", external.getDescription());
+        assertEquals(12.0, external.getPrice());
+        assertEquals("NZD", external.getCurrency());
+        assertEquals("Location", external.getLocation());
+        assertEquals(5, external.getMaxSubscriptions());
         assertEquals(id, KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getOrganizationId());
         assertEquals(orgId, new JasKeyTransformer().transformFrom(external.getOrganizationId()));
@@ -54,10 +62,18 @@ public class JasActivityTypeTransformerTest {
         external.setId(KeyUtil.keyToString(id));
         external.setName("activity");
         external.setDescription("Desc");
+        external.setPrice(12.0);
+        external.setCurrency("NZD");
+        external.setLocation("Location");
+        external.setMaxSubscriptions(5);
         ActivityType internal = transformer.transformFrom(external);
         assertNotNull(internal);
         assertEquals("activity", internal.getName());
         assertEquals("Desc", internal.getDescription());
+        assertEquals(12.0, internal.getPrice());
+        assertEquals("NZD", internal.getCurrency());
+        assertEquals("Location", internal.getLocation());
+        assertEquals(5, internal.getMaxSubscriptions());
         assertEquals(id, internal.getId());
     }
 }

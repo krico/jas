@@ -225,11 +225,19 @@ public class ActivityServiceTest {
         Key id = activityService.addActivityType(organization1, activityType);
         activityType.setName("New Name");
         activityType.setDescription("Description");
+        activityType.setPrice(55.0);
+        activityType.setCurrency("NZD");
+        activityType.setLocation("Location");
+        activityType.setMaxSubscriptions(6);
         ActivityType updatedActivityType = activityService.updateActivityType(activityType);
         assertNotNull(updatedActivityType);
         assertEquals(id, updatedActivityType.getId());
         assertEquals("New Name", updatedActivityType.getName());
         assertEquals("Description", updatedActivityType.getDescription());
+        assertEquals(55.0, updatedActivityType.getPrice());
+        assertEquals("NZD", updatedActivityType.getCurrency());
+        assertEquals("Location", updatedActivityType.getLocation());
+        assertEquals(6, updatedActivityType.getMaxSubscriptions());
         assertEquals("New Name", activityService.getActivityType(id).getName());
     }
 

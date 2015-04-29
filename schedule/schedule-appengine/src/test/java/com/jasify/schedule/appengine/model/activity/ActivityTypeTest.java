@@ -10,6 +10,7 @@ import org.slim3.datastore.Datastore;
 import java.util.Date;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNull;
 
 /**
  * @author wszarmach
@@ -75,6 +76,8 @@ public class ActivityTypeTest {
     @Test
     public void testLcNameDoesNotChangeName() {
         ActivityType activityType = new ActivityType();
+        assertNull(activityType.getName());
+        assertNull(activityType.getLcName());
         activityType.setName("Test1");
         assertEquals("Test1", activityType.getLcName());
         activityType.setLcName("Test2");
@@ -85,7 +88,40 @@ public class ActivityTypeTest {
     @Test
     public void testDescription() {
         ActivityType activityType = new ActivityType();
+        assertNull(activityType.getDescription());
         activityType.setDescription("Fun");
         assertEquals("Fun", activityType.getDescription());
+    }
+
+    @Test
+    public void testPrice() {
+        ActivityType activityType = new ActivityType();
+        assertNull(activityType.getPrice());
+        activityType.setPrice(15.0);
+        assertEquals(15.0, activityType.getPrice());
+    }
+
+    @Test
+    public void testCurrency() {
+        ActivityType activityType = new ActivityType();
+        assertNull(activityType.getCurrency());
+        activityType.setCurrency("NZD");
+        assertEquals("NZD", activityType.getCurrency());
+    }
+
+    @Test
+    public void testLocation() {
+        ActivityType activityType = new ActivityType();
+        assertNull(activityType.getLocation());
+        activityType.setLocation("Location");
+        assertEquals("Location", activityType.getLocation());
+    }
+
+    @Test
+    public void testMaxSubscriptions() {
+        ActivityType activityType = new ActivityType();
+        assertEquals(0, activityType.getMaxSubscriptions());
+        activityType.setMaxSubscriptions(12);
+        assertEquals(12, activityType.getMaxSubscriptions());
     }
 }

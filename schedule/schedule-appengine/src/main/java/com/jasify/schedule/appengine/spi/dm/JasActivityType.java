@@ -9,6 +9,10 @@ public class JasActivityType implements JasEndpointEntity {
     private String name;
     private String description;
     private String organizationId;
+    private Double price;
+    private String currency;
+    private String location;
+    private int maxSubscriptions;
 
     public String getId() {
         return id;
@@ -40,5 +44,37 @@ public class JasActivityType implements JasEndpointEntity {
 
     public void setOrganizationId(String organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public int getMaxSubscriptions() {
+        return maxSubscriptions;
+    }
+
+    public void setMaxSubscriptions(int maxSubscriptions) {
+        this.maxSubscriptions = maxSubscriptions;
     }
 }

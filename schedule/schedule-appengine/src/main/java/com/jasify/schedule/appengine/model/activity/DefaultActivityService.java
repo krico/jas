@@ -192,6 +192,10 @@ class DefaultActivityService implements ActivityService {
                 }
             }
             dbActivityType.setDescription(activityType.getDescription());
+            dbActivityType.setPrice(activityType.getPrice());
+            dbActivityType.setCurrency(activityType.getCurrency());
+            dbActivityType.setLocation(activityType.getLocation());
+            dbActivityType.setMaxSubscriptions(activityType.getMaxSubscriptions());
             Datastore.put(tx, dbActivityType);
             tx.commit();
         } finally {
