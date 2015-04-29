@@ -6,8 +6,8 @@ describe('Sign In with Email', function () {
     beforeEach(function(done){
         util.credentials('admin').then(function(c){
             credentials = c;
+            done();
         });
-        done();
     });
 
     it('should authenticate as admin and then logout', function () {

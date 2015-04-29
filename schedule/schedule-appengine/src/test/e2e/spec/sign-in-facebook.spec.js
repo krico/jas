@@ -3,10 +3,11 @@ var util = require('../lib/util');
 describe('Sign In with Facebook', function () {
     var AuthenticatePage = require('./authenticate.page');
     var credentials;
-    beforeEach(function(){
+    beforeEach(function(done){
         util.credentials('facebook').then(function(c){
             credentials = c;
-        })
+            done();
+        });
     });
 
     it('should authenticate using facebook', function () {
