@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.util;
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
+import com.google.common.base.Preconditions;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.beanutils.*;

@@ -69,7 +69,7 @@ if (process.env.TRAVIS_BUILD_NUMBER) {
 }
 
 config.multiCapabilities.forEach(function (value, index) {
-    value['name'] = 'Jasify(chrome)';
+    value['name'] = 'Jasify e2e suite';
     value['maxInstances'] = 1;
     value['shardTestFiles'] = false;
     value['logins'] = {admin: {user: 'sample' + index, pass: 'secret' + index}};

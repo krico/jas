@@ -1,8 +1,8 @@
 package com.jasify.schedule.appengine.mail;
 
-import com.google.appengine.repackaged.org.joda.time.DateTime;
-import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormat;
-import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormatter;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
