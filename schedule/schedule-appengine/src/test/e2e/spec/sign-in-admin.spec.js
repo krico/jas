@@ -3,10 +3,11 @@ var util = require('../lib/util');
 describe('Sign In with Email', function () {
     var AuthenticatePage = require('./authenticate.page');
     var credentials;
-    beforeEach(function(){
+    beforeEach(function(done){
         util.credentials('admin').then(function(c){
             credentials = c;
-        })
+        });
+        done();
     });
 
     it('should authenticate as admin and then logout', function () {
