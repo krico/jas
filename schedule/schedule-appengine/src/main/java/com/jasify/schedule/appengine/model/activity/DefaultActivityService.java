@@ -4,8 +4,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
-import com.jasify.schedule.appengine.mail.MailParser;
-import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.activity.RepeatDetailsMeta;
@@ -22,8 +20,6 @@ import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
@@ -35,7 +31,6 @@ import java.util.*;
  * @since 09/01/15.
  */
 class DefaultActivityService implements ActivityService {
-    private static final Logger log = LoggerFactory.getLogger(DefaultActivityService.class);
 
     private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
@@ -418,38 +413,6 @@ class DefaultActivityService implements ActivityService {
         return subscription;
     }
 
-    private void notify(Subscription subscription) throws EntityNotFoundException {
-        Activity activity = subscription.getActivityRef().getModel();
-        ActivityType activityType = activity.getActivityTypeRef().getModel();
-        Organization organization = getOrganization(activityType.getOrganizationRef().getKey());
-        User user = subscription.getUserRef().getModel();
-
-        String subject = String.format("[Jasify] Subscribe [%s]", user.getName());
-
-        try {
-            MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscription, organization);
-            MailServiceFactory.getMailService().send(user.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
-        } catch (Exception e) {
-            log.error("Failed to notify subscriber", e);
-        }
-
-        try {
-            MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription, organization);
-            for (User orgUser : organization.getUsers()) {
-                MailServiceFactory.getMailService().send(orgUser.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
-            }
-        } catch (Exception e) {
-            log.error("Failed to notify publisher", e);
-        }
-
-        try {
-            MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscription, organization);
-            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
-        } catch (Exception e) {
-            log.error("Failed to notify jasify", e);
-        }
-    }
-
     @Nonnull
     @Override
     public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, UniqueConstraintException, OperationException {
@@ -478,8 +441,6 @@ class DefaultActivityService implements ActivityService {
 
         Datastore.put(dbActivity);
         Datastore.put(subscription);
-
-        notify(subscription);
 
         return subscription;
     }
