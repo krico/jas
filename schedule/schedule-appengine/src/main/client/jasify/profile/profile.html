@@ -1,54 +1,79 @@
-<div ng-include="'profile/profile-nav.html'"></div>
-<form class="form-horizontal" role="form" name="vm.profileForm" novalidate>
-    <div class="col-sm-12" ng-if="vm.isWelcome()">
-        <blockquote>
-            <p>Welcome! This is your first login, blah blah blah someting about e-mail confirmation</p>
-        </blockquote>
+<div class="card">
+    <div class="card-header">
+        <h2>Profile Settings
+            <small>
+                Edit profile settings (email/about me) and link Google / Facebook logins with this account.
+            </small>
+        </h2>
     </div>
-    <div class="col-md-12">
-        <div class="form-group">
-            <label class="col-sm-2 control-label">name:</label>
-
-            <div class="col-sm-4">
-                <p class="form-control-static">{{vm.user.name}}</p>
+    <div class="card-body card-padding">
+        <h4 ng-if="vm.isWelcome">TODO: Welcome message</h4>
+        <div role="tabpanel">
+            <ul class="tab-nav" role="tablist">
+                <li class="active">
+                    <a prevent="click" href="#profile-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
+                        Profile Settings
+                    </a>
+                </li>
+                <li>
+                    <a prevent="click" href="#my-logins-tab" aria-controls="my-logins-tab" role="tab" data-toggle="tab">My
+                        Logins</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div ng-controller="ProfileSettingsController as vm" role="tabpanel" class="tab-pane active" id="profile-tab">
+                    <form role="form" novalidate name="vm.profileForm" ng-submit="vm.profileForm.$valid && vm.save()">
+                        <div jas-has-feedback class="form-group fg-float">
+                            <div class="fg-line">
+                                <input type="email" fg-input ng-model="vm.user.email" class="form-control fg-input"
+                                       id="emailAddress" required name="emailAddress">
+                            </div>
+                            <label class="fg-label">Email address</label>
+                            <jas-feedback-icon-valid field="vm.profileForm.emailAddress"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.profileForm.emailAddress"
+                                                       form="vm.profileForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.profileForm.emailAddress" form="vm.profileForm">
+                                <span ng-message="required">Email address is required.</span>
+                                <span ng-message="email">This email address is not valid.</span>
+                            </jas-error-help-block>
+                        </div>
+                        <div class="form-group fg-float">
+                            <div class="fg-line">
+                                <textarea class="form-control" rows="5" placeholder="..."></textarea>
+                            </div>
+                            <label class="fg-label">About me</label>
+                        </div>
+                        <div class="actions-group">
+                            <jp-ng-bs-animated-button options="vm.submitOptions" is-submitting="vm.isSubmitting" result="vm.result"></jp-ng-bs-animated-button>
+                            <button type="button" ng-click="vm.reset()" class="btn btn-warning waves-effect">Reset</button>
+                        </div>
+                    </form>
+                </div>
+                <div ng-controller="ProfileLoginsController as vm" role="tabpanel" class="tab-pane" id="my-logins-tab">
+                    <h5 ng-show="vm.logins">You can log in using any of the following accounts</h5>
+                    <table ng-show="vm.logins" class="table table-hover">
+                        <tbody>
+                            <tr ng-repeat="login in vm.logins">
+                                <td><i class="icon" ng-class="vm.icon(login)"></i> {{login.provider}}</td>
+                                <td>{{login.email}}</td>
+                                <td class="actions-column">
+                                    <button ng-click="vm.removeLogin(login)" class="btn btn-danger waves-effect"><i class="md-icon md-icon-delete"></i> Remove</button>
+                                </td>
+                            </tr>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="actions-group">
+                        <button class="btn btn-default btn-facebook" ng-click="vm.oauth('Facebook')">
+                            <i class="icon ion-social-facebook"></i> add Facebook login
+                        </button>
+                        <button class="btn btn-default btn-google" ng-click="vm.oauth('Google')">
+                            <i class="icon ion-social-google"></i> add Google login
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label for="email" class="col-sm-2 control-label">email:</label>
-
-            <div class="col-sm-4">
-                <input type="email" class="form-control" id="email" name="email" ng-model="vm.user.email"
-                       placeholder="email">
-            </div>
-            <div class="help-block small" ng-messages="vm.profileForm.email.$error">
-                <div class="help-block small" ng-message="email">Invalid email.</div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="about" class="col-sm-2 control-label">about:</label>
-
-            <div class="col-sm-4">
-                <textarea class="form-control" id="about" ng-model="vm.user.about" placeholder="about you..."
-                          rows="3"></textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-4">
-                <button type="button"
-                        ng-click="vm.save()" ng-disabled="!vm.profileForm.$dirty || vm.profileForm.$invalid"
-                        class="btn btn-default btn-primary"><span class="glyphicon glyphicon-save"></span>
-                    save
-                </button>
-                <button type="button"
-                        ng-click="vm.reset()" ng-disabled="!vm.profileForm.$dirty"
-                        class="btn btn-default"><span class="glyphicon glyphicon-open"></span>
-                    reset
-                </button>
-                <span ng-hide="vm.user.id" us-spinner=""></span>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
         </div>
     </div>
-</form>
+</div>
+

@@ -2,10 +2,10 @@
 
     angular.module('jasifyWeb').controller('ProfileLoginsController', ProfileLoginsController);
 
-    function ProfileLoginsController($scope, $log, $q, UserLogin, Session, OAuthWindow, logins) {
+    function ProfileLoginsController($scope, UserLogin, Session, OAuthWindow) {
         var vm = this;
 
-        vm.logins = logins;
+        vm.logins = $scope.logins;
         vm.alerts = [];
 
         vm.alert = function (t, m) {

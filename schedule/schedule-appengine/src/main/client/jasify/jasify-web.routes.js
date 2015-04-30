@@ -29,6 +29,7 @@
                 }
             })
             .when('/logout', {
+                templateUrl: 'logout/logout.html',
                 controller: 'LogoutController',
                 controllerAs: 'vm',
                 resolve: {
@@ -39,20 +40,14 @@
             })
             .when('/profile/:extra?', {
                 templateUrl: 'profile/profile.html',
-                controller: 'ProfileController',
-                controllerAs: 'vm',
+                controller: function($scope, logins) {
+                    $scope.logins = logins;
+                },
                 resolve: {
-                    allow: /*@ngInject*/ function (Allow) {
+                    allow: function (Allow) {
                         return Allow.user();
-                    }
-                }
-            })
-            .when('/profile-logins', {
-                templateUrl: 'profile/profile-logins.html',
-                controller: 'ProfileLoginsController',
-                controllerAs: 'vm',
-                resolve: {
-                    logins: /*@ngInject*/ function ($q, Allow, UserLogin, Session) {
+                    },
+                    logins: function ($q, Allow, UserLogin, Session) {
                         return Allow.user().then(
                             function () {
                                 return UserLogin.list(Session.userId);
@@ -64,7 +59,6 @@
                     }
                 }
             });
-
     }
 
 })(angular);
