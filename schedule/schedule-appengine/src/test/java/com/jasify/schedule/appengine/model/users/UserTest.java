@@ -24,7 +24,6 @@ public class UserTest {
         TestHelper.cleanupDatastore();
     }
 
-
     @Test
     public void testHashCode() throws Exception {
         HashSet<User> userSet = new HashSet<>();
@@ -51,5 +50,18 @@ public class UserTest {
         assertEquals(email, user.getName());
         assertEquals(email, user.getEmail());
         assertEquals(realName, user.getRealName());
+    }
+
+    @Test
+    public void testDisplayNameWithRealNameSet() {
+        User user = new User("Name");
+        user.setRealName("RealName");
+        assertEquals(user.getRealName(), user.getDisplayName());
+    }
+
+    @Test
+    public void testDisplayNameWithRealNameUnset() {
+        User user = new User("Name");
+        assertEquals(user.getName(), user.getDisplayName());
     }
 }

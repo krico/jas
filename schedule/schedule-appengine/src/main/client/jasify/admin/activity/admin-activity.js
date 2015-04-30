@@ -30,6 +30,7 @@
         vm.selectActivityType = selectActivityType;
         vm.loadActivityTypes = loadActivityTypes;
         vm.hasActivityTypes = hasActivityTypes;
+        vm.activityTypeChanged = activityTypeChanged;
         vm.alert = alert;
         vm.update = update;
         vm.create = create;
@@ -112,10 +113,6 @@
             function ok(r) {
                 vm.loadingActivityTypes = false;
                 vm.activityTypes = r.items;
-                if (vm.activityTypes.length == 1) {
-                    vm.activity.activityType = vm.activityTypes[0];
-                    vm.activity.description = vm.activityTypes[0].description;
-                }
                 vm.selectActivityType(vm.activityTypes, vm.activity);
             }
 
@@ -145,14 +142,24 @@
         }
 
         function selectActivityType(activityTypes, activity) {
-
             if (activity.activityType && activity.activityType.id) {
                 angular.forEach(activityTypes, function (value, key) {
                     if (activity.activityType.id == value.id) {
                         vm.activity.activityType = value;
                     }
                 });
+            } else if (vm.activityTypes.length == 1) {
+                vm.activity.activityType = vm.activityTypes[0];
+                vm.activityTypeChanged();
             }
+        }
+
+        function activityTypeChanged() {
+            vm.activity.description = vm.activity.activityType.description;
+            vm.activity.price = vm.activity.activityType.price;
+            vm.activity.currency = vm.activity.activityType.currency;
+            vm.activity.location = vm.activity.activityType.location;
+            vm.activity.maxSubscriptions = vm.activity.activityType.maxSubscriptions;
         }
 
         function create() {

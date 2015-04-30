@@ -32,7 +32,7 @@
                     <div class="col-sm-8 has-feedback" ng-class="vm.hasActivityTypes() ? false : 'has-error'">
                         <select ng-model="vm.activity.activityType" id="activityType" class="form-control"
                                 ng-options="activityType as activityType.name for activityType in vm.activityTypes"
-                                ng-change="vm.activity.description = vm.activity.activityType.description">
+                                ng-change="vm.activityTypeChanged()">
                         </select>
 
                         <div class="help-block small" ng-hide="vm.hasActivityTypes()">
