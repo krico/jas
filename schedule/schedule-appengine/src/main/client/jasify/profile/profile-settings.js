@@ -7,9 +7,17 @@
         var vm = this;
 
         vm.submitOptions = {
-            buttonSuccessText: 'Profile updated',
-            buttonSuccessClass: 'btn-success',
-            buttonInitialIcon: 'fa fa-send'
+            buttonDefaultText: 'Save',
+            buttonSubmittingText: 'Saving...',
+            buttonSuccessText: 'Profile updated'
+        };
+
+        vm.resetOptions = {
+            buttonDefaultClass: 'btn-warning',
+            buttonSubmittingClass: 'bgm-deeporange',
+            buttonDefaultText: 'Reset',
+            buttonSubmittingText: 'Reseting...',
+            buttonSuccessText: 'Profile restored'
         };
 
         vm.isWelcome = $routeParams.extra === 'welcome';
@@ -17,7 +25,7 @@
         vm.reset = reset;
         vm.user = {};
 
-        vm.reset();
+        vm.reset(true);
 
         function save() {
 
@@ -28,10 +36,8 @@
              */
             $timeout(function() {
                 User.update(vm.user).then(function saveSuccess(result) {
-
-                    vm.result = 'success';
+                    vm.submitResult = 'success';
                     $scope.setCurrentUser(vm.user);
-
                     vm.user = result;
                     vm.profileForm.$setPristine();
                     vm.profileForm.$setUntouched();
@@ -40,12 +46,26 @@
             }, 6000);
         }
 
-        function reset() {
-            User.get(Session.userId).then(function (user) {
-                vm.profileForm.$setPristine();
-                vm.profileForm.$setUntouched();
-                vm.user = user;
-            });
+        function reset(initialReset) {
+
+            if (!initialReset) {
+                vm.isReseting = true;
+            }
+
+            /*
+             * Simulate long running request
+             */
+            $timeout(function() {
+                if (!initialReset) {
+                    vm.resetResult = 'success';
+                }
+                User.get(Session.userId).then(function (user) {
+                    vm.profileForm.$setPristine();
+                    vm.profileForm.$setUntouched();
+                    vm.user = user;
+                });
+            }, 2000);
+
         }
     }
 

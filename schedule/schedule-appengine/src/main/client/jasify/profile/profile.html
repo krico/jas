@@ -7,7 +7,7 @@
         </h2>
     </div>
     <div class="card-body card-padding">
-        <h4 ng-if="vm.isWelcome">TODO: Welcome message</h4>
+        <div class="alert alert-success" role="alert" ng-if="vm.isWelcome || true">TODO: Welcome message</div>
         <div role="tabpanel">
             <ul class="tab-nav" role="tablist">
                 <li class="active">
@@ -44,8 +44,8 @@
                             <label class="fg-label">About me</label>
                         </div>
                         <div class="actions-group">
-                            <jp-ng-bs-animated-button options="vm.submitOptions" is-submitting="vm.isSubmitting" result="vm.result"></jp-ng-bs-animated-button>
-                            <button type="button" ng-click="vm.reset()" class="btn btn-warning waves-effect">Reset</button>
+                            <a-button type="submit" options="vm.submitOptions" is-submitting="vm.isSubmitting" result="vm.submitResult"></a-button>
+                            <a-button type="button" ng-click="vm.reset()" options="vm.resetOptions" is-submitting="vm.isReseting" result="vm.resetResult"></a-button>
                         </div>
                     </form>
                 </div>

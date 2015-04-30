@@ -13,9 +13,11 @@
   "css": [
     "src/main/stylesheet/angular-material.css",
     "src/main/stylesheet/styles.less",
-    "src/main/stylesheet/angular-material-theme.css"
+    "src/main/stylesheet/angular-material-theme.css",
+    "src/main/client/jasify/directives/a-button/a-button.css"
   ],
   "watchCss": [
+    "src/main/client/jasify/directives/**/*.*",
     "src/main/stylesheet/**/*.*"
   ],
   "html": [
@@ -48,8 +50,7 @@
         "angular-bootstrap/ui-bootstrap-tpls.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
         "spin.js/spin.js",
-        "angular-spinner/angular-spinner.js",
-        "ng-bs-animated-button/ng-bs-animated-button.js"
+        "angular-spinner/angular-spinner.js"
       ],
       "test": [
         "angular-mocks/angular-mocks.js"
@@ -57,7 +58,6 @@
     },
     "css": {
       "main": [
-        "ng-bs-animated-button/ng-bs-animated-button.css",
         "ionicons/css/ionicons.min.css",
         "font-awesome/css/font-awesome.min.css"
       ]

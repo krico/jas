@@ -16,8 +16,7 @@
         'jasify.payment',
         'jasify.balance',
         'jasify.checkout',
-        'jasify.templates',
-        'jasify.directives.form'
+        'jasify.templates'
     ]);
 
     /**

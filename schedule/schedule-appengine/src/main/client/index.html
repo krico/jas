@@ -47,18 +47,43 @@
         <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Log out</md-button>
     </div>
 </md-toolbar>
-<div flex layout="row">
-    <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left"
-                md-is-locked-open="$mdMedia('gt-sm') && vm.isAuthenticated()" >
-        <md-list>
-            <md-list-item ng-repeat="it in ul.users" ng-click="ul.selectUser(it)" ng-class="{'selected' : it === ul.selected }">
-                <md-icon class=avatar md-svg-icon="{{it.avatar}}"></md-icon>
-                <span>{{it.name}}</span>
-            </md-list-item>
-        </md-list>
+<div flex layout="row" ng-controller="NavbarController as navBarController">
+    <md-sidenav id="sidebar" class="toggled md-sidenav-left md-whiteframe-z2"
+                md-component-id="left"
+                md-is-locked-open="$mdMedia('gt-sm') && navBarController.isAuthenticated()" >
+        <ul class="main-menu" style="margin: 0">
+            <li>
+                <a ng-href="#/profile"><i class="md-icon md-icon-home"></i> My Profile</a>
+            </li>
+            <li ng-if="navBarController.isAdminOrOrgMember()" class="sub-menu">
+                <a ng-href="javascript:void(0)"><i class="md-icon md-icon-settings-applications"></i> Admin</a>
+                <ul>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="md-icon md-icon-person"></i> Users</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="md-icon md-icon-group"></i> Groups</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="md-icon md-icon-school"></i> Organizations</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="md-icon md-icon-accessibility"></i> Activities</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="md-icon md-icon-attach-money"></i> Balances</a></li>
+                </ul>
+            </li>
+            <li class="sub-menu">
+                <a ng-href="javascript:void(0)"><i class="md-icon md-icon-poll"></i> Balance</a>
+                <ul>
+                    <li><a ng-href="#/payment/make"><i class="ion-card"></i> Make a Payment</a></li>
+                    <li><a ng-href="#/payment/view"><i class="md-icon md-icon-attach-money"></i> View Balance</a></li>
+                </ul>
+            </li>
+            <li>
+                <a ng-href="#/checkout"><i class="md-icon md-icon-shopping-cart"></i> Checkout</a>
+            </li>
+            <li>
+                <a ng-href="#/logout"><i class="ion-android-exit"></i> Log out</a>
+            </li>
+        </ul>
     </md-sidenav>
     <div flex layout="column">
-        <md-content style="height: 100vh; background-position: 50% 50%; background-size: cover; background-repeat: none; background-image: url(http://d3nn82uaxijpm6.cloudfront.net/assets/website/backgrounds/unlock_your_potential-run-2ec3ce8df18718b9c5a6f1eb1c36696f.jpg)" layout="column" flex ng-view></md-content>
+        <md-content id="content" ng-class="{ 'home-splash': !navBarController.isAuthenticated() } " layout="column" flex>
+            <div class="container" ng-view></div>
+        </md-content>
     </div>
 </div>
 <footer class="footer">
@@ -71,24 +96,5 @@
     </div>
 </footer>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.9.0-rc2/angular-material.js"></script>
-<!--<script type="text/javascript">-->
-
-    <!--angular-->
-            <!--.module('starterApp', ['ngMaterial', 'users'])-->
-            <!--.config(function($mdThemingProvider, $mdIconProvider){-->
-                <!--$mdIconProvider-->
-                        <!--.defaultIconSet("./assets/svg/avatars.svg", 128)-->
-                        <!--.icon("xxx"       , "./assets/svg/menu.svg"        , 24)-->
-                        <!--.icon("share"      , "./assets/svg/share.svg"       , 24)-->
-                        <!--.icon("google_plus", "./assets/svg/google_plus.svg" , 512)-->
-                        <!--.icon("hangouts"   , "./assets/svg/hangouts.svg"    , 512)-->
-                        <!--.icon("twitter"    , "./assets/svg/twitter.svg"     , 512)-->
-                        <!--.icon("phone"      , "./assets/svg/phone.svg"       , 512);-->
-                <!--$mdThemingProvider.theme('default');-->
-
-            <!--});-->
-
-<!--</script>-->
-
 </body>
 </html>

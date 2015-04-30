@@ -1,12 +1,22 @@
+/**
+ * Form directives:
+ * - jasFeedbackIconPending, jasFeedbackIconInvalid, jasFeedbackIconValid for feedback icons
+ * - jasErrorHelpBlock, jasHasFeedback for general feedback (like error messages)
+ * - fgInput, fgFloat for floating labels support
+ */
+
 (function (angular, $) {
-    var jasifyDirectivesFormModule = angular.module('jasify.directives.form', []);
+
+    "use strict";
+
+    var jasifyDirectivesFormModule = angular.module('jasifyComponents');
 
     jasifyDirectivesFormModule.run(function() {
-        $('body').on('focus', '.form-control', function(){
+        $('body').on('focus', '.form-control', function () {
             $(this).closest('.fg-line').addClass('fg-toggled');
         });
 
-        $('body').on('blur', '.form-control', function(){
+        $('body').on('blur', '.form-control', function () {
             var p = $(this).closest('.form-group');
             var i = p.find('.form-control').val();
 
@@ -18,30 +28,24 @@
                 $(this).closest('.fg-line').removeClass('fg-toggled');
             }
         });
-
-        $('body').on('click', '.sub-menu > a', function(e){
-            e.preventDefault();
-            $(this).next().slideToggle(200);
-            $(this).parent().toggleClass('toggled');
-        });
     });
 
-    jasifyDirectivesFormModule.directive('prevent', function() {
+    jasifyDirectivesFormModule.directive('prevent', function () {
         return {
             restrict: 'A',
-            link: function(scope, elem, attrs) {
-                elem.on(attrs.prevent, function(e){
+            link: function (scope, elem, attrs) {
+                elem.on(attrs.prevent, function (e) {
                     e.preventDefault();
                 });
             }
         };
     });
 
-    jasifyDirectivesFormModule.directive('fgInput', function() {
+    jasifyDirectivesFormModule.directive('fgInput', function () {
         return {
             restrict: 'C',
-            link: function(scope, element, attrs, controllers) {
-                scope.$watch(attrs.ngModel, function(newValue) {
+            link: function (scope, element, attrs, controllers) {
+                scope.$watch(attrs.ngModel, function (newValue) {
                     if (!!newValue) {
                         $(element).parent('.fg-line').addClass('fg-toggled');
                     }
@@ -50,14 +54,12 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('fg-float', function() {
+    jasifyDirectivesFormModule.directive('fgFloat', function () {
         return {
             restrict: 'C',
-            link: function(scope, element, attrs) {
-                console.log(element);
-                $('.form-control', element).each(function(){
+            link: function (scope, element, attrs) {
+                $('.form-control', element).each(function () {
                     var i = $(this).val();
-
                     if (i.length !== 0) {
                         $(this).closest('.fg-line').addClass('fg-toggled');
                     }
@@ -66,7 +68,7 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('jasErrorHelpBlock', function() {
+    jasifyDirectivesFormModule.directive('jasErrorHelpBlock', function () {
         return {
             replace: true,
             restrict: 'E',
@@ -81,25 +83,25 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('jasHasFeedback', function() {
+    jasifyDirectivesFormModule.directive('jasHasFeedback', function () {
         return {
             restrict: 'A',
-            link: function(scope, element, attrs) {
+            link: function (scope, element, attrs) {
 
                 var $element = $(element);
 
                 var formName = $element.closest('form').attr('name');
                 var formFieldName = $element.find('input, select, textarea').attr('name');
 
-                scope.$watch(formName + '.' + formFieldName + '.$touched', function() {
+                scope.$watch(formName + '.' + formFieldName + '.$touched', function () {
                     updateClasses();
                 });
 
-                scope.$watch(formName + '.' + formFieldName + '.$valid', function() {
+                scope.$watch(formName + '.' + formFieldName + '.$valid', function () {
                     updateClasses();
                 });
 
-                scope.$watch(formName + '.$submitted', function() {
+                scope.$watch(formName + '.$submitted', function () {
                     updateClasses();
                 });
 
@@ -124,7 +126,7 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('jasFeedbackIconValid', function() {
+    jasifyDirectivesFormModule.directive('jasFeedbackIconValid', function () {
         return {
             multiElement: true,
             restrict: 'E',
@@ -136,7 +138,7 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('jasFeedbackIconInvalid', function() {
+    jasifyDirectivesFormModule.directive('jasFeedbackIconInvalid', function () {
         return {
             restrict: 'E',
             replace: true,
@@ -148,7 +150,7 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('jasFeedbackIconPending', function() {
+    jasifyDirectivesFormModule.directive('jasFeedbackIconPending', function () {
         return {
             restrict: 'E',
             replace: true,
