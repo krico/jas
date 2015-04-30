@@ -46,29 +46,30 @@
     }
 }
 
-[mask] {
+.mask-background {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-}
-
-.mask-background {
     display: none;
     background-color: grey;
     position: absolute;
-    z-index: 9999;
     width: 100%;
     height: 100%;
+    z-index: -1;
 }
 
 .mask-content {
-    display: none;
     position: absolute;
-    z-index: 99999;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: none;
     width: 100%;
     height: 100%;
+    z-index: -1;
 }
 
 .mask-cancel-message {
@@ -79,12 +80,14 @@
 }
 
 .mask-background.in-progress {
+    z-index: 9999;
     display: flex;
     opacity: 0.60;
     -webkit-animation: mask-background-animation 2s linear;
 }
 
 .mask-content.in-progress {
+    z-index: 99999;
     display: flex;
     -webkit-animation: mask-content-animation 2s linear;
 }
