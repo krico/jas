@@ -2,7 +2,10 @@
 
     angular.module('jasifyWeb').controller('ProfileSettingsController', ProfileSettingsController);
 
-    function ProfileSettingsController($scope, $timeout, $routeParams, Session, User) {
+    function ProfileSettingsController($scope, $timeout, $routeParams, Session, User, mask) {
+
+        // Uncomment to see how mask works
+        // $timeout(mask.show, 2000);
 
         var vm = this;
 
@@ -34,16 +37,19 @@
             /*
              * Simulate long running request
              */
-            $timeout(function() {
-                User.update(vm.user).then(function saveSuccess(result) {
-                    vm.submitResult = 'success';
-                    $scope.setCurrentUser(vm.user);
-                    vm.user = result;
-                    vm.profileForm.$setPristine();
-                    vm.profileForm.$setUntouched();
+            //$timeout(function() {
+            //
+            //}, 6000);
 
-                });
-            }, 6000);
+            User.update(vm.user).then(function saveSuccess(result) {
+                vm.submitResult = 'success';
+
+                $scope.setCurrentUser(vm.user);
+                vm.user = result;
+                vm.profileForm.$setPristine();
+                vm.profileForm.$setUntouched();
+
+            });
         }
 
         function reset(initialReset) {
@@ -55,16 +61,18 @@
             /*
              * Simulate long running request
              */
-            $timeout(function() {
+            //$timeout(function() {
+            //
+            //}, 2000);
+
+            User.get(Session.userId).then(function (user) {
                 if (!initialReset) {
-                    vm.resetResult = 'success';
-                }
-                User.get(Session.userId).then(function (user) {
                     vm.profileForm.$setPristine();
                     vm.profileForm.$setUntouched();
-                    vm.user = user;
-                });
-            }, 2000);
+                    vm.resetResult = 'success';
+                }
+                vm.user = user;
+            });
 
         }
     }

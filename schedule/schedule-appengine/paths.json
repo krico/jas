@@ -11,10 +11,10 @@
     "karmaConfig": "src/test/client/karma.conf.ci.js"
   },
   "css": [
-    "src/main/stylesheet/angular-material.css",
     "src/main/stylesheet/styles.less",
     "src/main/stylesheet/angular-material-theme.css",
-    "src/main/client/jasify/directives/a-button/a-button.css"
+    "src/main/client/jasify/directives/a-button/a-button.css",
+    "src/main/client/jasify/directives/mask/mask.css"
   ],
   "watchCss": [
     "src/main/client/jasify/directives/**/*.*",
@@ -39,6 +39,7 @@
         "jquery/dist/jquery.js",
         "bootstrap/dist/js/bootstrap.js",
         "angular/angular.js",
+        "angular-material/angular-material.js",
         "angular-aria/angular-aria.js",
         "angular-animate/angular-animate.js",
         "angular-route/angular-route.js",
@@ -59,7 +60,8 @@
     "css": {
       "main": [
         "ionicons/css/ionicons.min.css",
-        "font-awesome/css/font-awesome.min.css"
+        "font-awesome/css/font-awesome.min.css",
+        "angular-material/angular-material.css"
       ]
     }
   },
