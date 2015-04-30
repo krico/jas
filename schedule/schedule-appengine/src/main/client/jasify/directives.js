@@ -18,6 +18,36 @@
                 $(this).closest('.fg-line').removeClass('fg-toggled');
             }
         });
+
+        $('body').on('click', '.sub-menu > a', function(e){
+            e.preventDefault();
+            $(this).next().slideToggle(200);
+            $(this).parent().toggleClass('toggled');
+        });
+    });
+
+    jasifyDirectivesFormModule.directive('prevent', function() {
+        return {
+            restrict: 'A',
+            link: function(scope, elem, attrs) {
+                elem.on(attrs.prevent, function(e){
+                    e.preventDefault();
+                });
+            }
+        };
+    });
+
+    jasifyDirectivesFormModule.directive('fgInput', function() {
+        return {
+            restrict: 'C',
+            link: function(scope, element, attrs, controllers) {
+                scope.$watch(attrs.ngModel, function(newValue) {
+                    if (!!newValue) {
+                        $(element).parent('.fg-line').addClass('fg-toggled');
+                    }
+                });
+            }
+        };
     });
 
     jasifyDirectivesFormModule.directive('fg-float', function() {
@@ -74,8 +104,8 @@
                 });
 
                 function updateClasses() {
+
                     var form = scope.$eval(formName);
-                    console.log(form[formFieldName].$touched, form[formFieldName].$valid)
                     if (form[formFieldName].$touched && form[formFieldName].$valid) {
                         $element.addClass('has-success');
                     } else {
@@ -87,6 +117,8 @@
                     } else {
                         $element.removeClass('has-error');
                     }
+
+                    $element.toggleClass('has-feedback', element.hasClass('has-error') || element.hasClass('has-success'));
                 }
             }
         };
