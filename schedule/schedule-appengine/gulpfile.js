@@ -215,12 +215,14 @@ function clientDependenciesCssFun(key) {
 
 function html(cb) {
     return gulp.src(paths.html)
+        .pipe(plumber())
         .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
         .pipe(gulp.dest(paths.build + '/../'))
 }
 
 function staticHtml(cb) {
     return gulp.src(paths.staticHtml)
+        .pipe(plumber())
         .pipe(gulp.dest(paths.build + '/../'))
 }
 
