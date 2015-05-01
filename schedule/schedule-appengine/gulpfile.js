@@ -173,7 +173,7 @@ function lintJs(cb) {
 function clientCss(cb) {
     return gulp.src(paths.css)
         .pipe(plumber())
-        .pipe(sourcemaps.init())
+        //.pipe(sourcemaps.init())
         .pipe(less({
             paths: [
                 path.join(paths.bower, 'bootstrap', 'less')
@@ -183,7 +183,7 @@ function clientCss(cb) {
         .pipe(gulp.dest(paths.build + '/css'))
         .pipe(minifyCSS())
         .pipe(rename({extname: '.min.css'}))
-        .pipe(sourcemaps.write('./'))
+        //.pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/css'));
 }
 
