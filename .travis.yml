@@ -5,7 +5,6 @@ env:
   global:
   - ENV_IS_CI=true
   - JAS_CACHE=$HOME/cache
-  - bower_storage__cache=$HOME/.bower
   - secure: A5dIYYAok4DjMpiSrO7Ys08tPcwwn+wSJGWlLHAiinve9brgpvapVZ3KSksRA6ly7XkTFx7UHcp17wa6gXkFyq6EERCeLKfDGcOG6eI3I+YrFn2l0guVppw7ggMIKlCdaqXjz8/0Z7RgXeUV0d1z4WgWFOLkcH+R8uorhXFb4vg=
   - secure: WA+4zfk6DJLxuocm3cpG/SDtOyi0YCqAL0DaRxDUW/SIijfBBT6Jl1Cy4Pavlq/FeVrTRtjSvOWs35BN/+CA23NbckkbxPUWRUBbgZrkUmO73mH72l82p2Lw748s0jydvI9magvdP6aVhcK4SXLtDZnKt2N+R8EmNzLIx9+djFA=
   matrix:
