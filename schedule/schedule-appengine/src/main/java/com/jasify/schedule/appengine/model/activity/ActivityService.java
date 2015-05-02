@@ -136,16 +136,41 @@ public interface ActivityService {
 
     /**
      * @param activityPackage to be created
-     * @param activities      that are allowesd in this package
+     * @param activities      that are allowed in this package
      * @return the key to the new package
      * @throws EntityNotFoundException if not found
      * @throws FieldValueException     if fields are invalid
      */
     public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException;
 
+    /**
+     * @param activityPackage with the data to be updated
+     * @return the updated activityPackage
+     * @throws EntityNotFoundException if it doesn't exist
+     * @throws FieldValueException     if fields are invalid
+     */
+    public ActivityPackage updateActivityPackage(ActivityPackage activityPackage) throws EntityNotFoundException, FieldValueException;
+
     public void addActivityToActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
 
+    public void addActivityToActivityPackage(Key activityPackageId, Key activityId) throws EntityNotFoundException;
+
     public void removeActivityFromActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
+
+    public void removeActivityFromActivityPackage(Key activityPackageId, Key activityId) throws EntityNotFoundException;
+
+
+    /**
+     * @param organizationId to fetch activity packages from
+     * @return the list of activity packages for this organization
+     */
+    List<ActivityPackage> getActivityPackages(Key organizationId) throws EntityNotFoundException;
+
+    /**
+     * @param organization to fetch activity packages from
+     * @return the list of activity packages for this organization
+     */
+    List<ActivityPackage> getActivityPackages(Organization organization) throws EntityNotFoundException;
 
     /**
      * @param id to fetch
@@ -255,4 +280,5 @@ public interface ActivityService {
      * @throws EntityNotFoundException if any of the involved entities don't exist
      */
     public void cancelSubscription(Key subscriptionId) throws EntityNotFoundException;
+
 }

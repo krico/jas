@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.client.util.Lists;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.ForbiddenException;
@@ -14,6 +15,7 @@ import com.jasify.schedule.appengine.model.common.OrganizationService;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.common.TestOrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.UserLogin;
+import com.jasify.schedule.appengine.spi.dm.JasAddActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import org.easymock.Capture;
@@ -25,7 +27,10 @@ import org.junit.Test;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
@@ -1057,14 +1062,14 @@ public class ActivityEndpointTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testAddSubscriptionNoUserThrowsNotFoundException() throws Exception{
+    public void testAddSubscriptionNoUserThrowsNotFoundException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         endpoint.addSubscription(null, null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
-    public void testAddSubscriptionNotLoggedInThrowsUnauthorizedException() throws Exception{
+    public void testAddSubscriptionNotLoggedInThrowsUnauthorizedException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         User user = new User("Test");
@@ -1133,14 +1138,14 @@ public class ActivityEndpointTest {
 
 
     @Test(expected = NotFoundException.class)
-    public void testGetSubscriptionNoUserThrowsNotFoundException() throws Exception{
+    public void testGetSubscriptionNoUserThrowsNotFoundException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         endpoint.getSubscription(null, null, null);
     }
 
     @Test(expected = UnauthorizedException.class)
-    public void testGetSubscriptionNotLoggedInThrowsUnauthorizedException() throws Exception{
+    public void testGetSubscriptionNotLoggedInThrowsUnauthorizedException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         User user = new User("Test");
@@ -1206,21 +1211,21 @@ public class ActivityEndpointTest {
     }
 
     @Test(expected = UnauthorizedException.class)
-    public void testGetSubscriptionsNoUserThrowsNotFoundException() throws Exception{
+    public void testGetSubscriptionsNoUserThrowsNotFoundException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         endpoint.getSubscriptions(null, null);
     }
 
     @Test(expected = ForbiddenException.class)
-    public void testGetSubscriptionsNotAdminThrowsForbiddenException() throws Exception{
+    public void testGetSubscriptionsNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         endpoint.getSubscriptions(newCaller(1), null);
     }
 
     @Test(expected = NotFoundException.class)
-    public void testGetSubscriptionsThrowsNotFoundException() throws Exception{
+    public void testGetSubscriptionsThrowsNotFoundException() throws Exception {
         testOrganizationServiceFactory.replay();
         ActivityService service = ActivityServiceFactory.getActivityService();
         Key activityId = Datastore.allocateId(Activity.class);
@@ -1246,14 +1251,14 @@ public class ActivityEndpointTest {
     }
 
     @Test(expected = UnauthorizedException.class)
-    public void testCancelSubscriptionsNoUserThrowsNotFoundException() throws Exception{
+    public void testCancelSubscriptionsNoUserThrowsNotFoundException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         endpoint.cancelSubscription(null, null);
     }
 
     @Test(expected = ForbiddenException.class)
-    public void testCancelSubscriptionsNotAdminThrowsForbiddenException() throws Exception{
+    public void testCancelSubscriptionsNotAdminThrowsForbiddenException() throws Exception {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         endpoint.cancelSubscription(newCaller(1), null);
@@ -1279,5 +1284,93 @@ public class ActivityEndpointTest {
         expectLastCall();
         testActivityServiceFactory.replay();
         endpoint.cancelSubscription(newAdminCaller(1), subscriptionId);
+    }
+
+    @Test
+    public void testGetActivityPackages() throws Exception {
+        testOrganizationServiceFactory.replay();
+        Key organizationId = Datastore.allocateId(Organization.class);
+        ArrayList<ActivityPackage> resp = Lists.newArrayList();
+        resp.add(new ActivityPackage());
+        EasyMock.expect(ActivityServiceFactory.getActivityService().getActivityPackages(organizationId))
+                .andReturn(resp);
+        testActivityServiceFactory.replay();
+        List<ActivityPackage> activityPackages = endpoint.getActivityPackages(newAdminCaller(1), organizationId);
+        assertEquals(resp, activityPackages);
+    }
+
+    @Test
+    public void testGetActivityPackage() throws Exception {
+        testOrganizationServiceFactory.replay();
+        Key apId = Datastore.allocateId(ActivityPackage.class);
+        ActivityPackage resp = new ActivityPackage();
+        EasyMock.expect(ActivityServiceFactory.getActivityService().getActivityPackage(apId))
+                .andReturn(resp);
+        testActivityServiceFactory.replay();
+        ActivityPackage activityPackage = endpoint.getActivityPackage(newAdminCaller(1), apId);
+        assertEquals(resp, activityPackage);
+    }
+
+    @Test
+    public void testAddActivityPackage() throws Exception {
+        testOrganizationServiceFactory.replay();
+        JasAddActivityPackageRequest request = new JasAddActivityPackageRequest();
+        ActivityPackage activityPackage = new ActivityPackage();
+
+        Key orgId = Datastore.allocateId(Organization.class);
+        activityPackage.getOrganizationRef().setKey(orgId);
+        request.setActivityPackage(activityPackage);
+
+        request.getActivities().add(new Activity());
+
+        Key apId = Datastore.allocateId(ActivityPackage.class);
+
+        ActivityService mock = ActivityServiceFactory.getActivityService();
+        EasyMock.expect(mock.addActivityPackage(activityPackage, request.getActivities()))
+                .andReturn(apId);
+
+        EasyMock.expect(mock.getActivityPackage(apId)).andReturn(activityPackage);
+
+        testActivityServiceFactory.replay();
+
+        ActivityPackage fetched = endpoint.addActivityPackage(newAdminCaller(1), request);
+        assertEquals(activityPackage, fetched);
+    }
+
+    @Test
+    public void testUpdateActivityPackage() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityPackage activityPackage = new ActivityPackage();
+        Key id = Datastore.allocateId(ActivityPackage.class);
+        activityPackage.setId(id);
+        EasyMock.expect(ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage)).andReturn(activityPackage);
+        testActivityServiceFactory.replay();
+
+        ActivityPackage fetched = endpoint.updateActivityPackage(newAdminCaller(1), id, activityPackage);
+        assertEquals(activityPackage, fetched);
+    }
+
+    @Test
+    public void testAddActivityToActivityPackage() throws Exception {
+        testOrganizationServiceFactory.replay();
+        Key apId = Datastore.allocateId(ActivityPackage.class);
+        Key aId = Datastore.allocateId(Activity.class);
+        ActivityServiceFactory.getActivityService().addActivityToActivityPackage(apId, aId);
+        EasyMock.expectLastCall();
+        testActivityServiceFactory.replay();
+
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), apId, aId);
+    }
+
+    @Test
+    public void testRemoveActivityToActivityPackage() throws Exception {
+        testOrganizationServiceFactory.replay();
+        Key apId = Datastore.allocateId(ActivityPackage.class);
+        Key aId = Datastore.allocateId(Activity.class);
+        ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(apId, aId);
+        EasyMock.expectLastCall();
+        testActivityServiceFactory.replay();
+
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), apId, aId);
     }
 }

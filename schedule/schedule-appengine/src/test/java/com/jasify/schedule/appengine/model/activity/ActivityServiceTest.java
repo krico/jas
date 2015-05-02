@@ -3,6 +3,8 @@ package com.jasify.schedule.appengine.model.activity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.mail.MailServicePb;
 import com.google.appengine.api.mail.dev.LocalMailService;
+import com.google.appengine.labs.repackaged.com.google.common.base.Function;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
@@ -22,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static junit.framework.TestCase.*;
@@ -987,6 +990,51 @@ public class ActivityServiceTest {
     }
 
     @Test
+    public void testUpdateActivityPackage() throws Exception {
+        testCreateActivityPackage();
+        activityPackage.setDescription("New Desc");
+        Date created = activityPackage.getCreated();
+        activityPackage.setCreated(new Date(8282123));
+        activityPackage.setModified(new Date(555));
+        activityPackage.setItemCount(99);
+        activityPackage.setPrice(999d);
+        activityPackage.setExecutionCount(826);
+        activityPackage.setName("New Name");
+        activityPackage.setCurrency("BRL");
+        activityPackage.setMaxExecutions(200);
+        activityPackage.setValidFrom(new Date(12345678));
+        activityPackage.setValidUntil(new Date(22233344));
+        Key expectedOrgId = activityPackage.getOrganizationRef().getKey();
+        activityPackage.getOrganizationRef().setKey(null);
+
+        List<ActivityPackage> fetchedPackages = Lists.newArrayList();
+        fetchedPackages.add(activityService.updateActivityPackage(activityPackage));
+
+        long modified = System.currentTimeMillis();
+
+        fetchedPackages.add(activityService.getActivityPackage(activityPackage.getId()));
+        for (ActivityPackage fetched : fetchedPackages) {
+            assertNotNull(fetched);
+            assertEquals("New Desc", fetched.getDescription());
+            assertEquals(99, fetched.getItemCount());
+            assertEquals(999d, fetched.getPrice());
+            //achtung
+            assertEquals("Execution count should not be updated", 0, fetched.getExecutionCount());
+            assertEquals("original ap unchanged", 826, activityPackage.getExecutionCount());
+            assertEquals("New Name", fetched.getName());
+            assertEquals("BRL", fetched.getCurrency());
+            assertEquals(200, fetched.getMaxExecutions());
+            assertEquals(new Date(12345678), fetched.getValidFrom());
+            assertEquals(new Date(22233344), fetched.getValidUntil());
+
+            assertEquals(created, fetched.getCreated());
+            long fetchedModified = fetched.getModified().getTime();
+            assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+            assertEquals(expectedOrgId, fetched.getOrganizationRef().getKey());
+        }
+    }
+
+    @Test
     public void testCreateAddAndRemoveFromActivityPackage() throws Exception {
         testCreateActivityPackage();
 
@@ -1027,5 +1075,57 @@ public class ActivityServiceTest {
         assertTrue(activities.contains(activity1Organization1.getId()));
         assertTrue(activities.contains(activity2Organization1.getId()));
         log.info("{}", ModelMetadataUtil.dumpDb(new StringBuilder("DB DUMP\n")));
+    }
+
+    @Test
+    public void testGetActivityPackages() throws Exception {
+        testCreateActivityPackage();
+        Key ap1Org1 = activityPackage.getId();
+        testCreateActivityPackage();
+        Key ap2Org1 = activityPackage.getId();
+
+        ActivityPackage ap = new ActivityPackage();
+        ap.getOrganizationRef().setKey(organization2.getId());
+        ap.setCurrency("USD");
+        ap.setDescription("Super package");
+        ap.setMaxExecutions(0);
+        ap.setName("Supa");
+        ap.setPrice(20d);
+        ap.setItemCount(2);
+        ActivityType activityType = new ActivityType("ATO2");
+        activityType.setId(Datastore.allocateId(organization2.getId(), ActivityTypeMeta.get()));
+        activityType.getOrganizationRef().setKey(organization2.getId());
+        Datastore.put(activityType);
+
+        Activity activity = createActivity(activityType);
+        Datastore.put(activity);
+        Key ap1Org2 = activityService.addActivityPackage(ap, Arrays.asList(activity));
+
+
+        //Now we do the real test work
+        List<ActivityPackage> activityPackages = activityService.getActivityPackages(organization1);
+        assertNotNull(activityPackages);
+        assertEquals(2, activityPackages.size());
+        List<Key> ids = Lists.transform(activityPackages, new Function<ActivityPackage, Key>() {
+            @Nullable
+            @Override
+            public Key apply(ActivityPackage activityPackage) {
+                return activityPackage.getId();
+            }
+        });
+        assertTrue(ids.contains(ap1Org1));
+        assertTrue(ids.contains(ap2Org1));
+
+        activityPackages = activityService.getActivityPackages(organization2.getId());
+        assertNotNull(activityPackages);
+        assertEquals(1, activityPackages.size());
+        ids = Lists.transform(activityPackages, new Function<ActivityPackage, Key>() {
+            @Nullable
+            @Override
+            public Key apply(ActivityPackage activityPackage) {
+                return activityPackage.getId();
+            }
+        });
+        assertTrue(ids.contains(ap1Org2));
     }
 }

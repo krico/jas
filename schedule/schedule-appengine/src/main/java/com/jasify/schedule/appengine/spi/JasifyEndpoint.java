@@ -7,10 +7,7 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
-import com.jasify.schedule.appengine.model.activity.ActivityType;
-import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
@@ -78,6 +75,16 @@ public class JasifyEndpoint {
             Organization getOrganization() throws EntityNotFoundException {
                 ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(this.id);
                 return activityType.getOrganizationRef().getModel();
+            }
+        };
+    }
+
+    static OrgMemberChecker createFromActivityPackageId(Key id) {
+        return new OrgMemberChecker(id) {
+            @Override
+            Organization getOrganization() throws EntityNotFoundException {
+                ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(this.id);
+                return activityPackage.getOrganizationRef().getModel();
             }
         };
     }
