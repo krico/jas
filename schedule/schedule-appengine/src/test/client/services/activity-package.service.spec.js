@@ -138,6 +138,40 @@ describe('ActivityPackageService', function () {
         expect($gapiMock.client.jasify.activityPackages.remove).toHaveBeenCalledWith({id: at.id});
     });
 
+    it('should get activities of an activityPackage id', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.activityPackages, 'getActivities').and.returnValue($q.when({result: {items: expected}}));
+        ActivityPackage.getActivities('anActivityPackageId')
+            .then(function (at) {
+                expect(at).toEqual(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.activityPackages.getActivities)
+            .toHaveBeenCalledWith({activityPackageId: 'anActivityPackageId'});
+    });
+
+    it('should get activities of an activityPackage', function () {
+        var expected = [];
+        spyOn($gapiMock.client.jasify.activityPackages, 'getActivities').and.returnValue($q.when({result: {items: expected}}));
+        ActivityPackage.getActivities({id: 'anActivityPackageId'})
+            .then(function (at) {
+                expect(at).toEqual(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.activityPackages.getActivities)
+            .toHaveBeenCalledWith({activityPackageId: 'anActivityPackageId'});
+    });
+
     it('should add activity to activityPackage by id', function () {
         spyOn($gapiMock.client.jasify.activityPackages, 'addActivity').and.returnValue($q.when({result: false}));
         ActivityPackage.addActivity('anActivityPackageId', 'anActivityId')

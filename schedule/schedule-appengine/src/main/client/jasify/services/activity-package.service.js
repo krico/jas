@@ -9,6 +9,7 @@
             add: add,
             addActivity: addActivity,
             removeActivity: removeActivity,
+            getActivities: getActivities,
             remove: remove
         };
 
@@ -18,6 +19,13 @@
             return Endpoint.jasify(function (jasify) {
                 return jasify.activityPackages.query({organizationId: fetchId(organizationId)})
                     .then(resultHandler, errorHandler);
+            });
+        }
+
+        function getActivities(activityPackageId) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.activityPackages.getActivities({activityPackageId: fetchId(activityPackageId)})
+                    .then(resultItemsHandler, errorHandler);
             });
         }
 
@@ -71,6 +79,11 @@
 
         function errorHandler(e) {
             return $q.reject(e);
+        }
+
+        function resultItemsHandler(resp) {
+            if (resp.result) return resp.result.items;
+            return null;
         }
 
         function resultHandler(resp) {

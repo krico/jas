@@ -338,26 +338,6 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackages.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public void addActivityToActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
-        try {
-            ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackageId, activityId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
-        }
-    }
-
-    @ApiMethod(name = "activityPackages.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
-        try {
-            ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(activityPackageId, activityId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
-        }
-    }
-
     @ApiMethod(name = "activityPackages.add", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.POST)
     public ActivityPackage addActivityPackage(User caller, JasAddActivityPackageRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         ActivityPackage activityPackage = checkFound(request.getActivityPackage(), "request.activityPackage == NULL");
@@ -387,4 +367,35 @@ public class ActivityEndpoint {
         //TODO: remove activity package
         throw new RuntimeException("NOT IMPLEMENTED");
     }
+
+    @ApiMethod(name = "activityPackages.getActivities", path = "activity-packages-activity/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Activity> getActivityPackageActivities(User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        try {
+            ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(activityPackageId);
+            return activityPackage.getActivities();
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public void addActivityToActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
+        try {
+            ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackageId, activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
+        try {
+            ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(activityPackageId, activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        }
+    }
+
 }

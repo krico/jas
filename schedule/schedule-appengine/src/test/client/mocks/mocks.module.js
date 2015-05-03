@@ -118,6 +118,7 @@
                 addActivity: nop,
                 removeActivity: nop,
                 add: nop,
+                getActivities: nop,
                 remove: nop
             },
             activitySubscriptions: {

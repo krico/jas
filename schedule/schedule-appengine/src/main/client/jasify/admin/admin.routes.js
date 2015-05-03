@@ -224,15 +224,31 @@
                             }
                         );
                     },
-                    activityPackage: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+                    activityPackage: /*@ngInject*/ function ($q, $route, Allow, ActivityPackage) {
 
                         return Allow.adminOrOrgMember().then(allowed, forbidden);
 
                         function allowed() {
                             if ($route.current.params.id) {
-                                return Activity.get($route.current.params.id);
+                                return ActivityPackage.get($route.current.params.id);
                             } else {
                                 return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    },
+                    activityPackageActivities: /*@ngInject*/ function ($q, $route, Allow, ActivityPackage) {
+
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.id) {
+                                return ActivityPackage.getActivities($route.current.params.id);
+                            } else {
+                                return [];
                             }
                         }
 

@@ -39,6 +39,7 @@
 
                 <div class="col-sm-7">
                     <select ng-model="vm.organization" id="organization" class="form-control"
+                            ng-disabled="vm.activityPackage.id"
                             ng-options="organization as organization.name for organization in vm.organizations"
                             ng-change="vm.onOrganizationSelected(vm.organization)">
                     </select>
@@ -98,6 +99,8 @@
             </fieldset>
             <fieldset>
                 <legend class="h4">Activities</legend>
+                <input type="hidden" ng-model="vm.selectedActivities"/>
+
                 <div class="form-group">
                     <div class="col-sm-5">
                         <h5>Available</h5>
@@ -159,13 +162,13 @@
 </div>
 <script type="text/ng-template" id="aap-buttons.html">
     <div class="col-sm-offset-3 col-sm-8 col-align-right">
-        <button type="button" ng-if="vm.activity.id"
+        <button type="button" ng-if="vm.activityPackage.id"
                 ng-click="vm.update()"
                 ng-disabled="!vm.activityPackageForm.$dirty || vm.activityPackageForm.$invalid"
                 class="btn btn-default btn-sm btn-primary">
             <span class="glyphicon glyphicon-save"></span> update
         </button>
-        <button type="button" ng-if="!vm.activity.id"
+        <button type="button" ng-if="!vm.activityPackage.id"
                 ng-click="vm.create()"
                 ng-disabled="!vm.activityPackageForm.$dirty || vm.activityPackageForm.$invalid"
                 class="btn btn-default btn-sm btn-primary">
