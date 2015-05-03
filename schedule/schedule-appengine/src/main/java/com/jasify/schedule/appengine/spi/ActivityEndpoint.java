@@ -42,6 +42,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
         transformers = {
                 /* one per line in alphabetical order to avoid merge conflicts */
                 JasAccountTransformer.class,
+                JasActivityPackageTransformer.class,
                 JasActivityTransformer.class,
                 JasActivityTypeTransformer.class,
                 JasGroupTransformer.class,
@@ -304,7 +305,7 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackage.query", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.GET)
+    @ApiMethod(name = "activityPackages.query", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityPackage> getActivityPackages(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         try {
             return ActivityServiceFactory.getActivityService().getActivityPackages(organizationId);
@@ -313,7 +314,7 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackage.get", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    @ApiMethod(name = "activityPackages.get", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public ActivityPackage getActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         checkFound(id);
         try {
@@ -323,7 +324,7 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackage.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, ActivityPackage activityPackage) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdminOrOrgMember(caller, createFromActivityPackageId(id));
         checkFound(id);
@@ -337,7 +338,7 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackage.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
+    @ApiMethod(name = "activityPackages.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
     public void addActivityToActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
         try {
@@ -347,7 +348,7 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackage.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    @ApiMethod(name = "activityPackages.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
         try {
@@ -357,7 +358,7 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackage.add", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.POST)
+    @ApiMethod(name = "activityPackages.add", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.POST)
     public ActivityPackage addActivityPackage(User caller, JasAddActivityPackageRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         ActivityPackage activityPackage = checkFound(request.getActivityPackage(), "request.activityPackage == NULL");
         Key organizationId = checkFound(activityPackage.getOrganizationRef().getKey(), "request.activityPackage.organization == NULL");
@@ -379,7 +380,7 @@ public class ActivityEndpoint {
         }
     }
 
-    @ApiMethod(name = "activityPackage.remove", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    @ApiMethod(name = "activityPackages.remove", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
         checkFound(id);

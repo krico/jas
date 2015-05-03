@@ -35,6 +35,7 @@ import java.util.List;
         transformers = {
                 /* one per line in alphabetical order to avoid merge conflicts */
                 JasAccountTransformer.class,
+                JasActivityPackageTransformer.class,
                 JasActivityTransformer.class,
                 JasActivityTypeTransformer.class,
                 JasGroupTransformer.class,
