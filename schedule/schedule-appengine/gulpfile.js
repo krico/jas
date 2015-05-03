@@ -121,7 +121,12 @@ function clientJs(cb) {
         versionInfo.timestamp = argv.buildTimestamp;
         versionInfo.version = argv.buildVersion;
     }
-    gutil.log('Replacing version information\n' + gutil.colors.cyan(require('util').inspect(versionInfo)));
+    var vi = 'number: ' + gutil.colors.cyan(versionInfo.number) +
+        ', branch: ' + gutil.colors.cyan(versionInfo.branch) +
+        ', timestamp: ' + gutil.colors.cyan(versionInfo.timestamp) +
+        ', version: ' + gutil.colors.cyan(versionInfo.version);
+
+    gutil.log('Version information ' + vi);
 
     return gulp.src(paths.js)
         .pipe(plumber())
