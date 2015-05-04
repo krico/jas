@@ -76,6 +76,25 @@ public class TransactionOperatorTest {
         fail("Should have thrown");
     }
 
+    @Test
+    public void testExecuteSilently() {
+        TestOperation operation = new TestOperation();
+        operation.concurrencyExceptionCount = 2;
+        Key key = TransactionOperator.executeQuietly(operation);
+        assertNotNull(key);
+        Entity entity = Datastore.get(key);
+        assertNotNull(entity);
+        Number executeCount = (Number) entity.getProperty("executeCount");
+        assertEquals(3, executeCount.intValue());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testExecuteSilentlyPropagates() {
+        TestOperation operation = new TestOperation();
+        operation.toThrow = new IllegalArgumentException();
+        TransactionOperator.executeQuietly(operation);
+    }
+
     private void assertExecute(TestOperation operation, int expectedExecutions) throws TransactionOperationException {
         TransactionOperator.execute(operation);
         assertEquals(expectedExecutions, operation.executeCount);
@@ -87,14 +106,14 @@ public class TransactionOperatorTest {
         assertEquals(expectedExecutions, executeCount.intValue());
     }
 
-    private class TestOperation implements TransactionOperation {
+    private class TestOperation implements TransactionOperation<Key> {
         private Exception toThrow;
         private int concurrencyExceptionCount = 0;
         private int executeCount = 0;
         private Key id;
 
         @Override
-        public void execute(Transaction tx) throws Exception {
+        public Key execute(Transaction tx) throws Exception {
             ++executeCount;
             Entity entity = new Entity(name.getMethodName());
             entity.setProperty("executeCount", executeCount);
@@ -104,6 +123,7 @@ public class TransactionOperatorTest {
             if (toThrow != null) throw toThrow;
             tx.commit();
             this.id = aux;
+            return this.id;
         }
     }
 }

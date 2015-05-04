@@ -40,8 +40,16 @@ public final class TransactionOperator {
 
     }
 
-    public static void execute(TransactionOperation operation) throws ConcurrentModificationException, TransactionOperationException {
-        Singleton.INSTANCE.executeImpl(operation);
+    public static <T> T executeQuietly(TransactionOperation<T> operation) throws ConcurrentModificationException {
+        try {
+            return execute(operation);
+        } catch (TransactionOperationException e) {
+            throw Throwables.propagate(e.getCause());
+        }
+    }
+
+    public static <T> T execute(TransactionOperation<T> operation) throws ConcurrentModificationException, TransactionOperationException {
+        return Singleton.INSTANCE.executeImpl(operation);
     }
 
     private static void sleep(long ms) {
@@ -52,17 +60,16 @@ public final class TransactionOperator {
         }
     }
 
-    private void executeImpl(TransactionOperation operation) throws ConcurrentModificationException, TransactionOperationException {
+    private <T> T executeImpl(TransactionOperation<T> operation) throws ConcurrentModificationException, TransactionOperationException {
         int retries = retryCount;
         while (true) {
             Transaction tx = Datastore.beginTransaction();
             try {
-                operation.execute(tx);
-                break;
+                return operation.execute(tx);
             } catch (ConcurrentModificationException cme) {
                 if (retries == 0) throw cme;
                 --retries;
-                log.debug("ConcurrentModificationException, retry {} of {} will sleep {} ms", (retryCount - retries), retryCount, retrySleepMillis);
+                log.info("ConcurrentModificationException, retry {} of {} will sleep {} ms", (retryCount - retries), retryCount, retrySleepMillis);
                 sleep(retrySleepMillis);
             } catch (Exception e) {
                 log.debug("Exception executing operation", e);

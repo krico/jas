@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.activity;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
@@ -9,10 +10,7 @@ import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.OperationException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -136,30 +134,37 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Key addActivityType(Organization organization, ActivityType activityType) throws EntityNotFoundException, UniqueConstraintException, FieldValueException {
-        String name = StringUtils.trimToNull(activityType.getName());
+    public Key addActivityType(Organization organization, final ActivityType activityType) throws EntityNotFoundException, UniqueConstraintException, FieldValueException {
+        final String name = StringUtils.trimToNull(activityType.getName());
         if (name == null) {
             throw new FieldValueException("ActivityType.name");
         }
 
         Organization dbOrganization = getOrganization(organization.getId());
 
-        Key organizationId = dbOrganization.getId();
-        Transaction tx = Datastore.beginTransaction();
+        final Key organizationId = dbOrganization.getId();
+
         try {
-            if (!isActivityTypeNameUnique(tx, organizationId, name)) {
-                throw new UniqueConstraintException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
-            }
-            activityType.setId(Datastore.allocateId(organizationId, activityTypeMeta));
+            return TransactionOperator.execute(new TransactionOperation<Key>() {
+                @Override
+                public Key execute(Transaction tx) throws Exception {
+                    if (!isActivityTypeNameUnique(tx, organizationId, name)) {
+                        throw new UniqueConstraintException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
+                    }
+                    activityType.setId(Datastore.allocateId(organizationId, activityTypeMeta));
 
-            activityType.getOrganizationRef().setKey(organizationId);
+                    activityType.getOrganizationRef().setKey(organizationId);
 
-            Key ret = Datastore.put(tx, activityType);
-            tx.commit();
-            return ret;
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
+                    Key ret = Datastore.put(tx, activityType);
+                    tx.commit();
+                    return ret;
+                }
+            });
+        } catch (TransactionOperationException e) {
+            Throwables.propagateIfInstanceOf(e.getCause(), EntityNotFoundException.class);
+            Throwables.propagateIfInstanceOf(e.getCause(), UniqueConstraintException.class);
+            Throwables.propagateIfInstanceOf(e.getCause(), FieldValueException.class);
+            throw Throwables.propagate(e.getCause());
         }
     }
 
@@ -216,30 +221,38 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public ActivityType updateActivityType(ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException {
-        String name = StringUtils.trimToNull(activityType.getName());
+    public ActivityType updateActivityType(final ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException {
+        final String name = StringUtils.trimToNull(activityType.getName());
         if (name == null) {
             throw new FieldValueException("ActivityType.name");
         }
-        ActivityType dbActivityType = getActivityType(activityType.getId());
-        Transaction tx = Datastore.beginTransaction();
+        final ActivityType dbActivityType = getActivityType(activityType.getId());
+
         try {
-            if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), name)) {
-                dbActivityType.setName(name);
-                if (!isActivityTypeNameUnique(tx, dbActivityType.getOrganizationRef().getKey(), name)) {
-                    throw new UniqueConstraintException("ActivityType.name=" + name);
+            TransactionOperator.execute(new TransactionOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws Exception {
+                    if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), name)) {
+                        dbActivityType.setName(name);
+                        if (!isActivityTypeNameUnique(tx, dbActivityType.getOrganizationRef().getKey(), name)) {
+                            throw new UniqueConstraintException("ActivityType.name=" + name);
+                        }
+                    }
+                    dbActivityType.setDescription(activityType.getDescription());
+                    dbActivityType.setPrice(activityType.getPrice());
+                    dbActivityType.setCurrency(activityType.getCurrency());
+                    dbActivityType.setLocation(activityType.getLocation());
+                    dbActivityType.setMaxSubscriptions(activityType.getMaxSubscriptions());
+                    Datastore.put(tx, dbActivityType);
+                    tx.commit();
+                    return null;
                 }
-            }
-            dbActivityType.setDescription(activityType.getDescription());
-            dbActivityType.setPrice(activityType.getPrice());
-            dbActivityType.setCurrency(activityType.getCurrency());
-            dbActivityType.setLocation(activityType.getLocation());
-            dbActivityType.setMaxSubscriptions(activityType.getMaxSubscriptions());
-            Datastore.put(tx, dbActivityType);
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
+            });
+        } catch (TransactionOperationException e) {
+            Throwables.propagateIfInstanceOf(e.getCause(), EntityNotFoundException.class);
+            Throwables.propagateIfInstanceOf(e.getCause(), FieldValueException.class);
+            Throwables.propagateIfInstanceOf(e.getCause(), UniqueConstraintException.class);
+            throw Throwables.propagate(e);
         }
 
         return dbActivityType;
@@ -280,43 +293,43 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
-    private List<Key> addActivityRepeatTypeDaily(Activity activity, RepeatDetails repeatDetails, ActivityType activityType) throws EntityNotFoundException, FieldValueException {
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
+    private List<Key> addActivityRepeatTypeDaily(final Activity activity, final RepeatDetails repeatDetails, final ActivityType activityType) throws EntityNotFoundException, FieldValueException {
 
-        List<Key> result = null;
-        Transaction tx = Datastore.beginTransaction();
-        try {
-            repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
-            Datastore.put(tx, repeatDetails);
-            activity.setRepeatDetailsRef(repeatDetails);
-            List<Activity> activities = new ArrayList<>();
-            while (activities.size() < MaximumRepeatCounter) {
-                Activity newActivity = new Activity(activityType);
-                BeanUtil.copyProperties(newActivity, activity);
-                newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
-                newActivity.setStart(start.toDate());
-                newActivity.setFinish(finish.toDate());
-                activities.add(newActivity);
+        repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
+        activity.setRepeatDetails(repeatDetails);
 
-                start = start.plusDays(repeatDetails.getRepeatEvery());
-                finish = finish.plusDays(repeatDetails.getRepeatEvery());
+        return TransactionOperator.executeQuietly(new TransactionOperation<List<Key>>() {
+            @Override
+            public List<Key> execute(Transaction tx) throws Exception {
+                DateTime start = new DateTime(activity.getStart());
+                DateTime finish = new DateTime(activity.getFinish());
+                Datastore.put(tx, repeatDetails);
+                List<Activity> activities = new ArrayList<>();
+                while (activities.size() < MaximumRepeatCounter) {
+                    Activity newActivity = new Activity(activityType);
+                    BeanUtil.copyProperties(newActivity, activity);
+                    newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
+                    newActivity.setStart(start.toDate());
+                    newActivity.setFinish(finish.toDate());
+                    activities.add(newActivity);
 
-                if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
-                    break;
-                if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
-                    break;
+                    start = start.plusDays(repeatDetails.getRepeatEvery());
+                    finish = finish.plusDays(repeatDetails.getRepeatEvery());
+
+                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
+                        break;
+                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
+                        break;
+                }
+
+                if (!activities.isEmpty()) {
+                    List<Key> ret = Datastore.put(tx, activities);
+                    tx.commit();
+                    return ret;
+                }
+                return null;
             }
-
-            if (!activities.isEmpty()) {
-                result = Datastore.put(tx, activities);
-                tx.commit();
-            }
-        } finally {
-            if (tx.isActive()) tx.rollback();
-        }
-
-        return result;
+        });
     }
 
     private Set<Integer> getRepeatDays(RepeatDetails repeatDetails) {
@@ -332,72 +345,75 @@ class DefaultActivityService implements ActivityService {
     }
 
     // TODO: Computer says this is too complex so should get broken up
-    private List<Key> addActivityRepeatTypeWeekly(Activity activity, RepeatDetails repeatDetails, ActivityType activityType) throws EntityNotFoundException, FieldValueException {
-        Set<Integer> repeatDays = getRepeatDays(repeatDetails);
+    private List<Key> addActivityRepeatTypeWeekly(final Activity activity, final RepeatDetails repeatDetails, final ActivityType activityType) throws EntityNotFoundException, FieldValueException {
+        final Set<Integer> repeatDays = getRepeatDays(repeatDetails);
         if (repeatDays.isEmpty()) throw new FieldValueException("RepeatDetails.repeatDays");
 
-        int repeatEvery = 0;
+        final int repeatEvery;
         if (repeatDetails.getRepeatEvery() > 1) {
             repeatEvery = (repeatDetails.getRepeatEvery() - 1) * 7;
+        } else {
+            repeatEvery = 0;
         }
 
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
 
-        // Find the next chosen day
-        for (int day = 0; day < 7; day++) {
-            if (repeatDays.contains(start.getDayOfWeek())) {
-                break;
-            }
-            start = start.plusDays(1);
-            finish = finish.plusDays(1);
-        }
+        repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
+        activity.setRepeatDetails(repeatDetails);
 
-        List<Key> result = null;
-        Transaction tx = Datastore.beginTransaction();
-        try {
-            repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
-            Datastore.put(tx, repeatDetails);
-            activity.setRepeatDetailsRef(repeatDetails);
+        return TransactionOperator.executeQuietly(new TransactionOperation<List<Key>>() {
+            @Override
+            public List<Key> execute(Transaction tx) throws Exception {
+                DateTime start = new DateTime(activity.getStart());
+                DateTime finish = new DateTime(activity.getFinish());
 
-            List<Activity> activities = new ArrayList<>();
-            boolean repeatCompleted = false;
-            while (!repeatCompleted && activities.size() < MaximumRepeatCounter) {
-                // Run through 7 days per week
-                for (int day = 0; day < 7 && !repeatCompleted; day++) {
-                    // Its one of the chosen days
+                // Find the next chosen day
+                for (int day = 0; day < 7; day++) {
                     if (repeatDays.contains(start.getDayOfWeek())) {
-                        Activity newActivity = new Activity(activityType);
-                        BeanUtil.copyProperties(newActivity, activity);
-                        newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
-                        newActivity.setStart(start.toDate());
-                        newActivity.setFinish(finish.toDate());
-                        activities.add(newActivity);
+                        break;
                     }
-                    // Move to the next day
                     start = start.plusDays(1);
                     finish = finish.plusDays(1);
-
-                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
-                        repeatCompleted = true;
-                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
-                        repeatCompleted = true;
                 }
-                // Jump to next period
-                if (repeatEvery > 0) {
-                    start = start.plusDays(repeatEvery);
-                    finish = finish.plusDays(repeatEvery);
-                }
-            }
+                Datastore.put(tx, repeatDetails);
 
-            if (!activities.isEmpty()) {
-                result = Datastore.put(tx, activities);
-                tx.commit();
+                List<Activity> activities = new ArrayList<>();
+                boolean repeatCompleted = false;
+                while (!repeatCompleted && activities.size() < MaximumRepeatCounter) {
+                    // Run through 7 days per week
+                    for (int day = 0; day < 7 && !repeatCompleted; day++) {
+                        // Its one of the chosen days
+                        if (repeatDays.contains(start.getDayOfWeek())) {
+                            Activity newActivity = new Activity(activityType);
+                            BeanUtil.copyProperties(newActivity, activity);
+                            newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
+                            newActivity.setStart(start.toDate());
+                            newActivity.setFinish(finish.toDate());
+                            activities.add(newActivity);
+                        }
+                        // Move to the next day
+                        start = start.plusDays(1);
+                        finish = finish.plusDays(1);
+
+                        if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
+                            repeatCompleted = true;
+                        if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
+                            repeatCompleted = true;
+                    }
+                    // Jump to next period
+                    if (repeatEvery > 0) {
+                        start = start.plusDays(repeatEvery);
+                        finish = finish.plusDays(repeatEvery);
+                    }
+                }
+
+                if (!activities.isEmpty()) {
+                    List<Key> tmp = Datastore.put(tx, activities);
+                    tx.commit();
+                    return tmp;
+                }
+                return null;
             }
-        } finally {
-            if (tx.isActive()) tx.rollback();
-        }
-        return result;
+        });
     }
 
     @Nonnull
@@ -494,75 +510,79 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public ActivityPackageExecution subscribe(Key userId, Key activityPackageId, List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
+    public ActivityPackageExecution subscribe(final Key userId, final Key activityPackageId, final List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
         Preconditions.checkState(!activityIds.isEmpty(), "Need at least 1 activity to subscribe");
-        User user = getUser(userId);
-        List<ActivityPackageSubscription> subscriptions = new ArrayList<>(activityIds.size());
-
-        ActivityPackageExecution execution = new ActivityPackageExecution();
-
-        //I will implement this method with transactions, so we can use it as a reference for the other subscribe
-
-        Transaction tx = Datastore.beginTransaction();
+        final User user = getUser(userId);
         try {
-            ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
-            if (activityPackage.getItemCount() < activityIds.size()) {
-                throw new OperationException("ActivityPackage[" + activityPackage.getId() + "] itemCount=" +
-                        activityPackage.getItemCount() + ", activities.size=" + activityIds.size());
-            }
-            int executionCount = activityPackage.getExecutionCount();
-            if (activityPackage.getMaxExecutions() > 0 && executionCount >= activityPackage.getMaxExecutions()) {
-                throw new OperationException("ActivityPackage[" + activityPackage.getId() + "] has reached maxExecutions=" + executionCount);
-            }
-            activityPackage.setExecutionCount(executionCount + 1);
+            //I will implement this method with transactions, so we can use it as a reference for the other subscribe
+            return TransactionOperator.execute(new TransactionOperation<ActivityPackageExecution>() {
+                @Override
+                public ActivityPackageExecution execute(Transaction tx) throws Exception {
+                    ActivityPackageExecution execution = new ActivityPackageExecution();
 
-            execution.setId(Datastore.allocateId(userId, activityPackageExecutionMeta));
-            execution.getUserRef().setKey(userId);
-            execution.getActivityPackageRef().setKey(activityPackageId);
+                    ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
+                    if (activityPackage.getItemCount() < activityIds.size()) {
+                        throw new OperationException("ActivityPackage[" + activityPackage.getId() + "] itemCount=" +
+                                activityPackage.getItemCount() + ", activities.size=" + activityIds.size());
+                    }
+                    int executionCount = activityPackage.getExecutionCount();
+                    if (activityPackage.getMaxExecutions() > 0 && executionCount >= activityPackage.getMaxExecutions()) {
+                        throw new OperationException("ActivityPackage[" + activityPackage.getId() + "] has reached maxExecutions=" + executionCount);
+                    }
+                    activityPackage.setExecutionCount(executionCount + 1);
 
-            Datastore.put(tx, activityPackage, execution);
+                    execution.setId(Datastore.allocateId(userId, activityPackageExecutionMeta));
+                    execution.getUserRef().setKey(userId);
+                    execution.getActivityPackageRef().setKey(activityPackageId);
 
-            Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
+                    Datastore.put(tx, activityPackage, execution);
 
-            List<Key> packageActivityKeys = Lists.transform(Datastore
-                    .query(tx, activityPackageActivityMeta, organizationId)
-                    .filter(activityPackageActivityMeta.activityPackageRef.equal(activityPackageId))
-                    .asList(), APA_TO_ACTIVITY_KEY_FUNCTION);
+                    Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
 
-            for (Key activityId : activityIds) {
-                Preconditions.checkArgument(packageActivityKeys.contains(activityId));
-            }
+                    List<Key> packageActivityKeys = Lists.transform(Datastore
+                            .query(tx, activityPackageActivityMeta, organizationId)
+                            .filter(activityPackageActivityMeta.activityPackageRef.equal(activityPackageId))
+                            .asList(), APA_TO_ACTIVITY_KEY_FUNCTION);
 
-            List<Activity> activities = getActivities(tx, activityIds);
-            for (Activity activity : activities) {
-                int subscriptionCount = activity.getSubscriptionCount();
-                if (activity.getMaxSubscriptions() > 0 && subscriptionCount >= activity.getMaxSubscriptions()) {
-                    throw new OperationException("Activity[" + activity.getId() + "] fully subscribed");
+                    for (Key activityId : activityIds) {
+                        Preconditions.checkArgument(packageActivityKeys.contains(activityId));
+                    }
+
+                    List<Activity> activities = getActivities(tx, activityIds);
+                    for (Activity activity : activities) {
+                        int subscriptionCount = activity.getSubscriptionCount();
+                        if (activity.getMaxSubscriptions() > 0 && subscriptionCount >= activity.getMaxSubscriptions()) {
+                            throw new OperationException("Activity[" + activity.getId() + "] fully subscribed");
+                        }
+                        activity.setSubscriptionCount(subscriptionCount + 1);
+
+                        if (isSubscribed(tx, user, activity)) {
+                            throw new UniqueConstraintException("User already subscribed to activity: " + activity.getId());
+                        }
+
+                        ActivityPackageSubscription subscription = new ActivityPackageSubscription();
+                        subscription.setId(Datastore.allocateId(userId, subscriptionMeta));
+                        subscription.getActivityPackageExecutionRef().setKey(execution.getId());
+                        subscription.getActivityRef().setKey(activity.getId());
+                        subscription.getUserRef().setKey(userId);
+
+                        Datastore.put(tx, activity, subscription);
+                    }
+
+                    tx.commit();
+                    return execution;
                 }
-                activity.setSubscriptionCount(subscriptionCount + 1);
-
-                if (isSubscribed(tx, user, activity)) {
-                    throw new UniqueConstraintException("User already subscribed to activity: " + activity.getId());
-                }
-
-                ActivityPackageSubscription subscription = new ActivityPackageSubscription();
-                subscription.setId(Datastore.allocateId(userId, subscriptionMeta));
-                subscription.getActivityPackageExecutionRef().setKey(execution.getId());
-                subscription.getActivityRef().setKey(activity.getId());
-                subscription.getUserRef().setKey(userId);
-
-                Datastore.put(tx, activity, subscription);
-                subscriptions.add(subscription);
+            });
+        } catch (TransactionOperationException e) {
+            if (e.getCause() instanceof EntityNotFoundRuntimeException) {
+                throw new EntityNotFoundException("Not found", e.getCause());
             }
-
-            tx.commit();
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Not found", e);
-        } finally {
-            if (tx.isActive()) tx.rollback();
+            Throwables.propagateIfInstanceOf(e.getCause(), EntityNotFoundException.class);
+            Throwables.propagateIfInstanceOf(e.getCause(), UniqueConstraintException.class);
+            Throwables.propagateIfInstanceOf(e.getCause(), OperationException.class);
+            Throwables.propagateIfInstanceOf(e.getCause(), IllegalArgumentException.class);
+            throw Throwables.propagate(e.getCause());
         }
-
-        return execution;
     }
 
     private boolean isSubscribed(Transaction tx, User user, Activity activity) {
@@ -625,22 +645,22 @@ class DefaultActivityService implements ActivityService {
         activities = Preconditions.checkNotNull(activities);
 
         activityPackage.setId(Datastore.allocateId(organizationId, activityPackageMeta));
-        List<Object> models = new ArrayList<>();
+        final List<Object> models = new ArrayList<>();
         models.add(activityPackage);
         for (Activity activity : activities) {
             ActivityPackageActivity junction = new ActivityPackageActivity(activityPackage, activity);
             junction.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
             models.add(junction);
         }
+        TransactionOperator.executeQuietly(new TransactionOperation<Void>() {
+            @Override
+            public Void execute(Transaction tx) throws Exception {
+                Datastore.put(tx, models);
+                tx.commit();
+                return null;
+            }
+        });
 
-        Transaction tx = Datastore.beginTransaction();
-        try {
-            Datastore.put(tx, models);
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
-        }
         activityPackage.getActivityPackageActivityListRef().clear();
         return activityPackage.getId();
     }
@@ -673,33 +693,38 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public void addActivityToActivityPackage(Key activityPackageId, Key activityId) throws EntityNotFoundException {
-        Transaction tx = Datastore.beginTransaction();
+    public void addActivityToActivityPackage(final Key activityPackageId, final Key activityId) throws EntityNotFoundException {
         try {
-            Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackageId).getOrganizationRef().getKey();
+            TransactionOperator.execute(new TransactionOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws Exception {
+                    Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackageId).getOrganizationRef().getKey();
 
-            ActivityPackageActivity activityPackageActivity = Datastore
-                    .query(tx, activityPackageActivityMeta, organizationId)
-                    .filter(new CompositeCriterion(activityPackageActivityMeta,
-                            Query.CompositeFilterOperator.AND,
-                            activityPackageActivityMeta.activityPackageRef.equal(activityPackageId),
-                            activityPackageActivityMeta.activityRef.equal(activityId)))
-                    .asSingle();
+                    ActivityPackageActivity activityPackageActivity = Datastore
+                            .query(tx, activityPackageActivityMeta, organizationId)
+                            .filter(new CompositeCriterion(activityPackageActivityMeta,
+                                    Query.CompositeFilterOperator.AND,
+                                    activityPackageActivityMeta.activityPackageRef.equal(activityPackageId),
+                                    activityPackageActivityMeta.activityRef.equal(activityId)))
+                            .asSingle();
 
-            if (activityPackageActivity == null) {
-                activityPackageActivity = new ActivityPackageActivity();
-                activityPackageActivity.getActivityRef().setKey(activityId);
-                activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
-                activityPackageActivity.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
-                Datastore.put(tx, activityPackageActivity);
-            } else {
-                log.warn("Tried to add already existent ap: {} / a: {}", activityPackageId, activityId);
-            }
+                    if (activityPackageActivity == null) {
+                        activityPackageActivity = new ActivityPackageActivity();
+                        activityPackageActivity.getActivityRef().setKey(activityId);
+                        activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
+                        activityPackageActivity.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
+                        Datastore.put(tx, activityPackageActivity);
+                    } else {
+                        log.warn("Tried to add already existent ap: {} / a: {}", activityPackageId, activityId);
+                    }
 
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (TransactionOperationException e) {
+            Throwables.propagateIfInstanceOf(e, EntityNotFoundException.class);
+            throw Throwables.propagate(e);
         }
     }
 
@@ -710,30 +735,34 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public void removeActivityFromActivityPackage(Key activityPackageId, Key activityId) throws EntityNotFoundException {
-        Transaction tx = Datastore.beginTransaction();
+    public void removeActivityFromActivityPackage(final Key activityPackageId, final Key activityId) throws EntityNotFoundException {
         try {
+            TransactionOperator.execute(new TransactionOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws Exception {
+                    Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackageId).getOrganizationRef().getKey();
 
-            Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackageId).getOrganizationRef().getKey();
+                    ActivityPackageActivity activityPackageActivity = Datastore
+                            .query(tx, activityPackageActivityMeta, organizationId)
+                            .filter(new CompositeCriterion(activityPackageActivityMeta,
+                                    Query.CompositeFilterOperator.AND,
+                                    activityPackageActivityMeta.activityPackageRef.equal(activityPackageId),
+                                    activityPackageActivityMeta.activityRef.equal(activityId)))
+                            .asSingle();
 
-            ActivityPackageActivity activityPackageActivity = Datastore
-                    .query(tx, activityPackageActivityMeta, organizationId)
-                    .filter(new CompositeCriterion(activityPackageActivityMeta,
-                            Query.CompositeFilterOperator.AND,
-                            activityPackageActivityMeta.activityPackageRef.equal(activityPackageId),
-                            activityPackageActivityMeta.activityRef.equal(activityId)))
-                    .asSingle();
+                    if (activityPackageActivity == null) {
+                        log.warn("Tried to remove non existent ap: {} / a: {}", activityPackageId, activityId);
+                    } else {
+                        Datastore.delete(tx, activityPackageActivity.getId());
+                    }
 
-            if (activityPackageActivity == null) {
-                log.warn("Tried to remove non existent ap: {} / a: {}", activityPackageId, activityId);
-            } else {
-                Datastore.delete(tx, activityPackageActivity.getId());
-            }
-
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (TransactionOperationException e) {
+            Throwables.propagateIfInstanceOf(e, EntityNotFoundException.class);
+            throw Throwables.propagate(e);
         }
     }
 

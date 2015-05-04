@@ -64,7 +64,7 @@ public final class TestHelper {
     }
 
     public static LocalDatastoreServiceTestConfig createDatastoreServiceTestConfig() {
-        return new LocalDatastoreServiceTestConfig().setDefaultHighRepJobPolicyUnappliedJobPercentage(0.01f);
+        return new LocalDatastoreServiceTestConfig().setDefaultHighRepJobPolicyUnappliedJobPercentage(0.1f);
     }
 
     public static void assertUtilityClassWellDefined(Class<?> clazz) throws Exception {
