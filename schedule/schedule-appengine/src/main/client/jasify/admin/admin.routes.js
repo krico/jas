@@ -209,6 +209,39 @@
                     }
                 }
             })
+            .when('/admin/activity-packages/:organizationId?', {
+                templateUrl: 'admin/activity-package/admin-activity-packages.html',
+                controller: 'AdminActivityPackagesController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.adminOrOrgMember().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    },
+                    activityPackages: /*@ngInject*/ function ($q, $route, Allow, ActivityPackage) {
+
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.organizationId) {
+                                return ActivityPackage.query($route.current.params.organizationId);
+                            } else {
+                                return {items: []};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
             .when('/admin/activity-package/:id?', {
                 templateUrl: 'admin/activity-package/admin-activity-package.html',
                 controller: 'AdminActivityPackageController',

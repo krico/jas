@@ -14,8 +14,9 @@ import java.util.ConcurrentModificationException;
  * @since 04/05/15.
  */
 public final class TransactionOperator {
-    public static final int DEFAULT_RETRY_COUNT = 5;
-    public static final long DEFAULT_RETRY_SLEEP_MILLIS = 10;
+    public static final int DEFAULT_RETRY_COUNT = 10;
+    public static final long DEFAULT_RETRY_SLEEP_MILLIS = 50;
+
     private static final Logger log = LoggerFactory.getLogger(TransactionOperator.class);
 
     private final int retryCount;

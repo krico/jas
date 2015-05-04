@@ -9,4 +9,9 @@
         <property name="created" direction="desc"/>
     </datastore-index>
 
+    <datastore-index kind="ActivityPackage" ancestor="false" source="manual">
+        <property name="organizationRef" direction="asc"/>
+        <property name="created" direction="desc"/>
+    </datastore-index>
+
 </datastore-indexes>

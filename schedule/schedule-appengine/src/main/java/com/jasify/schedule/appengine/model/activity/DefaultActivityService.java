@@ -211,6 +211,7 @@ class DefaultActivityService implements ActivityService {
     public List<ActivityPackage> getActivityPackages(Key organizationId) throws EntityNotFoundException {
         return Datastore.query(activityPackageMeta)
                 .filter(activityPackageMeta.organizationRef.equal(organizationId))
+                .sort(activityPackageMeta.created.desc)
                 .asList();
     }
 
@@ -661,7 +662,6 @@ class DefaultActivityService implements ActivityService {
             }
         });
 
-        activityPackage.getActivityPackageActivityListRef().clear();
         return activityPackage.getId();
     }
 

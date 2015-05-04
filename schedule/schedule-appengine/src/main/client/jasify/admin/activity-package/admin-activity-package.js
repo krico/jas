@@ -102,6 +102,10 @@
         }
 
         function create() {
+            if (!(vm.selectedActivities && vm.selectedActivities.length > 0)) {
+                vm.alert('warning', 'You must select at least one activity');
+                return;
+            }
             vm.activityPackage.organizationId = vm.organization.id;
 
             ActivityPackage.add(vm.activityPackage, vm.selectedActivities).then(ok, fail);
