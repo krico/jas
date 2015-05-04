@@ -11,10 +11,10 @@
     "karmaConfig": "src/test/client/karma.conf.ci.js"
   },
   "css": [
-    "src/main/stylesheet/styles.less",
     "src/main/stylesheet/angular-material-theme.css",
     "src/main/client/jasify/directives/a-button/a-button.css",
-    "src/main/client/jasify/directives/mask/mask.css"
+    "src/main/client/jasify/directives/mask/mask.css",
+    "src/main/stylesheet/styles.less"
   ],
   "watchCss": [
     "src/main/client/jasify/directives/**/*.*",
@@ -37,6 +37,7 @@
       ],
       "main": [
         "jquery/dist/jquery.js",
+        "jquery-bootgrid/dist/jquery.bootgrid.js",
         "bootstrap/dist/js/bootstrap.js",
         "angular/angular.js",
         "angular-material/angular-material.js",
@@ -49,6 +50,7 @@
         "angular-sanitize/angular-sanitize.js",
         "angular-local-storage/dist/angular-local-storage.js",
         "angular-bootstrap/ui-bootstrap-tpls.js",
+        "angular-filter/dist/angular-filter.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
         "spin.js/spin.js",
         "angular-spinner/angular-spinner.js"
@@ -61,7 +63,9 @@
       "main": [
         "ionicons/css/ionicons.min.css",
         "font-awesome/css/font-awesome.min.css",
-        "angular-material/angular-material.css"
+        "angular-material/angular-material.css",
+        "bootstrap/dist/css/bootstrap.css",
+        "jquery-bootgrid/dist/jquery.bootgrid.css"
       ]
     }
   },

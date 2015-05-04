@@ -2,22 +2,24 @@
 
     angular.module('jasify.admin').controller('AdminUsersController', AdminUsersController);
 
-    function AdminUsersController($location, User) {
+    function AdminUsersController(jasPagerSettings, $location, User) {
         var vm = this;
 
         vm.sort = 'DESC';
         vm.page = 1;
+        vm.pagerSizes = jasPagerSettings.pages;
         vm._perPage = 10;
+        vm._searchBy = 'name';
         vm.total = 0;
         vm.numPages = 1;
         vm.maxSize = 4;
         vm.users = [];
-        vm.searchBy = 'name';
         vm.query = '';
         vm.regex = false;
 
+        vm.searchBy = searchBy;
         vm.pageChanged = pageChanged;
-        vm.typeChanged = typeChanged;
+        vm.searchByChanged = searchByChanged;
         vm.queryChanged = queryChanged;
         vm.perPage = perPage;
         vm.viewUser = viewUser;
@@ -34,12 +36,11 @@
                 q = RegExp.quote(vm.query);
             }
 
-            vm.users = [];
             User.query({
                 offset: vm._perPage * (vm.page-1),
                 limit: vm._perPage,
                 sort: vm.sort,
-                field: vm.searchBy,
+                field: vm.searchBy(),
                 query: q
             }).then(ok, fail);
 
@@ -54,7 +55,7 @@
             }
         }
 
-        function typeChanged() {
+        function searchByChanged() {
             if (vm.query) {
                 vm.queryChanged();
             }
@@ -77,6 +78,15 @@
                 }
             }
             return vm._perPage;
+
+        }
+
+        function searchBy(newValue) {
+            if (angular.isDefined(newValue)) {
+                vm._searchBy = newValue
+                vm.searchByChanged();
+            }
+            return vm._searchBy;
 
         }
 

@@ -2,7 +2,7 @@
 
     angular.module('jasifyWeb').controller('NavbarController', NavbarController);
 
-    function NavbarController($rootScope, $scope, $log, $location, $route, Auth, AUTH_EVENTS) {
+    function NavbarController($mdSidenav, $rootScope, $scope, $log, $location, $route, Auth, AUTH_EVENTS) {
         var vm = this;
 
         vm.path = "";
@@ -25,6 +25,16 @@
                 "href": "#/admin/users"
             }
         ];
+        vm.hide = hide;
+        vm.toggleList = toggleList;
+
+        function hide() {
+            $mdSidenav('left').close();
+        }
+
+        function toggleList() {
+            $mdSidenav('left').toggle();
+        }
 
         $scope.$on(AUTH_EVENTS.loginSuccess, vm.loginSucceeded);
         $scope.$on(AUTH_EVENTS.logoutSuccess, vm.logoutSucceeded);

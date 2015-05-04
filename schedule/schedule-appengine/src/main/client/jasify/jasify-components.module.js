@@ -18,4 +18,8 @@
             .setNotify(false, false);
     });
 
+    jasifyComponents.constant('jasPagerSettings', {
+        pages: [2,10,25,100]
+    });
+
 })(angular);

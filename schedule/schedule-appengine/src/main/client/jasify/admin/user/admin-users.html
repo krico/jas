@@ -1,73 +1,115 @@
-<div class="row">
-    <div class="col-sm-12">
-        <form name="usersForm" role="form" class="form-inline" novalidate>
-            <div class="form-group"><span class="form-control-static">search: </span></div>
-            <div class="form-group">
-                <label class="sr-only" for="searchBy">search by:</label>
-                <select id="searchBy" class="form-control input-sm" name="searchBy" ng-model="vm.searchBy"
-                        ng-change="vm.typeChanged()">
-                    <option>name</option>
-                    <option>email</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="sr-only" for="query">query</label>
-                <input id="query" type="text" class="form-control input-sm" placeholder="query"
-                       ng-model="vm.query" name="query" ng-model-options="{debounce:500}" ng-change="vm.queryChanged()">
-            </div>
-            <div class="checkbox">
-                <label class="input-sm">
-                    <input name="regex" ng-model="vm.regex" ng-change="vm.typeChanged()" type="checkbox"> regex
-                </label>
-            </div>
-            <div class="form-group">
-                <div class="input-group input-group-sm">
-                    <input id="perPage" name="perPage" pattern="^[1-9][0-9]*$" type="text"
-                           class="form-control text-right" size="2"
-                           ng-model="vm.perPage" ng-model-options="{debounce:500, getterSetter: true}">
-
-                    <div class="input-group-addon"> / page</div>
+<div class="card">
+    <div class="card-header">
+        <h2>Users List
+            <small>
+                Change user settings. Add new users. Use search settings to find users.
+            </small>
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="bootgrid-header container-fluid">
+            <div class="row">
+                <div class="actionBar">
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="search form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon glyphicon-search"></span>
+                            <input ng-change="vm.queryChanged()"
+                                   ng-model-options="{ debounce: 500 }"
+                                   ng-model="vm.query"
+                                   type="text" name="query" id="query" class="search-field form-control"
+                                   placeholder="Search">
+                        </div>
+                    </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="actions btn-group">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" value="">
+                                    <i class="input-helper"></i>
+                                    Regex
+                                </label>
+                            </div>
+                            <div class="dropdown btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                    <span class="dropdown-text">Search by: {{vm.searchBy()}}</span> <span
+                                        class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li ng-class="{ 'active': vm.searchBy() === 'name' }">
+                                        <a href prevent="click" ng-click="vm.searchBy('name')"
+                                           class="dropdown-item dropdown-item-button">Name</a>
+                                    </li>
+                                    <li ng-class="{ 'active': vm.searchBy() === 'email' }">
+                                        <a href prevent="click" ng-click="vm.searchBy('email')"
+                                           class="dropdown-item dropdown-item-button">Email</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="dropdown btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                    <span class="dropdown-text">Page Size: {{vm.perPage()}}</span> <span
+                                        class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li ng-repeat="size in vm.pagerSizes" ng-class="{ 'active': vm.perPage() === size }">
+                                        <a href prevent="click" ng-click="vm.perPage(size)"
+                                           class="dropdown-item dropdown-item-button">{{size}}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <pagination class="pagination-sm" max-size="vm.maxSize" ng-model="vm.page" ng-change="vm.pageChanged()"
-                            previous-text="&lt;" next-text="&gt;" first-text="&laquo;" last-text="&raquo;"
-                            total-items="vm.total" num-pages="vm.numPages" items-per-page="vm._perPage"
-                            boundary-links="true" rotate="true"></pagination>
-            </div>
-        </form>
+        </div>
     </div>
-    <div class="col-sm-12">
-        <span ng-hide="vm.total != -1" us-spinner=""></span>
-
-        <div class="table-responsive">
-            <table class="table table-hover" ng-hide="vm.total == -1">
-                <thead>
-                <tr>
-                    <th><a tooltip="add" href="#/admin/user"><span class="glyphicon glyphicon-plus"></span></a></th>
-                    <th>name</th>
-                    <th>email</th>
-                    <th>admin</th>
-                    <th>created</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="user in vm.users" ng-click="vm.viewUser(user.id)">
-                    <td>
-                        <button type="button" class="btn btn-link btn-xs" ng-click="vm.viewUser(user.id)"><span
-                                class="glyphicon glyphicon-edit"></span> {{user.numericId}}
-                        </button>
-                    </td>
-                    <td>{{user.name}}</td>
-                    <td>{{user.email}}</td>
-                    <td><span ng-if="user.admin" class="glyphicon glyphicon-check"></span></td>
-                    <td>{{user.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-                </tr>
-                <tr ng-if="vm.total == 0">
-                    <td colspan="4">No results found...</td>
-                </tr>
-                </tbody>
-            </table>
+    <div class="table-responsive">
+        <table id="users-list" class="table-vmiddle table table-striped table-hover">
+            <thead>
+            <tr>
+                <th>
+                    <a href="#/admin/user">
+                        <button title="Add User" class="btn bgm-teal btn-icon"><i class="md-icon md-icon-add"></i></button>
+                    </a>
+                </th>
+                </th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Admin</th>
+                <th>Created</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="user in vm.users track by user.id">
+                <td>
+                    <button title="Edit {{user.name}}" ng-click="vm.viewUser(user.id)" type="button" class="btn btn-primary"
+                            data-row-id="{{user.id}}">
+                        <span class="md-icon md-icon-edit"></span> Edit
+                    </button>
+                </td>
+                <td>{{user.name}}</td>
+                <td>{{user.email}}</td>
+                <td><span ng-if="user.admin" class="ion-checkmark-round"></span></td>
+                <td>{{user.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="bootgrid-footer container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <pagination max-size="vm.maxSize" ng-model="vm.page" ng-change="vm.pageChanged()"
+                            total-items="vm.total" num-pages="vm.numPages" items-per-page="vm.perPage()"
+                            boundary-links="true" rotate="true">
+                </pagination>
+            </div>
+            <div class="col-sm-6 infoBar">
+                <div class="infos">Showing {{vm.perPage() * (vm.page - 1) + 1}} to {{[vm.users.length * vm.page ,
+                    vm.total] | min}} of {{vm.total}} entries
+                </div>
+            </div>
         </div>
     </div>
 </div>
