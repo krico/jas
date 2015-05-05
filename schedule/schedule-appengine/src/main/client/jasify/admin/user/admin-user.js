@@ -19,7 +19,7 @@
             buttonDefaultText: 'Update Password',
             buttonSubmittingText: 'Saving...',
             buttonSuccessText: 'Password updated'
-        }
+        };
 
         vm.submitOptions = {
             buttonDefaultText: 'Save',

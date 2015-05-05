@@ -23,7 +23,7 @@
                     },
                     user: function(User, $route, $q) {
                         return $route.current.params.id ?
-                            User.get($route.current.params.id) : {}
+                            User.get($route.current.params.id) : {};
                     }
                 }
             })

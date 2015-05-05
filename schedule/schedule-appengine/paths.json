@@ -17,7 +17,7 @@
     "src/main/stylesheet/styles.less"
   ],
   "watchCss": [
-    "src/main/client/jasify/directives/**/*.*",
+    "src/main/client/jasify/directives/**/*.css",
     "src/main/stylesheet/**/*.*"
   ],
   "html": [

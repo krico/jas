@@ -26,6 +26,7 @@ var argv = require('yargs').argv,
     templateCache = require('gulp-angular-templatecache'),
     plumber = require('gulp-plumber');
 
+var bowerInstalled = false;
 var paths = require('./dynamic-paths.js');
 gutil.log('Project version: ' + gutil.colors.cyan(paths.projectVersion));
 
@@ -86,6 +87,8 @@ function sym(cb) {
 }
 
 function bowerInstall(cb) {
+    if(bowerInstalled) {return cb();}
+    bowerInstalled = true;
     return bower();
 }
 

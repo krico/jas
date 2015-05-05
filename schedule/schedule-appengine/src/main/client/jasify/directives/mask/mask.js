@@ -4,7 +4,7 @@
     angular.module("jasifyComponents")
         .directive('mask', maskDirective)
         .factory('mask', maskService)
-        .config(['$httpProvider', utilsConfiguration])
+        .config(['$httpProvider', utilsConfiguration]);
 
     function maskDirective($rootScope, $window, mask) {
 
@@ -70,7 +70,7 @@
         }
 
         function maskToggle(showFlag) {
-            observer && observer({
+            if(observer) observer({
                 show: showFlag
             });
         }
