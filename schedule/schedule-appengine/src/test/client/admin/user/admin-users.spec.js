@@ -23,7 +23,7 @@ describe('AdminUsersController', function () {
     });
 
     it('pageChanged passes query parameters and reads X-Total', function () {
-        vm.searchBy = 'email';
+        vm.searchBy('email');
         vm.page = 2;
         vm.query = 'foo';
         vm._perPage = 5;
@@ -38,7 +38,7 @@ describe('AdminUsersController', function () {
         expect(vm.page).toEqual(2);
         expect(vm.total).toEqual(50);
         expect(User.query).toHaveBeenCalledWith({
-            field: vm.searchBy,
+            field: vm.searchBy(),
             offset: ((vm.page-1) * vm._perPage),
             limit: vm._perPage,
             sort: vm.sort,
@@ -46,23 +46,23 @@ describe('AdminUsersController', function () {
         });
     });
 
-    it('typeChanged does nothing if query is not set', function () {
+    it('searchByChanged does nothing if query is not set', function () {
 
-        vm.typeChanged();
+        vm.searchByChanged();
 
     });
 
-    it('typeChanged calls queryChanged if query is set', function () {
+    it('searchByChanged calls queryChanged if query is set', function () {
 
         vm.query = 'foo';
         spyOn(vm, 'queryChanged');
-        vm.typeChanged();
+        vm.searchByChanged();
         expect(vm.queryChanged).toHaveBeenCalled();
 
     });
 
     it('queryChanged moves back to page 1', function () {
-        vm.searchBy = 'email';
+        vm.searchBy('email');
         vm.page = 2;
         vm.query = 'foo';
         vm._perPage = 5;
@@ -79,7 +79,7 @@ describe('AdminUsersController', function () {
     });
 
     it('perPage queries and stays on same record', function () {
-        vm.searchBy = 'email';
+        vm.searchBy('email');
         vm.page = 2;
         vm.query = 'foo';
         vm._perPage = 4;

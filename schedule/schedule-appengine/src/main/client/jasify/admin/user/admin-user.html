@@ -1,128 +1,167 @@
-<div class="row">
-    <div class="col-sm-1">
-        <a href="#/admin/users"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
+<div class="card">
+    <div class="card-header" ng-if="vm.user.id">
+        <a class="back-button" href="#/admin/users">
+            <md-tooltip>
+                Back
+            </md-tooltip>
+            <button class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+        </a>
+        <h2>{{vm.user.name}}'s Profile
+            <small>Edit user setting or change password</small>
+        </h2>
     </div>
-    <div class="col-sm-10">
-        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+    <div class="card-header" ng-if="!vm.user.id">
+        <a class="back-button" href="#/admin/users">
+            <md-tooltip>
+                Back
+            </md-tooltip>
+            <button class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+        </a>
+        <h2>Create new user
+        </h2>
+    </div>
+    <div class="card-body card-padding">
+        <div ng-if="vm.created" class="alert alert-success alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            User <strong>{{vm.user.name}}</strong> succesfully created.
+        </div>
+
+        <ul class="tab-nav" role="tablist">
+            <li class="active">
+                <a prevent="click" href="#profile-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
+                    User Settings
+                </a>
+            </li>
+            <li ng-if="vm.user.id">
+                <a prevent="click" href="#password-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
+                    Password Management
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="profile-tab">
+                <form role="form" novalidate name="vm.forms.userForm"
+                      ng-submit="vm.forms.userForm.$valid && vm.submit()">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <div jas-has-feedback class="form-group fg-float">
+                                <div class="fg-line">
+                                    <input type="text"
+                                           autocomplete="false" class="form-control fg-input" id="name" name="name"
+                                           required
+                                           ng-disabled="vm.user.id" ng-model="vm.user.name">
+                                </div>
+                                <label class="fg-label">Name</label>
+                                <jas-feedback-icon-valid field="vm.forms.userForm.name"></jas-feedback-icon-valid>
+                                <jas-feedback-icon-invalid field="vm.forms.userForm.name" form="vm.forms.userForm"></jas-feedback-icon-invalid>
+                                <jas-error-help-block field="vm.forms.userForm.name" form="vm.forms.userForm">
+                                    <span ng-message="required">Name is required.</span>
+                                </jas-error-help-block>
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" ng-checked="vm.user.admin" name="type"
+                                           ng-model="vm.user.admin">
+                                    <i class="input-helper"></i>
+                                    Is Admin
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group fg-float" ng-if="!vm.user.id">
+                        <div class="fg-line">
+                            <input type="password" class="form-control fg-input" id="password" name="password"
+                                   required
+                                   ng-model="vm.user.password">
+                        </div>
+                        <label class="fg-label">Password</label>
+                        <jas-feedback-icon-valid field="vm.forms.userForm.password"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.forms.userForm.password" form="vm.forms.userForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.forms.userForm.password" form="vm.forms.userForm">
+                            <span ng-message="required">Password is required.</span>
+                        </jas-error-help-block>
+                    </div>
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
+                            <input type="email" class="form-control fg-input" id="email" name="email" ng-model="vm.user.email">
+                        </div>
+                        <label class="fg-label">Email</label>
+                        <jas-feedback-icon-valid field="vm.forms.userForm.email"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.forms.userForm.email" form="vm.forms.userForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.forms.userForm.email" form="vm.forms.userForm">
+                            <span ng-message="email">This email address is not valid.</span>
+                        </jas-error-help-block>
+                    </div>
+                    <div class="form-group fg-float">
+                        <div class="fg-line">
+                            <textarea class="form-control" rows="3"
+                                      placeholder="This is something about me...."></textarea>
+                        </div>
+                        <label class="fg-label">About me</label>
+                    </div>
+                    <div class="actions-group">
+                        <a-button type="submit" options="vm.submitOptions" is-submitting="vm.isSubmitting"
+                                  result="vm.submitResult"></a-button>
+                        <a-button type="button" ng-click="vm.reset()" options="vm.resetOptions"
+                                  is-submitting="vm.isReseting" result="vm.resetResult"></a-button>
+                    </div>
+                </form>
+            </div>
+            <div ng-if="vm.user.id" role="tabpanel" class="tab-pane" id="password-tab">
+                <form role="form" novalidate ng-submit="vm.forms.passwordForm.$valid && vm.changePassword()" name="vm.forms.passwordForm">
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
+                            <input type="password" class="form-control" id="ch.oldPassword" name="oldPassword"
+                                   ng-model="vm.pw.oldPassword"
+                                   required>
+                        </div>
+                        <label class="fg-label">Current Password</label>
+                        <jas-feedback-icon-valid field="vm.forms.passwordForm.oldPassword"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.forms.passwordForm.oldPassword" form="vm.passwordForm.userForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.forms.passwordForm.oldPassword" form="vm.forms.passwordForm">
+                            <span ng-message="required">Current password is required.</span>
+                        </jas-error-help-block>
+                    </div>
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
+                            <input type="password" class="form-control" id="ch.password" name="password"
+                                   ng-model="vm.pw.newPassword"
+                                   required>
+                        </div>
+                        <label class="fg-label">New Password</label>
+                        <jas-feedback-icon-valid field="vm.forms.passwordForm.password"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.forms.passwordForm.password" form="vm.passwordForm.userForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.forms.passwordForm.password" form="vm.forms.passwordForm">
+                            <span ng-message="required">Password is required.</span>
+                        </jas-error-help-block>
+                    </div>
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
+                            <input type="password"
+                                   ng-model-options="{ debounce: 500 }"
+                                   class="form-control" id="ch.confirm" name="confirm"
+                                   ng-model="vm.pw.confirmPassword" required
+                                   jas-confirm-field="vm.forms.passwordForm.password"
+                                   placeholder="confirm">
+                        </div>
+                        <label class="fg-label">Confirm New Password</label>
+                        <jas-feedback-icon-valid field="vm.forms.passwordForm.confirm"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.forms.passwordForm.confirm" form="vm.passwordForm.confirm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.forms.passwordForm.confirm" form="vm.forms.passwordForm">
+                            <span ng-message="required">Password confirmation is required.</span>
+                            <span ng-message="jasConfirmField">Passwords do not match.</span>
+                        </jas-error-help-block>
+                    </div>
+                    <div class="actions-group">
+                        <a-button type="submit"
+                                  options="vm.passwordResetOptions"
+                                  is-submitting="vm.isResetingPassword"
+                                  result="vm.resetPasswordResult"></a-button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
-<tabset>
-    <tab>
-        <tab-heading><span class="glyphicon glyphicon-user"></span> user</tab-heading>
-        <form class="form-horizontal" role="form" name="vm.forms.userForm" novalidate>
-            <div class="form-group"></div>
-            <div class="form-group">
-                <div class="col-sm-3">
-                    <h5 ng-if="vm.create">create new user</h5>
-                    <h5 ng-if="!vm.create">{{vm.user.name}}'s profile</h5>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-1 control-label input-sm">name:</label>
-
-                <div class="col-sm-4">
-                    <input ng-disabled="!vm.create" type="text" class="form-control input-sm" id="name" name="name"
-                           ng-model="vm.user.name"
-                           placeholder="name">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-1 control-label input-sm">type:</label>
-
-                <div class="col-sm-4">
-                    <select class="form-control input-sm" id="type" name="type" ng-model="vm.user.admin">
-                        <option value="false">User</option>
-                        <option value="true">Admin</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group" ng-if="vm.create">
-                <label class="col-sm-1 control-label input-sm">password:</label>
-
-                <div class="col-sm-4">
-                    <input type="password" class="form-control input-sm" id="password" name="password"
-                           ng-model="vm.user.password"
-                           placeholder="password">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="email" class="col-sm-1 control-label input-sm">email:</label>
-
-                <div class="col-sm-4">
-                    <input type="email" class="form-control input-sm" id="email" name="email" ng-model="vm.user.email"
-                           placeholder="email">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="about" class="col-sm-1 control-label input-sm">about:</label>
-
-                <div class="col-sm-4">
-                    <textarea class="form-control input-sm" id="about" ng-model="vm.user.about"
-                              placeholder="about the user..."
-                              rows="3"></textarea>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-4">
-                    <button ng-if="!vm.create" type="button"
-                            ng-click="vm.save()" ng-disabled="!vm.forms.userForm.$dirty || vm.forms.userForm.$invalid"
-                            class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-save"></span>
-                        update
-                    </button>
-                    <button ng-if="vm.create" type="button"
-                            ng-click="vm.createUser()" ng-disabled="!vm.forms.userForm.$dirty || vm.forms.userForm.$invalid"
-                            class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span>
-                        create
-                    </button>
-                    <button type="button"
-                            ng-click="vm.reset()" ng-disabled="!vm.forms.userForm.$dirty"
-                            class="btn btn-default btn-sm"><span class="glyphicon glyphicon-open"></span>
-                        reset
-                    </button>
-                    <span ng-show="vm.loading" us-spinner=""></span>
-                </div>
-            </div>
-        </form>
-    </tab>
-    <tab disabled="create">
-        <tab-heading><span class="glyphicon glyphicon-lock"></span> password</tab-heading>
-        <form class="form-horizontal" role="form" name="vm.forms.passwordForm" novalidate>
-            <div class="form-group"></div>
-            <div class="form-group">
-                <div class="col-sm-3">
-                    <h5>{{vm.user.name}}'s password</h5>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-1 control-label input-sm">password:</label>
-
-                <div class="col-sm-4">
-                    <input type="password" class="form-control input-sm" id="ch.password" name="password"
-                           ng-model="vm.pw.newPassword"
-                           placeholder="password" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-1 control-label input-sm">confirm:</label>
-
-                <div class="col-sm-4">
-                    <input type="password" class="form-control input-sm" id="ch.confirm" name="confirm"
-                           ng-model="vm.pw.confirmPassword" required jas-confirm-field="vm.forms.passwordForm.password"
-                           placeholder="confirm">
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-4">
-                    <button type="button"
-                            ng-click="vm.changePassword()"
-                            ng-disabled="!vm.forms.passwordForm.$dirty || vm.forms.passwordForm.$invalid"
-                            class="btn btn-default btn-sm btn-primary"><span class="glyphicon glyphicon-save"></span>
-                        set password
-                    </button>
-
-                    <span ng-show="vm.loading" us-spinner=""></span>
-                </div>
-            </div>
-        </form>
-    </tab>
-</tabset>

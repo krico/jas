@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="jasifyWeb" ng-strict-di>
 <head>
+    <title>Jasify Schedule</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Jasify Schedule">
     <meta name="author" content="jasify.com">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
     <link rel="icon" href="favicon.ico">
-
     <script>
         (function (i, s, o, g, r, a, m) {
             i['GoogleAnalyticsObject'] = r;
@@ -23,86 +23,68 @@
 
         ga('create', 'UA-56638051-1', 'auto');
         ga('send', 'pageview');
-
     </script>
-
-    <!--[if lt IE 9]>
-    <script src="build/js/dep-boot.min.js"></script>
-    <![endif]-->
-
-    <title>Jasify Schedule</title>
-    <script src="build/js/dep-main.min.js"></script>
-    <script src="build/js/jasify.min.js"></script>
-    <script src="build/js/jasify.tpl.min.js"></script>
-
+    <script src="build/js/dep-main.js"></script>
+    <script src="build/js/jasify.js"></script>
+    <script src="build/js/jasify.tpl.js"></script>
     <script src="https://apis.google.com/js/client.js?onload=initializeEndpoint"></script>
-
-    <link href="build/css/dep-main.min.css" rel="stylesheet">
-    <link href="build/css/jasify.min.css" rel="stylesheet">
-
+    <link href="build/css/dep-main.css" rel="stylesheet">
+    <link href="build/css/jasify.css" rel="stylesheet">
 </head>
-
-<body ng-controller="ApplicationController as appVm">
-
-<!-- Static navbar -->
-<nav class="navbar navbar-static-top navbar-inverse" role="navigation" ng-controller="NavbarController as vm">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" ng-click="vm.toggleCollapse()">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#/home"><span class="glyphicon glyphicon-calendar"></span> Jasify</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse" collapse="vm.navbarCollapsed">
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown" ng-if="vm.isAdminOrOrgMember()" ng-class="vm.menuActive('/admin/')" dropdown>
-                    <a ng-href="#{{vm.path}}" class="dropdown-toggle" dropdown-toggle>admin <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li ng-if="vm.isAdmin()"><a ng-click="vm.collapse()" href="#/admin/users">users</a></li>
-                        <li ng-if="vm.isAdmin()"><a ng-click="vm.collapse()" href="#/admin/groups">groups</a></li>
-                        <li><a ng-click="vm.collapse()" href="#/admin/organizations">organizations</a></li>
-                        <li><a ng-click="vm.collapse()" href="#/admin/activities">activities</a></li>
-                        <li ng-if="vm.isAdmin()"><a ng-click="vm.collapse()" href="#/admin/balances">balances</a></li>
-                    </ul>
-                </li>
-
-                <li ng-hide="vm.isAuthenticated()">
-                    <a ng-click="vm.createAccount()">Create Account</a>
-                </li>
-                <li ng-hide="vm.isAuthenticated()">
-                    <a ng-click="vm.signIn()">Sign In</a>
-                </li>
-
-                <li class="dropdown" ng-if="vm.isAuthenticated()" ng-class="vm.menuActive('/balance/')" dropdown>
-                    <a ng-href="#{{vm.path}}" class="dropdown-toggle" dropdown-toggle>balance <span
-                            class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a ng-click="vm.collapse()" href="#/payment/make">make a payment</a></li>
-                        <li><a ng-click="vm.collapse()" href="#/balance/view">view balance</a></li>
-                    </ul>
-                </li>
-                <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/profile')">
-                    <a ng-click="vm.collapse()" href="#/profile">{{currentUser.name}}</a>
-                </li>
-                <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/checkout')">
-                    <a ng-click="vm.collapse()" href="#/checkout">checkout</a>
-                </li>
-                <li ng-show="vm.isAuthenticated()" ng-class="vm.menuActive('/logout')">
-                    <a ng-click="vm.collapse()" href="#/logout">log out</a>
-                </li>
-            </ul>
-        </div>
-        <!--/.nav-collapse -->
+<body layout="column" ng-controller="ApplicationController as appVm">
+<md-toolbar layout="row" class="md-whiteframe-z1" ng-controller="NavbarController as vm">
+    <div class="md-toolbar-tools">
+        <md-button hide-gt-md ng-click="vm.toggleList()" class="md-icon-button" aria-label="Settings">
+            <md-icon md-svg-icon="img/menu.svg"></md-icon>
+        </md-button>
+        <h2>
+            Jasify
+        </h2>
+        <span flex></span>
+        <md-button ng-hide="vm.isAuthenticated()" class="md-raised" ng-click="vm.signIn()">Sign in</md-button>
+        <md-button ng-hide="vm.isAuthenticated()" class="md-raised" ng-click="vm.createAccount()">Create Account</md-button>
+        <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Log out</md-button>
     </div>
-</nav>
-
-<div class="container" ng-view="">
+</md-toolbar>
+<div flex layout="row" ng-controller="NavbarController as navBarController">
+    <md-sidenav id="sidebar" class="toggled md-sidenav-left md-whiteframe-z2"
+                md-component-id="left"
+                md-is-locked-open="$mdMedia('gt-md') && navBarController.isAuthenticated()" >
+        <ul class="main-menu" style="margin: 0">
+            <li>
+                <a ng-click="navBarController.hide()" ng-href="#/profile"><i class="mdi mdi-home"></i> My Profile</a>
+            </li>
+            <li ng-if="navBarController.isAdminOrOrgMember()" class="sub-menu">
+                <a ng-href="javascript:void(0)"><i class="mdi mdi-settings-applications"></i> Admin</a>
+                <ul>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="mdi mdi-person"></i> Users</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="mdi mdi-group"></i> Groups</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="mdi mdi-school"></i> Organizations</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="mdi mdi-accessibility"></i> Activities</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="mdi mdi-attach-money"></i> Balances</a></li>
+                </ul>
+            </li>
+            <li class="sub-menu">
+                <a ng-href="javascript:void(0)"><i class="mdi mdi-poll"></i> Balance</a>
+                <ul>
+                    <li><a ng-href="#/payment/make"><i class="ion-card"></i> Make a Payment</a></li>
+                    <li><a ng-href="#/payment/view"><i class="mdi mdi-attach-money"></i> View Balance</a></li>
+                </ul>
+            </li>
+            <li>
+                <a ng-href="#/checkout"><i class="mdi mdi-shopping-cart"></i> Checkout</a>
+            </li>
+            <li>
+                <a ng-href="#/logout"><i class="ion-android-exit"></i> Log out</a>
+            </li>
+        </ul>
+    </md-sidenav>
+    <div flex layout="column">
+        <md-content id="content" ng-class="{ 'home-splash': !navBarController.isAuthenticated() } " layout="column" flex>
+            <div class="container" ng-view></div>
+        </md-content>
+    </div>
 </div>
-<!-- /container -->
-
 <footer class="footer">
     <div class="container">
         <p class="text-muted small">
@@ -112,6 +94,6 @@
         </p>
     </div>
 </footer>
-
+<div mask></div>
 </body>
 </html>

@@ -2,22 +2,40 @@
     <h5 ng-if="vm.isCreateAccount()" class="modal-title">Create Account</h5>
     <h5 ng-if="vm.isSignIn()" class="modal-title">Sign In</h5>
 </div>
-<div class="modal-body">
-
-    <p class="small" ng-if="vm.isCreateAccount()">Already have an account?
-        <a ng-click="vm.switchToSignIn()">Sign In</a>
-    </p>
-    <div ng-if="vm.isCreateAccount()" ng-controller="CreateAccountController as vm"
-         ng-include="'authenticate/create-account.html'"></div>
-
-    <p class="small" ng-if="vm.isSignIn()">Don't have an account?
-        <a ng-click="vm.switchToCreateAccount()">Create Account</a>
-    </p>
-    <div ng-if="vm.isSignIn()" ng-controller="SignInController as vm"
-         ng-include="'authenticate/sign-in.html'"></div>
-
+<div id="authenticate-dialog" class="modal-body">
+    <div ng-if="vm.isCreateAccount()">
+        <div ng-controller="CreateAccountController as vm" ng-include="'authenticate/create-account.html'"></div>
+        <small layout="row" layout-align="start center" class="sign-in">
+            Already have an account?&nbsp;<a href="javascript:void(0)" ng-click="vm.switchToSignIn()">Sign In</a>
+        </small>
+    </div>
+    <div ng-if="vm.isSignIn()">
+        <div ng-controller="SignInController as vm" ng-include="'authenticate/sign-in.html'"></div>
+        <small layout="row" layout-align="start center" class="sign-in">
+            Don't have an account?&nbsp;<a href="javascript:void(0)" ng-click="vm.switchToCreateAccount()"> Create Account</a>
+        </small>
+    </div>
 </div>
-<!--<div class="modal-footer">-->
-<!--<button class="btn btn-primary" ng-click="$close('OK')">ok</button>-->
-<!--<button class="btn btn-warning" ng-click="$dismiss('Cancel')">cancel</button>-->
+<!--<md-dialog id="authenticate-dialog" aria-label="" >-->
+<!--<md-toolbar class="dialog-title">-->
+<!--<div class="md-toolbar-tools">-->
+<!--<span>Create Account</span>-->
 <!--</div>-->
+<!--</md-toolbar>-->
+<!--<md-content class="sticky-container" ng-show="vm.isCreateAccount()">-->
+<!--<div ng-controller="CreateAccountController as vm" ng-include="'authenticate/create-account.html'"></div>-->
+<!--<small layout="row" layout-align="center center" class="sign-in">-->
+<!--<span>Already have an account?</span>-->
+<!--<button flex class="btn btn-sign-in btn-primary btn-sm waves-effect" ng-click="vm.switchToSignIn()">Sign In</button>-->
+<!--</small>-->
+<!--</md-content>-->
+<!--<md-content class="sticky-container" ng-show="vm.isSignIn()">-->
+<!--<h2 class="md-title ng-binding">Sign in</h2>-->
+<!--<button class="btn bgm-cyan waves-effect">Cyan</button>-->
+<!--<div ng-controller="SignInController as vm" ng-include="'authenticate/sign-in.html'"></div>-->
+<!--<div class="row">-->
+<!--Don't have an account?-->
+<!--<md-button class="md-raised md-primary" ng-click="vm.switchToCreateAccount()">Create Account</md-button>-->
+<!--</div>-->
+<!--</md-content>-->
+<!--</md-dialog>-->

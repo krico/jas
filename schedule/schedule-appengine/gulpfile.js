@@ -124,15 +124,15 @@ function clientJs(cb) {
     gutil.log('Replacing version information\n' + gutil.colors.cyan(require('util').inspect(versionInfo)));
 
     return gulp.src(paths.js)
+        .pipe(plumber())
+        .pipe(ngAnnotate())
         .pipe(sourcemaps.init())
         .pipe(replace('@NUMBER@', versionInfo.number))
         .pipe(replace('@BRANCH@', versionInfo.branch))
         .pipe(replace('@TIMESTAMP@', versionInfo.timestamp))
         .pipe(replace('@VERSION@', versionInfo.version))
-        .pipe(plumber())
         .pipe(concat('jasify.js'))
         .pipe(gulp.dest(paths.build + '/js'))
-        .pipe(ngAnnotate())
         .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
@@ -146,11 +146,11 @@ function clientDependenciesJsFun(key) {
     }
     return function (cb) {
         return gulp.src(src)
-            .pipe(sourcemaps.init())
             .pipe(plumber())
+            .pipe(ngAnnotate())
+            .pipe(sourcemaps.init())
             .pipe(concat('dep-' + key + '.js'))
             .pipe(gulp.dest(paths.build + '/js'))
-            .pipe(ngAnnotate())
             .pipe(uglify())
             .pipe(rename({extname: '.min.js'}))
             .pipe(sourcemaps.write('./'))
@@ -172,8 +172,8 @@ function lintJs(cb) {
 
 function clientCss(cb) {
     return gulp.src(paths.css)
-        .pipe(sourcemaps.init())
         .pipe(plumber())
+        //.pipe(sourcemaps.init())
         .pipe(less({
             paths: [
                 path.join(paths.bower, 'bootstrap', 'less')
@@ -183,7 +183,7 @@ function clientCss(cb) {
         .pipe(gulp.dest(paths.build + '/css'))
         .pipe(minifyCSS())
         .pipe(rename({extname: '.min.css'}))
-        .pipe(sourcemaps.write('./'))
+        //.pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/css'));
 }
 
@@ -195,6 +195,8 @@ function clientDependenciesCssFun(key) {
         src.push(items);
         fonts.push(items.replace(/\/css\/[^\/]+$/, "/fonts/**/*.*"));
     }
+    fonts.push('src/main/fonts' + '/**/*.*');
+    fonts.push(path.join(paths.bower, 'ionicons', 'fonts') + '/**/*.*');
     fonts.push(path.join(paths.bower, 'bootstrap', 'fonts') + '/**/*.*');
     return function (cb) {
 
@@ -213,12 +215,14 @@ function clientDependenciesCssFun(key) {
 
 function html(cb) {
     return gulp.src(paths.html)
+        .pipe(plumber())
         .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
         .pipe(gulp.dest(paths.build + '/../'))
 }
 
 function staticHtml(cb) {
     return gulp.src(paths.staticHtml)
+        .pipe(plumber())
         .pipe(gulp.dest(paths.build + '/../'))
 }
 

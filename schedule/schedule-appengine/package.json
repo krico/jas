@@ -4,7 +4,8 @@
   "description": "Jasify Schedule",
   "main": "jasify.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-dev": "karma start src/test/client/karma.conf.js"
   },
   "repository": {
     "type": "git",

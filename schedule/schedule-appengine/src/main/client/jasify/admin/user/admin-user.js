@@ -2,130 +2,88 @@
 
     angular.module('jasify.admin').controller('AdminUserController', AdminUserController);
 
-    function AdminUserController($routeParams, User, Auth) {
+    function AdminUserController($routeParams, $location, user, User, Auth) {
         var vm = this;
 
-        vm.user = null;
         vm.pw = {};
-        vm.create = false;
-        vm.loading = true;
-
-        vm.alerts = [];
+        vm.created = !!$routeParams.created;
+        vm.user = user;
         vm.forms = {};
-        vm.alert = alert;
-        vm.save = save;
         vm.reset = reset;
-        vm.createUser = createUser;
         vm.changePassword = changePassword;
+        vm.submit = user.id ? save : createUser;
 
-
-        vm.reset();
-
-
-        function alert(t, m) {
-            vm.alerts.push({type: t, msg: m});
+        vm.passwordResetOptions = {
+            buttonDefaultClass: 'btn-warning',
+            buttonSubmittingClass: 'bgm-deeporange',
+            buttonDefaultText: 'Update Password',
+            buttonSubmittingText: 'Saving...',
+            buttonSuccessText: 'Password updated'
         }
 
+        vm.submitOptions = {
+            buttonDefaultText: 'Save',
+            buttonSubmittingText: 'Saving...',
+            buttonSuccessText: 'Profile updated'
+        };
+
+        vm.resetOptions = {
+            buttonDefaultClass: 'btn-warning',
+            buttonSubmittingClass: 'bgm-deeporange',
+            buttonDefaultText: 'Reset',
+            buttonSubmittingText: 'Reseting...',
+            buttonSuccessText: 'Profile restored'
+        };
+
         function save() {
-
-            vm.loading = true;
-
-            User.update(vm.user).then(ok, fail);
-
-            function ok(u) {
-                vm.loading = false;
+            vm.isSubmitting = true;
+            User.update(vm.user).then(function ok(u) {
+                vm.submitResult = 'success';
                 vm.user = u;
-                if (vm.forms.userForm) {
-                    vm.forms.userForm.$setPristine();
-                }
-
-                vm.alert('success', 'User updated successfully (' + new Date() + ')');
-
-            }
-
-            function fail() {
-                vm.loading = false;
-                vm.alert('danger', 'User update failed (' + new Date() + ')');
-            }
+                vm.forms.userForm.$setPristine();
+                vm.forms.userForm.$setUntouched();
+            });
         }
 
         function reset() {
 
-            vm.loading = true;
+            vm.isReseting = true;
 
             if (vm.forms.userForm) {
                 vm.forms.userForm.$setPristine();
+                vm.forms.userForm.$setUntouched();
             }
 
-            if ($routeParams.id) {
-                vm.user = {};
-                User.get($routeParams.id).then(ok, fail);
-
+            if (user.id) {
+                User.get(user.id).then(function (result) {
+                    vm.resetResult = 'success';
+                    vm.user = result;
+                });
             } else {
+                vm.resetResult = 'success';
                 vm.user = {};
-                vm.create = true;
-                vm.loading = false;
             }
-
-            function ok(r) {
-                vm.user = r;
-                vm.loading = false;
-            }
-
-            function fail() {
-                vm.loading = false;
-                vm.alert('danger', 'Failed to read the user data from the server (' + new Date() + ')');
-            }
-
         }
 
         function createUser() {
-
-            vm.loading = true;
-
-            User.add(vm.user, vm.user.password).then(ok, fail);
-
-            function ok(r) {
-                vm.user = r;
-                vm.alert('success', 'User creation succeeded!');
-                vm.create = false;
-                vm.loading = false;
-            }
-
-            function fail() {
-
-                vm.loading = false;
-
-                vm.alert('danger', 'User creation failed!');
-            }
+            User.add(vm.user, vm.user.password).then(function(r) {
+                $location.path('/admin/user/' + r.id + '/created');
+            });
         }
 
 
         function changePassword() {
-
-            vm.loading = true;
-
-            Auth.changePassword(vm.user, vm.pw.newPassword)
-                .then(
-                //success
-                function () {
-                    vm.loading = false;
-                    if (vm.forms.passwordForm) {
-                        vm.forms.passwordForm.$setPristine();
-                    }
-                    vm.alert('success', 'Password changed (' + new Date() + ')');
-                    vm.pw = {};
-                },
-                // failure
-                function (data) {
-                    vm.loading = false;
-                    if (vm.forms.passwordForm) {
-                        vm.forms.passwordForm.$setPristine();
-                    }
-                    vm.alert('danger', 'Password change failed (' + new Date() + ')');
-
-                }
-            );
+            vm.isResetingPassword = true;
+            Auth.changePassword(vm.user, vm.pw.oldPassword, vm.pw.newPassword).then(function () {
+                vm.forms.passwordForm.$setPristine();
+                vm.forms.passwordForm.$setUntouched();
+                vm.resetPasswordResult = 'success';
+                vm.pw = {};
+            }, function () {
+                vm.forms.passwordForm.$setPristine();
+                vm.forms.passwordForm.$setUntouched();
+                vm.resetPasswordResult = 'error';
+            });
         }
 
     }

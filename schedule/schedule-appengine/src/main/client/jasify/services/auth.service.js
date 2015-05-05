@@ -125,12 +125,12 @@
             return restoreData.promise;
         }
 
-        function changePassword(credentials, newPassword) {
+        function changePassword(credentials, oldPassword, newPassword) {
             $log.info("Changing password (userId=" + Session.userId + ")!");
             return Endpoint.jasify(function (jasify) {
                 return jasify.auth.changePassword({
                     userId: credentials.id,
-                    oldPassword: credentials.password,
+                    oldPassword: oldPassword,
                     newPassword: newPassword
                 });
             });

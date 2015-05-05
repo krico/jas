@@ -1,4 +1,4 @@
-describe('ProfileController', function () {
+describe('ProfileSettingsController', function () {
     var $scope, $applicationScope, vm, $routeParams, User, Session, $controller, $rootScope, $q;
 
     beforeEach(module('jasifyWeb'));
@@ -20,7 +20,7 @@ describe('ProfileController', function () {
         Session.create(1, 555);
         User.get.and.returnValue($q.when({id: 555, name: 'test'}));
 
-        vm = $controller('ProfileController', {
+        vm = $controller('ProfileSettingsController', {
             $scope: $scope
         });
     };
@@ -36,29 +36,17 @@ describe('ProfileController', function () {
         $routeParams.extra = 'welcome';
         construct();
         $rootScope.$apply(); //load the user
-        expect(vm.isWelcome()).toEqual(true);
+        expect(vm.isWelcome).toEqual(true);
 
         $routeParams.extra = 'foo';
         construct();
         $rootScope.$apply(); //load the user
-        expect(vm.isWelcome()).toEqual(false);
+        expect(vm.isWelcome).toEqual(false);
     });
 
     it('sets extra to false when there are not route parameters', function () {
         $rootScope.$apply(); //load the user
-        expect(vm.isWelcome()).toEqual(false);
-    });
-
-    it('can handle alerts', function () {
-        $rootScope.$apply(); //load the user
-
-        expect(vm.alerts.length).toEqual(0);
-        vm.alert('success', 'alert text');
-
-        expect(vm.alerts.length).toEqual(1);
-        expect(vm.alerts[0].type).toEqual('success');
-        expect(vm.alerts[0].msg).toEqual('alert text');
-
+        expect(vm.isWelcome).toEqual(false);
     });
 
     it('loads user when constructed', function () {
@@ -73,14 +61,15 @@ describe('ProfileController', function () {
         $rootScope.$apply(); //load the user
 
         vm.user.about = 'about him';
-
-
         spyOn(User, 'update').and.returnValue($q.when(vm.user));
-        var called = null;
+        var called = 0;
 
         vm.profileForm = {
             $setPristine: function () {
-                called = true;
+                called++;
+            },
+            $setUntouched: function () {
+                called++;
             }
         };
 
@@ -90,7 +79,7 @@ describe('ProfileController', function () {
         $rootScope.$apply();
 
         expect($scope.currentUser.about).toEqual('about him');
-        expect(called).toBe(true);
+        expect(called).toBe(2);
     });
 
     it('resets to original user ', function () {
@@ -100,6 +89,12 @@ describe('ProfileController', function () {
 
         User.get.and.returnValue($q.when({id: 555, name: 'test'}));
 
+        vm.profileForm = {
+            $setPristine: function () {
+            },
+            $setUntouched: function () {
+            }
+        };
         vm.reset();
 
         $rootScope.$apply();
@@ -113,10 +108,13 @@ describe('ProfileController', function () {
 
         User.get.and.returnValue($q.when({id: 555, name: 'test'}));
 
-        var called = null;
+        var called = 0;
         vm.profileForm = {
             $setPristine: function () {
-                called = true;
+                called++;
+            },
+            $setUntouched: function () {
+                called++;
             }
         };
 
@@ -124,7 +122,7 @@ describe('ProfileController', function () {
 
         $rootScope.$apply();
 
-        expect(called).toEqual(true);
+        expect(called).toEqual(2);
 
     });
 

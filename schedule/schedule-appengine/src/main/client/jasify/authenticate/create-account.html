@@ -1,102 +1,92 @@
-<div ng-hide="vm.isEmail()">
-    <fieldset>
-        <div class="form-group col-sm-12">
-            <button class="btn btn-google btn-block" ng-click="vm.oauth('Google', $close)">
-                <i class="icon ion-social-google"></i>
-                Create Account with Google
-            </button>
-            <button class="btn btn-facebook btn-block" ng-click="vm.oauth('Facebook', $close)">
-                <i class="icon ion-social-facebook"></i>
-                Create Account with Facebook
-            </button>
-        </div>
-    </fieldset>
-    <fieldset>
-        <div class="form-group col-sm-12">
-            <button class="btn btn-default btn-block" ng-click="vm.withEmail()">
-                <i class="icon ion-email"></i>
-                Create Account with Email
-            </button>
-        </div>
-    </fieldset>
+<div id="create-account-service-or-email" ng-hide="vm.email">
+    <button class="btn btn-default btn-google btn-block" ng-click="vm.oauth('Google', $close)">
+        <i class="icon ion-social-google"></i>
+        Create Account with Google
+    </button>
+    <button class="btn btn-default btn-facebook btn-block" ng-click="vm.oauth('Facebook', $close)">
+        <i class="icon ion-social-facebook"></i>
+        Create Account with Facebook
+    </button>
+    <button class="btn btn-default btn-with-email btn-block" ng-click="vm.email = true">
+        <i class="icon ion-email"></i>
+        Create Account with Email
+    </button>
 </div>
-<div ng-show="vm.isEmail()">
-    <form class="form" role="form" novalidate name="vm.authenticateForm">
-        <div class="form-group form-group-sm has-feedback"
-             ng-class="{'has-success':vm.hasSuccess('realName'), 'has-error': vm.hasError('realName')}">
-
-            <label for="realName" class="sr-only">Full Name</label>
-            <input type="text" class="form-control" id="realName" name="realName" ng-model="vm.user.realName"
-                   placeholder="Full Name" minlength="3" required/>
-
-            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.realName.$error">
-                <div class="help-block small" ng-message="required">Type in your name.</div>
+<div ng-show="vm.email">
+    <form class="form" role="form" novalidate
+          name="vm.authenticateForm"
+          ng-submit="vm.authenticateForm.$valid && vm.create($close)">
+        <div jas-has-feedback class="form-group form-group-sm fg-float">
+            <div class="fg-line">
+                <input type="text" class="form-control input-sm" id="realName" name="realName" ng-model="vm.user.realName" minlength="3" required />
             </div>
+            <label class="fg-label">Full Name</label>
+            <jas-feedback-icon-valid field="vm.authenticateForm.realName"></jas-feedback-icon-valid>
+            <jas-feedback-icon-invalid field="vm.authenticateForm.realName" form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <jas-error-help-block field="vm.authenticateForm.realName" form="vm.authenticateForm">
+                <span ng-message="required">You can't leave this empty.</span>
+                <span ng-message="minlength">At least three characters are required.</span>
+            </jas-error-help-block>
         </div>
-        <div class="form-group form-group-sm has-feedback"
-             ng-model-options="{debounce:1000}"
-             ng-class="{'has-success':vm.hasSuccess('email'), 'has-error': vm.hasError('email')}">
-            <label for="email" class="sr-only">E-mail</label>
-            <input type="email" class="form-control" id="email" name="email" ng-model="vm.user.email"
-                   placeholder="E-mail" required jas-email/>
-            <span class="form-control-feedback"
-                  ng-show="vm.authenticateForm.email.$pending"
-                  us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}">
-            </span>
-
-            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.email.$error">
-                <div class="help-block small" ng-message="required">Type in your e-mail.</div>
-                <div class="help-block small" ng-message="email">This is not a valid e-mail.</div>
-                <div class="help-block small" ng-message="jasEmail">This e-mail is already registered or invalid.</div>
+        <div jas-has-feedback class="form-group fg-float">
+            <div class="fg-line">
+                <input type="email" class="form-control" id="email" name="email" ng-model="vm.user.email" required jas-email/>
             </div>
-
+            <label class="fg-label">E-mail</label>
+            <jas-feedback-icon-valid field="vm.authenticateForm.email"></jas-feedback-icon-valid>
+            <jas-feedback-icon-invalid field="vm.authenticateForm.email" form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <jas-feedback-icon-pending field="vm.authenticateForm.email"></jas-feedback-icon-pending>
+            <jas-error-help-block field="vm.authenticateForm.email" form="vm.authenticateForm">
+                <span ng-message="required">You can't leave this empty.</span>
+                <span ng-message="email">This is not a valid E-mail.</span>
+                <span ng-message="jasEmail">This e-mail is already registered or is invalid.</span>
+            </jas-error-help-block>
         </div>
-        <div class="form-group form-group-sm has-feedback"
-             ng-class="{'has-success':vm.hasSuccess('password'), 'has-error': vm.hasError('password')}">
-            <label for="password" class="sr-only">Password</label>
-            <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password"
-                   placeholder="Password" popover="{{vm.popoverText}}" popover-trigger="focus"
-                   popover-popup-delay="1000" required/>
-
-            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.password.$error">
-                <div class="help-block small" ng-message="required">Choose a password.</div>
+        <div jas-has-feedback class="form-group fg-float">
+            <div class="fg-line">
+                <input type="password" class="form-control" id="password" name="password" ng-model="vm.user.password" required/>
             </div>
+            <label class="fg-label">Password</label>
+            <jas-feedback-icon-valid field="vm.authenticateForm.password"></jas-feedback-icon-valid>
+            <jas-feedback-icon-invalid field="vm.authenticateForm.password" form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <jas-error-help-block field="vm.authenticateForm.password" form="vm.authenticateForm">
+                <span ng-message="required">Choose a password.</span>
+            </jas-error-help-block>
+            <small class="has-error" ng-show="vm.passwordStrengthText" ng-class="{ 'has-warning': vm.passwordStrength === 'average', 'has-error': vm.passwordStrength === 'weak' }">
+                <span class="help-block">Password strentgh: {{vm.passwordStrengthText}}</span>
+            </small>
             <jas-password-strength callback="vm.passwordStrengthCallback"
                                    password="vm.authenticateForm.password"/>
         </div>
-        <div>
-        </div>
-        <div class="form-group form-group-sm has-feedback"
-             ng-class="{'has-success':vm.hasSuccess('confirm'), 'has-error': vm.hasError('confirm')}">
-            <label for="confirm" class="sr-only">Confirm Password</label>
-            <input type="password" class="form-control" id="confirm" name="confirm" ng-model="vm.user.confirm"
-                   placeholder="Confirm Password" required jas-confirm-field="vm.authenticateForm.password"/>
-
-            <div class="help-block small" ng-show="vm.showErrors" ng-messages="vm.authenticateForm.confirm.$error">
-                <div class="help-block small" ng-message="required">Confirm the password.</div>
-                <div class="help-block small" ng-message="jasConfirmField">Passwords do not match.</div>
+        <div jas-has-feedback class="form-group fg-float">
+            <div class="fg-line">
+                <input type="password" class="form-control" id="confirm" name="confirm" ng-model="vm.user.confirm"
+                       required jas-confirm-field="vm.authenticateForm.password"/>
             </div>
+            <label class="fg-label">Confirm Password</label>
+            <jas-feedback-icon-valid field="vm.authenticateForm.confirm"></jas-feedback-icon-valid>
+            <jas-feedback-icon-invalid field="vm.authenticateForm.confirm" form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <jas-error-help-block field="vm.authenticateForm.confirm" form="vm.authenticateForm">
+                <span ng-message="required">Confirm the password.</span>
+                <span ng-message="jasConfirmField">Passwords do not match.</span>
+            </jas-error-help-block>
         </div>
-
-        <div class="form-group has-feedback"
-             ng-class="{'has-success':vm.hasSuccess('termsAndConditions'), 'has-error': vm.hasError('termsAndConditions')}">
-            <div class="checkbox">
-                <label class="small">
-                    <input required ng-model="vm.termsAndConditions" name="termsAndConditions"
-                           type="checkbox"> I have read and agree with the
-                    <a href="/terms-and-conditions.html" target="_blank"
-                       tooltip="General Terms and Conditions">GTC </a> .
-                </label>
-            </div>
+        <div jas-has-feedback class="checkbox m-t-25 m-b-25">
+            <label>
+                <input required ng-model="vm.termsAndConditions" name="termsAndConditions" type="checkbox"><i class="input-helper"></i>
+                I have read and agree with the
+                <a href="/terms-and-conditions.html" target="_blank">&nbsp;GTC</a> .
+            </label>
+            <jas-error-help-block field="vm.authenticateForm.termsAndConditions" form="vm.authenticateForm">
+                <span ng-message="required">In order to use our services, you must agree to General Terms & Conditions.</span>
+            </jas-error-help-block>
         </div>
-
-        <button class="btn btn-sm btn-primary" ng-click="vm.create($close)"
-                popover="{{vm.getTooltip()}}" popover-trigger="click"
-                popover-placement="right" popover-popup-delay="10"
-                ng-disabled="vm.inProgress">
+        <button type="submit" class="btn btn-sm btn-primary">
             <i class="icon ion-email"></i> Create Account
         </button>
-        <br/>
-        <small>Create Account with <a ng-click="vm.withOAuth()">Google or Facebook</a></small>
+        <hr />
+        <small layout="row" layout-align="start center" class="sign-in">
+            Create Account with&nbsp;<a href="javascript:void(0)" ng-click="vm.email = false">Google or Facebook</a>
+        </small>
     </form>
 </div>

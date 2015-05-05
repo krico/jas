@@ -13,13 +13,17 @@
                     }
                 }
             })
-            .when('/admin/user/:id?', {
+            .when('/admin/user/:id?/:created?', {
                 templateUrl: 'admin/user/admin-user.html',
                 controller: 'AdminUserController',
                 controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.admin();
+                    },
+                    user: function(User, $route, $q) {
+                        return $route.current.params.id ?
+                            User.get($route.current.params.id) : {}
                     }
                 }
             })

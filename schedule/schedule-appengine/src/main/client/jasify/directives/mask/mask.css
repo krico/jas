@@ -1,0 +1,98 @@
+@-webkit-keyframes mask-background-animation {
+    0% {
+        opacity: 0.1;
+    }
+    25% {
+        opacity: 0.1;
+    }
+    50% {
+        opacity: 0.20;
+    }
+    75% {
+        opacity: 0.40;
+    }
+    100% {
+        opacity: 0.60;
+    }
+}
+
+@-webkit-keyframes mask-content-animation {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0;
+    }
+    75% {
+        opacity: 0.50;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes mask-cancel-animation {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0;
+    }
+    55% {
+        opacity: 0.55;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.mask-background {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    background-color: grey;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.mask-content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.mask-cancel-message {
+    color: black;
+    visibility: hidden;
+    font-size: smaller;
+    max-width: 400px;
+}
+
+.mask-background.in-progress {
+    z-index: 9999;
+    display: flex;
+    opacity: 0.60;
+    -webkit-animation: mask-background-animation 2s linear;
+}
+
+.mask-content.in-progress {
+    z-index: 99999;
+    display: flex;
+    -webkit-animation: mask-content-animation 2s linear;
+}
+
+.mask-content.in-progress .mask-cancel-message {
+    visibility: visible;
+    -webkit-animation: mask-cancel-animation 10s linear;
+}
