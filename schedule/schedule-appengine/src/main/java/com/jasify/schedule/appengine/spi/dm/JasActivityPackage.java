@@ -20,6 +20,7 @@ public class JasActivityPackage implements JasEndpointEntity {
     private String description;
     private int itemCount;
     private String organizationId;
+    private int activityCount;
 
     public String getId() {
         return id;
@@ -123,5 +124,13 @@ public class JasActivityPackage implements JasEndpointEntity {
 
     public void setOrganizationId(String organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public int getActivityCount() {
+        return activityCount;
+    }
+
+    public void setActivityCount(int activityCount) {
+        this.activityCount = activityCount;
     }
 }

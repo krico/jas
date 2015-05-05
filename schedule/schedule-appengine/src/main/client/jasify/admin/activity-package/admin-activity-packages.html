@@ -29,7 +29,8 @@
                 </th>
                 <th>name</th>
                 <th>price</th>
-                <th><span tooltip="How many subsriptions are allowed">item count</span></th>
+                <th><span tooltip="How many subscriptions are allowed">#items</span></th>
+                <th><span tooltip="How many activities are inclded">#activities</span></th>
                 <th><span tooltip="How many times was this bought">executions</span></th>
                 <th></th>
             </tr>
@@ -43,6 +44,9 @@
                 </td>
                 <td ng-click="vm.viewActivityPackage(activityPackage.id)">
                     {{activityPackage.itemCount}}
+                </td>
+                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                    {{activityPackage.activityCount}}
                 </td>
                 <td ng-click="vm.viewActivityPackage(activityPackage.id)">
                     {{activityPackage.executions || 0}}

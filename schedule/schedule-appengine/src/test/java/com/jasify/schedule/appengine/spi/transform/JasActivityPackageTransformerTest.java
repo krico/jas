@@ -50,6 +50,7 @@ public class JasActivityPackageTransformerTest {
         assertEquals(internal.getDescription(), external.getDescription());
         assertEquals(internal.getMaxExecutions(), external.getMaxExecutions());
         assertEquals(internal.getCurrency(), external.getCurrency());
+        assertEquals(0, external.getActivityCount());
     }
 
     @Test
