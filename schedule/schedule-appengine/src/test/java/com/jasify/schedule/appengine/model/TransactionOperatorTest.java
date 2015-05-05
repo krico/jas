@@ -56,7 +56,7 @@ public class TransactionOperatorTest {
         TransactionOperator.execute(operation);
     }
 
-    @Test(expected = TransactionOperationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testExecuteThrowsTransactionOperationException() throws Exception {
         TestOperation operation = new TestOperation();
         operation.toThrow = new IllegalArgumentException();
@@ -69,8 +69,8 @@ public class TransactionOperatorTest {
         operation.toThrow = new IllegalArgumentException();
         try {
             TransactionOperator.execute(operation);
-        } catch (TransactionOperationException e) {
-            assertEquals(operation.toThrow, e.getCause());
+        } catch (Exception e) {
+            assertEquals(operation.toThrow, e);
             return;
         }
         fail("Should have thrown");
@@ -80,7 +80,7 @@ public class TransactionOperatorTest {
     public void testExecuteSilently() {
         TestOperation operation = new TestOperation();
         operation.concurrencyExceptionCount = 2;
-        Key key = TransactionOperator.executeQuietly(operation);
+        Key key = TransactionOperator.executeNoEx(operation);
         assertNotNull(key);
         Entity entity = Datastore.get(key);
         assertNotNull(entity);
@@ -92,10 +92,10 @@ public class TransactionOperatorTest {
     public void testExecuteSilentlyPropagates() {
         TestOperation operation = new TestOperation();
         operation.toThrow = new IllegalArgumentException();
-        TransactionOperator.executeQuietly(operation);
+        TransactionOperator.executeNoEx(operation);
     }
 
-    private void assertExecute(TestOperation operation, int expectedExecutions) throws TransactionOperationException {
+    private void assertExecute(TestOperation operation, int expectedExecutions) throws Exception {
         TransactionOperator.execute(operation);
         assertEquals(expectedExecutions, operation.executeCount);
         assertNotNull(operation.id);
@@ -106,7 +106,7 @@ public class TransactionOperatorTest {
         assertEquals(expectedExecutions, executeCount.intValue());
     }
 
-    private class TestOperation implements TransactionOperation<Key> {
+    private class TestOperation implements TransactionOperation<Key, Exception> {
         private Exception toThrow;
         private int concurrencyExceptionCount = 0;
         private int executeCount = 0;

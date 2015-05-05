@@ -145,9 +145,9 @@ class DefaultActivityService implements ActivityService {
         final Key organizationId = dbOrganization.getId();
 
         try {
-            return TransactionOperator.execute(new TransactionOperation<Key>() {
+            return TransactionOperator.execute(new ModelOperation<Key>() {
                 @Override
-                public Key execute(Transaction tx) throws Exception {
+                public Key execute(Transaction tx) throws ModelException {
                     if (!isActivityTypeNameUnique(tx, organizationId, name)) {
                         throw new UniqueConstraintException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
                     }
@@ -160,11 +160,10 @@ class DefaultActivityService implements ActivityService {
                     return ret;
                 }
             });
-        } catch (TransactionOperationException e) {
-            Throwables.propagateIfInstanceOf(e.getCause(), EntityNotFoundException.class);
-            Throwables.propagateIfInstanceOf(e.getCause(), UniqueConstraintException.class);
-            Throwables.propagateIfInstanceOf(e.getCause(), FieldValueException.class);
-            throw Throwables.propagate(e.getCause());
+        } catch (EntityNotFoundException | UniqueConstraintException | FieldValueException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
         }
     }
 
@@ -230,9 +229,9 @@ class DefaultActivityService implements ActivityService {
         final ActivityType dbActivityType = getActivityType(activityType.getId());
 
         try {
-            TransactionOperator.execute(new TransactionOperation<Void>() {
+            TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
-                public Void execute(Transaction tx) throws Exception {
+                public Void execute(Transaction tx) throws ModelException {
                     if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), name)) {
                         dbActivityType.setName(name);
                         if (!isActivityTypeNameUnique(tx, dbActivityType.getOrganizationRef().getKey(), name)) {
@@ -249,10 +248,9 @@ class DefaultActivityService implements ActivityService {
                     return null;
                 }
             });
-        } catch (TransactionOperationException e) {
-            Throwables.propagateIfInstanceOf(e.getCause(), EntityNotFoundException.class);
-            Throwables.propagateIfInstanceOf(e.getCause(), FieldValueException.class);
-            Throwables.propagateIfInstanceOf(e.getCause(), UniqueConstraintException.class);
+        } catch (EntityNotFoundException | FieldValueException | UniqueConstraintException e) {
+            throw e;
+        } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
 
@@ -299,9 +297,9 @@ class DefaultActivityService implements ActivityService {
         repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
         activity.setRepeatDetails(repeatDetails);
 
-        return TransactionOperator.executeQuietly(new TransactionOperation<List<Key>>() {
+        return TransactionOperator.executeNoEx(new ModelOperation<List<Key>>() {
             @Override
-            public List<Key> execute(Transaction tx) throws Exception {
+            public List<Key> execute(Transaction tx) throws ModelException {
                 DateTime start = new DateTime(activity.getStart());
                 DateTime finish = new DateTime(activity.getFinish());
                 Datastore.put(tx, repeatDetails);
@@ -361,9 +359,9 @@ class DefaultActivityService implements ActivityService {
         repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
         activity.setRepeatDetails(repeatDetails);
 
-        return TransactionOperator.executeQuietly(new TransactionOperation<List<Key>>() {
+        return TransactionOperator.executeNoEx(new ModelOperation<List<Key>>() {
             @Override
-            public List<Key> execute(Transaction tx) throws Exception {
+            public List<Key> execute(Transaction tx) throws ModelException {
                 DateTime start = new DateTime(activity.getStart());
                 DateTime finish = new DateTime(activity.getFinish());
 
@@ -516,9 +514,9 @@ class DefaultActivityService implements ActivityService {
         final User user = getUser(userId);
         try {
             //I will implement this method with transactions, so we can use it as a reference for the other subscribe
-            return TransactionOperator.execute(new TransactionOperation<ActivityPackageExecution>() {
+            return TransactionOperator.execute(new ModelOperation<ActivityPackageExecution>() {
                 @Override
-                public ActivityPackageExecution execute(Transaction tx) throws Exception {
+                public ActivityPackageExecution execute(Transaction tx) throws ModelException {
                     ActivityPackageExecution execution = new ActivityPackageExecution();
 
                     ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
@@ -574,15 +572,10 @@ class DefaultActivityService implements ActivityService {
                     return execution;
                 }
             });
-        } catch (TransactionOperationException e) {
-            if (e.getCause() instanceof EntityNotFoundRuntimeException) {
-                throw new EntityNotFoundException("Not found", e.getCause());
-            }
-            Throwables.propagateIfInstanceOf(e.getCause(), EntityNotFoundException.class);
-            Throwables.propagateIfInstanceOf(e.getCause(), UniqueConstraintException.class);
-            Throwables.propagateIfInstanceOf(e.getCause(), OperationException.class);
-            Throwables.propagateIfInstanceOf(e.getCause(), IllegalArgumentException.class);
-            throw Throwables.propagate(e.getCause());
+        } catch (EntityNotFoundException | UniqueConstraintException | OperationException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
         }
     }
 
@@ -653,9 +646,9 @@ class DefaultActivityService implements ActivityService {
             junction.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
             models.add(junction);
         }
-        TransactionOperator.executeQuietly(new TransactionOperation<Void>() {
+        TransactionOperator.executeNoEx(new ModelOperation<Void>() {
             @Override
-            public Void execute(Transaction tx) throws Exception {
+            public Void execute(Transaction tx) throws ModelException {
                 Datastore.put(tx, models);
                 tx.commit();
                 return null;
@@ -684,9 +677,9 @@ class DefaultActivityService implements ActivityService {
     @Override
     public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws EntityNotFoundException, FieldValueException {
         try {
-            return TransactionOperator.execute(new TransactionOperation<ActivityPackage>() {
+            return TransactionOperator.execute(new ModelOperation<ActivityPackage>() {
                 @Override
-                public ActivityPackage execute(Transaction tx) throws Exception {
+                public ActivityPackage execute(Transaction tx) throws ModelException {
 
                     Key activityPackageId = activityPackage.getId();
                     ActivityPackage dbActivityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
@@ -742,10 +735,10 @@ class DefaultActivityService implements ActivityService {
                     return dbActivityPackage;
                 }
             });
-        } catch (TransactionOperationException e) {
-            Throwables.propagateIfInstanceOf(e, EntityNotFoundException.class);
-            Throwables.propagateIfInstanceOf(e, FieldValueException.class);
-            throw Throwables.propagate(e.getCause());
+        } catch (EntityNotFoundException | FieldValueException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
         }
     }
 
@@ -767,9 +760,9 @@ class DefaultActivityService implements ActivityService {
     @Override
     public void addActivityToActivityPackage(final Key activityPackageId, final Key activityId) throws EntityNotFoundException {
         try {
-            TransactionOperator.execute(new TransactionOperation<Void>() {
+            TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
-                public Void execute(Transaction tx) throws Exception {
+                public Void execute(Transaction tx) throws ModelException {
                     Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackageId).getOrganizationRef().getKey();
 
                     ActivityPackageActivity activityPackageActivity = Datastore
@@ -794,8 +787,9 @@ class DefaultActivityService implements ActivityService {
                     return null;
                 }
             });
-        } catch (TransactionOperationException e) {
-            Throwables.propagateIfInstanceOf(e, EntityNotFoundException.class);
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
     }
@@ -809,9 +803,9 @@ class DefaultActivityService implements ActivityService {
     @Override
     public void removeActivityFromActivityPackage(final Key activityPackageId, final Key activityId) throws EntityNotFoundException {
         try {
-            TransactionOperator.execute(new TransactionOperation<Void>() {
+            TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
-                public Void execute(Transaction tx) throws Exception {
+                public Void execute(Transaction tx) throws ModelException {
                     Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackageId).getOrganizationRef().getKey();
 
                     ActivityPackageActivity activityPackageActivity = Datastore
@@ -832,8 +826,9 @@ class DefaultActivityService implements ActivityService {
                     return null;
                 }
             });
-        } catch (TransactionOperationException e) {
-            Throwables.propagateIfInstanceOf(e, EntityNotFoundException.class);
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
     }

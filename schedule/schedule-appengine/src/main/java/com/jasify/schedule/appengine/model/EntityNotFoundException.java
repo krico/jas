@@ -12,6 +12,10 @@ public class EntityNotFoundException extends ModelException {
         super(message);
     }
 
+    public EntityNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
     public EntityNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }

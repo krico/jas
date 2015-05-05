@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
+import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import java.util.ConcurrentModificationException;
 
@@ -42,15 +43,33 @@ public final class TransactionOperator {
 
     }
 
-    public static <T> T executeQuietly(TransactionOperation<T> operation) throws ConcurrentModificationException {
+    /**
+     * Is a convenience method that propagates any exception a a runtime exception.
+     *
+     * @param operation to execute
+     * @param <T>       return type
+     * @return the return of operation
+     * @throws ConcurrentModificationException if we failed to complete the transaction more than retryCount times
+     */
+    public static <T> T executeNoEx(TransactionOperation<T, ?> operation) throws ConcurrentModificationException {
         try {
             return execute(operation);
-        } catch (TransactionOperationException e) {
-            throw Throwables.propagate(e.getCause());
+        } catch (Exception e) {
+            throw Throwables.propagate(e);
         }
     }
 
-    public static <T> T execute(TransactionOperation<T> operation) throws ConcurrentModificationException, TransactionOperationException {
+    /**
+     * Execute the operation, retry <code>retryCount</code> times in case of Concurrent modification
+     *
+     * @param operation to execute
+     * @param <T>       return type
+     * @param <Ex>      the exception that can be thrown
+     * @return the return of operation
+     * @throws ConcurrentModificationException if we failed to complete the transaction more than retryCount times
+     * @throws Ex                              if operation throws Ex
+     */
+    public static <T, Ex extends Exception> T execute(TransactionOperation<T, Ex> operation) throws ConcurrentModificationException, Ex {
         return Singleton.INSTANCE.executeImpl(operation);
     }
 
@@ -62,21 +81,26 @@ public final class TransactionOperator {
         }
     }
 
-    private <T> T executeImpl(TransactionOperation<T> operation) throws ConcurrentModificationException, TransactionOperationException {
+    private <T, Ex extends Exception> T executeImpl(TransactionOperation<T, Ex> operation) throws ConcurrentModificationException, Ex {
         int retries = retryCount;
         while (true) {
             Transaction tx = Datastore.beginTransaction();
             try {
                 return operation.execute(tx);
+            } catch (EntityNotFoundRuntimeException ere) {
+
+                //As a convenience we replace EntityNotFoundRUNTIME with our own EntityNotFound exception
+                if (operation instanceof ModelOperation) {
+                    //noinspection unchecked
+                    throw (Ex) new EntityNotFoundException(ere);
+                }
+
+                throw ere;
             } catch (ConcurrentModificationException cme) {
                 if (retries == 0) throw cme;
                 --retries;
                 log.info("ConcurrentModificationException, retry {} of {} will sleep {} ms", (retryCount - retries), retryCount, retrySleepMillis);
                 sleep(retrySleepMillis);
-            } catch (Exception e) {
-                log.debug("Exception executing operation", e);
-                Throwables.propagateIfInstanceOf(e, TransactionOperationException.class);
-                throw new TransactionOperationException(e);
             } finally {
                 if (tx.isActive()) {
                     log.debug("Rolling back transaction");
