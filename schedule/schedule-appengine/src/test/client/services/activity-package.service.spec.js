@@ -66,10 +66,11 @@ describe('ActivityPackageService', function () {
     });
 
     it('should update activityPackage', function () {
-        var expected = {name: "ActivityPackage"};
+        var expected = {id: 'anAp', name: "ActivityPackage"};
+        var expectedList = [{id: 'who'}];
         spyOn($gapiMock.client.jasify.activityPackages, 'update').and.returnValue($q.when({result: expected}));
 
-        ActivityPackage.update(expected)
+        ActivityPackage.update(expected, expectedList)
             .then(function (activityPackage) {
                 expect(activityPackage).toBe(expected);
             },
@@ -79,7 +80,11 @@ describe('ActivityPackageService', function () {
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.activityPackages.update).toHaveBeenCalledWith(expected);
+        expect($gapiMock.client.jasify.activityPackages.update).toHaveBeenCalledWith({
+            id: expected.id,
+            activityPackage: expected,
+            activities: expectedList
+        });
     });
 
     it('should add activityPackage', function () {

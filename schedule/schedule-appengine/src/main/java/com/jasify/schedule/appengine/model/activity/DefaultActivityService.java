@@ -669,12 +669,84 @@ class DefaultActivityService implements ActivityService {
     public ActivityPackage updateActivityPackage(ActivityPackage activityPackage) throws EntityNotFoundException, FieldValueException {
         ActivityPackage dbActivityPackage = getActivityPackage(activityPackage.getId());
 
-        BeanUtil.copyPropertiesExcluding(dbActivityPackage, activityPackage, "id", "created", "modified",
-                "executionCount", "organizationRef", "activityPackageActivityListRef");
+        copyProperties(activityPackage, dbActivityPackage);
 
         Datastore.put(dbActivityPackage);
 
         return dbActivityPackage;
+    }
+
+    private void copyProperties(ActivityPackage source, ActivityPackage destination) {
+        BeanUtil.copyPropertiesExcluding(destination, source,
+                "id", "created", "modified", "executionCount", "organizationRef", "activityPackageActivityListRef");
+    }
+
+    @Override
+    public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws EntityNotFoundException, FieldValueException {
+        try {
+            return TransactionOperator.execute(new TransactionOperation<ActivityPackage>() {
+                @Override
+                public ActivityPackage execute(Transaction tx) throws Exception {
+
+                    Key activityPackageId = activityPackage.getId();
+                    ActivityPackage dbActivityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
+                    List<Key> newKeys = Lists.transform(activities, ACTIVITY_TO_KEY_FUNCTION);
+                    Set<Key> existingKeys = dbActivityPackage.getActivityKeys();
+
+                    Key organizationId = dbActivityPackage.getOrganizationRef().getKey();
+
+                    copyProperties(activityPackage, dbActivityPackage);
+
+                    List<Object> models = new ArrayList<Object>();
+                    models.add(dbActivityPackage);
+
+                    Set<Key> toAdd = new HashSet<Key>();
+                    for (Key newKey : newKeys) {
+                        if (existingKeys.contains(newKey)) continue;
+                        toAdd.add(newKey);
+                    }
+
+                    for (Key activityId : toAdd) {
+                        ActivityPackageActivity activityPackageActivity = new ActivityPackageActivity();
+                        activityPackageActivity.getActivityRef().setKey(activityId);
+                        activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
+                        activityPackageActivity.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
+                        models.add(activityPackageActivity);
+                    }
+                    Datastore.put(tx, models);
+
+                    Set<Key> toRemove = new HashSet<Key>();
+                    for (Key existingKey : existingKeys) {
+                        if (newKeys.contains(existingKey)) continue;
+                        toRemove.add(existingKey);
+                    }
+
+                    Set<Key> junctionsToRemove = new HashSet<Key>();
+                    for (Key activityId : toRemove) {
+                        List<Key> keyList = Datastore.query(tx, activityPackageActivityMeta, organizationId)
+                                .filter(new CompositeCriterion(activityPackageActivityMeta,
+                                        Query.CompositeFilterOperator.AND,
+                                        activityPackageActivityMeta.activityPackageRef.equal(activityPackageId),
+                                        activityPackageActivityMeta.activityRef.equal(activityId)))
+                                .asKeyList();
+                        if (keyList.isEmpty())
+                            throw new OperationException("Failed to find relation that should exist");
+                        junctionsToRemove.addAll(keyList);
+                    }
+                    Datastore.delete(tx, junctionsToRemove);
+
+                    tx.commit();
+
+                    dbActivityPackage.getActivityPackageActivityListRef().clear();
+
+                    return dbActivityPackage;
+                }
+            });
+        } catch (TransactionOperationException e) {
+            Throwables.propagateIfInstanceOf(e, EntityNotFoundException.class);
+            Throwables.propagateIfInstanceOf(e, FieldValueException.class);
+            throw Throwables.propagate(e.getCause());
+        }
     }
 
     @Nonnull

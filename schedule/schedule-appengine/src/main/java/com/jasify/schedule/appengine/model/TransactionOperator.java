@@ -25,7 +25,8 @@ public final class TransactionOperator {
     private TransactionOperator() {
         ApplicationData applicationData = ApplicationData.instance();
         String retryCountKey = TransactionOperator.class.getName() + ".RetryCount";
-        Integer retryCount = applicationData.getProperty(retryCountKey);
+        Long longProp = applicationData.getProperty(retryCountKey);
+        Integer retryCount = longProp == null ? null : longProp.intValue();
         if (retryCount == null) {
             retryCount = DEFAULT_RETRY_COUNT;
             applicationData.setProperty(retryCountKey, retryCount);

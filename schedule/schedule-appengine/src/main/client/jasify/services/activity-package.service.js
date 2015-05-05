@@ -36,9 +36,13 @@
             });
         }
 
-        function update(activityPackage) {
+        function update(activityPackage, activities) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.activityPackages.update(activityPackage)
+                return jasify.activityPackages.update({
+                    id: activityPackage.id,
+                    activityPackage: activityPackage,
+                    activities: activities
+                })
                     .then(resultHandler, errorHandler);
             });
         }

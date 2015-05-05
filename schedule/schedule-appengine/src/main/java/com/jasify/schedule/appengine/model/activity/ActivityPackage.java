@@ -175,6 +175,21 @@ public class ActivityPackage {
             Activity activity = link.getActivityRef().getModel();
             if (activity != null) ret.add(activity);
         }
+        Collections.sort(ret, new Comparator<Activity>() {
+            @Override
+            public int compare(Activity o1, Activity o2) {
+                Date start1 = o1.getStart();
+                if (start1 == null) {
+                    start1 = o1.getCreated() == null ? new Date(Long.MAX_VALUE) : o1.getCreated();
+                }
+                Date start2 = o2.getStart();
+                if (start2 == null) {
+                    start2 = o2.getCreated() == null ? new Date(Long.MAX_VALUE) : o2.getCreated();
+                }
+
+                return start1.compareTo(start2);
+            }
+        });
 
         return ret;
     }

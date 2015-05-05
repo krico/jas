@@ -10,7 +10,7 @@ import java.util.List;
  * @author krico
  * @since 02/05/15.
  */
-public class JasAddActivityPackageRequest {
+public class JasActivityPackageRequest {
     private ActivityPackage activityPackage;
     private List<Activity> activities = Lists.newArrayList();
 

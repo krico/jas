@@ -990,6 +990,90 @@ public class ActivityServiceTest {
     }
 
     @Test
+    public void testUpdateActivityPackageWithActivities() throws Exception {
+        testCreateActivityPackage();
+        Activity thirdActivity = createActivity(activityType1OfOrganization1);
+        activityService.addActivity(thirdActivity, null);
+
+        activityPackage.setDescription("New Desc");
+        Date created = activityPackage.getCreated();
+        activityPackage.setCreated(new Date(8282123));
+        activityPackage.setModified(new Date(555));
+        activityPackage.setItemCount(99);
+        activityPackage.setPrice(999d);
+        activityPackage.setExecutionCount(826);
+        activityPackage.setName("New Name");
+        activityPackage.setCurrency("BRL");
+        activityPackage.setMaxExecutions(200);
+        activityPackage.setValidFrom(new Date(12345678));
+        activityPackage.setValidUntil(new Date(22233344));
+        Key expectedOrgId = activityPackage.getOrganizationRef().getKey();
+        activityPackage.getOrganizationRef().setKey(null);
+
+        activityPackage.getActivityPackageActivityListRef().clear();
+        Set<Key> activityKeys = activityPackage.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(2, activityKeys.size());
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(activity2Organization1.getId()));
+
+        ActivityPackage fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity, activity1Organization1));
+
+        long modified = System.currentTimeMillis();
+        assertNotNull(fetched);
+
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(2, activityKeys.size());
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+
+        assertNotNull(fetched);
+        assertEquals("New Desc", fetched.getDescription());
+        assertEquals(99, fetched.getItemCount());
+        assertEquals(999d, fetched.getPrice());
+        //achtung
+        assertEquals("Execution count should not be updated", 0, fetched.getExecutionCount());
+        assertEquals("original ap unchanged", 826, activityPackage.getExecutionCount());
+        assertEquals("New Name", fetched.getName());
+        assertEquals("BRL", fetched.getCurrency());
+        assertEquals(200, fetched.getMaxExecutions());
+        assertEquals(new Date(12345678), fetched.getValidFrom());
+        assertEquals(new Date(22233344), fetched.getValidUntil());
+
+        assertEquals(created, fetched.getCreated());
+        long fetchedModified = fetched.getModified().getTime();
+        assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+        assertEquals(expectedOrgId, fetched.getOrganizationRef().getKey());
+
+
+        fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity));
+
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(1, activityKeys.size());
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+
+        fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity, activity2Organization1, activity1Organization1));
+
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(3, activityKeys.size());
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(activity2Organization1.getId()));
+
+        fetched.getActivityPackageActivityListRef().clear();
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(3, activityKeys.size());
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(activity2Organization1.getId()));
+
+    }
+
+    @Test
     public void testUpdateActivityPackage() throws Exception {
         testCreateActivityPackage();
         activityPackage.setDescription("New Desc");

@@ -33,59 +33,7 @@
 
         function update() {
 
-            var toAdd = [];
-            angular.forEach(vm.selectedActivities, function (value) {
-                var selectedId = value.id;
-
-                var found = [];
-                angular.forEach(activityPackageActivities, function (existingValue) {
-                    if (selectedId == existingValue.id) {
-                        //noinspection JSPotentiallyInvalidUsageOfThis
-                        this.push(existingValue);
-                    }
-                }, found);
-
-                if (found.length === 0) {
-                    // selected but not in the original :-> needs to be added
-                    this.push(value);
-                }
-
-            }, toAdd);
-
-            var toRemove = [];
-            angular.forEach(activityPackageActivities, function (existingValue) {
-                var found = [];
-                var existingId = existingValue.id;
-                angular.forEach(vm.selectedActivities, function (selectedValue) {
-                    if (existingId == selectedValue.id) {
-                        //noinspection JSPotentiallyInvalidUsageOfThis
-                        this.push(selectedValue);
-                    }
-                }, found);
-
-                if (found.length === 0) {
-                    // in the original but not in the selected :-> needs to be removed
-                    this.push(existingValue);
-                }
-
-            }, toRemove);
-
-            //TODO: I really don't like the complexity, but I just want to finish this
-            //We should do this server-side and have a single call to the backend
-            var promises = [];
-            promises.push(ActivityPackage.update(vm.activityPackage));
-
-            angular.forEach(toRemove, function (remove) {
-                var promise = ActivityPackage.removeActivity(vm.activityPackage, remove);
-                this.push(promise);
-            }, promises);
-
-            angular.forEach(toAdd, function (add) {
-                var promise = ActivityPackage.addActivity(vm.activityPackage, add);
-                this.push(promise);
-            }, promises);
-
-            return $q.all(promises).then(ok, fail);
+            return ActivityPackage.update(vm.activityPackage, vm.selectedActivities).then(ok, fail);
 
             function ok(resp) {
                 //update original state

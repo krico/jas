@@ -15,7 +15,7 @@ import com.jasify.schedule.appengine.model.common.OrganizationService;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.common.TestOrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.UserLogin;
-import com.jasify.schedule.appengine.spi.dm.JasAddActivityPackageRequest;
+import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import org.easymock.Capture;
@@ -1314,7 +1314,7 @@ public class ActivityEndpointTest {
     @Test
     public void testAddActivityPackage() throws Exception {
         testOrganizationServiceFactory.replay();
-        JasAddActivityPackageRequest request = new JasAddActivityPackageRequest();
+        JasActivityPackageRequest request = new JasActivityPackageRequest();
         ActivityPackage activityPackage = new ActivityPackage();
 
         Key orgId = Datastore.allocateId(Organization.class);
@@ -1343,10 +1343,15 @@ public class ActivityEndpointTest {
         ActivityPackage activityPackage = new ActivityPackage();
         Key id = Datastore.allocateId(ActivityPackage.class);
         activityPackage.setId(id);
-        EasyMock.expect(ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage)).andReturn(activityPackage);
+
+        JasActivityPackageRequest request = new JasActivityPackageRequest();
+        request.setActivityPackage(activityPackage);
+        request.setActivities(new ArrayList<Activity>());
+
+        EasyMock.expect(ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage, request.getActivities())).andReturn(activityPackage);
         testActivityServiceFactory.replay();
 
-        ActivityPackage fetched = endpoint.updateActivityPackage(newAdminCaller(1), id, activityPackage);
+        ActivityPackage fetched = endpoint.updateActivityPackage(newAdminCaller(1), id, request);
         assertEquals(activityPackage, fetched);
     }
 

@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.common.base.Preconditions;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
@@ -17,7 +18,7 @@ import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
-import com.jasify.schedule.appengine.spi.dm.JasAddActivityPackageRequest;
+import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
@@ -325,21 +326,23 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, ActivityPackage activityPackage) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdminOrOrgMember(caller, createFromActivityPackageId(id));
         checkFound(id);
+        ActivityPackage activityPackage = Preconditions.checkNotNull(request.getActivityPackage(), "request.ActivityPackage is NULL");
+        List<Activity> activities = Preconditions.checkNotNull(request.getActivities(), "request.Activities is NULL");
         activityPackage.setId(id);
         try {
-            return ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage);
+            return ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage, activities);
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Not found");
         } catch (FieldValueException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "activityPackages.add", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.POST)
-    public ActivityPackage addActivityPackage(User caller, JasAddActivityPackageRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public ActivityPackage addActivityPackage(User caller, JasActivityPackageRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         ActivityPackage activityPackage = checkFound(request.getActivityPackage(), "request.activityPackage == NULL");
         Key organizationId = checkFound(activityPackage.getOrganizationRef().getKey(), "request.activityPackage.organization == NULL");
         List<Activity> activities = checkFound(request.getActivities(), "request.activities == NULL");
