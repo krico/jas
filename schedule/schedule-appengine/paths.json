@@ -26,6 +26,9 @@
   "staticHtml": [
     "src/main/html/**/*.html"
   ],
+  "images": [
+    "src/main/webapp/img/**/*.*"
+  ],
   "partials": [
     "src/main/client/jasify/**/*.html"
   ],

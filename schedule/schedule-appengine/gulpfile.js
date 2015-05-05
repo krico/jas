@@ -54,9 +54,10 @@ gulp.task('lint-test-js', lintTestJs);
 gulp.task('lint', ['lint-js', 'lint-test-js']);
 gulp.task('html', html);
 gulp.task('static-html', staticHtml);
+gulp.task('images', images);
 gulp.task('test', ['build'], testClient);
 gulp.task('watch', rebuild);
-gulp.task('build', ['client', 'html', 'static-html']);
+gulp.task('build', ['client', 'html', 'static-html', 'images']);
 gulp.task('default', ['watch', 'build', 'lint']);
 
 function rebuild() {
@@ -70,6 +71,7 @@ function rebuild() {
     gulp.watch(paths.watchCss, ['client-css']);
     gulp.watch(paths.html, ['html']);
     gulp.watch(paths.staticHtml, ['static-html']);
+    gulp.watch(paths.images, ['images']);
 }
 
 
@@ -229,6 +231,12 @@ function staticHtml(cb) {
     return gulp.src(paths.staticHtml)
         .pipe(plumber())
         .pipe(gulp.dest(paths.build + '/../'))
+}
+
+function images(cb) {
+    return gulp.src(paths.images)
+        .pipe(plumber())
+        .pipe(gulp.dest(paths.build + '/../img'))
 }
 
 
