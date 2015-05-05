@@ -61,6 +61,7 @@
                     <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="mdi mdi-group"></i> Groups</a></li>
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="mdi mdi-school"></i> Organizations</a></li>
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="mdi mdi-accessibility"></i> Activities</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activity-packages"><i class="mdi mdi-shop-two"></i> Activity Packages</a></li>
                     <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="mdi mdi-attach-money"></i> Balances</a></li>
                 </ul>
             </li>
@@ -95,5 +96,9 @@
     </div>
 </footer>
 <div mask></div>
+<!-- These three hidden inputs are for protractor -->
+<input type="hidden" id="auth.status" ng-value="vm.isAuthenticated() ? 'authenticated' : 'anonymous'"/>
+<input type="hidden" id="auth.name" ng-value="currentUser.name"/>
+<input type="hidden" id="auth.id" ng-value="currentUser.id"/>
 </body>
 </html>

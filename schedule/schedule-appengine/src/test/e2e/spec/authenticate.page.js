@@ -3,8 +3,8 @@ var inherits = require('util').inherits;
 
 function AuthenticatePage() {
     JasifyPage.call(this);
-    this.signInMenu = this.menuItem('Sign In');
-    this.logOutMenu = this.menuItem('log out');
+    this.signInMenu = this.menuButton('Sign In');
+    this.logOutMenu = this.menuButton('log out');
     this.logOutConfirmation = element(by.css('.glyphicon-log-out'));
     this.signInWithFacebookButton = element(by.partialButtonText('Sign In with Facebook'));
     this.signInWithEmailButton = element(by.partialButtonText('Sign In with Email'));

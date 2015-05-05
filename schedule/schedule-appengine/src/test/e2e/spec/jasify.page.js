@@ -42,7 +42,11 @@ JasifyPage.prototype.title = function () {
 };
 
 JasifyPage.prototype.menuItem = function (linkText) {
-    return element(by.tagName('nav')).all(by.linkText(linkText)).first();
+    return element(by.tagName('li')).all(by.linkText(linkText)).first();
+};
+
+JasifyPage.prototype.menuButton = function (linkText) {
+    return element(by.tagName('md-button')).all(by.partialButtonText(linkText)).first();
 };
 
 JasifyPage.prototype.getAuthStatus = function () {

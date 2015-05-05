@@ -7,7 +7,8 @@
     "prebower": "bower prune",
     "bower": "bower install",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-dev": "karma start src/test/client/karma.conf.js"
+    "test-dev": "karma start src/test/client/karma.conf.js",
+    "test-e2e": "protractor src/test/e2e/protractor.cfg.js --suite ci"
   },
   "repository": {
     "type": "git",
