@@ -2,7 +2,7 @@
     <div class="card-header">
         <h2>Users List
             <small>
-                Change user settings. Add new users. Use search settings to find users.
+                Use search settings to find users, change user settings or add new user.
             </small>
         </h2>
     </div>
@@ -71,7 +71,10 @@
             <tr>
                 <th>
                     <a href="#/admin/user">
-                        <button title="Add User" class="btn bgm-teal btn-icon"><i class="md-icon md-icon-add"></i></button>
+                        <md-tooltip md-direction="right">
+                            Add User
+                        </md-tooltip>
+                        <button class="btn bgm-teal btn-icon"><i class="md mdi mdi-person-add"></i></button>
                     </a>
                 </th>
                 </th>
@@ -84,9 +87,13 @@
             <tbody>
             <tr ng-repeat="user in vm.users track by user.id">
                 <td>
-                    <button title="Edit {{user.name}}" ng-click="vm.viewUser(user.id)" type="button" class="btn btn-primary"
+
+                    <button ng-click="vm.viewUser(user.id)" type="button" class="btn btn-primary"
                             data-row-id="{{user.id}}">
-                        <span class="md-icon md-icon-edit"></span> Edit
+                        <span class="mdi mdi-edit"></span> Edit
+                        <md-tooltip md-direction="right">
+                            Edit {{user.name}}
+                        </md-tooltip>
                     </button>
                 </td>
                 <td>{{user.name}}</td>

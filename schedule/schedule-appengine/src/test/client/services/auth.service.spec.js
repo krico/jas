@@ -133,7 +133,7 @@ describe('AuthService', function () {
 
         var ok = false;
 
-        Auth.changePassword(credentials, 'newPw').then(function () {
+        Auth.changePassword(credentials, 'password', 'newPw').then(function () {
             ok = true;
         });
 

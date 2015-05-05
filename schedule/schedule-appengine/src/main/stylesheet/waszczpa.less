@@ -2,6 +2,7 @@
 
 body {
   padding: 0 !important;
+  margin: 0 !important;
 }
 
 #content {
@@ -79,6 +80,10 @@ td.actions-column {
   top: 0;
 }
 
+.fg-label {
+  z-index: 1 !important;
+}
+
 .bootgrid-header {
 
   .actions.btn-group {
@@ -99,6 +104,17 @@ td.actions-column {
   @media (min-width: 480px) {
     .search {
       width: 100%;
+    }
+  }
+}
+
+.card-header {
+  .back-button {
+    position: relative;
+    top: -10px;
+    float: left;
+    button {
+      margin-right: 10px;
     }
   }
 }

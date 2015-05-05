@@ -52,27 +52,27 @@
                 md-is-locked-open="$mdMedia('gt-md') && navBarController.isAuthenticated()" >
         <ul class="main-menu" style="margin: 0">
             <li>
-                <a ng-click="navBarController.hide()" ng-href="#/profile"><i class="md-icon md-icon-home"></i> My Profile</a>
+                <a ng-click="navBarController.hide()" ng-href="#/profile"><i class="mdi mdi-home"></i> My Profile</a>
             </li>
             <li ng-if="navBarController.isAdminOrOrgMember()" class="sub-menu">
-                <a ng-href="javascript:void(0)"><i class="md-icon md-icon-settings-applications"></i> Admin</a>
+                <a ng-href="javascript:void(0)"><i class="mdi mdi-settings-applications"></i> Admin</a>
                 <ul>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="md-icon md-icon-person"></i> Users</a></li>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="md-icon md-icon-group"></i> Groups</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="md-icon md-icon-school"></i> Organizations</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="md-icon md-icon-accessibility"></i> Activities</a></li>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="md-icon md-icon-attach-money"></i> Balances</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="mdi mdi-person"></i> Users</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="mdi mdi-group"></i> Groups</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="mdi mdi-school"></i> Organizations</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="mdi mdi-accessibility"></i> Activities</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="mdi mdi-attach-money"></i> Balances</a></li>
                 </ul>
             </li>
             <li class="sub-menu">
-                <a ng-href="javascript:void(0)"><i class="md-icon md-icon-poll"></i> Balance</a>
+                <a ng-href="javascript:void(0)"><i class="mdi mdi-poll"></i> Balance</a>
                 <ul>
                     <li><a ng-href="#/payment/make"><i class="ion-card"></i> Make a Payment</a></li>
-                    <li><a ng-href="#/payment/view"><i class="md-icon md-icon-attach-money"></i> View Balance</a></li>
+                    <li><a ng-href="#/payment/view"><i class="mdi mdi-attach-money"></i> View Balance</a></li>
                 </ul>
             </li>
             <li>
-                <a ng-href="#/checkout"><i class="md-icon md-icon-shopping-cart"></i> Checkout</a>
+                <a ng-href="#/checkout"><i class="mdi mdi-shopping-cart"></i> Checkout</a>
             </li>
             <li>
                 <a ng-href="#/logout"><i class="ion-android-exit"></i> Log out</a>

@@ -60,7 +60,7 @@
             link: function (scope, element, attrs) {
                 $('.form-control', element).each(function () {
                     var i = $(this).val();
-                    if (i.length !== 0) {
+                    if (i !== null && i.length !== 0) {
                         $(this).closest('.fg-line').addClass('fg-toggled');
                     }
                 });
@@ -134,7 +134,7 @@
             scope: {
                 field: '='
             },
-            template: '<i ng-show="field.$valid && field.$touched" class="md-icon md-icon-check form-control-feedback"></i>'
+            template: '<i ng-show="field.$valid && field.$touched" class="md mdi mdi-check form-control-feedback"></i>'
         };
     });
 
@@ -146,7 +146,7 @@
                 field: '=',
                 form: '='
             },
-            template: '<i ng-show="(form.$submitted || field.$touched) && field.$invalid" class="md-icon md-icon-close form-control-feedback"></i>'
+            template: '<i ng-show="(form.$submitted || field.$touched) && field.$invalid" class="md mdi mdi-close form-control-feedback"></i>'
         };
     });
 

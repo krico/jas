@@ -8,69 +8,72 @@
     </div>
     <div class="card-body card-padding">
         <div class="alert alert-success" role="alert" ng-if="vm.isWelcome || true">TODO: Welcome message</div>
-        <div role="tabpanel">
-            <ul class="tab-nav" role="tablist">
-                <li class="active">
-                    <a prevent="click" href="#profile-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
-                        Profile Settings
-                    </a>
-                </li>
-                <li>
-                    <a prevent="click" href="#my-logins-tab" aria-controls="my-logins-tab" role="tab" data-toggle="tab">My
-                        Logins</a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div ng-controller="ProfileSettingsController as vm" role="tabpanel" class="tab-pane active" id="profile-tab">
-                    <form role="form" novalidate name="vm.profileForm" ng-submit="vm.profileForm.$valid && vm.save()">
-                        <div jas-has-feedback class="form-group fg-float">
-                            <div class="fg-line">
-                                <input type="email" fg-input ng-model="vm.user.email" class="form-control fg-input"
-                                       id="emailAddress" required name="emailAddress">
-                            </div>
-                            <label class="fg-label">Email address</label>
-                            <jas-feedback-icon-valid field="vm.profileForm.emailAddress"></jas-feedback-icon-valid>
-                            <jas-feedback-icon-invalid field="vm.profileForm.emailAddress"
-                                                       form="vm.profileForm"></jas-feedback-icon-invalid>
-                            <jas-error-help-block field="vm.profileForm.emailAddress" form="vm.profileForm">
-                                <span ng-message="required">Email address is required.</span>
-                                <span ng-message="email">This email address is not valid.</span>
-                            </jas-error-help-block>
+        <ul class="tab-nav" role="tablist">
+            <li class="active">
+                <a prevent="click" href="#profile-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
+                    Profile Settings
+                </a>
+            </li>
+            <li>
+                <a prevent="click" href="#my-logins-tab" aria-controls="my-logins-tab" role="tab" data-toggle="tab">My
+                    Logins</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div ng-controller="ProfileSettingsController as vm" role="tabpanel" class="tab-pane active"
+                 id="profile-tab">
+                <form role="form" novalidate name="vm.profileForm" ng-submit="vm.profileForm.$valid && vm.save()">
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
+                            <input type="email" ng-model="vm.user.email" class="form-control fg-input"
+                                   id="emailAddress" required name="emailAddress">
                         </div>
-                        <div class="form-group fg-float">
-                            <div class="fg-line">
-                                <textarea class="form-control" rows="5" placeholder="..."></textarea>
-                            </div>
-                            <label class="fg-label">About me</label>
-                        </div>
-                        <div class="actions-group">
-                            <a-button type="submit" options="vm.submitOptions" is-submitting="vm.isSubmitting" result="vm.submitResult"></a-button>
-                            <a-button type="button" ng-click="vm.reset()" options="vm.resetOptions" is-submitting="vm.isReseting" result="vm.resetResult"></a-button>
-                        </div>
-                    </form>
-                </div>
-                <div ng-controller="ProfileLoginsController as vm" role="tabpanel" class="tab-pane" id="my-logins-tab">
-                    <h5 ng-show="vm.logins">You can log in using any of the following accounts</h5>
-                    <table ng-show="vm.logins" class="table table-hover">
-                        <tbody>
-                            <tr ng-repeat="login in vm.logins">
-                                <td><i class="icon" ng-class="vm.icon(login)"></i> {{login.provider}}</td>
-                                <td>{{login.email}}</td>
-                                <td class="actions-column">
-                                    <button ng-click="vm.removeLogin(login)" class="btn btn-danger waves-effect"><i class="md-icon md-icon-delete"></i> Remove</button>
-                                </td>
-                            </tr>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="actions-group">
-                        <button class="btn btn-default btn-facebook" ng-click="vm.oauth('Facebook')">
-                            <i class="icon ion-social-facebook"></i> add Facebook login
-                        </button>
-                        <button class="btn btn-default btn-google" ng-click="vm.oauth('Google')">
-                            <i class="icon ion-social-google"></i> add Google login
-                        </button>
+                        <label class="fg-label">Email address</label>
+                        <jas-feedback-icon-valid field="vm.profileForm.emailAddress"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.profileForm.emailAddress"
+                                                   form="vm.profileForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.profileForm.emailAddress" form="vm.profileForm">
+                            <span ng-message="required">Email address is required.</span>
+                            <span ng-message="email">This email address is not valid.</span>
+                        </jas-error-help-block>
                     </div>
+                    <div class="form-group fg-float">
+                        <div class="fg-line">
+                            <textarea class="form-control" rows="5" placeholder="..."></textarea>
+                        </div>
+                        <label class="fg-label">About me</label>
+                    </div>
+                    <div class="actions-group">
+                        <a-button type="submit" options="vm.submitOptions" is-submitting="vm.isSubmitting"
+                                  result="vm.submitResult"></a-button>
+                        <a-button type="button" ng-click="vm.reset()" options="vm.resetOptions"
+                                  is-submitting="vm.isReseting" result="vm.resetResult"></a-button>
+                    </div>
+                </form>
+            </div>
+            <div ng-controller="ProfileLoginsController as vm" role="tabpanel" class="tab-pane" id="my-logins-tab">
+                <h5 ng-show="vm.logins">You can log in using any of the following accounts</h5>
+                <table ng-show="vm.logins" class="table table-hover">
+                    <tbody>
+                    <tr ng-repeat="login in vm.logins">
+                        <td><i class="icon" ng-class="vm.icon(login)"></i> {{login.provider}}</td>
+                        <td>{{login.email}}</td>
+                        <td class="actions-column">
+                            <button ng-click="vm.removeLogin(login)" class="btn btn-danger waves-effect"><i
+                                    class="md-icon md-icon-delete"></i> Remove
+                            </button>
+                        </td>
+                    </tr>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="actions-group">
+                    <button class="btn btn-default btn-facebook" ng-click="vm.oauth('Facebook')">
+                        <i class="icon ion-social-facebook"></i> add Facebook login
+                    </button>
+                    <button class="btn btn-default btn-google" ng-click="vm.oauth('Google')">
+                        <i class="icon ion-social-google"></i> add Google login
+                    </button>
                 </div>
             </div>
         </div>
