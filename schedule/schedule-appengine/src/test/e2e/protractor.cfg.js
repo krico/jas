@@ -2,9 +2,7 @@ var config = {
     //seleniumAddress: 'http://localhost:4444/wd/hub',
     baseUrl: 'http://localhost:8080',
     suites: {
-        admin: 'spec/*-admin.spec.js',
-        facebook: 'spec/*-facebook.spec.js',
-        ci: 'spec/*-admin.spec.js', //run in travis-ci + sauce-labs
+        ci: 'spec/sign-in-with-email.spec.js', //run in travis-ci + sauce-labs
         full: 'spec/*.spec.js'
     },
     framework: 'jasmine2',
