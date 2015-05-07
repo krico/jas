@@ -26,6 +26,7 @@ describe('Sign In with Email', function () {
         expect(welcome.getWelcomeText()).toEqual('Welcome `' + credentials.user + '`');
         welcome.clickLogout();
 
+        page = new HomePage();
         expect(page.getAuthStatus()).toEqual('anonymous');
         done();
     });
