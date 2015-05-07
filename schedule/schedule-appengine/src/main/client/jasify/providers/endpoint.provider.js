@@ -6,16 +6,29 @@
      * is finished.  You can call 'Endpoint.load()' to get a promise that get resolved when
      * the gapi client is loaded.  After that you can use either $gapi directly, or you can
      * use Endpoint to get the api.
+     * To configure values in the endpoint in your app config you can do:
+     * function (EndpointProvider) {
+     *       EndpointProvider.apiName('myApiName');
+     *       EndpointProvider.apiVersion('myApiVersion');
+     *       EndpointProvider.apiPath('https://my/api/path');
+     *       EndpointProvider.googleClientUrl('https://my/google/client.js');
+     *  })
+     * Check the "describe('Config'" section of this provider's spec.
      */
     angular.module('jasifyComponents').provider('Endpoint', EndpointProvider);
 
     function EndpointProvider() {
-
+        var beVerbose = false;
         var googleClientUrl = 'https://apis.google.com/js/client.js';
         var apiName = 'jasify';
         var apiVersion = 'v1';
         var apiPath = '/_ah/api';
+        var googleClientLoaded = false;
 
+        this.verbose = function (v) {
+            if (v) beVerbose = v;
+            return beVerbose;
+        };
         this.googleClientUrl = function (url) {
             if (url) googleClientUrl = url;
             return googleClientUrl;
@@ -38,7 +51,7 @@
 
         this.$get = endpoint;
 
-        function endpoint($log, $q, $window, $gapi) {
+        function endpoint($log, $q, $timeout, $window, $document, $gapi) {
 
             var Endpoint = {
                 init: init,
@@ -52,15 +65,46 @@
                 promise: null,
                 deferred: null,
                 failed: false,
+                loadGoogleClient: loadGoogleClient,
+                googleClientLoaded: false,
                 settings: null
             };
 
-            /**
-             * Function to initialize google cloud endpoints
-             */
-            $window.endpointInitialize = function () {
-                Endpoint.init();
-            };
+            Endpoint.loadGoogleClient(); // Load the google client script when service is instantiated
+
+            function verbose(msg){
+                if(beVerbose) $log.debug(msg);
+            }
+
+            function loadGoogleClient() {
+
+                if (googleClientLoaded) return;
+                verbose('Loading google client from [' + Endpoint.googleClientUrl + ']');
+
+                googleClientLoaded = true;
+
+                var script = $document[0].createElement('script');
+                script.onload = function (e) {
+                    $timeout(function () {
+                        verbose('client.js loaded');
+                    });
+                };
+
+                script.onerror = function (e) {
+                    $timeout(function () {
+                        $log.info('client.js loading failed: ' + angular.toJson(e));
+                        Endpoint.init(); //make it fail
+                    });
+                };
+
+                $window.endpointOnLoad = function () {
+                    $timeout(function () {
+                        Endpoint.init();
+                    });
+                };
+                script.src = Endpoint.googleClientUrl + '?onload=endpointOnLoad';
+                $document[0].body.appendChild(script);
+            }
 
             function isLoaded() {
                 return Endpoint.loaded;
@@ -68,8 +112,10 @@
 
 
             function errorHandler(resp) {
-                $log.debug("jasify() error: (" + resp.status + ") '" + resp.statusText + "'");
-
+                if (resp.status)
+                    $log.debug('jasify() error: (' + resp.status + ') ' + resp.statusText);
+                else
+                    $log.debug('Jasify error: ' + angular.toJson(resp));
                 return $q.reject(resp);
             }
 
@@ -105,9 +151,14 @@
             }
 
             function init() {
-                $log.debug('Endpoint.init');
+                verbose('Endpoint.init');
                 if (Endpoint.promise === null) {
                     Endpoint.load(); //create promise
+                }
+
+                if ($gapi.client === undefined) {
+                    loadErrorHandler('Failed to load google client from [' + Endpoint.googleClientUrl + ']');
+                    return;
                 }
 
                 return $gapi.client.load(apiName, apiVersion, null, apiPath)
@@ -128,7 +179,7 @@
                 Endpoint.promise = null;
                 if (Endpoint.deferred) Endpoint.deferred.resolve('loaded');
                 Endpoint.deferred = null;
-                $log.debug('Endpoint.initialized');
+                verbose('Endpoint.initialized');
             }
 
             return Endpoint;

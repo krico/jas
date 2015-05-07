@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasifyWeb', [
+    var jasifyWeb = angular.module('jasifyWeb', [
         'ngRoute',
         'ngResource',
         'ngMessages',
@@ -20,10 +20,14 @@
         'angular.filter'
     ]);
 
+    jasifyWeb.config(function (EndpointProvider) {
+        EndpointProvider.verbose(true);
+    });
+
     /**
      * Listen to route changes and check
      */
-    angular.module('jasifyWeb').run(jasifyWebRun);
+    jasifyWeb.run(jasifyWebRun);
 
     function jasifyWebRun($rootScope, $log) {
         $rootScope.$on('$routeChangeError', function (event, next, current) {
@@ -31,7 +35,7 @@
         });
     }
 
-    angular.module("template/pagination/pagination.html", []).run(["$templateCache", function($templateCache) {
+    angular.module("template/pagination/pagination.html", []).run(["$templateCache", function ($templateCache) {
         $templateCache.put("template/pagination/pagination.html",
             "<ul class=\"pagination\">\n" +
             "  <li ng-if=\"boundaryLinks\" ng-class=\"{disabled: noPrevious()}\"><a href ng-click=\"selectPage(1)\"><i class=\"md mdi mdi-more-horiz\"></i></a></li>\n" +
