@@ -83,6 +83,11 @@
 
                 googleClientLoaded = true;
 
+                if(!($document[0] && $document[0].createElement)) {
+                    $log.warn('No createElement under document, hoping this is a test');
+                    return;
+                }
+
                 var script = $document[0].createElement('script');
                 script.onload = function (e) {
                     $timeout(function () {
