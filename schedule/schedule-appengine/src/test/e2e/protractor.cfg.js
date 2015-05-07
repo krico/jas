@@ -1,3 +1,4 @@
+var timeout = 30000;
 var config = {
     //seleniumAddress: 'http://localhost:4444/wd/hub',
     baseUrl: 'http://localhost:8080',
@@ -5,7 +6,7 @@ var config = {
         ci: 'spec/sign-in-with-email.spec.js', //run in travis-ci + sauce-labs
         full: 'spec/*.spec.js'
     },
-    allScriptsTimeout: 30000,
+    allScriptsTimeout: timeout,
     framework: 'jasmine2',
     // See the full list at https://github.com/juliemr/minijasminenode
     jasmineNodeOpts: {
@@ -18,10 +19,10 @@ var config = {
         // If true, include stack traces in failures.
         includeStackTrace: true,
         // Default time to wait in ms before a test fails.
-        defaultTimeoutInterval: 30000
+        defaultTimeoutInterval: timeout
     },
     params: {
-        externalTimeout: 30000,
+        externalTimeout: timeout,
         logins: {
             facebook: {
                 user: 'protractor_dspkqpy_user@tfbnw.net',
@@ -42,6 +43,8 @@ var config = {
         // protractor not available here
     },
     onPrepare: function () {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
+        jasmine.getEnv().defaultTimeoutInterval = timeout;
         //     jasmine.getEnv().addReporter(new jasmine.JUnitXmlReporter(
         //         'outputdir/', true, true));
     }

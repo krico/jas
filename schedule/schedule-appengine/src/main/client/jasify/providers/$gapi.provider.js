@@ -1,4 +1,4 @@
-(function (angular) {
+(function (angular, gapi) {
     /**
      * To follow the "Angular way", instead of accessing gapi.client directly,
      * we provide the $gapi service and use it instead.  This allows us to
@@ -7,9 +7,9 @@
     angular.module('jasifyComponents').provider('$gapi', $gapiProvider);
 
     function $gapiProvider() {
-        this.$get = function () {
+        this.$get = function ($window) {
             return gapi;
         };
     }
 
-})(angular);
+})(angular, gapi);
