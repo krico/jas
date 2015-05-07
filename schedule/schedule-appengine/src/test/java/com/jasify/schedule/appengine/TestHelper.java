@@ -40,7 +40,12 @@ import static junit.framework.TestCase.*;
 public final class TestHelper {
     private static final Logger log = LoggerFactory.getLogger(TestHelper.class);
 
+    static {
+        System.setProperty("slim3.useXGTX", "true");
+    }
+
     private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(
+            createDatastoreServiceTestConfig(),
             new LocalMailServiceTestConfig()
                     .setLogMailBody(false)
                     .setLogMailLevel(Level.OFF)
@@ -49,15 +54,21 @@ public final class TestHelper {
     private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
 
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig().setNoIndexAutoGen(true)
+            createDatastoreServiceTestConfig()
     );
 
-    private static final LocalServiceTestHelper memcacheWithDatastoreHelper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
-            .setNoIndexAutoGen(true), new LocalMemcacheServiceTestConfig());
+    private static final LocalServiceTestHelper memcacheWithDatastoreHelper = new LocalServiceTestHelper(createDatastoreServiceTestConfig(), new LocalMemcacheServiceTestConfig());
 
     private static ServletRunner servletRunner;
 
     private TestHelper() {
+    }
+
+    public static LocalDatastoreServiceTestConfig createDatastoreServiceTestConfig() {
+        return new LocalDatastoreServiceTestConfig()
+                .setApplyAllHighRepJobPolicy();
+//                .setDefaultHighRepJobPolicyUnappliedJobPercentage(100);
+// todo: read https://cloud.google.com/appengine/docs/java/tools/localunittesting#Java_Writing_High_Replication_Datastore_tests
     }
 
     public static void assertUtilityClassWellDefined(Class<?> clazz) throws Exception {

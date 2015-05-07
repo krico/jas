@@ -116,7 +116,7 @@ public class Activity {
         return activityTypeRef;
     }
 
-    public void setRepeatDetailsRef(RepeatDetails repeatDetails) { repeatDetailsRef.setModel(repeatDetails); }
+    public void setRepeatDetails(RepeatDetails repeatDetails) { repeatDetailsRef.setModel(repeatDetails); }
 
     public ModelRef<RepeatDetails> getRepeatDetailsRef() {
         return repeatDetailsRef;

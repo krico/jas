@@ -52,7 +52,7 @@
 
             function failed(reason) {
                 vm.complete = true;
-                $window.alert('Failed to authenticate');
+                $window.alert('Failed to authenticate: ' + angular.toJson(reason));
                 //TODO: handle failure
                 $location.replace();
                 $location.path("/");

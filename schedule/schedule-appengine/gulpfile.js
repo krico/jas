@@ -26,6 +26,7 @@ var argv = require('yargs').argv,
     templateCache = require('gulp-angular-templatecache'),
     plumber = require('gulp-plumber');
 
+var bowerInstalled = false;
 var paths = require('./dynamic-paths.js');
 gutil.log('Project version: ' + gutil.colors.cyan(paths.projectVersion));
 
@@ -45,7 +46,7 @@ gulp.task('client-dependencies', ['client-dependencies-js', 'client-dependencies
 gulp.task('client-tpl', clientTpl);
 gulp.task('client-js', clientJs);
 
-gulp.task('client-css', clientCss);
+gulp.task('client-css', ['bower-install'], clientCss);
 
 gulp.task('client', ['client-tpl', 'client-js', 'client-dependencies', 'client-css']);
 
@@ -54,9 +55,10 @@ gulp.task('lint-test-js', lintTestJs);
 gulp.task('lint', ['lint-js', 'lint-test-js']);
 gulp.task('html', html);
 gulp.task('static-html', staticHtml);
+gulp.task('images', images);
 gulp.task('test', ['build'], testClient);
 gulp.task('watch', rebuild);
-gulp.task('build', ['client', 'html', 'static-html']);
+gulp.task('build', ['client', 'html', 'static-html', 'images']);
 gulp.task('default', ['watch', 'build', 'lint']);
 
 function rebuild() {
@@ -70,6 +72,7 @@ function rebuild() {
     gulp.watch(paths.watchCss, ['client-css']);
     gulp.watch(paths.html, ['html']);
     gulp.watch(paths.staticHtml, ['static-html']);
+    gulp.watch(paths.images, ['images']);
 }
 
 
@@ -84,6 +87,8 @@ function sym(cb) {
 }
 
 function bowerInstall(cb) {
+    if(bowerInstalled) {return cb();}
+    bowerInstalled = true;
     return bower();
 }
 
@@ -121,7 +126,12 @@ function clientJs(cb) {
         versionInfo.timestamp = argv.buildTimestamp;
         versionInfo.version = argv.buildVersion;
     }
-    gutil.log('Replacing version information\n' + gutil.colors.cyan(require('util').inspect(versionInfo)));
+    var vi = 'number: ' + gutil.colors.cyan(versionInfo.number) +
+        ', branch: ' + gutil.colors.cyan(versionInfo.branch) +
+        ', timestamp: ' + gutil.colors.cyan(versionInfo.timestamp) +
+        ', version: ' + gutil.colors.cyan(versionInfo.version);
+
+    gutil.log('Version information ' + vi);
 
     return gulp.src(paths.js)
         .pipe(plumber())
@@ -224,6 +234,12 @@ function staticHtml(cb) {
     return gulp.src(paths.staticHtml)
         .pipe(plumber())
         .pipe(gulp.dest(paths.build + '/../'))
+}
+
+function images(cb) {
+    return gulp.src(paths.images)
+        .pipe(plumber())
+        .pipe(gulp.dest(paths.build + '/../img'))
 }
 
 

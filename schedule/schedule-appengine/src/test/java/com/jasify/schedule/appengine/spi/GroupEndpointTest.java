@@ -283,7 +283,7 @@ public class GroupEndpointTest {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
         Key key = Datastore.allocateId(Group.class);
         service.getGroup(key);
-        expectLastCall().andThrow(new EntityNotFoundException(null));
+        expectLastCall().andThrow(new EntityNotFoundException((String) null));
         testOrganizationServiceFactory.replay();
         endpoint.getGroupUsers(newAdminCaller(55), key);
     }
@@ -294,7 +294,7 @@ public class GroupEndpointTest {
         Key groupId = Datastore.allocateId(Group.class);
         Key userId = Datastore.allocateId(User.class);
         service.addUserToGroup(groupId, userId);
-        expectLastCall().andThrow(new EntityNotFoundException(null));
+        expectLastCall().andThrow(new EntityNotFoundException((String) null));
         testOrganizationServiceFactory.replay();
         endpoint.addUserToGroup(newAdminCaller(55), groupId, userId);
     }

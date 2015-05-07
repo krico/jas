@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.model.balance;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
@@ -34,8 +33,7 @@ public class BalanceServiceTest {
 
     private final LocalTaskQueueTestConfig.TaskCountDownLatch latch = new LocalTaskQueueTestConfig.TaskCountDownLatch(1);
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig()
-                    .setNoIndexAutoGen(true),
+            TestHelper.createDatastoreServiceTestConfig(),
             new LocalTaskQueueTestConfig()
                     .setDisableAutoTaskExecution(false)
                     .setQueueXmlPath(TestHelper.relPath("src/main/webapp/WEB-INF/queue.xml").getPath())

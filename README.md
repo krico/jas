@@ -1,4 +1,4 @@
-# jasify [![Build Status](https://travis-ci.org/krico/jas.svg?branch=master)](https://travis-ci.org/krico/jas)
+# jasify [![Build Status](https://travis-ci.org/krico/jas.svg?branch=master)](https://travis-ci.org/krico/jas)[![Sauce Test Status](https://saucelabs.com/browser-matrix/jasify.svg)](https://saucelabs.com/u/jasify)
 
 Janes Asmussen Szarmach
 

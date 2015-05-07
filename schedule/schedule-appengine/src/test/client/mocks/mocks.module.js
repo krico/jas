@@ -111,6 +111,16 @@
                 add: nop,
                 remove: nop
             },
+            activityPackages: {
+                query: nop,
+                get: nop,
+                update: nop,
+                addActivity: nop,
+                removeActivity: nop,
+                add: nop,
+                getActivities: nop,
+                remove: nop
+            },
             activitySubscriptions: {
                 add: nop,
                 query: nop,

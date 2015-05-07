@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-sm-4">
+        <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
+            <div class="form-group">
+                <label class="control-label col-sm-4" for="organization">Organization:</label>
+
+                <div class="col-sm-7">
+                    <select ng-model="vm.organization" id="organization" class="form-control"
+                            ng-options="organization as organization.name for organization in vm.organizations"
+                            ng-change="vm.organizationSelected(vm.organization)">
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-6">
+        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-10">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>
+                    <a ng-click="vm.addActivityPackage()" tooltip="Create new activity package">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </a>
+                </th>
+                <th>name</th>
+                <th>price</th>
+                <th><span tooltip="How many subscriptions are allowed">#items</span></th>
+                <th><span tooltip="How many activities are inclded">#activities</span></th>
+                <th><span tooltip="How many times was this bought">executions</span></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="activityPackage in vm.activityPackages">
+                <td>{{activityPackage.id}}</td>
+                <td ng-click="vm.viewActivityPackage(activityPackage.id)">{{activityPackage.name}}</td>
+                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                    {{activityPackage.price | currency:activityPackage.currency}}
+                </td>
+                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                    {{activityPackage.itemCount}}
+                </td>
+                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                    {{activityPackage.activityCount}}
+                </td>
+                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                    {{activityPackage.executions || 0}}
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-xs"
+                            ng-disabled="activityPackage.executions > 0"
+                            ng-click="vm.remove(activityPackage.id)"><span
+                            class="glyphicon glyphicon-remove" tooltip="Delete"></span>
+                    </button>
+                </td>
+            </tr>
+            <tr ng-if="vm.activityPackages.length == 0">
+                <td colspan="8">No activity packages...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

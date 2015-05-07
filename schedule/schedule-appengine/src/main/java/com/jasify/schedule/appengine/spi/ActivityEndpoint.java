@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.common.base.Preconditions;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
@@ -17,6 +18,7 @@ import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
+import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
@@ -41,6 +43,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
         transformers = {
                 /* one per line in alphabetical order to avoid merge conflicts */
                 JasAccountTransformer.class,
+                JasActivityPackageTransformer.class,
                 JasActivityTransformer.class,
                 JasActivityTypeTransformer.class,
                 JasGroupTransformer.class,
@@ -252,7 +255,7 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activitySubscriptions.add", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.POST)
-    public Subscription addSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException  {
+    public Subscription addSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
         mustBeSameUserOrAdmin(caller, userId);
         try {
             return ActivityServiceFactory.getActivityService().subscribe(userId, activityId);
@@ -297,9 +300,105 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, createFromSubscriptionId(subscriptionId));
         checkFound(subscriptionId);
         try {
-            ActivityServiceFactory.getActivityService().cancel(subscriptionId);
+            ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
+
+    @ApiMethod(name = "activityPackages.query", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<ActivityPackage> getActivityPackages(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
+        try {
+            return ActivityServiceFactory.getActivityService().getActivityPackages(organizationId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.get", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public ActivityPackage getActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        checkFound(id);
+        try {
+            return ActivityServiceFactory.getActivityService().getActivityPackage(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(id));
+        checkFound(id);
+        ActivityPackage activityPackage = Preconditions.checkNotNull(request.getActivityPackage(), "request.ActivityPackage is NULL");
+        List<Activity> activities = Preconditions.checkNotNull(request.getActivities(), "request.Activities is NULL");
+        activityPackage.setId(id);
+        try {
+            return ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage, activities);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Not found");
+        } catch (FieldValueException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.add", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.POST)
+    public ActivityPackage addActivityPackage(User caller, JasActivityPackageRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        ActivityPackage activityPackage = checkFound(request.getActivityPackage(), "request.activityPackage == NULL");
+        Key organizationId = checkFound(activityPackage.getOrganizationRef().getKey(), "request.activityPackage.organization == NULL");
+        List<Activity> activities = checkFound(request.getActivities(), "request.activities == NULL");
+
+        if (activities.isEmpty())
+            throw new BadRequestException("request.activities.isEmpty");
+
+        mustBeAdminOrOrgMember(caller, createFromOrganizationId(organizationId));
+
+        ActivityService activityService = ActivityServiceFactory.getActivityService();
+        try {
+            Key id = activityService.addActivityPackage(activityPackage, activities);
+            return activityService.getActivityPackage(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (FieldValueException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.remove", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
+        checkFound(id);
+        //TODO: remove activity package
+        throw new RuntimeException("NOT IMPLEMENTED");
+    }
+
+    @ApiMethod(name = "activityPackages.getActivities", path = "activity-packages-activity/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Activity> getActivityPackageActivities(User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        try {
+            ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(activityPackageId);
+            return activityPackage.getActivities();
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public void addActivityToActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
+        try {
+            ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackageId, activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        }
+    }
+
+    @ApiMethod(name = "activityPackages.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
+        try {
+            ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(activityPackageId, activityId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("User not found");
+        }
+    }
+
 }

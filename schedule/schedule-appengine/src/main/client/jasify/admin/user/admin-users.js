@@ -83,7 +83,7 @@
 
         function searchBy(newValue) {
             if (angular.isDefined(newValue)) {
-                vm._searchBy = newValue
+                vm._searchBy = newValue;
                 vm.searchByChanged();
             }
             return vm._searchBy;

@@ -3,13 +3,16 @@ package com.jasify.schedule.appengine.model.activity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.mail.MailServicePb;
 import com.google.appengine.api.mail.dev.LocalMailService;
+import com.google.appengine.labs.repackaged.com.google.common.base.Function;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.*;
-import com.jasify.schedule.appengine.model.activity.RepeatDetails.*;
+import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
+import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
@@ -17,14 +20,21 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static junit.framework.TestCase.*;
 
 public class ActivityServiceTest {
+    private static final Logger log = LoggerFactory.getLogger(ActivityServiceTest.class);
+
     private static final String TEST_ACTIVITY_TYPE = "Test Activity Type";
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     private ActivityService activityService;
     private User testUser1;
     private User testUser2;
@@ -34,12 +44,13 @@ public class ActivityServiceTest {
     private ActivityType activityType2OfOrganization1;
     private Activity activity1Organization1;
     private Activity activity2Organization1;
+    private ActivityPackage activityPackage;
 
     private Activity createActivity(ActivityType activityType) {
         Activity activity = new Activity(activityType);
         DateTime date = new DateTime();
         date = date.plusDays(1);
-        activity.setStart(new DateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),10,0,0).toDate());
+        activity.setStart(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate());
         activity.setFinish(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate());
         return activity;
     }
@@ -57,19 +68,31 @@ public class ActivityServiceTest {
 
     private void setRepeatDay(RepeatDetails repeatDetails, int jodaDayOfWeek) {
         switch (jodaDayOfWeek) {
-            case DateTimeConstants.MONDAY: repeatDetails.setMondayEnabled(true); break;
-            case DateTimeConstants.TUESDAY: repeatDetails.setTuesdayEnabled(true); break;
-            case DateTimeConstants.WEDNESDAY: repeatDetails.setWednesdayEnabled(true); break;
-            case DateTimeConstants.THURSDAY: repeatDetails.setThursdayEnabled(true); break;
-            case DateTimeConstants.FRIDAY: repeatDetails.setFridayEnabled(true); break;
-            case DateTimeConstants.SATURDAY: repeatDetails.setSaturdayEnabled(true); break;
-            case DateTimeConstants.SUNDAY: repeatDetails.setSundayEnabled(true); break;
-            default: break;
+            case DateTimeConstants.MONDAY:
+                repeatDetails.setMondayEnabled(true);
+                break;
+            case DateTimeConstants.TUESDAY:
+                repeatDetails.setTuesdayEnabled(true);
+                break;
+            case DateTimeConstants.WEDNESDAY:
+                repeatDetails.setWednesdayEnabled(true);
+                break;
+            case DateTimeConstants.THURSDAY:
+                repeatDetails.setThursdayEnabled(true);
+                break;
+            case DateTimeConstants.FRIDAY:
+                repeatDetails.setFridayEnabled(true);
+                break;
+            case DateTimeConstants.SATURDAY:
+                repeatDetails.setSaturdayEnabled(true);
+                break;
+            case DateTimeConstants.SUNDAY:
+                repeatDetails.setSundayEnabled(true);
+                break;
+            default:
+                break;
         }
     }
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void initializeDatastore() {
@@ -302,14 +325,14 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithNullRepeatDetails() throws Exception{
+    public void testAddActivityWithNullRepeatDetails() throws Exception {
         List<Key> ids = activityService.addActivity(activity1Organization1, null);
         assertNotNull(ids);
         assertEquals(1, ids.size());
     }
 
     @Test
-    public void testAddActivityWithNullRepeatType() throws Exception{
+    public void testAddActivityWithNullRepeatType() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("RepeatDetails.repeatType");
         RepeatDetails repeatDetails = new RepeatDetails();
@@ -330,7 +353,7 @@ public class ActivityServiceTest {
     public void testActivityStartInPast() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("Activity.start");
-        activity1Organization1.setStart(new DateTime(2000,1,1,10,0,0).toDate());
+        activity1Organization1.setStart(new DateTime(2000, 1, 1, 10, 0, 0).toDate());
         activityService.addActivity(activity1Organization1, null);
     }
 
@@ -369,7 +392,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithInvalidRepeatEvery() throws Exception{
+    public void testAddActivityWithInvalidRepeatEvery() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("RepeatDetails.repeatEvery");
         RepeatDetails repeatDetails = new RepeatDetails();
@@ -380,7 +403,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithNullRepeatUntilType() throws Exception{
+    public void testAddActivityWithNullRepeatUntilType() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("RepeatDetails.repeatUntilType");
         RepeatDetails repeatDetails = new RepeatDetails();
@@ -389,7 +412,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithNullRepeatUntilDate() throws Exception{
+    public void testAddActivityWithNullRepeatUntilDate() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("RepeatDetails.untilDate");
         RepeatDetails repeatDetails = new RepeatDetails();
@@ -399,7 +422,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithRepeatUntilDateInPast() throws Exception{
+    public void testAddActivityWithRepeatUntilDateInPast() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("RepeatDetails.untilDate");
         RepeatDetails repeatDetails = new RepeatDetails();
@@ -410,7 +433,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithInvalidRepeatUntilCount() throws Exception{
+    public void testAddActivityWithInvalidRepeatUntilCount() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("RepeatDetails.untilCount");
         RepeatDetails repeatDetails = new RepeatDetails();
@@ -421,7 +444,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithNoRepeatDays() throws Exception{
+    public void testAddActivityWithNoRepeatDays() throws Exception {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("RepeatDetails.repeatDays");
         RepeatDetails repeatDetails = new RepeatDetails();
@@ -433,7 +456,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithRepeatDailyCount() throws Exception{
+    public void testAddActivityWithRepeatDailyCount() throws Exception {
         DateTime date = new DateTime();
         date = date.plusDays(1);
 
@@ -446,16 +469,16 @@ public class ActivityServiceTest {
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
-        assertEquals(new DateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),10,0,0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),11,0,0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
         date = date.plusDays(1);
-        assertEquals(new DateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatDailyDate() throws Exception{
+    public void testAddActivityWithRepeatDailyDate() throws Exception {
         DateTime date1 = new DateTime();
         date1 = date1.plusDays(1);
 
@@ -469,15 +492,15 @@ public class ActivityServiceTest {
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(),10,0,0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(),11,0,0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatDailyEveryWeek() throws Exception{
+    public void testAddActivityWithRepeatDailyEveryWeek() throws Exception {
         DateTime date1 = new DateTime();
         date1 = date1.plusDays(1);
 
@@ -491,16 +514,16 @@ public class ActivityServiceTest {
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(),10,0,0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(),11,0,0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
         DateTime date2 = date1.plusDays(7);
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatDailyEveryTwoWeeks() throws Exception{
+    public void testAddActivityWithRepeatDailyEveryTwoWeeks() throws Exception {
         DateTime date1 = new DateTime();
         date1 = date1.plusDays(1);
 
@@ -514,16 +537,16 @@ public class ActivityServiceTest {
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
         DateTime date2 = date1.plusDays(14);
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatDailyDoesNotExceedMaximum() throws Exception{
+    public void testAddActivityWithRepeatDailyDoesNotExceedMaximum() throws Exception {
         RepeatDetails repeatDetails = new RepeatDetails();
         repeatDetails.setRepeatType(RepeatType.Daily);
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
@@ -535,7 +558,7 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testAddActivityWithRepeatWeeklyCount() throws Exception{
+    public void testAddActivityWithRepeatWeeklyCount() throws Exception {
         DateTime date1 = new DateTime();
         date1 = date1.plusDays(1);
 
@@ -549,16 +572,16 @@ public class ActivityServiceTest {
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
         DateTime date2 = date1.plusDays(7);
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatWeeklyDate() throws Exception{
+    public void testAddActivityWithRepeatWeeklyDate() throws Exception {
         DateTime date1 = new DateTime();
         date1 = date1.plusDays(1);
 
@@ -573,16 +596,16 @@ public class ActivityServiceTest {
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
         DateTime date3 = date1.plusDays(7);
-        assertEquals(new DateTime(date3.getYear(),date3.getMonthOfYear(),date3.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date3.getYear(),date3.getMonthOfYear(),date3.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatWeeklyEveryTwoWeeks() throws Exception{
+    public void testAddActivityWithRepeatWeeklyEveryTwoWeeks() throws Exception {
         DateTime date1 = new DateTime();
         date1 = date1.plusDays(1);
 
@@ -597,16 +620,16 @@ public class ActivityServiceTest {
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date1.getYear(),date1.getMonthOfYear(),date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
         DateTime date3 = date1.plusDays(14);
-        assertEquals(new DateTime(date3.getYear(),date3.getMonthOfYear(),date3.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date3.getYear(),date3.getMonthOfYear(),date3.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatWeeklyTwoDaysEveryTwoWeeks() throws Exception{
+    public void testAddActivityWithRepeatWeeklyTwoDaysEveryTwoWeeks() throws Exception {
         DateTime date1 = new DateTime();
         date1 = date1.plusDays(1);
 
@@ -623,24 +646,24 @@ public class ActivityServiceTest {
         assertEquals(4, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
         DateTime date2 = date1.plusDays(1);
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),10,0,0).toDate(), activity1.getStart());
-        assertEquals(new DateTime(date2.getYear(),date2.getMonthOfYear(),date2.getDayOfMonth(),11,0,0).toDate(), activity1.getFinish());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
         Activity activity2 = activityService.getActivity(ids.get(1));
         DateTime date3 = date2.plusDays(2);
-        assertEquals(new DateTime(date3.getYear(),date3.getMonthOfYear(),date3.getDayOfMonth(),10,0,0).toDate(), activity2.getStart());
-        assertEquals(new DateTime(date3.getYear(),date3.getMonthOfYear(),date3.getDayOfMonth(),11,0,0).toDate(), activity2.getFinish());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
         Activity activity3 = activityService.getActivity(ids.get(2));
         DateTime date4 = date2.plusDays(14);
-        assertEquals(new DateTime(date4.getYear(),date4.getMonthOfYear(),date4.getDayOfMonth(),10,0,0).toDate(), activity3.getStart());
-        assertEquals(new DateTime(date4.getYear(),date4.getMonthOfYear(),date4.getDayOfMonth(),11,0,0).toDate(), activity3.getFinish());
+        assertEquals(new DateTime(date4.getYear(), date4.getMonthOfYear(), date4.getDayOfMonth(), 10, 0, 0).toDate(), activity3.getStart());
+        assertEquals(new DateTime(date4.getYear(), date4.getMonthOfYear(), date4.getDayOfMonth(), 11, 0, 0).toDate(), activity3.getFinish());
         Activity activity4 = activityService.getActivity(ids.get(3));
         DateTime date5 = date4.plusDays(2);
-        assertEquals(new DateTime(date5.getYear(),date5.getMonthOfYear(),date5.getDayOfMonth(),10,0,0).toDate(), activity4.getStart());
-        assertEquals(new DateTime(date5.getYear(),date5.getMonthOfYear(),date5.getDayOfMonth(),11,0,0).toDate(), activity4.getFinish());
+        assertEquals(new DateTime(date5.getYear(), date5.getMonthOfYear(), date5.getDayOfMonth(), 10, 0, 0).toDate(), activity4.getStart());
+        assertEquals(new DateTime(date5.getYear(), date5.getMonthOfYear(), date5.getDayOfMonth(), 11, 0, 0).toDate(), activity4.getFinish());
     }
 
     @Test
-    public void testAddActivityWithRepeatWeeklyDoesNotExceedMaximum() throws Exception{
+    public void testAddActivityWithRepeatWeeklyDoesNotExceedMaximum() throws Exception {
         RepeatDetails repeatDetails = new RepeatDetails();
         repeatDetails.setRepeatType(RepeatType.Weekly);
         repeatDetails.setFridayEnabled(true);
@@ -922,5 +945,271 @@ public class ActivityServiceTest {
         }
         assertTrue(ids.contains(subscription1.getId()));
         assertTrue(ids.contains(subscription2.getId()));
+    }
+
+    @Test
+    public void testCreateActivityPackage() throws Exception {
+        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activity2Organization1, null);
+
+        ActivityPackage ap = new ActivityPackage();
+        ap.getOrganizationRef().setKey(organization1.getId());
+        ap.setCurrency("USD");
+        ap.setDescription("Super package");
+        ap.setMaxExecutions(0);
+        ap.setName("Supa");
+        ap.setPrice(20d);
+        ap.setItemCount(2);
+
+        Key id = activityService.addActivityPackage(ap, Arrays.asList(activity1Organization1, activity2Organization1));
+        assertNotNull(id);
+        activityPackage = activityService.getActivityPackage(id);
+        Set<Key> keys = activityPackage.getActivityKeys();
+        assertNotNull(keys);
+        assertEquals(2, keys.size());
+        assertTrue(keys.contains(activity1Organization1.getId()));
+        assertTrue(keys.contains(activity2Organization1.getId()));
+
+        List<Activity> activities = activityPackage.getActivities();
+        assertNotNull(activities);
+        assertEquals(2, activities.size());
+
+        boolean found = false;
+        for (Activity activity : activities) {
+            found = activity.getId().equals(activity1Organization1.getId());
+            if (found) break;
+        }
+        assertTrue(found);
+
+        found = false;
+        for (Activity activity : activities) {
+            found = activity.getId().equals(activity2Organization1.getId());
+            if (found) break;
+        }
+        assertTrue(found);
+    }
+
+    @Test
+    public void testUpdateActivityPackageWithActivities() throws Exception {
+        testCreateActivityPackage();
+        Activity thirdActivity = createActivity(activityType1OfOrganization1);
+        activityService.addActivity(thirdActivity, null);
+
+        activityPackage.setDescription("New Desc");
+        Date created = activityPackage.getCreated();
+        activityPackage.setCreated(new Date(8282123));
+        activityPackage.setModified(new Date(555));
+        activityPackage.setItemCount(99);
+        activityPackage.setPrice(999d);
+        activityPackage.setExecutionCount(826);
+        activityPackage.setName("New Name");
+        activityPackage.setCurrency("BRL");
+        activityPackage.setMaxExecutions(200);
+        activityPackage.setValidFrom(new Date(12345678));
+        activityPackage.setValidUntil(new Date(22233344));
+        Key expectedOrgId = activityPackage.getOrganizationRef().getKey();
+        activityPackage.getOrganizationRef().setKey(null);
+
+        activityPackage.getActivityPackageActivityListRef().clear();
+        Set<Key> activityKeys = activityPackage.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(2, activityKeys.size());
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(activity2Organization1.getId()));
+
+        ActivityPackage fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity, activity1Organization1));
+
+        long modified = System.currentTimeMillis();
+        assertNotNull(fetched);
+
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(2, activityKeys.size());
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+
+        assertNotNull(fetched);
+        assertEquals("New Desc", fetched.getDescription());
+        assertEquals(99, fetched.getItemCount());
+        assertEquals(999d, fetched.getPrice());
+        //achtung
+        assertEquals("Execution count should not be updated", 0, fetched.getExecutionCount());
+        assertEquals("original ap unchanged", 826, activityPackage.getExecutionCount());
+        assertEquals("New Name", fetched.getName());
+        assertEquals("BRL", fetched.getCurrency());
+        assertEquals(200, fetched.getMaxExecutions());
+        assertEquals(new Date(12345678), fetched.getValidFrom());
+        assertEquals(new Date(22233344), fetched.getValidUntil());
+
+        assertEquals(created, fetched.getCreated());
+        long fetchedModified = fetched.getModified().getTime();
+        assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+        assertEquals(expectedOrgId, fetched.getOrganizationRef().getKey());
+
+
+        fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity));
+
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(1, activityKeys.size());
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+
+        fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity, activity2Organization1, activity1Organization1));
+
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(3, activityKeys.size());
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(activity2Organization1.getId()));
+
+        fetched.getActivityPackageActivityListRef().clear();
+        activityKeys = fetched.getActivityKeys();
+        assertNotNull(activityKeys);
+        assertEquals(3, activityKeys.size());
+        assertTrue(activityKeys.contains(thirdActivity.getId()));
+        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+        assertTrue(activityKeys.contains(activity2Organization1.getId()));
+
+    }
+
+    @Test
+    public void testUpdateActivityPackage() throws Exception {
+        testCreateActivityPackage();
+        activityPackage.setDescription("New Desc");
+        Date created = activityPackage.getCreated();
+        activityPackage.setCreated(new Date(8282123));
+        activityPackage.setModified(new Date(555));
+        activityPackage.setItemCount(99);
+        activityPackage.setPrice(999d);
+        activityPackage.setExecutionCount(826);
+        activityPackage.setName("New Name");
+        activityPackage.setCurrency("BRL");
+        activityPackage.setMaxExecutions(200);
+        activityPackage.setValidFrom(new Date(12345678));
+        activityPackage.setValidUntil(new Date(22233344));
+        Key expectedOrgId = activityPackage.getOrganizationRef().getKey();
+        activityPackage.getOrganizationRef().setKey(null);
+
+        List<ActivityPackage> fetchedPackages = Lists.newArrayList();
+        fetchedPackages.add(activityService.updateActivityPackage(activityPackage));
+
+        long modified = System.currentTimeMillis();
+
+        fetchedPackages.add(activityService.getActivityPackage(activityPackage.getId()));
+        for (ActivityPackage fetched : fetchedPackages) {
+            assertNotNull(fetched);
+            assertEquals("New Desc", fetched.getDescription());
+            assertEquals(99, fetched.getItemCount());
+            assertEquals(999d, fetched.getPrice());
+            //achtung
+            assertEquals("Execution count should not be updated", 0, fetched.getExecutionCount());
+            assertEquals("original ap unchanged", 826, activityPackage.getExecutionCount());
+            assertEquals("New Name", fetched.getName());
+            assertEquals("BRL", fetched.getCurrency());
+            assertEquals(200, fetched.getMaxExecutions());
+            assertEquals(new Date(12345678), fetched.getValidFrom());
+            assertEquals(new Date(22233344), fetched.getValidUntil());
+
+            assertEquals(created, fetched.getCreated());
+            long fetchedModified = fetched.getModified().getTime();
+            assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+            assertEquals(expectedOrgId, fetched.getOrganizationRef().getKey());
+        }
+    }
+
+    @Test
+    public void testCreateAddAndRemoveFromActivityPackage() throws Exception {
+        testCreateActivityPackage();
+
+        activityService.removeActivityFromActivityPackage(activityPackage, activity2Organization1);
+
+        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        Set<Key> keys = activityPackage.getActivityKeys();
+        assertEquals(1, keys.size());
+        assertTrue(keys.contains(activity1Organization1.getId()));
+
+        activityService.addActivityToActivityPackage(activityPackage, activity2Organization1);
+
+        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        keys = activityPackage.getActivityKeys();
+        assertEquals(2, keys.size());
+        assertTrue(keys.contains(activity1Organization1.getId()));
+        assertTrue(keys.contains(activity2Organization1.getId()));
+    }
+
+    @Test
+    public void testSubscribeToActivityPackage() throws Exception {
+        testCreateActivityPackage();
+        ActivityPackageExecution ret = activityService.subscribe(testUser1, activityPackage, Arrays.asList(activity2Organization1, activity1Organization1));
+        assertNotNull(ret);
+        assertEquals(activityPackage.getId(), ret.getActivityPackageRef().getKey());
+        assertEquals(testUser1.getId(), ret.getUserRef().getKey());
+        assertNull(ret.getTransferRef().getKey());
+        List<ActivityPackageSubscription> subscriptions = ret.getSubscriptionListRef().getModelList();
+        assertEquals(2, subscriptions.size());
+        HashSet<Key> activities = new HashSet<>();
+        for (ActivityPackageSubscription subscription : subscriptions) {
+            assertEquals(ret.getId(), subscription.getActivityPackageExecutionRef().getKey());
+            assertNull(subscription.getTransferRef().getKey());
+            assertEquals(testUser1.getId(), subscription.getUserRef().getKey());
+            assertNotNull(subscription.getActivityRef().getKey());
+            activities.add(subscription.getActivityRef().getKey());
+        }
+        assertTrue(activities.contains(activity1Organization1.getId()));
+        assertTrue(activities.contains(activity2Organization1.getId()));
+        log.info("{}", ModelMetadataUtil.dumpDb(new StringBuilder("DB DUMP\n")));
+    }
+
+    @Test
+    public void testGetActivityPackages() throws Exception {
+        testCreateActivityPackage();
+        Key ap1Org1 = activityPackage.getId();
+        testCreateActivityPackage();
+        Key ap2Org1 = activityPackage.getId();
+
+        ActivityPackage ap = new ActivityPackage();
+        ap.getOrganizationRef().setKey(organization2.getId());
+        ap.setCurrency("USD");
+        ap.setDescription("Super package");
+        ap.setMaxExecutions(0);
+        ap.setName("Supa");
+        ap.setPrice(20d);
+        ap.setItemCount(2);
+        ActivityType activityType = new ActivityType("ATO2");
+        activityType.setId(Datastore.allocateId(organization2.getId(), ActivityTypeMeta.get()));
+        activityType.getOrganizationRef().setKey(organization2.getId());
+        Datastore.put(activityType);
+
+        Activity activity = createActivity(activityType);
+        Datastore.put(activity);
+        Key ap1Org2 = activityService.addActivityPackage(ap, Arrays.asList(activity));
+
+
+        //Now we do the real test work
+        List<ActivityPackage> activityPackages = activityService.getActivityPackages(organization1);
+        assertNotNull(activityPackages);
+        assertEquals(2, activityPackages.size());
+        List<Key> ids = Lists.transform(activityPackages, new Function<ActivityPackage, Key>() {
+            @Nullable
+            @Override
+            public Key apply(ActivityPackage activityPackage) {
+                return activityPackage.getId();
+            }
+        });
+        assertTrue(ids.contains(ap1Org1));
+        assertTrue(ids.contains(ap2Org1));
+
+        activityPackages = activityService.getActivityPackages(organization2.getId());
+        assertNotNull(activityPackages);
+        assertEquals(1, activityPackages.size());
+        ids = Lists.transform(activityPackages, new Function<ActivityPackage, Key>() {
+            @Nullable
+            @Override
+            public Key apply(ActivityPackage activityPackage) {
+                return activityPackage.getId();
+            }
+        });
+        assertTrue(ids.contains(ap1Org2));
     }
 }

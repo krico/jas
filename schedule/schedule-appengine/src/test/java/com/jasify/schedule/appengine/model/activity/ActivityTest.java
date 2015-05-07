@@ -102,7 +102,7 @@ public class ActivityTest {
     public void testRepeatDetailsRef() {
         Activity activity = new Activity();
         RepeatDetails repeatDetails = new RepeatDetails();
-        activity.setRepeatDetailsRef(repeatDetails);
+        activity.setRepeatDetails(repeatDetails);
         assertEquals(repeatDetails, activity.getRepeatDetailsRef().getModel());
     }
 

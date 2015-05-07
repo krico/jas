@@ -7,7 +7,7 @@
 
 (function(angular) {
 
-    "use strict;"
+    "use strict;";
 
     angular.module('jasifyComponents').directive('aButton', function ($timeout, $rootScope) {
         return {
@@ -92,7 +92,6 @@
                 if (scope.options.onlyIcons) {
                     scope.onlyIcons = 'icons-only';
                 }
-                ;
 
                 //$rootScope.$on('mask-hide', function () {
                 //    if (scope.isSubmitting) {

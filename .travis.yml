@@ -1,9 +1,21 @@
 language: java
-jdk: oraclejdk7
-env: ENV_IS_CI=true bower_storage_cache=$HOME/.bower
 sudo: false
+jdk: oraclejdk7
+env:
+  global:
+  - ENV_IS_CI=true
+  - JAS_CACHE=$HOME/cache
+  - secure: A5dIYYAok4DjMpiSrO7Ys08tPcwwn+wSJGWlLHAiinve9brgpvapVZ3KSksRA6ly7XkTFx7UHcp17wa6gXkFyq6EERCeLKfDGcOG6eI3I+YrFn2l0guVppw7ggMIKlCdaqXjz8/0Z7RgXeUV0d1z4WgWFOLkcH+R8uorhXFb4vg=
+  - secure: WA+4zfk6DJLxuocm3cpG/SDtOyi0YCqAL0DaRxDUW/SIijfBBT6Jl1Cy4Pavlq/FeVrTRtjSvOWs35BN/+CA23NbckkbxPUWRUBbgZrkUmO73mH72l82p2Lw748s0jydvI9magvdP6aVhcK4SXLtDZnKt2N+R8EmNzLIx9+djFA=
+  matrix:
+  - JAS_BUILD_MODE=ci
+  - JAS_BUILD_MODE=e2e
 cache:
   directories:
-  - $HOME/.m2
-  - $HOME/.bower
-  - $HOME/.npm
+  - $JAS_CACHE
+addons:
+  sauce_connect: true
+install: scripts/build-install.sh
+before_script: scripts/build-setup.sh
+script: scripts/build-runner.sh
+before_cache: scripts/build-before-cache.sh

@@ -62,15 +62,26 @@ It should look something like (*you need to replace REAL_CLIENT_ID and REAL_CLIE
 are not using oauth with google, you can put any value there:
 
 ```javascript
-
 {
   "ApplicationConfig" : {
     "OAuth2ProviderConfig.Google.ClientId" : "REAL_CLIENT_ID",
-    "OAuth2ProviderConfig.Google.ClientSecret" : "REAL_CLIENT_SECRET"
+    "OAuth2ProviderConfig.Google.ClientSecret" : "REAL_CLIENT_SECRET",
+    "com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType": null
   }
 }
+```
 
+If you want the dev system to be initialized with some values to ease your testing (organizations, etc) you can control
+that with `com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType`.  The types are implemented in
+`com.jasify.schedule.appengine.model.SchemaMigrationInitialLoad`.  For example, set it to
 
+```javascript
+{
+  "ApplicationConfig" : {
+    ...
+    "com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType": "samples"
+  }
+}
 ```
 ## Style
 
@@ -90,6 +101,28 @@ are not using oauth with google, you can put any value there:
  * To run only the jasmine tests, you need to run `mvn phantomjs:install jasmine:test`.  Another option is to run a webserver
    and run your tests in the browser.  Then you can simply reload the browser to test again.  For this, run `mvn jasmine:bdd`.
  * Checkout [Jasmine Documentation](http://jasmine.github.io/2.0/introduction.html)
+
+## Protractor (end to end testing)
+
+ * To get protractor going, have a look at the [tutorial](http://angular.github.io/protractor/#/tutorial).
+ If you don't want to install anything and rely only on jasify, you can do
+```
+# download selenium binaries
+./node_modules/.bin/webdriver-manager update
+# start selenium server (http://localhost:4444/wd/hub)
+./node_modules/.bin/webdriver-manager start
+
+# on another terminal, run
+./node_modules/.bin/protractor src/test/e2e/protractor.cfg.js
+```
+ * I've also setup a run configuration on intellij, for that you need to install the "NodeJS" plugin. Then it's quite
+ simple:
+  * Edit Configurations -> Click on the "+" and choose run type "Node.js"
+  * Name: Jasify Protractor
+  * Working Dir: PATH_TO_CHECKOUT/schedule/schedule-appengine
+  * Javascript file: node_modules/protractor/lib/cli.js
+  * Application: src/test/e2e/protractor.cfg.js
+
 
 ## Links
 

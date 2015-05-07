@@ -6,6 +6,8 @@
     <sessions-enabled>true</sessions-enabled>
     <system-properties>
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+        <!-- Enable cross group transactions for slim3 -->
+        <property name="slim3.useXGTX" value="true"/>
     </system-properties>
     <inbound-services>
         <!-- Enable incoming e-mails -->
