@@ -13,7 +13,7 @@ describe('Sign In with Email', function () {
         });
     });
 
-    it('should login and then logout', function () {
+    it('should login and then logout', function (done) {
         var page = new HomePage();
         page.go();
         expect(page.getAuthStatus()).toEqual('anonymous');
@@ -27,7 +27,6 @@ describe('Sign In with Email', function () {
         welcome.clickLogout();
 
         expect(page.getAuthStatus()).toEqual('anonymous');
-
-        browser.debugger();
+        done();
     });
 });
