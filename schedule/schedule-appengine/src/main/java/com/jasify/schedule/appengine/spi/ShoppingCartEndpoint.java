@@ -19,7 +19,6 @@ import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -59,6 +58,13 @@ public class ShoppingCartEndpoint {
         ShoppingCart cart = ShoppingCartServiceFactory.getShoppingCartService().getUserCart(jasUser.getUserId());
         cart.calculate();
         return cart;
+    }
+
+    @ApiMethod(name = "carts.clearUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public ShoppingCart clearUserCart(User caller) throws UnauthorizedException, ForbiddenException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
+        return ShoppingCartServiceFactory.getShoppingCartService().clearCart(cartId).calculate();
     }
 
     @ApiMethod(name = "carts.addUserActivity", path = "carts/user/activity/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)

@@ -53,7 +53,8 @@
                 get: nop,
                 removeItem: nop,
                 addUserActivity: nop,
-                getUserCart: nop
+                getUserCart: nop,
+                clearUserCart: nop
             },
             users: {
                 query: nop,
