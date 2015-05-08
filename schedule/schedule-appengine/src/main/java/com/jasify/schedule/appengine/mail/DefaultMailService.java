@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,28 +50,13 @@ public final class DefaultMailService implements MailService {
                 ApplicationData applicationData = ApplicationData.instance();
 
                 String senderAddressKey = MailService.class.getName() + ".SenderAddress";
-                String senderAddressString = applicationData.getProperty(senderAddressKey);
-                if (StringUtils.isBlank(senderAddressString)) {
-                    senderAddressString = DEFAULT_SENDER;
-                    log.warn("No senderAddress defined (key: {}) defaulting to: {}", senderAddressKey, senderAddressString);
-                    applicationData.setProperty(senderAddressKey, senderAddressString);
-                }
+                String senderAddressString = applicationData.getPropertyWithDefaultValue(senderAddressKey, DEFAULT_SENDER);
 
                 String senderAddressNameKey = MailService.class.getName() + ".SenderAddressName";
-                String senderAddressNameString = applicationData.getProperty(senderAddressNameKey);
-                if (StringUtils.isBlank(senderAddressNameString)) {
-                    senderAddressNameString = DEFAULT_SENDER_NAME;
-                    log.warn("No senderAddress defined (key: {}) defaulting to: {}", senderAddressNameKey, senderAddressNameString);
-                    applicationData.setProperty(senderAddressNameKey, senderAddressNameString);
-                }
+                String senderAddressNameString = applicationData.getPropertyWithDefaultValue(senderAddressNameKey, DEFAULT_SENDER_NAME);
 
                 String applicationOwnersKey = MailService.class.getName() + ".ApplicationOwners";
-                String applicationOwnersString = applicationData.getProperty(applicationOwnersKey);
-                if (StringUtils.isBlank(applicationOwnersString)) {
-                    applicationOwnersString = DEFAULT_OWNER;
-                    log.warn("No senderAddress defined (key: {}) defaulting to: {}", applicationOwnersKey, applicationOwnersString);
-                    applicationData.setProperty(applicationOwnersKey, applicationOwnersString);
-                }
+                String applicationOwnersString = applicationData.getPropertyWithDefaultValue(applicationOwnersKey, DEFAULT_OWNER);
 
                 for (String owner : StringUtils.split(applicationOwnersString, ',')) {
                     applicationOwners = ArrayUtils.add(applicationOwners, new InternetAddress(owner));

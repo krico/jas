@@ -67,6 +67,14 @@ public class ApplicationDataTest {
     }
 
     @Test
+    public void testGetDefaultProperties() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertNull(instance.getProperty("Test1"));
+        assertEquals("TestResult", instance.getPropertyWithDefaultValue("Test1", "TestResult"));
+        assertEquals("TestResult", instance.getProperty("Test1"));
+    }
+
+    @Test
     public void testLoad() {
         ApplicationData instance = ApplicationData.instance().reload();
 

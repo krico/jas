@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
+import org.apache.commons.lang3.StringUtils;
 import java.util.TreeMap;
 
 /**
@@ -60,6 +61,16 @@ public final class ApplicationData {
     @SuppressWarnings("unchecked")
     public <T> T getProperty(String key) {
         return (T) application.getProperties().get(key);
+    }
+
+    public <T> T getPropertyWithDefaultValue(String key, T defaultValue) {
+        T value = getProperty(key);
+        if (value == null || StringUtils.isBlank(value.toString())) {
+            value = defaultValue;
+            log.warn("No value defined (key: {}) defaulting to: {}", key, defaultValue);
+            setProperty(key, defaultValue);
+        }
+        return value;
     }
 
     Application loadApplication() {
