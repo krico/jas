@@ -165,7 +165,8 @@
             // These two remove the warnings from ngstorage
             localStorage: {}, sessionStorage: {},
             innerHeight: 400,
-            innerWidth: 500
+            innerWidth: 500,
+            IS_UNIT_TEST: true
         };
         return mock;
     }

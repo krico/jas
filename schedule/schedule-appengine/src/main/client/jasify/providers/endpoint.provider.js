@@ -72,21 +72,17 @@
 
             Endpoint.loadGoogleClient(); // Load the google client script when service is instantiated
 
-            function verbose(msg){
-                if(beVerbose) $log.debug(msg);
+            function verbose(msg) {
+                if (beVerbose) $log.debug(msg);
             }
 
             function loadGoogleClient() {
 
                 if (googleClientLoaded) return;
-                verbose('Loading google client from [' + Endpoint.googleClientUrl + ']');
-
                 googleClientLoaded = true;
+                if ($window.IS_UNIT_TEST) return; //this could be done better
 
-                if(!($document[0] && $document[0].createElement)) {
-                    $log.warn('No createElement under document, hoping this is a test');
-                    return;
-                }
+                verbose('Loading google client from [' + Endpoint.googleClientUrl + ']');
 
                 var script = $document[0].createElement('script');
                 script.onload = function (e) {
