@@ -16,6 +16,7 @@
             $(this).closest('.fg-line').addClass('fg-toggled');
         });
 
+
         $('body').on('blur', '.form-control', function () {
             var p = $(this).closest('.form-group');
             var i = p.find('.form-control').val();
@@ -28,6 +29,20 @@
                 $(this).closest('.fg-line').removeClass('fg-toggled');
             }
         });
+
+
+    });
+
+    jasifyDirectivesFormModule.directive('wizardTrigger', function() {
+        return {
+            restrict: 'A',
+            link: function (scope, elem, attrs) {
+                elem.on('click', function() {
+                    var tabName = attrs.wizardTrigger;
+                    $('[href="' + tabName + '"]').click();
+                })
+            }
+        }
     });
 
     jasifyDirectivesFormModule.directive('prevent', function () {
@@ -36,6 +51,17 @@
             link: function (scope, elem, attrs) {
                 elem.on(attrs.prevent, function (e) {
                     e.preventDefault();
+                });
+            }
+        };
+    });
+
+    jasifyDirectivesFormModule.directive('formWizardBasic', function () {
+        return {
+            restrict: 'C',
+            link: function (scope, element) {
+                $(element).bootstrapWizard({
+                    tabClass: 'fw-nav'
                 });
             }
         };

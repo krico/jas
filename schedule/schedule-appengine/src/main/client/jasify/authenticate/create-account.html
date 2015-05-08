@@ -15,10 +15,10 @@
 <div ng-show="vm.email">
     <form class="form" role="form" novalidate
           name="vm.authenticateForm"
-          ng-submit="vm.authenticateForm.$valid && vm.create($close)">
-        <div jas-has-feedback class="form-group form-group-sm fg-float">
+          ng-submit="vm.authenticateForm.$valid && vm.create(vm.onCreated)">
+        <div jas-has-feedback class="form-group fg-float">
             <div class="fg-line">
-                <input type="text" class="form-control input-sm" id="realName" name="realName" ng-model="vm.user.realName" minlength="3" required />
+                <input type="text" class="form-control" id="realName" name="realName" ng-model="vm.user.realName" minlength="3" required />
             </div>
             <label class="fg-label">Full Name</label>
             <jas-feedback-icon-valid field="vm.authenticateForm.realName"></jas-feedback-icon-valid>

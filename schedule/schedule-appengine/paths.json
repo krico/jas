@@ -16,6 +16,10 @@
     "src/main/client/jasify/directives/mask/mask.css",
     "src/main/stylesheet/styles.less"
   ],
+  "cssBooking": [
+    "src/main/stylesheet/booking-theme.css",
+    "src/main/stylesheet/waszczpa.less"
+  ],
   "watchCss": [
     "src/main/client/jasify/directives/**/*.css",
     "src/main/stylesheet/**/*.*"
@@ -54,9 +58,11 @@
         "angular-local-storage/dist/angular-local-storage.js",
         "angular-bootstrap/ui-bootstrap-tpls.js",
         "angular-filter/dist/angular-filter.js",
+        "checklist-model/checklist-model.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
         "spin.js/spin.js",
-        "angular-spinner/angular-spinner.js"
+        "angular-spinner/angular-spinner.js",
+        "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js"
       ],
       "test": [
         "angular-mocks/angular-mocks.js"

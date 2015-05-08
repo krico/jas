@@ -22,7 +22,6 @@
                 fn();
             }
         }
-
         function oauth(provider, cb) {
             Auth.providerAuthorize(provider).then(function (resp) {
                 $window.location.href = resp.result.authorizeUrl;
