@@ -3,11 +3,16 @@ package com.jasify.schedule.appengine.model.payment;
 import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.jasify.schedule.appengine.model.payment.task.CancelPaymentTask;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowEngine;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowException;
@@ -27,6 +32,8 @@ import java.util.List;
 class DefaultPaymentService implements PaymentService {
     private static final Logger log = LoggerFactory.getLogger(DefaultPaymentService.class);
 
+    private static final long DEFAULT_CANCEL_TASK_DELAY_IN_MILLISECONDS = 1800000l;
+
     private final PaymentMeta paymentMeta;
     private final SubscriptionMeta subscriptionMeta;
 
@@ -41,7 +48,7 @@ class DefaultPaymentService implements PaymentService {
 
     @Nonnull
     @Override
-    public <T extends Payment> Key newPayment(long userId, T payment, List<PaymentWorkflow> workflowList) throws PaymentException {
+    public <T extends Payment> Key newPayment(long userId, T payment, List<PaymentWorkflow> workflowList) {
         Key userKey = Datastore.createKey(UserMeta.get(), userId);
         payment.getUserRef().setKey(userKey);
         return newPayment(userKey, payment, workflowList);
@@ -49,7 +56,7 @@ class DefaultPaymentService implements PaymentService {
 
     @Nonnull
     @Override
-    public <T extends Payment> Key newPayment(Key parentKey, T payment, List<PaymentWorkflow> workflowList) throws PaymentException {
+    public <T extends Payment> Key newPayment(Key parentKey, T payment, List<PaymentWorkflow> workflowList) {
         Preconditions.checkArgument(payment.getId() == null, "newPayment cannot have an id");
         payment.validate();
 
@@ -91,21 +98,33 @@ class DefaultPaymentService implements PaymentService {
         }
     }
 
+    private void queueCancelTask(Transaction tx, Key paymentId) {
+        // If the transaction completes add a task to cancel the shopping cart to cancel the ShoppingCart
+        ApplicationData applicationData = ApplicationData.instance();
+        String cancelTaskDelayInMillisecondsKey = PaymentService.class.getName() + ".CancelTaskDelayInMilliseconds";
+        Long countdownMillis = applicationData.getPropertyWithDefaultValue(cancelTaskDelayInMillisecondsKey, DEFAULT_CANCEL_TASK_DELAY_IN_MILLISECONDS);
+        Queue queue = QueueFactory.getQueue("payment-queue");
+        queue.add(tx, TaskOptions.Builder.withPayload(new CancelPaymentTask(paymentId)).countdownMillis(countdownMillis));
+    }
+
     @Override
-    public <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws PaymentException {
+    public <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws EntityNotFoundException, PaymentException {
         Preconditions.checkNotNull(payment.getId(), "PaymentService.newPayment first");
         Preconditions.checkNotNull(provider);
         Transaction tx = Datastore.beginTransaction();
         try {
             Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
             if (dbPayment == null) {
-                throw new PaymentException("Payment not found");
+                throw new EntityNotFoundException("Payment id=" + payment.getId());
             }
             if (dbPayment.getState() != PaymentStateEnum.New) {
                 throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected New)");
             }
             provider.createPayment(payment, baseUrl);
             Datastore.put(tx, payment);
+
+            queueCancelTask(tx, dbPayment.getId());
+
             tx.commit();
         } finally {
             if (tx.isActive()) {
@@ -114,11 +133,10 @@ class DefaultPaymentService implements PaymentService {
         }
 
         transitionWorkflowList(payment);
-
     }
 
     @Override
-    public <T extends Payment> void executePayment(PaymentProvider<T> provider, T payment) throws PaymentException {
+    public <T extends Payment> void executePayment(PaymentProvider<T> provider, T payment) throws EntityNotFoundException, PaymentException {
         Preconditions.checkNotNull(provider);
         Preconditions.checkNotNull(payment.getId());
         Transaction tx = Datastore.beginTransaction();
@@ -126,7 +144,7 @@ class DefaultPaymentService implements PaymentService {
             Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
 
             if (dbPayment == null) {
-                throw new PaymentException("Payment not found");
+                throw new EntityNotFoundException("Payment id=" + payment.getId());
             }
 
             if (dbPayment.getState() != PaymentStateEnum.Created) {
@@ -155,7 +173,7 @@ class DefaultPaymentService implements PaymentService {
             Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
 
             if (dbPayment == null) {
-                throw new PaymentException("Payment not found");
+                throw new EntityNotFoundException("Payment id=" + payment.getId());
             }
 
             if (dbPayment.getState() == PaymentStateEnum.Canceled) {
@@ -177,7 +195,6 @@ class DefaultPaymentService implements PaymentService {
         }
 
         transitionWorkflowList(payment);
-
     }
 
     @Nonnull

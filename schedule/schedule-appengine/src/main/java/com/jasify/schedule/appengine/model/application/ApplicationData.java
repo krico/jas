@@ -62,6 +62,17 @@ public final class ApplicationData {
         return (T) application.getProperties().get(key);
     }
 
+    // Note that only certain class's are supported
+    public <T> T getPropertyWithDefaultValue(String key, T defaultValue) {
+        T value = getProperty(key);
+        if (value == null) {
+            value = defaultValue;
+            log.warn("No value defined (key: {}) defaulting to: {}", key, defaultValue);
+            setProperty(key, defaultValue);
+        }
+        return value;
+    }
+
     Application loadApplication() {
         log.debug("Loading application");
         Transaction tx = Datastore.beginTransaction();
