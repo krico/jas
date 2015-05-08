@@ -32,7 +32,7 @@ import java.util.List;
 class DefaultPaymentService implements PaymentService {
     private static final Logger log = LoggerFactory.getLogger(DefaultPaymentService.class);
 
-    private static final long DEFAULT_CANCEL_TASK_DELAY_IN_MILLISECONDS = 1800000l;
+    private static final int DEFAULT_CANCEL_TASK_DELAY_IN_MILLISECONDS = 1800000;
 
     private final PaymentMeta paymentMeta;
     private final SubscriptionMeta subscriptionMeta;
@@ -102,7 +102,7 @@ class DefaultPaymentService implements PaymentService {
         // If the transaction completes add a task to cancel the shopping cart to cancel the ShoppingCart
         ApplicationData applicationData = ApplicationData.instance();
         String cancelTaskDelayInMillisecondsKey = PaymentService.class.getName() + ".CancelTaskDelayInMilliseconds";
-        Long countdownMillis = applicationData.getPropertyWithDefaultValue(cancelTaskDelayInMillisecondsKey, DEFAULT_CANCEL_TASK_DELAY_IN_MILLISECONDS);
+        Integer countdownMillis = applicationData.getPropertyWithDefaultValue(cancelTaskDelayInMillisecondsKey, DEFAULT_CANCEL_TASK_DELAY_IN_MILLISECONDS);
         Queue queue = QueueFactory.getQueue("payment-queue");
         queue.add(tx, TaskOptions.Builder.withPayload(new CancelPaymentTask(paymentId)).countdownMillis(countdownMillis));
     }
