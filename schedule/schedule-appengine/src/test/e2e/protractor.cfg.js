@@ -65,9 +65,11 @@ if (process.env.TRAVIS_BUILD_NUMBER) {
         //{browserName: 'internet explorer', platform: 'Windows 7', version: '9.0'},
 
         {browserName: 'safari', platform: 'OS X 10.10', version: '8.0'},
-        {browserName: 'safari', platform: 'OS X 10.9', version: '7.0'},
+        //timing out
+        //{browserName: 'safari', platform: 'OS X 10.9', version: '7.0'},
 
-        {browserName: 'chrome', platform: 'Linux', version: '26.0'},
+        //timing out
+        //{browserName: 'chrome', platform: 'Linux', version: '26.0'},
         {browserName: 'chrome', platform: 'Linux', version: '41.0'},
         {browserName: 'chrome', platform: 'OS X 10.10', version: '41.0'},
         {browserName: 'chrome', platform: 'Windows 8.1', version: '41.0'},
