@@ -236,6 +236,10 @@ public final class KeyUtil {
         throw new IllegalArgumentException("Failed to parse offset:" + offset + ", key: '" + new String(chars) + "'");
     }
 
+    public static String userIdToCartId(long userId) {
+        return String.format("U%016d", userId);
+    }
+
     private enum ParseState {
         Init, Prefix, Negate, StringLength, StringData, Id
     }
