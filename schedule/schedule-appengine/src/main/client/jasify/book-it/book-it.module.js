@@ -17,6 +17,10 @@
         'jasify.templates'
     ]);
 
+    angular.module('jasify.bookIt').config(function (EndpointProvider) {
+        EndpointProvider.verbose(true);
+    });
+
     /**
      * Listen to route changes and check
      */

@@ -23,7 +23,8 @@
         var apiName = 'jasify';
         var apiVersion = 'v1';
         var apiPath = '/_ah/api';
-        var googleClientLoaded = false;
+
+        var googleClientLoaded = !!window.GLOBAL_GOOGLE_CLIENT_LOADED;
 
         this.verbose = function (v) {
             if (v) beVerbose = v;
@@ -80,8 +81,7 @@
 
                 if (googleClientLoaded) return;
                 googleClientLoaded = true;
-                if ($window.IS_UNIT_TEST) return; //this could be done better
-
+console.log("READING");
                 verbose('Loading google client from [' + Endpoint.googleClientUrl + ']');
 
                 var script = $document[0].createElement('script');

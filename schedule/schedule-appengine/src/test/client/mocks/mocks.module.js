@@ -1,4 +1,5 @@
-(function (ng) {
+(function (ng, window) {
+    window.GLOBAL_GOOGLE_CLIENT_LOADED = true;
 
     ng.module('jasify.mocks', ['ng'])
         .config(function ($provide) {
@@ -165,8 +166,7 @@
             // These two remove the warnings from ngstorage
             localStorage: {}, sessionStorage: {},
             innerHeight: 400,
-            innerWidth: 500,
-            IS_UNIT_TEST: true
+            innerWidth: 500
         };
         return mock;
     }
@@ -188,4 +188,4 @@
         return mock;
     }
 
-})(angular);
+})(angular, window);
