@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="tab2">
-                <div ng-show="!vm.auth.isAuthenticated()">
+                <div ng-if="!vm.auth.isAuthenticated()">
                     <div class="card">
                         <div class="card-body card-padding-sm card-with-icon">
                             <i class="md md-info-outline"></i>
@@ -84,8 +84,7 @@
                         </div>
                     </div>
                 </div>
-                <div ng-show="vm.auth.isAuthenticated()">
-
+                <div ng-if="vm.auth.isAuthenticated()">
                     <div class="card">
                         <div ng-show="!!vm.selection.length" class="bgm-bluegray card-header card-header-with-icon m-b-20">
                             <h2>Selected Activities

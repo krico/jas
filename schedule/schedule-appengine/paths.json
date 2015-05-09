@@ -1,7 +1,15 @@
 {
   "js": [
     "src/main/client/**/*.module.js",
-    "src/main/client/**/*.js"
+    "src/main/client/**/*.js",
+    "!src/main/client/iframeResizer.contentWindow.min.js",
+    "!src/main/client/iframeResizer.min.js",
+    "!src/main/client/booking-via-jasify.js"
+  ],
+  "customJs": [
+    "src/main/client/iframeResizer.contentWindow.min.js",
+    "src/main/client/iframeResizer.min.js",
+    "src/main/client/booking-via-jasify.js"
   ],
   "test": {
     "js": [

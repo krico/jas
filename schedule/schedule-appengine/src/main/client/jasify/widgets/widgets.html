@@ -1,2 +1,31 @@
-<iframe src="booking-util.html" width="100%" scrolling="no"></iframe>
-<script>iFrameResize({log:true})</script>
+<div class="card">
+    <div class="card-header ch-alt">
+        <h2>Booking via Jasify widget <small>To embed it, use this code snippet:
+            <pre><code>
+&lt;!-- Container for widget --&gt;
+&lt;div id=&quot;booking-via-jasify&gt;&lt;/div&gt;
+&lt;!-- Creator script initializer (it registers window.createBookingViaJasify function) --&gt;
+&lt;script src=&quot;booking-via-jasify.js&quot;&gt;&lt;/script&gt;
+&lt;!-- Library for resizing iframe to fit content --&gt;
+&lt;script src=&quot;iframeResizer.min.js&quot;&gt;&lt;/script&gt;
+&lt;!-- Script that creates widget. It must be executed when #booking-via-jasify element is present on the page --&gt;
+&lt;script&gt;
+window.createBookingViaJasify();
+iFrameResize();
+&lt;/script&gt;
+            </code></pre></small>
+        </h2>
+    </div>
+
+<!-- Container for widget -->
+<div id="booking-via-jasify" class="card-body card-padding"></div>
+<!-- Creator script initializer (it registers window.createBookingViaJasify function) -->
+<!--<script src="booking-via-jasify.js"></script>-->
+<!-- Library for resizing iframe to fit content -->
+<script src="iframeResizer.min.js"></script>
+<!-- Script that creates widget. It must be executed when #booking-via-jasify element is present on the page -->
+<script>
+    window.createBookingViaJasify();
+    iFrameResize();
+</script>
+</div>

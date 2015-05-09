@@ -59,8 +59,15 @@ gulp.task('static-html', staticHtml);
 gulp.task('images', images);
 gulp.task('test', ['build'], testClient);
 gulp.task('watch', rebuild);
-gulp.task('build', ['client', 'html', 'static-html', 'images']);
+gulp.task('custom-js', customJs);
+gulp.task('build', ['client', 'html', 'static-html', 'images', 'custom-js']);
 gulp.task('default', ['watch', 'build', 'lint']);
+
+function customJs() {
+    return gulp
+        .src(paths.customJs)
+        .pipe(gulp.dest(paths.build + '/../'))
+}
 
 function rebuild() {
 

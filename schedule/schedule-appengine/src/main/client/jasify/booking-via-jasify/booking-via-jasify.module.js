@@ -79,8 +79,8 @@
                     $location.path('/checkout');
                 }, function() {
                     // TODO
-                })
-            })
+                });
+            });
         }
     }
 
