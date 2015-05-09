@@ -18,20 +18,22 @@
                     <div class="card-body card-padding-sm">
                         <div class="activity-listview listview lv-bordered lv-lg">
                             <div class="lv-body" ng-repeat="activity in vm.activities">
-                                <div class="lv-item media">
-                                    <div class="checkbox pull-left">
+                                <div class="selectable-lv-item lv-item media" ng-class="{ 'active' : vm.selection.indexOf(activity) !== -1 }">
+                                    <div ng-class="{ 'disabled': vm.isFullyBooked(activity) }" class="checkbox pull-left">
                                         <label>
-                                            <input type="checkbox" checklist-model="vm.selection"
+                                            <input ng-disabled="vm.isFullyBooked(activity)" type="checkbox" checklist-model="vm.selection"
                                                    checklist-value="activity">
                                             <i class="input-helper"></i>
                                         </label>
                                     </div>
                                     <div class="media-body">
-                                        <div class="lv-title">{{activity.activityType.name}}</div>
+                                        <div class="lv-title">
+                                            <span ng-show="vm.isFullyBooked(activity)" class="label label-danger m-r-10">Fully Booked</span>
+                                            {{activity.activityType.name}}
+                                        </div>
                                         <ul class="lv-attrs">
                                             <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
-                                            <li>Places left: {{activity.maxSubscriptions -
-                                                activity.subscriptionCount}}
+                                            <li ng-if="!vm.isFullyBooked(activity)">Places left: {{activity.maxSubscriptions - activity.subscriptionCount}}
                                             </li>
                                             <li>Price: {{activity.price}} {{activity.currency}}</li>
                                             <li ng-if="activity.location">Location: {{activity.location}}</li>
@@ -92,7 +94,7 @@
                             <button ng-click="vm.bookIt()" class="btn bgm-blue btn-float waves-effect btn-float-text">
                                 Submit <i class="md md-shopping-cart"></i></button>
                         </div>
-                        <div ng-show="!vm.selection.length"  class="bgm-amber card-header card-header-with-icon m-b-20">
+                        <div ng-show="!vm.selection.length" class="bgm-amber card-header card-header-with-icon m-b-20">
                             <h2>No Activities selected
                                 <small>You did not select any activities. Browse back to Activity list and select activities.</small>
                             </h2>
@@ -104,10 +106,12 @@
                                 <div class="lv-body" ng-repeat="activity in vm.selection">
                                     <div class="lv-item media">
                                         <div class="media-body">
-                                            <div class="lv-title">{{activity.activityType.name}}</div>
+                                            <div class="lv-title">
+                                                {{$index + 1}}. {{activity.activityType.name}}
+                                            </div>
                                             <ul class="lv-attrs">
                                                 <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
-                                                <li>Places left: {{activity.maxSubscriptions - activity.subscriptionCount}}</li>
+                                                <li ng-if="activity.maxSubscriptions < activity.subscriptionCount">Places left: {{activity.maxSubscriptions - activity.subscriptionCount}}</li>
                                                 <li>Price: {{activity.price}} {{activity.currency}}</li>
                                                 <li ng-if="activity.location">Location: {{activity.location}}</li>
                                             </ul>

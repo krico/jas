@@ -52,26 +52,34 @@
         var vm = this;
 
         this.selection = [];
+
         this.activities = activities.items;
         this.auth = Auth;
         this.bookIt = bookIt;
+        this.isFullyBooked = isFullyBooked;
 
         $rootScope.$on(AUTH_EVENTS.accountCreated, function() {
             Auth.restore(true);
         });
 
+        function isFullyBooked(activity) {
+            return activity.maxSubscriptions <= activity.subscriptionCount;
+        }
+
         function bookIt() {
-            var promises = [];
+            ShoppingCart.clearUserCart().then(function() {
+                var promises = [];
 
-            angular.forEach(this.selection, function(value) {
-               promises.push(ShoppingCart.addUserActivity(value.id));
-            });
+                angular.forEach(vm.selection, function(value) {
+                    promises.push(ShoppingCart.addUserActivity(value.id));
+                });
 
-            $q.all(promises).then(function() {
-                BrowserData.setPaymentAcceptRedirect($location.path());
-                $location.path('/checkout');
-            }, function() {
-                alert("!");
+                $q.all(promises).then(function() {
+                    BrowserData.setPaymentAcceptRedirect($location.path());
+                    $location.path('/checkout');
+                }, function() {
+                    // TODO
+                })
             })
         }
     }
