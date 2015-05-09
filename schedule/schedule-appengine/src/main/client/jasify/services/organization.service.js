@@ -4,6 +4,7 @@
     function organization(Endpoint, $q, $log) {
         var Organization = {
             query: query,
+            queryPublic: queryPublic,
             get: get,
             update: update,
             add: add,
@@ -19,6 +20,13 @@
         function query() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.query()
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function queryPublic() {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.organizations.queryPublic()
                     .then(resultHandler, errorHandler);
             });
         }

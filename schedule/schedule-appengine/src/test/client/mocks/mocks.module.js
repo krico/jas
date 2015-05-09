@@ -78,6 +78,7 @@
             },
             organizations: {
                 query: nop,
+                queryPublic: nop,
                 get: nop,
                 update: nop,
                 add: nop,

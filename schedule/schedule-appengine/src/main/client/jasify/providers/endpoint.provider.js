@@ -81,7 +81,7 @@
 
                 if (googleClientLoaded) return;
                 googleClientLoaded = true;
-console.log("READING");
+
                 verbose('Loading google client from [' + Endpoint.googleClientUrl + ']');
 
                 var script = $document[0].createElement('script');

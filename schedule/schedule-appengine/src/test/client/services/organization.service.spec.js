@@ -15,6 +15,21 @@ describe('OrganizationService', function () {
 
     it('should query all organizations', function () {
         var expected = [];
+        spyOn($gapiMock.client.jasify.organizations, 'queryPublic').and.returnValue($q.when({result: {items: expected}}));
+        Organization.queryPublic()
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.organizations.queryPublic).toHaveBeenCalled();
+    });
+    it('should query all organizations', function () {
+        var expected = [];
         spyOn($gapiMock.client.jasify.organizations, 'query').and.returnValue($q.when({result: {items: expected}}));
         Organization.query()
             .then(function (res) {
