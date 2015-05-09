@@ -95,7 +95,7 @@ public class TransactionOperatorTest {
         TransactionOperator.executeNoEx(operation);
     }
 
-    private void assertExecute(TestOperation operation, int expectedExecutions) throws Exception {
+    private void assertExecute(TestOperation operation, long expectedExecutions) throws Exception {
         TransactionOperator.execute(operation);
         assertEquals(expectedExecutions, operation.executeCount);
         assertNotNull(operation.id);
@@ -108,7 +108,7 @@ public class TransactionOperatorTest {
 
     private class TestOperation implements TransactionOperation<Key, Exception> {
         private Exception toThrow;
-        private int concurrencyExceptionCount = 0;
+        private long concurrencyExceptionCount = 0;
         private int executeCount = 0;
         private Key id;
 

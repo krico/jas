@@ -29,24 +29,31 @@ public final class ApplicationData {
     public <T> void setProperty(String keyName, T value) {
         log.debug("Setting AppProp[{}]", keyName);
         Transaction tx = Datastore.beginTransaction();
-        Key key = createPropertyKey(keyName);
-        ApplicationProperty property = Datastore.getOrNull(tx, ApplicationProperty.class, key);
-        if (property == null) {
-            log.debug("New AppProp[{}] = [{}]", keyName, value);
-            property = new ApplicationProperty();
-            property.setKey(key);
-            property.setValue(value);
-        } else {
-            log.debug("Upd AppProp[{}] = [{}] -> [{}]", keyName, property.getValue(), value);
-            property.setValue(value);
+        try {
+            Key key = createPropertyKey(keyName);
+            ApplicationProperty property = Datastore.getOrNull(tx, ApplicationProperty.class, key);
+            if (property == null) {
+                log.debug("New AppProp[{}] = [{}]", keyName, value);
+                property = new ApplicationProperty();
+                property.setKey(key);
+                property.setValue(value);
+            } else {
+                log.debug("Upd AppProp[{}] = [{}] -> [{}]", keyName, property.getValue(), value);
+                property.setValue(value);
+            }
+            Datastore.put(tx, property, application);
+            tx.commit();
+            log.debug("Wrote: {}", property);
+            //Poor man's concurrency
+            TreeMap<String, Object> replace = new TreeMap<>(application.getProperties());
+            replace.put(keyName, property.getValue());
+            application.setProperties(replace);
+        } finally {
+            if (tx.isActive()) {
+                log.debug("Rolling back transaction");
+                tx.rollback();
+            }
         }
-        Datastore.put(tx, property, application);
-        tx.commit();
-        log.debug("Wrote: {}", property);
-        //Poor man's concurrency
-        TreeMap<String, Object> replace = new TreeMap<>(application.getProperties());
-        replace.put(keyName, property.getValue());
-        application.setProperties(replace);
     }
 
     public Key createPropertyKey(String keyName) {
