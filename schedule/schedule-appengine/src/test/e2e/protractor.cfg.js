@@ -35,7 +35,7 @@ var config = {
         }
     },
     //ref: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
-    //maxSessions: 1,
+    maxSessions: 1,
     multiCapabilities: [
         {browserName: 'chrome'}
     ],
@@ -74,7 +74,9 @@ if (process.env.TRAVIS_BUILD_NUMBER) {
         {browserName: 'chrome', platform: 'OS X 10.10', version: '41.0'},
         {browserName: 'chrome', platform: 'Windows 8.1', version: '41.0'},
 
-        {browserName: 'firefox'}
+        {browserName: 'firefox', platform: 'Windows 8'},
+        {browserName: 'firefox', platform: 'OS X 10.9'},
+        {browserName: 'firefox', platform: 'Linux'}
     );
 
     config.multiCapabilities.forEach(function (value, index) {
