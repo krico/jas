@@ -7,8 +7,8 @@
         return function(value) {
             var from = value[0],
                 to = value[1],
-                fromDate = $filter('date')(from, 'EEE M/d/yy'),
-                toDate = $filter('date')(from, 'EEE M/d/yy'),
+                fromDate = $filter('date')(from, 'EEE, d MMM'),
+                toDate = $filter('date')(from, 'EEE, d MMM'),
                 fromTime = $filter('date')(from, 'h:mm a'),
                 toTime = $filter('date')(from, 'h:mm a');
 
