@@ -13,7 +13,7 @@
             function logoutSuccess() {
                 $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
                 $scope.setCurrentUser(null);
-                $location.path('home');
+                $location.path('');
             }
 
             function logoutFailed(msg) {
