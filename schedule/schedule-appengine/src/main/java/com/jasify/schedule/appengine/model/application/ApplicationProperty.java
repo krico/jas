@@ -45,6 +45,9 @@ public class ApplicationProperty {
             case Boolean:
                 ret = booleanValue;
                 break;
+            case Integer:
+                ret = longValue == null ? null : longValue.intValue();
+                break;
             case Long:
                 ret = longValue;
                 break;
@@ -76,6 +79,9 @@ public class ApplicationProperty {
         } else if (value instanceof Boolean) {
             type = TypeEnum.Boolean;
             booleanValue = (Boolean) value;
+        } else if (value instanceof Integer) {
+            type = TypeEnum.Integer;
+            longValue = ((Integer) value).longValue();
         } else if (value instanceof Long) {
             type = TypeEnum.Long;
             longValue = (Long) value;
@@ -183,6 +189,6 @@ public class ApplicationProperty {
     }
 
     public static enum TypeEnum {
-        String, Boolean, Long, Text, Blob, List
+        String, Boolean, Integer, Long, Text, Blob, List
     }
 }
