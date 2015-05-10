@@ -28,8 +28,21 @@ body {
 @facebookBgColor: #3b5998;
 @googleBgColor: #dd4b39;
 
-.actions-group > button ~ button {
-  margin-left: 10px;
+@angularMaterialLayoutSm: 600px;
+
+@media (min-width:@angularMaterialLayoutSm) {
+  .actions-group > button ~ button {
+    margin-left: 10px;
+  }
+}
+
+@media (max-width:@angularMaterialLayoutSm) {
+  .actions-group > button {
+    .btn-block();
+  }
+  .actions-group > button ~ button {
+    margin-top: 5px;
+  }
 }
 
 td.actions-column {
@@ -173,7 +186,7 @@ td.actions-column {
   background-color: #fffcbe;
 }
 
-@media (max-width:768px) {
+@media (max-width:@angularMaterialLayoutSm) {
   md-sidenav {
     width: 204px;
     min-width: 204px;
