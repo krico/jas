@@ -25,7 +25,7 @@
             User.add(vm.user, vm.user.password).then(saveSuccess, saveError);
 
             function saveSuccess(ret) {
-                $rootScope.$broadcast(AUTH_EVENTS.accountCreated)
+                $rootScope.$broadcast(AUTH_EVENTS.accountCreated);
                 if (angular.isFunction(cb)) {
                     cb();
                 }

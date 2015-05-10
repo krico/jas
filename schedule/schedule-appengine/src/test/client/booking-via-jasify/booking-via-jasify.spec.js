@@ -62,7 +62,7 @@ describe('BookingViaJasify', function () {
             "subscriptionCount": 2,
             "bookItUrl": "https://jasify-schedule.appspot.com/book-it.html#/A161-O53"
         }]
-    }
+    };
 
     beforeEach(module('jasify.bookingViaJasify'));
 
@@ -82,22 +82,22 @@ describe('BookingViaJasify', function () {
 
     it('should expose activities', function () {
         expect(controller.activities).toEqual(activities.items);
-    })
+    });
 
     it('should recognize activity as fully booked', function () {
         expect(controller.isFullyBooked(activities.items[0])).toBe(true);
-    })
+    });
 
     it('should recognize activity as not fully booked', function () {
         expect(controller.isFullyBooked(activities.items[1])).toBe(false);
-    })
+    });
 
     it('should clean shopping cart before booking', function() {
 
         controller.bookIt();
 
         expect(ShoopingCart.clearUserCart).toHaveBeenCalled();
-    })
+    });
 
     it('should add selection to ShoppingCart', function() {
         controller.selection = controller.activities;
@@ -111,8 +111,8 @@ describe('BookingViaJasify', function () {
 
         $rootScope.$apply();
 
-        expect(activitiesAddedToCart).toEqual(controller.selection.map(function(activity) { return activity.id }));
-    })
+        expect(activitiesAddedToCart).toEqual(controller.selection.map(function(activity) { return activity.id; }));
+    });
 
     it('should redirect to success page when all activities were booked', function() {
         controller.selection = controller.activities;
@@ -129,7 +129,7 @@ describe('BookingViaJasify', function () {
 
         expect(BrowserData.setPaymentAcceptRedirect).toHaveBeenCalledWith('done');
         expect($location.path).toHaveBeenCalledWith('/checkout');
-    })
+    });
 
     it('should redirect to success page when all activities were booked', function() {
         controller.selection = controller.activities;
@@ -143,13 +143,13 @@ describe('BookingViaJasify', function () {
         $rootScope.$apply();
 
         expect(BrowserData.setPaymentAcceptRedirect).toHaveBeenCalled();
-    })
+    });
 
     it('should restore session after user account was created', function() {
         spyOn(Auth, 'restore');
         $rootScope.$broadcast(AUTH_EVENTS.accountCreated);
         $rootScope.$apply();
         expect(Auth.restore).toHaveBeenCalledWith(true);
-    })
+    });
 
-})
+});
