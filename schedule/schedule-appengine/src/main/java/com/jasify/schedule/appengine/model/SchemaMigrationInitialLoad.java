@@ -1,5 +1,8 @@
 package com.jasify.schedule.appengine.model;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationService;
@@ -7,13 +10,13 @@ import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slim3.datastore.Datastore;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import javax.annotation.Nullable;
+import java.util.*;
 
 /**
  * Methods that initialize the datastore with data.  Used only in development
@@ -130,7 +133,55 @@ class SchemaMigrationInitialLoad {
             repeatDetails.setFridayEnabled(true);
 
 
-            activityService.addActivity(activity, repeatDetails);
+            List<Key> activityKeys = activityService.addActivity(activity, repeatDetails);
+            List<Activity> activities = Lists.transform(activityKeys, new Function<Key, Activity>() {
+                @Nullable
+                @Override
+                public Activity apply(Key input) {
+                    return Datastore.get(Activity.class, input);
+                }
+            });
+
+            ActivityPackage activityPackageFull = new ActivityPackage();
+            activityPackageFull.getOrganizationRef().setModel(organization);
+            activityPackageFull.setName("Activity Package " + KeyUtil.keyToString(organization.getId()) + " (FULL)");
+            activityPackageFull.setDescription(activityPackageFull.getName() + " description");
+            activityPackageFull.setCurrency("CHF");
+            activityPackageFull.setPrice(215d);
+            activityPackageFull.setItemCount(activities.size() / 2);
+
+            activityService.addActivityPackage(activityPackageFull, activities);
+
+            List<Activity> even = new ArrayList<>();
+            List<Activity> odd = new ArrayList<>();
+
+            for (int i = 0; i < activities.size(); i++) {
+                if (i % 2 == 0) {
+                    even.add(activities.get(i));
+                } else {
+                    odd.add(activities.get(i));
+                }
+            }
+
+            ActivityPackage activityPackageEven = new ActivityPackage();
+            activityPackageEven.getOrganizationRef().setModel(organization);
+            activityPackageEven.setName("Activity Package " + KeyUtil.keyToString(organization.getId()) + " (even)");
+            activityPackageEven.setDescription(activityPackageEven.getName() + " description");
+            activityPackageEven.setCurrency("CHF");
+            activityPackageEven.setPrice(107d);
+            activityPackageEven.setItemCount(even.size() - 2);
+
+            activityService.addActivityPackage(activityPackageEven, even);
+
+            ActivityPackage activityPackageOdd = new ActivityPackage();
+            activityPackageOdd.getOrganizationRef().setModel(organization);
+            activityPackageOdd.setName("Activity Package " + KeyUtil.keyToString(organization.getId()) + " (odd)");
+            activityPackageOdd.setDescription(activityPackageOdd.getName() + " description");
+            activityPackageOdd.setCurrency("CHF");
+            activityPackageOdd.setPrice(107d);
+            activityPackageOdd.setItemCount(odd.size() - 2);
+
+            activityService.addActivityPackage(activityPackageOdd, odd);
         }
     }
 
