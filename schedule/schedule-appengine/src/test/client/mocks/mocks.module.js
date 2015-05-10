@@ -1,4 +1,5 @@
-(function (ng) {
+(function (ng, window) {
+    window.GLOBAL_GOOGLE_CLIENT_LOADED = true;
 
     ng.module('jasify.mocks', ['ng'])
         .config(function ($provide) {
@@ -52,7 +53,8 @@
                 get: nop,
                 removeItem: nop,
                 addUserActivity: nop,
-                getUserCart: nop
+                getUserCart: nop,
+                clearUserCart: nop
             },
             users: {
                 query: nop,
@@ -187,4 +189,4 @@
         return mock;
     }
 
-})(angular);
+})(angular, window);

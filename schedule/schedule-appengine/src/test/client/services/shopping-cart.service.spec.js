@@ -46,6 +46,22 @@ describe('ShoppingCartService', function () {
         expect($gapiMock.client.jasify.carts.getUserCart).toHaveBeenCalled();
     });
 
+    it('should clear user shopping cart ', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'clearUserCart').and.returnValue($q.when({result: expected}));
+        ShoppingCart.clearUserCart()
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.clearUserCart).toHaveBeenCalled();
+    });
+
     it('should remove item from cart by id (objects)', function () {
         var expected = {};
         spyOn($gapiMock.client.jasify.carts, 'removeItem').and.returnValue($q.when({result: expected}));

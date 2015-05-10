@@ -15,7 +15,7 @@ import java.util.ConcurrentModificationException;
  * @since 04/05/15.
  */
 public final class TransactionOperator {
-    public static final long DEFAULT_RETRY_COUNT = 10;
+    public static final int DEFAULT_RETRY_COUNT = 10;
     public static final long DEFAULT_RETRY_SLEEP_MILLIS = 50;
 
     private static final Logger log = LoggerFactory.getLogger(TransactionOperator.class);
@@ -27,8 +27,8 @@ public final class TransactionOperator {
         ApplicationData applicationData = ApplicationData.instance();
 
         String retryCountKey = TransactionOperator.class.getName() + ".RetryCount";
-        Long retryCount = applicationData.getPropertyWithDefaultValue(retryCountKey, DEFAULT_RETRY_COUNT);
-        this.retryCount = Math.max(0, retryCount.intValue());
+        Integer retryCount = applicationData.getPropertyWithDefaultValue(retryCountKey, DEFAULT_RETRY_COUNT);
+        this.retryCount = Math.max(0, retryCount);
 
         String retrySleepKey = TransactionOperator.class.getName() + ".RetrySleepMillis";
         long retrySleep = applicationData.getPropertyWithDefaultValue(retrySleepKey, DEFAULT_RETRY_SLEEP_MILLIS);

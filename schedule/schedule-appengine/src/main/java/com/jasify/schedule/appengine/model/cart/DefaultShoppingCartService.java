@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.cart;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +30,10 @@ public class DefaultShoppingCartService implements ShoppingCartService {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    private static String userIdToCartId(long userId) {
-        return String.format("U%016d", userId);
-    }
-
     @Nonnull
     @Override
     public ShoppingCart getUserCart(long userId) {
-        String key = userIdToCartId(userId);
+        String key = KeyUtil.userIdToCartId(userId);
         ShoppingCart cart = Memcache.get(key);
         if (cart == null) {
             cart = new ShoppingCart(key);
