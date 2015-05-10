@@ -1,24 +1,28 @@
+@import (reference) "bootstrap.less";
+
 /* BEGIN: OAuth buttons */
 
-md-content {
+.container:not(.home-splash) md-content {
   overflow-y: scroll;
 }
 
 body {
   padding: 0 !important;
   margin: 0 !important;
-}
 
-#content {
-  background-color: inherit;
-
-  .container {
-    width: 100%;
+  #content {
+    background-color: inherit;
+    padding-right: 15px;
   }
 }
 
+.main-content > .container {
+  padding-right: 0;
+}
+
+
+
 .home-splash {
-  height: 100vh;
   background-position: 50% 50%;
   background-size: cover;
   background-repeat: none;
