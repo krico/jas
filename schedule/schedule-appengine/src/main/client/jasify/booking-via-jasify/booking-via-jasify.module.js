@@ -17,11 +17,7 @@
         'jasify.templates',
         "checklist-model",
         "jasifyFilters"
-    ]);
-
-    module.controller('BookingViaJasify', BookingViaJasify);
-    module.run(jasifyWebRun);
-    module.config(bookingViaRoutes);
+    ]).config(bookingViaRoutes);
 
     function bookingViaRoutes($routeProvider) {
         $routeProvider
@@ -37,51 +33,14 @@
                         return Activity.query({organizationId: 'O53'});
                     }
                 }
-            })
-        ;
-    }
-
-    function jasifyWebRun($rootScope, $log) {
-        $rootScope.$on('$routeChangeError', function (event, next, current) {
-            $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
-        });
-    }
-
-    function BookingViaJasify(AUTH_EVENTS, $rootScope, $location, $q, BrowserData, ShoppingCart, Auth, activities) {
-
-        var vm = this;
-
-        this.selection = [];
-
-        this.activities = activities.items;
-        this.auth = Auth;
-        this.bookIt = bookIt;
-        this.isFullyBooked = isFullyBooked;
-
-        $rootScope.$on(AUTH_EVENTS.accountCreated, function() {
-            Auth.restore(true);
-        });
-
-        function isFullyBooked(activity) {
-            return activity.maxSubscriptions <= activity.subscriptionCount;
-        }
-
-        function bookIt() {
-            ShoppingCart.clearUserCart().then(function() {
-                var promises = [];
-
-                angular.forEach(vm.selection, function(value) {
-                    promises.push(ShoppingCart.addUserActivity(value.id));
-                });
-
-                $q.all(promises).then(function() {
-                    BrowserData.setPaymentAcceptRedirect($location.path());
-                    $location.path('/checkout');
-                }, function() {
-                    // TODO
-                });
+            }).when('/done', {
+                templateUrl: 'booking-via-jasify/booking-via-jasify-done.html',
+                resolve: {
+                    allow: /*@ngInject*/ function (Allow) {
+                        return Allow.all();
+                    }
+                }
             });
-        }
     }
 
 })(angular);
