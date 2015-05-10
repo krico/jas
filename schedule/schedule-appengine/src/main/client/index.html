@@ -31,18 +31,18 @@
     <link href="build/css/jasify.css" rel="stylesheet">
 </head>
 <body layout="column" ng-controller="ApplicationController as appVm">
-<md-toolbar layout="row" class="md-whiteframe-z1" ng-controller="NavbarController as vm">
-    <div class="md-toolbar-tools">
-        <md-button ng-show="vm.isAuthenticated()" hide-gt-md ng-click="vm.toggleList()" class="md-icon-button" aria-label="Settings">
-            <md-icon md-svg-icon="img/menu.svg"></md-icon>
-        </md-button>
-        <h2>
-            Jasify
-        </h2>
-        <span flex></span>
-        <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Log out</md-button>
-    </div>
-</md-toolbar>
+    <md-toolbar layout="row" class="md-whiteframe-z1" ng-controller="NavbarController as vm">
+        <div class="md-toolbar-tools">
+            <md-button ng-show="vm.isAuthenticated()" hide-gt-md ng-click="vm.toggleList()" class="md-icon-button" aria-label="Settings">
+                <md-icon md-svg-icon="img/menu.svg"></md-icon>
+            </md-button>
+            <h2>
+                Jasify
+            </h2>
+            <span flex></span>
+            <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Log out</md-button>
+        </div>
+    </md-toolbar>
 <div class="main-content" flex layout="row" ng-controller="NavbarController as navBarController">
     <md-sidenav id="sidebar"
                 class="toggled md-sidenav-left md-whiteframe-z2"
@@ -81,9 +81,8 @@
             </li>
         </ul>
     </md-sidenav>
-    <div flex layout="column">
-        <md-content id="content" ng-class="{ 'home-splash': !navBarController.isAuthenticated() } " layout="column" flex>
-            <div class="container" ng-view></div>
+        <div class="container" layout="column" flex>
+            <md-content ng-view id="content" ng-class="{ 'home-splash': !navBarController.isAuthenticated() } ">
         </md-content>
     </div>
 </div>
