@@ -46,6 +46,7 @@ public class ApplicationDataTest {
         list.add("Three");
         assertNull(instance.getProperty("String"));
         assertNull(instance.getProperty("Boolean"));
+        assertNull(instance.getProperty("Integer"));
         assertNull(instance.getProperty("Long"));
         assertNull(instance.getProperty("Text"));
         assertNull(instance.getProperty("Blob"));
@@ -53,6 +54,7 @@ public class ApplicationDataTest {
 
         instance.setProperty("String", "A String");
         instance.setProperty("Boolean", true);
+        instance.setProperty("Integer", 1);
         instance.setProperty("Long", 1L);
         instance.setProperty("Text", new Text("Some text..."));
         instance.setProperty("Blob", new Blob("Some text...".getBytes()));
@@ -60,6 +62,7 @@ public class ApplicationDataTest {
 
         assertEquals("A String", instance.getProperty("String"));
         assertEquals(Boolean.TRUE, instance.getProperty("Boolean"));
+        assertEquals(new Integer(1), instance.getProperty("Integer"));
         assertEquals(new Long(1), instance.getProperty("Long"));
         assertEquals(new Text("Some text..."), instance.getProperty("Text"));
         assertEquals(new Blob("Some text...".getBytes()), instance.getProperty("Blob"));
@@ -72,6 +75,7 @@ public class ApplicationDataTest {
 
         assertNull(instance.getProperty("String"));
         assertNull(instance.getProperty("Boolean"));
+        assertNull(instance.getProperty("Integer"));
         assertNull(instance.getProperty("Long"));
         assertNull(instance.getProperty("Text"));
         assertNull(instance.getProperty("Blob"));
@@ -84,6 +88,7 @@ public class ApplicationDataTest {
 
         instance.setProperty("String", "A String");
         instance.setProperty("Boolean", true);
+        instance.setProperty("Integer", 1);
         instance.setProperty("Long", 1L);
         instance.setProperty("Text", new Text("Some text..."));
         instance.setProperty("Blob", new Blob("Some text...".getBytes()));
@@ -102,6 +107,7 @@ public class ApplicationDataTest {
 
         assertEquals("A String", instance.getProperty("String"));
         assertEquals(Boolean.TRUE, instance.getProperty("Boolean"));
+        assertEquals(new Integer(1), instance.getProperty("Integer"));
         assertEquals(new Long(1), instance.getProperty("Long"));
         assertEquals(new Text("Some text..."), instance.getProperty("Text"));
         assertEquals(new Blob("Some text...".getBytes()), instance.getProperty("Blob"));
@@ -109,6 +115,7 @@ public class ApplicationDataTest {
 
         instance.setProperty("String", null);
         instance.setProperty("Boolean", null);
+        instance.setProperty("Integer", null);
         instance.setProperty("Long", null);
         instance.setProperty("Text", null);
         instance.setProperty("Blob", null);
@@ -123,6 +130,7 @@ public class ApplicationDataTest {
 
         assertNull(instance.getProperty("String"));
         assertNull(instance.getProperty("Boolean"));
+        assertNull(instance.getProperty("Integer"));
         assertNull(instance.getProperty("Long"));
         assertNull(instance.getProperty("Text"));
         assertNull(instance.getProperty("Blob"));
@@ -132,6 +140,7 @@ public class ApplicationDataTest {
 
         assertNull(instance.getProperty("String"));
         assertNull(instance.getProperty("Boolean"));
+        assertNull(instance.getProperty("Integer"));
         assertNull(instance.getProperty("Long"));
         assertNull(instance.getProperty("Text"));
         assertNull(instance.getProperty("Blob"));
