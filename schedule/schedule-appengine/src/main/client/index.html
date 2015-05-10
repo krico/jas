@@ -43,44 +43,44 @@
             <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Log out</md-button>
         </div>
     </md-toolbar>
-<div class="main-content" flex layout="row" ng-controller="NavbarController as navBarController">
-    <md-sidenav id="sidebar"
-                class="toggled md-sidenav-left md-whiteframe-z2"
-                md-component-id="left"
-                md-is-locked-open="$mdMedia('gt-md') && navBarController.isAuthenticated()" >
-        <ul class="main-menu" style="margin: 0">
-            <li>
-                <a ng-href="#/profile"><i class="mdi mdi-home"></i> My Profile</a>
-            </li>
-            <li ng-if="navBarController.isAdminOrOrgMember()" class="sub-menu">
-                <a href><i class="mdi mdi-settings-applications"></i> Admin</a>
-                <ul>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="mdi mdi-person"></i> Users</a></li>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="mdi mdi-group"></i> Groups</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="mdi mdi-school"></i> Organizations</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="mdi mdi-accessibility"></i> Activities</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activity-packages"><i class="mdi mdi-shop-two"></i> Activity Packages</a></li>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="mdi mdi-attach-money"></i> Balances</a></li>
-                </ul>
-            </li>
-            <li class="sub-menu">
-                <a href><i class="mdi mdi-poll"></i> Balance</a>
-                <ul>
-                    <li><a ng-href="#/payment/make"><i class="ion-card"></i> Make a Payment</a></li>
-                    <li><a ng-href="#/payment/view"><i class="mdi mdi-attach-money"></i> View Balance</a></li>
-                </ul>
-            </li>
-            <li>
-                <a ng-href="#/checkout"><i class="mdi mdi-shopping-cart"></i> Checkout</a>
-            </li>
-            <li>
+    <div class="main-content" flex layout="row" ng-controller="NavbarController as navBarController">
+        <md-sidenav id="sidebar"
+                    class="toggled md-sidenav-left md-whiteframe-z2"
+                    md-component-id="left"
+                    md-is-locked-open="$mdMedia('gt-md') && navBarController.isAuthenticated()" >
+            <ul class="main-menu" style="margin: 0">
+                <li>
+                    <a ng-href="#/profile"><i class="mdi mdi-home"></i> My Profile</a>
+                </li>
+                <li ng-if="navBarController.isAdminOrOrgMember()" class="sub-menu">
+                    <a href><i class="mdi mdi-settings-applications"></i> Admin</a>
+                    <ul>
+                        <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="mdi mdi-person"></i> Users</a></li>
+                        <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="mdi mdi-group"></i> Groups</a></li>
+                        <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="mdi mdi-school"></i> Organizations</a></li>
+                        <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="mdi mdi-accessibility"></i> Activities</a></li>
+                        <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activity-packages"><i class="mdi mdi-shop-two"></i> Activity Packages</a></li>
+                        <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="mdi mdi-attach-money"></i> Balances</a></li>
+                    </ul>
+                </li>
+                <li class="sub-menu">
+                    <a href><i class="mdi mdi-poll"></i> Balance</a>
+                    <ul>
+                        <li><a ng-href="#/payment/make"><i class="ion-card"></i> Make a Payment</a></li>
+                        <li><a ng-href="#/payment/view"><i class="mdi mdi-attach-money"></i> View Balance</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a ng-href="#/checkout"><i class="mdi mdi-shopping-cart"></i> Checkout</a>
+                </li>
+                <li>
                 <a ng-href="#/widgets"><i class="mdi mdi-now-widgets"></i> Widgets</a>
             </li>
             <li>
-                <a ng-href="#/logout"><i class="ion-android-exit"></i> Log out</a>
-            </li>
-        </ul>
-    </md-sidenav>
+                    <a ng-href="#/logout"><i class="ion-android-exit"></i> Log out</a>
+                </li>
+            </ul>
+        </md-sidenav>
         <div class="container" layout="column" flex>
             <md-content ng-view id="content" ng-class="{ 'home-splash': !navBarController.isAuthenticated() } ">
         </md-content>
