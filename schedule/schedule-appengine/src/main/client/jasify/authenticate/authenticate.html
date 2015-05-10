@@ -4,7 +4,7 @@
 </div>
 <div id="authenticate-dialog" class="modal-body">
     <div ng-if="vm.isCreateAccount()">
-        <div ng-controller="CreateAccountController as vm" ng-include="'authenticate/create-account.html'"></div>
+        <div ng-controller="CreateAccountController as vm" ng-init="vm.onCreated = $close" ng-include="'authenticate/create-account.html'"></div>
         <small layout="row" layout-align="start center" class="sign-in">
             Already have an account?&nbsp;<a href="javascript:void(0)" ng-click="vm.switchToSignIn()">Sign In</a>
         </small>

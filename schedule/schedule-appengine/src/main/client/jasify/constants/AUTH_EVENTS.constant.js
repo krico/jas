@@ -10,6 +10,7 @@
         sessionTimeout: 'auth-session-timeout',
         signIn: 'auth-sign-in',
         createAccount: 'auth-create-account',
+        accountCreated: 'auth-account-created',
         notAuthenticated: 'auth-not-authenticated',
         notAuthorized: 'auth-not-authorized',
         notGuest: 'auth-not-guest'

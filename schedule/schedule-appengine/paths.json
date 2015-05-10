@@ -1,7 +1,15 @@
 {
   "js": [
     "src/main/client/**/*.module.js",
-    "src/main/client/**/*.js"
+    "src/main/client/**/*.js",
+    "!src/main/client/iframeResizer.contentWindow.min.js",
+    "!src/main/client/iframeResizer.min.js",
+    "!src/main/client/booking-via-jasify.js"
+  ],
+  "customJs": [
+    "src/main/client/iframeResizer.contentWindow.min.js",
+    "src/main/client/iframeResizer.min.js",
+    "src/main/client/booking-via-jasify.js"
   ],
   "test": {
     "js": [
@@ -15,6 +23,10 @@
     "src/main/client/jasify/directives/a-button/a-button.css",
     "src/main/client/jasify/directives/mask/mask.css",
     "src/main/stylesheet/styles.less"
+  ],
+  "cssBooking": [
+    "src/main/stylesheet/booking-theme.css",
+    "src/main/stylesheet/waszczpa.less"
   ],
   "watchCss": [
     "src/main/client/jasify/directives/**/*.css",
@@ -54,9 +66,11 @@
         "angular-local-storage/dist/angular-local-storage.js",
         "angular-bootstrap/ui-bootstrap-tpls.js",
         "angular-filter/dist/angular-filter.js",
+        "checklist-model/checklist-model.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
         "spin.js/spin.js",
-        "angular-spinner/angular-spinner.js"
+        "angular-spinner/angular-spinner.js",
+        "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js"
       ],
       "test": [
         "angular-mocks/angular-mocks.js"

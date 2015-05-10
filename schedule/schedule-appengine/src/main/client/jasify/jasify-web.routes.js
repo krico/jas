@@ -28,6 +28,16 @@
                     }
                 }
             })
+            .when('/widgets', {
+                templateUrl: 'widgets/widgets.html',
+                controller: 'WidgetsController',
+                controllerAs: 'vm',
+                resolve: {
+                    allow: /*@ngInject*/ function (Allow) {
+                        return Allow.all();
+                    }
+                }
+            })
             .when('/logout', {
                 templateUrl: 'logout/logout.html',
                 controller: 'LogoutController',

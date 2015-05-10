@@ -1,0 +1,127 @@
+<div class="container">
+    <div class="form-wizard-basic fw-container">
+        <ul class="tab-nav text-center">
+            <li><a prevent="click" href="#tab1" data-toggle="tab">Activities</a></li>
+            <li><a prevent="click" href="#tab2" data-toggle="tab">Checkout</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade" id="tab1">
+                <div class="card">
+                    <div class="card-header card-header-with-icon bgm-bluegray m-b-20">
+                        <h2>Activities
+                            <small>Select activities you would like to join.</small>
+                        </h2>
+                        <button wizard-trigger="#tab2" class="btn bgm-blue btn-float waves-effect btn-float-text">
+                            Checkout <i
+                                class="md md-send"></i></button>
+                    </div>
+                    <div class="card-body card-padding-sm">
+                        <div class="activity-listview listview lv-bordered lv-lg">
+                            <div class="lv-body" ng-repeat="activity in vm.activities">
+                                <div class="selectable-lv-item lv-item media" ng-class="{ 'active' : vm.selection.indexOf(activity) !== -1 }">
+                                    <div ng-class="{ 'disabled': vm.isFullyBooked(activity) }" class="checkbox pull-left">
+                                        <label>
+                                            <input ng-disabled="vm.isFullyBooked(activity)" type="checkbox" checklist-model="vm.selection"
+                                                   checklist-value="activity">
+                                            <i class="input-helper"></i>
+                                        </label>
+                                    </div>
+                                    <div class="media-body">
+                                        <div class="lv-title">
+                                            <span ng-show="vm.isFullyBooked(activity)" class="label label-danger m-r-10">Fully Booked</span>
+                                            {{activity.activityType.name}}
+                                        </div>
+                                        <ul class="lv-attrs">
+                                            <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
+                                            <li ng-if="!vm.isFullyBooked(activity)">Places left: {{activity.maxSubscriptions - activity.subscriptionCount}}
+                                            </li>
+                                            <li>Price: {{activity.price}} {{activity.currency}}</li>
+                                            <li ng-if="activity.location">Location: {{activity.location}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab2">
+                <div ng-if="!vm.auth.isAuthenticated()">
+                    <div class="card">
+                        <div class="card-body card-padding-sm card-with-icon">
+                            <i class="md md-info-outline"></i>
+                            Booking is done via Jasify. <br/>Sign In or Create Account in order to finish booking
+                            process.
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Sign In
+                                        <small>Sign in with already created Jasify account</small>
+                                    </h2>
+                                </div>
+                                <div class="card-body card-padding-sm">
+                                    <div ng-controller="SignInController as vm"
+                                         ng-include="'authenticate/sign-in.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Create Account
+                                        <small>If you don't have Jasify account, create it</small>
+                                    </h2>
+                                </div>
+                                <div class="card-body card-padding-sm">
+                                    <div ng-controller="CreateAccountController as vm"
+                                         ng-init="vm.onCreated = vm.accountCreated"
+                                         ng-include="'authenticate/create-account.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="vm.auth.isAuthenticated()">
+                    <div class="card">
+                        <div ng-show="!!vm.selection.length" class="bgm-bluegray card-header card-header-with-icon m-b-20">
+                            <h2>Selected Activities
+                                <small>Review selected activities. If everything is OK, submit it.</small>
+                            </h2>
+                            <button ng-click="vm.bookIt()" class="btn bgm-blue btn-float waves-effect btn-float-text">
+                                Submit <i class="md md-shopping-cart"></i></button>
+                        </div>
+                        <div ng-show="!vm.selection.length" class="bgm-amber card-header card-header-with-icon m-b-20">
+                            <h2>No Activities selected
+                                <small>You did not select any activities. Browse back to Activity list and select activities.</small>
+                            </h2>
+                            <button wizard-trigger="#tab1" class="btn bgm-blue btn-float waves-effect btn-float-text">
+                                <i class="md md-undo"></i> Back to Activities</button>
+                        </div>
+                        <div class="card-body card-padding-sm">
+                            <div class="activity-listview listview lv-bordered lv-lg">
+                                <div class="lv-body" ng-repeat="activity in vm.selection">
+                                    <div class="lv-item media">
+                                        <div class="media-body">
+                                            <div class="lv-title">
+                                                {{$index + 1}}. {{activity.activityType.name}}
+                                            </div>
+                                            <ul class="lv-attrs">
+                                                <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
+                                                <li ng-if="activity.maxSubscriptions < activity.subscriptionCount">Places left: {{activity.maxSubscriptions - activity.subscriptionCount}}</li>
+                                                <li>Price: {{activity.price}} {{activity.currency}}</li>
+                                                <li ng-if="activity.location">Location: {{activity.location}}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

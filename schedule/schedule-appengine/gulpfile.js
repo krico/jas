@@ -47,8 +47,9 @@ gulp.task('client-tpl', clientTpl);
 gulp.task('client-js', clientJs);
 
 gulp.task('client-css', ['bower-install'], clientCss);
+gulp.task('booking-css', ['bower-install'], bookingCss)
 
-gulp.task('client', ['client-tpl', 'client-js', 'client-dependencies', 'client-css']);
+gulp.task('client', ['client-tpl', 'client-js', 'client-dependencies', 'client-css', 'booking-css']);
 
 gulp.task('lint-js', lintJs);
 gulp.task('lint-test-js', lintTestJs);
@@ -58,8 +59,15 @@ gulp.task('static-html', staticHtml);
 gulp.task('images', images);
 gulp.task('test', ['build'], testClient);
 gulp.task('watch', rebuild);
-gulp.task('build', ['client', 'html', 'static-html', 'images']);
+gulp.task('custom-js', customJs);
+gulp.task('build', ['client', 'html', 'static-html', 'images', 'custom-js']);
 gulp.task('default', ['watch', 'build', 'lint']);
+
+function customJs() {
+    return gulp
+        .src(paths.customJs)
+        .pipe(gulp.dest(paths.build + '/../'))
+}
 
 function rebuild() {
 
@@ -69,7 +77,7 @@ function rebuild() {
     gulp.watch(paths.js, ['lint-after-client-js']);
     gulp.watch(paths.partials, ['client-tpl']);
     gulp.watch(paths.test.js, ['lint-test-js']);
-    gulp.watch(paths.watchCss, ['client-css']);
+    gulp.watch(paths.watchCss, ['client-css', 'booking-css']);
     gulp.watch(paths.html, ['html']);
     gulp.watch(paths.staticHtml, ['static-html']);
     gulp.watch(paths.images, ['images']);
@@ -190,11 +198,28 @@ function clientCss(cb) {
             ]
         }))
         .pipe(concat('jasify.css'))
-        .pipe(gulp.dest(paths.build + '/css'))
-        .pipe(minifyCSS())
-        .pipe(rename({extname: '.min.css'}))
-        //.pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(paths.build + '/css'));
+        //.pipe(minifyCSS())
+        //.pipe(rename({extname: '.min.css'}))
+        //.pipe(sourcemaps.write('./'))
+        //.pipe(gulp.dest(paths.build + '/css'));
+}
+
+function bookingCss(cb) {
+    return gulp.src(paths.cssBooking)
+        .pipe(plumber())
+        //.pipe(sourcemaps.init())
+        .pipe(less({
+            paths: [
+                path.join(paths.bower, 'bootstrap', 'less')
+            ]
+        }))
+        .pipe(concat('booking.css'))
+        .pipe(gulp.dest(paths.build + '/css'));
+        //.pipe(minifyCSS())
+        //.pipe(rename({extname: '.min.css'}))
+        //.pipe(sourcemaps.write('./'))
+        //.pipe(gulp.dest(paths.build + '/css'));
 }
 
 function clientDependenciesCssFun(key) {
@@ -226,7 +251,7 @@ function clientDependenciesCssFun(key) {
 function html(cb) {
     return gulp.src(paths.html)
         .pipe(plumber())
-        .pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
+        //.pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
         .pipe(gulp.dest(paths.build + '/../'))
 }
 

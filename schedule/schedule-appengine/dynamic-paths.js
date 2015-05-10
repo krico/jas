@@ -1,6 +1,18 @@
-require('require-xml');
-var pom = JSON.parse(require('./pom.xml'));
+var fs = require('fs'),
+    xml2js = require('xml2js');
+
+var parser = new xml2js.Parser();
+var pomXml = fs.readFileSync('./pom.xml');
+var pomJson;
+
+parser.parseString(pomXml, function (err, result) {
+    pomJson = result;
+});
+
+
 var paths = require(__dirname + '/paths.json');
-paths.projectVersion = pom.project.version;
+paths.projectVersion = pomJson.project.version;
 paths.build = paths.buildTemplate.replace('@VERSION@', paths.projectVersion);
 module.exports = paths;
+
+
