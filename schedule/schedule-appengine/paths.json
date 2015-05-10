@@ -2,13 +2,9 @@
   "js": [
     "src/main/client/**/*.module.js",
     "src/main/client/**/*.js",
-    "!src/main/client/iframeResizer.contentWindow.min.js",
-    "!src/main/client/iframeResizer.min.js",
     "!src/main/client/booking-via-jasify.js"
   ],
   "customJs": [
-    "src/main/client/iframeResizer.contentWindow.min.js",
-    "src/main/client/iframeResizer.min.js",
     "src/main/client/booking-via-jasify.js"
   ],
   "test": {
@@ -71,6 +67,12 @@
         "spin.js/spin.js",
         "angular-spinner/angular-spinner.js",
         "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js"
+      ],
+      "iframecontentwindow": [
+        "iframe-resizer/js/iframeResizer.contentWindow.min.js"
+      ],
+      "iframeresizer": [
+        "iframe-resizer/js/iframeResizer.min.js"
       ],
       "test": [
         "angular-mocks/angular-mocks.js"

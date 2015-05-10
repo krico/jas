@@ -39,7 +39,17 @@ gulp.task('client-dependencies-css', ['bower-install'], clientDependenciesCssFun
 gulp.task('client-dependencies-js-boot', ['bower-install'], clientDependenciesJsFun('boot'));
 gulp.task('client-dependencies-js-main', ['bower-install'], clientDependenciesJsFun('main'));
 gulp.task('client-dependencies-js-test', ['bower-install'], clientDependenciesJsFun('test'));
-gulp.task('client-dependencies-js', ['client-dependencies-js-boot', 'client-dependencies-js-main', 'client-dependencies-js-test']);
+gulp.task('client-dependencies-js-iframecontentwindow', ['bower-install'], clientDependenciesJsFun('iframecontentwindow'));
+gulp.task('client-dependencies-js-iframeresizer', ['bower-install'], clientDependenciesJsFun('iframeresizer'));
+gulp.task('client-dependencies-js',
+    [
+        'client-dependencies-js-boot',
+        'client-dependencies-js-main',
+        'client-dependencies-js-test',
+        'client-dependencies-js-iframecontentwindow',
+        'client-dependencies-js-iframeresizer'
+    ]
+);
 
 gulp.task('client-dependencies', ['client-dependencies-js', 'client-dependencies-css']);
 
