@@ -21,7 +21,7 @@
 
     function bookingViaRoutes($routeProvider) {
         $routeProvider
-            .when('/', {
+            .when('/:organizationId', {
                 templateUrl: 'booking-via-jasify/booking-via-jasify.html',
                 controller: 'BookingViaJasify',
                 controllerAs: 'vm',
@@ -29,8 +29,8 @@
                     allow: function(Allow) {
                         return Allow.all();
                     },
-                    activities: function(Activity) {
-                        return Activity.query({organizationId: 'O53'});
+                    activities: function($route, Activity) {
+                        return Activity.query({organizationId: $route.current.params.organizationId });
                     }
                 }
             }).when('/done', {
