@@ -1,24 +1,28 @@
+@import (reference) "bootstrap.less";
+
 /* BEGIN: OAuth buttons */
 
-md-content {
+.container:not(.home-splash) md-content {
   overflow-y: scroll;
 }
 
 body {
   padding: 0 !important;
   margin: 0 !important;
-}
 
-#content {
-  background-color: inherit;
-
-  .container {
-    width: 100%;
+  #content {
+    background-color: inherit;
+    padding-right: 15px;
   }
 }
 
+.main-content > .container {
+  padding-right: 0;
+}
+
+
+
 .home-splash {
-  height: 100vh;
   background-position: 50% 50%;
   background-size: cover;
   background-repeat: none;
@@ -28,8 +32,21 @@ body {
 @facebookBgColor: #3b5998;
 @googleBgColor: #dd4b39;
 
-.actions-group > button ~ button {
-  margin-left: 10px;
+@angularMaterialLayoutSm: 600px;
+
+@media (min-width:@angularMaterialLayoutSm) {
+  .actions-group > button ~ button {
+    margin-left: 10px;
+  }
+}
+
+@media (max-width:@angularMaterialLayoutSm) {
+  .actions-group > button {
+    .btn-block();
+  }
+  .actions-group > button ~ button {
+    margin-top: 5px;
+  }
 }
 
 td.actions-column {
@@ -171,4 +188,19 @@ td.actions-column {
 
 .lv-item.active {
   background-color: #fffcbe;
+}
+
+@media (max-width:@angularMaterialLayoutSm) {
+  md-sidenav {
+    width: 204px;
+    min-width: 204px;
+  }
+
+  #sidebar .main-menu > li.sub-menu > ul > li > a {
+    padding-left: 30px;
+  }
+
+  .tab-nav > li {
+    display: block;
+  }
 }

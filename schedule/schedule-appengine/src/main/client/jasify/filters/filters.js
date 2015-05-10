@@ -17,6 +17,6 @@
             } else {
                 return fromDate + ' ' + fromTime + ' - ' + toDate + ' ' + toTime;
             }
-        }
+        };
     }
 })(angular);

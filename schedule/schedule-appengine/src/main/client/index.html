@@ -24,48 +24,51 @@
         ga('create', 'UA-56638051-1', 'auto');
         ga('send', 'pageview');
     </script>
-    <script src="build/js/dep-main.js"></script>
-    <script src="build/js/jasify.js"></script>
-    <script src="build/js/jasify.tpl.js"></script>
     <link href="build/css/dep-main.css" rel="stylesheet">
     <link href="build/css/jasify.css" rel="stylesheet">
 </head>
 <body layout="column" ng-controller="ApplicationController as appVm">
 <md-toolbar layout="row" class="md-whiteframe-z1" ng-controller="NavbarController as vm">
     <div class="md-toolbar-tools">
-        <md-button hide-gt-md ng-click="vm.toggleList()" class="md-icon-button" aria-label="Settings">
+        <md-button ng-show="vm.isAuthenticated()" hide-gt-md ng-click="vm.toggleList()" class="md-icon-button"
+                   aria-label="Settings">
             <md-icon md-svg-icon="img/menu.svg"></md-icon>
         </md-button>
         <h2>
             Jasify
         </h2>
         <span flex></span>
-        <md-button ng-hide="vm.isAuthenticated()" class="md-raised" ng-click="vm.signIn()">Sign In</md-button>
-        <md-button ng-hide="vm.isAuthenticated()" class="md-raised" ng-click="vm.createAccount()">Create Account</md-button>
         <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Log out</md-button>
     </div>
 </md-toolbar>
-<div flex layout="row" ng-controller="NavbarController as navBarController">
-    <md-sidenav id="sidebar" class="toggled md-sidenav-left md-whiteframe-z2"
+<div class="main-content" flex layout="row" ng-controller="NavbarController as navBarController">
+    <md-sidenav id="sidebar"
+                class="toggled md-sidenav-left md-whiteframe-z2"
                 md-component-id="left"
-                md-is-locked-open="$mdMedia('gt-md') && navBarController.isAuthenticated()" >
+                md-is-locked-open="$mdMedia('gt-md') && navBarController.isAuthenticated()">
         <ul class="main-menu" style="margin: 0">
             <li>
-                <a ng-click="navBarController.hide()" ng-href="#/profile"><i class="mdi mdi-home"></i> My Profile</a>
+                <a ng-href="#/profile"><i class="mdi mdi-home"></i> My Profile</a>
             </li>
             <li ng-if="navBarController.isAdminOrOrgMember()" class="sub-menu">
-                <a ng-href="javascript:void(0)"><i class="mdi mdi-settings-applications"></i> Admin</a>
+                <a href><i class="mdi mdi-settings-applications"></i> Admin</a>
                 <ul>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="mdi mdi-person"></i> Users</a></li>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="mdi mdi-group"></i> Groups</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i class="mdi mdi-school"></i> Organizations</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i class="mdi mdi-accessibility"></i> Activities</a></li>
-                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activity-packages"><i class="mdi mdi-shop-two"></i> Activity Packages</a></li>
-                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i class="mdi mdi-attach-money"></i> Balances</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/users"><i class="mdi mdi-person"></i>
+                        Users</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/groups"><i class="mdi mdi-group"></i>
+                        Groups</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/organizations"><i
+                            class="mdi mdi-school"></i> Organizations</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activities"><i
+                            class="mdi mdi-accessibility"></i> Activities</a></li>
+                    <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activity-packages"><i
+                            class="mdi mdi-shop-two"></i> Activity Packages</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/balances"><i
+                            class="mdi mdi-attach-money"></i> Balances</a></li>
                 </ul>
             </li>
             <li class="sub-menu">
-                <a ng-href="javascript:void(0)"><i class="mdi mdi-poll"></i> Balance</a>
+                <a href><i class="mdi mdi-poll"></i> Balance</a>
                 <ul>
                     <li><a ng-href="#/payment/make"><i class="ion-card"></i> Make a Payment</a></li>
                     <li><a ng-href="#/payment/view"><i class="mdi mdi-attach-money"></i> View Balance</a></li>
@@ -82,9 +85,8 @@
             </li>
         </ul>
     </md-sidenav>
-    <div flex layout="column">
-        <md-content id="content" ng-class="{ 'home-splash': !navBarController.isAuthenticated() } " layout="column" flex>
-            <div class="container" ng-view></div>
+    <div class="container" layout="column" flex  ng-class="{ 'home-splash': !navBarController.isAuthenticated() } ">
+        <md-content ng-view id="content" flex>
         </md-content>
     </div>
 </div>
@@ -102,5 +104,8 @@
 <input type="hidden" id="auth.status" ng-value="vm.isAuthenticated() ? 'authenticated' : 'anonymous'"/>
 <input type="hidden" id="auth.name" ng-value="currentUser.name"/>
 <input type="hidden" id="auth.id" ng-value="currentUser.id"/>
+<script src="build/js/dep-main.js"></script>
+<script src="build/js/jasify.js"></script>
+<script src="build/js/jasify.tpl.js"></script>
 </body>
 </html>

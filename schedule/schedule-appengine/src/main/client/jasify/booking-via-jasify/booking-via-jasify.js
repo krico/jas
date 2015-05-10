@@ -1,6 +1,7 @@
 (function (angular) {
 
-    angular.module('jasify.bookingViaJasify')
+    angular
+        .module('jasify.bookingViaJasify')
         .controller('BookingViaJasify', BookingViaJasify);
 
     function BookingViaJasify(AUTH_EVENTS, $rootScope, $location, $q, BrowserData, ShoppingCart, Auth, activities) {

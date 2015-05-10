@@ -16,7 +16,7 @@
         return {
             restrict: 'C',
             link: function (scope, elem, attrs, ctrl) {
-                elem.on('click', clickHandler)
+                elem.on('click', clickHandler);
             }
         };
     }

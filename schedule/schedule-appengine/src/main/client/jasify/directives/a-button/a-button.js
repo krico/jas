@@ -9,7 +9,7 @@
 
     "use strict;";
 
-    angular.module('jasifyComponents').directive('aButton', function ($timeout, $rootScope) {
+    angular.module('jasifyComponents').directive('aButton', function ($timeout, $mdMedia) {
         return {
             restrict: 'AE',
             replace: true,
@@ -92,6 +92,14 @@
                 if (scope.options.onlyIcons) {
                     scope.onlyIcons = 'icons-only';
                 }
+
+                scope.$watch(function() { return $mdMedia('sm'); }, function(small) {
+                    if (small) {
+                        delete scope.buttonTextFloatClass;
+                    } else {
+                        scope.buttonTextFloatClass = setButtonTextFloatClass();
+                    }
+                });
 
                 //$rootScope.$on('mask-hide', function () {
                 //    if (scope.isSubmitting) {

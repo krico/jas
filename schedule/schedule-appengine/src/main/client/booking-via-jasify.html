@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="jasify.bookingViaJasify" ng-strict-di>
-    <script src="iframeResizer.contentWindow.min.js"></script>
+    <script src="/build/js/dep-iframecontentwindow.min.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,13 +25,13 @@
 
     </script>
     <title>Jasify via Booking</title>
-    <script src="build/js/dep-main.js"></script>
-    <script src="build/js/jasify.js"></script>
-    <script src="build/js/jasify.tpl.js"></script>
-    <script src="https://apis.google.com/js/client.js?onload=initializeEndpoint"></script>
-    <link href="build/css/booking.css" rel="stylesheet">
+    <link href="/build/css/booking.css" rel="stylesheet">
 </head>
 <body>
 <div ng-view></div>
+<script src="/build/js/dep-main.js"></script>
+<script src="/build/js/jasify.js"></script>
+<script src="/build/js/jasify.tpl.js"></script>
+<script src="https://apis.google.com/js/client.js?onload=initializeEndpoint"></script>
 </body>
 </html>

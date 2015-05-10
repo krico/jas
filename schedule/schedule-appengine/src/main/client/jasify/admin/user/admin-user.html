@@ -1,10 +1,7 @@
 <div class="card">
     <div class="card-header" ng-if="vm.user.id">
         <a class="back-button" href="#/admin/users">
-            <md-tooltip>
-                Back
-            </md-tooltip>
-            <button class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+            <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
         </a>
         <h2>{{vm.user.name}}'s Profile
             <small>Edit user setting or change password</small>
@@ -12,10 +9,7 @@
     </div>
     <div class="card-header" ng-if="!vm.user.id">
         <a class="back-button" href="#/admin/users">
-            <md-tooltip>
-                Back
-            </md-tooltip>
-            <button class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+            <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
         </a>
         <h2>Create new user
         </h2>
@@ -29,12 +23,12 @@
         <ul class="tab-nav" role="tablist">
             <li class="active">
                 <a prevent="click" href="#profile-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
-                    User Settings
+                    <i class="mdi mdi-settings"></i> User Settings
                 </a>
             </li>
             <li ng-if="vm.user.id">
                 <a prevent="click" href="#password-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
-                    Password Management
+                    <i class="ion-ios-color-wand"></i> Password Management
                 </a>
             </li>
         </ul>

@@ -40,9 +40,9 @@
                 elem.on('click', function() {
                     var tabName = attrs.wizardTrigger;
                     $('[href="' + tabName + '"]').click();
-                })
+                });
             }
-        }
+        };
     });
 
     jasifyDirectivesFormModule.directive('prevent', function () {

@@ -71,10 +71,7 @@
             <tr>
                 <th>
                     <a href="#/admin/user">
-                        <md-tooltip md-direction="right">
-                            Add User
-                        </md-tooltip>
-                        <button class="btn bgm-teal btn-icon"><i class="md mdi mdi-person-add"></i></button>
+                        <button title="Add User" class="btn bgm-teal btn-icon"><i class="md mdi mdi-person-add"></i></button>
                     </a>
                 </th>
                 </th>
@@ -87,13 +84,9 @@
             <tbody>
             <tr ng-repeat="user in vm.users track by user.id">
                 <td>
-
-                    <button ng-click="vm.viewUser(user.id)" type="button" class="btn btn-primary"
+                    <button title="Edit {{user.name}}" ng-click="vm.viewUser(user.id)" type="button" class="btn btn-primary"
                             data-row-id="{{user.id}}">
                         <span class="mdi mdi-edit"></span> Edit
-                        <md-tooltip md-direction="right">
-                            Edit {{user.name}}
-                        </md-tooltip>
                     </button>
                 </td>
                 <td>{{user.name}}</td>
