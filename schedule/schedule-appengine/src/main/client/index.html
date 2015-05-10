@@ -33,15 +33,13 @@
 <body layout="column" ng-controller="ApplicationController as appVm">
 <md-toolbar layout="row" class="md-whiteframe-z1" ng-controller="NavbarController as vm">
     <div class="md-toolbar-tools">
-        <md-button hide-gt-md ng-click="vm.toggleList()" class="md-icon-button" aria-label="Settings">
+        <md-button ng-show="vm.isAuthenticated()" hide-gt-md ng-click="vm.toggleList()" class="md-icon-button" aria-label="Settings">
             <md-icon md-svg-icon="img/menu.svg"></md-icon>
         </md-button>
         <h2>
             Jasify
         </h2>
         <span flex></span>
-        <md-button ng-hide="vm.isAuthenticated()" class="md-raised" ng-click="vm.signIn()">Sign In</md-button>
-        <md-button ng-hide="vm.isAuthenticated()" class="md-raised" ng-click="vm.createAccount()">Create Account</md-button>
         <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Log out</md-button>
     </div>
 </md-toolbar>
