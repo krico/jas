@@ -10102,7 +10102,6 @@ body #content {
         width: calc(100% - 30px);
     }
 }
-
 #sidebar .main-menu {
     list-style: none;
     padding-left: 0;
@@ -11457,6 +11456,10 @@ html:not(.ie9) .select.fg-line:before {
     margin-top: 0;
     margin-bottom: 0;
 }
+.tooltip-inner {
+    border-radius: 1px;
+    padding: 3px 10px 5px;
+}
 /*
  * Block Header
  * Used for Heading outside the Cards.
@@ -11777,13 +11780,6 @@ html:not(.ie9) .select.fg-line:before {
     -ms-transform: rotate(90deg);
     -o-transform: rotate(90deg);
     transform: rotate(90deg);
-}
-@media (max-width: 480px) {
-    .bootgrid-header .actions {
-        position: absolute;
-        top: 0;
-        right: 15px;
-    }
 }
 .bootgrid-table th > .column-header-anchor > .icon {
     top: 0px;
