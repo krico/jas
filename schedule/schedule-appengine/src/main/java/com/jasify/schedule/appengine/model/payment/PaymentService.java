@@ -14,14 +14,14 @@ import java.util.List;
  */
 public interface PaymentService {
     @Nonnull
-    <T extends Payment> Key newPayment(long userId, T payment, List<PaymentWorkflow> workflowList) throws PaymentException;
+    <T extends Payment> Key newPayment(long userId, T payment, List<PaymentWorkflow> workflowList);
 
     @Nonnull
-    <T extends Payment> Key newPayment(Key parentKey, T payment, List<PaymentWorkflow> workflowList) throws PaymentException;
+    <T extends Payment> Key newPayment(Key parentKey, T payment, List<PaymentWorkflow> workflowList);
 
-    <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws PaymentException;
+    <T extends Payment> void createPayment(PaymentProvider<T> provider, T payment, GenericUrl baseUrl) throws EntityNotFoundException, PaymentException;
 
-    <T extends Payment> void executePayment(PaymentProvider<T> provider, T payment) throws PaymentException;
+    <T extends Payment> void executePayment(PaymentProvider<T> provider, T payment) throws EntityNotFoundException, PaymentException;
 
     <T extends Payment> void cancelPayment(T payment) throws EntityNotFoundException, PaymentException;
 

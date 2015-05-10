@@ -41,7 +41,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="activity in vm.activities">
+            <tr ng-repeat="activity in vm.activities | orderBy:'start'">
                 <td></td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.activityType.name}}</td>
                 <td ng-click="vm.viewActivity(activity.id)">{{activity.location}}</td>

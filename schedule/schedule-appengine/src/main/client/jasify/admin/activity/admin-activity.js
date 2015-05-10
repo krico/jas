@@ -44,10 +44,13 @@
         vm.init();
 
         function init() {
-            vm.activity.start = new Date();
-            vm.activity.start.setMinutes(0, 0, 0);
-            vm.activity.start.setHours(vm.activity.start.getHours() + 1);
-            vm.activity.finish = new Date(vm.activity.start.getTime() + 60 * 60 * 1000);
+            if (!vm.activity.id) {
+                vm.activity.start = new Date();
+                vm.activity.start.setMinutes(0, 0, 0);
+                vm.activity.start.setHours(vm.activity.start.getHours() + 1);
+                vm.activity.finish = new Date(vm.activity.start.getTime() + 60 * 60 * 1000);
+            }
+            // We do not currently have the ability to update "series" so for the time being repeat details are always reset to default
             vm.repeatDetails.repeatType = vm.repeatTypes[0];
             vm.repeatDetails.repeatUntilType = vm.repeatUntilTypes[0];
             vm.repeatDetails.untilCount = 1;

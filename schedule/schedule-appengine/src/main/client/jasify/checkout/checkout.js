@@ -14,8 +14,8 @@
         vm.redirecting = false;
         vm.paymentType = 'PayPal';
         vm.paymentTypes = [
-            {label: 'PayPal', id: 'PayPal'},
-            {label: 'Pay at the door (cash)', id: 'Cash'}
+            {label: 'PayPal', id: 'PayPal'}//,
+        //    {label: 'Pay at the door (cash)', id: 'Cash'}
         ];
 
         function alert(t, m) {

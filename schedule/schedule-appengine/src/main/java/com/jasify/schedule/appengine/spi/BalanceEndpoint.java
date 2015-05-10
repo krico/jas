@@ -69,7 +69,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
 public class BalanceEndpoint {
 
     @ApiMethod(name = "balance.createPayment", path = "balance/create-payment", httpMethod = ApiMethod.HttpMethod.POST)
-    public JasPaymentResponse createPayment(User caller, JasPaymentRequest paymentRequest) throws UnauthorizedException, PaymentException, BadRequestException {
+    public JasPaymentResponse createPayment(User caller, JasPaymentRequest paymentRequest) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(paymentRequest.getBaseUrl()));
         if (paymentRequest.getType() != PaymentTypeEnum.PayPal) {
@@ -80,12 +80,16 @@ public class BalanceEndpoint {
         payment.setCurrency(paymentRequest.getCurrency());
         payment.addItem("Jasify Credits", 1, paymentRequest.getAmount());
         paymentService.newPayment(jasCaller.getUserId(), payment, Collections.<PaymentWorkflow>emptyList());
-        paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
+        try {
+            paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Payment");
+        }
         return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
     }
 
     @ApiMethod(name = "balance.createCheckoutPayment", path = "balance/create-checkout-payment", httpMethod = ApiMethod.HttpMethod.POST)
-    public JasPaymentResponse createCheckoutPayment(User caller, JasCheckoutPaymentRequest paymentRequest) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException {
+    public JasPaymentResponse createCheckoutPayment(User caller, JasCheckoutPaymentRequest paymentRequest) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException {
         //TODO: I had a real hard time (and gave up) writing a test for this method.  Indicates it's too complex?
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         Preconditions.checkNotNull(paymentRequest.getType());
@@ -108,7 +112,7 @@ public class BalanceEndpoint {
     }
 
     private <T extends Payment> T createPaymentInternal(JasifyEndpointUser jasCaller, PaymentProvider<T> provider,
-                                                        JasCheckoutPaymentRequest request) throws PaymentException, NotFoundException {
+                                                        JasCheckoutPaymentRequest request) throws NotFoundException, PaymentException {
         GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(request.getBaseUrl()));
         String cartId = Preconditions.checkNotNull(StringUtils.trimToNull(request.getCartId()));
 
@@ -137,7 +141,11 @@ public class BalanceEndpoint {
         workflowList.add(PaymentWorkflowFactory.workflowForCartId(cartId));
 
         paymentService.newPayment(jasCaller.getUserId(), payment, workflowList);
-        paymentService.createPayment(provider, payment, baseUrl);
+        try {
+            paymentService.createPayment(provider, payment, baseUrl);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Payment");
+        }
         return payment;
     }
 
@@ -154,28 +162,32 @@ public class BalanceEndpoint {
     }
 
     @ApiMethod(name = "balance.executePayment", path = "balance/execute-payment/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public void executePayment(User caller, @Named("id") Key paymentId, @Nullable @Named("payerId") String payerId) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException, ForbiddenException {
+    public void executePayment(User caller, @Named("id") Key paymentId, @Nullable @Named("payerId") String payerId) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException, ForbiddenException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
         Preconditions.checkNotNull(payment.getType(), "No PaymentType");
-        switch (payment.getType()) {
-            case PayPal: {
-                PayPalPayment payPalPayment = (PayPalPayment) payment;
-                payPalPayment.setPayerId(Preconditions.checkNotNull(payerId, "payerID == NULL"));
-                paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
-                BalanceServiceFactory.getBalanceService().payment(payPalPayment);
+        try {
+            switch (payment.getType()) {
+                case PayPal: {
+                    PayPalPayment payPalPayment = (PayPalPayment) payment;
+                    payPalPayment.setPayerId(Preconditions.checkNotNull(payerId, "payerID == NULL"));
+                    paymentService.executePayment(PayPalPaymentProvider.instance(), payPalPayment);
+                    BalanceServiceFactory.getBalanceService().payment(payPalPayment);
+                }
+                break;
+                case Cash: {
+                    CashPayment cashPayment = (CashPayment) payment;
+                    paymentService.executePayment(CashPaymentProvider.instance(), cashPayment);
+                    //TODO: how do we handle this now?
+                    BalanceServiceFactory.getBalanceService().payment(cashPayment);
+                }
+                break;
+                default:
+                    throw new BadRequestException("Unsupported payment type: " + payment.getType());
             }
-            break;
-            case Cash: {
-                CashPayment cashPayment = (CashPayment) payment;
-                paymentService.executePayment(CashPaymentProvider.instance(), cashPayment);
-                //TODO: how do we handle this now?
-                BalanceServiceFactory.getBalanceService().payment(cashPayment);
-            }
-            break;
-            default:
-                throw new BadRequestException("Unsupported payment type: " + payment.getType());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Payment");
         }
     }
 

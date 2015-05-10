@@ -38,6 +38,57 @@ public class ApplicationDataTest {
     }
 
     @Test
+    public void testGetDefaultPropertiesForString() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertNull(instance.getProperty("Test1"));
+        assertEquals("TestResult", instance.getPropertyWithDefaultValue("Test1", "TestResult"));
+        assertEquals("TestResult", instance.getProperty("Test1"));
+    }
+
+    @Test
+    public void testGetDefaultPropertiesForInteger() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertNull(instance.getProperty("Test1"));
+        assertEquals(15, (int)instance.getPropertyWithDefaultValue("Test1", 15));
+        assertEquals(15, instance.getProperty("Test1"));
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testGetDefaultPropertiesForDouble() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertNull(instance.getProperty("Test1"));
+        instance.getPropertyWithDefaultValue("Test1", 15.8);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testGetDefaultPropertiesForFloat() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertNull(instance.getProperty("Test1"));
+        instance.getPropertyWithDefaultValue("Test1", 15f);
+    }
+
+    @Test
+    public void testGetDefaultPropertiesForLong() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertEquals(15l, (long)instance.getPropertyWithDefaultValue("Test1", 15l));
+        assertEquals(15l, instance.getProperty("Test1"));
+    }
+
+    @Test
+    public void testGetDefaultPropertiesForBoolean() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertEquals(Boolean.TRUE, instance.getPropertyWithDefaultValue("Test1", Boolean.TRUE));
+        assertEquals(Boolean.TRUE, instance.getProperty("Test1"));
+    }
+
+    @Test
+    public void testGetDefaultPropertiesForNull() {
+        ApplicationData instance = ApplicationData.instance().reload();
+        assertNull(instance.getPropertyWithDefaultValue("Test1", null));
+        assertNull(instance.getProperty("Test1"));
+    }
+
+    @Test
     public void testGetSetProperties() {
         ApplicationData instance = ApplicationData.instance().reload();
         List<String> list = new ArrayList<>();
@@ -146,5 +197,4 @@ public class ApplicationDataTest {
         assertNull(instance.getProperty("Blob"));
         assertNull(instance.getProperty("List"));
     }
-
 }

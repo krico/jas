@@ -25,22 +25,14 @@ public final class TransactionOperator {
 
     private TransactionOperator() {
         ApplicationData applicationData = ApplicationData.instance();
-        String retryCountKey = TransactionOperator.class.getName() + ".RetryCount";
-        Long longProp = applicationData.getProperty(retryCountKey);
-        Integer retryCount = longProp == null ? null : longProp.intValue();
-        if (retryCount == null) {
-            retryCount = DEFAULT_RETRY_COUNT;
-            applicationData.setProperty(retryCountKey, retryCount);
-        }
-        this.retryCount = Math.max(0, retryCount);
-        String retrySleepKey = TransactionOperator.class.getName() + ".RetrySleepMillis";
-        Long retrySleep = applicationData.getProperty(retrySleepKey);
-        if (retrySleep == null) {
-            retrySleep = DEFAULT_RETRY_SLEEP_MILLIS;
-            applicationData.setProperty(retryCountKey, retrySleep);
-        }
-        this.retrySleepMillis = Math.max(0, retrySleep);
 
+        String retryCountKey = TransactionOperator.class.getName() + ".RetryCount";
+        Integer retryCount = applicationData.getPropertyWithDefaultValue(retryCountKey, DEFAULT_RETRY_COUNT);
+        this.retryCount = Math.max(0, retryCount);
+
+        String retrySleepKey = TransactionOperator.class.getName() + ".RetrySleepMillis";
+        long retrySleep = applicationData.getPropertyWithDefaultValue(retrySleepKey, DEFAULT_RETRY_SLEEP_MILLIS);
+        this.retrySleepMillis = Math.max(0, retrySleep);
     }
 
     /**

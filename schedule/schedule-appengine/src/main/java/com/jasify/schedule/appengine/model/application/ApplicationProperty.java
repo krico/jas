@@ -65,7 +65,7 @@ public class ApplicationProperty {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> void setValue(T value) {
+    public <T> void setValue(T value) throws IllegalArgumentException {
         stringValue = null;
         booleanValue = null;
         longValue = null;
@@ -94,6 +94,8 @@ public class ApplicationProperty {
         } else if (value instanceof List) {
             type = TypeEnum.List;
             listValue = (List<String>) value;
+        } else if (value != null) {
+            throw new IllegalArgumentException("Class " + value.getClass().getName() + " not supported");
         }
     }
 
