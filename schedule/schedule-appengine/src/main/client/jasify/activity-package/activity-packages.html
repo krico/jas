@@ -20,6 +20,7 @@
                                     <select ng-model="vm.organization" id="organization" class="form-control"
                                             ng-options="organization as organization.name for organization in vm.organizations"
                                             ng-change="vm.organizationSelected(vm.organization)">
+                                        <option value="" disabled selected>-- select organization --</option>
                                     </select>
                                 </div>
                             </div>
@@ -30,16 +31,43 @@
         </div>
     </div>
     <div class="table-responsive">
-        <table id="users-list" class="table-vmiddle table table-striped table-hover">
+        <table id="ap-list" class="table-vmiddle table table-striped table-hover">
             <thead>
             <tr>
-                <th>ID</th>
+                <th>&nbsp;</th>
+                <th>Price</th>
+                <th>
+                    sub/av
+                    <md-tooltip md-direction="top">
+                        Subscribe (sub) of (av) available
+                    </md-tooltip>
+                </th>
+                <th>Name</th>
+                <th>Description</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="ap in vm.activityPackages track by ap.id">
                 <td>
-                    {{ap.id}}
+                    <button ng-click="vm.bookIt(ap)" type="button" class="btn btn-primary"
+                            data-row-id="{{ap.id}}">
+                        <i class="fa fa-shopping-cart"></i> Book it!
+                        <md-tooltip md-direction="right">
+                            Book {{ap.name}}
+                        </md-tooltip>
+                    </button>
+                </td>
+                <td>
+                    {{ap.price | currency : ap.currency : 2}}
+                </td>
+                <td>
+                    {{ap.itemCount}} of {{ap.activityCount}}
+                </td>
+                <td>
+                    {{ap.name}}
+                </td>
+                <td>
+                    {{ap.description}}
                 </td>
             </tr>
             </tbody>

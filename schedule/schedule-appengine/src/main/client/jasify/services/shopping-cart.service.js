@@ -7,6 +7,7 @@
             getUserCart: getUserCart,
             clearUserCart: clearUserCart,
             addUserActivity: addUserActivity,
+            addUserActivityPackage: addUserActivityPackage,
             removeItem: removeItem
         };
 
@@ -57,6 +58,19 @@
             });
         }
 
+        function addUserActivityPackage(activityPackage, activities) {
+            var req = {
+                activityPackageId: fetchId(activityPackage),
+                activityIds: fetchIds(activities)
+            };
+            $log.debug('addUserActivityPackage: ' + angular.toJson(req) + '\nNOT IMPLEMENTED!!');
+
+            return Endpoint.jasify(function (jasify) {
+                return jasify.carts.addUserActivityPackage(req)
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
         function errorHandler(e) {
             return $q.reject(e);
         }
@@ -72,6 +86,18 @@
                 return o.id;
             }
             return o;
+        }
+
+        function fetchIds(arr) {
+            if (angular.isArray(arr)) {
+                var ret = [];
+                angular.forEach(arr, function (value, key) {
+                    ret.push(fetchId(value));
+                });
+                return ret;
+            } else {
+                return [fetchId(arr)];
+            }
         }
 
         return ShoppingCart;
