@@ -71,6 +71,13 @@ public final class ApplicationData {
 
     // Note that only certain class's are supported
     public <T> T getPropertyWithDefaultValue(String key, T defaultValue) {
+        if (defaultValue instanceof Integer) {
+            Object probe = getProperty(key);
+            if (probe instanceof Long) {
+                log.warn("Bad Long value stored where we want an Integer...  Fixing it to avoid problems [{}] = [{}]", key, probe);
+                setProperty(key, ((Long) probe).intValue());
+            }
+        }
         T value = getProperty(key);
         if (value == null) {
             value = defaultValue;
