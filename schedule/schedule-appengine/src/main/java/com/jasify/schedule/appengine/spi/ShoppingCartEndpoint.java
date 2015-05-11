@@ -7,19 +7,25 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.cart.ShoppingCartService;
 import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.spi.dm.JasActivityPackageSubscription;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author krico
@@ -87,6 +93,54 @@ public class ShoppingCartEndpoint {
 
         cart.getItems().add(new ShoppingCart.ItemBuilder().activity(activity).build());
         cartService.putCart(cart);
+        return cart;
+    }
+
+    @ApiMethod(name = "carts.addUserActivityPackage", path = "carts/user/activity-package/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public ShoppingCart addUserActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, JasActivityPackageSubscription subscription) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
+        ShoppingCart cart = cartService.getUserCart(jasUser.getUserId());
+        ActivityPackage activityPackage;
+        try {
+            activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(activityPackageId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("activityPackageId=" + activityPackageId);
+        }
+        if (StringUtils.isBlank(activityPackage.getName())) {
+            throw new BadRequestException("Cannot add activityPackageId with no name to cart, activityPackageId=" + activityPackageId);
+        }
+        if (activityPackage.getPrice() == null) {
+            throw new BadRequestException("Cannot add activityPackageId with no price to cart, activityPackageId=" + activityPackageId);
+        }
+
+        List<Key> activityIds = Preconditions.checkNotNull(subscription.getActivityIds());
+        if (activityIds.isEmpty()) {
+            throw new BadRequestException("You must have at least 1 activity, activityPackageId=" + activityPackageId);
+        }
+
+
+        Set<Key> uniqueKeys = new LinkedHashSet<>();
+        for (Key activityId : activityIds) {
+            uniqueKeys.add(activityId);
+        }
+
+        for (Key activityId : uniqueKeys) {
+            try {
+                //simply validate that it exists
+                ActivityServiceFactory.getActivityService().getActivity(activityId);
+            } catch (EntityNotFoundException e) {
+                throw new NotFoundException("activityId=" + activityId);
+            }
+        }
+
+        cart.getItems().add(new ShoppingCart.ItemBuilder()
+                .activityPackage(activityPackage)
+                .data(new ArrayList<Key>(uniqueKeys))
+                .build());
+
+        cartService.putCart(cart);
+
         return cart;
     }
 

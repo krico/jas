@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.OrganizationAccount;
@@ -57,6 +58,14 @@ public final class FormatUtil {
         }
         if (activity.getStart() == null || activity.getFinish() == null) return name;
         return name + START_FORMAT.get().format(activity.getStart()) + FINISH_FORMAT.get().format(activity.getFinish());
+    }
+
+    public static String toString(ActivityPackage activityPackage) {
+        String name = StringUtils.trimToEmpty(activityPackage.getName());
+        if (StringUtils.isBlank(name)) {
+            name = "Activity: " + KeyUtil.toHumanReadableString(activityPackage.getId());
+        }
+        return name + " (" + activityPackage.getItemCount() + " allowed subscriptions)";
     }
 
     public static String toString(UserAccount account) {

@@ -63,7 +63,7 @@
                 activityPackageId: fetchId(activityPackage),
                 activityIds: fetchIds(activities)
             };
-            $log.debug('addUserActivityPackage: ' + angular.toJson(req) + '\nNOT IMPLEMENTED!!');
+            $log.debug(angular.toJson(req));
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.addUserActivityPackage(req)

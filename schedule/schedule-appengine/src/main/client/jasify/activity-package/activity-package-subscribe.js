@@ -2,7 +2,7 @@
 
     angular.module('jasify.activityPackage').controller('ActivityPackageSubscribeController', ActivityPackageSubscribeController);
 
-    function ActivityPackageSubscribeController($log, ShoppingCart, activityPackage, activityPackageActivities) {
+    function ActivityPackageSubscribeController($log, $location, ShoppingCart, activityPackage, activityPackageActivities) {
         var vm = this;
         vm.activityPackage = activityPackage;
         vm.activityPackageActivities = activityPackageActivities;
@@ -32,18 +32,15 @@
             angular.forEach(vm.selectedActivities, function (selected, key) {
                 if (selected) activities.push(key);
             }, activities);
-            $log.debug('Book\n' + angular.toJson(vm.activityPackage) + '\n' + angular.toJson(activities));
-            return ShoppingCart.addUserActivityPackage({
-                activityPackageId: vm.activityPackage.id,
-                activities: activities
-            }).then(ok, nok);
+
+            return ShoppingCart.addUserActivityPackage(vm.activityPackage, activities).then(ok, nok);
 
             function ok(r) {
-                //TODO:
+                $location.path('/checkout');
             }
 
             function nok(r) {
-                //TODO:
+                $log.warn('failed: ' + angular.toJson(r));
             }
         }
     }
