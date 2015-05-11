@@ -1,3 +1,5 @@
+/*global: window */
+
 /*
  * aButton - animated button.
  *
@@ -5,43 +7,129 @@
  *
  */
 
-(function(angular) {
+(function (angular) {
 
     "use strict;";
 
-    angular.module('jasifyComponents').directive('aButton', function ($timeout, $mdMedia) {
+    angular
+        .module('jasifyComponents')
+        .service('aButtonController', aButtonController)
+        .directive('aButton', aButtonDirective);
+
+    function aButtonController($timeout) {
+
+        function ButtonController(options) {
+
+            var self = this;
+
+            self.options = options;
+            self.inProgress = false,
+                self.result = null;
+
+            this.start = function (promise) {
+                self.inProgress = true;
+                if (promise) {
+                    promise.then(self.success, self.error);
+                }
+            };
+
+            this.pulse = function() {
+                self.start();
+                $timeout(self.success, 0);
+            }
+
+            this.end = function () {
+                self.inProgress = false;
+                self.result = null;
+            }
+
+            this.success = function () {
+                self.result = 'success';
+            }
+
+            this.error = function () {
+                self.result = 'error';
+            }
+        }
+
+        return {
+            create: function (options) {
+                return new ButtonController(options);
+            },
+            createSave: function (options) {
+                return new ButtonController(angular.extend({
+                    buttonDefaultText: 'Save',
+                    buttonSubmittingText: 'Saving...'
+                }, options));
+            },
+            createReset: function (options) {
+                return new ButtonController(angular.extend({
+                    buttonDefaultText: 'Reset',
+                    buttonSubmittingText: 'Reseting...',
+                    buttonDefaultClass: 'btn-warning',
+                    buttonSubmittingClass: 'btn-warning',
+                    buttonSuccessText: 'Reset done'
+                }, options));
+            },
+            createPassword: function () {
+                return new ButtonController({
+                    buttonDefaultClass: 'btn-warning',
+                    buttonSubmittingClass: 'bgm-deeporange',
+                    buttonDefaultText: 'Update Password',
+                    buttonSubmittingText: 'Saving...',
+                    buttonSuccessText: 'Password updated'
+                });
+            },
+            createProfileSave: function () {
+                return new ButtonController({
+                    buttonDefaultText: 'Save',
+                    buttonSubmittingText: 'Saving...',
+                    buttonSuccessText: 'Profile updated'
+                });
+            },
+            createProfileReset: function () {
+                return new ButtonController({
+                    buttonDefaultText: 'Reset',
+                    buttonSubmittingText: 'Reseting...',
+                    buttonDefaultClass: 'btn-warning',
+                    buttonSubmittingClass: 'btn-warning',
+                    buttonSuccessText: 'Profile restored'
+                });
+            }
+        }
+    }
+
+    function aButtonDirective($timeout, $mdMedia) {
+
         return {
             restrict: 'AE',
             replace: true,
             scope: {
-                isSubmitting: '=',
-                result: '=',
+                controller: '=',
                 options: '=?'
             },
             controller: ['$scope', function ($scope) {
                 $scope.options = $scope.options || {};
                 $scope.options = {
-                    buttonDefaultClass: $scope.options.buttonDefaultClass || 'btn-primary',
-                    buttonSubmittingClass: $scope.options.buttonSubmittingClass || 'bgm-lightgreen',
-                    buttonSuccessClass: $scope.options.buttonSuccessClass || 'btn-success',
-                    buttonErrorClass: $scope.options.buttonErrorClass || 'btn-danger',
-                    buttonSizeClass: $scope.options.buttonSizeClass || null,
-                    buttonDefaultText: $scope.options.buttonDefaultText || 'Submit',
-                    buttonSubmittingText: $scope.options.buttonSubmittingText || 'Submitting...',
-                    buttonSuccessText: $scope.options.buttonSuccessText || 'Completed',
-                    buttonErrorText: $scope.options.buttonErrorText || 'There was an error',
-                    buttonInitialIcon: $scope.options.buttonInitialIcon || 'glyphicon glyphicon-plus',
-                    buttonSubmittingIcon: $scope.options.buttonSubmittingIcon || 'glyphicon glyphicon-refresh',
-                    buttonSuccessIcon: $scope.options.buttonSuccessIcon || 'glyphicon glyphicon-ok',
-                    buttonErrorIcon: $scope.options.buttonErrorIcon || 'glyphicon glyphicon-remove',
-                    formIsInvalid: $scope.options.formIsInvalid || '',
-                    animationCompleteTime: $scope.options.animationCompleteTime || '2000',
-                    iconsPosition: $scope.options.iconsPosition || 'left',
-                    autoSubmitOnClick: $scope.options.autoSubmitOnClick || true,
-                    onlyIcons: $scope.options.onlyIcons || false
+                    buttonDefaultClass: $scope.controller.options.buttonDefaultClass || $scope.options.buttonDefaultClass || 'btn-primary',
+                    buttonSubmittingClass: $scope.controller.options.buttonSubmittingClass || $scope.options.buttonSubmittingClass || 'btn-primary',
+                    buttonSuccessClass: $scope.controller.options.buttonSuccessClass || $scope.options.buttonSuccessClass || 'btn-primary',
+                    buttonErrorClass: $scope.controller.options.buttonErrorClass || $scope.options.buttonErrorClass || 'btn-danger',
+                    buttonSizeClass: $scope.controller.options.buttonSizeClass || $scope.options.buttonSizeClass || null,
+                    buttonDefaultText: $scope.controller.options.buttonDefaultText || $scope.options.buttonDefaultText || 'Submit',
+                    buttonSubmittingText: $scope.controller.options.buttonSubmittingText || $scope.options.buttonSubmittingText || 'Submitting...',
+                    buttonSuccessText: $scope.controller.options.buttonSuccessText || $scope.options.buttonSuccessText || 'Completed',
+                    buttonErrorText: $scope.controller.options.buttonErrorText || $scope.options.buttonErrorText || 'There was an error',
+                    buttonInitialIcon: $scope.controller.options.buttonInitialIcon || $scope.options.buttonInitialIcon || 'glyphicon glyphicon-plus',
+                    buttonSubmittingIcon: $scope.controller.options.buttonSubmittingIcon || $scope.options.buttonSubmittingIcon || 'glyphicon glyphicon-refresh',
+                    buttonSuccessIcon: $scope.controller.options.buttonSuccessIcon || $scope.options.buttonSuccessIcon || 'glyphicon glyphicon-ok',
+                    buttonErrorIcon: $scope.controller.options.buttonErrorIcon || $scope.options.buttonErrorIcon || 'glyphicon glyphicon-remove',
+                    animationCompleteTime: $scope.controller.options.animationCompleteTime || $scope.options.animationCompleteTime || '2000',
+                    iconsPosition: $scope.controller.options.iconsPosition || $scope.options.iconsPosition || 'left',
+                    onlyIcons: $scope.controller.options.onlyIcons || $scope.options.onlyIcons || false
                 };
             }],
-            template: '<button class="btn {{buttonClass}} {{buttonSize}} {{onlyIcons}} btn-ng-bs-animated clearfix" ng-disabled="{{formIsInvalid}}">' +
+            template: '<button class="btn {{buttonClass}} {{buttonSize}} {{onlyIcons}} btn-ng-bs-animated clearfix">' +
             '<div class="icons pull-{{iconsPosition}}">' +
             '<span class="{{buttonInitialIcon}} icon-initial"></span>' +
             '<span class="{{buttonSubmittingIcon}} icon-spinner icon-submit hidden"></span>' +
@@ -92,8 +180,11 @@
                 if (scope.options.onlyIcons) {
                     scope.onlyIcons = 'icons-only';
                 }
+                ;
 
-                scope.$watch(function() { return $mdMedia('sm'); }, function(small) {
+                scope.$watch(function () {
+                    return $mdMedia('sm');
+                }, function (small) {
                     if (small) {
                         delete scope.buttonTextFloatClass;
                     } else {
@@ -101,37 +192,23 @@
                     }
                 });
 
-                //$rootScope.$on('mask-hide', function () {
-                //    if (scope.isSubmitting) {
-                //        scope.result = 'success';
-                //    }
-                //})
-                //
-                //if (scope.options.autoSubmitOnClick) {
-                //    angular.element(element).on('click', function () {
-                //        scope.$apply(function () {
-                //            scope.isSubmitting = true;
-                //        })
-                //    });
-                //}
-
-                scope.$watch('isSubmitting', function (newValue) {
+                scope.$watch('controller.inProgress', function (newValue) {
                     if (newValue) {
                         scope.buttonClass = scope.options.buttonSubmittingClass;
                         scope.buttonText = scope.options.buttonSubmittingText;
-                        el.attr('disabled', true).addClass('is-active');
+                        el.prop('disabled', true).addClass('is-active');
                         icons.submitting.removeClass('hidden');
                     }
                 }, true).bind(this);
 
-                scope.$watch('result', function (newValue) {
-                    scope.isSubmitting = null;
+                scope.$watch('controller.result', function (newValue) {
                     if (newValue === 'success') {
                         scope.buttonClass = scope.options.buttonSuccessClass;
                         scope.buttonText = scope.options.buttonSuccessText;
                         icons.submitting.addClass('hidden');
                         icons.success.removeClass('hidden');
                         $timeout(endAnimation, scope.options.animationCompleteTime);
+                        scope.controller.end();
                     }
                     if (newValue === 'error') {
                         scope.buttonClass = scope.options.buttonErrorClass;
@@ -139,9 +216,11 @@
                         icons.submitting.addClass('hidden');
                         icons.error.removeClass('hidden');
                         $timeout(endAnimation, scope.options.animationCompleteTime);
+                        scope.controller.end();
                     }
                 }, true).bind(this);
             }
         };
-    });
-}(angular));
+    }
+
+}(window.angular));

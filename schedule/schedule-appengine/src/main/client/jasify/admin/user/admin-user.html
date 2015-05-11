@@ -96,10 +96,8 @@
                         <label class="fg-label">About me</label>
                     </div>
                     <div class="actions-group">
-                        <a-button type="submit" options="vm.submitOptions" is-submitting="vm.isSubmitting"
-                                  result="vm.submitResult"></a-button>
-                        <a-button type="button" ng-click="vm.reset()" options="vm.resetOptions"
-                                  is-submitting="vm.isReseting" result="vm.resetResult"></a-button>
+                        <a-button controller="vm.submitBtn" type="submit" ></a-button>
+                        <a-button controller="vm.resetBtn" type="button" ng-click="vm.reset()"></a-button>
                     </div>
                 </form>
             </div>
@@ -149,10 +147,7 @@
                         </jas-error-help-block>
                     </div>
                     <div class="actions-group">
-                        <a-button type="submit"
-                                  options="vm.passwordResetOptions"
-                                  is-submitting="vm.isResetingPassword"
-                                  result="vm.resetPasswordResult"></a-button>
+                        <a-button type="submit" controller="vm.passwordBtn"></a-button>
                     </div>
                 </form>
             </div>

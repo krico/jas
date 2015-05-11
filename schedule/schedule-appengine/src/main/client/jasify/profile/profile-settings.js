@@ -2,26 +2,15 @@
 
     angular.module('jasifyWeb').controller('ProfileSettingsController', ProfileSettingsController);
 
-    function ProfileSettingsController($scope, $timeout, $routeParams, Session, User, mask) {
+    function ProfileSettingsController($scope, $routeParams, Session, User, aButtonController) {
 
         // Uncomment to see how mask works
         // $timeout(mask.show, 2000);
 
         var vm = this;
 
-        vm.submitOptions = {
-            buttonDefaultText: 'Save',
-            buttonSubmittingText: 'Saving...',
-            buttonSuccessText: 'Profile updated'
-        };
-
-        vm.resetOptions = {
-            buttonDefaultClass: 'btn-warning',
-            buttonSubmittingClass: 'bgm-deeporange',
-            buttonDefaultText: 'Reset',
-            buttonSubmittingText: 'Reseting...',
-            buttonSuccessText: 'Profile restored'
-        };
+        vm.saveBtn = aButtonController.createProfileSave();
+        vm.resetBtn = aButtonController.createProfileReset();
 
         vm.isWelcome = $routeParams.extra === 'welcome';
         vm.save = save;
@@ -32,8 +21,6 @@
 
         function save() {
 
-            vm.isSubmitting = true;
-
             /*
              * Simulate long running request
              */
@@ -41,23 +28,17 @@
             //
             //}, 6000);
 
-            User.update(vm.user).then(function saveSuccess(result) {
-                vm.submitResult = 'success';
-
+            var promise = User.update(vm.user);
+            vm.saveBtn.start(promise);
+            promise.then(function saveSuccess(result) {
                 $scope.setCurrentUser(vm.user);
                 vm.user = result;
                 vm.profileForm.$setPristine();
                 vm.profileForm.$setUntouched();
-
             });
         }
 
         function reset(initialReset) {
-
-            if (!initialReset) {
-                vm.isReseting = true;
-            }
-
             /*
              * Simulate long running request
              */
@@ -65,11 +46,14 @@
             //
             //}, 2000);
 
-            User.get(Session.userId).then(function (user) {
+            var promise = User.get(Session.userId);
+            if (!initialReset) {
+                vm.resetBtn.start(promise);
+            }
+            promise.then(function (user) {
                 if (!initialReset) {
                     vm.profileForm.$setPristine();
                     vm.profileForm.$setUntouched();
-                    vm.resetResult = 'success';
                 }
                 vm.user = user;
             });
