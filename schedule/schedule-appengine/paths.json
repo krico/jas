@@ -15,7 +15,6 @@
     "karmaConfig": "src/test/client/karma.conf.ci.js"
   },
   "css": [
-    "src/main/stylesheet/angular-material-theme.css",
     "src/main/client/jasify/directives/a-button/a-button.css",
     "src/main/client/jasify/directives/mask/mask.css",
     "src/main/stylesheet/styles.less"
@@ -35,7 +34,8 @@
     "src/main/html/**/*.html"
   ],
   "images": [
-    "src/main/webapp/img/**/*.*"
+    "src/main/img/**/*.*",
+    "src/main/webapp/images/**/*.*"
   ],
   "partials": [
     "src/main/client/jasify/**/*.html"
