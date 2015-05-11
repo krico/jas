@@ -579,6 +579,44 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
+    @Override
+    public void cancelActivityPackageExecution(final Key activityPackageExecutionId) throws EntityNotFoundException {
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    ActivityPackageExecution execution = Datastore.get(tx, activityPackageExecutionMeta, activityPackageExecutionId);
+                    ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, execution.getActivityPackageRef().getKey());
+                    activityPackage.setExecutionCount(activityPackage.getExecutionCount() - 1);
+                    Datastore.put(tx, activityPackage);
+
+                    Key userId = execution.getUserRef().getKey();
+                    List<Key> subscriptionIds = Datastore.query(tx, ActivityPackageSubscriptionMeta.get(), userId)
+                            .filter(ActivityPackageSubscriptionMeta.get().activityPackageExecutionRef.equal(activityPackageExecutionId))
+                            .asKeyList();
+
+                    for (Key subscriptionId : subscriptionIds) {
+                        cancelSubscription(tx, subscriptionId);
+                    }
+
+
+                    Datastore.delete(tx, execution.getId());
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    @Override
+    public void cancel(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException {
+        cancelActivityPackageExecution(activityPackageExecution.getId());
+    }
+
     private boolean isSubscribed(Transaction tx, User user, Activity activity) {
         return !Datastore.query(tx, subscriptionMeta, user.getId())
                 .filter(subscriptionMeta.activityRef.equal(activity.getId()))
@@ -601,12 +639,30 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public void cancelSubscription(Key subscriptionId) throws EntityNotFoundException {
-        Subscription dbSubscription = getSubscription(subscriptionId);
-        Activity dbActivity = getActivity(dbSubscription.getActivityRef().getKey());
+    public void cancelSubscription(final Key subscriptionId) throws EntityNotFoundException {
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    cancelSubscription(tx, subscriptionId);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    private void cancelSubscription(Transaction tx, Key subscriptionId) throws EntityNotFoundException {
+        if (subscriptionId == null) throw new EntityNotFoundException("Subscription id=NULL");
+        Subscription dbSubscription = Datastore.get(tx, subscriptionMeta, subscriptionId);
+        Activity dbActivity = Datastore.get(tx, activityMeta, dbSubscription.getActivityRef().getKey());
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
-        Datastore.put(dbActivity);
-        Datastore.delete(dbSubscription.getId());
+        Datastore.put(tx, dbActivity);
+        Datastore.delete(tx, subscriptionId);
     }
 
     @Nonnull

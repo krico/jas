@@ -292,4 +292,20 @@ public interface ActivityService {
      */
     void cancelSubscription(Key subscriptionId) throws EntityNotFoundException;
 
+    /**
+     * Cancel an activityPackageExecution, effectively reversing {@link #subscribe(com.jasify.schedule.appengine.model.users.User, ActivityPackage, java.util.List)}
+     *
+     * @param activityPackageExecution to cancel
+     * @throws EntityNotFoundException if eny entity doesn't exist
+     */
+    void cancel(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException;
+
+    /**
+     * Cancel an activityPackageExecution, effectively reversing {@link #subscribe(com.jasify.schedule.appengine.model.users.User, ActivityPackage, java.util.List)}
+     *
+     * @param activityPackageExecutionId to cancel
+     * @throws EntityNotFoundException if eny entity doesn't exist
+     */
+    void cancelActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException;
+
 }

@@ -10,7 +10,10 @@ import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
-import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.OperationException;
+import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -45,6 +48,7 @@ public class ActivityServiceTest {
     private Activity activity1Organization1;
     private Activity activity2Organization1;
     private ActivityPackage activityPackage;
+    private ActivityPackageExecution activityPackageExecution;
 
     private Activity createActivity(ActivityType activityType) {
         Activity activity = new Activity(activityType);
@@ -1141,16 +1145,16 @@ public class ActivityServiceTest {
     @Test
     public void testSubscribeToActivityPackage() throws Exception {
         testCreateActivityPackage();
-        ActivityPackageExecution ret = activityService.subscribe(testUser1, activityPackage, Arrays.asList(activity2Organization1, activity1Organization1));
-        assertNotNull(ret);
-        assertEquals(activityPackage.getId(), ret.getActivityPackageRef().getKey());
-        assertEquals(testUser1.getId(), ret.getUserRef().getKey());
-        assertNull(ret.getTransferRef().getKey());
-        List<ActivityPackageSubscription> subscriptions = ret.getSubscriptionListRef().getModelList();
+        activityPackageExecution = activityService.subscribe(testUser1, activityPackage, Arrays.asList(activity2Organization1, activity1Organization1));
+        assertNotNull(activityPackageExecution);
+        assertEquals(activityPackage.getId(), activityPackageExecution.getActivityPackageRef().getKey());
+        assertEquals(testUser1.getId(), activityPackageExecution.getUserRef().getKey());
+        assertNull(activityPackageExecution.getTransferRef().getKey());
+        List<ActivityPackageSubscription> subscriptions = activityPackageExecution.getSubscriptionListRef().getModelList();
         assertEquals(2, subscriptions.size());
         HashSet<Key> activities = new HashSet<>();
         for (ActivityPackageSubscription subscription : subscriptions) {
-            assertEquals(ret.getId(), subscription.getActivityPackageExecutionRef().getKey());
+            assertEquals(activityPackageExecution.getId(), subscription.getActivityPackageExecutionRef().getKey());
             assertNull(subscription.getTransferRef().getKey());
             assertEquals(testUser1.getId(), subscription.getUserRef().getKey());
             assertNotNull(subscription.getActivityRef().getKey());
@@ -1158,7 +1162,36 @@ public class ActivityServiceTest {
         }
         assertTrue(activities.contains(activity1Organization1.getId()));
         assertTrue(activities.contains(activity2Organization1.getId()));
-        log.info("{}", ModelMetadataUtil.dumpDb(new StringBuilder("DB DUMP\n")));
+    }
+
+    @Test
+    public void testCancelActivityPackageExecution() throws Exception {
+        testSubscribeToActivityPackage();
+        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        assertEquals(1, activityPackage.getExecutionCount());
+
+        List<ActivityPackageSubscription> subscriptions = activityPackageExecution.getSubscriptionListRef().getModelList();
+        List<Activity> activities = new ArrayList<>();
+        for (ActivityPackageSubscription subscription : subscriptions) {
+            Activity activity = subscription.getActivityRef().getModel();
+            activities.add(activity);
+            assertEquals(1, activity.getSubscriptionCount());
+        }
+        activityService.cancel(activityPackageExecution);
+
+        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        assertEquals(0, activityPackage.getExecutionCount());
+
+        for (Activity activity : activities) {
+            activity = activityService.getActivity(activity.getId());
+            assertEquals(0, activity.getSubscriptionCount());
+        }
+
+        for (ActivityPackageSubscription subscription : subscriptions) {
+            assertNull(Datastore.getOrNull(subscription.getId()));
+        }
+        assertNull(Datastore.getOrNull(activityPackageExecution.getId()));
+
     }
 
     @Test
