@@ -2,10 +2,13 @@
 
     angular.module('jasify.admin').controller('AdminActivityPackageController', AdminActivityPackageController);
 
-    function AdminActivityPackageController($log, $location, $q, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
+    function AdminActivityPackageController($log, $location, aButtonController, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
         var vm = this;
         vm.alerts = [];
-        vm.organization = {};
+        vm.organization = null;
+
+        vm.saveBtn = aButtonController.createSave();
+        vm.resetBtn = aButtonController.createReset();
 
         /* updated by the vm.reset() call */
         vm.activityPackage = {};
@@ -23,11 +26,20 @@
         vm.filterSelected = filterSelected;
         vm.sortActivityArray = sortActivityArray;
 
+        vm.save = function(activityPackage) {
+            if (activityPackage.id) {
+                vm.update()
+            }
+            else {
+                vm.create();
+            }
+        }
+
         vm.update = update;
         vm.create = create;
         vm.reset = reset;
 
-        vm.reset();
+        vm.reset(true);
 
         vm.selectOrganization(vm.organizations, vm.activityPackage, $location.search().organizationId);
 
@@ -68,7 +80,7 @@
             }
         }
 
-        function reset() {
+        function reset(initialReset) {
             if (activityPackage) {
                 vm.activityPackage = angular.copy(activityPackage);
             } else {
@@ -81,6 +93,9 @@
                 vm.selectedActivities = [];
             }
             makePristine();
+            if(!initialReset) {
+                vm.resetBtn.pulse();
+            }
         }
 
         function makeDirty() {
@@ -92,6 +107,7 @@
         function makePristine() {
             if (vm.activityPackageForm) {
                 vm.activityPackageForm.$setPristine();
+                vm.activityPackageForm.$setUntouched();
             }
         }
 
