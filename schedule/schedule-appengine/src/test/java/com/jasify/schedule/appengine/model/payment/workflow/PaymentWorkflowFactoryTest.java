@@ -29,12 +29,12 @@ public class PaymentWorkflowFactoryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testIllegalKey() throws Exception {
-        PaymentWorkflowFactory.workflowFor(Datastore.allocateId(User.class));
+        PaymentWorkflowFactory.workflowFor(Datastore.allocateId(User.class), null);
     }
 
     @Test
     public void testUnknownKey() throws Exception {
-        PaymentWorkflow workflow = PaymentWorkflowFactory.workflowFor(Datastore.allocateId(Activity.class));
+        PaymentWorkflow workflow = PaymentWorkflowFactory.workflowFor(Datastore.allocateId(Activity.class), null);
         assertNotNull(workflow);
         assertTrue(workflow instanceof ActivityPaymentWorkflow);
     }
