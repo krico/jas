@@ -1,17 +1,35 @@
-<div class="row">
-    <div class="col-sm-4">
-        <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
+<div class="card">
+    <div class="card-header">
+        <h2>Activity Packages
+            <small>
+                Group your Activities with Activity Packages.
+            </small>
+        </h2>
+    </div>
+    <div class="card-body card-padding-sm">
+        <div class="form-horizontal" role="form">
             <div class="form-group">
-                <label class="control-label col-sm-4" for="organization">Organization:</label>
-
-                <div class="col-sm-7">
-                    <select ng-model="vm.organization" id="organization" class="form-control"
-                            ng-options="organization as organization.name for organization in vm.organizations"
-                            ng-change="vm.organizationSelected(vm.organization)">
-                    </select>
+                <label for="organization" class="col-sm-2 control-label">Organization:</label>
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <div class="select">
+                            <select id="organization" class="form-control"
+                                    ng-model="vm.organization"
+                                    ng-options="organization as organization.name for organization in vm.organizations"
+                                    ng-change="vm.organizationSelected(vm.organization)">
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-4">
+
     </div>
     <div class="col-sm-6">
         <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
