@@ -40,8 +40,12 @@ body {
   }
 }
 
+.actions-group + .form-group {
+  margin-top: 20px;
+}
+
 @media (max-width:@angularMaterialLayoutSm) {
-  .actions-group > button {
+  .grow-on-small, .actions-group > button {
     .btn-block();
   }
   .actions-group > button ~ button {
@@ -202,5 +206,38 @@ td.actions-column {
 
   .tab-nav > li {
     display: block;
+  }
+}
+
+#activity-selection-lists {
+  .col-xs-6:first-child {
+    .lv-item {
+      border-right: 1px solid #f0f0f0;
+      &:last-child {
+        border-bottom: 1px solid #f0f0f0;
+      }
+    }
+  }
+  .col-xs-6:not(:first-child) {
+    .lv-item {
+      border-left: 1px solid #f0f0f0;
+      &:last-child {
+        border-bottom: 1px solid #f0f0f0;
+      }
+    }
+  }
+
+  @media (max-width:@angularMaterialLayoutSm) {
+    .col-xs-6:first-child {
+      padding-right: 1px;
+    }
+    .col-xs-6:not(first-child) {
+      padding-left: 1px;
+    }
+
+    .lv-item {
+      padding-left: 5px;
+      padding-right: 5px;
+    }
   }
 }
