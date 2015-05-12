@@ -53,7 +53,7 @@
             if (numSelectedActivities < vm.activityPackage.itemCount) {
                 jasDialogs.warning(
                     "Items Count specifies minimum number of activities in the package. " +
-                    "You must select at least " + vm.activityPackage.itemCount + " activities or decrease Items Count");
+                    "You must select at least " + vm.activityPackage.itemCount + " activities or decrease Items Count.");
                 return false;
             }
 
