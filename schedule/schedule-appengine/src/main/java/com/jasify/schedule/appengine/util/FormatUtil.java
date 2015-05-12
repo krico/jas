@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.util;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.OrganizationAccount;
@@ -46,6 +47,21 @@ public final class FormatUtil {
 
         if (subscription.getUserRef().getKey() != null) {
             builder.append(" (").append(toString(subscription.getUserRef().getModel())).append(')');
+        }
+
+        return builder.toString();
+    }
+
+    public static String toString(ActivityPackageExecution activityPackageExecution) {
+        if (activityPackageExecution.getActivityPackageRef().getKey() == null) {
+            return toShortString(activityPackageExecution.getId());
+        }
+
+        StringBuilder builder = new StringBuilder()
+                .append(toString(activityPackageExecution.getActivityPackageRef().getModel()));
+
+        if (activityPackageExecution.getUserRef().getKey() != null) {
+            builder.append(" (").append(toString(activityPackageExecution.getUserRef().getModel())).append(')');
         }
 
         return builder.toString();
@@ -104,5 +120,8 @@ public final class FormatUtil {
 
     public static String toTransactionFeeString(Subscription subscription) {
         return "Transaction Fee " + toString(subscription);
+    }
+    public static String toTransactionFeeString(ActivityPackageExecution activityPackageExecution) {
+        return "Transaction Fee " + toString(activityPackageExecution);
     }
 }

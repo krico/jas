@@ -5,12 +5,12 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.meta.activity.ActivityPackageExecutionMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.balance.*;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityType;
-import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.balance.task.ApplyActivityPackageExecutionCharges;
 import com.jasify.schedule.appengine.model.balance.task.ApplySubscriptionCharges;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
@@ -38,6 +38,7 @@ public class DefaultBalanceService implements BalanceService {
     private final TransferMeta transferMeta;
     private final TransactionMeta transactionMeta;
     private final SubscriptionMeta subscriptionMeta;
+    private final ActivityPackageExecutionMeta activityPackageExecutionMeta;
     private final Key custodialAccountKey;
 
     private DefaultBalanceService() {
@@ -47,6 +48,7 @@ public class DefaultBalanceService implements BalanceService {
         transferMeta = TransferMeta.get();
         transactionMeta = TransactionMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
+        activityPackageExecutionMeta = ActivityPackageExecutionMeta.get();
         custodialAccountKey = Datastore.createKey(accountMeta, AccountUtil.CUSTODIAL_ACCOUNT);
     }
 
@@ -92,6 +94,45 @@ public class DefaultBalanceService implements BalanceService {
         Queue queue = QueueFactory.getQueue("balance-queue");
         queue.add(TaskOptions.Builder.withPayload(new ApplySubscriptionCharges(subscription.getId())));
 
+    }
+
+    @Override
+    public void unpaidActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException {
+        ActivityPackageExecution activityPackageExecution = Datastore.get(activityPackageExecutionMeta, activityPackageExecutionId);
+        ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+        Key organizationId = activityPackage.getOrganizationRef().getKey();
+        Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
+        Account payer = AccountUtil.memberAccountMustExist(activityPackageExecution.getUserRef().getKey());
+        activityPackageExecution(activityPackageExecution, payer, beneficiary, true);
+
+    }
+
+    @Override
+    public void activityPackageExecution(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException {
+        activityPackageExecution(activityPackageExecution.getId());
+    }
+
+    @Override
+    public void activityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException {
+        ActivityPackageExecution activityPackageExecution = Datastore.get(activityPackageExecutionMeta, activityPackageExecutionId);
+        ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+        Key organizationId = activityPackage.getOrganizationRef().getKey();
+        Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
+        Account payer = AccountUtil.memberAccountMustExist(activityPackageExecution.getUserRef().getKey());
+        activityPackageExecution(activityPackageExecution, payer, beneficiary, false);
+    }
+
+    private void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) {
+
+        //TODO: Validate balance is there before we start.
+
+        linkToTransfer(execution);
+
+        Transfer transfer = createActivityPackageExecutionTransfer(execution, payer, beneficiary, unpaid);
+        applyTransfer(transfer);
+
+        Queue queue = QueueFactory.getQueue("balance-queue");
+        queue.add(TaskOptions.Builder.withPayload(new ApplyActivityPackageExecutionCharges(execution.getId())));
     }
 
     /**
@@ -185,6 +226,39 @@ public class DefaultBalanceService implements BalanceService {
 
             } else {
                 log.warn("Transfer already existed, Transfer.Id={}", executedPayment.getTransferRef().getKey());
+            }
+            tx.commit();
+        } finally {
+            if (tx.isActive())
+                tx.rollback();
+        }
+        return transfer;
+    }
+
+    private Transfer createActivityPackageExecutionTransfer(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) {
+        Transfer transfer;
+        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
+        try {
+            transfer = Datastore.getOrNull(tx, transferMeta, execution.getTransferRef().getKey());
+            if (transfer == null) {
+                ActivityPackage activityPackage = execution.getActivityPackageRef().getModel();
+                Double amount = activityPackage.getPrice();
+                transfer = new Transfer();
+                transfer.setId(execution.getTransferRef().getKey());
+                transfer.setAmount(amount);
+                if (unpaid) { //cash payments are marked as unpaid
+                    transfer.setUnpaid(amount);
+                }
+                transfer.setCurrency(activityPackage.getCurrency());
+                transfer.setDescription(FormatUtil.toString(activityPackage));
+                transfer.setReference(Objects.toString(execution.getId()));
+                transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
+                transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));
+
+                Datastore.put(tx, transfer);
+
+            } else {
+                log.warn("Transfer already existed, Transfer.Id={}", execution.getTransferRef().getKey());
             }
             tx.commit();
         } finally {
