@@ -1,21 +1,21 @@
 /*global: window */
 
-/*
- * aButton - animated button.
- *
- * Form button that gives feedback about initiated action (progress/done/error)
- *
- */
-
 (function (angular) {
 
-    "use strict;";
+    "use strict";
 
     angular
         .module('jasifyComponents')
         .service('aButtonController', aButtonController)
         .directive('aButton', aButtonDirective);
 
+    /**
+     *
+     * Animated buttons controller factory. It created predefined buttons that are used all over the app.
+     *
+     * @param $timeout
+     * @returns {{create: Function, createSave: Function, createReset: Function, createPassword: Function, createProfileSave: Function, createProfileReset: Function}}
+     */
     function aButtonController($timeout) {
 
         function ButtonController(options) {
@@ -23,8 +23,8 @@
             var self = this;
 
             self.options = options;
-            self.inProgress = false,
-                self.result = null;
+            self.inProgress = false;
+            self.result = null;
 
             this.start = function (promise) {
                 self.inProgress = true;
@@ -33,23 +33,23 @@
                 }
             };
 
-            this.pulse = function() {
+            this.pulse = function () {
                 self.start();
                 $timeout(self.success, 0);
-            }
+            };
 
             this.end = function () {
                 self.inProgress = false;
                 self.result = null;
-            }
+            };
 
             this.success = function () {
                 self.result = 'success';
-            }
+            };
 
             this.error = function () {
                 self.result = 'error';
-            }
+            };
         }
 
         return {
@@ -96,9 +96,18 @@
                     buttonSuccessText: 'Profile restored'
                 });
             }
-        }
+        };
     }
 
+    /**
+     *
+     * aButton - animated button.
+     * Form button that gives feedback about initiated action (progress/done/error)
+     *
+     * @param $timeout
+     * @param $mdMedia
+     * @returns {{restrict: string, replace: boolean, scope: {controller: string, options: string}, controller: *[], template: string, link: Function}}
+     */
     function aButtonDirective($timeout, $mdMedia) {
 
         return {
@@ -180,7 +189,6 @@
                 if (scope.options.onlyIcons) {
                     scope.onlyIcons = 'icons-only';
                 }
-                ;
 
                 scope.$watch(function () {
                     return $mdMedia('sm');

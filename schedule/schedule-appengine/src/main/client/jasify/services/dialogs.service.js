@@ -1,32 +1,36 @@
 /*global window */
 (function (angular, swal) {
 
-    "use strict;"
+    "use strict";
 
     angular
         .module('jasifyComponents')
         .factory('jasDialogs', jasDialogs);
 
+    /**
+     * Jasify dialogs wrapper, if we don't like swal we can change it.
+     *
+     * TODO: Replace if(swal) statements when we have it properly mocked
+     *
+     * @returns {{success: Function, warning: Function, error: Function}}
+     */
     function jasDialogs() {
 
         return {
             success: function(message) {
-                swal && swal(
-                    "",
-                    message,
-                    "success")
+                if (swal) {
+                    swal("", message, "success");
+                }
             },
             warning: function(message) {
-                swal && swal(
-                    "",
-                    message,
-                    "warning")
+                if (swal) {
+                    swal("", message, "warning");
+                }
             },
             error: function(message) {
-                swal && swal(
-                    "Operation Failed",
-                    message,
-                    "warning")
+                if (swal) {
+                    swal("Operation Failed", message,"warning");
+                }
             }
         };
     }
