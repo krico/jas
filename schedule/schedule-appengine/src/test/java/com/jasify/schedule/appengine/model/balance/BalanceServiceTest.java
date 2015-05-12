@@ -6,9 +6,7 @@ import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.ModelMetadataUtil;
-import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityType;
-import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.CashPayment;
 import com.jasify.schedule.appengine.model.payment.PayPalPayment;
@@ -155,6 +153,36 @@ public class BalanceServiceTest {
         }, true);
     }
 
+    @Test
+    public void testActivityPackageExecutionWithId() throws Exception {
+        assertActivityPackageExecution(new DoActivityPackageExecution() {
+            @Override
+            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws EntityNotFoundException {
+                balanceService.activityPackageExecution(execution.getId());
+            }
+        }, false);
+    }
+
+    @Test
+    public void testActivityPackageExecutionWithModel() throws Exception {
+        assertActivityPackageExecution(new DoActivityPackageExecution() {
+            @Override
+            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws EntityNotFoundException {
+                balanceService.activityPackageExecution(execution);
+            }
+        }, false);
+    }
+
+    @Test
+    public void testUnpaidActivityPackageExecutionWithId() throws Exception {
+        assertActivityPackageExecution(new DoActivityPackageExecution() {
+            @Override
+            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws EntityNotFoundException {
+                balanceService.unpaidActivityPackageExecution(execution.getId());
+            }
+        }, true);
+    }
+
     private void assertSubscription(DoSubscription doer, boolean unpaid) throws Exception {
         Activity activity = new Activity();
         activity.setPrice(18d);
@@ -192,6 +220,73 @@ public class BalanceServiceTest {
         Transfer transfer = subscription.getTransferRef().getModel();
         assertNotNull(transfer);
         assertEquals(subscription.getActivityRef().getModel().getCurrency(), transfer.getCurrency());
+
+        Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();
+        assertNotNull(beneficiaryTransaction);
+        assertEquals(transfer.getCurrency(), beneficiaryTransaction.getCurrency());
+        assertEquals(18d, beneficiaryTransaction.getAmount());
+        if (unpaid) {
+            assertEquals(18d, beneficiaryTransaction.getUnpaid());
+            assertEquals(0d, beneficiaryTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(18d, beneficiaryTransaction.getAccountRef().getModel().getUnpaid());
+        } else {
+            assertEquals(0d, beneficiaryTransaction.getUnpaid());
+            assertEquals(18d, beneficiaryTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(0d, beneficiaryTransaction.getAccountRef().getModel().getUnpaid());
+        }
+
+        Transaction payerTransaction = transfer.getPayerLegRef().getModel();
+        assertNotNull(payerTransaction);
+        assertEquals(transfer.getCurrency(), payerTransaction.getCurrency());
+        assertEquals(-18d, payerTransaction.getAmount());
+        if (unpaid) {
+            assertEquals(-18d, payerTransaction.getUnpaid());
+            assertEquals(0d, payerTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(-18d, payerTransaction.getAccountRef().getModel().getUnpaid());
+        } else {
+            assertEquals(-0d, payerTransaction.getUnpaid());
+            assertEquals(-18d, payerTransaction.getAccountRef().getModel().getBalance());
+            assertEquals(0d, payerTransaction.getAccountRef().getModel().getUnpaid());
+        }
+    }
+
+    private void assertActivityPackageExecution(DoActivityPackageExecution doer, boolean unpaid) throws Exception {
+        ActivityPackage activityPackage = new ActivityPackage();
+        activityPackage.setPrice(18d);
+        activityPackage.setCurrency("CHF");
+        activityPackage.setName("Da Subscription");
+
+        ActivityPackageExecution activityPackageExecution = new ActivityPackageExecution();
+        activityPackageExecution.getActivityPackageRef().setModel(activityPackage);
+
+        Key userId = Datastore.allocateId(User.class);
+        Key organizationId = Datastore.allocateId(Organization.class);
+
+        User user = new User();
+        user.setId(userId);
+
+        Organization org = new Organization();
+        org.setId(organizationId);
+        activityPackage.getOrganizationRef().setModel(org);
+
+        activityPackageExecution.getUserRef().setKey(userId);
+
+        Account userAccount = AccountUtil.memberAccountMustExist(userId);
+
+        Account organizationAccount = AccountUtil.memberAccountMustExist(organizationId);
+
+        Datastore.put(activityPackage, activityPackageExecution, user, org);
+
+
+        doer.activityPackageExecution(activityPackageExecution, userAccount, organizationAccount);
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        log.info("{}", ModelMetadataUtil.dumpDb(new StringBuilder("DB DUMP\n")));
+        activityPackageExecution = Datastore.get(ActivityPackageExecution.class, activityPackageExecution.getId());
+        assertNotNull("Not linked", activityPackageExecution.getTransferRef().getKey());
+        Transfer transfer = activityPackageExecution.getTransferRef().getModel();
+        assertNotNull(transfer);
+        assertEquals(activityPackageExecution.getActivityPackageRef().getModel().getCurrency(), transfer.getCurrency());
 
         Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();
         assertNotNull(beneficiaryTransaction);
@@ -354,5 +449,9 @@ public class BalanceServiceTest {
 
     private static interface DoSubscription {
         void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException;
+    }
+
+    private static interface DoActivityPackageExecution {
+        void activityPackageExecution(ActivityPackageExecution activityPackageExecution, Account payer, Account beneficiary) throws EntityNotFoundException;
     }
 }

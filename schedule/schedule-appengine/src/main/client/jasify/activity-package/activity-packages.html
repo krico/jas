@@ -1,0 +1,76 @@
+<div class="card">
+    <div class="card-header">
+        <h2>Activity Package List
+            <small>
+                Activity packages allow you to purchase multiple activities in a single transaction
+                (often at a better price)
+            </small>
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="bootgrid-header container-fluid">
+            <div class="row">
+                <div class="actionBar">
+                    <div class="col-sm-12 col-lg-6">
+                        <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
+                            <div class="form-group">
+                                <label class="control-label col-sm-4" for="organization">Organization:</label>
+
+                                <div class="col-sm-7">
+                                    <select ng-model="vm.organization" id="organization" class="form-control"
+                                            ng-options="organization as organization.name for organization in vm.organizations"
+                                            ng-change="vm.organizationSelected(vm.organization)">
+                                        <option value="" disabled selected>-- select organization --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="ap-list" class="table-vmiddle table table-striped table-hover">
+            <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Price</th>
+                <th>
+                    sub/av
+                    <md-tooltip md-direction="top">
+                        Subscribe (sub) of (av) available
+                    </md-tooltip>
+                </th>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="ap in vm.activityPackages track by ap.id">
+                <td>
+                    <button ng-click="vm.bookIt(ap)" type="button" class="btn btn-primary"
+                            data-row-id="{{ap.id}}">
+                        <i class="fa fa-shopping-cart"></i> Book it!
+                        <md-tooltip md-direction="right">
+                            Book {{ap.name}}
+                        </md-tooltip>
+                    </button>
+                </td>
+                <td>
+                    {{ap.price | currency : ap.currency : 2}}
+                </td>
+                <td>
+                    {{ap.itemCount}} of {{ap.activityCount}}
+                </td>
+                <td>
+                    {{ap.name}}
+                </td>
+                <td>
+                    {{ap.description}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

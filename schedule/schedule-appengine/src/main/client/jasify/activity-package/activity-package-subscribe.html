@@ -1,0 +1,66 @@
+<div class="card">
+    <div class="card-header">
+        <a class="back-button" ng-href="{{'#/activity-packages/'+vm.activityPackage.organizationId}}">
+            <md-tooltip>
+                Back
+            </md-tooltip>
+            <button class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+        </a>
+
+        <h2>Activity Package `{{vm.activityPackage.name}}`
+            <small>
+                Select {{vm.activityPackage.itemCount}} of the {{vm.activityPackage.activityCount}} activities below
+            </small>
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-8 col-sm-offset-1">
+                Price: <b>{{vm.activityPackage.price | currency : vm.activityPackage.currency : 2}}</b>
+                <button ng-click="vm.bookIt()" type="button" class="btn btn-primary">
+                    <i class="fa fa-shopping-cart"></i> Book it!
+                    <md-tooltip md-direction="right">
+                        Go to shopping cart an checkout
+                    </md-tooltip>
+                </button>
+            </div>
+            <div class="col-sm-8 col-sm-offset-1">
+                You can select <span
+                    class="activity-package-remaining-counter">{{vm.remainingActivitiesToSelect()}}</span>
+                activities
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="activity-list" class="table-vmiddle table table-striped table-hover">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="activity in vm.activityPackageActivities track by activity.id">
+                <td ng-class="{'activity-package-selected':vm.selectedActivities[activity.id]}">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" ng-model="vm.selectedActivities[activity.id]"
+                                   ng-disabled="!vm.selectedActivities[activity.id] && vm.remainingActivitiesToSelect() === 0"><i
+                                class="input-helper"></i>
+                        </label>
+                    </div>
+                </td>
+                <td ng-class="{'activity-package-selected':vm.selectedActivities[activity.id]}">
+                    <strong>
+                        {{activity.start | date:'EEE, dd MMM'}}
+                    </strong>
+                    <i>
+                        ({{activity.start | date:'HH:mm'}} - {{activity.finish | date:'HH:mm'}})
+                    </i>
+                    {{activity.name || activity.activityType.name}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

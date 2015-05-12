@@ -15,6 +15,7 @@
         'jasify.authenticate',
         'jasify.payment',
         'jasify.balance',
+        'jasify.activityPackage',
         'jasify.checkout',
         'jasify.templates',
         'jasify.filters',

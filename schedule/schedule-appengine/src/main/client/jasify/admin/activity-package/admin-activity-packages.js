@@ -7,6 +7,7 @@
         vm.organizations = organizations.items;
         vm.activityPackages = activityPackages.items;
         vm.alert = alert;
+        vm.alerts = [];
         vm.setSelectedOrganization = setSelectedOrganization;
         vm.organizationSelected = organizationSelected;
         vm.addActivityPackage = addActivityPackage;
@@ -20,6 +21,11 @@
         }
 
         function addActivityPackage() {
+            if (!(vm.organization && vm.organization.id)) {
+                vm.alert('warning', 'You must select an organization first');
+                return;
+            }
+
             $location.path('/admin/activity-package').search('organizationId', vm.organization.id);
         }
 

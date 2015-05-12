@@ -134,7 +134,7 @@ public class BalanceEndpoint {
         for (ShoppingCart.Item item : items) {
             payment.addItem(item.getDescription(), item.getUnits(), item.getPrice());
             if (item.getItemId() != null) {
-                workflowList.add(PaymentWorkflowFactory.workflowFor(item.getItemId()));
+                workflowList.add(PaymentWorkflowFactory.workflowFor(item.getItemId(), item.getData()));
             }
         }
 

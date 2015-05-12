@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.cart;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import com.jasify.schedule.appengine.model.payment.PayPalPaymentProvider;
 import com.jasify.schedule.appengine.util.FormatUtil;
 
@@ -88,6 +89,7 @@ public class ShoppingCart implements Serializable {
         private String description;
         private int units;
         private double price;
+        private Object data;
 
         public ItemBuilder activity(Activity activity) {
             description = FormatUtil.toString(activity);
@@ -97,9 +99,23 @@ public class ShoppingCart implements Serializable {
             return this;
         }
 
+        public ItemBuilder activityPackage(ActivityPackage activityPackage) {
+            description = FormatUtil.toString(activityPackage);
+            units = 1;
+            price = activityPackage.getPrice();
+            itemId = activityPackage.getId();
+            return this;
+        }
+
+        public ItemBuilder data(Object data) {
+            this.data = data;
+            return this;
+        }
+
         public Item build() {
             Item item = new Item(description, units, price);
             item.setItemId(itemId);
+            item.setData(data);
             return item;
         }
     }
@@ -110,6 +126,7 @@ public class ShoppingCart implements Serializable {
         private String description;
         private int units;
         private double price;
+        private Object data;
 
         public Item() {
         }
@@ -158,6 +175,14 @@ public class ShoppingCart implements Serializable {
 
         public void setItemId(Key itemId) {
             this.itemId = itemId;
+        }
+
+        public Object getData() {
+            return data;
+        }
+
+        public void setData(Object data) {
+            this.data = data;
         }
     }
 }

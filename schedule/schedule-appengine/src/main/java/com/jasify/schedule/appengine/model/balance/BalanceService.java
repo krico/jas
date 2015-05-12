@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.balance;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
@@ -42,6 +43,12 @@ public interface BalanceService {
     void subscription(Key subscriptionId) throws EntityNotFoundException;
 
     void subscription(Subscription subscription) throws EntityNotFoundException;
+
+    void unpaidActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException;
+
+    void activityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException;
+
+    void activityPackageExecution(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException;
 
     Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount);
 

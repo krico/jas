@@ -2,6 +2,8 @@ package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.OrganizationAccount;
@@ -50,6 +52,21 @@ public final class FormatUtil {
         return builder.toString();
     }
 
+    public static String toString(ActivityPackageExecution activityPackageExecution) {
+        if (activityPackageExecution.getActivityPackageRef().getKey() == null) {
+            return toShortString(activityPackageExecution.getId());
+        }
+
+        StringBuilder builder = new StringBuilder()
+                .append(toString(activityPackageExecution.getActivityPackageRef().getModel()));
+
+        if (activityPackageExecution.getUserRef().getKey() != null) {
+            builder.append(" (").append(toString(activityPackageExecution.getUserRef().getModel())).append(')');
+        }
+
+        return builder.toString();
+    }
+
     public static String toString(Activity activity) {
         String name = StringUtils.trimToEmpty(activity.getName());
         if (StringUtils.isBlank(name)) {
@@ -57,6 +74,14 @@ public final class FormatUtil {
         }
         if (activity.getStart() == null || activity.getFinish() == null) return name;
         return name + START_FORMAT.get().format(activity.getStart()) + FINISH_FORMAT.get().format(activity.getFinish());
+    }
+
+    public static String toString(ActivityPackage activityPackage) {
+        String name = StringUtils.trimToEmpty(activityPackage.getName());
+        if (StringUtils.isBlank(name)) {
+            name = "Activity: " + KeyUtil.toHumanReadableString(activityPackage.getId());
+        }
+        return name + " (" + activityPackage.getItemCount() + " allowed subscriptions)";
     }
 
     public static String toString(UserAccount account) {
@@ -95,5 +120,8 @@ public final class FormatUtil {
 
     public static String toTransactionFeeString(Subscription subscription) {
         return "Transaction Fee " + toString(subscription);
+    }
+    public static String toTransactionFeeString(ActivityPackageExecution activityPackageExecution) {
+        return "Transaction Fee " + toString(activityPackageExecution);
     }
 }

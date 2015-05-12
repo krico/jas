@@ -1,24 +1,22 @@
 package com.jasify.schedule.appengine.mail;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.KeyUtil;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author wszarmach
@@ -28,46 +26,16 @@ import java.util.List;
 public class MailParser {
 
     private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm");
+    /*
+    Rather than two StringBuilders maybe it would be better to convert from html to text
+    while maintaining new lines and tabs
+     */
+    private final StringBuilder htmlBuilder;
+    private final StringBuilder textBuilder;
 
-    private enum SubstituteKey {
-        ActivityDetails("%ActivityDetails%"),
-        ActivityFinish("%ActivityFinish%"),
-        ActivityName("%ActivityName%"),
-        ActivityPrice("%ActivityPrice%"),
-        ActivityStart("%ActivityStart%"),
-        Branch("%Branch%"),
-        Fees("%Fees%"),
-        JasifyUrl("%JasifyUrl%"),
-        Number("%Number%"),
-        OrderNumber("%OrderNumber%"),
-        PaymentMethod("%PaymentMethod%"),
-        PasswordUrl("%PasswordUrl%"),
-        PublisherName("%PublisherName%"),
-        SubscriberName("%SubscriberName%"),
-        Tax("%Tax%"),
-        Timestamp("%Timestamp%"),
-        TotalPrice("%TotalPrice%"),
-        UserName("%UserName%"),
-        Version("%Version%");
-
-        private final String key;
-
-        SubstituteKey(String key) {
-            this.key = key;
-        }
-    }
-
-    private enum MultiSubscription {
-        Jasify("/jasify/Subscription", "/jasify/SubscriptionActivityDetails"),
-        Subscriber("/subscriber/Subscription", "/subscriber/SubscriptionActivityDetails");
-
-        String subscription;
-        String activityDetails;
-
-        MultiSubscription(String subscription, String activityDetails) {
-            this.subscription = subscription;
-            this.activityDetails = activityDetails;
-        }
+    private MailParser(String resource) throws IOException {
+        htmlBuilder = createStringBuilder(resource + ".html");
+        textBuilder = createStringBuilder(resource + ".txt");
     }
 
     public static MailParser createNewVersionEmail(String version, String timestamp, String branch, String number, String jasifyUrl) throws Exception {
@@ -104,7 +72,7 @@ public class MailParser {
         return mailParser;
     }
 
-    private static MailParser createSubscriptionEmail(MultiSubscription multiSubscription, List<Subscription> subscriptions) throws Exception {
+    private static MailParser createSubscriptionEmail(MultiSubscription multiSubscription, List<Subscription> subscriptions, List<ActivityPackageExecution> executions) throws Exception {
         double totalPrice = 0;
         String subscriberName = null;
         List<MailParser> activityDetails = new ArrayList<>();
@@ -137,12 +105,8 @@ public class MailParser {
         return mailParser;
     }
 
-    public static MailParser createJasifySubscriptionEmail(Subscription subscription) throws Exception {
-        return createJasifySubscriptionEmail(Arrays.asList(new Subscription[]{subscription}));
-    }
-
-    public static MailParser createJasifySubscriptionEmail(List<Subscription> subscriptions) throws Exception {
-        return createSubscriptionEmail(MultiSubscription.Jasify, subscriptions);
+    public static MailParser createJasifySubscriptionEmail(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) throws Exception {
+        return createSubscriptionEmail(MultiSubscription.Jasify, subscriptions, executions);
     }
 
     public static MailParser createPublisherSubscriptionEmail(Subscription subscription) throws Exception {
@@ -165,12 +129,8 @@ public class MailParser {
         return mailParser;
     }
 
-    public static MailParser createSubscriberSubscriptionEmail(Subscription subscription) throws Exception {
-        return createSubscriberSubscriptionEmail(Arrays.asList(new Subscription[]{subscription}));
-    }
-
-    public static MailParser createSubscriberSubscriptionEmail(List<Subscription> subscriptions) throws Exception {
-        return createSubscriptionEmail(MultiSubscription.Subscriber, subscriptions);
+    public static MailParser createSubscriberSubscriptionEmail(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) throws Exception {
+        return createSubscriptionEmail(MultiSubscription.Subscriber, subscriptions, executions);
     }
 
     public static MailParser createSubscriberPasswordRecoveryEmail(String passwordUrl) throws Exception {
@@ -194,7 +154,6 @@ public class MailParser {
         return mailParser;
     }
 
-
     public static MailParser createSubscriberGoogleSignUpConfirmationEmail(String subscriberName, String jasifyUrl) throws Exception {
         MailParser mailParser = new MailParser("/subscriber/GoogleSignUpConfirmation");
         mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);
@@ -213,18 +172,6 @@ public class MailParser {
         decimalFormat.setMinimumFractionDigits(2);
         decimalFormat.setGroupingUsed(false);
         return decimalFormat.format(output);
-    }
-
-    /*
-    Rather than two StringBuilders maybe it would be better to convert from html to text
-    while maintaining new lines and tabs
-     */
-    private final StringBuilder htmlBuilder;
-    private final StringBuilder textBuilder;
-
-    private MailParser(String resource) throws IOException {
-        htmlBuilder = createStringBuilder(resource + ".html");
-        textBuilder = createStringBuilder(resource + ".txt");
     }
 
     private StringBuilder createStringBuilder(String resource) throws IOException {
@@ -270,5 +217,46 @@ public class MailParser {
 
     public String getText() {
         return textBuilder.toString();
+    }
+
+    private enum SubstituteKey {
+        ActivityDetails("%ActivityDetails%"),
+        ActivityFinish("%ActivityFinish%"),
+        ActivityName("%ActivityName%"),
+        ActivityPrice("%ActivityPrice%"),
+        ActivityStart("%ActivityStart%"),
+        Branch("%Branch%"),
+        Fees("%Fees%"),
+        JasifyUrl("%JasifyUrl%"),
+        Number("%Number%"),
+        OrderNumber("%OrderNumber%"),
+        PaymentMethod("%PaymentMethod%"),
+        PasswordUrl("%PasswordUrl%"),
+        PublisherName("%PublisherName%"),
+        SubscriberName("%SubscriberName%"),
+        Tax("%Tax%"),
+        Timestamp("%Timestamp%"),
+        TotalPrice("%TotalPrice%"),
+        UserName("%UserName%"),
+        Version("%Version%");
+
+        private final String key;
+
+        SubstituteKey(String key) {
+            this.key = key;
+        }
+    }
+
+    private enum MultiSubscription {
+        Jasify("/jasify/Subscription", "/jasify/SubscriptionActivityDetails"),
+        Subscriber("/subscriber/Subscription", "/subscriber/SubscriptionActivityDetails");
+
+        String subscription;
+        String activityDetails;
+
+        MultiSubscription(String subscription, String activityDetails) {
+            this.subscription = subscription;
+            this.activityDetails = activityDetails;
+        }
     }
 }

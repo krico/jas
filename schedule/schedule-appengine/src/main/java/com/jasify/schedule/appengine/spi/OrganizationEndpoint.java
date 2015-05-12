@@ -16,7 +16,6 @@ import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
-import org.slim3.datastore.Datastore;
 
 import java.util.List;
 
@@ -52,6 +51,11 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class OrganizationEndpoint {
+
+    @ApiMethod(name = "organizations.queryPublic", path = "organizations-public", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Organization> getPublicOrganizations(User caller) throws UnauthorizedException, ForbiddenException, EntityNotFoundException {
+        return OrganizationServiceFactory.getOrganizationService().getOrganizations();
+    }
 
     @ApiMethod(name = "organizations.query", path = "organizations", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Organization> getOrganizations(User caller) throws UnauthorizedException, ForbiddenException, EntityNotFoundException {
