@@ -31,6 +31,29 @@ public class ActivityPackagePaymentWorkflow extends PaymentWorkflow {
         this.activityIds = activityIds;
     }
 
+    public Key getActivityPackageId() {
+        return activityPackageId;
+    }
+
+    public void setActivityPackageId(Key activityPackageId) {
+        this.activityPackageId = activityPackageId;
+    }
+
+    public List<Key> getActivityIds() {
+        return activityIds;
+    }
+
+    public void setActivityIds(List<Key> activityIds) {
+        this.activityIds = activityIds;
+    }
+
+    public Key getActivityPackageExecutionId() {
+        return activityPackageExecutionId;
+    }
+
+    public void setActivityPackageExecutionId(Key activityPackageExecutionId) {
+        this.activityPackageExecutionId = activityPackageExecutionId;
+    }
 
     @Override
     public void onCreated() throws PaymentWorkflowException {
