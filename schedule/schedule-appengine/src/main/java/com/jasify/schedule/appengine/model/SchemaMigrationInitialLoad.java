@@ -11,6 +11,7 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.KeyUtil;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -106,6 +107,9 @@ class SchemaMigrationInitialLoad {
 
             Activity activity = new Activity(activityType);
             activity.setName(activityType.getName());
+            activity.setCurrency("CHF");
+            activity.setPrice((double) (20 + RandomUtils.nextInt(1, 5)));
+            activity.setMaxSubscriptions(10);
             activity.setDescription(activityType.getDescription());
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTime(new Date());
