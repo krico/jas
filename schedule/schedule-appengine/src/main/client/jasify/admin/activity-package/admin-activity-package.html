@@ -1,50 +1,33 @@
-<style>
-    /* ========================================================================================
-       TODO: Move this to application.less after dragonflypl tells us how that should look like
-       And these should be using the bootstrap variables
-       ======================================================================================== */
-    .activity-list-item {
-        padding: 5px;
-        margin: 5px 0;
-        border: 1px solid #eee;
-        border-left-width: 5px;
-        border-radius: 3px;
-    }
-
-    .activity-list-item-selected {
-        border-left-color: #6d96d0;
-    }
-
-    .activity-list-item-danger {
-        border-left-color: #ce4844;
-    }
-
-    .activity-list-item-available {
-        border-left-color: #19631f;
-    }
-
-    .col-align-right {
-        text-align: right;
-    }
-</style>
-<div class="card">
-    <div class="card-header" ng-if="!vm.activityPackage.id">
-        <a class="back-button" href="#/admin/activity-packages">
-            <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
-        </a>
-
-        <h2>New Activity Package
-            <small>TODO</small>
-        </h2>
-    </div>
-    <div class="card-body card-padding-sm">
-        <form novalidate name="vm.activityPackageForm" class="form-horizontal" role="form"
-              ng-submit="vm.activityPackageForm.$valid && vm.save(vm.activityPackage)">
+<form novalidate name="vm.activityPackageForm" class="form-horizontal" role="form"
+      ng-submit="vm.activityPackageForm.$valid && vm.save(vm.activityPackage)">
+    <div class="card">
+        <div class="card-header" ng-if="!vm.activityPackage.id">
             <div class="actions-group">
                 <a-button type="submit" controller="vm.saveBtn"></a-button>
-                <a-button type="reset" ng-click="vm.reset()" controller="vm.resetBtn"></a-button>
+                <a-button type="button" ng-click="vm.reset()" controller="vm.resetBtn"></a-button>
             </div>
-
+            <a class="back-button"
+               ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
+                <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+            </a>
+            <h2>New Activity Package
+                <small>Group Activities into Package</small>
+            </h2>
+        </div>
+        <div class="card-header" ng-if="vm.activityPackage.id">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <a-button type="button" ng-click="vm.reset()" controller="vm.resetBtn"></a-button>
+            </div>
+            <a class="back-button"
+               ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
+                <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+            </a>
+            <h2>Edit Activity Package
+                <small>Group Activities into Package</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
             <div jas-has-feedback class="form-group">
                 <label for="name" class="col-sm-2 control-label">Name:</label>
 
@@ -85,7 +68,7 @@
 
                 <div class="col-sm-4">
                     <div class="fg-line">
-                        <input id="price" name="price" type="number" min="0" max="10000" class="form-control"
+                        <input id="price" name="price" type="number" min="1" max="10000" class="form-control"
                                ng-model="vm.activityPackage.price" required placeholder="Enter price"
                                ng-change="vm.activityPackage.currency='CHF'"/>
                     </div>
@@ -121,7 +104,7 @@
                 <div class="col-sm-4">
                     <div class="fg-line">
                         <input id="itemCount" name="itemCount" type="number"
-                               min="0" max="100" class="form-control" placeholder="Enter Item Count"
+                               min="2" max="100" class="form-control" placeholder="Enter Item Count"
                                ng-model="vm.activityPackage.itemCount" required/>
                     </div>
                     <jas-feedback-icon-valid field="vm.activityPackageForm.itemCount"></jas-feedback-icon-valid>
@@ -130,7 +113,7 @@
                     <jas-error-help-block field="vm.activityPackageForm.itemCount" form="vm.activityPackageForm">
                         <span ng-message="required">Item Count is required.</span>
                         <span ng-message="number">Invalid number.</span>
-                        <span ng-message="min">Value must be greater than 0.</span>
+                        <span ng-message="min">Value must be greater than 1.</span>
                         <span ng-message="max">Value must be smaller than 100.</span>
                     </jas-error-help-block>
                 </div>
@@ -157,60 +140,44 @@
                     </jas-error-help-block>
                 </div>
             </div>
+
+            <md-subheader class="md-no-sticky bgm-bluegray c-white">Activities ({{vm.selectedActivities.length || 0}} selected)</md-subheader>
             <div id="activity-selection-lists" class="row">
                 <div class="col-xs-6">
-                    <div class="listview lv-bordered">
-                        <div class="lv-header bgm-bluegray c-white">
-                            Available Activities:
-                        </div>
-                        <div class="lv-body">
-                            <div class="lv-item media" ng-repeat="activity in vm.activities | filter:vm.filterSelected">
-                                <div class="media-body">
-                                    <div>
-                                        <div class="lv-title">
-                                            <button type="button" ng-click="vm.selectActivity(activity)"
-                                                    class="btn btn-primary waves-effect grow-on-small">
-                                                <i class="mdi mdi-add-circle">&nbsp; Add <span class="hidden-xs">{{activity.activityType.name}}</span></i>
-                                            </button>
-                                        </div>
-                                        <ul class="lv-attrs">
-                                            <li class="visible-xs-inline-block">{{activity.activityType.name}}</li>
-                                            <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
-                                            <li>Price: {{activity.price}} {{activity.currency}}</li>
-                                        </ul>
-                                    </div>
-                                </div>
+                    <md-list>
+                        <md-subheader class="md-no-sticky">Available <br class="visible-xs-block" /> (click to select)</md-subheader>
+                        <md-list-item ng-click="vm.selectActivity(activity)" div layout="row"
+                                      layout-align="start center" class="md-2-line"
+                                      ng-repeat="activity in vm.activities | filter:vm.filterSelected">
+                            <md-divider></md-divider>
+                            <div class="md-list-item-text">
+                                <h3> {{ activity.activityType.name }} </h3>
+
+                                <p> {{[activity.start, activity.finish] | tableShortDateTime}} </p>
+
+                                <p> Price: {{activity.price}} {{activity.currency}}</p>
                             </div>
-                        </div>
-                    </div>
+                        </md-list-item>
+                    </md-list>
                 </div>
                 <div class="col-xs-6">
-                    <div class="listview lv-bordered">
-                        <div class="lv-header bgm-bluegray c-white">
-                            Activities in Package:
-                        </div>
-                        <div class="lv-body">
-                            <div class="lv-item media" ng-repeat="activity in vm.selectedActivities">
-                                <div class="media-body">
-                                    <div>
-                                        <div class="lv-title">
-                                            <button type="button" ng-click="vm.deselectActivity(activity.id)"
-                                                    class="btn btn-warning waves-effect grow-on-small">
-                                                <i class="mdi mdi-remove-circle">&nbsp; Remove <span class="hidden-xs">{{activity.activityType.name}}</span></i>
-                                            </button>
-                                        </div>
-                                        <ul class="lv-attrs">
-                                            <li class="visible-xs-inline-block">{{activity.activityType.name}}</li>
-                                            <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
-                                            <li>Price: {{activity.price}} {{activity.currency}}</li>
-                                        </ul>
-                                    </div>
-                                </div>
+                    <md-list>
+                        <md-subheader class="md-no-sticky">Selected <br class="visible-xs-block"  /> (click to deselect)</md-subheader>
+                        <md-list-item ng-click="vm.deselectActivity(activity.id)" div layout="row"
+                                      layout-align="start center" class="md-2-line"
+                                      ng-repeat="activity in vm.selectedActivities">
+                            <md-divider></md-divider>
+                            <div class="md-list-item-text">
+                                <h3> {{ activity.activityType.name }} </h3>
+
+                                <p> {{[activity.start, activity.finish] | tableShortDateTime}} </p>
+
+                                <p> Price: {{activity.price}} {{activity.currency}}</p>
                             </div>
-                        </div>
-                    </div>
+                        </md-list-item>
+                    </md-list>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
-</div>
+</form>
