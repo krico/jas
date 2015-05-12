@@ -17,6 +17,7 @@
         'jasify.balance',
         'jasify.checkout',
         'jasify.templates',
+        'jasify.filters',
         'angular.filter'
     ]);
 

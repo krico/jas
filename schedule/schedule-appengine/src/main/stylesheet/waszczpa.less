@@ -20,8 +20,6 @@ body {
   padding-right: 0;
 }
 
-
-
 .home-splash {
   background-position: 50% 50%;
   background-size: cover;
@@ -34,16 +32,37 @@ body {
 
 @angularMaterialLayoutSm: 600px;
 
-@media (min-width:@angularMaterialLayoutSm) {
-  .actions-group > button ~ button {
-    margin-left: 10px;
+.actions-group {
+
+  @media (min-width: @angularMaterialLayoutSm) {
+    > button ~ button {
+      margin-left: 10px;
+    }
   }
 }
 
-@media (max-width:@angularMaterialLayoutSm) {
-  .actions-group > button {
+.card-header {
+  .actions-group {
+
+    float: right;
+
+    @media (max-width: @angularMaterialLayoutSm) {
+      float: none;
+      margin-bottom: 2em;
+    }
+
+  }
+}
+
+.actions-group + .form-group {
+  margin-top: 20px;
+}
+
+@media (max-width: @angularMaterialLayoutSm) {
+  .grow-on-small, .actions-group > button {
     .btn-block();
   }
+
   .actions-group > button ~ button {
     margin-top: 5px;
   }
@@ -51,7 +70,7 @@ body {
 
 td.actions-column {
   padding: 0 !important;
-  vertical-align: middle  !important;;
+  vertical-align: middle !important;;
 }
 
 .tab-pane {
@@ -59,6 +78,7 @@ td.actions-column {
     margin-top: 25px;
   }
 }
+
 #authenticate-dialog {
 
   .sign-in {
@@ -88,6 +108,7 @@ td.actions-column {
     color: white;
   }
 }
+
 .btn.btn-default.btn-google {
   background-color: @googleBgColor;
   color: white;
@@ -180,6 +201,7 @@ td.actions-column {
     }
   }
 }
+
 .selectable-lv-item {
   .media-body {
     cursor: pointer;
@@ -190,7 +212,7 @@ td.actions-column {
   background-color: #fffcbe;
 }
 
-@media (max-width:@angularMaterialLayoutSm) {
+@media (max-width: @angularMaterialLayoutSm) {
   md-sidenav {
     width: 204px;
     min-width: 204px;
@@ -202,5 +224,34 @@ td.actions-column {
 
   .tab-nav > li {
     display: block;
+  }
+}
+
+#activity-selection-lists {
+
+  @media (max-width: @angularMaterialLayoutSm) {
+    .md-subheader {
+      * {
+        font-size: 12px;
+        line-height: 1.1;
+      }
+    }
+
+    md-list {
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+
+    .md-list-item-text {
+      * {
+        font-size: smaller;
+      }
+    }
+  }
+}
+
+.sweet-alert {
+  .lead.text-muted {
+    margin-top: 25px;
   }
 }

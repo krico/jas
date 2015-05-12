@@ -1,183 +1,183 @@
-<style>
-    /* ========================================================================================
-       TODO: Move this to application.less after dragonflypl tells us how that should look like
-       And these should be using the bootstrap variables
-       ======================================================================================== */
-    .activity-list-item {
-        padding: 5px;
-        margin: 5px 0;
-        border: 1px solid #eee;
-        border-left-width: 5px;
-        border-radius: 3px;
-    }
+<form novalidate name="vm.activityPackageForm" class="form-horizontal" role="form"
+      ng-submit="vm.activityPackageForm.$valid && vm.save(vm.activityPackage)">
+    <div class="card">
+        <div class="card-header" ng-if="!vm.activityPackage.id">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <a-button type="button" ng-click="vm.reset()" controller="vm.resetBtn"></a-button>
+            </div>
+            <a class="back-button"
+               ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
+                <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+            </a>
+            <h2>New Activity Package
+                <small>Group Activities into Package</small>
+            </h2>
+        </div>
+        <div class="card-header" ng-if="vm.activityPackage.id">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <a-button type="button" ng-click="vm.reset()" controller="vm.resetBtn"></a-button>
+            </div>
+            <a class="back-button"
+               ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
+                <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+            </a>
+            <h2>Edit Activity Package
+                <small>Group Activities into Package</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div jas-has-feedback class="form-group">
+                <label for="name" class="col-sm-2 control-label">Name:</label>
 
-    .activity-list-item-selected {
-        border-left-color: #6d96d0;
-    }
-
-    .activity-list-item-danger {
-        border-left-color: #ce4844;
-    }
-
-    .activity-list-item-available {
-        border-left-color: #19631f;
-    }
-
-    .col-align-right {
-        text-align: right;
-    }
-</style>
-
-<div class="row">
-    <div class="col-sm-1">
-        <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
-    </div>
-    <div class="col-sm-4">
-        <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
-            <div class="form-group">
-                <label class="control-label col-sm-4" for="organization">Organization:</label>
-
-                <div class="col-sm-7">
-                    <select ng-model="vm.organization" id="organization" class="form-control"
-                            ng-disabled="vm.activityPackage.id"
-                            ng-options="organization as organization.name for organization in vm.organizations"
-                            ng-change="vm.onOrganizationSelected(vm.organization)">
-                    </select>
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <input placeholder="Enter name" ng-model="vm.activityPackage.name" type="text"
+                               class="form-control" id="name" name="name" required/>
+                    </div>
+                    <jas-feedback-icon-valid field="vm.activityPackageForm.name"></jas-feedback-icon-valid>
+                    <jas-feedback-icon-invalid field="vm.activityPackageForm.name"
+                                               form="vm.activityPackageForm"></jas-feedback-icon-invalid>
+                    <jas-error-help-block field="vm.activityPackageForm.name" form="vm.activityPackageForm">
+                        <span ng-message="required">Name is required.</span>
+                    </jas-error-help-block>
                 </div>
             </div>
-        </form>
-    </div>
-    <div class="col-sm-7">
-        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
-    </div>
-</div>
-<div class="row">
-    <div class="col-sm-6 well well-sm text-center" ng-hide="vm.organization.id">Select an organization.</div>
-    <div class="col-sm-6" ng-show="vm.organization.id">
-        <form class="form-horizontal" role="form" name="vm.activityPackageForm" novalidate>
-            <fieldset>
-                <legend class="h4">Activity Package</legend>
-                <div class="form-group" ng-include="'aap-buttons.html'"></div>
-                <div class="form-group">
-                    <label for="name" class="col-sm-3 control-label">Name:</label>
+            <div jas-has-feedback class="form-group">
+                <label for="description" class="col-sm-2 control-label">Description:</label>
 
-                    <div class="col-sm-8">
-                        <input id="name" type="text" class="form-control" ng-model="vm.activityPackage.name" required/>
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <textarea ng-model="vm.activityPackage.description"
+                                  id="description" name="description"
+                                  required
+                                  class="form-control" rows="3" placeholder="Enter description">
+                        </textarea>
                     </div>
+                    <jas-feedback-icon-valid field="vm.activityPackageForm.description"></jas-feedback-icon-valid>
+                    <jas-feedback-icon-invalid field="vm.activityPackageForm.description"
+                                               form="vm.activityPackageForm"></jas-feedback-icon-invalid>
+                    <jas-error-help-block field="vm.activityPackageForm.description" form="vm.activityPackageForm">
+                        <span ng-message="required">Description is required.</span>
+                    </jas-error-help-block>
                 </div>
-                <div class="form-group">
-                    <label for="description" class="col-sm-3 control-label">Description:</label>
+            </div>
+            <div jas-has-feedback class="form-group">
+                <label for="price" class="col-sm-2 control-label">Price:</label>
 
-                    <div class="col-sm-8">
-                    <textarea class="form-control input-sm" id="description" ng-model="vm.activityPackage.description"
-                              rows="3">
-                    </textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="price" class="col-sm-3 control-label">Price:</label>
-
-                    <div class="col-sm-3">
-                        <input id="price" type="number" min="0" class="form-control" ng-model="vm.activityPackage.price"
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <input id="price" name="price" type="number" min="1" max="10000" class="form-control"
+                               ng-model="vm.activityPackage.price" required placeholder="Enter price"
                                ng-change="vm.activityPackage.currency='CHF'"/>
                     </div>
-                    <div class="col-sm-2 text-left">
-                        <select ng-model="vm.activityPackage.currency" class="form-control">
-                            <option>CHF</option>
-                        </select>
+                    <jas-feedback-icon-valid field="vm.activityPackageForm.price"></jas-feedback-icon-valid>
+                    <jas-feedback-icon-invalid field="vm.activityPackageForm.price"
+                                               form="vm.activityPackageForm"></jas-feedback-icon-invalid>
+                    <jas-error-help-block field="vm.activityPackageForm.price" form="vm.activityPackageForm">
+                        <span ng-message="required">Price is required.</span>
+                        <span ng-message="number">Invalid number.</span>
+                        <span ng-message="min">Value must be greater than 0.</span>
+                        <span ng-message="max">Value must be smaller than 10000.</span>
+                    </jas-error-help-block>
+                </div>
+            </div>
+            <div jas-has-feedback class="form-group">
+                <label for="currency" class="col-sm-2 control-label">Currency:</label>
+
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <div class="select">
+                            <select ng-model="vm.activityPackage.currency" name="currency" id="currency" required
+                                    class="form-control">
+                                <option>CHF</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="itemCount" class="col-sm-3 control-label"
-                           tooltip="Number of activities a client can subscribe to">Item Count:</label>
+            </div>
+            <div jas-has-feedback class="form-group">
+                <label for="itemCount" class="col-sm-2 control-label"
+                       tooltip="Number of activities a client can subscribe to">Item Count:</label>
 
-                    <div class="col-sm-8">
-                        <input id="itemCount" type="number" min="0" class="form-control"
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <input id="itemCount" name="itemCount" type="number"
+                               min="2" max="100" class="form-control" placeholder="Enter Item Count"
                                ng-model="vm.activityPackage.itemCount" required/>
                     </div>
+                    <jas-feedback-icon-valid field="vm.activityPackageForm.itemCount"></jas-feedback-icon-valid>
+                    <jas-feedback-icon-invalid field="vm.activityPackageForm.itemCount"
+                                               form="vm.activityPackageForm"></jas-feedback-icon-invalid>
+                    <jas-error-help-block field="vm.activityPackageForm.itemCount" form="vm.activityPackageForm">
+                        <span ng-message="required">Item Count is required.</span>
+                        <span ng-message="number">Invalid number.</span>
+                        <span ng-message="min">Value must be greater than 1.</span>
+                        <span ng-message="max">Value must be smaller than 100.</span>
+                    </jas-error-help-block>
                 </div>
-            </fieldset>
-            <fieldset>
-                <legend class="h4">Activities</legend>
-                <input type="hidden" ng-model="vm.selectedActivities"/>
+            </div>
+            <div jas-has-feedback class="form-group">
+                <label class="control-label col-sm-2" for="organization">Organization:</label>
 
-                <div class="form-group">
-                    <div class="col-sm-5">
-                        <h5>Available</h5>
-
-                        <div class="activity-list-item activity-list-item-danger" ng-hide="vm.activities.length > 0">
-                            No activities available.
-                        </div>
-
-                        <div class="activity-list-item activity-list-item-available small"
-                             ng-repeat="activity in vm.activities | filter:vm.filterSelected">
-
-                            <button type="button" class="close" aria-label="Select"
-                                    ng-click="vm.selectActivity(activity)" tooltip="Select">
-                                <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-                            </button>
-
-                            <div>
-                                <strong>
-                                    {{activity.start | date:'EEE, dd MMM'}}
-                                </strong>
-                                <i>
-                                    ({{activity.start | date:'HH:mm'}} - {{activity.finish | date:'HH:mm'}})
-                                </i>
-                            </div>
-                            {{activity.name || activity.activityType.name}}
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <div class="select">
+                            <select id="organization" name="organization" class="form-control"
+                                    ng-model="vm.organization" required
+                                    ng-disabled="vm.activityPackage.id"
+                                    ng-options="organization as organization.name for organization in vm.organizations"
+                                    ng-change="vm.onOrganizationSelected(vm.organization)">
+                            </select>
                         </div>
                     </div>
-                    <div class="col-sm-5 col-sm-offset-1">
-                        <h5>Selected</h5>
-
-                        <div class="activity-list-item" ng-hide="vm.selectedActivities.length > 0">
-                            No activities selected.
-                        </div>
-
-                        <div class="activity-list-item activity-list-item-selected small"
-                             ng-repeat="activity in vm.selectedActivities">
-
-                            <button type="button" class="close" aria-label="Remove"
-                                    ng-click="vm.deselectActivity(activity.id)" tooltip="Remove">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-
-                            <div>
-                                <strong>
-                                    {{activity.start | date:'EEE, dd MMM'}}
-                                </strong>
-                                <i>
-                                    ({{activity.start | date:'HH:mm'}} - {{activity.finish | date:'HH:mm'}})
-                                </i>
-                            </div>
-                            {{activity.name || activity.activityType.name}}
-                        </div>
-                    </div>
+                    <jas-feedback-icon-valid field="vm.activityPackageForm.organization"></jas-feedback-icon-valid>
+                    <jas-feedback-icon-invalid field="vm.activityPackageForm.organization"
+                                               form="vm.activityPackageForm"></jas-feedback-icon-invalid>
+                    <jas-error-help-block field="vm.activityPackageForm.organization" form="vm.activityPackageForm">
+                        <span ng-message="required">Organization is required.</span>
+                    </jas-error-help-block>
                 </div>
-            </fieldset>
-            <div class="form-group" ng-include="'aap-buttons.html'"></div>
-        </form>
+            </div>
+
+            <md-subheader class="md-no-sticky bgm-bluegray c-white">Activities ({{vm.selectedActivities.length || 0}} selected)</md-subheader>
+            <div id="activity-selection-lists" class="row">
+                <div class="col-xs-6">
+                    <md-list>
+                        <md-subheader class="md-no-sticky">Available <br class="visible-xs-block" /> (click to select)</md-subheader>
+                        <md-list-item ng-click="vm.selectActivity(activity)" div layout="row"
+                                      layout-align="start center" class="md-2-line"
+                                      ng-repeat="activity in vm.activities | filter:vm.filterSelected">
+                            <md-divider></md-divider>
+                            <div class="md-list-item-text">
+                                <h3> {{ activity.activityType.name }} </h3>
+
+                                <p> {{[activity.start, activity.finish] | tableShortDateTime}} </p>
+
+                                <p> Price: {{activity.price}} {{activity.currency}}</p>
+                            </div>
+                        </md-list-item>
+                    </md-list>
+                </div>
+                <div class="col-xs-6">
+                    <md-list>
+                        <md-subheader class="md-no-sticky">Selected <br class="visible-xs-block"  /> (click to deselect)</md-subheader>
+                        <md-list-item ng-click="vm.deselectActivity(activity.id)" div layout="row"
+                                      layout-align="start center" class="md-2-line"
+                                      ng-repeat="activity in vm.selectedActivities">
+                            <md-divider></md-divider>
+                            <div class="md-list-item-text">
+                                <h3> {{ activity.activityType.name }} </h3>
+
+                                <p> {{[activity.start, activity.finish] | tableShortDateTime}} </p>
+
+                                <p> Price: {{activity.price}} {{activity.currency}}</p>
+                            </div>
+                        </md-list-item>
+                    </md-list>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-<script type="text/ng-template" id="aap-buttons.html">
-    <div class="col-sm-offset-3 col-sm-8 col-align-right">
-        <button type="button" ng-if="vm.activityPackage.id"
-                ng-click="vm.update()"
-                ng-disabled="!vm.activityPackageForm.$dirty || vm.activityPackageForm.$invalid"
-                class="btn btn-default btn-sm btn-primary">
-            <span class="glyphicon glyphicon-save"></span> update
-        </button>
-        <button type="button" ng-if="!vm.activityPackage.id"
-                ng-click="vm.create()"
-                ng-disabled="!vm.activityPackageForm.$dirty || vm.activityPackageForm.$invalid"
-                class="btn btn-default btn-sm btn-primary">
-            <span class="glyphicon glyphicon-plus"></span> create
-        </button>
-        <button type="button"
-                ng-click="vm.reset()" ng-disabled="!vm.activityPackageForm.$dirty"
-                class="btn btn-default btn-sm">
-            <span class="glyphicon glyphicon-open"></span> reset
-        </button>
-    </div>
-</script>
+</form>

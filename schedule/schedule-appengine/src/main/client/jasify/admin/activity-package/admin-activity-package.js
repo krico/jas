@@ -1,11 +1,15 @@
+/*global window */
 (function (angular) {
 
     angular.module('jasify.admin').controller('AdminActivityPackageController', AdminActivityPackageController);
 
-    function AdminActivityPackageController($log, $location, $q, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
+    function AdminActivityPackageController($location, jasDialogs, aButtonController, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
+
         var vm = this;
-        vm.alerts = [];
-        vm.organization = {};
+        vm.organization = null;
+
+        vm.saveBtn = aButtonController.createSave();
+        vm.resetBtn = aButtonController.createReset();
 
         /* updated by the vm.reset() call */
         vm.activityPackage = {};
@@ -14,8 +18,6 @@
 
         vm.activities = [];
         vm.organizations = organizations.items;
-        vm.alert = alert;
-        vm.back = back;
         vm.selectOrganization = selectOrganization;
         vm.onOrganizationSelected = onOrganizationSelected;
         vm.deselectActivity = deselectActivity;
@@ -23,52 +25,80 @@
         vm.filterSelected = filterSelected;
         vm.sortActivityArray = sortActivityArray;
 
+        vm.save = function (activityPackage) {
+            if (activityPackage.id) {
+                vm.update();
+            } else {
+                vm.create();
+            }
+        };
+
         vm.update = update;
         vm.create = create;
         vm.reset = reset;
 
-        vm.reset();
+        vm.reset(true);
 
         vm.selectOrganization(vm.organizations, vm.activityPackage, $location.search().organizationId);
 
+        function validateItemsCount() {
+
+            var numSelectedActivities = (vm.selectedActivities || []).length;
+
+            if (numSelectedActivities === 0) {
+                jasDialogs.warning('You must select at least one activity.');
+                return false;
+            }
+
+            if (numSelectedActivities < vm.activityPackage.itemCount) {
+                jasDialogs.warning(
+                    "Items Count specifies minimum number of activities in the package. " +
+                    "You must select at least " + vm.activityPackage.itemCount + " activities or decrease Items Count.");
+                return false;
+            }
+
+            return true;
+        }
+
         function update() {
 
-            return ActivityPackage.update(vm.activityPackage, vm.selectedActivities).then(ok, fail);
+            if (!validateItemsCount()) {
+                return;
+            }
 
-            function ok(resp) {
-                //update original state
+            var promise = ActivityPackage.update(vm.activityPackage, vm.selectedActivities).then(ok, fail);
+            vm.saveBtn.start(promise);
+
+            function ok() {
                 activityPackage = angular.copy(vm.activityPackage);
                 activityPackageActivities = angular.copy(vm.selectedActivities);
 
                 makePristine();
             }
 
-            function fail(resp) {
-                //TODO
-                $log.debug('FAIL: ' + angular.toJson(resp));
+            function fail() {
+                jasDialogs.error('Failed to update Activity Package. Please try again.');
             }
         }
 
         function create() {
-            if (!(vm.selectedActivities && vm.selectedActivities.length > 0)) {
-                vm.alert('warning', 'You must select at least one activity');
+
+            if (!validateItemsCount()) {
                 return;
             }
+
             vm.activityPackage.organizationId = vm.organization.id;
 
-            ActivityPackage.add(vm.activityPackage, vm.selectedActivities).then(ok, fail);
-
-            function ok(resp) {
+            ActivityPackage.add(vm.activityPackage, vm.selectedActivities).then(function (resp) {
+                jasDialogs.success('Activity Package was created.');
                 $location.path('/admin/activity-package/' + resp.id);
-            }
-
-            function fail(resp) {
-                //TODO:
-                $log.debug('FAIL: ' + angular.toJson(resp));
-            }
+            }, function () {
+                jasDialogs.error('Failed to create Activity Package. Please try again.');
+            });
         }
 
-        function reset() {
+        function reset(initialReset) {
+
             if (activityPackage) {
                 vm.activityPackage = angular.copy(activityPackage);
             } else {
@@ -81,6 +111,10 @@
                 vm.selectedActivities = [];
             }
             makePristine();
+
+            if (!initialReset) {
+                vm.resetBtn.pulse();
+            }
         }
 
         function makeDirty() {
@@ -92,6 +126,7 @@
         function makePristine() {
             if (vm.activityPackageForm) {
                 vm.activityPackageForm.$setPristine();
+                vm.activityPackageForm.$setUntouched();
             }
         }
 
@@ -131,7 +166,9 @@
 
         function filterSelected(value, index) {
             for (var i = 0; i < vm.selectedActivities.length; ++i) {
-                if (vm.selectedActivities[i].id == value.id) return false;
+                if (vm.selectedActivities[i].id == value.id) {
+                    return false;
+                }
             }
             return true;
         }
@@ -171,29 +208,10 @@
                 vm.sortActivityArray(vm.activities);
             }
 
-            function failed(reason) {
-                vm.alert('danger', 'Failed: ' + angular.toJson(reason));
-            }
-        }
-
-        function alert(t, m) {
-            vm.alerts.push({type: t, msg: m});
-        }
-
-        function back() {
-            var orgId = null;
-            if (vm.activityPackage && vm.activityPackage.organizationId) {
-                orgId = vm.activityPackage.organizationId;
-            } else if (vm.organization.id) {
-                orgId = vm.organization.id;
-            }
-
-            if (orgId === null) {
-                $location.path('/admin/activity-packages');
-            } else {
-                $location.path('/admin/activity-packages/' + orgId); //TODO: path orgID to activity/X
+            function failed() {
+                jasDialogs.error("Failed to get organization activities");
             }
         }
     }
 
-})(angular);
+})(window.angular);

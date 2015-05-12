@@ -16,7 +16,7 @@
         'jasify.checkout',
         'jasify.templates',
         "checklist-model",
-        "jasifyFilters"
+        "jasify.filters"
     ]).config(bookingViaRoutes);
 
     function bookingViaRoutes($routeProvider) {

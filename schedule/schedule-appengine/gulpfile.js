@@ -274,7 +274,7 @@ function staticHtml(cb) {
 function images(cb) {
     return gulp.src(paths.images)
         .pipe(plumber())
-        .pipe(gulp.dest(paths.build + '/../img'))
+        .pipe(gulp.dest(paths.build + '/img'))
 }
 
 
