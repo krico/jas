@@ -66,7 +66,8 @@
         "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
         "spin.js/spin.js",
         "angular-spinner/angular-spinner.js",
-        "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js"
+        "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js",
+        "bootstrap-sweetalert/lib/sweet-alert.js"
       ],
       "iframecontentwindow": [
         "iframe-resizer/js/iframeResizer.contentWindow.min.js"
@@ -84,7 +85,8 @@
         "font-awesome/css/font-awesome.min.css",
         "angular-material/angular-material.css",
         "bootstrap/dist/css/bootstrap.css",
-        "jquery-bootgrid/dist/jquery.bootgrid.css"
+        "jquery-bootgrid/dist/jquery.bootgrid.css",
+        "bootstrap-sweetalert/lib/sweet-alert.css"
       ]
     }
   },

@@ -11655,6 +11655,46 @@ html:not(.ie9) .select.fg-line:before {
     margin-top: 0;
     margin-bottom: 0;
 }
+.alert {
+    padding-left: 30px;
+}
+.alert span {
+    cursor: pointer;
+}
+.alert:not(.alert-dismissible) {
+    padding-right: 30px;
+}
+.alert.alert-dismissable {
+    padding-right: 44px;
+}
+.alert-inverse {
+    background: rgba(51, 51, 51, 0.9);
+    box-shadow: 0 0 5px rgba(51, 51, 51, 0.5);
+    color: #fff;
+}
+.alert-inverse a {
+    color: #fff;
+}
+.growl-animated {
+    border: 0;
+    color: #fff;
+}
+.growl-animated.alert-info {
+    background: rgba(33, 150, 243, 0.8);
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+}
+.growl-animated.alert-success {
+    background: rgba(76, 175, 80, 0.8);
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+.growl-animated.alert-warning {
+    background: rgba(255, 152, 0, 0.8);
+    box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+}
+.growl-animated.alert-danger {
+    background: rgba(244, 67, 54, 0.8);
+    box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
+}
 .tooltip-inner {
     border-radius: 1px;
     padding: 3px 10px 5px;
@@ -12013,4 +12053,29 @@ html:not(.ie9) .select.fg-line:before {
 .command-delete {
     background: #fff;
     border: 1px solid #eee !important;
+}
+.sweet-alert {
+    border-radius: 2px;
+    font-family: inherit;
+    padding: 30px;
+}
+.sweet-alert > h2 {
+    font-size: 20px;
+    font-weight: normal;
+    color: #000000;
+    margin: 0 0 5px;
+}
+.sweet-alert p {
+    font-size: 13px;
+    color: #5e5e5e;
+}
+.sweet-alert button {
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    font-weight: 300;
+    border-radius: 2px;
+}
+.sweet-alert .sa-icon {
+    margin: 0 auto 20px;
 }
