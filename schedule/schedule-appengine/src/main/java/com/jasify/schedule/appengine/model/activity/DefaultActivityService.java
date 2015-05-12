@@ -676,6 +676,16 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
+    @Override
+    public ActivityPackageExecution getActivityPackageExecution(Key id) throws EntityNotFoundException {
+        if (id == null) throw new EntityNotFoundException("ActivityPackageExecution id=NULL");
+        try {
+            return Datastore.get(activityPackageExecutionMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("ActivityPackageExecution id=" + id);
+        }
+    }
+
     @Nonnull
     @Override
     public List<Subscription> getSubscriptions(Activity activity) throws EntityNotFoundException {

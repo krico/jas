@@ -276,6 +276,8 @@ public interface ActivityService {
     @Nonnull
     Subscription getSubscription(Key id) throws EntityNotFoundException;
 
+    ActivityPackageExecution getActivityPackageExecution(Key id) throws EntityNotFoundException;
+
     /**
      * Cancel a subscription, effectively doing the reverse of {@link #subscribe}
      *
