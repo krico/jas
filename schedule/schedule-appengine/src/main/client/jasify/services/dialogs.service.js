@@ -31,6 +31,21 @@
                 if (swal) {
                     swal("Operation Failed", message,"warning");
                 }
+            },
+            ruSure: function(message, onConfirm) {
+                if (swal) {
+                    swal({
+                        title: "Are you sure?",
+                        text: message,
+                        showCancelButton: true,
+                        confirmButtonClass: "btn-danger",
+                        confirmButtonText: "Yes",
+                        closeOnConfirm: true
+                    }, function () {
+
+                        onConfirm();
+                    });
+                }
             }
         };
     }

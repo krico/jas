@@ -114,6 +114,9 @@
                                                 <li>Price: {{activity.price}} {{activity.currency}}</li>
                                                 <li ng-if="activity.location">Location: {{activity.location}}</li>
                                             </ul>
+                                            <div class="lv-actions actions">
+                                                <button tooltip="Remove" ng-click="vm.confirmRemove(activity)" class="btn btn-warning btn-icon"><i class="md md-close"></i></button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
