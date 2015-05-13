@@ -24,8 +24,8 @@
             jasDialogs.ruSure("Do you want to remove this activity?", function() {
                 $rootScope.$apply(function () {
                     vm.selection.splice(vm.selection.indexOf(activity), 1);
-                })
-            })
+                });
+            });
         }
 
         function isFullyBooked(activity) {
