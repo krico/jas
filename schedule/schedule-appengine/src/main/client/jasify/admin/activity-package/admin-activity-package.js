@@ -200,7 +200,7 @@
                 vm.selectedActivities = [];
             }
             if (organization.id) {
-                Activity.query({organizationId: organization.id}).then(ok, failed);
+                Activity.query({organizationId: organization.id, fromDate: new Date().toISOString()}).then(ok, failed);
             }
 
             function ok(resp) {
