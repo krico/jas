@@ -35,6 +35,7 @@ gulp.task('sym', ['build'], sym);
 gulp.task('bower-install', bowerInstall);
 
 gulp.task('client-dependencies-css', ['bower-install'], clientDependenciesCssFun('main'));
+gulp.task('client-dependencies-booking', ['bower-install'], clientDependenciesCssFun('booking'));
 
 gulp.task('client-dependencies-js-boot', ['bower-install'], clientDependenciesJsFun('boot'));
 gulp.task('client-dependencies-js-main', ['bower-install'], clientDependenciesJsFun('main'));
@@ -51,7 +52,7 @@ gulp.task('client-dependencies-js',
     ]
 );
 
-gulp.task('client-dependencies', ['client-dependencies-js', 'client-dependencies-css']);
+gulp.task('client-dependencies', ['client-dependencies-js', 'client-dependencies-css', 'client-dependencies-booking']);
 
 gulp.task('client-tpl', clientTpl);
 gulp.task('client-js', clientJs);

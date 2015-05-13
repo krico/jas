@@ -87,6 +87,9 @@
         "bootstrap/dist/css/bootstrap.css",
         "jquery-bootgrid/dist/jquery.bootgrid.css",
         "bootstrap-sweetalert/lib/sweet-alert.css"
+      ],
+      "booking": [
+        "bootstrap-sweetalert/lib/sweet-alert.css"
       ]
     }
   },
