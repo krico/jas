@@ -1,24 +1,22 @@
 <script type="text/ng-template" id="checkoutButton.html">
-    <div class="col-md-2 col-md-offset-7">
-        <button ng-if="vm.paymentType == 'PayPal'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
-                ng-click="vm.createPayment()"
-                class="btn btn-primary btn-block">
-            Continue to PayPal
-        </button>
-        <button ng-if="vm.paymentType == 'Cash'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
-                ng-click="vm.createPayment()"
-                class="btn btn-primary btn-block">
-            Continue and pay later
-        </button>
-    </div>
+    <button ng-if="vm.paymentType == 'PayPal'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
+            ng-click="vm.createPayment()"
+            class="btn btn-primary grow-on-small pull-right">
+        Continue to PayPal
+    </button>
+    <button ng-if="vm.paymentType == 'Cash'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
+            ng-click="vm.createPayment()"
+            class="btn btn-primary grow-on-small pull-right">
+        Continue and pay later
+    </button>
 </script>
 <div class="row">
     <div class="col-sm-6 col-sm-offset-3">
         <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
-    <ng-include src="'checkoutButton.html'"></ng-include>
     <div class="col-md-6 col-md-offset-3">
         <span ng-show="vm.inProgress || vm.redirecting" us-spinner="{radius:30, width:8, length: 16}"></span>
+        <ng-include src="'checkoutButton.html'"></ng-include>
         <table class="table checkout-table">
             <thead>
             <tr class="checkout-title">
@@ -112,11 +110,15 @@
                             <td align="center"></td>
                         </tr>
                         <tr>
-                            <td align="center"><a href="https://www.paypal.com/uk/webapps/mpp/paypal-popup"
-                                                  title="How PayPal Works"
-                                                  onclick="javascript:window.open('https://www.paypal.com/uk/webapps/mpp/paypal-popup','WIPaypal','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700'); return false;"><img
-                                    src="https://www.paypalobjects.com/webstatic/mktg/Logo/AM_mc_vs_ms_ae_UK.png"
-                                    border="0" alt="PayPal Acceptance Mark"></a></td>
+                            <td align="center">
+                                <a href="https://www.paypal.com/uk/webapps/mpp/paypal-popup"
+                                   title="How PayPal Works"
+                                   onclick="javascript:window.open('https://www.paypal.com/uk/webapps/mpp/paypal-popup','WIPaypal','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700'); return false;">
+                                    <img class="paypal-logo" src="https://www.paypalobjects.com/webstatic/mktg/Logo/AM_mc_vs_ms_ae_UK.png"
+                                         border="0"
+                                         alt="PayPal Acceptance Mark">
+                                </a>
+                            </td>
                         </tr>
                     </table>
                     <!-- PayPal Logo -->
@@ -124,6 +126,6 @@
             </tr>
             </thead>
         </table>
+        <ng-include src="'checkoutButton.html'"></ng-include>
     </div>
-    <ng-include src="'checkoutButton.html'"></ng-include>
 </div>
