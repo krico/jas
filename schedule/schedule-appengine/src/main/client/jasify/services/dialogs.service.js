@@ -42,7 +42,6 @@
                         confirmButtonText: "Yes",
                         closeOnConfirm: true
                     }, function () {
-
                         onConfirm();
                     });
                 }

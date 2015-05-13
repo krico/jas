@@ -17,7 +17,7 @@
             }
 
             if (currentOrganizationId === queryParams.organizationId) {
-                log("Skipping rendering booking-via-jasifytml");
+                log("Skipping rendering booking-via-jasify");
                 return;
             }
 
