@@ -2,6 +2,8 @@
 
     "use strict";
 
+    var currentOrganizationId
+
     function createBookingViaJasify() {
 
         try {
@@ -14,6 +16,13 @@
                 queryParams[param[0]] = param[1];
             }
 
+            if (currentOrganizationId === queryParams.organizationId) {
+                log("Skipping rendering booking-via-jasifytml");
+                return;
+            }
+
+            currentOrganizationId = queryParams.organizationId;
+
             var ifrm = document.createElement("IFRAME");
             ifrm.setAttribute("src", "booking-via-jasify.html#/" + queryParams.organizationId);
             ifrm.setAttribute("frameBorder", "0");
@@ -22,13 +31,19 @@
 
             var placeholder = document.getElementById('booking-via-jasify');
             if (placeholder) {
+                placeholder.innerHTML = "";
                 placeholder.appendChild(ifrm);
+                log("Rendering booking-via-jasify");
             }
         }
         catch(error) {
-            if(console && console.log) {
-                console.log(error);
-            }
+            log(error);
+        }
+    }
+
+    function log(message) {
+        if (console && console.log) {
+            console.log(message);
         }
     }
 
