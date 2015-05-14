@@ -75,7 +75,7 @@ public class UserEndpoint {
                                 @Nullable @Named("field") String field,
                                 @Nullable @Named("orderBy") String orderBy,
                                 @Nullable @Named("order") Query.SortDirection order) throws UnauthorizedException, ForbiddenException {
-        mustBeAdmin(caller);
+        mustBeAdminOrOrgMember(caller); // TODO: Once we have a clean way to get organization clients this should be changed to mustBeOrgAdmin(callser);
         JasUserList users = new JasUserList();
 
         if (offset == null) offset = 0;

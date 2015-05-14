@@ -70,6 +70,14 @@
             </div>
         </div>
     </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="infos col-sm-6">Subscriptions: {{vm.activity.subscriptionCount}} of {{vm.activity.maxSubscriptions}}
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="table-responsive">
         <table id="users-list" class="table-vmiddle table table-striped table-hover">
             <thead>
@@ -81,7 +89,7 @@
             <tbody>
             <tr ng-repeat="user in vm.users track by user.id">
                 <th>
-                    <button title="Add User" class="btn bgm-teal btn-icon" ng-disabled="vm.isSubscribed(user)" ng-click="vm.subscribe(user)"><i class="md mdi mdi-person-add"></i></button>
+                    <button title="Add User" class="btn bgm-teal btn-icon" ng-disabled="vm.activity.subscriptionCount >= vm.activity.maxSubscriptions || vm.isSubscribed(user)" ng-click="vm.subscribe(user)"><i class="md mdi mdi-person-add"></i></button>
                 </th>
                 <td>{{user.name}}</td>
             </tr>

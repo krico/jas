@@ -109,6 +109,7 @@
 
             function ok(r) {
                 vm.subscribedUsers[user.id] = true;
+                vm.activity.subscriptionCount = vm.activity.subscriptionCount + 1;
             }
 
             function fail(r) {

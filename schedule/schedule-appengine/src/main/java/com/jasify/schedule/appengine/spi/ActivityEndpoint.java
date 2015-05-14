@@ -256,7 +256,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.add", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.POST)
     public Subscription addSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
-        mustBeSameUserOrAdmin(caller, userId);
+        mustBeSameUserOrAdminOrOrgMember(caller, userId, createFromActivityId(activityId));
         try {
             return ActivityServiceFactory.getActivityService().subscribe(userId, activityId);
         } catch (EntityNotFoundException e) {
