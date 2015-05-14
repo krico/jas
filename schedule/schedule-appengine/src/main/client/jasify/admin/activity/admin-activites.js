@@ -16,6 +16,7 @@
         vm.viewActivity = viewActivity;
         vm.viewOrganization = viewOrganization;
         vm.viewSubscribers = viewSubscribers;
+        vm.addSubscriber = addSubscriber;
         vm.addActivity = addActivity;
         vm.remove = remove;
 
@@ -59,6 +60,10 @@
 
         function viewSubscribers(id) {
             $location.path('/admin/activities/' + id + '/subscribers');
+        }
+
+        function addSubscriber(id) {
+            $location.path('/admin/activities/' + id + '/subscribe');
         }
 
         function remove(id) {
