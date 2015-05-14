@@ -5,7 +5,7 @@ function WelcomePage(path) {
     BasePage.call(this);
     this.path = path || '/#/';
     this.welcomeText = element.all(by.binding('currentUser.name')).first();
-    this.logoutButton = element.all(by.linkText('Log out')).first();
+    this.logoutButton = element.all(by.linkText('Sign out')).first();
 }
 
 util.inherits(WelcomePage, BasePage);
