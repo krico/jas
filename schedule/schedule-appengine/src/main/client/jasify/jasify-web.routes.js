@@ -35,7 +35,17 @@
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.all();
-                    }
+                    },
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.adminOrOrgMember().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    },
                 }
             })
             .when('/logout', {

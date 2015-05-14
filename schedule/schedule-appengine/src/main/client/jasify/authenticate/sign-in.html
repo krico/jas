@@ -20,7 +20,6 @@
                 <input id="email" name="email" ng-model="vm.user.email" required class="form-control fg-input" />
             </div>
             <label class="fg-label">Email or Username</label>
-            <jas-feedback-icon-valid field="vm.authenticateForm.email"></jas-feedback-icon-valid>
             <jas-feedback-icon-invalid field="vm.authenticateForm.email" form="vm.authenticateForm"></jas-feedback-icon-invalid>
             <jas-error-help-block field="vm.authenticateForm.email" form="vm.authenticateForm">
                 <span ng-message="required">Email or Username is required</span>
@@ -31,7 +30,6 @@
                 <input id="password" name="password" ng-model="vm.user.password" required class="form-control fg-input" type="password" />
             </div>
             <label class="fg-label">Password</label>
-            <jas-feedback-icon-valid field="vm.authenticateForm.password"></jas-feedback-icon-valid>
             <jas-feedback-icon-invalid field="vm.authenticateForm.password" form="vm.authenticateForm"></jas-feedback-icon-invalid>
             <jas-error-help-block field="vm.authenticateForm.password" form="vm.authenticateForm">
                 <span ng-message="required">Password is required</span>

@@ -1,3 +1,4 @@
+
 <div class="card">
     <div class="card-header">
         <h2>Profile Settings
@@ -7,7 +8,7 @@
         </h2>
     </div>
     <div class="card-body card-padding">
-        <div class="alert alert-success" role="alert" ng-if="vm.isWelcome || true">TODO: Welcome message</div>
+        <div class="alert alert-success" role="alert" ng-if="vm.isWelcome">{{vm.isWelcome}}</div>
         <ul class="tab-nav" role="tablist">
             <li class="active">
                 <a prevent="click" href="#profile-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
@@ -45,7 +46,7 @@
                     </div>
                     <div class="actions-group">
                         <a-button type="submit" controller="vm.saveBtn" ></a-button>
-                        <a-button type="reset" controller="vm.resetBtn" ng-click="vm.reset()"></a-button>
+                        <button type="button" btn-href="/" class="btn btn-default waves-effect">Cancel</button>
                     </div>
                 </form>
             </div>

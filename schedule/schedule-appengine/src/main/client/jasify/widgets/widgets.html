@@ -1,31 +1,57 @@
 <div class="card">
-    <div class="card-header ch-alt">
-        <h2>Booking via Jasify widget <small>To embed it, use this code snippet (<strong>replace ORGANIZATION_ID with real organization id)</strong>:
-            <pre><code>
+    <div class="card-header">
+        <h2>Booking via Jasify widget <small>To embed it, select organization & use generated code snippet.</small>
+        </h2>
+    </div>
+    <div class="card-body card-padding-sm">
+        <div class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="organization" class="col-sm-offset-2 col-sm-4 control-label">Widget for the organization:</label>
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <div ng-if="vm.organizations.length > 1" class="select">
+                            <select id="organization" class="form-control"
+                                    ng-model="vm.organization"
+                                    ng-options="organization as organization.name for organization in vm.organizations"
+                                    ng-change="vm.organizationSelected(vm.organization)">
+                            </select>
+                        </div>
+                        <p ng-if="vm.organizations.length === 1" class="form-control-static">{{vm.organizations[0].name}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+<pre><code>
 &lt;!-- Container for widget --&gt;
 &lt;div id=&quot;booking-via-jasify&gt;&lt;/div&gt;
 &lt;!-- Creator script initializer (it registers window.createBookingViaJasify function) --&gt;
-&lt;script id=&quot;booking-with-jasify-script&quot; src=&quot;booking-via-jasify.js?organizationId=ORGANIZATION_ID&quot;&gt;&lt;/script&gt;
+&lt;script id=&quot;booking-with-jasify-script&quot; src=&quot;https://jasify-schedule.appspot.com/booking-via-jasify.js?organizationId={{vm.organization.id || 'ORGANIZATION_ID'}}&quot;&gt;&lt;/script&gt;
 &lt;!-- Library for resizing iframe to fit content --&gt;
-&lt;script src=&quot;build/js/dep-iframeresizer.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://jasify-schedule.appspot.com/build/js/dep-iframeresizer.js&quot;&gt;&lt;/script&gt;
 &lt;!-- Script that creates widget. It must be executed when #booking-via-jasify element is present on the page --&gt;
 &lt;script&gt;
-window.createBookingViaJasify();
-iFrameResize();
-&lt;/script&gt;
-            </code></pre></small>
-        </h2>
-    </div>
-
-<!-- Container for widget -->
-<div id="booking-via-jasify" class="card-body card-padding"></div>
-<!-- Creator script initializer (it registers window.createBookingViaJasify function) -->
-<script id="booking-with-jasify-script" src="booking-via-jasify.js?organizationId=O53"></script>
-<!-- Library for resizing iframe to fit content -->
-<script src="build/js/dep-iframeresizer.js"></script>
-<!-- Script that creates widget. It must be executed when #booking-via-jasify element is present on the page -->
-<script>
     window.createBookingViaJasify();
     iFrameResize();
-</script>
+&lt;/script&gt;
+</code></pre>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <!-- Container for widget -->
+    <div id="booking-via-jasify" class="card-body card-padding-sm"></div>
+    <!-- Creator script initializer (it registers window.createBookingViaJasify function) -->
+    <!--<script id="booking-with-jasify-script" src="{{vm.scriptUrl()}}"></script>-->
+    <!-- Library for resizing iframe to fit content -->
+    <script src="build/js/dep-iframeresizer.js"></script>
+    <!-- Script that creates widget. It must be executed when #booking-via-jasify element is present on the page -->
+    <script>
+        setInterval(function() {
+            if (window.createBookingViaJasify) {
+                window.createBookingViaJasify();
+                window.iFrameResize();
+            }
+        }, 2000);
+    </script>
 </div>
