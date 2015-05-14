@@ -24,10 +24,17 @@ var argv = require('yargs').argv,
     karma = require('gulp-karma'),
     gulpif = require('gulp-if'),
     templateCache = require('gulp-angular-templatecache'),
-    plumber = require('gulp-plumber');
+    plumber = require('gulp-plumber'),
+    plug = require('gulp-load-plugins')(),
+    runSequence = require('run-sequence');
 
 var bowerInstalled = false;
 var paths = require('./dynamic-paths.js');
+
+paths.cssBuild = paths.build + '/css/';
+paths.jsBuild = paths.build + '/js/';
+paths.appRoot = paths.build + '/../';
+
 gutil.log('Project version: ' + gutil.colors.cyan(paths.projectVersion));
 
 gulp.task('clean', clean);
@@ -71,13 +78,26 @@ gulp.task('images', images);
 gulp.task('test', ['build'], testClient);
 gulp.task('watch', rebuild);
 gulp.task('custom-js', customJs);
+
+/**
+ * Cache busting & revision tasks
+ * */
+gulp.task('jsRev', jsRev);
+gulp.task('cssRev', cssRev);
+gulp.task('jsRevReplace', ['jsRev'], jsRevReplace);
+gulp.task('cssRevReplace', ['cssRev'], cssRevReplace);
+gulp.task('rev', ['jsRevReplace', 'cssRevReplace']);
+
 gulp.task('build', ['client', 'html', 'static-html', 'images', 'custom-js']);
+gulp.task('build-prod', function(callback) {
+   runSequence('clean', 'build', 'rev', callback);
+});
 gulp.task('default', ['watch', 'build', 'lint']);
 
 function customJs() {
     return gulp
         .src(paths.customJs)
-        .pipe(gulp.dest(paths.build + '/../'))
+        .pipe(gulp.dest(paths.appRoot))
 }
 
 function rebuild() {
@@ -93,7 +113,6 @@ function rebuild() {
     gulp.watch(paths.staticHtml, ['static-html']);
     gulp.watch(paths.images, ['images']);
 }
-
 
 function clean(cb) {
     del([paths.build, paths.symBuild], cb);
@@ -128,14 +147,13 @@ function clientTpl(cb) {
             footer: '})(angular);'
         }))
         .pipe(sourcemaps.init())
-        .pipe(gulp.dest(paths.build + '/js'))
+        .pipe(gulp.dest(paths.jsBuild))
         .pipe(ngAnnotate())
         .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(paths.build + '/js'));
+        .pipe(gulp.dest(paths.jsBuild));
 }
-
 
 function clientJs(cb) {
     var versionInfo = {number: 'unknown', branch: 'none', timestamp: new Date().getTime(), version: '0.0-DEV'};
@@ -161,11 +179,11 @@ function clientJs(cb) {
         .pipe(replace('@TIMESTAMP@', versionInfo.timestamp))
         .pipe(replace('@VERSION@', versionInfo.version))
         .pipe(concat('jasify.js'))
-        .pipe(gulp.dest(paths.build + '/js'))
+        .pipe(gulp.dest(paths.jsBuild))
         .pipe(uglify())
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(paths.build + '/js'));
+        .pipe(gulp.dest(paths.jsBuild));
 }
 
 function clientDependenciesJsFun(key) {
@@ -179,11 +197,11 @@ function clientDependenciesJsFun(key) {
             .pipe(ngAnnotate())
             .pipe(sourcemaps.init())
             .pipe(concat('dep-' + key + '.js'))
-            .pipe(gulp.dest(paths.build + '/js'))
+            .pipe(gulp.dest(paths.jsBuild))
             .pipe(uglify())
             .pipe(rename({extname: '.min.js'}))
             .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest(paths.build + '/js'));
+            .pipe(gulp.dest(paths.jsBuild));
     };
 }
 
@@ -209,11 +227,11 @@ function clientCss(cb) {
             ]
         }))
         .pipe(concat('jasify.css'))
-        .pipe(gulp.dest(paths.build + '/css'));
-        //.pipe(minifyCSS())
-        //.pipe(rename({extname: '.min.css'}))
+        .pipe(gulp.dest(paths.cssBuild))
+        .pipe(minifyCSS())
+        .pipe(rename({extname: '.min.css'}))
         //.pipe(sourcemaps.write('./'))
-        //.pipe(gulp.dest(paths.build + '/css'));
+        .pipe(gulp.dest(paths.cssBuild));
 }
 
 function bookingCss(cb) {
@@ -226,11 +244,11 @@ function bookingCss(cb) {
             ]
         }))
         .pipe(concat('booking.css'))
-        .pipe(gulp.dest(paths.build + '/css'));
-        //.pipe(minifyCSS())
-        //.pipe(rename({extname: '.min.css'}))
+        .pipe(gulp.dest(paths.cssBuild))
+        .pipe(minifyCSS())
+        .pipe(rename({extname: '.min.css'}))
         //.pipe(sourcemaps.write('./'))
-        //.pipe(gulp.dest(paths.build + '/css'));
+        .pipe(gulp.dest(paths.cssBuild));
 }
 
 function clientDependenciesCssFun(key) {
@@ -251,25 +269,60 @@ function clientDependenciesCssFun(key) {
 
         return gulp.src(src)
             .pipe(concat('dep-' + key + '.css'))
-            .pipe(gulp.dest(paths.build + '/css'))
+            .pipe(gulp.dest(paths.cssBuild))
             .pipe(minifyCSS())
             .pipe(rename({extname: '.min.css'}))
-            .pipe(gulp.dest(paths.build + '/css'));
+            .pipe(gulp.dest(paths.cssBuild));
     };
 }
 
+function jsRev() {
+    return gulp.src(paths.jsBuild + '*.js')
+        .pipe(plug.rev())
+        .pipe(gulp.dest(paths.jsBuild))
+        .pipe(plug.rev.manifest())
+        .pipe(gulp.dest(paths.jsBuild))
+}
+
+function cssRev() {
+    return gulp.src(paths.cssBuild + '*.css')
+        .pipe(plug.rev())
+        .pipe(gulp.dest(paths.cssBuild))
+        .pipe(plug.rev.manifest())
+        .pipe(gulp.dest(paths.cssBuild))
+}
+
+function jsRevReplace() {
+
+    var manifest = gulp.src(paths.jsBuild + 'rev-manifest.json'),
+        htmlFiles = paths.appRoot + '*.html';
+
+    return gulp.src(htmlFiles)
+        .pipe(plug.revReplace({manifest: manifest}))
+        .pipe(gulp.dest(paths.appRoot));
+}
+
+function cssRevReplace() {
+
+    var manifest = gulp.src(paths.cssBuild + 'rev-manifest.json'),
+        htmlFiles = paths.appRoot + '*.html';
+
+    return gulp.src(htmlFiles)
+        .pipe(plug.revReplace({manifest: manifest}))
+        .pipe(gulp.dest(paths.appRoot));
+}
 
 function html(cb) {
     return gulp.src(paths.html)
         .pipe(plumber())
         //.pipe(htmlmin({collapseWhitespace: true, minifyJS: true}))
-        .pipe(gulp.dest(paths.build + '/../'))
+        .pipe(gulp.dest(paths.appRoot))
 }
 
 function staticHtml(cb) {
     return gulp.src(paths.staticHtml)
         .pipe(plumber())
-        .pipe(gulp.dest(paths.build + '/../'))
+        .pipe(gulp.dest(paths.appRoot))
 }
 
 function images(cb) {

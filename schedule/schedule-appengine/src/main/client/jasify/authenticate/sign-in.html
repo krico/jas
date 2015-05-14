@@ -17,7 +17,7 @@
           name="vm.authenticateForm" ng-submit="vm.authenticateForm.$valid && vm.signIn($close)">
         <div jas-has-feedback class="form-group fg-float">
             <div class="fg-line">
-                <input id="email" name="email" ng-model="vm.user.email" required class="form-control fg-input" />
+                <input id="email" autofocus name="email" ng-model="vm.user.email" required class="form-control fg-input" />
             </div>
             <label class="fg-label">Email or Username</label>
             <jas-feedback-icon-invalid field="vm.authenticateForm.email" form="vm.authenticateForm"></jas-feedback-icon-invalid>

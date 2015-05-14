@@ -11,7 +11,7 @@
 
     var jasifyDirectivesFormModule = angular.module('jasifyComponents');
 
-    jasifyDirectivesFormModule.run(function() {
+    jasifyDirectivesFormModule.run(function () {
 
         $('body').on('focus', '.form-control', function () {
             $(this).closest('.fg-line').addClass('fg-toggled');
@@ -34,27 +34,27 @@
 
     });
 
-    jasifyDirectivesFormModule.directive( 'btnHref', function ( $location ) {
-        return function ( scope, element, attrs ) {
+    jasifyDirectivesFormModule.directive('btnHref', function ($location) {
+        return function (scope, element, attrs) {
             var path;
 
-            attrs.$observe( 'btnHref', function (val) {
+            attrs.$observe('btnHref', function (val) {
                 path = val;
             });
 
-            element.bind( 'click', function () {
-                scope.$apply( function () {
-                    $location.path( path );
+            element.bind('click', function () {
+                scope.$apply(function () {
+                    $location.path(path);
                 });
             });
         };
     });
 
-    jasifyDirectivesFormModule.directive('wizardTrigger', function() {
+    jasifyDirectivesFormModule.directive('wizardTrigger', function () {
         return {
             restrict: 'A',
             link: function (scope, elem, attrs) {
-                elem.on('click', function() {
+                elem.on('click', function () {
                     var tabName = attrs.wizardTrigger;
                     $('[href="' + tabName + '"]').click();
                 });
@@ -203,6 +203,17 @@
             template: '<span class="form-control-feedback" ng-show="field.$pending"><span us-spinner="{lines:9, length:5, width:2, radius:3, trail: 40}"></span></span>'
         };
     });
+
+    jasifyDirectivesFormModule.directive('autofocus', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function ($scope, $element) {
+                $timeout(function () {
+                    $element[0].focus();
+                });
+            }
+        }
+    }]);
 
 }(angular, jQuery));
 
