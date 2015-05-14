@@ -35,7 +35,7 @@
                 <th>location</th>
                 <th>start</th>
                 <th>finish</th>
-                <th>subscriptions</th>
+                <th>subscriptions
                 <th>price</th>
                 <th></th>
             </tr>
@@ -57,6 +57,11 @@
                     <button type="button" class="btn btn-link btn-xs" ng-show="activity.subscriptionCount > 0"
                             ng-click="vm.viewSubscribers(activity.id)">
                         <span class="glyphicon glyphicon-user" tooltip="Subscribers"></span>
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-link btn-xs" ng-disabled="activity.subscriptionCount == activity.maxSubscriptions" ng-click="vm.addSubscriber(activity.id)"><span
+                            class="glyphicon glyphicon-plus" tooltip="Add Subscriber"></span>
                     </button>
                 </td>
                 <td>
