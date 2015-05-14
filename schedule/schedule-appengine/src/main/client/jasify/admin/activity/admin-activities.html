@@ -60,6 +60,11 @@
                     </button>
                 </td>
                 <td>
+                    <button type="button" class="btn btn-link btn-xs" ng-disabled="activity.subscriptionCount == activity.maxSubscriptions" ng-click="vm.addSubscriber(activity.id)"><span
+                            class="glyphicon glyphicon-plus" tooltip="Add Subscriber"></span>
+                    </button>
+                </td>
+                <td>
                     <button type="button" class="btn btn-danger btn-xs" ng-disabled="activity.subscriptionCount > 0" ng-click="vm.remove(activity.id)"><span
                             class="glyphicon glyphicon-remove" tooltip="Delete"></span>
                     </button>

@@ -190,6 +190,45 @@
                     }
                 }
             })
+            .when('/admin/activities/:activityId/subscribe', {
+                templateUrl: 'admin/activity/admin-subscribe.html',
+                controller: 'AdminSubscribeController',
+                controllerAs: 'vm',
+                resolve: {
+                    activity: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.activityId) {
+                                return Activity.get($route.current.params.activityId);
+                            } else {
+                                return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    },
+                    subscriptions: /*@ngInject*/ function ($q, $route, Allow, Activity) {
+
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.activityId) {
+                                return Activity.getSubscribers($route.current.params.activityId);
+                            } else {
+                                return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
             .when('/admin/balances/:accountId?', {
                 templateUrl: 'admin/balance/admin-balances.html',
                 controller: 'AdminBalancesController',
