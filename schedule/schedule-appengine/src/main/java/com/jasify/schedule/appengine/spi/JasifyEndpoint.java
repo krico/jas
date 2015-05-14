@@ -122,6 +122,17 @@ public class JasifyEndpoint {
         throw new ForbiddenException("Must be admin");
     }
 
+    /*
+        This is a temporary class until we have a clean way to get clients of an organization
+     */
+    @Deprecated
+    static JasifyEndpointUser mustBeAdminOrOrgMember(User caller) throws ForbiddenException, UnauthorizedException {
+        JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
+        if (jasifyEndpointUser.isAdmin()) return jasifyEndpointUser;
+        if (jasifyEndpointUser.isOrgMember()) return jasifyEndpointUser;
+        throw new ForbiddenException("Must be admin");
+    }
+
     static JasifyEndpointUser mustBeAdminOrOrgMember(User caller, OrgMemberChecker orgMemberChecker) throws ForbiddenException, UnauthorizedException, NotFoundException {
         JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
         if (jasifyEndpointUser.isAdmin()) return jasifyEndpointUser;

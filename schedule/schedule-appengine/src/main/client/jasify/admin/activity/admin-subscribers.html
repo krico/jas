@@ -9,13 +9,13 @@
             <thead>
             <tr>
                 <th>Created</th>
-                <th>Real Name</th>
+                <th>Name</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="subscription in vm.subscriptions">
                 <td>{{subscription.user.created | date:'yyyy-MM-dd HH:mm'}}</td>
-                <td>{{subscription.user.realName}}</td>
+                <td>{{subscription.user.name}}</td>
                 <td>
                     <a ng-href="mailto:{{subscription.user.email}}" target="_top"><span class="glyphicon glyphicon-envelope"></span></a>
                 </td>

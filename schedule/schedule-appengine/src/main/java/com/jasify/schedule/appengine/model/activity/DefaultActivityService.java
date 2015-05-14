@@ -467,6 +467,7 @@ class DefaultActivityService implements ActivityService {
     @Override
     public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException, OperationException {
         Subscription subscription = subscribe(user.getId(), activity.getId());
+        // Add +1 to subscriptionCount to keep the passed in object in sync with what we just did
         activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
         return subscription;
     }
@@ -474,8 +475,8 @@ class DefaultActivityService implements ActivityService {
     @Nonnull
     @Override
     public Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, UniqueConstraintException, OperationException {
-        User dbUser = getUser(userId);
-        Activity dbActivity = getActivity(activityId);
+        final User dbUser = getUser(userId);
+        final Activity dbActivity = getActivity(activityId);
 
         List<Subscription> existingSubscriptions = dbActivity.getSubscriptionListRef().getModelList();
         for (Subscription subscription : existingSubscriptions) {
@@ -488,19 +489,29 @@ class DefaultActivityService implements ActivityService {
             throw new OperationException("Activity fully subscribed");
         }
 
-        Subscription subscription = new Subscription();
+        try {
+            return TransactionOperator.execute(new ModelOperation<Subscription>() {
+                @Override
+                public Subscription execute(Transaction tx) throws ModelException {
+                    Subscription subscription = new Subscription();
 
-        subscription.setId(Datastore.allocateId(dbUser.getId(), subscriptionMeta));
-        subscription.getActivityRef().setKey(dbActivity.getId());
-        subscription.getUserRef().setKey(dbUser.getId());
+                    subscription.setId(Datastore.allocateId(dbUser.getId(), subscriptionMeta));
+                    subscription.getActivityRef().setKey(dbActivity.getId());
+                    subscription.getUserRef().setKey(dbUser.getId());
 
-        //TODO: put this in a transaction
-        dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() + 1);
+                    dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() + 1);
 
-        Datastore.put(dbActivity);
-        Datastore.put(subscription);
+                    Datastore.put(tx, dbActivity);
+                    Datastore.put(tx, subscription);
 
-        return subscription;
+                    // TODO Add this user to the organizations client list
+                    tx.commit();
+                    return subscription;
+                }
+            });
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
     }
 
     @Override
@@ -568,6 +579,7 @@ class DefaultActivityService implements ActivityService {
                         Datastore.put(tx, activity, subscription);
                     }
 
+                    // TODO Add this user to the organizations client list
                     tx.commit();
                     return execution;
                 }
