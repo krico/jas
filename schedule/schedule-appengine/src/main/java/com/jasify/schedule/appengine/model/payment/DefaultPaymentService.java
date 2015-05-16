@@ -161,7 +161,6 @@ class DefaultPaymentService implements PaymentService {
         }
 
         transitionWorkflowList(payment);
-
     }
 
     @Override
@@ -186,7 +185,11 @@ class DefaultPaymentService implements PaymentService {
             dbPayment.setState(PaymentStateEnum.Canceled);
             Datastore.put(tx, dbPayment);
             tx.commit();
-
+            /*
+             Must also update the payment object. It is forwarded to transitionWorkflowList call and
+             our current model always reflects the current state in the passed in object
+             */
+            payment.setState(PaymentStateEnum.Canceled);
             log.info("Payment canceled id={}", dbPayment.getId());
         } finally {
             if (tx.isActive()) {

@@ -47,7 +47,9 @@ public class ActivityServiceTest {
     private ActivityType activityType2OfOrganization1;
     private Activity activity1Organization1;
     private Activity activity2Organization1;
-    private ActivityPackage activityPackage;
+    private ActivityPackage activityPackage10Organization;
+    private ActivityPackageExecution activityPackageExecution10Organization;
+  //  private ActivityPackage activityPackage;
     private ActivityPackageExecution activityPackageExecution;
 
     private Activity createActivity(ActivityType activityType) {
@@ -57,6 +59,24 @@ public class ActivityServiceTest {
         activity.setStart(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate());
         activity.setFinish(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate());
         return activity;
+    }
+
+    private ActivityPackage createActivityPackage(Organization organization) {
+        ActivityPackage activityPackage = new ActivityPackage();
+        activityPackage.getOrganizationRef().setKey(organization.getId());
+        activityPackage.setDescription("New Desc");
+        DateTime date = new DateTime();
+        activityPackage.setCreated(date.toDate());
+        activityPackage.setModified(date.toDate());
+        activityPackage.setItemCount(1);
+        activityPackage.setPrice(999d);
+        activityPackage.setExecutionCount(0);
+        activityPackage.setName("New Name");
+        activityPackage.setCurrency("BRL");
+        activityPackage.setMaxExecutions(200);
+        activityPackage.setValidFrom(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate());
+        activityPackage.setValidUntil(new DateTime(date.getYear(), date.getMonthOfYear() + 1, date.getDayOfMonth(), 10, 0, 0).toDate());
+        return activityPackage;
     }
 
     private Organization createOrganization(String name) {
@@ -116,6 +136,7 @@ public class ActivityServiceTest {
         Datastore.put(activityType1OfOrganization1, activityType2OfOrganization1);
         activity1Organization1 = createActivity(activityType1OfOrganization1);
         activity2Organization1 = createActivity(activityType2OfOrganization1);
+        activityPackage10Organization = createActivityPackage(organization1);
     }
 
     @After
@@ -956,25 +977,18 @@ public class ActivityServiceTest {
         activityService.addActivity(activity1Organization1, null);
         activityService.addActivity(activity2Organization1, null);
 
-        ActivityPackage ap = new ActivityPackage();
-        ap.getOrganizationRef().setKey(organization1.getId());
-        ap.setCurrency("USD");
-        ap.setDescription("Super package");
-        ap.setMaxExecutions(0);
-        ap.setName("Supa");
-        ap.setPrice(20d);
-        ap.setItemCount(2);
+        activityPackage10Organization.setItemCount(2);
 
-        Key id = activityService.addActivityPackage(ap, Arrays.asList(activity1Organization1, activity2Organization1));
+        Key id = activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
         assertNotNull(id);
-        activityPackage = activityService.getActivityPackage(id);
-        Set<Key> keys = activityPackage.getActivityKeys();
+        ActivityPackage ap = activityService.getActivityPackage(id);
+        Set<Key> keys = ap.getActivityKeys();
         assertNotNull(keys);
         assertEquals(2, keys.size());
         assertTrue(keys.contains(activity1Organization1.getId()));
         assertTrue(keys.contains(activity2Organization1.getId()));
 
-        List<Activity> activities = activityPackage.getActivities();
+        List<Activity> activities = ap.getActivities();
         assertNotNull(activities);
         assertEquals(2, activities.size());
 
@@ -994,71 +1008,120 @@ public class ActivityServiceTest {
     }
 
     @Test
+    public void testUpdateActivityPackage() throws Exception {
+        testCreateActivityPackage();
+        activityPackage10Organization.setDescription("New Desc");
+        DateTime dateTime = new DateTime();
+        Date created = activityPackage10Organization.getCreated();
+        activityPackage10Organization.setCreated(dateTime.plusHours(1).toDate());
+        activityPackage10Organization.setModified(new Date(555));
+        activityPackage10Organization.setItemCount(99);
+        activityPackage10Organization.setPrice(999d);
+        activityPackage10Organization.setExecutionCount(826);
+        activityPackage10Organization.setName("New Name");
+        activityPackage10Organization.setCurrency("BRL");
+        activityPackage10Organization.setMaxExecutions(200);
+        activityPackage10Organization.setValidFrom(dateTime.plusHours(2).toDate());
+        activityPackage10Organization.setValidUntil(dateTime.plusHours(3).toDate());
+        Key expectedOrgId = activityPackage10Organization.getOrganizationRef().getKey();
+        activityPackage10Organization.getOrganizationRef().setKey(null);
+
+        List<ActivityPackage> fetchedPackages = Lists.newArrayList();
+        fetchedPackages.add(activityService.updateActivityPackage(activityPackage10Organization));
+
+        long modified = System.currentTimeMillis();
+
+        fetchedPackages.add(activityService.getActivityPackage(activityPackage10Organization.getId()));
+        for (ActivityPackage fetched : fetchedPackages) {
+            assertNotNull(fetched);
+            assertEquals("New Desc", fetched.getDescription());
+            assertEquals(99, fetched.getItemCount());
+            assertEquals(999d, fetched.getPrice());
+            //achtung
+            assertEquals("Execution count should not be updated", 0, fetched.getExecutionCount());
+            assertEquals("original ap unchanged", 826, activityPackage10Organization.getExecutionCount());
+            assertEquals("New Name", fetched.getName());
+            assertEquals("BRL", fetched.getCurrency());
+            assertEquals(200, fetched.getMaxExecutions());
+            assertEquals(dateTime.plusHours(2).toDate(), fetched.getValidFrom());
+            assertEquals(dateTime.plusHours(3).toDate(), fetched.getValidUntil());
+
+            assertEquals(created, fetched.getCreated());
+            long fetchedModified = fetched.getModified().getTime();
+            assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+            assertEquals(expectedOrgId, fetched.getOrganizationRef().getKey());
+        }
+    }
+//
+//    @Test
+//    public void testUpdateActivityPackage() throws Exception {
+//        testCreateActivityPackage();
+//        Activity thirdActivity = createActivity(activityType1OfOrganization1);
+//        activityService.addActivity(thirdActivity, null);
+//        activityPackage10Organization.setCreated(new Date(activityPackage10Organization.getCreated().getTime() + 1));
+//        activityPackage10Organization.setPrice(999d);
+//        activityPackage10Organization.setItemCount(99);
+//        activityPackage10Organization.setMaxExecutions(200);
+//        activityPackage10Organization.setCurrency("NZD");
+//        activityPackage10Organization.setDescription("New Desc");
+//        activityPackage10Organization.setExecutionCount(200);
+//        activityPackage10Organization.setName("New Name");
+//        activityPackage10Organization.setValidFrom(new Date(activityPackage10Organization.getCreated().getTime() + 1));
+//        activityPackage10Organization.setValidUntil(new Date(activityPackage10Organization.getCreated().getTime() + 2));
+//        activityPackage10Organization.setMaxExecutions(200);
+//        Key expectedOrgId = activityPackage10Organization.getOrganizationRef().getKey();
+//        activityPackage10Organization.getOrganizationRef().setKey(null);
+//        activityPackage10Organization.getActivityPackageActivityListRef().clear();
+//        Set<Key> activityKeys = activityPackage10Organization.getActivityKeys();
+//        assertNotNull(activityKeys);
+//        assertEquals(2, activityKeys.size());
+//        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+//        assertTrue(activityKeys.contains(activity2Organization1.getId()));
+//
+//        ActivityPackage activityPackage = activityService.updateActivityPackage(activityPackage10Organization, Arrays.asList(thirdActivity, activity1Organization1));
+//
+//        long modified = System.currentTimeMillis();
+//        assertNotNull(activityPackage);
+//
+//        activityKeys = activityPackage.getActivityKeys();
+//        assertNotNull(activityKeys);
+//        assertEquals(2, activityKeys.size());
+//        assertTrue(activityKeys.contains(activity1Organization1.getId()));
+//        assertTrue(activityKeys.contains(thirdActivity.getId()));
+//
+//        assertNotNull(activityPackage);
+//        assertEquals("New Desc", activityPackage.getDescription());
+//        assertEquals(99, activityPackage.getItemCount());
+//        assertEquals(999d, activityPackage.getPrice());
+//        //achtung
+//        assertEquals("Execution count should not be updated", 0, activityPackage.getExecutionCount());
+//        assertEquals("original ap unchanged", 200, activityPackage10Organization.getExecutionCount());
+//        assertEquals("New Name", activityPackage.getName());
+//        assertEquals("NZD", activityPackage.getCurrency());
+//        assertEquals(200, activityPackage.getMaxExecutions());
+//        assertEquals(new Date(activityPackage10Organization.getCreated().getTime() + 1), activityPackage.getValidFrom());
+//        assertEquals(new Date(activityPackage10Organization.getCreated().getTime() + 2), activityPackage.getValidUntil());
+//
+//        assertEquals(new Date(activityPackage10Organization.getCreated().getTime() + 1).toString(), activityPackage.getCreated().toString());
+//        long fetchedModified = activityPackage.getModified().getTime();
+//        assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+//        assertEquals(expectedOrgId, activityPackage.getOrganizationRef().getKey());
+//    }
+
+    @Test
     public void testUpdateActivityPackageWithActivities() throws Exception {
         testCreateActivityPackage();
         Activity thirdActivity = createActivity(activityType1OfOrganization1);
         activityService.addActivity(thirdActivity, null);
 
-        activityPackage.setDescription("New Desc");
-        Date created = activityPackage.getCreated();
-        activityPackage.setCreated(new Date(8282123));
-        activityPackage.setModified(new Date(555));
-        activityPackage.setItemCount(99);
-        activityPackage.setPrice(999d);
-        activityPackage.setExecutionCount(826);
-        activityPackage.setName("New Name");
-        activityPackage.setCurrency("BRL");
-        activityPackage.setMaxExecutions(200);
-        activityPackage.setValidFrom(new Date(12345678));
-        activityPackage.setValidUntil(new Date(22233344));
-        Key expectedOrgId = activityPackage.getOrganizationRef().getKey();
-        activityPackage.getOrganizationRef().setKey(null);
+        ActivityPackage fetched = activityService.updateActivityPackage(activityPackage10Organization, Arrays.asList(thirdActivity));
 
-        activityPackage.getActivityPackageActivityListRef().clear();
-        Set<Key> activityKeys = activityPackage.getActivityKeys();
-        assertNotNull(activityKeys);
-        assertEquals(2, activityKeys.size());
-        assertTrue(activityKeys.contains(activity1Organization1.getId()));
-        assertTrue(activityKeys.contains(activity2Organization1.getId()));
-
-        ActivityPackage fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity, activity1Organization1));
-
-        long modified = System.currentTimeMillis();
-        assertNotNull(fetched);
-
-        activityKeys = fetched.getActivityKeys();
-        assertNotNull(activityKeys);
-        assertEquals(2, activityKeys.size());
-        assertTrue(activityKeys.contains(activity1Organization1.getId()));
-        assertTrue(activityKeys.contains(thirdActivity.getId()));
-
-        assertNotNull(fetched);
-        assertEquals("New Desc", fetched.getDescription());
-        assertEquals(99, fetched.getItemCount());
-        assertEquals(999d, fetched.getPrice());
-        //achtung
-        assertEquals("Execution count should not be updated", 0, fetched.getExecutionCount());
-        assertEquals("original ap unchanged", 826, activityPackage.getExecutionCount());
-        assertEquals("New Name", fetched.getName());
-        assertEquals("BRL", fetched.getCurrency());
-        assertEquals(200, fetched.getMaxExecutions());
-        assertEquals(new Date(12345678), fetched.getValidFrom());
-        assertEquals(new Date(22233344), fetched.getValidUntil());
-
-        assertEquals(created, fetched.getCreated());
-        long fetchedModified = fetched.getModified().getTime();
-        assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
-        assertEquals(expectedOrgId, fetched.getOrganizationRef().getKey());
-
-
-        fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity));
-
-        activityKeys = fetched.getActivityKeys();
+        Set<Key> activityKeys = fetched.getActivityKeys();
         assertNotNull(activityKeys);
         assertEquals(1, activityKeys.size());
         assertTrue(activityKeys.contains(thirdActivity.getId()));
 
-        fetched = activityService.updateActivityPackage(activityPackage, Arrays.asList(thirdActivity, activity2Organization1, activity1Organization1));
+        fetched = activityService.updateActivityPackage(activityPackage10Organization, Arrays.asList(thirdActivity, activity2Organization1, activity1Organization1));
 
         activityKeys = fetched.getActivityKeys();
         assertNotNull(activityKeys);
@@ -1074,61 +1137,16 @@ public class ActivityServiceTest {
         assertTrue(activityKeys.contains(thirdActivity.getId()));
         assertTrue(activityKeys.contains(activity1Organization1.getId()));
         assertTrue(activityKeys.contains(activity2Organization1.getId()));
-
     }
 
-    @Test
-    public void testUpdateActivityPackage() throws Exception {
-        testCreateActivityPackage();
-        activityPackage.setDescription("New Desc");
-        Date created = activityPackage.getCreated();
-        activityPackage.setCreated(new Date(8282123));
-        activityPackage.setModified(new Date(555));
-        activityPackage.setItemCount(99);
-        activityPackage.setPrice(999d);
-        activityPackage.setExecutionCount(826);
-        activityPackage.setName("New Name");
-        activityPackage.setCurrency("BRL");
-        activityPackage.setMaxExecutions(200);
-        activityPackage.setValidFrom(new Date(12345678));
-        activityPackage.setValidUntil(new Date(22233344));
-        Key expectedOrgId = activityPackage.getOrganizationRef().getKey();
-        activityPackage.getOrganizationRef().setKey(null);
-
-        List<ActivityPackage> fetchedPackages = Lists.newArrayList();
-        fetchedPackages.add(activityService.updateActivityPackage(activityPackage));
-
-        long modified = System.currentTimeMillis();
-
-        fetchedPackages.add(activityService.getActivityPackage(activityPackage.getId()));
-        for (ActivityPackage fetched : fetchedPackages) {
-            assertNotNull(fetched);
-            assertEquals("New Desc", fetched.getDescription());
-            assertEquals(99, fetched.getItemCount());
-            assertEquals(999d, fetched.getPrice());
-            //achtung
-            assertEquals("Execution count should not be updated", 0, fetched.getExecutionCount());
-            assertEquals("original ap unchanged", 826, activityPackage.getExecutionCount());
-            assertEquals("New Name", fetched.getName());
-            assertEquals("BRL", fetched.getCurrency());
-            assertEquals(200, fetched.getMaxExecutions());
-            assertEquals(new Date(12345678), fetched.getValidFrom());
-            assertEquals(new Date(22233344), fetched.getValidUntil());
-
-            assertEquals(created, fetched.getCreated());
-            long fetchedModified = fetched.getModified().getTime();
-            assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
-            assertEquals(expectedOrgId, fetched.getOrganizationRef().getKey());
-        }
-    }
 
     @Test
     public void testCreateAddAndRemoveFromActivityPackage() throws Exception {
         testCreateActivityPackage();
 
-        activityService.removeActivityFromActivityPackage(activityPackage, activity2Organization1);
+        activityService.removeActivityFromActivityPackage(activityPackage10Organization, activity2Organization1);
 
-        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        ActivityPackage activityPackage = activityService.getActivityPackage(activityPackage10Organization.getId());
         Set<Key> keys = activityPackage.getActivityKeys();
         assertEquals(1, keys.size());
         assertTrue(keys.contains(activity1Organization1.getId()));
@@ -1145,9 +1163,9 @@ public class ActivityServiceTest {
     @Test
     public void testSubscribeToActivityPackage() throws Exception {
         testCreateActivityPackage();
-        activityPackageExecution = activityService.subscribe(testUser1, activityPackage, Arrays.asList(activity2Organization1, activity1Organization1));
+        activityPackageExecution = activityService.subscribe(testUser1, activityPackage10Organization, Arrays.asList(activity2Organization1, activity1Organization1));
         assertNotNull(activityPackageExecution);
-        assertEquals(activityPackage.getId(), activityPackageExecution.getActivityPackageRef().getKey());
+        assertEquals(activityPackage10Organization.getId(), activityPackageExecution.getActivityPackageRef().getKey());
         assertEquals(testUser1.getId(), activityPackageExecution.getUserRef().getKey());
         assertNull(activityPackageExecution.getTransferRef().getKey());
         List<ActivityPackageSubscription> subscriptions = activityPackageExecution.getSubscriptionListRef().getModelList();
@@ -1167,7 +1185,7 @@ public class ActivityServiceTest {
     @Test
     public void testCancelActivityPackageExecution() throws Exception {
         testSubscribeToActivityPackage();
-        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        ActivityPackage activityPackage = activityService.getActivityPackage(activityPackage10Organization.getId());
         assertEquals(1, activityPackage.getExecutionCount());
 
         List<ActivityPackageSubscription> subscriptions = activityPackageExecution.getSubscriptionListRef().getModelList();
@@ -1197,9 +1215,9 @@ public class ActivityServiceTest {
     @Test
     public void testGetActivityPackages() throws Exception {
         testCreateActivityPackage();
-        Key ap1Org1 = activityPackage.getId();
+        Key ap1Org1 = activityPackage10Organization.getId();
         testCreateActivityPackage();
-        Key ap2Org1 = activityPackage.getId();
+        Key ap2Org1 = activityPackage10Organization.getId();
 
         ActivityPackage ap = new ActivityPackage();
         ap.getOrganizationRef().setKey(organization2.getId());
@@ -1214,9 +1232,7 @@ public class ActivityServiceTest {
         activityType.getOrganizationRef().setKey(organization2.getId());
         Datastore.put(activityType);
 
-        Activity activity = createActivity(activityType);
-        Datastore.put(activity);
-        Key ap1Org2 = activityService.addActivityPackage(ap, Arrays.asList(activity));
+        Key ap1Org2 = activityService.addActivityPackage(ap, Arrays.asList(activity2Organization1, activity1Organization1));
 
 
         //Now we do the real test work
@@ -1245,4 +1261,68 @@ public class ActivityServiceTest {
         });
         assertTrue(ids.contains(ap1Org2));
     }
+
+    @Test
+    public void testActivityWithCreateDateInPastThrows() {
+
+    }
+
+    @Test
+    public void testActivityPackageWithNoActivitiesThrows() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("ActivityPackage.activities");
+        activityPackage10Organization.setItemCount(2);
+        activityService.addActivityPackage(activityPackage10Organization, Collections.EMPTY_LIST);
+    }
+
+    @Test
+    public void testActivityPackageWithZeroItemCountThrows() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("ActivityPackage.itemCount");
+        activityPackage10Organization.setItemCount(0);
+        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
+    }
+
+    @Test
+    public void testActivityPackageWithDuplicateActivitiesThrows() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("ActivityPackage.activities");
+        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity1Organization1));
+    }
+
+    @Test
+    public void testActivityPackageLessActivitiesThanItemCountThrows() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("ActivityPackage.activities");
+        activityPackage10Organization.setItemCount(2);
+        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1));
+    }
+
+    @Test
+    public void testActivityPackageWithOneActivityThrows() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("ActivityPackage.activities");
+        activityPackage10Organization.setItemCount(1);
+        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1));
+    }
+
+//    @Test
+//    public void testActivityPackageWithValidUntilBeforeValidFromThrows() throws Exception {
+//        thrown.expect(FieldValueException.class);
+//        thrown.expectMessage("ActivityPackage.validUntil");
+//        activityPackage10Organization.setItemCount(2);
+//        DateTime datetime = new DateTime();
+//        activityPackage10Organization.setValidFrom(datetime.plusDays(2).toDate());
+//        activityPackage10Organization.setValidUntil(datetime.plusDays(1).toDate());
+//        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
+//    }
+
+//    @Test
+//    public void testActivityPackageWithValidFromInPastThrows() throws Exception {
+//        thrown.expect(FieldValueException.class);
+//        thrown.expectMessage("ActivityPackage.validFrom");
+//        activityPackage10Organization.setItemCount(2);
+//        activityPackage10Organization.setValidFrom(new Date(20));
+//        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
+//    }
 }

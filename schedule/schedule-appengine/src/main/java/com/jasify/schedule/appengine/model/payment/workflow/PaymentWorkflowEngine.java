@@ -45,6 +45,7 @@ public final class PaymentWorkflowEngine {
         log.debug("{} [{} -> {}]", workflow.getId(), oldState, newState);
 
         if (oldState == newState) {
+            log.warn("Invalid transition {} [{} -> {}]", workflow.getId(), oldState, newState);
             return workflow; //no transition
         }
 
