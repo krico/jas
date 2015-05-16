@@ -13,6 +13,7 @@ module.exports = function (config) {
             outputFile: 'target/surefire-reports/javascript-results.xml',
             suite: ''
         },
+        browserNoActivityTimeout: 30000,
         browsers: ['PhantomJS']
     });
 };
