@@ -355,7 +355,6 @@ class DefaultActivityService implements ActivityService {
             repeatEvery = 0;
         }
 
-
         repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
         activity.setRepeatDetails(repeatDetails);
 
@@ -715,6 +714,13 @@ class DefaultActivityService implements ActivityService {
     public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException {
         Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
         activities = Preconditions.checkNotNull(activities);
+
+        if (activityPackage.getItemCount() <= 0) throw new FieldValueException("ActivityPackage.itemCount");
+        if (activities.isEmpty() || activities.size() == 1 || activities.size() < activityPackage.getItemCount()) {
+            throw new FieldValueException("ActivityPackage.activities.size");
+        }
+        if (new HashSet<>(activities).size() != activities.size()) throw new FieldValueException("ActivityPackage.activities has duplicates");
+//        if (activityPackage.getValidUntil().getTime() < activityPackage.getValidFrom().getTime()) throw new FieldValueException("ActivityPackage.validUntil");
 
         activityPackage.setId(Datastore.allocateId(organizationId, activityPackageMeta));
         final List<Object> models = new ArrayList<>();

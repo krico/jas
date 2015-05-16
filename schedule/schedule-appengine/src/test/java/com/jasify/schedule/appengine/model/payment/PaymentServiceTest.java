@@ -14,6 +14,7 @@ import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.users.User;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,6 +107,16 @@ public class PaymentServiceTest {
     }
 
     @Test
+    public void testCancelPayment() throws Exception {
+        PayPalPayment payment = newPayment();
+        payment.setState(PaymentStateEnum.Created);
+        Datastore.put(payment);
+        paymentService.cancelPayment(payment);
+        assertEquals(PaymentStateEnum.Canceled, payment.getState());
+        assertEquals(PaymentStateEnum.Canceled, paymentService.getPayment(payment.getId()).getState());
+    }
+
+    @Test
     public void testCancelTaskIsQueued() throws Exception {
         PayPalPayment payment = newPayment();
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
@@ -147,7 +158,7 @@ public class PaymentServiceTest {
 
     @Test
     public void testCancelTaskIgnoresCompletedPayments() throws Exception {
-        PayPalPayment payment = newPayment();
+        final PayPalPayment payment = newPayment();
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
 
         @SuppressWarnings("unchecked")
@@ -155,7 +166,13 @@ public class PaymentServiceTest {
         mockProvider.createPayment(payment, baseUrl);
         EasyMock.expectLastCall();
         mockProvider.executePayment(payment);
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().andAnswer(new IAnswer() {
+            @Override
+            public Object answer() throws Throwable {
+                payment.setState(PaymentStateEnum.Completed);
+                return null;
+            }
+        });;
         EasyMock.replay(mockProvider);
 
         paymentService.createPayment(mockProvider, payment, baseUrl);
@@ -169,6 +186,7 @@ public class PaymentServiceTest {
         LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
         localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
 
+        // TODO: This test is incomplete because it doesnt check that PaymentServiceFactory.getPaymentService().cancelPayment(payment) is not called!
         assert(localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
     }
 
