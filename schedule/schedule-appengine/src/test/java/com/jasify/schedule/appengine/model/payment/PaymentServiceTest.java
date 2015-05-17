@@ -195,4 +195,23 @@ public class PaymentServiceTest {
         PayPalPayment payment = newPayment();
         assertNotNull(paymentService.getPayment(payment.getId()));
     }
+
+    @Test(expected = PaymentException.class)
+    public void testCreatePaymentThrowsIfPaymentNotInNewState () throws Exception {
+        PayPalPayment payment = new PayPalPayment();
+        payment.setCurrency("USD");
+        payment.setAmount(30.35);
+        payment.setState(PaymentStateEnum.Created);
+        paymentService.newPayment(Datastore.allocateId(User.class), payment, Collections.<PaymentWorkflow>emptyList());
+        GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
+
+        @SuppressWarnings("unchecked")
+        PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
+        mockProvider.createPayment(payment, baseUrl);
+        EasyMock.expectLastCall();
+        EasyMock.replay(mockProvider);
+
+        paymentService.createPayment(mockProvider, payment, baseUrl);
+    }
+
 }

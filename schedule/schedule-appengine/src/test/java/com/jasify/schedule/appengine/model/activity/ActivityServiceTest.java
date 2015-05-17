@@ -23,8 +23,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nullable;
@@ -33,8 +31,6 @@ import java.util.*;
 import static junit.framework.TestCase.*;
 
 public class ActivityServiceTest {
-    private static final Logger log = LoggerFactory.getLogger(ActivityServiceTest.class);
-
     private static final String TEST_ACTIVITY_TYPE = "Test Activity Type";
     @Rule
     public ExpectedException thrown = ExpectedException.none();

@@ -18,7 +18,7 @@
         vm.regex = false;
 
         vm.activity = activity;
-        vm.subscriptions = subscriptions;
+        vm.subscriptions = subscriptions.items;
         vm.subscribe = subscribe;
         vm.isSubscribed = isSubscribed;
         vm.back = back;
@@ -35,9 +35,10 @@
         vm.init();
 
         function init() {
-            var arrayLength = vm.subscriptions.items.length;
-            for (i = 0; i < arrayLength; i++) {
-                vm.subscribedUsers[vm.subscriptions.items[i].user.id] = true;
+            if (vm.subscriptions != null) {
+                for (i = 0; i < vm.subscriptions.length; i++) {
+                    vm.subscribedUsers[vm.subscriptions[i].user.id] = true;
+                }
             }
             vm.pageChanged();
         }
