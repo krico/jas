@@ -43,7 +43,7 @@
   "dependencies": {
     "js": {
       "boot": [
-        "html5shiv/dist/html5shiv.min.js",
+        "html5shiv/dist/html5shiv.js",
         "respond/dest/respond.min.js"
       ],
       "main": [

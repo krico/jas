@@ -196,6 +196,7 @@ function clientDependenciesJsFun(key) {
     }
     return function (cb) {
         return gulp.src(src)
+            .pipe(plug.size({showFiles: true, title: key}))
             .pipe(plumber())
             .pipe(ngAnnotate())
             .pipe(sourcemaps.init())
@@ -203,6 +204,7 @@ function clientDependenciesJsFun(key) {
             .pipe(gulp.dest(paths.jsBuild))
             .pipe(uglify())
             .pipe(rename({extname: '.min.js'}))
+            .pipe(plug.size({title: key + '.min'}))
             .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest(paths.jsBuild));
     };
