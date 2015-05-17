@@ -1,39 +1,46 @@
 <div class="container">
     <div class="form-wizard-basic fw-container">
         <ul class="tab-nav text-center">
-            <li><a prevent="click" href="#tab1" data-toggle="tab">Activities</a></li>
-            <li><a prevent="click" href="#tab2" data-toggle="tab">Checkout</a></li>
+            <li><a prevent="click" href="#activities" data-toggle="tab">Activities</a></li>
+            <li><a prevent="click" href="#activity-packages" data-toggle="tab">Activity Packages</a></li>
+            <li><a prevent="click" href="#checkout" data-toggle="tab">Checkout</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane fade" id="tab1">
+            <div class="tab-pane fade" id="activities">
                 <div class="card">
                     <div class="card-header card-header-with-icon bgm-bluegray m-b-20">
                         <h2>Activities
                             <small>Select activities you would like to join.</small>
                         </h2>
-                        <button wizard-trigger="#tab2" class="btn bgm-blue btn-float waves-effect btn-float-text">
-                            Checkout <i
+                        <button wizard-trigger="#activity-packages"
+                                class="pull-right btn bgm-blue btn-float waves-effect btn-float-text">
+                            Book Activity Packages <i
                                 class="md md-send"></i></button>
                     </div>
                     <div class="card-body card-padding-sm">
                         <div class="activity-listview listview lv-bordered lv-lg">
                             <div class="lv-body">
-                                <div ng-repeat="activity in vm.activities" class="selectable-lv-item lv-item media" ng-class="{ 'active' : vm.selection.indexOf(activity) !== -1 }">
-                                    <div ng-class="{ 'disabled': vm.isFullyBooked(activity) }" class="checkbox pull-left">
+                                <div ng-repeat="activity in vm.activities" class="selectable-lv-item lv-item media"
+                                     ng-class="{ 'active' : vm.selection.indexOf(activity) !== -1 }">
+                                    <div ng-class="{ 'disabled': vm.isFullyBooked(activity) }"
+                                         class="checkbox pull-left">
                                         <label>
-                                            <input ng-disabled="vm.isFullyBooked(activity)" type="checkbox" checklist-model="vm.selection"
+                                            <input ng-disabled="vm.isFullyBooked(activity)" type="checkbox"
+                                                   checklist-model="vm.selection"
                                                    checklist-value="activity">
                                             <i class="input-helper"></i>
                                         </label>
                                     </div>
                                     <div class="media-body">
                                         <div class="lv-title">
-                                            <span ng-show="vm.isFullyBooked(activity)" class="label label-danger m-r-10">Fully Booked</span>
+                                            <span ng-show="vm.isFullyBooked(activity)"
+                                                  class="label label-danger m-r-10">Fully Booked</span>
                                             {{activity.activityType.name}}
                                         </div>
                                         <ul class="lv-attrs">
                                             <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
-                                            <li ng-if="!vm.isFullyBooked(activity)">Places left: {{activity.maxSubscriptions - activity.subscriptionCount}}
+                                            <li ng-if="!vm.isFullyBooked(activity)">Places left:
+                                                {{activity.maxSubscriptions - activity.subscriptionCount}}
                                             </li>
                                             <li>Price: {{activity.price}} {{activity.currency}}</li>
                                             <li ng-if="activity.location">Location: {{activity.location}}</li>
@@ -45,7 +52,82 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade" id="tab2">
+            <div class="tab-pane fade" id="activity-packages">
+                <div class="card">
+                    <div class="card-header card-header-with-icon bgm-bluegray m-b-20">
+                        <h2>Activity Packages
+                            <small>Select Activities you would like to join, grouped in Activity Packages.</small>
+                        </h2>
+                        <button wizard-trigger="#checkout"
+                                class="btn bgm-blue btn-float waves-effect btn-float-text pull-right">
+                            Checkout <i
+                                class="md md-send"></i></button>
+                        <button wizard-trigger="#activities"
+                                class="btn bgm-blue btn-float waves-effect btn-float-text pull-left">
+                            <i class="md md-undo"></i> Back
+                        </button>
+                    </div>
+                    <div class="card-body card-padding-sm">
+                        <div class="activity-listview listview lv-bordered lv-lg"
+                             ng-repeat="activityPackage in vm.activityPackages">
+                            <div class="lv-header-alt">
+                                <h2 class="lvh-label">{{activityPackage.name}}</h2>
+                                <br />
+                                <h2 class="lvh-label">
+                                    <small>
+                                        Select <strong>{{activityPackage.itemCount}} of the
+                                        {{vm.activityPackageActivities[activityPackage.id].length}}</strong> activities
+                                        below.
+                                    </small>
+                                </h2>
+                                <h2 class="lvh-label"><small>Price: <strong>{{activityPackage.price}} {{activityPackage.currency}}</strong></small></h2>
+                                <h2 class="lvh-label m-r-10">
+                                <span ng-show="vm.packageSelectionIncomplete(activityPackage)"
+                                      class="label label-warning">
+                                    {{vm.activityPackageSelection[activityPackage.id].length || 0}}/{{activityPackage.itemCount}} Activities selected.</span>
+                                <span ng-show="vm.packageSelectionComplete(activityPackage)"
+                                      class="label label-info">
+                                    Package selection completed.</span>
+                                <span ng-show="vm.packageSelectionTooBig(activityPackage)"
+                                      class="label label-info">
+                                    You selected to many activities. Exactly {{activityPackage.itemCount}} activities must be selected.</span>
+                                </h2>
+                            </div>
+                            <div class="lv-body">
+                                <div ng-repeat="activity in vm.activityPackageActivities[activityPackage.id]"
+                                     class="selectable-lv-item lv-item media"
+                                     ng-class="{ 'active' : vm.activityPackageSelection[activityPackage.id] && vm.activityPackageSelection[activityPackage.id].indexOf(activity) !== -1 }">
+                                    <div ng-class="{ 'disabled': vm.disableActivityPackageActivitySelection(activity, activityPackage) }"
+                                         class="checkbox pull-left">
+                                        <label>
+                                            <input ng-disabled="vm.disableActivityPackageActivitySelection(activity, activityPackage)" type="checkbox"
+                                                   checklist-model="vm.activityPackageSelection[activityPackage.id]"
+                                                   checklist-value="activity">
+                                            <i class="input-helper"></i>
+                                        </label>
+                                    </div>
+                                    <div class="media-body">
+                                        <div class="lv-title">
+                                            <span ng-show="vm.isActivityFullyBooked(activity)"
+                                                  class="label label-danger m-r-10">Fully Booked</span>
+                                            {{activity.activityType.name}}
+                                        </div>
+                                        <ul class="lv-attrs">
+                                            <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
+                                            <li ng-if="!vm.isActivityFullyBooked(activity)">Places left:
+                                                {{activity.maxSubscriptions - activity.subscriptionCount}}
+                                            </li>
+                                            <li>Price: {{activity.price}} {{activity.currency}}</li>
+                                            <li ng-if="activity.location">Location: {{activity.location}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="checkout">
                 <div ng-if="!vm.auth.isAuthenticated()">
                     <div class="card">
                         <div class="card-body card-padding-sm card-with-icon">
@@ -86,22 +168,58 @@
                 </div>
                 <div ng-if="vm.auth.isAuthenticated()">
                     <div class="card">
-                        <div ng-show="!!vm.selection.length" class="bgm-bluegray card-header card-header-with-icon m-b-20">
-                            <h2>Selected Activities
-                                <small>Review selected activities. If everything is OK, submit it.</small>
+                        <div ng-show="!!vm.selection.length || vm.hasCompletedActivityPackages()"
+                             class="bgm-bluegray card-header card-header-with-icon m-b-20">
+                            <h2>Your Selection summary
+                                <small>Review selected activities & activity packages. If everything is OK, submit it.
+                                </small>
                             </h2>
                             <button ng-click="vm.bookIt()" class="btn bgm-blue btn-float waves-effect btn-float-text">
                                 Submit <i class="md md-shopping-cart"></i></button>
                         </div>
-                        <div ng-show="!vm.selection.length" class="bgm-amber card-header card-header-with-icon m-b-20">
-                            <h2>No Activities selected
-                                <small>You did not select any activities. Browse back to Activity list and select activities.</small>
+                        <div ng-show="!vm.selection.length && !vm.hasCompletedActivityPackages()"
+                             class="bgm-amber card-header card-header-with-icon m-b-20">
+                            <h2>No Items selected
+                                <small>You did not select any activities nor activity packages. Browse back to Activity list and select
+                                    activities.
+                                </small>
                             </h2>
-                            <button wizard-trigger="#tab1" class="btn bgm-blue btn-float waves-effect btn-float-text">
-                                <i class="md md-undo"></i> Back to Activities</button>
+                            <button wizard-trigger="#activity-packages"
+                                    class="pull-left btn bgm-blue btn-float waves-effect btn-float-text">
+                                <i class="md md-undo"></i> Back
+                            </button>
                         </div>
                         <div class="card-body card-padding-sm">
-                            <div class="activity-listview listview lv-bordered lv-lg">
+                            <div ng-show="vm.hasCompletedActivityPackages()"
+                                 class="activity-listview listview lv-bordered lv-lg">
+                                <div class="lv-header-alt">
+                                    <h2 class="lvh-label">Selected Activity Packages</h2>
+                                </div>
+                                <div class="lv-body">
+                                    <div class="lv-item media"
+                                         ng-repeat="activityPackage in vm.activityPackages | filter:vm.packageSelectionComplete">
+                                        <div class="media-body">
+                                            <div class="lv-title">
+                                                {{$index + 1}}. {{activityPackage.name}}
+                                            </div>
+                                            <ul class="lv-attrs">
+                                                <li>Activities in Package: {{activityPackage.itemCount}}</li>
+                                                <li>Price: {{activityPackage.price}} {{activityPackage.currency}}</li>
+                                            </ul>
+                                            <div class="lv-actions actions">
+                                                <button tooltip="Remove"
+                                                        ng-click="vm.confirmRemoveActivityPackage(activityPackage)"
+                                                        class="btn btn-warning btn-icon"><i class="md md-close"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="vm.selection.length" class="activity-listview listview lv-bordered lv-lg">
+                                <div class="lv-header-alt">
+                                    <h2 class="lvh-label">Selected Activities</h2>
+                                </div>
                                 <div class="lv-body">
                                     <div class="lv-item media" ng-repeat="activity in vm.selection">
                                         <div class="media-body">
@@ -110,12 +228,17 @@
                                             </div>
                                             <ul class="lv-attrs">
                                                 <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
-                                                <li ng-if="activity.maxSubscriptions < activity.subscriptionCount">Places left: {{activity.maxSubscriptions - activity.subscriptionCount}}</li>
+                                                <li ng-if="activity.maxSubscriptions < activity.subscriptionCount">
+                                                    Places left: {{activity.maxSubscriptions -
+                                                    activity.subscriptionCount}}
+                                                </li>
                                                 <li>Price: {{activity.price}} {{activity.currency}}</li>
                                                 <li ng-if="activity.location">Location: {{activity.location}}</li>
                                             </ul>
                                             <div class="lv-actions actions">
-                                                <button tooltip="Remove" ng-click="vm.confirmRemove(activity)" class="btn btn-warning btn-icon"><i class="md md-close"></i></button>
+                                                <button tooltip="Remove" ng-click="vm.confirmRemoveActivity(activity)"
+                                                        class="btn btn-warning btn-icon"><i class="md md-close"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
