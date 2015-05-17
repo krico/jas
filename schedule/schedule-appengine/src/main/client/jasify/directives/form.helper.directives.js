@@ -212,7 +212,7 @@
                     $element[0].focus();
                 });
             }
-        }
+        };
     }]);
 
 }(angular, jQuery));

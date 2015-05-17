@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.model.activity.TestActivityServiceFactory;
 import com.jasify.schedule.appengine.model.balance.TestBalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
+import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import org.easymock.EasyMock;
 import org.junit.After;
@@ -22,17 +23,52 @@ import java.util.ArrayList;
 import static junit.framework.TestCase.*;
 
 public class ActivityPackagePaymentWorkflowTest {
-    private Key workflowId;
-    private Key activityPackageExecutionId;
+    private ActivityPackagePaymentWorkflow activityPackagePaymentWorkflow;
+    private ActivityPackageExecution activityPackageExecution;
+    private ArrayList<Key> activityIds;
+    private User user;
+    private ActivityPackage activityPackage;
+    private Payment payment;
+
 
     @Before
     public void setup() {
         TestHelper.initializeDatastore();
+        user = new User();
+        activityIds = createActivityIds();
+        activityPackage = createActivityPackage();
+        activityPackageExecution = new ActivityPackageExecution();
+        payment = createPayment(user);
+        activityPackagePaymentWorkflow = createActivityPaymentWorkflow(payment, activityPackage);
     }
 
     @After
     public void cleanup() {
         TestHelper.cleanupDatastore();
+    }
+
+    private ActivityPackage createActivityPackage() {
+        ActivityPackage activityPackage = new ActivityPackage();
+        activityPackage.setId(Datastore.allocateId(ActivityPackage.class));
+        return activityPackage;
+    }
+
+    private ArrayList<Key> createActivityIds () {
+        ArrayList<Key> activityIds = new ArrayList<>();
+        activityIds.add(Datastore.allocateId(Activity.class));
+        return activityIds;
+    }
+
+    private Payment createPayment(User user) {
+        Payment payment = new Payment();
+        payment.getUserRef().setModel(user);
+        return payment;
+    }
+
+    private ActivityPackagePaymentWorkflow createActivityPaymentWorkflow(Payment payment, ActivityPackage activityPackage) {
+        ActivityPackagePaymentWorkflow activityPackagePaymentWorkflow = new ActivityPackagePaymentWorkflow(activityPackage.getId(), activityIds);
+        activityPackagePaymentWorkflow.getPaymentRef().setModel(payment);
+        return activityPackagePaymentWorkflow;
     }
 
     @Test
@@ -44,31 +80,16 @@ public class ActivityPackagePaymentWorkflowTest {
 
     @Test
     public void testOnCreated() throws Exception {
+        Datastore.put(payment, activityPackagePaymentWorkflow, user, activityPackage, activityPackageExecution);
+
         TestActivityServiceFactory testActivityServiceFactory = new TestActivityServiceFactory();
         testActivityServiceFactory.setUp();
         try {
-            ArrayList<Key> activityIds = new ArrayList<>();
-            activityIds.add(Datastore.allocateId(Activity.class));
-
-            Payment payment = new Payment();
-            User user = new User();
-            payment.getUserRef().setModel(user);
-            ActivityPackage activityPackage = new ActivityPackage();
-            activityPackage.setId(Datastore.allocateId(ActivityPackage.class));
-
-            ActivityPackagePaymentWorkflow workflow = new ActivityPackagePaymentWorkflow(activityPackage.getId(), activityIds);
-            workflow.getPaymentRef().setModel(payment);
-
-            ActivityPackageExecution activityPackageExecution = new ActivityPackageExecution();
-            Datastore.put(payment, workflow, user, activityPackage, activityPackageExecution);
-            workflowId = workflow.getId();
-            activityPackageExecutionId = activityPackageExecution.getId();
-
             EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().subscribe(user.getId(), activityPackage.getId(), activityIds))
                     .andReturn(activityPackageExecution);
             testActivityServiceFactory.replay();
 
-            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(workflow.getId(), PaymentStateEnum.Created);
+            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(activityPackagePaymentWorkflow.getId(), PaymentStateEnum.Created);
 
             assertEquals(activityPackageExecution.getId(), transition.getActivityPackageExecutionId());
             assertEquals(PaymentStateEnum.Created, transition.getState());
@@ -92,10 +113,10 @@ public class ActivityPackagePaymentWorkflowTest {
         TestActivityServiceFactory testActivityServiceFactory = new TestActivityServiceFactory();
         testActivityServiceFactory.setUp();
         try {
-            testActivityServiceFactory.getActivityServiceMock().cancelActivityPackageExecution(activityPackageExecutionId);
+            testActivityServiceFactory.getActivityServiceMock().cancelActivityPackageExecution(activityPackageExecution.getId());
             EasyMock.expectLastCall();
             testActivityServiceFactory.replay();
-            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(workflowId, PaymentStateEnum.Canceled);
+            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(activityPackagePaymentWorkflow.getId(), PaymentStateEnum.Canceled);
             assertNotNull(transition);
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -106,16 +127,38 @@ public class ActivityPackagePaymentWorkflowTest {
     }
 
     @Test
-    public void testOnCompleted() throws Exception {
+    public void testOnCompletedForCashPayment() throws Exception {
+        payment.setType(PaymentTypeEnum.Cash);
         testOnCreated();
 
         TestBalanceServiceFactory testBalanceServiceFactory = new TestBalanceServiceFactory();
         testBalanceServiceFactory.setUp();
         try {
-            testBalanceServiceFactory.getBalanceServiceMock().activityPackageExecution(activityPackageExecutionId);
+            testBalanceServiceFactory.getBalanceServiceMock().unpaidActivityPackageExecution(activityPackageExecution.getId());
             EasyMock.expectLastCall();
             testBalanceServiceFactory.replay();
-            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(workflowId, PaymentStateEnum.Completed);
+            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(activityPackagePaymentWorkflow.getId(), PaymentStateEnum.Completed);
+            assertNotNull(transition);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            fail(e.toString());
+        } finally {
+            TestHelper.tearDown(testBalanceServiceFactory);
+        }
+    }
+
+    @Test
+    public void testOnCompletedForPayPalPayment() throws Exception {
+        payment.setType(PaymentTypeEnum.PayPal);
+        testOnCreated();
+
+        TestBalanceServiceFactory testBalanceServiceFactory = new TestBalanceServiceFactory();
+        testBalanceServiceFactory.setUp();
+        try {
+            testBalanceServiceFactory.getBalanceServiceMock().activityPackageExecution(activityPackageExecution.getId());
+            EasyMock.expectLastCall();
+            testBalanceServiceFactory.replay();
+            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(activityPackagePaymentWorkflow.getId(), PaymentStateEnum.Completed);
             assertNotNull(transition);
         } catch (Exception e) {
             e.printStackTrace(System.err);
