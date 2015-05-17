@@ -19,7 +19,7 @@
         angular.forEach(this.activityPackages, function (activityPackage) {
             ActivityPackage.getActivities(activityPackage.id).then(function (result) {
                 vm.activityPackageActivities[activityPackage.id] = result;
-            })
+            });
         });
 
         this.auth = Auth;
@@ -59,13 +59,13 @@
                 vm.activityPackageSelection[activityPackage.id].indexOf(activity) !== -1) {
                 return false;
             }
-            return vm.isActivityFullyBooked(activity) || vm.isActivityPackageFullyBooked(activityPackage)
+            return vm.isActivityFullyBooked(activity) || vm.isActivityPackageFullyBooked(activityPackage);
         }
 
-        function hasCompletedActivityPackages () {
+        function hasCompletedActivityPackages() {
             return _.some(vm.activityPackages, function (value) {
                 return vm.packageSelectionComplete(value);
-            })
+            });
         }
 
         function isActivityPackageFullyBooked(activityPackage) {
@@ -77,19 +77,19 @@
             return activity.maxSubscriptions <= activity.subscriptionCount;
         }
 
-        function packageSelectionIncomplete (activityPackage) {
-            return vm.activityPackageSelection
-                && vm.activityPackageSelection[activityPackage.id]
-                && vm.activityPackageSelection[activityPackage.id].length !== 0
-                && (activityPackage.itemCount > vm.activityPackageSelection[activityPackage.id].length);
+        function packageSelectionIncomplete(activityPackage) {
+            return vm.activityPackageSelection &&
+                vm.activityPackageSelection[activityPackage.id] &&
+                vm.activityPackageSelection[activityPackage.id].length !== 0 &&
+                (activityPackage.itemCount > vm.activityPackageSelection[activityPackage.id].length);
         }
 
-        function packageSelectionComplete (activityPackage) {
+        function packageSelectionComplete(activityPackage) {
             return vm.activityPackageSelection && vm.activityPackageSelection[activityPackage.id] &&
                 (activityPackage.itemCount === vm.activityPackageSelection[activityPackage.id].length);
         }
 
-        function packageSelectionTooBig (activityPackage) {
+        function packageSelectionTooBig(activityPackage) {
             return vm.activityPackageSelection && vm.activityPackageSelection[activityPackage.id] &&
                 (activityPackage.itemCount < vm.activityPackageSelection[activityPackage.id].length);
         }
@@ -100,10 +100,13 @@
                     timeout = 100;
 
                 angular.forEach(vm.selection, function (value) {
-                    $q.all(promises).then(function () {
-                        $log.debug("Adding activity to shopping cart: " + value.id);
-                        promises.push(ShoppingCart.addUserActivity(value.id));
-                    })
+                    $timeout(function () {
+                        $q.all(promises).then(function () {
+                            $log.debug("Adding activity to shopping cart: " + value.id);
+                            promises.push(ShoppingCart.addUserActivity(value.id));
+                        });
+                    }, timeout);
+                    timeout += 100;
                 });
 
                 var completeActivityPackages = _.filter(vm.activityPackages, vm.packageSelectionComplete);
@@ -113,13 +116,12 @@
                         $log.debug("Adding activity to shopping cart: " + value.id);
                         promises.push(ShoppingCart.addUserActivity(value.id));
                     }, timeout);
-
                     timeout += 100;
                 });
 
-                var completeActivityPackages = _.filter(vm.activityPackages, vm.packageSelectionComplete);
+                var completeActivityPackagesList = _.filter(vm.activityPackages, vm.packageSelectionComplete);
 
-                angular.forEach(completeActivityPackages, function (value) {
+                angular.forEach(completeActivityPackagesList, function (value) {
                     $timeout(function () {
                         $log.debug("Adding activity package to shopping cart: " + value.id);
                         promises.push(ShoppingCart.addUserActivityPackage(value, vm.activityPackageSelection[value.id]));
@@ -137,7 +139,7 @@
                     }, function () {
                         // TODO
                     });
-                }, timeout)
+                }, timeout);
 
             });
         }
