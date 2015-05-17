@@ -67,7 +67,8 @@
         "spin.js/spin.js",
         "angular-spinner/angular-spinner.js",
         "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js",
-        "bootstrap-sweetalert/lib/sweet-alert.js"
+        "bootstrap-sweetalert/lib/sweet-alert.js",
+        "lodash/lodash.js"
       ],
       "iframecontentwindow": [
         "iframe-resizer/js/iframeResizer.contentWindow.min.js"
