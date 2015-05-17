@@ -76,6 +76,7 @@ gulp.task('html', html);
 gulp.task('static-html', staticHtml);
 gulp.task('images', images);
 gulp.task('test', ['build'], testClient);
+gulp.task('test-prod', ['build-prod'], testClient);
 gulp.task('watch', rebuild);
 gulp.task('custom-js', customJs);
 
@@ -89,8 +90,8 @@ gulp.task('cssRevReplace', ['cssRev'], cssRevReplace);
 gulp.task('rev', ['jsRevReplace', 'cssRevReplace']);
 
 gulp.task('build', ['client', 'html', 'static-html', 'images', 'custom-js']);
-gulp.task('build-prod', function(callback) {
-   runSequence('clean', 'build', 'rev', callback);
+gulp.task('build-prod', function (callback) {
+    runSequence('clean', 'build', 'rev', callback);
 });
 gulp.task('default', ['watch', 'build', 'lint']);
 
@@ -125,7 +126,9 @@ function sym(cb) {
 }
 
 function bowerInstall(cb) {
-    if(bowerInstalled) {return cb();}
+    if (bowerInstalled) {
+        return cb();
+    }
     bowerInstalled = true;
     return bower();
 }
@@ -193,6 +196,7 @@ function clientDependenciesJsFun(key) {
     }
     return function (cb) {
         return gulp.src(src)
+            .pipe(plug.size({showFiles: true, title: key}))
             .pipe(plumber())
             .pipe(ngAnnotate())
             .pipe(sourcemaps.init())
@@ -200,6 +204,7 @@ function clientDependenciesJsFun(key) {
             .pipe(gulp.dest(paths.jsBuild))
             .pipe(uglify())
             .pipe(rename({extname: '.min.js'}))
+            .pipe(plug.size({title: key + '.min'}))
             .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest(paths.jsBuild));
     };
@@ -298,6 +303,7 @@ function jsRevReplace() {
         htmlFiles = paths.appRoot + '*.html';
 
     return gulp.src(htmlFiles)
+        .pipe(replace(/build\/js\/([^\/]+)\.js/g, 'build/js/$1.min.js'))
         .pipe(plug.revReplace({manifest: manifest}))
         .pipe(gulp.dest(paths.appRoot));
 }
@@ -308,6 +314,7 @@ function cssRevReplace() {
         htmlFiles = paths.appRoot + '*.html';
 
     return gulp.src(htmlFiles)
+        .pipe(replace(/build\/css\/([^\/]+)\.css/g, 'build/css/$1.min.css'))
         .pipe(plug.revReplace({manifest: manifest}))
         .pipe(gulp.dest(paths.appRoot));
 }
