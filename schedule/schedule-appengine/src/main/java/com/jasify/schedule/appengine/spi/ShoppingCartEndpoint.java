@@ -8,9 +8,11 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityService;
 import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.cart.ShoppingCartService;
@@ -18,7 +20,9 @@ import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageSubscription;
+import com.jasify.schedule.appengine.spi.dm.JasItemDetails;
 import com.jasify.schedule.appengine.spi.transform.*;
+import com.jasify.schedule.appengine.util.FormatUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -144,7 +148,7 @@ public class ShoppingCartEndpoint {
         return cart;
     }
 
-    @ApiMethod(name = "carts.removeItem", path = "carts/{cartId}/{ordinal}", httpMethod = ApiMethod.HttpMethod.GET)
+    @ApiMethod(name = "carts.removeItem", path = "carts/{cartId}/{ordinal}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public ShoppingCart removeItem(User caller, @Named("cartId") String cartId, @Named("ordinal") Integer ordinal) throws UnauthorizedException, ForbiddenException, NotFoundException {
         JasifyEndpoint.mustBeLoggedIn(caller); //TODO: check that user owns this cart
         ShoppingCart cart = ShoppingCartServiceFactory.getShoppingCartService().getCart(cartId);
@@ -164,5 +168,47 @@ public class ShoppingCartEndpoint {
         ShoppingCartServiceFactory.getShoppingCartService().putCart(cart);
 
         return cart;
+    }
+
+    @ApiMethod(name = "carts.getItem", path = "carts/{cartId}/{ordinal}", httpMethod = ApiMethod.HttpMethod.GET)
+    public JasItemDetails getItem(User caller, @Named("cartId") String cartId, @Named("ordinal") Integer ordinal) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        JasifyEndpoint.mustBeLoggedIn(caller); //TODO: check that user owns this cart
+        ShoppingCart cart = ShoppingCartServiceFactory.getShoppingCartService().getCart(cartId);
+        if (cart == null) {
+            throw new NotFoundException("Cart.id = " + cartId);
+        }
+
+        List<ShoppingCart.Item> items = cart.getItems();
+        if (ordinal >= 0 && ordinal < items.size()) {
+            ShoppingCart.Item item = items.get(ordinal);
+            Key id = item.getItemId();
+
+            try {
+                if (ActivityPackageMeta.get().getKind().equals(id.getKind())) {
+
+                    List<Key> subItemIds = new ArrayList<>();
+                    List<String> subItems = new ArrayList<>();
+                    List<String> subItemTypes = new ArrayList<>();
+
+                    ActivityService activityService = ActivityServiceFactory.getActivityService();
+
+                    //noinspection unchecked
+                    for (Key key : (Iterable<Key>) item.getData()) {
+                        Activity activity = activityService.getActivity(key);
+                        subItemIds.add(key);
+                        subItems.add(FormatUtil.toString(activity));
+                        subItemTypes.add(key.getKind());
+                    }
+                    return new JasItemDetails(item, subItemIds, subItems, subItemTypes);
+                }
+
+                return new JasItemDetails(item);
+            } catch (EntityNotFoundException e) {
+                throw new NotFoundException(e);
+            }
+
+        } else {
+            throw new NotFoundException("Item ordinal: " + ordinal);
+        }
     }
 }

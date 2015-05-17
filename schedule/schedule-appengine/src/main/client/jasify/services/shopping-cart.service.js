@@ -8,7 +8,8 @@
             clearUserCart: clearUserCart,
             addUserActivity: addUserActivity,
             addUserActivityPackage: addUserActivityPackage,
-            removeItem: removeItem
+            removeItem: removeItem,
+            getItem: getItem
         };
 
         function getUserCart() {
@@ -43,6 +44,18 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.removeItem(req)
+                    .then(resultHandler, errorHandler);
+            });
+        }
+
+        function getItem(cart, item) {
+            var req = {
+                cartId: fetchId(cart),
+                ordinal: fetchId(item)
+            };
+
+            return Endpoint.jasify(function (jasify) {
+                return jasify.carts.getItem(req)
                     .then(resultHandler, errorHandler);
             });
         }
