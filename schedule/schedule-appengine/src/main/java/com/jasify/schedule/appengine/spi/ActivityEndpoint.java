@@ -1,6 +1,5 @@
 package com.jasify.schedule.appengine.spi;
 
-import com.google.common.base.Preconditions;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
@@ -8,6 +7,7 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -367,8 +367,13 @@ public class ActivityEndpoint {
     public void removeActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
         checkFound(id);
-        //TODO: remove activity package
-        throw new RuntimeException("NOT IMPLEMENTED");
+        try {
+            ActivityServiceFactory.getActivityService().removeActivityPackage(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (OperationException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 
     @ApiMethod(name = "activityPackages.getActivities", path = "activity-packages-activity/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.GET)

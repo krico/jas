@@ -462,6 +462,34 @@ class DefaultActivityService implements ActivityService {
         Datastore.delete(id);
     }
 
+    @Override
+    public void removeActivityPackage(final Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException {
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, id);
+                    if (activityPackage.getExecutionCount() != 0) {
+                        throw new OperationException("ActivityPackage has executions");
+                    }
+                    List<Key> toDelete = new ArrayList<Key>();
+                    toDelete.add(activityPackage.getId());
+                    toDelete.addAll(Datastore
+                            .query(tx, activityPackageActivityMeta, activityPackage.getOrganizationRef().getKey())
+                            .filter(activityPackageActivityMeta.activityPackageRef.equal(id))
+                            .asKeyList());
+                    Datastore.delete(tx, toDelete);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (EntityNotFoundException | IllegalArgumentException | OperationException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
     @Nonnull
     @Override
     public Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException, OperationException {
@@ -719,7 +747,12 @@ class DefaultActivityService implements ActivityService {
         if (activities.isEmpty() || activities.size() == 1 || activities.size() < activityPackage.getItemCount()) {
             throw new FieldValueException("ActivityPackage.activities.size");
         }
-        if (new HashSet<>(activities).size() != activities.size()) throw new FieldValueException("ActivityPackage.activities has duplicates");
+        HashSet<Key> activityIds = new HashSet<>();
+        for (Activity activity : activities) {
+            if (!activityIds.add(activity.getId())) {
+                throw new FieldValueException("ActivityPackage.activities has duplicates");
+            }
+        }
 //        if (activityPackage.getValidUntil().getTime() < activityPackage.getValidFrom().getTime()) throw new FieldValueException("ActivityPackage.validUntil");
 
         activityPackage.setId(Datastore.allocateId(organizationId, activityPackageMeta));
