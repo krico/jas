@@ -382,8 +382,8 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <arguments>--no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch}
-                                --buildTimestamp=${timestamp} --buildVersion=${project.version} build
+                            <arguments>build-prod --no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch}
+                                --buildTimestamp=${timestamp} --buildVersion=${project.version}
                             </arguments>
                         </configuration>
                     </execution>
@@ -395,7 +395,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
-                            <arguments>test --no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch}
+                            <arguments>test-prod --no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch}
                                 --buildTimestamp=${timestamp} --buildVersion=${project.version}
                                 --skiptests${skipTests}
                             </arguments>
