@@ -263,3 +263,26 @@ td.actions-column {
     width: 100%;
   }
 }
+
+.card .card-header [wizard-trigger].btn-float {
+  @media (max-width: @angularMaterialLayoutSm) {
+    font-size: smaller;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  position: relative;
+  bottom: 0;
+  right: 0;
+
+  &:last-of-type {
+    margin-right: 10px;
+  }
+}
+
+@media (max-width: @angularMaterialLayoutSm) {
+  .label {
+    display: inline-block;
+    white-space: normal;
+  }
+}

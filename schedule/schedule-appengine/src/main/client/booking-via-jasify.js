@@ -23,8 +23,13 @@
 
             currentOrganizationId = queryParams.organizationId;
 
+            var host = '';
+            if (location.hostname !== 'localhost') {
+                host = 'https://jasify-schedule.appspot.com/'
+            }
+
             var ifrm = document.createElement("IFRAME");
-            ifrm.setAttribute("src", "booking-via-jasify.html#/" + queryParams.organizationId);
+            ifrm.setAttribute("src", host + "booking-via-jasify.html#/" + queryParams.organizationId);
             ifrm.setAttribute("frameBorder", "0");
             ifrm.setAttribute("width", "100%");
             ifrm.setAttribute("scrolling", "no");
