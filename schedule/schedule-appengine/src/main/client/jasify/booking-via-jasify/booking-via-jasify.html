@@ -71,7 +71,8 @@
                         <div class="activity-listview listview lv-bordered lv-lg"
                              ng-repeat="activityPackage in vm.activityPackages">
                             <div class="lv-header-alt">
-                                <div class="checkbox pull-left">
+                                <div class="checkbox pull-left"
+                                     ng-if="vm.activityPackageActivities[activityPackage.id].length === activityPackage.itemCount">
                                     <label>
                                         <input type="checkbox"
                                                ng-model="vm.activityPackageSelectAllFlags[activityPackage.id]"
