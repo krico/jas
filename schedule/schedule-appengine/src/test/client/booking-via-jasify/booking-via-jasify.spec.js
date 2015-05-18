@@ -1,68 +1,73 @@
+/*global describe, beforeEach, it, module, inject, spyOn */
+
 describe('BookingViaJasify', function () {
+
+    'use strict';
 
     var $q,
         $location,
         $rootScope,
         Auth,
+        BrowserData,
         ShoopingCart,
         AUTH_EVENTS,
-        scope,
         controller,
+        activityPackages = { items: []},
         activities = {
-        "items": [{
-            "id": "A159-O53",
-            "start": "2015-05-07T23:00:00.000+02:00",
-            "finish": "2015-05-08T00:00:00.000+02:00",
-            "price": 10.0,
-            "activityType": {
-                "id": "AT157-O53",
-                "name": "yoga",
-                "organizationId": "O53",
+            "items": [{
+                "id": "A159-O53",
+                "start": "2015-05-07T23:00:00.000+02:00",
+                "finish": "2015-05-08T00:00:00.000+02:00",
                 "price": 10.0,
+                "activityType": {
+                    "id": "AT157-O53",
+                    "name": "yoga",
+                    "organizationId": "O53",
+                    "price": 10.0,
+                    "currency": "CHF",
+                    "maxSubscriptions": 10
+                },
                 "currency": "CHF",
-                "maxSubscriptions": 10
-            },
-            "currency": "CHF",
-            "location": "some location",
-            "maxSubscriptions": 10,
-            "subscriptionCount": 10,
-            "bookItUrl": "https://jasify-schedule.appspot.com/book-it.html#/A159-O53"
-        }, {
-            "id": "A160-O53",
-            "start": "2015-05-08T20:00:00.000+02:00",
-            "finish": "2015-05-08T21:00:00.000+02:00",
-            "price": 10.0,
-            "activityType": {
-                "id": "AT157-O53",
-                "name": "yoga",
-                "organizationId": "O53",
+                "location": "some location",
+                "maxSubscriptions": 10,
+                "subscriptionCount": 10,
+                "bookItUrl": "https://jasify-schedule.appspot.com/book-it.html#/A159-O53"
+            }, {
+                "id": "A160-O53",
+                "start": "2015-05-08T20:00:00.000+02:00",
+                "finish": "2015-05-08T21:00:00.000+02:00",
                 "price": 10.0,
+                "activityType": {
+                    "id": "AT157-O53",
+                    "name": "yoga",
+                    "organizationId": "O53",
+                    "price": 10.0,
+                    "currency": "CHF",
+                    "maxSubscriptions": 10
+                },
                 "currency": "CHF",
-                "maxSubscriptions": 10
-            },
-            "currency": "CHF",
-            "maxSubscriptions": 10,
-            "subscriptionCount": 2,
-            "bookItUrl": "https://jasify-schedule.appspot.com/book-it.html#/A160-O53"
-        }, {
-            "id": "A161-O53",
-            "start": "2015-05-09T20:00:00.000+02:00",
-            "finish": "2015-05-09T21:00:00.000+02:00",
-            "price": 10.0,
-            "activityType": {
-                "id": "AT157-O53",
-                "name": "yoga",
-                "organizationId": "O53",
+                "maxSubscriptions": 10,
+                "subscriptionCount": 2,
+                "bookItUrl": "https://jasify-schedule.appspot.com/book-it.html#/A160-O53"
+            }, {
+                "id": "A161-O53",
+                "start": "2015-05-09T20:00:00.000+02:00",
+                "finish": "2015-05-09T21:00:00.000+02:00",
                 "price": 10.0,
+                "activityType": {
+                    "id": "AT157-O53",
+                    "name": "yoga",
+                    "organizationId": "O53",
+                    "price": 10.0,
+                    "currency": "CHF",
+                    "maxSubscriptions": 10
+                },
                 "currency": "CHF",
-                "maxSubscriptions": 10
-            },
-            "currency": "CHF",
-            "maxSubscriptions": 10,
-            "subscriptionCount": 2,
-            "bookItUrl": "https://jasify-schedule.appspot.com/book-it.html#/A161-O53"
-        }]
-    };
+                "maxSubscriptions": 10,
+                "subscriptionCount": 2,
+                "bookItUrl": "https://jasify-schedule.appspot.com/book-it.html#/A161-O53"
+            }]
+        };
 
     beforeEach(module('jasify.bookingViaJasify'));
 
@@ -74,10 +79,10 @@ describe('BookingViaJasify', function () {
         BrowserData = _BrowserData_;
         Auth = _Auth_;
         AUTH_EVENTS = _AUTH_EVENTS_;
-        spyOn(ShoopingCart, 'clearUserCart').and.callFake(function() {
+        spyOn(ShoopingCart, 'clearUserCart').and.callFake(function () {
             return $q.when(true);
         });
-        controller = $controller('BookingViaJasify', { activities: activities});
+        controller = $controller('BookingViaJasify', {activities: activities, activityPackages: activityPackages});
     }));
 
     it('should expose activities', function () {
@@ -85,42 +90,43 @@ describe('BookingViaJasify', function () {
     });
 
     it('should recognize activity as fully booked', function () {
-        expect(controller.isFullyBooked(activities.items[0])).toBe(true);
+        expect(controller.isActivityFullyBooked(activities.items[0])).toBe(true);
     });
 
     it('should recognize activity as not fully booked', function () {
-        expect(controller.isFullyBooked(activities.items[1])).toBe(false);
+        expect(controller.isActivityFullyBooked(activities.items[1])).toBe(false);
     });
 
-    it('should clean shopping cart before booking', function() {
+    it('should clean shopping cart before booking', function () {
 
         controller.bookIt();
-
         expect(ShoopingCart.clearUserCart).toHaveBeenCalled();
     });
 
-    it('should add selection to ShoppingCart', function() {
-        controller.selection = controller.activities;
+    it('should add selection to ShoppingCart', function () {
+        controller.activitySelection = controller.activities;
         controller.bookIt();
 
         var activitiesAddedToCart = [];
 
-        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function(activity) {
+        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function (activity) {
             activitiesAddedToCart.push(activity);
         });
 
         $rootScope.$apply();
 
-        expect(activitiesAddedToCart).toEqual(controller.selection.map(function(activity) { return activity.id; }));
+        expect(activitiesAddedToCart).toEqual(controller.activitySelection.map(function (activity) {
+            return activity.id;
+        }));
     });
 
-    it('should redirect to success page when all activities were booked', function() {
+    it('should redirect to success page when all activities were booked', function () {
         controller.selection = controller.activities;
         controller.bookIt();
         spyOn(BrowserData, 'setPaymentAcceptRedirect');
         spyOn($location, 'path');
 
-        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function() {
+        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function () {
             var dfd = $q.defer();
             dfd.resolve();
             return dfd.promise;
@@ -131,11 +137,11 @@ describe('BookingViaJasify', function () {
         expect($location.path).toHaveBeenCalledWith('/checkout');
     });
 
-    it('should redirect to success page when all activities were booked', function() {
+    it('should redirect to success page when all activities were booked', function () {
         controller.selection = controller.activities;
         controller.bookIt();
         spyOn(BrowserData, 'setPaymentAcceptRedirect');
-        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function() {
+        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function () {
             var dfd = $q.defer();
             dfd.resolve();
             return dfd.promise;
@@ -145,7 +151,7 @@ describe('BookingViaJasify', function () {
         expect(BrowserData.setPaymentAcceptRedirect).toHaveBeenCalled();
     });
 
-    it('should restore session after user account was created', function() {
+    it('should restore session after user account was created', function () {
         spyOn(Auth, 'restore');
         $rootScope.$broadcast(AUTH_EVENTS.accountCreated);
         $rootScope.$apply();

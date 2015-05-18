@@ -5,13 +5,14 @@
         .module('jasify.bookingViaJasify')
         .controller('BookingViaJasify', BookingViaJasify);
 
-    function BookingViaJasify(AUTH_EVENTS, $timeout, $log, $rootScope, $location, $q, BrowserData, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs) {
+    function BookingViaJasify(AUTH_EVENTS, $log, $rootScope, $location, $q,
+                              BrowserData, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs) {
 
         var vm = this;
 
-        vm.selection = [];
-
         vm.activities = activities.items;
+        vm.activitySelection = [];
+
         vm.activityPackages = activityPackages.items;
         vm.activityPackageActivities = {};
         vm.activityPackageSelection = {};
@@ -41,7 +42,7 @@
         function confirmRemoveActivity(activity) {
             jasDialogs.ruSure("Do you want to remove this Activity?", function () {
                 $rootScope.$apply(function () {
-                    vm.selection.splice(vm.selection.indexOf(activity), 1);
+                    vm.activitySelection.splice(vm.activitySelection.indexOf(activity), 1);
                 });
             });
         }
@@ -96,50 +97,27 @@
 
         function bookIt() {
             ShoppingCart.clearUserCart().then(function () {
-                var promises = [],
-                    timeout = 100;
+                var promises = [];
 
-                angular.forEach(vm.selection, function (value) {
-                    $timeout(function () {
-                        $q.all(promises).then(function () {
-                            $log.debug("Adding activity to shopping cart: " + value.id);
-                            promises.push(ShoppingCart.addUserActivity(value.id));
-                        });
-                    }, timeout);
-                    timeout += 100;
-                });
-
-                var completeActivityPackages = _.filter(vm.activityPackages, vm.packageSelectionComplete);
-
-                angular.forEach(vm.selection, function (value) {
-                    $timeout(function () {
-                        $log.debug("Adding activity to shopping cart: " + value.id);
-                        promises.push(ShoppingCart.addUserActivity(value.id));
-                    }, timeout);
-                    timeout += 100;
+                angular.forEach(vm.activitySelection, function (value) {
+                    $log.debug("Adding activity to shopping cart: " + value.id);
+                    promises.push(ShoppingCart.addUserActivity(value.id));
                 });
 
                 var completeActivityPackagesList = _.filter(vm.activityPackages, vm.packageSelectionComplete);
 
                 angular.forEach(completeActivityPackagesList, function (value) {
-                    $timeout(function () {
-                        $log.debug("Adding activity package to shopping cart: " + value.id);
-                        promises.push(ShoppingCart.addUserActivityPackage(value, vm.activityPackageSelection[value.id]));
-                    }, timeout);
-                    timeout += 100;
+                    $log.debug("Adding activity package to shopping cart: " + value.id);
+                    promises.push(ShoppingCart.addUserActivityPackage(value, vm.activityPackageSelection[value.id]));
                 });
 
-                timeout += 100;
-
-                $timeout(function () {
-                    $q.all(promises).then(function () {
-                        $log.debug('Shopping cart is ready');
-                        BrowserData.setPaymentAcceptRedirect('done');
-                        $location.path('/checkout');
-                    }, function () {
-                        // TODO
-                    });
-                }, timeout);
+                $q.all(promises).then(function () {
+                    $log.debug('Shopping cart is ready');
+                    BrowserData.setPaymentAcceptRedirect('done');
+                    $location.path('/checkout');
+                }, function () {
+                    // TODO
+                });
 
             });
         }
