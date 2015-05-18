@@ -43,6 +43,8 @@
     "twitter-bootstrap-wizard": "~1.0.0",
     "bootstrap-sweetalert": "~0.4.3",
     "lodash": "~3.8.0"
+    "autosize": "~3.0.4",
+    "eonasdan-bootstrap-datetimepicker": "4.0.0"
   },
   "resolutions": {
     "angular": "~1.3.1"
