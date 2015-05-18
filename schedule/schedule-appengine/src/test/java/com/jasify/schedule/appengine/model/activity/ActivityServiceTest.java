@@ -1085,6 +1085,7 @@ public class ActivityServiceTest {
 //        assertTrue(activityKeys.contains(activity1Organization1.getId()));
 //        assertTrue(activityKeys.contains(thirdActivity.getId()));
 //
+    // TODO: THIS PART IS NOT YET IN A SEPERATED TEST
 //        assertNotNull(activityPackage);
 //        assertEquals("New Desc", activityPackage.getDescription());
 //        assertEquals(99, activityPackage.getItemCount());

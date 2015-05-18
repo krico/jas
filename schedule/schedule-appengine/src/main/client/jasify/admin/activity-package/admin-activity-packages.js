@@ -2,7 +2,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityPackagesController', AdminActivityPackagesController);
 
-    function AdminActivityPackagesController($log, $routeParams, $location, organizations, activityPackages) {
+    function AdminActivityPackagesController($log, $routeParams, $location, organizations, activityPackages, ActivityPackage) {
         var vm = this;
         vm.organizations = organizations.items;
         vm.activityPackages = activityPackages.items;
@@ -12,6 +12,7 @@
         vm.organizationSelected = organizationSelected;
         vm.addActivityPackage = addActivityPackage;
         vm.viewActivityPackage = viewActivityPackage;
+        vm.remove = remove;
 
         vm.setSelectedOrganization($routeParams.organizationId);
         $location.search('organizationId', null);
@@ -32,6 +33,20 @@
 
         function viewActivityPackage(id) {
             $location.path('/admin/activity-package/' + id);
+        }
+
+        function remove(id) {
+            ActivityPackage.remove(id).then(ok, fail);
+            function ok(r) {
+                vm.alert('warning', 'ActivityPackage removed!');
+                var newAP = [];
+                angular.forEach(vm.activityPackages, function (value, key) {
+                    if (id != value.id) {
+                        this.push(value);
+                    }
+                }, newAP);
+                vm.activityPackages = newAP;
+            }
         }
 
         function setSelectedOrganization(organizationId) {
