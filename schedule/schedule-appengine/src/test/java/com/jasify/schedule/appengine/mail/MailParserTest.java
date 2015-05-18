@@ -4,10 +4,7 @@ import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormat;
 import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormatter;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
-import com.jasify.schedule.appengine.model.activity.ActivityType;
-import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.KeyUtil;
@@ -16,8 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * @author wszarmach
@@ -34,6 +30,8 @@ public class MailParserTest {
     Organization organization;
     Subscription subscription1;
     Subscription subscription2;
+    ActivityPackageExecution activityPackageExecution1;
+    ActivityPackageExecution activityPackageExecution2;
 
     private Activity createActivity(ActivityType activityType, double price, DateTime start, DateTime finish) {
         Activity activity = new Activity(activityType);
@@ -51,6 +49,58 @@ public class MailParserTest {
         return subscription;
     }
 
+    private ActivityPackage createActivityPackage(ActivityType activityType, List<Activity> activities) {
+        ActivityPackage activityPackage = new ActivityPackage();
+        activityPackage.getOrganizationRef().setModel(activityType.getOrganizationRef().getModel());
+        activityPackage.setPrice(random(20.0, 25.0));
+        activityPackage.setItemCount(2);
+        activityPackage.setName("Squash Bundle");
+        activityPackage.setCurrency("CHF");
+        for (Activity activity : activities) {
+            activityPackage.getActivities().add(activity);
+        }
+        return activityPackage;
+    }
+
+    private ActivityPackageSubscription createActivityPackageSubscription(User user, Activity activity) {
+        ActivityPackageSubscription activityPackageSubscription = new ActivityPackageSubscription();
+        activityPackageSubscription.getUserRef().setModel(user);
+        activityPackageSubscription.getActivityRef().setModel(activity);
+        return activityPackageSubscription;
+    }
+
+    private ActivityPackageExecution createActivityPackageExecution(User user, ActivityType activityType) {
+        List<Activity> activities = new ArrayList<>();
+        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 15, 13, 0), new DateTime(2015, 4, 15, 14, 0)));
+        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 16, 13, 0), new DateTime(2015, 4, 16, 14, 0)));
+        ActivityPackage activityPackage = createActivityPackage(activityType, activities);
+
+        ActivityPackageExecution activityPackageExecution = new ActivityPackageExecution();
+        activityPackageExecution.getActivityPackageRef().setModel(activityPackage);
+        activityPackageExecution.getUserRef().setModel(user);
+        activityPackageExecution.setId(Datastore.allocateId(ActivityPackageExecution.class));
+
+        for (Activity activity :  activities) {
+            ActivityPackageSubscription activityPackageSubscription = createActivityPackageSubscription(user, activity);
+            activityPackageSubscription.getActivityPackageExecutionRef().setModel(activityPackageExecution);
+            activityPackageExecution.getSubscriptionListRef().getModelList().add(activityPackageSubscription);
+        }
+        return activityPackageExecution;
+    }
+
+    private double round(double value, int places) {
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
+
+    private double random(double min, double max)
+    {
+        double diff = max - min;
+        return round(min + Math.random( ) * diff, 2);
+    }
+
     @Before
     public void initializeDatastore() {
         TestHelper.initializeJasify();
@@ -64,11 +114,14 @@ public class MailParserTest {
         this.activityType = new ActivityType("Squash");
         this.activityType.getOrganizationRef().setModel(this.organization);
 
-        this.activity1 = createActivity(this.activityType, 20.0, new DateTime(2015, 3, 30, 12, 0), new DateTime(2015, 3, 30, 12, 45));
+        this.activity1 = createActivity(this.activityType, random(10.0, 20.0), new DateTime(2015, 3, 30, 12, 0), new DateTime(2015, 3, 30, 12, 45));
         this.subscription1 = createSubscription(this.user, this.activity1);
 
-        this.activity2 = createActivity(this.activityType, 19.75, new DateTime(2015, 3, 15, 12, 0), new DateTime(2015, 3, 15, 14, 0));
+        this.activity2 = createActivity(this.activityType, random(10.0, 20.0), new DateTime(2015, 3, 15, 12, 0), new DateTime(2015, 3, 15, 14, 0));
         this.subscription2 = createSubscription(this.user, this.activity2);
+
+        this.activityPackageExecution1 = createActivityPackageExecution(this.user, this.activityType);
+        this.activityPackageExecution2 = createActivityPackageExecution(this.user, this.activityType);
     }
 
     @After
@@ -94,6 +147,20 @@ public class MailParserTest {
     }
 
     @Test
+    public void testUserNameFallback() throws Exception {
+        MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
+        User user = subscription1.getUserRef().getModel();
+        String text = mailParser.getText();
+        assert (text.contains("Subscriber    : " + user.getRealName()));
+        assert (!text.contains("Subscriber    : " + user.getName()));
+        user.setRealName(null);
+        mailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
+        text = mailParser.getText();
+        assert (!text.contains("Subscriber    : " + user.getRealName()));
+        assert (text.contains("Subscriber    : " + user.getName()));
+    }
+
+    @Test
     public void testJasifyUserSignUpEmailAsText() throws Exception {
         MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
         String text = mailParser.getText();
@@ -113,50 +180,85 @@ public class MailParserTest {
 
     @Test
     public void testJasifySubscriptionEmailAsText() throws Exception {
-        MailParser mailParser = MailParser.createJasifySubscriptionEmail(Arrays.asList(subscription1, subscription2), Collections.<ActivityPackageExecution>emptyList());
+        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
+        double totalPrice = 0;
         assert (text.contains("A new subscription has been created for " + user.getRealName()));
 
-        assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(subscription1.getId())));
-        assert (text.contains("Publisher     : " + organization.getName()));
-        assert (text.contains("Activity      : " + activity1.getName()));
-        assert (text.contains("Start         : " + new DateTime(activity1.getStart()).toString(dtf)));
-        assert (text.contains("Finish        : " + new DateTime(activity1.getFinish()).toString(dtf)));
-        assert (text.contains("Price         : " + activity1.getPrice()));
+        for (Subscription subscription : subscriptions) {
+            assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(subscription.getId())));
+            Activity activity = subscription.getActivityRef().getModel();
+            ActivityType activityType = activity.getActivityTypeRef().getModel();
+            Organization organization = activityType.getOrganizationRef().getModel();
+            assert (text.contains("Publisher     : " + organization.getName()));
+            assert (text.contains("Activity      : " + activity.getName()));
+            assert (text.contains("Start         : " + new DateTime(activity.getStart()).toString(dtf)));
+            assert (text.contains("Finish        : " + new DateTime(activity.getFinish()).toString(dtf)));
+            assert (text.contains("Price         : " + activity.getPrice()));
+            totalPrice += activity.getPrice();
+        }
 
-        assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(subscription2.getId())));
-        assert (text.contains("Publisher     : " + organization.getName()));
-        assert (text.contains("Activity      : " + activity2.getName()));
-        assert (text.contains("Start         : " + new DateTime(activity2.getStart()).toString(dtf)));
-        assert (text.contains("Finish        : " + new DateTime(activity2.getFinish()).toString(dtf)));
-        assert (text.contains("Price         : " + activity2.getPrice()));
+        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+            assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
+            ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+            Organization organization = activityPackage.getOrganizationRef().getModel();
+            assert (text.contains("Publisher     : " + organization.getName()));
+            assert (text.contains("Package       : " + activityPackage.getName()));
+            assert (text.contains("Price         : " + activityPackage.getPrice()));
+            for (ActivityPackageSubscription activityPackageSubscription : activityPackageExecution.getSubscriptionListRef().getModelList()) {
+                Activity activity = activityPackageSubscription.getActivityRef().getModel();
+                assert (text.contains("Start         : " + new DateTime(activity.getStart()).toString(dtf)));
+                assert (text.contains("Finish        : " + new DateTime(activity.getFinish()).toString(dtf)));
+            }
+            totalPrice += activityPackage.getPrice();
+        }
 
-        assert (text.contains("Total         : " + MailParser.formatPrice(activity1.getPrice() + activity2.getPrice())));
+        assert (text.contains(": " + MailParser.formatPrice(totalPrice)));
     }
 
     @Test
     public void testJasifySubscriptionEmailAsHtml() throws Exception {
-        MailParser mailParser = MailParser.createJasifySubscriptionEmail(Arrays.asList(subscription1, subscription2), Collections.<ActivityPackageExecution>emptyList());
+        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+
+        MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
 
+        double totalPrice = 0;
         assert (html.contains("A new subscription has been created for " + user.getRealName()));
 
-        assert (html.contains(": " + KeyUtil.toHumanReadableString(subscription1.getId())));
-        assert (html.contains(": " + organization.getName()));
-        assert (html.contains(": " + activity1.getName()));
-        assert (html.contains(": " + new DateTime(activity1.getStart()).toString(dtf)));
-        assert (html.contains(": " + new DateTime(activity1.getFinish()).toString(dtf)));
-        assert (html.contains(": " + activity1.getPrice()));
+        for (Subscription subscription : subscriptions) {
+            assert (html.contains(": " + KeyUtil.toHumanReadableString(subscription.getId())));
+            Activity activity = subscription.getActivityRef().getModel();
+            ActivityType activityType = activity.getActivityTypeRef().getModel();
+            Organization organization = activityType.getOrganizationRef().getModel();
+            assert (html.contains(": " + organization.getName()));
+            assert (html.contains(": " + activity.getName()));
+            assert (html.contains(": " + new DateTime(activity.getStart()).toString(dtf)));
+            assert (html.contains(": " + new DateTime(activity.getFinish()).toString(dtf)));
+            assert (html.contains(": " + activity.getPrice()));
+            totalPrice += activity.getPrice();
+        }
 
-        assert (html.contains(": " + KeyUtil.toHumanReadableString(subscription2.getId())));
-        assert (html.contains(": " + organization.getName()));
-        assert (html.contains(": " + activity2.getName()));
-        assert (html.contains(": " + new DateTime(activity2.getStart()).toString(dtf)));
-        assert (html.contains(": " + new DateTime(activity2.getFinish()).toString(dtf)));
-        assert (html.contains(": " + activity2.getPrice()));
+        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+            assert (html.contains(": " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
+            ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+            Organization organization = activityPackage.getOrganizationRef().getModel();
+            assert (html.contains(": " + organization.getName()));
+            assert (html.contains(": " + activityPackage.getName()));
+            assert (html.contains(": " + activityPackage.getPrice()));
+            for (ActivityPackageSubscription activityPackageSubscription : activityPackageExecution.getSubscriptionListRef().getModelList()) {
+                Activity activity = activityPackageSubscription.getActivityRef().getModel();
+                assert (html.contains(": " + new DateTime(activity.getStart()).toString(dtf)));
+                assert (html.contains(": " + new DateTime(activity.getFinish()).toString(dtf)));
+            }
+            totalPrice += activityPackage.getPrice();
+        }
 
-        assert (html.contains(": " + MailParser.formatPrice(activity1.getPrice() + activity2.getPrice())));
+        assert (html.contains(": " + MailParser.formatPrice(totalPrice)));
     }
 
     @Test
@@ -177,52 +279,89 @@ public class MailParserTest {
 
     @Test
     public void testSubscriberSubscriptionEmailAsText() throws Exception {
-        MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(Arrays.asList(new Subscription[]{subscription1, subscription2}), Collections.<ActivityPackageExecution>emptyList());
+        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
+        double totalPrice = 0;
         assert (text.contains("Dear " + user.getRealName()));
-        assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(subscription1.getId())));
-        assert (text.contains("Purchased From: " + organization.getName()));
-        assert (text.contains("Activity      : " + activity1.getName()));
-        assert (text.contains("Start         : " + new DateTime(activity1.getStart()).toString(dtf)));
-        assert (text.contains("Finish        : " + new DateTime(activity1.getFinish()).toString(dtf)));
-        assert (text.contains("Price         : " + activity1.getPrice()));
 
-        assert (text.contains(": " + KeyUtil.toHumanReadableString(subscription2.getId())));
-        assert (text.contains(": " + organization.getName()));
-        assert (text.contains(": " + activity2.getName()));
-        assert (text.contains(": " + new DateTime(activity2.getStart()).toString(dtf)));
-        assert (text.contains(": " + new DateTime(activity2.getFinish()).toString(dtf)));
-        assert (text.contains(": " + activity2.getPrice()));
+        for (Subscription subscription : subscriptions) {
+            assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(subscription.getId())));
+            Activity activity = subscription.getActivityRef().getModel();
+            ActivityType activityType = activity.getActivityTypeRef().getModel();
+            Organization organization = activityType.getOrganizationRef().getModel();
+            assert (text.contains("Purchased From: " + organization.getName()));
+            assert (text.contains("Activity      : " + activity.getName()));
+            assert (text.contains("Start         : " + new DateTime(activity.getStart()).toString(dtf)));
+            assert (text.contains("Finish        : " + new DateTime(activity.getFinish()).toString(dtf)));
+            assert (text.contains("Price         : " + activity.getPrice()));
+            totalPrice += activity.getPrice();
+        }
 
-        assert (text.contains(": " + MailParser.formatPrice(activity1.getPrice() + activity2.getPrice())));
+        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+            assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
+            ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+            Organization organization = activityPackage.getOrganizationRef().getModel();
+            assert (text.contains("Purchased From: " + organization.getName()));
+            assert (text.contains("Package       : " + activityPackage.getName()));
+            assert (text.contains("Price         : " + activityPackage.getPrice()));
+            for (ActivityPackageSubscription activityPackageSubscription : activityPackageExecution.getSubscriptionListRef().getModelList()) {
+                Activity activity = activityPackageSubscription.getActivityRef().getModel();
+                assert (text.contains("Start         : " + new DateTime(activity.getStart()).toString(dtf)));
+                assert (text.contains("Finish        : " + new DateTime(activity.getFinish()).toString(dtf)));
+            }
+            totalPrice += activityPackage.getPrice();
+        }
+
+        assert (text.contains(": " + MailParser.formatPrice(totalPrice)));
     }
 
     @Test
     public void testSubscriberSubscriptionEmailAsHtml() throws Exception {
-        MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(Arrays.asList(new Subscription[]{subscription1, subscription2}), Collections.<ActivityPackageExecution>emptyList());
+        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+
+        MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
 
         assert (html.contains("Dear " + user.getRealName()));
-        assert (html.contains(": " + KeyUtil.toHumanReadableString(subscription1.getId())));
-        assert (html.contains(": " + organization.getName()));
-        assert (html.contains(": " + activity1.getName()));
-        assert (html.contains(": " + new DateTime(activity1.getStart()).toString(dtf)));
-        assert (html.contains(": " + new DateTime(activity1.getFinish()).toString(dtf)));
-        assert (html.contains(": " + activity1.getPrice()));
+        double totalPrice = 0;
 
-        assert (html.contains(": " + KeyUtil.toHumanReadableString(subscription2.getId())));
-        assert (html.contains(": " + organization.getName()));
-        assert (html.contains(": " + activity2.getName()));
-        assert (html.contains(": " + new DateTime(activity2.getStart()).toString(dtf)));
-        assert (html.contains(": " + new DateTime(activity2.getFinish()).toString(dtf)));
-        assert (html.contains(": " + activity2.getPrice()));
+        for (Subscription subscription : subscriptions) {
+            assert (html.contains(": " + KeyUtil.toHumanReadableString(subscription.getId())));
+            Activity activity = subscription.getActivityRef().getModel();
+            ActivityType activityType = activity.getActivityTypeRef().getModel();
+            Organization organization = activityType.getOrganizationRef().getModel();
+            assert (html.contains(": " + organization.getName()));
+            assert (html.contains(": " + activity.getName()));
+            assert (html.contains(": " + new DateTime(activity.getStart()).toString(dtf)));
+            assert (html.contains(": " + new DateTime(activity.getFinish()).toString(dtf)));
+            assert (html.contains(": " + activity.getPrice()));
+            totalPrice += activity.getPrice();
+        }
 
-        assert (html.contains(": " + MailParser.formatPrice(activity1.getPrice() + activity2.getPrice())));
+        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+            assert (html.contains(": " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
+            ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+            Organization organization = activityPackage.getOrganizationRef().getModel();
+            assert (html.contains(": " + organization.getName()));
+            assert (html.contains(": " + activityPackage.getName()));
+            assert (html.contains(": " + activityPackage.getPrice()));
+            for (ActivityPackageSubscription activityPackageSubscription : activityPackageExecution.getSubscriptionListRef().getModelList()) {
+                Activity activity = activityPackageSubscription.getActivityRef().getModel();
+                assert (html.contains(": " + new DateTime(activity.getStart()).toString(dtf)));
+                assert (html.contains(": " + new DateTime(activity.getFinish()).toString(dtf)));
+            }
+            totalPrice += activityPackage.getPrice();
+        }
+
+        assert (html.contains(": " + MailParser.formatPrice(totalPrice)));
     }
 
     @Test
-    public void testPublisherSubscriptionEmailAsText() throws Exception {
+    public void testPublisherActivitySubscriptionEmailAsText() throws Exception {
         MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
         String text = mailParser.getText();
 
@@ -236,7 +375,7 @@ public class MailParserTest {
     }
 
     @Test
-    public void testPublisherSubscriptionEmailAsHtml() throws Exception {
+    public void testPublisherActivitySubscriptionEmailAsHtml() throws Exception {
         MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
         String html = mailParser.getHtml();
 
@@ -248,6 +387,43 @@ public class MailParserTest {
         assert (html.contains(": " + new DateTime(activity1.getStart()).toString(dtf)));
         assert (html.contains(": " + new DateTime(activity1.getFinish()).toString(dtf)));
         assert (html.contains(": " + activity1.getPrice()));
+    }
+
+    @Test
+    public void testPublisherActivityPackageSubscriptionEmailAsText() throws Exception {
+        ActivityPackageSubscription activityPackageSubscription = activityPackageExecution1.getSubscriptionListRef().getModelList().get(0);
+        MailParser mailParser = MailParser.createPublisherSubscriptionEmail(activityPackageSubscription);
+        String text = mailParser.getText();
+        User user = activityPackageExecution1.getUserRef().getModel();
+        Activity activity = activityPackageSubscription.getActivityRef().getModel();
+        ActivityPackage activityPackage = activityPackageExecution1.getActivityPackageRef().getModel();
+
+        assert (text.contains("Dear " + organization.getName()));
+        assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(activityPackageExecution1.getId())));
+        assert (text.contains("Subscriber    : " + user.getRealName()));
+        assert (text.contains("Activity      : " + activity.getName() + " [" + activityPackage.getName() + "]"));
+        assert (text.contains("Start         : " + new DateTime(activity.getStart()).toString(dtf)));
+        assert (text.contains("Finish        : " + new DateTime(activity.getFinish()).toString(dtf)));
+        assert (text.contains("Price         : " + activityPackage.getPrice()));
+    }
+
+    @Test
+    public void testPublisherActivityPackageSubscriptionEmailAsHtml() throws Exception {
+        ActivityPackageSubscription activityPackageSubscription = activityPackageExecution1.getSubscriptionListRef().getModelList().get(0);
+        MailParser mailParser = MailParser.createPublisherSubscriptionEmail(activityPackageSubscription);
+        String html = mailParser.getHtml();
+        User user = activityPackageExecution1.getUserRef().getModel();
+        Activity activity = activityPackageSubscription.getActivityRef().getModel();
+        ActivityPackage activityPackage = activityPackageExecution1.getActivityPackageRef().getModel();
+
+        assert (html.contains("Order of Squash"));
+        assert (html.contains("Dear " + organization.getName()));
+        assert (html.contains(": " + KeyUtil.toHumanReadableString(activityPackageExecution1.getId())));
+        assert (html.contains(": " + user.getRealName()));
+        assert (html.contains(": " + activity.getName() + " [" + activityPackage.getName() + "]"));
+        assert (html.contains(": " + new DateTime(activity.getStart()).toString(dtf)));
+        assert (html.contains(": " + new DateTime(activity.getFinish()).toString(dtf)));
+        assert (html.contains(": " + activityPackage.getPrice()));
     }
 
     @Test
@@ -304,5 +480,17 @@ public class MailParserTest {
 
         assert (html.contains("Dear Fred BlaBla"));
         assert (html.contains("MagicUrl"));
+    }
+
+    @Test
+    public  void testNewVersionEmail() throws Exception {
+        MailParser mailParser = MailParser.createNewVersionEmail("Beta", "222", "ABC", "#2", "https://URL");
+        String text = mailParser.getText();
+
+        assert (text.contains("Version    : Beta"));
+        assert (text.contains("Timestamp  : 222"));
+        assert (text.contains("Branch     : ABC"));
+        assert (text.contains("Number     : #2"));
+        assert (text.contains("Try it out at: https://URL"));
     }
 }
