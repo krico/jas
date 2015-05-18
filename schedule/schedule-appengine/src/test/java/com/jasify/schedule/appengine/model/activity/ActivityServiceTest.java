@@ -45,7 +45,7 @@ public class ActivityServiceTest {
     private Activity activity2Organization1;
     private ActivityPackage activityPackage10Organization;
     private ActivityPackageExecution activityPackageExecution10Organization;
-  //  private ActivityPackage activityPackage;
+    //  private ActivityPackage activityPackage;
     private ActivityPackageExecution activityPackageExecution;
 
     private Activity createActivity(ActivityType activityType) {
@@ -1154,6 +1154,20 @@ public class ActivityServiceTest {
         assertEquals(2, keys.size());
         assertTrue(keys.contains(activity1Organization1.getId()));
         assertTrue(keys.contains(activity2Organization1.getId()));
+    }
+
+    @Test
+    public void testRemoveActivityPackage() throws Exception {
+        testCreateActivityPackage();
+        activityService.removeActivityPackage(activityPackage10Organization.getId());
+        assertNull("Activity Package must be deleted", Datastore.getOrNull(activityPackage10Organization.getId()));
+        assertTrue("Junctions must be deleted", Datastore.query(ActivityPackageActivity.class).asKeyList().isEmpty());
+    }
+
+    @Test(expected = OperationException.class)
+    public void testRemoveActivityPackageFailsIfSubscribed() throws Exception {
+        testSubscribeToActivityPackage();
+        activityService.removeActivityPackage(activityPackage10Organization.getId());
     }
 
     @Test

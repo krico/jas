@@ -162,6 +162,8 @@ public interface ActivityService {
      */
     ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException;
 
+    void removeActivityPackage(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
+
     void addActivityToActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
 
     void addActivityToActivityPackage(Key activityPackageId, Key activityId) throws EntityNotFoundException;
@@ -309,5 +311,4 @@ public interface ActivityService {
      * @throws EntityNotFoundException if eny entity doesn't exist
      */
     void cancelActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException;
-
 }
