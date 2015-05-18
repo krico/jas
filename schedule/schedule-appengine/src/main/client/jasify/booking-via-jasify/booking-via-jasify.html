@@ -20,7 +20,7 @@
                     <div class="card-body card-padding-sm">
                         <div class="activity-listview listview lv-bordered lv-lg">
                             <div class="lv-body">
-                                <div ng-repeat="activity in vm.activities" class="selectable-lv-item lv-item media"
+                                <div ng-repeat="activity in vm.activities | orderBy: 'start'" class="selectable-lv-item lv-item media"
                                      ng-class="{ 'active' : vm.isActivitySelected(activity) }">
                                     <div ng-class="{ 'disabled': vm.isFullyBooked(activity) }"
                                          class="checkbox pull-left">
@@ -103,7 +103,7 @@
                                 </h2>
                             </div>
                             <div class="lv-body">
-                                <div ng-repeat="activity in vm.activityPackageActivities[activityPackage.id]"
+                                <div ng-repeat="activity in vm.activityPackageActivities[activityPackage.id] | orderBy: 'start'"
                                      class="selectable-lv-item lv-item media"
                                      ng-class="{ 'active' : vm.isSelectedActivityPackageItem(activity, activityPackage) }">
                                     <div ng-class="{ 'disabled': vm.disableActivityPackageActivitySelection(activity, activityPackage) }"
