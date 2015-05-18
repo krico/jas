@@ -68,7 +68,7 @@
 
                 <div class="col-sm-4">
                     <div class="fg-line">
-                        <input id="price" name="price" type="number" min="1" max="10000" class="form-control"
+                        <input id="price" name="price" type="number" min="0" max="10000" class="form-control"
                                ng-model="vm.activityPackage.price" required placeholder="Enter price"
                                ng-change="vm.activityPackage.currency='CHF'"/>
                     </div>
@@ -78,7 +78,7 @@
                     <jas-error-help-block field="vm.activityPackageForm.price" form="vm.activityPackageForm">
                         <span ng-message="required">Price is required.</span>
                         <span ng-message="number">Invalid number.</span>
-                        <span ng-message="min">Value must be greater than 0.</span>
+                        <span ng-message="min">Value must be greater than or equal to 0.</span>
                         <span ng-message="max">Value must be smaller than 10000.</span>
                     </jas-error-help-block>
                 </div>

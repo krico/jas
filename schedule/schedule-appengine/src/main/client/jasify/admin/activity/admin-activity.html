@@ -1,191 +1,358 @@
-<div class="row">
-    <div class="col-sm-1">
-        <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
-    </div>
-    <div class="col-sm-4">
-        <form class="form-horizontal" role="form" name="vm.organizationForm" novalidate>
-            <div class="form-group">
-                <label class="control-label col-sm-4" for="organization">Organization:</label>
+<form novalidate class="form-horizontal" name="vm.activityForm" ng-submit="vm.activityForm.$valid && vm.saveOrUpdate()">
+    <div class="card">
+        <div class="card-header">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <button type="button" btn-href="/admin/activities" class="btn btn-default waves-effect">Cancel</button>
+            </div>
+            <h2 ng-if="!vm.activity.id">New Activity
+                <small>Select Organization & Activity Type and create Activities.</small>
+            </h2>
+            <h2 ng-if="vm.activity.id">Edit Activity
+                <small>Edit details of existing activity.</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4" for="organization">Organization:</label>
 
-                <div class="col-sm-7">
-                    <select ng-model="vm.organization" id="organization" class="form-control"
-                            ng-options="organization as organization.name for organization in vm.organizations"
-                            ng-change="vm.loadActivityTypes(vm.organization)">
-                    </select>
+                        <div class="col-sm-8" ng-show="!vm.activity.id">
+                            <div class="fg-line">
+                                <div class="select">
+                                    <select id="organization" name="organization" class="form-control" required
+                                            ng-model="vm.organization" ng-change="vm.loadActivityTypes(vm.organization)"
+                                            ng-options="organization as organization.name for organization in vm.organizations">
+                                    </select>
+                                </div>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityForm.organization"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityForm.organization"
+                                                       form="vm.activityForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityForm.organization" form="vm.activityForm">
+                                <span ng-message="required">Organization is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                        <div class="col-sm-8" ng-show="vm.activity.id">
+                            <p class="form-control-static">{{vm.organizationForActivity.name}}</p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="activityType" class="col-sm-4 control-label">Activity Type:</label>
+
+                        <div class="col-sm-8" ng-show="!vm.activity.id" >
+                            <div class="fg-line">
+                                <div class="select">
+                                    <select id="activityType" name="activityType" class="form-control" required
+                                            ng-model="vm.activity.activityType" ng-change="vm.activityTypeChanged()"
+                                            ng-options="activityType as activityType.name for activityType in vm.activityTypes">
+                                    </select>
+                                </div>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityForm.activityType"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityForm.activityType"
+                                                       form="vm.activityForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityForm.activityType" form="vm.activityForm">
+                                <span ng-message="required">Activity Type is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                        <div class="col-sm-8" ng-show="vm.activity.id">
+                            <p class="form-control-static">{{vm.activity.activityType.name}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4">Start/End date:</label>
+
+                        <div class="col-sm-4 time-date-pair">
+                            <div class="col-sm-6" jas-has-feedback>
+                                <div class="fg-line">
+                                    <input name="fromDate" class="form-control date-picker" placeholder="DD/MM/YYYY"
+                                           required default-date="vm.defaultFromDate" ng-model="vm.activity.fromDate">
+                                </div>
+                                <jas-error-help-block field="vm.activityForm.fromDate" form="vm.activityForm">
+                                    <span ng-message="required">Starting date is required.</span>
+                                </jas-error-help-block>
+                            </div>
+                            <div class="col-sm-5" jas-has-feedback>
+                                <div class="fg-line">
+                                    <input name="fromTime" class="form-control time-picker" placeholder="HH:MM" required
+                                           default-date="vm.defaultFromDate"
+                                           ng-model="vm.activity.fromTime">
+                                </div>
+                                <jas-error-help-block field="vm.activityForm.fromTime" form="vm.activityForm">
+                                    <span ng-message="required">Starting hour is required.</span>
+                                </jas-error-help-block>
+                            </div>
+                            <label class="control-label"> to </label>
+                        </div>
+                        <div class="col-sm-4 time-date-pair">
+                            <div class="col-sm-6" jas-has-feedback>
+                                <div class="fg-line">
+                                    <input name="toDate" class="form-control date-picker" placeholder="DD/MM/YYYY"
+                                           required default-date="vm.defaultToDate" ng-model="vm.activity.toDate">
+                                </div>
+                                <jas-error-help-block field="vm.activityForm.toDate" form="vm.activityForm">
+                                    <span ng-message="required">Ending date is required.</span>
+                                </jas-error-help-block>
+                            </div>
+                            <div class="col-sm-6" jas-has-feedback>
+                                <div class="fg-line">
+                                    <input name="toTime" class="form-control time-picker"
+                                           placeholder="HH:MM" required
+                                           default-date="vm.defaultToDate"
+                                           ng-model="vm.activity.toTime">
+                                </div>
+                                <jas-error-help-block field="vm.activityForm.toTime" form="vm.activityForm">
+                                    <span ng-message="required">Ending hour is required.</span>
+                                </jas-error-help-block>
+                            </div>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="location" class="col-sm-4 control-label">Location:</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="location" name="location" required placeholder="Enter location"
+                                       class="form-control"
+                                       ng-model="vm.activity.location"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityForm.location"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityForm.location"
+                                                       form="vm.activityForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityForm.location" form="vm.activityForm">
+                                <span ng-message="required">Location is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="price" class="col-sm-4 col-xs-12 control-label">Price:</label>
+
+                        <div jas-has-feedback class="col-sm-4 col-xs-7">
+                            <div class="fg-line">
+                                <input id="price" name="price" placeholder="Enter price" type="number"
+                                       class="form-control"
+                                       min="0" max="10000" required
+                                       ng-model="vm.activity.price"
+                                       ng-change="vm.activity.currency = 'CHF'"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityForm.price"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityForm.price"
+                                                       form="vm.activityForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityForm.price" form="vm.activityForm">
+                                <span ng-message="required">Price is required.</span>
+                                <span ng-message="number">Invalid number.</span>
+                                <span ng-message="min">Value must be greater than or equal to 0.</span>
+                                <span ng-message="max">Value must be smaller than 10000.</span>
+                            </jas-error-help-block>
+                        </div>
+                        <div jas-has-feedback class="col-sm-4 col-xs-5">
+                            <div class="fg-line">
+                                <div class="select">
+                                    <select name="currency" id="currency" required class="form-control"
+                                            ng-model="vm.activity.currency">
+                                        <option>CHF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityForm.currency"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityForm.currency"
+                                                       form="vm.activityForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityForm.currency" form="vm.activityForm">
+                                <span ng-message="required">Currency is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="capacity" class="col-sm-4 control-label">Capacity:</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="capacity" name="capacity" type="number" placeholder="Enter capacity"
+                                       class="form-control" min="1" max="1000" required
+                                       ng-model="vm.activity.maxSubscriptions"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityForm.capacity"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityForm.capacity"
+                                                       form="vm.activityForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityForm.capacity" form="vm.activityForm">
+                                <span ng-message="required">Capacity is required.</span>
+                                <span ng-message="number">Invalid number.</span>
+                                <span ng-message="min">Value must be greater than 0.</span>
+                                <span ng-message="max">Value must be smaller than 1000.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="col-sm-4 control-label">Description:</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <textarea class="form-control auto-size" id="description" name="description" rows="2"
+                                          placeholder="Enter description"
+                                          ng-model="vm.activity.description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="!vm.activity.id" class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Repeat settings:</label>
+
+                        <div class="col-sm-8">
+                            <div class="radio radio-inline">
+                                <label>
+                                    <input type="radio" name="repeatType" value="No" ng-checked="true"
+                                           ng-model="vm.repeatDetails.repeatType">
+                                    <i class="input-helper"></i>
+                                    Do not repeat
+                                </label>
+                            </div>
+                            <div class="radio radio-inline">
+                                <label>
+                                    <input type="radio" name="repeatType" value="Daily"
+                                           ng-model="vm.repeatDetails.repeatType">
+                                    <i class="input-helper"></i>
+                                    Repeat daily
+                                </label>
+                            </div>
+                            <div class="radio radio-inline">
+                                <label>
+                                    <input type="radio" name="repeatType" value="Weekly"
+                                           ng-model="vm.repeatDetails.repeatType">
+                                    <i class="input-helper"></i>
+                                    Repeat on days
+                                </label>
+                            </div>
+                            <div class="m-t-25" ng-show="vm.repeatDetails.repeatType === 'Weekly'">
+                                <div class="btn-group">
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" name="daysOfWeek"
+                                               ng-model="vm.repeatDetails.mondayEnabled"> Mon
+                                    </label>
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" name="daysOfWeek"
+                                               ng-model="vm.repeatDetails.tuesdayEnabled"> Tue
+                                    </label>
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" name="daysOfWeek"
+                                               ng-model="vm.repeatDetails.wednesdayEnabled"> Wed
+                                    </label>
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" name="daysOfWeek"
+                                               ng-model="vm.repeatDetails.thursdayEnabled"> Tru
+                                    </label>
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" name="daysOfWeek"
+                                               ng-model="vm.repeatDetails.fridayEnabled"> Fri
+                                    </label>
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" name="daysOfWeek"
+                                               ng-model="vm.repeatDetails.saturdayEnabled"> Sat
+                                    </label>
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" name="daysOfWeek"
+                                               ng-model="vm.repeatDetails.sundayEnabled"> Sun
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-show="vm.repeatDetails.repeatType !== 'No'" class="form-group" jas-has-feedback>
+                        <label for="repeatEvery" class="col-sm-4 control-label">Repeat every:</label>
+
+                        <div class="col-sm-4">
+                            <div class="fg-line">
+                                <input type="number" id="repeatEvery" name="repeatEvery" min="1" max="30"
+                                       ng-required="vm.repeatDetails.repeatType !== 'No'"
+                                       ng-model="vm.repeatDetails.repeatEvery" class="form-control">
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityForm.repeatEvery"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityForm.repeatEvery"
+                                                       form="vm.activityForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityForm.repeatEvery" form="vm.activityForm">
+                                <span ng-message="required">Repeat value is required.</span>
+                                <span ng-message="min">Repeat min value is 1.</span>
+                                <span ng-message="max">Repeat max value is 30.</span>
+                            </jas-error-help-block>
+                        </div>
+                        <div class="col-sm-4 control-label text-left">
+                            {{vm.repeatDetails.repeatType === 'Daily' ? 'day(s)' : 'week(s)' }}
+                        </div>
+                    </div>
+                    <div ng-show="vm.repeatDetails.repeatType !== 'No'" class="form-group">
+                        <label class="col-sm-4 control-label">Ends:</label>
+
+                        <div class="col-sm-4" layout="row">
+                            <div class="radio radio-addon">
+                                <label>
+                                    <input type="radio" name="endsOnOption" value="Date"
+                                           ng-checked="true"
+                                           ng-model="vm.repeatDetails.repeatUntilType">
+                                    <i class="input-helper"></i>
+                                    On:
+                                </label>
+                            </div>
+                            <div flex jas-has-feedback>
+                                <div class="fg-line">
+                                    <input name="endsOnDateValue" id="endsOnDateValue" type='text'
+                                           class="form-control date-picker"
+                                           ng-focus="vm.repeatDetails.repeatUntilType = 'Date'"
+                                           ng-required="vm.repeatDetails.repeatType !== 'No' && vm.repeatDetails.repeatUntilType === 'Date'"
+                                           ng-model="vm.repeatDetails.untilDate" data-toggle="dropdown"
+                                           placeholder="Enter activity end date">
+                                </div>
+                                <jas-feedback-icon-valid field="vm.activityForm.endsOnDateValue"></jas-feedback-icon-valid>
+                                <jas-feedback-icon-invalid field="vm.activityForm.endsOnDateValue"
+                                                           form="vm.activityForm"></jas-feedback-icon-invalid>
+                            </div>
+                        </div>
+                        <div class="col-sm-offset-4 col-sm-4"
+                             ng-class="{ 'has-error': vm.activityForm.endsOnDateValue.$invalid }">
+                            <jas-error-help-block field="vm.activityForm.endsOnDateValue" form="vm.activityForm">
+                                <span ng-message="required">End date is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div ng-show="vm.repeatDetails.repeatType !== 'No'" class="form-group">
+                        <div class="col-sm-offset-4 col-sm-4" layout="row">
+                            <div class="radio radio-addon">
+                                <label>
+                                    <input type="radio" name="endsOnOption"
+                                           value="Count"
+                                           ng-model="vm.repeatDetails.repeatUntilType">
+                                    <i class="input-helper"></i>
+                                    After:
+                                </label>
+                            </div>
+                            <div flex jas-has-feedback>
+                                <div class="fg-line">
+                                    <input name="endsAfterOccurences" type="number"
+                                           ng-model="vm.repeatDetails.untilCount"
+                                           ng-required="vm.repeatDetails.repeatUntilType === 'Count'"
+                                           ng-focus="vm.repeatDetails.repeatUntilType = 'Count'"
+                                           min="1" max="100" class="form-control">
+                                </div>
+                                <jas-feedback-icon-valid field="vm.activityForm.endsAfterOccurences"></jas-feedback-icon-valid>
+                                <jas-feedback-icon-invalid field="vm.activityForm.endsAfterOccurences"
+                                                           form="vm.activityForm"></jas-feedback-icon-invalid>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 control-label text-left">
+                            times
+                        </div>
+                        <div class="col-sm-offset-4 col-sm-12"
+                             ng-class="{ 'has-error': vm.activityForm.endsAfterOccurences.$invalid }">
+                            <jas-error-help-block field="vm.activityForm.endsAfterOccurences" form="vm.activityForm">
+                                <span ng-message="required">Times number is required.</span>
+                                <span ng-message="min">Times min value is 1.</span>
+                                <span ng-message="max">Times max value is 100.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
-    <div class="col-sm-7">
-        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
-    </div>
-</div>
-<div class="row">
-    <div class="col-sm-6 well well-sm text-center" ng-hide="vm.organization.id">Select an organization.</div>
-    <div class="col-sm-6" ng-show="vm.organization.id">
-        <form class="form-horizontal" role="form" name="vm.activityForm" novalidate>
-            <fieldset>
-                <legend class="h4">Activity</legend>
-                <div class="form-group">
-                    <label for="activityType" class="col-sm-3 control-label">Activity Type:</label>
-
-                    <div class="col-sm-8 has-feedback" ng-class="vm.hasActivityTypes() ? false : 'has-error'">
-                        <select ng-model="vm.activity.activityType" id="activityType" class="form-control"
-                                ng-options="activityType as activityType.name for activityType in vm.activityTypes"
-                                ng-change="vm.activityTypeChanged()">
-                        </select>
-
-                        <div class="help-block small" ng-hide="vm.hasActivityTypes()">
-                            You need to <a ng-href="#/admin/organization/{{vm.organization.id}}">create an activity</a>
-                            type before you can create an activity.
-                        </div>
-
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="description" class="col-sm-3 control-label">Description:</label>
-
-                    <div class="col-sm-8">
-                    <textarea class="form-control input-sm" id="description" ng-model="vm.activity.description"
-                              rows="3">
-                    </textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="start" class="col-sm-3 control-label">Start:</label>
-
-                    <div class="col-sm-8">
-                        <p class="input-group">
-                            <input id="start" type="text" class="form-control"
-                                   datepicker-popup="{{vm.dateFormat}}"
-                                   ng-model="vm.activity.start" is-open="vm.isStartOpen" min-date="vm.minStartDate"
-                                   ng-required="true" ng-focus="vm.openStart($event)" close-text="Close"/>
-                            <span class="input-group-btn">
-                                <button type="button" class="btn btn-default" ng-click="vm.openStart($event)"><i
-                                        class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="finish" class="col-sm-3 control-label">Finish:</label>
-
-                    <div class="col-sm-8">
-                        <p class="input-group">
-                            <input id="finish" type="text" class="form-control"
-                                   datepicker-popup="{{vm.dateFormat}}"
-                                   ng-model="vm.activity.finish" is-open="vm.isFinishOpen"
-                                   min-date="vm.activity.start"
-                                   ng-required="true" ng-focus="vm.openFinish($event)" close-text="Close"/>
-                            <span class="input-group-btn">
-                                <button type="button" class="btn btn-default" ng-click="vm.openFinish($event)"><i
-                                        class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
-                    </div>
-                </div>
-                <div class="form-group" ng-show="!vm.activity.id">
-                    <label for class="col-sm-3 control-label">Repeat:</label>
-
-                    <div class="col-sm-8">
-                        <span class="input-group-btn">
-                            <select style="vertical-align:middle" ng-model="vm.repeatDetails.repeatType" class="form-control">
-                                <option ng-repeat="rt in vm.repeatTypes" value="{{rt}}">{{rt}}</option>
-                            </select>
-                        </span>
-                    </div>
-                </div>
-                <div class="form-group" ng-show="vm.repeatDetails.repeatType=='Weekly'">
-                    <label for class="control-label col-sm-5">Days:</label>
-
-                    <div class="btn-group col-sm-6">
-                        <label class="btn" ng-class="{'btn-primary': vm.repeatDetails.mondayEnabled, 'btn-default': !vm.repeatDetails.mondayEnabled}" ng-model="vm.repeatDetails.mondayEnabled" btn-checkbox>M</label>
-                        <label class="btn" ng-class="{'btn-primary': vm.repeatDetails.tuesdayEnabled, 'btn-default': !vm.repeatDetails.tuesdayEnabled}" ng-model="vm.repeatDetails.tuesdayEnabled" btn-checkbox>T</label>
-                        <label class="btn" ng-class="{'btn-primary': vm.repeatDetails.wednesdayEnabled, 'btn-default': !vm.repeatDetails.wednesdayEnabled}" ng-model="vm.repeatDetails.wednesdayEnabled" btn-checkbox>W</label>
-                        <label class="btn" ng-class="{'btn-primary': vm.repeatDetails.thursdayEnabled, 'btn-default': !vm.repeatDetails.thursdayEnabled}" ng-model="vm.repeatDetails.thursdayEnabled" btn-checkbox>T</label>
-                        <label class="btn" ng-class="{'btn-primary': vm.repeatDetails.fridayEnabled, 'btn-default': !vm.repeatDetails.fridayEnabled}" ng-model="vm.repeatDetails.fridayEnabled" btn-checkbox>F</label>
-                        <label class="btn" ng-class="{'btn-primary': vm.repeatDetails.saturdayEnabled, 'btn-default': !vm.repeatDetails.saturdayEnabled}" ng-model="vm.repeatDetails.saturdayEnabled" btn-checkbox>S</label>
-                        <label class="btn" ng-class="{'btn-primary': vm.repeatDetails.sundayEnabled, 'btn-default': !vm.repeatDetails.sundayEnabled}" ng-model="vm.repeatDetails.sundayEnabled" btn-checkbox>S</label>
-                    </div>
-                </div>
-                <div class="form-group" ng-show="vm.repeatDetails.repeatType!='No'">
-                    <label for class="control-label col-sm-5">Every:</label>
-
-                    <div class="col-sm-6">
-                        <input type="number" min="1" class="form-control" ng-model="vm.repeatDetails.repeatEvery"/>
-                    </div>
-                </div>
-                <div class="form-group" ng-show="vm.repeatDetails.repeatType!='No'">
-                    <label for class="control-label col-sm-5">Until:</label>
-
-                    <div class="col-sm-6">
-                        <select style="vertical-align:middle" ng-model="vm.repeatDetails.repeatUntilType" class="form-control">
-                            <option ng-repeat="rt in vm.repeatUntilTypes" value="{{rt}}">{{rt}}</option>
-                        </select>
-
-                        <div ng-show="vm.repeatDetails.repeatUntilType=='Count'">
-                            <input type="number" min="1" class="form-control" ng-model="vm.repeatDetails.untilCount"/>
-                        </div>
-                        <div class="input-group" ng-show="vm.repeatDetails.repeatUntilType=='Date'">
-                            <input id="repeat" name="repeat" type="text" class="form-control"
-                                   datepicker-popup="{{vm.dateFormat}}"
-                                   ng-model="vm.repeatDetails.untilDate" is-open="vm.isRepeatOpen" min-date="vm.activity.finish"
-                                   ng-focus="vm.openRepeat($event)" close-text="Close"/>
-                            <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="vm.openRepeat($event)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="price" class="col-sm-3 control-label">Price:</label>
-
-                    <div class="col-sm-3">
-                        <input id="price" type="number" min="0" class="form-control" ng-model="vm.activity.price"
-                               ng-change="vm.activity.currency='CHF'"/>
-                    </div>
-                    <div class="col-sm-2 text-left">
-                        <select ng-model="vm.activity.currency" class="form-control">
-                            <option>CHF</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="location" class="col-sm-3 control-label">Location:</label>
-
-                    <div class="col-sm-8">
-                        <input id="location" type="text" class="form-control" ng-model="vm.activity.location"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="maxSubscriptions" class="col-sm-3 control-label"
-                           tooltip="Maximum number of participants allowed">Capacity:</label>
-
-                    <div class="col-sm-8">
-                        <input id="maxSubscriptions" type="number" min="0" class="form-control"
-                               ng-model="vm.activity.maxSubscriptions"/>
-                    </div>
-                </div>
-            </fieldset>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <button type="button" ng-if="vm.activity.id"
-                            ng-click="vm.update()" ng-disabled="!vm.activityForm.$dirty || vm.activityForm.$invalid"
-                            class="btn btn-default btn-sm btn-primary">
-                        <span class="glyphicon glyphicon-save"></span> update
-                    </button>
-                    <button type="button" ng-if="!vm.activity.id"
-                            ng-click="vm.create()" ng-disabled="!vm.activityForm.$dirty || vm.activityForm.$invalid"
-                            class="btn btn-default btn-sm btn-primary">
-                        <span class="glyphicon glyphicon-plus"></span> create
-                    </button>
-                    <button type="button"
-                            ng-click="vm.reset()" ng-disabled="!vm.activityForm.$dirty" class="btn btn-default btn-sm">
-                        <span class="glyphicon glyphicon-open"></span> reset
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+</form>

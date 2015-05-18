@@ -145,7 +145,9 @@
             restrict: 'C',
             link: function ($scope, element, attr) {
                 $(element).datetimepicker({
-                    format: 'DD/MM/YYYY'
+                    format: 'DD/MM/YYYY',
+                    useCurrent: false,
+                    defaultDate: $scope.$eval(attr.defaultDate)
                 }).on('dp.change', function(e) {
                     return $scope.$apply(function () {
                         var i, obj, objPath, path, _i, _len;
@@ -217,10 +219,15 @@
             restrict: 'A',
             link: function (scope, element, attrs) {
 
-                var $element = $(element);
+                debugger
 
-                var formName = $element.closest('form').attr('name');
-                var formFieldName = $element.find('input, select, textarea').attr('name');
+                var $element = $(element),
+                    formName = $element.closest('form').attr('name'),
+                    formFieldName = $element.find('input, select, textarea').attr('name');
+
+                if (!formName || !formFieldName) {
+                    return;
+                }
 
                 scope.$watch(formName + '.' + formFieldName + '.$touched', function () {
                     updateClasses();
