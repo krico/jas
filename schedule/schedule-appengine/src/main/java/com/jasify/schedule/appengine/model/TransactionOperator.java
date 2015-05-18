@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model;
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.jasify.schedule.appengine.util.Threads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -65,14 +66,6 @@ public final class TransactionOperator {
         return Singleton.INSTANCE.executeImpl(operation);
     }
 
-    private static void sleep(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            //don't care
-        }
-    }
-
     private <T, Ex extends Exception> T executeImpl(TransactionOperation<T, Ex> operation) throws ConcurrentModificationException, Ex {
         int retries = retryCount;
         while (true) {
@@ -92,7 +85,7 @@ public final class TransactionOperator {
                 if (retries == 0) throw cme;
                 --retries;
                 log.info("ConcurrentModificationException, retry {} of {} will sleep {} ms", (retryCount - retries), retryCount, retrySleepMillis);
-                sleep(retrySleepMillis);
+                Threads.sleep(retrySleepMillis);
             } finally {
                 if (tx.isActive()) {
                     log.debug("Rolling back transaction");

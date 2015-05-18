@@ -65,9 +65,7 @@ public class ShoppingCartEndpoint {
     @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
     public ShoppingCart getUserCart(User caller) throws UnauthorizedException, ForbiddenException {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
-        ShoppingCart cart = ShoppingCartServiceFactory.getShoppingCartService().getUserCart(jasUser.getUserId());
-        cart.calculate();
-        return cart;
+        return ShoppingCartServiceFactory.getShoppingCartService().getUserCart(jasUser.getUserId()).calculate();
     }
 
     @ApiMethod(name = "carts.clearUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.DELETE)
@@ -80,8 +78,7 @@ public class ShoppingCartEndpoint {
     @ApiMethod(name = "carts.addUserActivity", path = "carts/user/activity/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
     public ShoppingCart addUserActivity(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
-        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
-        ShoppingCart cart = cartService.getUserCart(jasUser.getUserId());
+
         Activity activity;
         try {
             activity = ActivityServiceFactory.getActivityService().getActivity(activityId);
@@ -94,17 +91,17 @@ public class ShoppingCartEndpoint {
         if (activity.getPrice() == null) {
             throw new BadRequestException("Cannot add activity with no price to cart, id=" + activityId);
         }
-
-        cart.getItems().add(new ShoppingCart.ItemBuilder().activity(activity).build());
-        cartService.putCart(cart);
-        return cart;
+        String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
+        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
+        return cartService.addItem(cartId, new ShoppingCart.ItemBuilder()
+                .activity(activity)
+                .build())
+                .calculate();
     }
 
     @ApiMethod(name = "carts.addUserActivityPackage", path = "carts/user/activity-package/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.POST)
     public ShoppingCart addUserActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, JasActivityPackageSubscription subscription) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
-        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
-        ShoppingCart cart = cartService.getUserCart(jasUser.getUserId());
         ActivityPackage activityPackage;
         try {
             activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(activityPackageId);
@@ -138,36 +135,20 @@ public class ShoppingCartEndpoint {
             }
         }
 
-        cart.getItems().add(new ShoppingCart.ItemBuilder()
+        String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
+        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
+        return cartService.addItem(cartId, new ShoppingCart.ItemBuilder()
                 .activityPackage(activityPackage)
                 .data(new ArrayList<Key>(uniqueKeys))
-                .build());
-
-        cartService.putCart(cart);
-
-        return cart;
+                .build())
+                .calculate();
     }
 
     @ApiMethod(name = "carts.removeItem", path = "carts/{cartId}/{ordinal}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public ShoppingCart removeItem(User caller, @Named("cartId") String cartId, @Named("ordinal") Integer ordinal) throws UnauthorizedException, ForbiddenException, NotFoundException {
         JasifyEndpoint.mustBeLoggedIn(caller); //TODO: check that user owns this cart
-        ShoppingCart cart = ShoppingCartServiceFactory.getShoppingCartService().getCart(cartId);
-        if (cart == null) {
-            throw new NotFoundException("Cart.id = " + cartId);
-        }
-
-        List<ShoppingCart.Item> items = cart.getItems();
-        if (ordinal >= 0 && ordinal < items.size()) {
-            items.remove(ordinal.intValue());
-        } else {
-            throw new NotFoundException("Item ordinal: " + ordinal);
-        }
-
-        cart.calculate();
-
-        ShoppingCartServiceFactory.getShoppingCartService().putCart(cart);
-
-        return cart;
+        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
+        return cartService.removeItem(cartId, ordinal).calculate();
     }
 
     @ApiMethod(name = "carts.getItem", path = "carts/{cartId}/{ordinal}", httpMethod = ApiMethod.HttpMethod.GET)

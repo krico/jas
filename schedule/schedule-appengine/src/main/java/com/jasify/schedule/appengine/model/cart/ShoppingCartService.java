@@ -53,4 +53,10 @@ public interface ShoppingCartService {
      */
     ShoppingCart clearCart(@Nonnull String cartId);
 
+    @Nonnull
+    ShoppingCart addItem(@Nonnull String cartId, @Nonnull ShoppingCart.Item item);
+
+    @Nonnull
+    ShoppingCart removeItem(@Nonnull String cartId, int ordinal);
+
 }
