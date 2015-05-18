@@ -81,7 +81,7 @@ public final class MemcacheOperator {
             statistics.retries++;
             long willSleep = 1 + RandomUtils.nextLong(retrySleepMillis / 2, retrySleepMillis);
             statistics.sleep += willSleep;
-            log.info("ConcurrentModificationException, retry {} of {} will sleep {} ms", (retryCount - retries), retryCount, willSleep);
+            log.info("Memcache entity was changed, retry {} of {} will sleep {} ms", (retryCount - retries), retryCount, willSleep);
             Threads.sleep(willSleep);
         } while (true);
     }

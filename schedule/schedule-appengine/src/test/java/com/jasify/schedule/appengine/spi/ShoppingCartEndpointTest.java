@@ -62,18 +62,13 @@ public class ShoppingCartEndpointTest {
     public void testRemoveItem() throws Exception {
         JasifyEndpointUser caller = new JasifyEndpointUser("foo@bar", 22, false, false);
         ShoppingCart cart = new ShoppingCart();
-        cart.setId("FF");
-        cart.getItems().add(new ShoppingCart.Item());
-        EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().getCart(cart.getId()))
+        EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().removeItem(cart.getId(), 0))
                 .andReturn(cart);
-        EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().putCart(cart))
-                .andReturn(cart.getId());
 
         testShoppingCartServiceFactory.replay();
         ShoppingCart userCart = endpoint.removeItem(caller, cart.getId(), 0);
         assertNotNull(userCart);
         assertEquals(cart, userCart);
-        assertTrue(cart.getItems().isEmpty());
     }
 
     @Test

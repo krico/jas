@@ -1,7 +1,10 @@
 package com.jasify.schedule.appengine.model.cart;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.memcache.MemcacheService;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.memcache.BaseMemcacheTransaction;
+import com.jasify.schedule.appengine.memcache.MemcacheOperator;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.slim3.memcache.Memcache;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -70,6 +75,39 @@ public class DefaultShoppingCartService implements ShoppingCartService {
         ShoppingCart value = new ShoppingCart(cartId);
         Memcache.put(cartId, value);
         return value;
+    }
+
+    @Nonnull
+    @Override
+    public ShoppingCart addItem(@Nonnull final String cartId, @Nonnull final ShoppingCart.Item item) {
+        return MemcacheOperator.update(new BaseMemcacheTransaction<ShoppingCart>(cartId) {
+            @Nonnull
+            @Override
+            public ShoppingCart execute(@Nullable MemcacheService.IdentifiableValue identifiable) {
+                ShoppingCart cart = identifiable == null ? new ShoppingCart(cartId) : (ShoppingCart) identifiable.getValue();
+                cart.getItems().add(item);
+                return cart;
+            }
+        });
+    }
+
+    @Nonnull
+    @Override
+    public ShoppingCart removeItem(@Nonnull final String cartId, final int ordinal) {
+        return MemcacheOperator.update(new BaseMemcacheTransaction<ShoppingCart>(cartId) {
+            @Nonnull
+            @Override
+            public ShoppingCart execute(@Nullable MemcacheService.IdentifiableValue identifiable) {
+                ShoppingCart cart = identifiable == null ? new ShoppingCart(cartId) : (ShoppingCart) identifiable.getValue();
+                List<ShoppingCart.Item> items = cart.getItems();
+                if (ordinal >= 0 && ordinal < items.size()) {
+                    items.remove(ordinal);
+                } else {
+                    throw new IllegalArgumentException("Item ordinal: " + ordinal);
+                }
+                return cart;
+            }
+        });
     }
 
     private static class Singleton {
