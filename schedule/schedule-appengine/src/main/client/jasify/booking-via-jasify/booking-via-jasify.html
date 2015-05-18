@@ -21,12 +21,12 @@
                         <div class="activity-listview listview lv-bordered lv-lg">
                             <div class="lv-body">
                                 <div ng-repeat="activity in vm.activities" class="selectable-lv-item lv-item media"
-                                     ng-class="{ 'active' : vm.selection.indexOf(activity) !== -1 }">
+                                     ng-class="{ 'active' : vm.activitySelection && vm.activitySelection.indexOf(activity) !== -1 }">
                                     <div ng-class="{ 'disabled': vm.isFullyBooked(activity) }"
                                          class="checkbox pull-left">
                                         <label>
                                             <input ng-disabled="vm.isFullyBooked(activity)" type="checkbox"
-                                                   checklist-model="vm.selection"
+                                                   checklist-model="vm.activitySelection"
                                                    checklist-value="activity">
                                             <i class="input-helper"></i>
                                         </label>
@@ -168,7 +168,7 @@
                 </div>
                 <div ng-if="vm.auth.isAuthenticated()">
                     <div class="card">
-                        <div ng-show="!!vm.selection.length || vm.hasCompletedActivityPackages()"
+                        <div ng-show="!!vm.activitySelection.length || vm.hasCompletedActivityPackages()"
                              class="bgm-bluegray card-header card-header-with-icon m-b-20">
                             <h2>Your Selection summary
                                 <small>Review selected activities & activity packages. If everything is OK, submit it.
@@ -177,7 +177,7 @@
                             <button ng-click="vm.bookIt()" class="btn bgm-blue btn-float waves-effect btn-float-text">
                                 Submit <i class="md md-shopping-cart"></i></button>
                         </div>
-                        <div ng-show="!vm.selection.length && !vm.hasCompletedActivityPackages()"
+                        <div ng-show="!vm.activitySelection.length && !vm.hasCompletedActivityPackages()"
                              class="bgm-amber card-header card-header-with-icon m-b-20">
                             <h2>No Items selected
                                 <small>You did not select any activities nor activity packages. Browse back to Activity list and select
@@ -216,12 +216,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div ng-show="vm.selection.length" class="activity-listview listview lv-bordered lv-lg">
+                            <div ng-show="vm.activitySelection.length" class="activity-listview listview lv-bordered lv-lg">
                                 <div class="lv-header-alt">
                                     <h2 class="lvh-label">Selected Activities</h2>
                                 </div>
                                 <div class="lv-body">
-                                    <div class="lv-item media" ng-repeat="activity in vm.selection">
+                                    <div class="lv-item media" ng-repeat="activity in vm.activitySelection">
                                         <div class="media-body">
                                             <div class="lv-title">
                                                 {{$index + 1}}. {{activity.activityType.name}}
