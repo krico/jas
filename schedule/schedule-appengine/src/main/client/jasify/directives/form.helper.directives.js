@@ -34,6 +34,12 @@
 
     });
 
+    jasifyDirectivesFormModule.provider('$moment', function() {
+        this.$get = ['$window', function($window) {
+            return $window.moment;
+        }];
+    });
+
     jasifyDirectivesFormModule.directive('btnHref', function ($location) {
         return function (scope, element, attrs) {
             var path;
@@ -89,6 +95,77 @@
                 }
 
                 $(element).bootstrapWizard(options);
+            }
+        };
+    });
+
+    jasifyDirectivesFormModule.directive('autoSize', function () {
+        return {
+            restrict: 'C',
+            link: function (scope, element) {
+                autosize && autosize(element);
+            }
+        };
+    });
+
+    jasifyDirectivesFormModule.directive('timePicker', function () {
+        return {
+            restrict: 'C',
+            link: function ($scope, element, attr) {
+                $(element).datetimepicker({
+                    format: 'LT',
+                    useCurrent: false,
+                    defaultDate: $scope.$eval(attr.defaultDate)
+                }).on('dp.change', function(e) {
+                    return $scope.$apply(function () {
+                        var i, obj, objPath, path, _i, _len;
+                        if (e.date) {
+                            objPath = attr.ngModel.split(".");
+                            obj = $scope;
+                            for (i = _i = 0, _len = objPath.length; _i < _len; i = ++_i) {
+                                path = objPath[i];
+                                if (!obj[path]) {
+                                    obj[path] = {};
+                                }
+                                if (i === objPath.length - 1) {
+                                    obj[path] = e.date.format('LT');
+                                } else {
+                                    obj = obj[path];
+                                }
+                            }
+                        }
+                    });
+                }).trigger('db.update');
+            }
+        };
+    });
+
+    jasifyDirectivesFormModule.directive('datePicker', function () {
+        return {
+            restrict: 'C',
+            link: function ($scope, element, attr) {
+                $(element).datetimepicker({
+                    format: 'DD/MM/YYYY'
+                }).on('dp.change', function(e) {
+                    return $scope.$apply(function () {
+                        var i, obj, objPath, path, _i, _len;
+                        if (e.date) {
+                            objPath = attr.ngModel.split(".");
+                            obj = $scope;
+                            for (i = _i = 0, _len = objPath.length; _i < _len; i = ++_i) {
+                                path = objPath[i];
+                                if (!obj[path]) {
+                                    obj[path] = {};
+                                }
+                                if (i === objPath.length - 1) {
+                                    obj[path] = e.date.format('DD/MM/YYYY');
+                                } else {
+                                    obj = obj[path];
+                                }
+                            }
+                        }
+                    });
+                });
             }
         };
     });
