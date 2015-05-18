@@ -47,6 +47,9 @@
                 }, newAP);
                 vm.activityPackages = newAP;
             }
+            function fail(r) {
+                vm.alert('error', 'Failed to remove activity package!');
+            }
         }
 
         function setSelectedOrganization(organizationId) {
