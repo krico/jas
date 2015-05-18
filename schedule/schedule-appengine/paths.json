@@ -68,7 +68,7 @@
         "angular-spinner/angular-spinner.js",
         "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js",
         "bootstrap-sweetalert/lib/sweet-alert.js",
-        "lodash/lodash.js"
+        "lodash/lodash.js",
         "autosize/dest/autosize.js",
         "moment/min/moment.min.js",
         "eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
