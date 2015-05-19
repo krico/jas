@@ -1,0 +1,5 @@
+Order        #: %OrderNumber%
+Purchased From: %PublisherName%
+Package       : %ActivityPackageName%
+Price         : %ActivityPackagePrice%
+%ActivityPackageActivityDetails%

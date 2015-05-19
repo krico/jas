@@ -1,0 +1,3 @@
+Activity      : %ActivityName%
+Start         : %ActivityStart%
+Finish        : %ActivityFinish%
