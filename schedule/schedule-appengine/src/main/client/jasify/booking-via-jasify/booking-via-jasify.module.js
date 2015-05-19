@@ -1,6 +1,9 @@
+/*global window */
 (function (angular) {
 
-    var module = angular.module('jasify.bookingViaJasify', [
+    'use strict';
+
+    angular.module('jasify.bookingViaJasify', [
         'ngRoute',
         'ngResource',
         'ngMessages',
@@ -26,27 +29,17 @@
                 controller: 'BookingViaJasify',
                 controllerAs: 'vm',
                 resolve: {
-                    allow: function(Allow) {
+                    allow: function (Allow) {
                         return Allow.all();
                     },
-                    activities: function($route, Activity) {
-                        return Activity.query({organizationId: $route.current.params.organizationId });
+                    activities: function ($route, Activity) {
+                        return Activity.query({organizationId: $route.current.params.organizationId});
                     },
-                    activityPackages: function ($q, $route, Allow, ActivityPackage) {
-
-                        return Allow.adminOrOrgMember().then(allowed, forbidden);
-
-                        function allowed() {
-                            if ($route.current.params.organizationId) {
-                                return ActivityPackage.query($route.current.params.organizationId);
-                            } else {
-                                return {items: []};
-                            }
+                    activityPackages: function ($route, ActivityPackage) {
+                        if ($route.current.params.organizationId) {
+                            return ActivityPackage.query($route.current.params.organizationId);
                         }
-
-                        function forbidden(reason) {
-                            return $q.reject(reason);
-                        }
+                        return {items: []};
                     }
                 }
             }).when('/done', {
@@ -59,4 +52,4 @@
             });
     }
 
-})(angular);
+}(window.angular));
