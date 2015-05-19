@@ -55,7 +55,7 @@
         }
 
         function addActivity() {
-            $location.path('/admin/activity');
+            $location.path('/admin/activity').search('organizationId', vm.organization.id);
         }
 
         function viewSubscribers(id) {

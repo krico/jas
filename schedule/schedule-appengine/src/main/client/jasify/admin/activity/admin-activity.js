@@ -30,7 +30,7 @@
 
             vm.activityTypes = [];
 
-            if (!organization.id) {
+            if (!organization || !organization.id) {
                 return;
             }
 
@@ -134,16 +134,24 @@
         }
 
         function initOrganization() {
+
+            if (!vm.organizations || vm.organizations.length === 0) {
+                return;
+            }
+
             if (activity.id) {
                 vm.organization = _.find(
                     vm.organizations,
                     {id: vm.activity.activityType.organizationId}
                 );
             } else {
-                if (vm.organizations && vm.organizations.length === 1) {
+                if (vm.organizations.length === 1) {
                     vm.organization = vm.organizations[0];
-                    vm.loadActivityTypes(vm.organization);
+                } else {
+                    vm.organization = _.find(vm.organizations, { id: $location.search().organizationId})
                 }
+
+                vm.loadActivityTypes(vm.organization);
             }
         }
 
