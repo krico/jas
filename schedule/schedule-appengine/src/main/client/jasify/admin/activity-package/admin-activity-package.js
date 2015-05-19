@@ -91,6 +91,8 @@
 
             ActivityPackage.add(vm.activityPackage, vm.selectedActivities).then(function (resp) {
                 jasDialogs.success('Activity Package was created.');
+
+                $location.search({});
                 $location.path('/admin/activity-package/' + resp.id);
             }, function () {
                 jasDialogs.error('Failed to create Activity Package. Please try again.');

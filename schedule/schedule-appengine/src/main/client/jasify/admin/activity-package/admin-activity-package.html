@@ -1,37 +1,49 @@
 <form novalidate name="vm.activityPackageForm" class="form-horizontal" role="form"
       ng-submit="vm.activityPackageForm.$valid && vm.save(vm.activityPackage)">
     <div class="card">
-        <div class="card-header" ng-if="!vm.activityPackage.id">
-            <div class="actions-group">
-                <a-button type="submit" controller="vm.saveBtn"></a-button>
-                <a-button type="button" ng-click="vm.reset()" controller="vm.resetBtn"></a-button>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="card-header" ng-if="!vm.activityPackage.id">
+                    <div class="actions-group">
+                        <a-button type="submit" controller="vm.saveBtn"></a-button>
+                        <button type="button"
+                                btn-href="/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}"
+                                class="btn btn-default waves-effect">Cancel
+                        </button>
+                    </div>
+                    <a class="back-button"
+                       ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
+                        <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+                    </a>
+
+                    <h2>New Activity Package
+                        <small>Group Activities into Package</small>
+                    </h2>
+                </div>
+                <div class="card-header" ng-if="vm.activityPackage.id">
+                    <div class="actions-group">
+                        <a-button type="submit" controller="vm.saveBtn"></a-button>
+                        <button type="button"
+                                btn-href="/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}"
+                                class="btn btn-default waves-effect">Cancel
+                        </button>
+                    </div>
+                    <a class="back-button"
+                       ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
+                        <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+                    </a>
+
+                    <h2>Edit Activity Package
+                        <small>Group Activities into Package</small>
+                    </h2>
+                </div>
             </div>
-            <a class="back-button"
-               ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
-                <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
-            </a>
-            <h2>New Activity Package
-                <small>Group Activities into Package</small>
-            </h2>
-        </div>
-        <div class="card-header" ng-if="vm.activityPackage.id">
-            <div class="actions-group">
-                <a-button type="submit" controller="vm.saveBtn"></a-button>
-                <a-button type="button" ng-click="vm.reset()" controller="vm.resetBtn"></a-button>
-            </div>
-            <a class="back-button"
-               ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
-                <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
-            </a>
-            <h2>Edit Activity Package
-                <small>Group Activities into Package</small>
-            </h2>
         </div>
         <div class="card-body card-padding-sm">
             <div jas-has-feedback class="form-group">
-                <label for="name" class="col-sm-2 control-label">Name:</label>
+                <label for="name" class="col-sm-3 control-label">Name:</label>
 
-                <div class="col-sm-4">
+                <div class="col-sm-5">
                     <div class="fg-line">
                         <input placeholder="Enter name" ng-model="vm.activityPackage.name" type="text"
                                class="form-control" id="name" name="name" required/>
@@ -45,9 +57,9 @@
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
-                <label for="description" class="col-sm-2 control-label">Description:</label>
+                <label for="description" class="col-sm-3 control-label">Description:</label>
 
-                <div class="col-sm-4">
+                <div class="col-sm-5">
                     <div class="fg-line">
                         <textarea ng-model="vm.activityPackage.description"
                                   id="description" name="description"
@@ -63,10 +75,9 @@
                     </jas-error-help-block>
                 </div>
             </div>
-            <div jas-has-feedback class="form-group">
-                <label for="price" class="col-sm-2 control-label">Price:</label>
-
-                <div class="col-sm-4">
+            <div class="form-group">
+                <label for="price" class="col-sm-3  col-xs-12 control-label">Price:</label>
+                <div jas-has-feedback class="col-sm-3 col-xs-6">
                     <div class="fg-line">
                         <input id="price" name="price" type="number" min="0" max="10000" class="form-control"
                                ng-model="vm.activityPackage.price" required placeholder="Enter price"
@@ -82,26 +93,28 @@
                         <span ng-message="max">Value must be smaller than 10000.</span>
                     </jas-error-help-block>
                 </div>
-            </div>
-            <div jas-has-feedback class="form-group">
-                <label for="currency" class="col-sm-2 control-label">Currency:</label>
-
-                <div class="col-sm-4">
+                <div jas-has-feedback class="col-sm-2 col-xs-6">
                     <div class="fg-line">
                         <div class="select">
-                            <select ng-model="vm.activityPackage.currency" name="currency" id="currency" required
-                                    class="form-control">
+                            <select name="currency" id="currency" required class="form-control"
+                                    ng-model="vm.activityPackage.currency">
                                 <option>CHF</option>
                             </select>
                         </div>
                     </div>
+                    <jas-feedback-icon-valid field="vm.activityForm.currency"></jas-feedback-icon-valid>
+                    <jas-feedback-icon-invalid field="vm.activityForm.currency"
+                                               form="vm.activityForm"></jas-feedback-icon-invalid>
+                    <jas-error-help-block field="vm.activityForm.currency" form="vm.activityForm">
+                        <span ng-message="required">Currency is required.</span>
+                    </jas-error-help-block>
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
-                <label for="itemCount" class="col-sm-2 control-label"
+                <label for="itemCount" class="col-sm-3 control-label"
                        tooltip="Number of activities a client can subscribe to">Item Count:</label>
 
-                <div class="col-sm-4">
+                <div class="col-sm-5">
                     <div class="fg-line">
                         <input id="itemCount" name="itemCount" type="number"
                                min="2" max="100" class="form-control" placeholder="Enter Item Count"
@@ -119,9 +132,9 @@
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
-                <label class="control-label col-sm-2" for="organization">Organization:</label>
+                <label class="control-label col-sm-3" for="organization">Organization:</label>
 
-                <div class="col-sm-4">
+                <div class="col-sm-5">
                     <div class="fg-line">
                         <div class="select">
                             <select id="organization" name="organization" class="form-control"
@@ -141,11 +154,14 @@
                 </div>
             </div>
 
-            <md-subheader class="md-no-sticky bgm-bluegray c-white">Activities ({{vm.selectedActivities.length || 0}} selected)</md-subheader>
+            <md-subheader class="md-no-sticky bgm-bluegray c-white">Activities ({{vm.selectedActivities.length || 0}}
+                selected)
+            </md-subheader>
             <div id="activity-selection-lists" class="row">
                 <div class="col-xs-6">
                     <md-list>
-                        <md-subheader class="md-no-sticky">Available <br class="visible-xs-block" /> (click to select)</md-subheader>
+                        <md-subheader class="md-no-sticky">Available <br class="visible-xs-block"/> (click to select)
+                        </md-subheader>
                         <md-list-item ng-click="vm.selectActivity(activity)" div layout="row"
                                       layout-align="start center" class="md-2-line"
                                       ng-repeat="activity in vm.activities | filter:vm.filterSelected">
@@ -162,7 +178,8 @@
                 </div>
                 <div class="col-xs-6">
                     <md-list>
-                        <md-subheader class="md-no-sticky">Selected <br class="visible-xs-block"  /> (click to deselect)</md-subheader>
+                        <md-subheader class="md-no-sticky">Selected <br class="visible-xs-block"/> (click to deselect)
+                        </md-subheader>
                         <md-list-item ng-click="vm.deselectActivity(activity.id)" div layout="row"
                                       layout-align="start center" class="md-2-line"
                                       ng-repeat="activity in vm.selectedActivities">
