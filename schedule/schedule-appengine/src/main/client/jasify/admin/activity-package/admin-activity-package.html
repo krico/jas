@@ -11,11 +11,7 @@
                                 class="btn btn-default waves-effect">Cancel
                         </button>
                     </div>
-                    <a class="back-button"
-                       ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
-                        <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
-                    </a>
-
+                    <card-back ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}"></card-back>
                     <h2>New Activity Package
                         <small>Group Activities into Package</small>
                     </h2>

@@ -66,7 +66,7 @@
         </div>
     </div>
     <div class="table-responsive">
-        <table id="users-list" class="table-vmiddle table table-striped table-hover">
+        <table id="users-list" class="table table-condensed table-striped table-hover table-vmiddle ">
             <thead>
             <tr>
                 <th>
@@ -83,7 +83,7 @@
             <tbody>
             <tr ng-repeat="user in vm.users track by user.id">
                 <td>
-                    <button title="Edit {{user.name}}" ng-click="vm.viewUser(user.id)" type="button" class="btn btn-primary"
+                    <button title="Edit {{user.name}}" ng-click="vm.viewUser(user.id)" type="button" class="btn btn-sm btn-primary"
                             data-row-id="{{user.id}}">
                         <span class="mdi mdi-edit"></span> Edit
                     </button>

@@ -19,6 +19,7 @@
         'jasify.checkout',
         'jasify.templates',
         'jasify.filters',
+        'jasify.common.ui',
         'angular.filter',
         'bs3dp4ng'
     ]);

@@ -336,7 +336,6 @@ td.actions-column {
   }
 }
 
-
 .fw-nav {
   li:not(.active) {
     .badge {
@@ -359,4 +358,18 @@ td.actions-column {
 
 .card .row .card-header {
   padding-right: 0;
+}
+
+.btn.btn-icon.btn-primary.command-edit:not(:hover) .mdi,
+.btn.btn-icon.btn-danger.command-delete:not(:hover) .mdi {
+  color: rgb(94, 94, 94);
+}
+
+.btn.btn-icon.btn-primary.command-edit:focus .mdi,
+.btn.btn-icon.btn-danger.command-delete:focus .mdi {
+  color: white;
+}
+
+.command-edit, .command-delete {
+  margin: 0 2px;
 }
