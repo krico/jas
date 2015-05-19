@@ -1,14 +1,14 @@
-/*global window */
+/*global window, _ */
 (function (angular) {
 
     'use strict';
 
     angular.module('jasify.admin').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($location, $moment, Activity, aButtonController, ActivityType, activity, organizations) {
-        var vm = this,
-            loadActivityTypes,
-            activityTypeChanged;
+    function AdminActivityController($location, $moment,
+                                     jasDialogs, Activity, aButtonController, ActivityType,
+                                     activity, organizations) {
+        var vm = this;
 
         vm.saveBtn = aButtonController.createSave();
         vm.organizations = organizations.items;
@@ -22,13 +22,17 @@
             vm.defaultFromDate = $moment(activity.start);
             vm.defaultToDate = $moment(activity.finish);
 
-            vm.organizationForActivity = _.find(
+            vm.organization = _.find(
                 vm.organizations,
                 {id: vm.activity.activityType.organizationId}
             );
         } else {
             vm.defaultFromDate = $moment().add(1, 'hour');
             vm.defaultToDate = $moment().add(2, 'hour');
+            if (vm.organizations && vm.organizations.length === 2) {
+                vm.organization = vm.organizations[0];
+                vm.loadActivityTypes(vm.organization);
+            }
         }
 
         vm.activity.fromDate = vm.defaultFromDate.format('DD/MM/YYYY');
@@ -96,8 +100,13 @@
                     vm.activity.toTime = $moment(vm.activity.finish).format('LT');
                 } else {
                     if (result.items.length === 1) {
+                        jasDialogs.success('Activity was created.');
                         $location.path('/admin/activity/' + result.items[0].id);
+                    } else if (result.items.length > 1) {
+                        jasDialogs.success(result.items.length + ' activities were created.');
+                        $location.path("/admin/activities/" + result.items[0].activityType.organizationId);
                     } else {
+                        jasDialogs.warning('No activities were created.');
                         $location.path("/admin/activities");
                     }
                 }

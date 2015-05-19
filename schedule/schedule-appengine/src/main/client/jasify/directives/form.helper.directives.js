@@ -219,8 +219,6 @@
             restrict: 'A',
             link: function (scope, element, attrs) {
 
-                debugger
-
                 var $element = $(element),
                     formName = $element.closest('form').attr('name'),
                     formFieldName = $element.find('input, select, textarea').attr('name');
