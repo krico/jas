@@ -94,6 +94,9 @@
                     };
 
                 } else {
+
+                    $location.search({});
+
                     if (result.items.length === 1) {
                         jasDialogs.success('Activity was created.');
                         $location.path('/admin/activity/' + result.items[0].id);
