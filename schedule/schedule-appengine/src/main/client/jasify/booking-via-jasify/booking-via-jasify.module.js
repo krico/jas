@@ -3,7 +3,7 @@
 
     'use strict';
 
-    angular.module('jasify.bookingViaJasify', [
+    var bookingViaJasify = angular.module('jasify.bookingViaJasify', [
         'ngRoute',
         'ngResource',
         'ngMessages',
@@ -11,6 +11,7 @@
         'ngSanitize',
         'ui.bootstrap',
         'angularSpinner',
+        'LocalStorageModule',
         'ui.bootstrap.datetimepicker',
         'jasifyComponents',
         'jasify.authenticate',
@@ -20,10 +21,26 @@
         'jasify.templates',
         "checklist-model",
         "jasify.filters"
-    ]).config(bookingViaRoutes);
+    ]);
+
+    bookingViaJasify.config(bookingViaRoutes);
+    bookingViaJasify.constant('sessionStorageKeys', {
+        activityPackageSelection: 'activityPackageSelection',
+        activitySelection: 'activitySelection'
+    });
 
     function bookingViaRoutes($routeProvider) {
         $routeProvider
+            .when('/done', {
+                templateUrl: 'booking-via-jasify/booking-via-jasify-done.html',
+                resolve: {
+                    allow: /*@ngInject*/ function (Allow, localStorageService, sessionStorageKeys) {
+                        localStorageService.remove(sessionStorageKeys.activityPackageSelection);
+                        localStorageService.remove(sessionStorageKeys.activitySelection);
+                        return Allow.all();
+                    }
+                }
+            })
             .when('/:organizationId', {
                 templateUrl: 'booking-via-jasify/booking-via-jasify.html',
                 controller: 'BookingViaJasify',
@@ -42,14 +59,13 @@
                         return {items: []};
                     }
                 }
-            }).when('/done', {
-                templateUrl: 'booking-via-jasify/booking-via-jasify-done.html',
-                resolve: {
-                    allow: /*@ngInject*/ function (Allow) {
-                        return Allow.all();
-                    }
-                }
             });
     }
+
+    bookingViaJasify.config(function (localStorageServiceProvider) {
+        localStorageServiceProvider
+            .setStorageType('sessionStorage')
+            .setPrefix('bookingViaJasify');
+    });
 
 }(window.angular));

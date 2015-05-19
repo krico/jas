@@ -82,7 +82,7 @@ describe('BookingViaJasify', function () {
         spyOn(ShoopingCart, 'clearUserCart').and.callFake(function () {
             return $q.when(true);
         });
-        controller = $controller('BookingViaJasify', {activities: activities, activityPackages: activityPackages});
+        controller = $controller('BookingViaJasify', {$scope: $rootScope.$new(), activities: activities, activityPackages: activityPackages});
     }));
 
     it('should expose activities', function () {
