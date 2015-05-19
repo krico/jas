@@ -1,4 +1,4 @@
-<div class="card">
+<div ng-if="vm.organizations.length > 0" class="card">
     <div class="card-header">
         <h2>Activity Packages
             <small>
@@ -68,9 +68,15 @@
         </tbody>
     </table>
 </div>
-<div class="card" ng-if="vm.activityPackages.length === 0">
+<div class="card" ng-if="vm.organizations.length > 0 && vm.activityPackages.length === 0">
     <div class="card-padding card-body text-center">
-        <p>No Activity Packages are defined.</p>
-        <button ng-click="vm.addActivityPackage()" class="btn btn-primary waves-effect">Create First</button>
+        <p>No Activity Packages are defined for {{vm.organization.name}}.</p>
+        <button ng-click="vm.addActivityPackage()" class="btn btn-primary waves-effect">Create Activity Package</button>
+    </div>
+</div>
+<div class="card" ng-if="vm.organizations.length === 0">
+    <div class="card-padding card-body text-center">
+        <p>Before creating Activity Package you need to create Organization.</p>
+        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
     </div>
 </div>
