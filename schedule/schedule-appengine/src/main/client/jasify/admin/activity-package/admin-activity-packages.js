@@ -14,8 +14,11 @@
         vm.viewActivityPackage = viewActivityPackage;
         vm.remove = remove;
 
-        vm.setSelectedOrganization($routeParams.organizationId);
-        $location.search('organizationId', null);
+        if ($routeParams.organizationId) {
+            vm.setSelectedOrganization($routeParams.organizationId);
+        } else if (vm.organizations.length > 0) {
+            vm.organizationSelected(vm.organizations[0])
+        }
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
