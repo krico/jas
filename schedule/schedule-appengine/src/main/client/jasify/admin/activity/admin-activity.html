@@ -1,10 +1,15 @@
-<form novalidate class="form-horizontal" name="vm.activityForm" ng-submit="vm.activityForm.$valid && vm.saveOrUpdate()">
+<form novalidate class="form-horizontal" name="vm.activityForm"
+      ng-submit="vm.activityForm.$valid && vm.saveOrUpdate()">
     <div class="card">
         <div class="card-header">
             <div class="actions-group">
                 <a-button type="submit" controller="vm.saveBtn"></a-button>
-                <button type="button" btn-href="/admin/activities" class="btn btn-default waves-effect">Cancel</button>
+                <button type="button" btn-href="/admin/activities" class="btn btn-default waves-effect">Cancel
+                </button>
             </div>
+            <a class="back-button" href="#/admin/activities">
+                <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
+            </a>
             <h2 ng-if="!vm.activity.id">New Activity
                 <small>Select Organization & Activity Type and create Activities.</small>
             </h2>
@@ -22,7 +27,8 @@
                             <div class="fg-line">
                                 <div class="select">
                                     <select id="organization" name="organization" class="form-control" required
-                                            ng-model="vm.organization" ng-change="vm.loadActivityTypes(vm.organization)"
+                                            ng-model="vm.organization"
+                                            ng-change="vm.loadActivityTypes(vm.organization)"
                                             ng-options="organization as organization.name for organization in vm.organizations">
                                     </select>
                                 </div>
@@ -41,7 +47,7 @@
                     <div jas-has-feedback class="form-group">
                         <label for="activityType" class="col-sm-4 control-label">Activity Type:</label>
 
-                        <div class="col-sm-8" ng-show="!vm.activity.id" >
+                        <div class="col-sm-8" ng-show="!vm.activity.id">
                             <div class="fg-line">
                                 <div class="select">
                                     <select id="activityType" name="activityType" class="form-control" required
@@ -67,8 +73,10 @@
                         <div class="col-sm-4 time-date-pair">
                             <div class="col-sm-6" jas-has-feedback>
                                 <div class="fg-line">
-                                    <input name="fromDate" class="form-control date-picker" placeholder="DD/MM/YYYY"
-                                           required default-date="vm.defaultFromDate" ng-model="vm.activity.fromDate">
+                                    <input name="fromDate" class="form-control date-picker"
+                                           date-picker-options="vm.fromDateOptions"
+                                           ng-change="vm.updateMinToDate()"
+                                           required ng-model="vm.activity.start">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.fromDate" form="vm.activityForm">
                                     <span ng-message="required">Starting date is required.</span>
@@ -76,9 +84,8 @@
                             </div>
                             <div class="col-sm-5" jas-has-feedback>
                                 <div class="fg-line">
-                                    <input name="fromTime" class="form-control time-picker" placeholder="HH:MM" required
-                                           default-date="vm.defaultFromDate"
-                                           ng-model="vm.activity.fromTime">
+                                    <input name="fromTime" class="form-control time-picker" required
+                                           ng-model="vm.fromTime">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.fromTime" form="vm.activityForm">
                                     <span ng-message="required">Starting hour is required.</span>
@@ -89,8 +96,9 @@
                         <div class="col-sm-4 time-date-pair">
                             <div class="col-sm-6" jas-has-feedback>
                                 <div class="fg-line">
-                                    <input name="toDate" class="form-control date-picker" placeholder="DD/MM/YYYY"
-                                           required default-date="vm.defaultToDate" ng-model="vm.activity.toDate">
+                                    <input name="toDate" class="form-control date-picker"
+                                           date-picker-options="vm.toDateOptions"
+                                           required ng-model="vm.activity.finish">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.toDate" form="vm.activityForm">
                                     <span ng-message="required">Ending date is required.</span>
@@ -98,10 +106,8 @@
                             </div>
                             <div class="col-sm-6" jas-has-feedback>
                                 <div class="fg-line">
-                                    <input name="toTime" class="form-control time-picker"
-                                           placeholder="HH:MM" required
-                                           default-date="vm.defaultToDate"
-                                           ng-model="vm.activity.toTime">
+                                    <input name="toTime" class="form-control time-picker" required
+                                           ng-model="vm.toTime">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.toTime" form="vm.activityForm">
                                     <span ng-message="required">Ending hour is required.</span>
@@ -298,12 +304,14 @@
                                 <div class="fg-line">
                                     <input name="endsOnDateValue" id="endsOnDateValue" type='text'
                                            class="form-control date-picker"
+                                           date-picker-options="vm.repeatUntilDateOptions"
                                            ng-focus="vm.repeatDetails.repeatUntilType = 'Date'"
                                            ng-required="vm.repeatDetails.repeatType !== 'No' && vm.repeatDetails.repeatUntilType === 'Date'"
                                            ng-model="vm.repeatDetails.untilDate" data-toggle="dropdown"
                                            placeholder="Enter activity end date">
                                 </div>
-                                <jas-feedback-icon-valid field="vm.activityForm.endsOnDateValue"></jas-feedback-icon-valid>
+                                <jas-feedback-icon-valid
+                                        field="vm.activityForm.endsOnDateValue"></jas-feedback-icon-valid>
                                 <jas-feedback-icon-invalid field="vm.activityForm.endsOnDateValue"
                                                            form="vm.activityForm"></jas-feedback-icon-invalid>
                             </div>
@@ -332,9 +340,10 @@
                                            ng-model="vm.repeatDetails.untilCount"
                                            ng-required="vm.repeatDetails.repeatUntilType === 'Count'"
                                            ng-focus="vm.repeatDetails.repeatUntilType = 'Count'"
-                                           min="1" max="100" class="form-control">
+                                           min="2" max="100" class="form-control">
                                 </div>
-                                <jas-feedback-icon-valid field="vm.activityForm.endsAfterOccurences"></jas-feedback-icon-valid>
+                                <jas-feedback-icon-valid
+                                        field="vm.activityForm.endsAfterOccurences"></jas-feedback-icon-valid>
                                 <jas-feedback-icon-invalid field="vm.activityForm.endsAfterOccurences"
                                                            form="vm.activityForm"></jas-feedback-icon-invalid>
                             </div>
@@ -344,9 +353,10 @@
                         </div>
                         <div class="col-sm-offset-4 col-sm-12"
                              ng-class="{ 'has-error': vm.activityForm.endsAfterOccurences.$invalid }">
-                            <jas-error-help-block field="vm.activityForm.endsAfterOccurences" form="vm.activityForm">
+                            <jas-error-help-block field="vm.activityForm.endsAfterOccurences"
+                                                  form="vm.activityForm">
                                 <span ng-message="required">Times number is required.</span>
-                                <span ng-message="min">Times min value is 1.</span>
+                                <span ng-message="min">Times min value is 2.</span>
                                 <span ng-message="max">Times max value is 100.</span>
                             </jas-error-help-block>
                         </div>

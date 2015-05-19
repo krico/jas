@@ -69,9 +69,9 @@
         "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js",
         "bootstrap-sweetalert/lib/sweet-alert.js",
         "lodash/lodash.js",
-        "autosize/dest/autosize.js",
+        "autosize/dist/autosize.js",
         "moment/min/moment.min.js",
-        "eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
+        "eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js"
       ],
       "iframecontentwindow": [
         "iframe-resizer/js/iframeResizer.contentWindow.min.js"

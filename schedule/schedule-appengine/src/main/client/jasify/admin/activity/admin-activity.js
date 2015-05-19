@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($location, $moment,
+    function AdminActivityController($scope, $location, $moment,
                                      jasDialogs, Activity, aButtonController, ActivityType,
                                      activity, organizations) {
         var vm = this;
@@ -14,32 +14,10 @@
         vm.organizations = organizations.items;
         vm.loadActivityTypes = loadActivityTypes;
         vm.activityTypeChanged = activityTypeChanged;
-
         vm.activity = activity;
 
-        if (activity.id) {
-
-            vm.defaultFromDate = $moment(activity.start);
-            vm.defaultToDate = $moment(activity.finish);
-
-            vm.organization = _.find(
-                vm.organizations,
-                {id: vm.activity.activityType.organizationId}
-            );
-        } else {
-            vm.defaultFromDate = $moment().add(1, 'hour');
-            vm.defaultToDate = $moment().add(2, 'hour');
-            if (vm.organizations && vm.organizations.length === 2) {
-                vm.organization = vm.organizations[0];
-                vm.loadActivityTypes(vm.organization);
-            }
-        }
-
-        vm.activity.fromDate = vm.defaultFromDate.format('DD/MM/YYYY');
-        vm.activity.fromTime = vm.defaultFromDate.format('LT');
-
-        vm.activity.toDate = vm.defaultToDate.format('DD/MM/YYYY');
-        vm.activity.toTime = vm.defaultToDate.format('LT');
+        initOrganization();
+        initDates();
 
         vm.saveOrUpdate = saveOrUpdate;
 
@@ -73,14 +51,25 @@
             var activityToSave = angular.copy(vm.activity),
                 promise;
 
-            activityToSave.start = $moment(vm.activity.fromDate + " " + vm.activity.fromTime, "DD/MM/YYYY LT");
-            activityToSave.finish = $moment(vm.activity.toDate + " " + vm.activity.toTime, "DD/MM/YYYY LT");
+            activityToSave.start = $moment(activityToSave.start)
+                .set('hour', vm.fromTime.hour)
+                .set('minute', vm.fromTime.minute)
+                .format();
 
-            delete activityToSave.fromDate;
-            delete activityToSave.fromTime;
+            activityToSave.finish = $moment(activityToSave.finish)
+                .set('hour', vm.toTime.hour)
+                .set('minute', vm.toTime.minute)
+                .format();
 
-            delete activityToSave.toDate;
-            delete activityToSave.toTime;
+            if (activityToSave.start > activityToSave.finish) {
+                jasDialogs.warning("Activity's finish date precedes start date. Please correct.");
+                return;
+            }
+
+            if ($moment(activityToSave.start) < $moment()) {
+                jasDialogs.warning("Activity's start date precedes current date. Please correct.");
+                return;
+            }
 
             if (activityToSave.id) {
                 promise = Activity.update(activityToSave);
@@ -94,10 +83,16 @@
             function ok(result) {
                 if (activityToSave.id) {
                     vm.activity = result;
-                    vm.activity.fromDate = $moment(vm.activity.start).format('DD/MM/YYYY');
-                    vm.activity.fromTime = $moment(vm.activity.start).format('LT');
-                    vm.activity.toDate = $moment(vm.activity.finish).format('DD/MM/YYYY');
-                    vm.activity.toTime = $moment(vm.activity.finish).format('LT');
+
+                    vm.fromTime = {
+                        hour: $moment(vm.activity.start).get('hour'),
+                        minute: $moment(vm.activity.start).get('minute')
+                    };
+                    vm.toTime = {
+                        hour: $moment(vm.activity.finish).get('hour'),
+                        minute: $moment(vm.activity.finish).get('minute')
+                    };
+
                 } else {
                     if (result.items.length === 1) {
                         jasDialogs.success('Activity was created.');
@@ -136,6 +131,55 @@
             vm.activity.currency = vm.activity.activityType.currency;
             vm.activity.location = vm.activity.activityType.location;
             vm.activity.maxSubscriptions = vm.activity.activityType.maxSubscriptions;
+        }
+
+        function initOrganization() {
+            if (activity.id) {
+                vm.organization = _.find(
+                    vm.organizations,
+                    {id: vm.activity.activityType.organizationId}
+                );
+            } else {
+                if (vm.organizations && vm.organizations.length === 1) {
+                    vm.organization = vm.organizations[0];
+                    vm.loadActivityTypes(vm.organization);
+                }
+            }
+        }
+
+        function initDates() {
+
+            $scope.$watch('vm.activity.start', function () {
+                vm.repeatUntilDateOptions.minDate =
+                    vm.toDateOptions.minDate =
+                        vm.activity.start;
+            });
+
+            vm.fromDateOptions = {
+                minDate: $moment()
+            };
+
+            vm.toDateOptions = {
+                minDate: $moment()
+            };
+
+            vm.repeatUntilDateOptions = {
+                minDate: $moment()
+            };
+
+            if (!activity.id) {
+                activity.start = $moment().add(1, 'day').add(1, 'hour').set('minute', 0).format();
+                activity.finish = $moment().add(1, 'day').add(2, 'hour').set('minute', 0).format();
+            }
+
+            vm.fromTime = {
+                hour: $moment(activity.start).get('hour'),
+                minute: $moment(activity.start).get('minute')
+            };
+            vm.toTime = {
+                hour: $moment(activity.finish).get('hour'),
+                minute: $moment(activity.finish).get('minute')
+            };
         }
     }
 
