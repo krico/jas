@@ -2,7 +2,7 @@
     <div class="col-sm-12">
         <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
-    <div class="col-sm-12">
+    <div class="col-sm-12" ng-if="vm.isAdmin()">
         <form name="organizationForm" role="form" class="form-inline" novalidate ng-submit="vm.add(vm.organization)">
             <div class="form-group">
                 <label class="sr-only" for="name">Organization Name</label>
