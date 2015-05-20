@@ -65,7 +65,7 @@ gulp.task('client-tpl', clientTpl);
 gulp.task('client-js', clientJs);
 
 gulp.task('client-css', ['bower-install'], clientCss);
-gulp.task('booking-css', ['bower-install'], bookingCss)
+gulp.task('booking-css', ['bower-install'], bookingCss);
 
 gulp.task('client', ['client-tpl', 'client-js', 'client-dependencies', 'client-css', 'booking-css']);
 
@@ -113,6 +113,7 @@ function rebuild() {
     gulp.watch(paths.html, ['html']);
     gulp.watch(paths.staticHtml, ['static-html']);
     gulp.watch(paths.images, ['images']);
+    gulp.watch(paths.customJs, ['custom-js']);
 }
 
 function clean(cb) {
