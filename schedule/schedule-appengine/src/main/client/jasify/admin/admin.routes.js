@@ -21,7 +21,7 @@
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.admin();
                     },
-                    user: function(User, $route, $q) {
+                    user: function (User, $route, $q) {
                         return $route.current.params.id ?
                             User.get($route.current.params.id) : {};
                     }
@@ -106,15 +106,30 @@
                 controller: 'AdminActivitiesController',
                 controllerAs: 'vm',
                 resolve: {
-                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
-                        return Allow.adminOrOrgMember().then(
+                    organizations: /*@ngInject*/ function ($location, $route, $q, Allow, Organization) {
+
+                        var dfd = $q.defer();
+
+                        Allow.adminOrOrgMember().then(
                             function () {
-                                return Organization.query();
+                                Organization.query().then(function (result) {
+                                    if ($route.current.params.organizationId) {
+                                        dfd.resolve(result);
+                                    } else {
+                                        if (result.items && result.items.length > 0) {
+                                            $location.path('/admin/activities/' + result.items[0].id);
+                                        } else {
+                                            dfd.resolve({items: []});
+                                        }
+                                    }
+                                });
                             },
                             function (reason) {
                                 return $q.reject(reason);
                             }
                         );
+
+                        return dfd.promise;
                     },
                     activities: /*@ngInject*/ function ($q, $route, Allow, Activity) {
 
@@ -122,7 +137,14 @@
 
                         function allowed() {
                             if ($route.current.params.organizationId) {
-                                return Activity.query({organizationId: $route.current.params.organizationId});
+
+                                var dfd = $q.defer();
+
+                                Activity.query({organizationId: $route.current.params.organizationId}).then(function (result) {
+                                    dfd.resolve(angular.extend({items: []}, result));
+                                });
+
+                                return dfd.promise;
                             } else {
                                 return {items: []};
                             }
