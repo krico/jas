@@ -73,13 +73,22 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('formWizardBasic', function () {
+    jasifyDirectivesFormModule.directive('formWizardBasic', function ($log) {
         return {
             restrict: 'C',
-            link: function (scope, element) {
-                $(element).bootstrapWizard({
-                    tabClass: 'fw-nav'
-                });
+            link: function (scope, element, attrs) {
+                var options = {tabClass: 'fw-nav'};
+                if (attrs.formWizardBasic) {
+                    var extraOptions = scope.$eval(attrs.formWizardBasic);
+                    if (angular.isObject(extraOptions)) {
+                        angular.extend(options, extraOptions);
+                    } else {
+                        $log.error('formWizardBasic must evaluate to an object [' + attrs.formWizardBasic +
+                        '] evaluates to [' + angular.toJson(extraOptions) + ']');
+                    }
+                }
+
+                $(element).bootstrapWizard(options);
             }
         };
     });

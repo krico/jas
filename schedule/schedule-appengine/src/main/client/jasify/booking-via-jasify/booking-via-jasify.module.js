@@ -26,7 +26,8 @@
     bookingViaJasify.config(bookingViaRoutes);
     bookingViaJasify.constant('sessionStorageKeys', {
         activityPackageSelection: 'activityPackageSelection',
-        activitySelection: 'activitySelection'
+        activitySelection: 'activitySelection',
+        selectedTabIndex: 'selectedTabIndex'
     });
 
     function bookingViaRoutes($routeProvider) {
