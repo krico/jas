@@ -23,7 +23,7 @@
 
             currentOrganizationId = queryParams.organizationId;
 
-            var host = '';
+            var host = '/';
             if (location.hostname !== 'localhost') {
                 host = 'https://jasify-schedule.appspot.com/'
             }
