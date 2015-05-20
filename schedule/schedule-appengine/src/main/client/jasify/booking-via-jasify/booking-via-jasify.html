@@ -71,6 +71,14 @@
                         <div class="activity-listview listview lv-bordered lv-lg"
                              ng-repeat="activityPackage in vm.activityPackages">
                             <div class="lv-header-alt">
+                                <div class="checkbox pull-left">
+                                    <label>
+                                        <input type="checkbox"
+                                               ng-model="vm.activityPackageSelectAllFlags[activityPackage.id]"
+                                               ng-click="vm.selectAllForActivityPackage(activityPackage, this.checked)">
+                                        <i class="input-helper"></i>
+                                    </label>
+                                </div>
                                 <h2 class="lvh-label">{{activityPackage.name}}</h2>
                                 <br />
                                 <h2 class="lvh-label">
@@ -100,8 +108,10 @@
                                     <div ng-class="{ 'disabled': vm.disableActivityPackageActivitySelection(activity, activityPackage) }"
                                          class="checkbox pull-left">
                                         <label>
-                                            <input ng-disabled="vm.disableActivityPackageActivitySelection(activity, activityPackage)" type="checkbox"
+                                            <input type="checkbox"
+                                                   ng-disabled="vm.disableActivityPackageActivitySelection(activity, activityPackage)"
                                                    checklist-model="vm.activityPackageSelection[activityPackage.id]"
+                                                   checklist-change="vm.updateSelectAllFlag(activityPackage.id)"
                                                    checklist-value="activity">
                                             <i class="input-helper"></i>
                                         </label>
