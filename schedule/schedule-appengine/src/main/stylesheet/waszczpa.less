@@ -370,6 +370,11 @@ td.actions-column {
   color: white;
 }
 
-.command-edit, .command-delete {
-  margin: 0 2px;
+.row-commands {
+  white-space: nowrap;
+
+  [class*='command-'] ~ [class*='command-'] {
+    margin-left: 4px;
+  }
 }
+

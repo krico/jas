@@ -41,7 +41,7 @@
         </thead>
         <tbody>
         <tr ng-repeat="activity in vm.activities | orderBy:'start'">
-            <td class="text-left">
+            <td class="row-commands">
                 <row-edit action="vm.viewActivity(activity.id)"></row-edit>
                 <row-delete action="vm.remove(activity.id)"></row-delete>
             </td>
