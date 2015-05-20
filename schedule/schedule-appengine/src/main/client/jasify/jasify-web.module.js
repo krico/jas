@@ -7,6 +7,7 @@
         'ngCookies',
         'ngSanitize',
         'ngMaterial',
+        'ngAnimate',
         'ui.bootstrap',
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
