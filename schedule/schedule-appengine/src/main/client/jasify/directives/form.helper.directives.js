@@ -104,10 +104,18 @@
     jasifyDirectivesFormModule.directive('autoSize', function () {
         return {
             restrict: 'C',
-            link: function (scope, element) {
-                if (autosize) {
-                    autosize(element);
+            link: function (scope, element, attrs) {
+
+                function initialize() {
+                    if (autosize) {
+                        autosize(element);
+                    }
                 }
+
+                var unwatch = scope.$watch(attrs.ngModel, function(newValue, oldValue) {
+                    initialize();
+                    unwatch();
+                });
             }
         };
     });
