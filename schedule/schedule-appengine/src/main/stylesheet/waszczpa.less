@@ -286,3 +286,23 @@ td.actions-column {
     white-space: normal;
   }
 }
+
+.fw-nav {
+  li:not(.active) {
+    .badge {
+      background-color: lighten(@link-color, 33%);
+    }
+  }
+
+  @media (max-width: @angularMaterialLayoutSm) {
+    .badge {
+      float: left;
+    }
+  }
+}
+
+.lv-header-alt {
+  .checkbox {
+    margin-left: 13px;
+  }
+}

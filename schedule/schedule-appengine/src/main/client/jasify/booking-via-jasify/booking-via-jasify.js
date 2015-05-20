@@ -19,12 +19,14 @@
         vm.activityPackages = activityPackages.items;
         vm.activityPackageActivities = {};
         vm.activityPackageSelection = {};
+        vm.activityPackageSelectAllFlags = [];
 
         wireUpSessionStorage();
 
         angular.forEach(this.activityPackages, function (activityPackage) {
             ActivityPackage.getActivities(activityPackage.id).then(function (result) {
                 vm.activityPackageActivities[activityPackage.id] = result;
+                updateSelectAllFlags();
             });
         });
 
@@ -39,6 +41,8 @@
         this.packageSelectionIncomplete = packageSelectionIncomplete;
         this.packageSelectionComplete = packageSelectionComplete;
         this.packageSelectionTooBig = packageSelectionTooBig;
+        this.selectAllForActivityPackage = selectAllForActivityPackage;
+        this.updateSelectAllFlag = updateSelectAllFlag;
         this.isActivitySelected = function (activity) {
             return _.find(vm.activitySelection, {'id': activity.id});
         };
@@ -137,6 +141,36 @@
         function packageSelectionTooBig(activityPackage) {
             return vm.activityPackageSelection && vm.activityPackageSelection[activityPackage.id] &&
                 (activityPackage.itemCount < vm.activityPackageSelection[activityPackage.id].length);
+        }
+
+        function selectAllForActivityPackage(activityPackage) {
+            if (vm.activityPackageSelectAllFlags[activityPackage.id]) {
+                vm.activityPackageSelection[activityPackage.id] =
+                    angular.copy(vm.activityPackageActivities[activityPackage.id]);
+            } else {
+                delete vm.activityPackageSelection[activityPackage.id];
+            }
+        }
+
+        function updateSelectAllFlag(activityPackageId) {
+            if (vm.activityPackageSelection[activityPackageId] &&
+                vm.activityPackageActivities[activityPackageId] &&
+                vm.activityPackageSelection[activityPackageId].length === vm.activityPackageActivities[activityPackageId].length) {
+                vm.activityPackageSelectAllFlags[activityPackageId] = true;
+            } else {
+                vm.activityPackageSelectAllFlags[activityPackageId] = false;
+            }
+        }
+
+        function updateSelectAllFlags() {
+            angular.forEach(vm.activityPackageActivities, function (activityPackageActivities, activityPackageId) {
+                if (vm.activityPackageSelection[activityPackageId] &&
+                    vm.activityPackageSelection[activityPackageId].length === activityPackageActivities.length) {
+                    vm.activityPackageSelectAllFlags[activityPackageId] = true;
+                } else {
+                    vm.activityPackageSelectAllFlags[activityPackageId] = false;
+                }
+            });
         }
 
         function wireUpSessionStorage() {

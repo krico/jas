@@ -51,7 +51,10 @@
                         return Allow.all();
                     },
                     activities: function ($route, Activity) {
-                        return Activity.query({organizationId: $route.current.params.organizationId});
+                        return Activity.query({
+                            fromDate: new Date().toISOString(),
+                            organizationId: $route.current.params.organizationId
+                        });
                     },
                     activityPackages: function ($route, ActivityPackage) {
                         if ($route.current.params.organizationId) {

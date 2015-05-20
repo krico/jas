@@ -1,9 +1,9 @@
 <div class="container">
     <div id="wizard" class="form-wizard-basic: vm.wizardOptions; fw-container">
         <ul class="tab-nav text-center">
-            <li><a prevent="click" href="#activities" data-toggle="tab">Activities</a></li>
-            <li><a prevent="click" href="#activity-packages" data-toggle="tab">Activity Packages</a></li>
-            <li><a prevent="click" href="#checkout" data-toggle="tab">Checkout</a></li>
+            <li><a prevent="click" href="#activities" data-toggle="tab"><span class="badge">1</span> Activities</a></li>
+            <li><a prevent="click" href="#activity-packages" data-toggle="tab"><span class="badge">2</span> Activity Packages</a></li>
+            <li><a prevent="click" href="#checkout" data-toggle="tab"><span class="badge">3</span> Checkout</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane fade" id="activities">
@@ -20,7 +20,7 @@
                     <div class="card-body card-padding-sm">
                         <div class="activity-listview listview lv-bordered lv-lg">
                             <div class="lv-body">
-                                <div ng-repeat="activity in vm.activities" class="selectable-lv-item lv-item media"
+                                <div ng-repeat="activity in vm.activities | orderBy: 'start'" class="selectable-lv-item lv-item media"
                                      ng-class="{ 'active' : vm.isActivitySelected(activity) }">
                                     <div ng-class="{ 'disabled': vm.isFullyBooked(activity) }"
                                          class="checkbox pull-left">
@@ -71,6 +71,15 @@
                         <div class="activity-listview listview lv-bordered lv-lg"
                              ng-repeat="activityPackage in vm.activityPackages">
                             <div class="lv-header-alt">
+                                <div class="checkbox pull-left"
+                                     ng-if="vm.activityPackageActivities[activityPackage.id].length === activityPackage.itemCount">
+                                    <label>
+                                        <input type="checkbox"
+                                               ng-model="vm.activityPackageSelectAllFlags[activityPackage.id]"
+                                               ng-click="vm.selectAllForActivityPackage(activityPackage, this.checked)">
+                                        <i class="input-helper"></i>
+                                    </label>
+                                </div>
                                 <h2 class="lvh-label">{{activityPackage.name}}</h2>
                                 <br />
                                 <h2 class="lvh-label">
@@ -94,14 +103,16 @@
                                 </h2>
                             </div>
                             <div class="lv-body">
-                                <div ng-repeat="activity in vm.activityPackageActivities[activityPackage.id]"
+                                <div ng-repeat="activity in vm.activityPackageActivities[activityPackage.id] | orderBy: 'start'"
                                      class="selectable-lv-item lv-item media"
                                      ng-class="{ 'active' : vm.isSelectedActivityPackageItem(activity, activityPackage) }">
                                     <div ng-class="{ 'disabled': vm.disableActivityPackageActivitySelection(activity, activityPackage) }"
                                          class="checkbox pull-left">
                                         <label>
-                                            <input ng-disabled="vm.disableActivityPackageActivitySelection(activity, activityPackage)" type="checkbox"
+                                            <input type="checkbox"
+                                                   ng-disabled="vm.disableActivityPackageActivitySelection(activity, activityPackage)"
                                                    checklist-model="vm.activityPackageSelection[activityPackage.id]"
+                                                   checklist-change="vm.updateSelectAllFlag(activityPackage.id)"
                                                    checklist-value="activity">
                                             <i class="input-helper"></i>
                                         </label>
