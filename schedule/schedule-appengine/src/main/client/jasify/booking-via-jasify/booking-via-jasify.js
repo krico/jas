@@ -5,11 +5,14 @@
         .module('jasify.bookingViaJasify')
         .controller('BookingViaJasify', BookingViaJasify);
 
-    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $location, $q, localStorageService, sessionStorageKeys,
+    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $location, $q, $timeout, localStorageService, sessionStorageKeys,
                               BrowserData, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs) {
 
         var vm = this;
-
+        vm.wizardOptions = {
+            onInit: onWizardInit,
+            onTabClick: onWizardClick
+        };
         vm.activities = activities.items;
         vm.activitySelection = [];
 
@@ -39,7 +42,7 @@
         this.isActivitySelected = function (activity) {
             return _.find(vm.activitySelection, {'id': activity.id});
         };
-        this.isSelectedActivityPackageItem = function(activity, activityPackage) {
+        this.isSelectedActivityPackageItem = function (activity, activityPackage) {
             return vm.activityPackageSelection[activityPackage.id] &&
                 _.find(vm.activityPackageSelection[activityPackage.id], {'id': activity.id});
         };
@@ -47,6 +50,38 @@
         $rootScope.$on(AUTH_EVENTS.accountCreated, function () {
             Auth.restore(true);
         });
+
+        function onWizardClick(tab, navigation, index) {
+            $timeout(function () {
+                var v = activeTab();
+                $log.debug('Active tab: ' + v);
+                localStorageService.set(sessionStorageKeys.selectedTabIndex, v);
+            }, 500);
+        }
+
+        function onWizardInit(tab, navigation, index) {
+            $timeout(function () {
+                var tabIndex = localStorageService.get(sessionStorageKeys.selectedTabIndex);
+                if (angular.isNumber(tabIndex)) {
+                    $('#wizard').bootstrapWizard('show', tabIndex);
+                }
+            });
+
+            return true;
+        }
+
+        function activeTab() {
+            if ($('#activities').css('display') != 'none') {
+                return 0;
+            }
+            if ($('#activity-packages').css('display') != 'none') {
+                return 1;
+            }
+            if ($('#checkout').css('display') != 'none') {
+                return 2;
+            }
+            return -1;
+        }
 
         function confirmRemoveActivity(activity) {
             jasDialogs.ruSure("Do you want to remove this Activity?", function () {
@@ -66,7 +101,7 @@
 
         function disableActivityPackageActivitySelection(activity, activityPackage) {
             if (vm.activityPackageSelection[activityPackage.id] &&
-                _.find(vm.activityPackageSelection[activityPackage.id], { id: activity.id })) {
+                _.find(vm.activityPackageSelection[activityPackage.id], {id: activity.id})) {
                 return false;
             }
             return vm.isActivityFullyBooked(activity) || vm.isActivityPackageFullyBooked(activityPackage);
