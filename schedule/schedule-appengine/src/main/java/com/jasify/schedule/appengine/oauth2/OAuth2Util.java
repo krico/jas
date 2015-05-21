@@ -21,6 +21,7 @@ public final class OAuth2Util {
             .put("/", "r007")
             .put("/index.html", "1d3X")
             .put("/book-it.html", "b0oK")
+            .put("/checkout-window.html", "w1nD")
             .put("/booking-via-jasify.html", "v1aJ")
             .build();
     private static final Logger log = LoggerFactory.getLogger(OAuth2Util.class);
