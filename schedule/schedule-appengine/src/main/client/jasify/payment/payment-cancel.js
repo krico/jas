@@ -2,15 +2,16 @@
 
     angular.module('jasify.payment').controller('PaymentCancelController', PaymentCancelController);
 
-    function PaymentCancelController($location, $routeParams, Balance) {
+    function PaymentCancelController($location, $routeParams, $timeout, BrowserData, Balance) {
         var vm = this;
         vm.alert = alert;
         vm.alerts = [];
         vm.cancelPayment = cancelPayment;
-        vm.makePayment = makePayment;
+        vm.again = again;
         vm.complete = false;
         vm.status = '';
         vm.cancelPayment($routeParams.paymentId);
+        vm.autoRedirect = BrowserData.getPaymentCancelRedirectAuto();
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -27,6 +28,11 @@
             function ok(resp) {
                 vm.complete = true;
                 vm.status = 'Payment canceled!';
+                if (vm.autoRedirect) {
+                    $timeout(function () {
+                        vm.again();
+                    }, 3000);
+                }
             }
 
             function fail(res) {
@@ -35,8 +41,13 @@
             }
         }
 
-        function makePayment() {
-            $location.path('/payment/make');
+        function again() {
+            $location.replace();
+            $location.search({paymentStatus: 'failed'});
+            $location.path(BrowserData.getPaymentCancelRedirect());
+            BrowserData.clearPaymentAcceptRedirect();
+            BrowserData.clearPaymentCancelRedirect();
+            BrowserData.clearPaymentCancelRedirectAuto();
         }
     }
 })(angular);

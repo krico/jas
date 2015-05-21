@@ -17,6 +17,9 @@
         });
 
         addProperty('paymentAcceptRedirect', '/balance/view');
+        addProperty('paymentCancelRedirect', '/payment/make');
+        addProperty('paymentCancelRedirectAuto', false);
+        addProperty('lastPaymentSucceeded', false);
         addProperty('firstAccess', true);
         addProperty('rememberUser');
         addProperty('loggedIn', false);

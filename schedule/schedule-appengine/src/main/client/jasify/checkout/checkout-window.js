@@ -26,6 +26,8 @@
                 vm.message = 'Redirecting to payment provider (this might take a few seconds) ...';
                 $log.debug("Redirecting: " + resp.approveUrl);
                 BrowserData.setPaymentAcceptRedirect('/close');
+                BrowserData.setPaymentCancelRedirect('/close');
+                BrowserData.setPaymentCancelRedirectAuto(true);
                 $window.location.href = resp.approveUrl;
             }
 

@@ -7,8 +7,11 @@
         <div class="col-sm-6 h4 text-danger">
             {{vm.status}}
         </div>
-        <div class="col-sm-6 col-sm-offset-3">
-            Would you like to <a ng-click="vm.makePayment()">make another payment</a>?
+        <div class="col-sm-6 col-sm-offset-3" ng-hide="vm.autoRedirect">
+            Would you like to <a ng-click="vm.again()">try again</a>?
+        </div>
+        <div class="col-sm-6 col-sm-offset-3" ng-show="vm.autoRedirect">
+            You should be automatically redirected shortly.
         </div>
         <div class="col-sm-6 col-sm-offset-3">
             <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>

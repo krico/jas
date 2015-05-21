@@ -41,6 +41,7 @@
                 $location.search({paymentStatus: 'success'});
                 $location.path(BrowserData.getPaymentAcceptRedirect());
                 BrowserData.clearPaymentAcceptRedirect();
+                BrowserData.clearPaymentCancelRedirect();
             }
 
             function fail(res) {

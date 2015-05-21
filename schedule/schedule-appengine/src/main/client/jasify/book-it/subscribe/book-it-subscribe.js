@@ -52,6 +52,7 @@
             function added(cart) {
                 vm.inProgress = false;
                 BrowserData.setPaymentAcceptRedirect($location.path());
+                BrowserData.setPaymentCancelRedirect($location.path());
                 $location.path('/checkout');
             }
 
