@@ -19,7 +19,9 @@
         'jasify.checkout',
         'jasify.templates',
         'jasify.filters',
-        'angular.filter'
+        'jasify.common.ui',
+        'angular.filter',
+        'bs3dp4ng'
     ]);
 
     jasifyWeb.config(function (EndpointProvider) {
@@ -36,7 +38,7 @@
             $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
         });
     }
-
+    
     angular.module("template/pagination/pagination.html", []).run(["$templateCache", function ($templateCache) {
         $templateCache.put("template/pagination/pagination.html",
             "<ul class=\"pagination\">\n" +

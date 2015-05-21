@@ -264,6 +264,55 @@ td.actions-column {
   }
 }
 
+.btn-group {
+  .btn.btn-default.active {
+    .btn-primary();
+  }
+}
+
+.input-group-addon.text {
+  vertical-align: middle;
+}
+
+.control-label.text-left {
+  text-align: left !important;
+}
+
+@media (min-width: @angularMaterialLayoutSm) {
+  .time-date-pair {
+    > div {
+      &:first-child {
+        padding-left: 0;
+      }
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: @angularMaterialLayoutSm) {
+  .time-date-pair {
+    > div {
+      padding: 0;
+    }
+  }
+}
+
+@media (max-width: @angularMaterialLayoutSm) {
+  .radio.radio-inline {
+    margin-left: 0;
+  }
+}
+
+.radio-addon {
+  margin-right: 10px;
+}
+
+.form-horizontal .has-feedback[flex] i.form-control-feedback {
+  right: 0;
+}
+
 .card .card-header [wizard-trigger].btn-float {
   @media (max-width: @angularMaterialLayoutSm) {
     font-size: smaller;
@@ -305,4 +354,22 @@ td.actions-column {
   .checkbox {
     margin-left: 13px;
   }
+}
+
+.card .row .card-header {
+  padding-right: 0;
+}
+
+.btn.btn-icon.btn-primary.command-edit:not(:hover) .mdi,
+.btn.btn-icon.btn-danger.command-delete:not(:hover) .mdi {
+  color: rgb(94, 94, 94);
+}
+
+.btn.btn-icon.btn-primary.command-edit:focus .mdi,
+.btn.btn-icon.btn-danger.command-delete:focus .mdi {
+  color: white;
+}
+
+.command-edit, .command-delete {
+  margin: 0 2px;
 }

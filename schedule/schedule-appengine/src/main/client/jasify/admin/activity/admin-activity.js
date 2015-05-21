@@ -1,159 +1,130 @@
+/*global window, _ */
 (function (angular) {
+
+    'use strict';
 
     angular.module('jasify.admin').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($location, $scope, ActivityType, Activity, activity, organizations) {
+    function AdminActivityController($scope, $location, $moment,
+                                     jasDialogs, Activity, aButtonController, ActivityType,
+                                     activity, organizations) {
         var vm = this;
 
-        vm.dateFormat = 'dd MMM yyyy HH:mm';
-        vm.alerts = [];
-        vm.organization = {};
-        vm.activity = activity;
-        vm.activityTypes = [];
-        vm.loadingActivityTypes = false;
-
-        vm.isStartOpen = false;
-        vm.openStart = openStart;
-
-        vm.isFinishOpen = false;
-        vm.openFinish = openFinish;
-
-        vm.isRepeatOpen = false;
-        vm.openRepeat = openRepeat;
-        vm.repeatDetails = {};
-        vm.repeatTypes = ["No", "Daily", "Weekly"];
-        vm.repeatUntilTypes = ["Count", "Date"];
-        vm.minStartDate = new Date(); // this seems wrong?
-
+        vm.saveBtn = aButtonController.createSave();
         vm.organizations = organizations.items;
-        vm.selectOrganization = selectOrganization;
-        vm.selectActivityType = selectActivityType;
         vm.loadActivityTypes = loadActivityTypes;
-        vm.hasActivityTypes = hasActivityTypes;
         vm.activityTypeChanged = activityTypeChanged;
-        vm.alert = alert;
-        vm.update = update;
-        vm.create = create;
-        vm.reset = reset;
-        vm.back = back;
-        vm.init = init;
-        vm.setRepeatDayOfWeek = setRepeatDayOfWeek;
+        vm.activity = activity;
 
-        vm.selectOrganization(vm.organizations, vm.activity, $location.search().organizationId);
+        initOrganization();
+        initDates();
 
-        vm.init();
+        vm.saveOrUpdate = saveOrUpdate;
 
-        function init() {
-            if (!vm.activity.id) {
-                vm.activity.start = new Date();
-                vm.activity.start.setMinutes(0, 0, 0);
-                vm.activity.start.setHours(vm.activity.start.getHours() + 1);
-                vm.activity.finish = new Date(vm.activity.start.getTime() + 60 * 60 * 1000);
-            }
-            // We do not currently have the ability to update "series" so for the time being repeat details are always reset to default
-            vm.repeatDetails.repeatType = vm.repeatTypes[0];
-            vm.repeatDetails.repeatUntilType = vm.repeatUntilTypes[0];
-            vm.repeatDetails.untilCount = 1;
-            vm.repeatDetails.repeatEvery = 1;
-            vm.repeatDetails.untilDate = new Date(vm.activity.finish);
-        }
-
-        function alert(t, m) {
-            vm.alerts.push({type: t, msg: m});
-        }
-
-        function back() {
-            var orgId = null;
-            if (vm.activity.activityType && vm.activity.activityType.organizationId) {
-                orgId = vm.activity.activityType.organizationId;
-            } else if (vm.organization.id) {
-                orgId = vm.organization.id;
-            }
-
-            if (orgId === null) {
-                $location.path("/admin/activities");
-            } else {
-                $location.path("/admin/activities/" + orgId); //TODO: path orgID to activity/X
-            }
-        }
-
-        function openStart($event) {
-            $event.preventDefault();
-            $event.stopPropagation();
-
-            vm.isStartOpen = true;
-        }
-
-        function openFinish($event) {
-            $event.preventDefault();
-            $event.stopPropagation();
-
-            vm.isFinishOpen = true;
-        }
-
-        function openRepeat($event) {
-            $event.preventDefault();
-            $event.stopPropagation();
-
-            vm.isRepeatOpen = true;
-        }
-
-        function hasActivityTypes() {
-            if (vm.loadingActivityTypes) return true;
-            return vm.activityTypes.length !== 0;
-        }
+        vm.repeatDetails = {
+            repeatType: "No",
+            repeatUntilType: "Date"
+        };
 
         function loadActivityTypes(organization) {
 
-            vm.loadingActivityTypes = true;
-
             vm.activityTypes = [];
 
-            if (!organization.id) return;
+            if (!organization || !organization.id) {
+                return;
+            }
 
             ActivityType.query(organization).then(ok, fail);
 
             function ok(r) {
-                vm.loadingActivityTypes = false;
                 vm.activityTypes = r.items;
-                vm.selectActivityType(vm.activityTypes, vm.activity);
+                selectActivityType(vm.activityTypes, vm.activity);
             }
 
             function fail(r) {
-                vm.loadingActivityTypes = false;
-                vm.alert('danger', 'Failed to load activity types');
+                //vm.alert('danger', 'Failed to load activity types');
             }
         }
 
-        function selectOrganization(organizations, activity, organizationId) {
-            if (activity.activityType && activity.activityType.organizationId) {
-                angular.forEach(organizations, function (value, key) {
-                    if (activity.activityType.organizationId == value.id) {
-                        vm.organization = value;
-                    }
-                });
-            } else if (organizationId) {
-                angular.forEach(organizations, function (value, key) {
-                    if (organizationId == value.id) {
-                        vm.organization = value;
-                    }
-                });
+        function saveOrUpdate() {
+
+            var activityToSave = angular.copy(vm.activity),
+                promise;
+
+            activityToSave.start = $moment(activityToSave.start)
+                .set('hour', vm.fromTime.hour)
+                .set('minute', vm.fromTime.minute)
+                .format();
+
+            activityToSave.finish = $moment(activityToSave.finish)
+                .set('hour', vm.toTime.hour)
+                .set('minute', vm.toTime.minute)
+                .format();
+
+            if (activityToSave.start > activityToSave.finish) {
+                jasDialogs.warning("Activity's finish date precedes start date. Please correct.");
+                return;
             }
-            if (vm.organization && vm.organization.id) {
-                vm.loadActivityTypes(vm.organization);
+
+            if ($moment(activityToSave.start) < $moment()) {
+                jasDialogs.warning("Activity's start date precedes current date. Please correct.");
+                return;
+            }
+
+            if (activityToSave.id) {
+                promise = Activity.update(activityToSave);
+            } else {
+                promise = Activity.add(activityToSave, vm.repeatDetails);
+            }
+
+            vm.saveBtn.start(promise);
+            promise.then(ok, fail);
+
+            function ok(result) {
+                if (activityToSave.id) {
+                    vm.activity = result;
+
+                    vm.fromTime = {
+                        hour: $moment(vm.activity.start).get('hour'),
+                        minute: $moment(vm.activity.start).get('minute')
+                    };
+                    vm.toTime = {
+                        hour: $moment(vm.activity.finish).get('hour'),
+                        minute: $moment(vm.activity.finish).get('minute')
+                    };
+
+                } else {
+
+                    $location.search({});
+
+                    if (result.items.length === 1) {
+                        jasDialogs.success('Activity was created.');
+                        $location.path('/admin/activity/' + result.items[0].id);
+                    } else if (result.items.length > 1) {
+                        jasDialogs.success(result.items.length + ' activities were created.');
+                        $location.path("/admin/activities/" + result.items[0].activityType.organizationId);
+                    } else {
+                        jasDialogs.warning('No activities were created.');
+                        $location.path("/admin/activities");
+                    }
+                }
+            }
+
+            function fail(r) {
+                vm.alert('danger', 'Failed: ' + r.statusText);
             }
         }
 
         function selectActivityType(activityTypes, activity) {
-            if (activity.activityType && activity.activityType.id) {
-                angular.forEach(activityTypes, function (value, key) {
-                    if (activity.activityType.id == value.id) {
+            if (vm.activityTypes.length === 1) {
+                vm.activity.activityType = vm.activityTypes[0];
+                vm.activityTypeChanged();
+            } else if (activity.activityType && activity.activityType.id) {
+                angular.forEach(activityTypes, function (value) {
+                    if (activity.activityType.id === value.id) {
                         vm.activity.activityType = value;
                     }
                 });
-            } else if (vm.activityTypes.length == 1) {
-                vm.activity.activityType = vm.activityTypes[0];
-                vm.activityTypeChanged();
             }
         }
 
@@ -165,110 +136,62 @@
             vm.activity.maxSubscriptions = vm.activity.activityType.maxSubscriptions;
         }
 
-        function create() {
-            Activity.add(vm.activity, vm.repeatDetails).then(ok, fail);
+        function initOrganization() {
 
-            function ok(r) {
-                if (r.items.length == 1) {
-                    $location.path('/admin/activity/' + r.items[0].id);
+            if (!vm.organizations || vm.organizations.length === 0) {
+                return;
+            }
+
+            if (activity.id) {
+                vm.organization = _.find(
+                    vm.organizations,
+                    {id: vm.activity.activityType.organizationId}
+                );
+            } else {
+                if (vm.organizations.length === 1) {
+                    vm.organization = vm.organizations[0];
                 } else {
-                    $location.path("/admin/activities");
+                    vm.organization = _.find(vm.organizations, { id: $location.search().organizationId})
                 }
-            }
 
-            function fail(r) {
-                vm.alert('danger', 'Failed: ' + r.statusText);
+                vm.loadActivityTypes(vm.organization);
             }
         }
 
-        function update() {
-            Activity.update(vm.activity).then(ok, fail);
-            function ok(r) {
-                vm.alert('info', 'Activity updated!');
-                vm.activity = r;
-                vm.selectActivityType(vm.activityTypes, vm.activity);
+        function initDates() {
+
+            $scope.$watch('vm.activity.start', function () {
+                vm.repeatUntilDateOptions.minDate =
+                    vm.toDateOptions.minDate =
+                        vm.activity.start;
+            });
+
+            vm.fromDateOptions = {
+                minDate: $moment()
+            };
+
+            vm.toDateOptions = {
+                minDate: $moment()
+            };
+
+            vm.repeatUntilDateOptions = {
+                minDate: $moment()
+            };
+
+            if (!activity.id) {
+                activity.start = $moment().add(1, 'day').add(1, 'hour').set('minute', 0).format();
+                activity.finish = $moment().add(1, 'day').add(2, 'hour').set('minute', 0).format();
             }
 
-            function fail(r) {
-                vm.alert('danger', 'Failed: ' + r.statusText);
-            }
+            vm.fromTime = {
+                hour: $moment(activity.start).get('hour'),
+                minute: $moment(activity.start).get('minute')
+            };
+            vm.toTime = {
+                hour: $moment(activity.finish).get('hour'),
+                minute: $moment(activity.finish).get('minute')
+            };
         }
-
-        function setRepeatDayOfWeek(day, enabled) {
-            switch (day.getDay()) {
-                case 0: vm.repeatDetails.sundayEnabled = enabled; break;
-                case 1: vm.repeatDetails.mondayEnabled = enabled; break;
-                case 2: vm.repeatDetails.tuesdayEnabled = enabled; break;
-                case 3: vm.repeatDetails.wednesdayEnabled = enabled; break;
-                case 4: vm.repeatDetails.thursdayEnabled = enabled; break;
-                case 5: vm.repeatDetails.fridayEnabled = enabled; break;
-                case 6: vm.repeatDetails.saturdayEnabled = enabled; break;
-            }
-        }
-
-        function reset() {
-            Activity.get(vm.activity.id).then(ok, fail);
-            vm.activity = {};
-            function ok(r) {
-                vm.activity = r;
-                vm.selectOrganization(vm.organizations, vm.activity, $location.search().organizationId);
-            }
-
-            function fail(r) {
-                vm.alert('danger', 'Failed: ' + r.statusText);
-            }
-        }
-
-        $scope.$watch(
-            // This function returns the value being watched.
-            function () {
-                return vm.activity.start;
-            },
-            // This is the change listener, called when the value returned from the above function changes
-            function (newValue, oldValue) {
-                if (newValue !== oldValue) {
-                    var offset = newValue.getTime() - oldValue.getTime();
-                    vm.activity.finish = new Date(vm.activity.finish.getTime() + offset);
-                    if (vm.repeatDetails.repeatType == "Weekly") {
-                        vm.setRepeatDayOfWeek(oldValue, false);
-                        vm.setRepeatDayOfWeek(newValue, true);
-                    }
-                }
-            }
-        );
-
-        $scope.$watch(
-            // This function returns the value being watched.
-            function () {
-                return vm.activity.finish;
-            },
-            // This is the change listener, called when the value returned from the above function changes
-            function (newValue, oldValue) {
-                if (newValue !== oldValue && vm.activity.finish.getTime() > vm.repeatDetails.untilDate.getTime()) {
-                    vm.repeatDetails.untilDate = new Date(vm.activity.finish);
-                }
-            }
-        );
-
-        $scope.$watch(
-            // This function returns the value being watched.
-            function () {
-                return vm.repeatDetails.repeatType;
-            },
-            // This is the change listener, called when the value returned from the above function changes
-            function (newValue, oldValue) {
-                if (newValue !== oldValue) {
-                    if (oldValue == "No") {
-                        vm.repeatDetails.untilDate = new Date(vm.activity.finish.getTime());
-                    }
-                    if (newValue == "Weekly") {
-                        vm.setRepeatDayOfWeek(vm.activity.start, true);
-                    } else {
-                        vm.setRepeatDayOfWeek(vm.activity.start, false);
-                    }
-                }
-            }
-        );
     }
 
-})(angular);
+}(window.angular));

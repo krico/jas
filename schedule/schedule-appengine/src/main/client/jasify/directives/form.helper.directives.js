@@ -1,3 +1,5 @@
+/*global autosize */
+
 /**
  * Form directives:
  * - jasFeedbackIconPending, jasFeedbackIconInvalid, jasFeedbackIconValid for feedback icons
@@ -32,6 +34,12 @@
         });
 
 
+    });
+
+    jasifyDirectivesFormModule.provider('$moment', function () {
+        this.$get = ['$window', function ($window) {
+            return $window.moment;
+        }];
     });
 
     jasifyDirectivesFormModule.directive('btnHref', function ($location) {
@@ -93,6 +101,17 @@
         };
     });
 
+    jasifyDirectivesFormModule.directive('autoSize', function () {
+        return {
+            restrict: 'C',
+            link: function (scope, element) {
+                if (autosize) {
+                    autosize(element);
+                }
+            }
+        };
+    });
+
     jasifyDirectivesFormModule.directive('fgInput', function () {
         return {
             restrict: 'C',
@@ -140,10 +159,13 @@
             restrict: 'A',
             link: function (scope, element, attrs) {
 
-                var $element = $(element);
+                var $element = $(element),
+                    formName = $element.closest('form').attr('name'),
+                    formFieldName = $element.find('input, select, textarea').attr('name');
 
-                var formName = $element.closest('form').attr('name');
-                var formFieldName = $element.find('input, select, textarea').attr('name');
+                if (!formName || !formFieldName) {
+                    return;
+                }
 
                 scope.$watch(formName + '.' + formFieldName + '.$touched', function () {
                     updateClasses();

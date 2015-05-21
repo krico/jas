@@ -68,7 +68,10 @@
         "angular-spinner/angular-spinner.js",
         "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js",
         "bootstrap-sweetalert/lib/sweet-alert.js",
-        "lodash/lodash.js"
+        "lodash/lodash.js",
+        "autosize/dist/autosize.js",
+        "moment/min/moment.min.js",
+        "eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js"
       ],
       "iframecontentwindow": [
         "iframe-resizer/js/iframeResizer.contentWindow.min.js"

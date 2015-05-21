@@ -1,4 +1,4 @@
-<div class="card">
+<div ng-if="vm.organizations.length > 0" class="card">
     <div class="card-header">
         <h2>Activity Packages
             <small>
@@ -24,63 +24,56 @@
             </div>
         </div>
     </div>
+    <table ng-if="vm.activityPackages.length > 0" class="table table-hover table-condensed">
+        <thead>
+        <tr>
+            <th>
+                <add-row ng-click="vm.addActivityPackage()" description="Add Activity Package" />
+            </th>
+            <th>Name</th>
+            <th>Price</th>
+            <th><span tooltip="How many subscriptions are allowed">No. items</span></th>
+            <th><span tooltip="How many activities are inclded">No. activities</span></th>
+            <th><span tooltip="How many times was this bought">Executions</span></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="activityPackage in vm.activityPackages">
+            <td>{{activityPackage.id}}</td>
+            <td ng-click="vm.viewActivityPackage(activityPackage.id)">{{activityPackage.name}}</td>
+            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                {{activityPackage.price | currency:activityPackage.currency}}
+            </td>
+            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                {{activityPackage.itemCount}}
+            </td>
+            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                {{activityPackage.activityCount}}
+            </td>
+            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+                {{activityPackage.executionCount || 0}}
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-xs"
+                        ng-disabled="activityPackage.executions > 0"
+                        ng-click="vm.remove(activityPackage.id)"><span
+                        class="glyphicon glyphicon-remove" tooltip="Delete"></span>
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
-
-
-<div class="row">
-    <div class="col-sm-4">
-
-    </div>
-    <div class="col-sm-6">
-        <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+<div class="card" ng-if="vm.organizations.length > 0 && vm.activityPackages.length === 0">
+    <div class="card-padding card-body text-center">
+        <p>No Activity Packages are defined for {{vm.organization.name}}.</p>
+        <button ng-click="vm.addActivityPackage()" class="btn btn-primary waves-effect">Create Activity Package</button>
     </div>
 </div>
-<div class="row">
-    <div class="col-sm-10">
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th>
-                    <a ng-click="vm.addActivityPackage()" tooltip="Create new activity package">
-                        <span class="glyphicon glyphicon-plus"></span>
-                    </a>
-                </th>
-                <th>name</th>
-                <th>price</th>
-                <th><span tooltip="How many subscriptions are allowed">#items</span></th>
-                <th><span tooltip="How many activities are inclded">#activities</span></th>
-                <th><span tooltip="How many times was this bought">executions</span></th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="activityPackage in vm.activityPackages">
-                <td>{{activityPackage.id}}</td>
-                <td ng-click="vm.viewActivityPackage(activityPackage.id)">{{activityPackage.name}}</td>
-                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
-                    {{activityPackage.price | currency:activityPackage.currency}}
-                </td>
-                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
-                    {{activityPackage.itemCount}}
-                </td>
-                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
-                    {{activityPackage.activityCount}}
-                </td>
-                <td ng-click="vm.viewActivityPackage(activityPackage.id)">
-                    {{activityPackage.executionCount || 0}}
-                </td>
-                <td>
-                    <button type="button" class="btn btn-danger btn-xs"
-                            ng-disabled="activityPackage.executions > 0"
-                            ng-click="vm.remove(activityPackage.id)"><span
-                            class="glyphicon glyphicon-remove" tooltip="Delete"></span>
-                    </button>
-                </td>
-            </tr>
-            <tr ng-if="vm.activityPackages.length == 0">
-                <td colspan="8">No activity packages...</td>
-            </tr>
-            </tbody>
-        </table>
+<div class="card" ng-if="vm.organizations.length === 0">
+    <div class="card-padding card-body text-center">
+        <p>Before creating Activity Package you need to create Organization.</p>
+        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
     </div>
 </div>
