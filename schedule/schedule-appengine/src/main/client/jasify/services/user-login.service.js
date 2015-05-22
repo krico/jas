@@ -15,9 +15,12 @@
                 return jasify.userLogins.list({userId: userId});
             }).then(
                 function (resp) {
+                    resp = resp || {};
+                    resp.result = resp.result || {};
+                    resp.result.items = resp.result.items || [];
                     return resp.result.items;
                 },
-                Endpoint.errorHandler);
+                Endpoint.rejectHandler);
         }
 
         function remove(login) {
@@ -27,7 +30,7 @@
                 function (resp) {
                     return true;
                 },
-                Endpoint.errorHandler);
+                Endpoint.rejectHandler);
         }
 
         return UserLogin;

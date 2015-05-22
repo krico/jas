@@ -15,14 +15,14 @@
         function getUserCart() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.getUserCart()
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function clearUserCart() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.clearUserCart()
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -32,7 +32,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.get(req)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -44,7 +44,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.removeItem(req)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -56,7 +56,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.getItem(req)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -67,7 +67,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.addUserActivity(req)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -80,16 +80,8 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.addUserActivityPackage(req)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
-        }
-
-        function errorHandler(e) {
-            return $q.reject(e);
-        }
-
-        function resultHandler(resp) {
-            return resp.result;
         }
 
         function fetchId(o) {
