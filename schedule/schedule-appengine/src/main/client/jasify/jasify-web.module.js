@@ -24,8 +24,9 @@
         'bs3dp4ng'
     ]);
 
-    jasifyWeb.config(function (EndpointProvider) {
+    jasifyWeb.config(function (EndpointProvider, localStorageServiceProvider) {
         EndpointProvider.verbose(true);
+        localStorageServiceProvider.setPrefix('Jasify');
     });
 
     /**

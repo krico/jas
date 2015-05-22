@@ -21,7 +21,7 @@
                     throw  Error("ngHref is not defined on element");
                 }
             }
-        }
+        };
     });
 
     module.directive('addRow', function () {
@@ -40,7 +40,7 @@
                     throw  Error("description is not defined on element");
                 }
             }
-        }
+        };
     });
 
     module.directive('rowEdit', function(jasDialogs) {
@@ -57,8 +57,8 @@
                     throw Error("action is not defined on element");
                 }
             }
-        }
-    })
+        };
+    });
 
 
     module.directive('rowDelete', function (jasDialogs) {
@@ -77,10 +77,10 @@
                 }
                 scope.confirm = function() {
                     jasDialogs.ruSure("", scope.action);
-                }
+                };
             }
-        }
-    })
+        };
+    });
 
 
 }(window.angular));

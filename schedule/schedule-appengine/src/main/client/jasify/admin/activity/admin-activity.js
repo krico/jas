@@ -151,7 +151,7 @@
                 if (vm.organizations.length === 1) {
                     vm.organization = vm.organizations[0];
                 } else {
-                    vm.organization = _.find(vm.organizations, { id: $location.search().organizationId})
+                    vm.organization = _.find(vm.organizations, { id: $location.search().organizationId});
                 }
 
                 vm.loadActivityTypes(vm.organization);

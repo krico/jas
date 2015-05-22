@@ -205,6 +205,7 @@
                 $q.all(promises).then(function () {
                     $log.debug('Shopping cart is ready');
                     BrowserData.setPaymentAcceptRedirect('done');
+                    BrowserData.setPaymentCancelRedirect($location.path());
                     $location.path('/checkout');
                 }, function () {
                     // TODO

@@ -38,6 +38,7 @@
                     allow: /*@ngInject*/ function (Allow, localStorageService, sessionStorageKeys) {
                         localStorageService.remove(sessionStorageKeys.activityPackageSelection);
                         localStorageService.remove(sessionStorageKeys.activitySelection);
+                        localStorageService.remove(sessionStorageKeys.selectedTabIndex);
                         return Allow.all();
                     }
                 }
@@ -66,10 +67,12 @@
             });
     }
 
-    bookingViaJasify.config(function (localStorageServiceProvider) {
+    bookingViaJasify.config(function (localStorageServiceProvider, CheckoutProvider) {
+        //TODO: We use storage to communicate with checkout, so needs to be local and prefix jasify
         localStorageServiceProvider
-            .setStorageType('sessionStorage')
-            .setPrefix('bookingViaJasify');
+            //.setStorageType('sessionStorage')
+            .setPrefix('Jasify');
+        CheckoutProvider.popupMode(true);
     });
 
 }(window.angular));

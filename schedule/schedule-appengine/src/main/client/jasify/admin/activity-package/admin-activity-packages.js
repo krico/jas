@@ -17,7 +17,7 @@
         if ($routeParams.organizationId) {
             vm.setSelectedOrganization($routeParams.organizationId);
         } else if (vm.organizations.length > 0) {
-            vm.organizationSelected(vm.organizations[0])
+            vm.organizationSelected(vm.organizations[0]);
         }
 
         function alert(t, m) {

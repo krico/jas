@@ -2,13 +2,14 @@
 
     "use strict";
 
-    var currentOrganizationId
+    var currentOrganizationId;
 
     function createBookingViaJasify() {
 
         try {
             var queryParams = {},
-                scriptTagUrlQueryString = document.getElementById('booking-with-jasify-script').src.split('?')[1],
+                scriptTagSrc = document.getElementById('booking-with-jasify-script').src,
+                scriptTagUrlQueryString = scriptTagSrc.split('?')[1],
                 varArray = scriptTagUrlQueryString.split("&");
 
             for (var i = 0; i < varArray.length; i++) {
@@ -23,11 +24,11 @@
 
             currentOrganizationId = queryParams.organizationId;
 
-            var host = '';
-            if (location.hostname !== 'localhost') {
-                host = 'https://jasify-schedule.appspot.com/'
-            }
+            var host = /^(http[^:]:\/\/[^/]+)(\/.*)?$/.exec(scriptTagSrc);
+            if (host == null) host = '/';
+            else host = host[1] + '/';
 
+            log('Detected host: '+host);
             var ifrm = document.createElement("IFRAME");
             ifrm.setAttribute("src", host + "booking-via-jasify.html#/" + queryParams.organizationId);
             ifrm.setAttribute("frameBorder", "0");
@@ -41,7 +42,7 @@
                 log("Rendering booking-via-jasify");
             }
         }
-        catch(error) {
+        catch (error) {
             log(error);
         }
     }

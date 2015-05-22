@@ -1,0 +1,20 @@
+<div class="card">
+    <div class="card-header">
+        <h1>Checkout Payment</h1>
+    </div>
+    <div class="card-body card-padding">
+        <blockquote ng-hide="vm.loaded" class="text-info">
+            Checking payment status ...
+        </blockquote>
+        <blockquote ng-show="vm.loaded && !vm.operationFailed" class="text-success">
+            Payment completed successfully!
+        </blockquote>
+        <blockquote ng-show="vm.loaded && vm.operationFailed" class="text-danger">
+            Payment failed!
+        </blockquote>
+        <i ng-show="vm.loaded">
+            This browser window should close automatically in about 5 seconds, if that fails, please
+            <b>close this window</b>.
+        </i>
+    </div>
+</div>
