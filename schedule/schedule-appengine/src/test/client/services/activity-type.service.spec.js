@@ -13,6 +13,22 @@ describe('ActivityTypeService', function () {
         Endpoint.jasifyLoaded();
     }));
 
+    it('ActivityType.query always returns array', function () {
+        spyOn($gapiMock.client.jasify.activityTypes, 'query').and.returnValue($q.when({result: {}}));
+        var id = 'abc';
+        ActivityType.query(id)
+            .then(function (res) {
+                expect(res.items).toBeDefined();
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.activityTypes.query).toHaveBeenCalledWith({organizationId: id});
+    });
+
     it('should query all activityTypes by organization id', function () {
         var expected = [];
         spyOn($gapiMock.client.jasify.activityTypes, 'query').and.returnValue($q.when({result: {items: expected}}));
