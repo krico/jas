@@ -20,14 +20,14 @@
         function query() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.query()
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function queryPublic() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.queryPublic()
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -127,14 +127,14 @@
         function users(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.users({id: id})
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function groups(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.groups({id: id})
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 

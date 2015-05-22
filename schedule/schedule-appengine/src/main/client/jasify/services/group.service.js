@@ -16,7 +16,7 @@
         function query() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.query()
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -44,7 +44,7 @@
         function users(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.users({id: id})
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
