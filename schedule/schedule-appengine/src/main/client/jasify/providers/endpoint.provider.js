@@ -80,7 +80,7 @@
             Endpoint.loadGoogleClient(); // Load the google client script when service is instantiated
 
             function rejectHandler(resp) {
-                return $q.reject(e);
+                return $q.reject(resp);
             }
 
             function resultHandler(resp) {
