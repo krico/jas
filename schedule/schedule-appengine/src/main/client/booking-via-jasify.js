@@ -26,6 +26,7 @@
 
             var host = /^(http[^:]:\/\/[^/]+)(\/.*)?$/.exec(scriptTagSrc);
             if (host == null) host = '/';
+            else host = host[1];
 
             log('Detected host: '+host);
             var ifrm = document.createElement("IFRAME");
