@@ -2,20 +2,21 @@
 
     angular.module('jasify.checkout').controller('CheckoutController', CheckoutController);
 
-    function CheckoutController($log, $rootScope, $window, $modal, ShoppingCart, Balance, cart) {
+    function CheckoutController($log, $rootScope, $window, $modal, $location, $cookies, ShoppingCart, Balance, PopupWindow,
+                                Checkout, BrowserData, cart) {
         var vm = this;
         vm.isEmpty = isEmpty;
         vm.alert = alert;
         vm.removeItem = removeItem;
         vm.alerts = [];
-        vm.createPayment = createPayment;
+        vm.createPayment = Checkout.popupMode ? createPaymentPopup : createPayment;
         vm.cart = cart;
         vm.inProgress = false;
         vm.redirecting = false;
         vm.paymentType = 'PayPal';
         vm.paymentTypes = [
             {label: 'PayPal', id: 'PayPal'}//,
-        //    {label: 'Pay at the door (cash)', id: 'Cash'}
+            //    {label: 'Pay at the door (cash)', id: 'Cash'}
         ];
 
         function alert(t, m) {
@@ -26,8 +27,30 @@
             return !(vm.cart && vm.cart.items && vm.cart.items.length > 0);
         }
 
-        function createPayment() {
+        function createPaymentPopup() {
             vm.inProgress = true;
+            var acceptRedirect = BrowserData.getPaymentAcceptRedirect();
+            var cancelRedirect = BrowserData.getPaymentCancelRedirect();
+            delete $cookies.popupPaymentStatus;
+            PopupWindow.open('/checkout-window.html', {width: 820}).then(ok, fail);
+            function ok() {
+                vm.inProgress = false;
+                if ($cookies.popupPaymentStatus == 'success') {
+                    $location.search({paymentStatus: 'success'});
+                    $location.path(acceptRedirect);
+                } else {
+                    $location.search({paymentStatus: 'failed'});
+                    $location.path(cancelRedirect);
+                }
+            }
+
+            function fail(res) {
+                vm.inProgress = false;
+                alert('danger', 'Failed: ' + res);
+            }
+        }
+
+        function createPayment() {
             Balance.createCheckoutPayment({
                 cartId: cart.id,
                 type: vm.paymentType

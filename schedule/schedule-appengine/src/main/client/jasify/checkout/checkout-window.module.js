@@ -20,7 +20,13 @@
         'jasify.templates',
         "jasify.filters"
     ])
+        .config(configureStorage)
         .run(jasifyCheckoutWindowRun);
+
+    function configureStorage(localStorageServiceProvider) {
+        localStorageServiceProvider
+            .setPrefix('Jasify');
+    }
 
     function jasifyCheckoutWindowRun($rootScope, $log) {
         $rootScope.$on('$routeChangeError', function (event, next, current) {

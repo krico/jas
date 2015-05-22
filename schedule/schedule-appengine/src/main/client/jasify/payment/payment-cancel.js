@@ -31,7 +31,7 @@
                 if (vm.autoRedirect) {
                     $timeout(function () {
                         vm.again();
-                    }, 3000);
+                    }, 2000);
                 }
             }
 
