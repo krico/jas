@@ -70,7 +70,8 @@ public class ActivityPackagePaymentWorkflow extends PaymentWorkflow {
     public void onCanceled() throws PaymentWorkflowException {
         if (activityPackageExecutionId != null) {
             try {
-                ActivityServiceFactory.getActivityService().cancelActivityPackageExecution(activityPackageExecutionId);
+                ActivityPackageExecution activityPackageExecution = ActivityServiceFactory.getActivityService().getActivityPackageExecution(activityPackageExecutionId);
+                ActivityServiceFactory.getActivityService().cancelActivityPackageExecution(activityPackageExecution);
             } catch (EntityNotFoundException e) {
                 throw new PaymentWorkflowException(e);
             }
