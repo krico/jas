@@ -4,11 +4,15 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityService;
 import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
+import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import org.slim3.datastore.Model;
 
 /**
@@ -48,7 +52,10 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
     public void onCreated() throws PaymentWorkflowException {
         Payment payment = getPaymentRef().getModel();
         try {
-            Subscription subscribe = ActivityServiceFactory.getActivityService().subscribe(payment.getUserRef().getKey(), activityId);
+            ActivityService activityService = ActivityServiceFactory.getActivityService();
+            User user = UserServiceFactory.getUserService().get(payment.getUserRef().getKey());
+            Activity activity = activityService.getActivity(activityId);
+            Subscription subscribe = activityService.subscribe(user, activity);
             subscriptionId = subscribe.getId();
         } catch (EntityNotFoundException | UniqueConstraintException | OperationException e) {
             throw new PaymentWorkflowException(e);

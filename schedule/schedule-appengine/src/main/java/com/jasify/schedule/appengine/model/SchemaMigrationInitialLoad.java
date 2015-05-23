@@ -137,7 +137,7 @@ class SchemaMigrationInitialLoad {
             repeatDetails.setFridayEnabled(true);
 
 
-            List<Key> activityKeys = activityService.addActivity(activity, repeatDetails);
+            List<Key> activityKeys = activityService.addActivity(activityType, activity, repeatDetails);
             List<Activity> activities = Lists.transform(activityKeys, new Function<Key, Activity>() {
                 @Nullable
                 @Override
