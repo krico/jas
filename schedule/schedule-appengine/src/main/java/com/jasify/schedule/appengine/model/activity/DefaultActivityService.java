@@ -8,13 +8,13 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.meta.activity.*;
-import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
-import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -54,8 +54,6 @@ class DefaultActivityService implements ActivityService {
     private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
     private final RepeatDetailsMeta repeatDetailsMeta;
-    private final OrganizationMeta organizationMeta;
-    private final UserMeta userMeta;
     private final SubscriptionMeta subscriptionMeta;
     private final ActivityPackageMeta activityPackageMeta;
     private final ActivityPackageActivityMeta activityPackageActivityMeta;
@@ -65,8 +63,6 @@ class DefaultActivityService implements ActivityService {
         activityTypeMeta = ActivityTypeMeta.get();
         activityMeta = ActivityMeta.get();
         repeatDetailsMeta = RepeatDetailsMeta.get();
-        organizationMeta = OrganizationMeta.get();
-        userMeta = UserMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
         activityPackageMeta = ActivityPackageMeta.get();
         activityPackageActivityMeta = ActivityPackageActivityMeta.get();
@@ -75,27 +71,6 @@ class DefaultActivityService implements ActivityService {
 
     static ActivityService instance() {
         return Singleton.INSTANCE;
-    }
-
-
-    private Organization getOrganization(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("Organization.id=NULL");
-
-        try {
-            return Datastore.get(organizationMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Organization id=" + id);
-        }
-    }
-
-    private User getUser(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("User id=NULL");
-
-        try {
-            return Datastore.get(userMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("User id=" + id);
-        }
     }
 
     private boolean isActivityTypeNameUnique(Transaction tx, Key organizationId, String name) {
@@ -161,6 +136,7 @@ class DefaultActivityService implements ActivityService {
     @Override
     public ActivityType getActivityType(Key id) throws EntityNotFoundException {
         try {
+
             return Datastore.get(activityTypeMeta, id);
         } catch (EntityNotFoundRuntimeException e) {
             throw new EntityNotFoundException("ActivityType.id=" + id);
@@ -170,8 +146,10 @@ class DefaultActivityService implements ActivityService {
     @Nonnull
     @Override
     public ActivityType getActivityType(Organization organization, String name) throws EntityNotFoundException {
+        // TODO: This method needs cleanup
         name = StringUtils.trimToEmpty(name);
-        getOrganization(organization.getId());
+        if (organization.getId() == null) throw new EntityNotFoundException("Organization.id=NULL");
+        OrganizationServiceFactory.getOrganizationService().getOrganization(organization.getId());
 
         ActivityType ret = Datastore.query(activityTypeMeta, organization.getId())
                 .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
@@ -499,8 +477,11 @@ class DefaultActivityService implements ActivityService {
 
     @Override
     public ActivityPackageExecution subscribe(final Key userId, final Key activityPackageId, final List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
+        // TODO: This method needs cleanup
         Preconditions.checkState(!activityIds.isEmpty(), "Need at least 1 activity to subscribe");
-        final User user = getUser(userId);
+        if (userId == null) throw new EntityNotFoundException("User id=NULL");
+        final User user = UserServiceFactory.getUserService().getExistingUser(userId);
+
         try {
             //I will implement this method with transactions, so we can use it as a reference for the other subscribe
             return TransactionOperator.execute(new ModelOperation<ActivityPackageExecution>() {
@@ -542,11 +523,11 @@ class DefaultActivityService implements ActivityService {
                         if (activity.getMaxSubscriptions() > 0 && subscriptionCount >= activity.getMaxSubscriptions()) {
                             throw new OperationException("Activity[" + activity.getId() + "] fully subscribed");
                         }
-                        activity.setSubscriptionCount(subscriptionCount + 1);
 
                         if (isSubscribed(tx, user, activity)) {
                             throw new UniqueConstraintException("User already subscribed to activity: " + activity.getId());
                         }
+                        activity.setSubscriptionCount(subscriptionCount + 1);
 
                         ActivityPackageSubscription subscription = new ActivityPackageSubscription();
                         subscription.setId(Datastore.allocateId(userId, subscriptionMeta));
@@ -673,6 +654,7 @@ class DefaultActivityService implements ActivityService {
     @Nonnull
     @Override
     public List<Subscription> getSubscriptions(Activity activity) {
+        // This assumes that you have the latest version of activity
         return activity.getSubscriptionListRef().getModelList();
     }
 

@@ -37,6 +37,8 @@ public interface UserService {
 
     User get(Key id);
 
+    @Nonnull
+    public User getExistingUser(Key id) throws EntityNotFoundException;
 
     User findByLogin(String provider, String userId);
 
