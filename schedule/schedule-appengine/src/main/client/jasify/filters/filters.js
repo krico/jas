@@ -1,10 +1,24 @@
 (function (angular) {
 
     angular.module('jasify.filters', [])
-        .filter('tableShortDateTime', tableShortDateTime);
+        .filter('tableShortDateTime', tableShortDateTime)
+        .filter('calendarLong', calendarLong);
+
+    function calendarLong($filter) {
+        return function (value) {
+            var mValue = moment(value).format(),
+                weekBefore = moment().add('day', -6).format(),
+                weekAfter = moment().add('day', 6).format();
+
+            if (mValue > weekAfter || mValue < weekBefore) {
+                return $filter('amDateFormat')(value, 'L LT');
+            }
+            return $filter('amCalendar')(value);
+        };
+    }
 
     function tableShortDateTime($filter) {
-        return function(value) {
+        return function (value) {
             var from = value[0],
                 to = value[1],
                 fromDate = $filter('date')(from, 'EEE, d MMM'),
@@ -14,9 +28,9 @@
 
             if (fromDate === toDate) {
                 return fromDate + ' ' + fromTime + ' - ' + toTime;
-            } else {
-                return fromDate + ' ' + fromTime + ' - ' + toDate + ' ' + toTime;
             }
+            return fromDate + ' ' + fromTime + ' - ' + toDate + ' ' + toTime;
         };
     }
+
 })(angular);

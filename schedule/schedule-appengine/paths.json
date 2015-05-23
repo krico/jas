@@ -47,6 +47,8 @@
         "respond/dest/respond.min.js"
       ],
       "main": [
+        "moment/min/moment.min.js",
+        "moment/locale/de.js",
         "jquery/dist/jquery.js",
         "jquery-bootgrid/dist/jquery.bootgrid.js",
         "bootstrap/dist/js/bootstrap.js",
@@ -62,6 +64,7 @@
         "angular-local-storage/dist/angular-local-storage.js",
         "angular-bootstrap/ui-bootstrap-tpls.js",
         "angular-filter/dist/angular-filter.js",
+        "angular-moment/angular-moment.js",
         "checklist-model/checklist-model.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
         "spin.js/spin.js",
@@ -70,7 +73,6 @@
         "bootstrap-sweetalert/lib/sweet-alert.js",
         "lodash/lodash.js",
         "autosize/dist/autosize.js",
-        "moment/min/moment.min.js",
         "eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js"
       ],
       "iframecontentwindow": [

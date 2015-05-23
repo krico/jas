@@ -18,7 +18,7 @@
             template: '<a class="back-button"><button tooltip="Back" class="btn btn-default btn-icon"><i class="md mdi-undo"></i></button></a>',
             link: function (scope, element, attrs) {
                 if (!attrs.ngHref && !attrs.href) {
-                    throw  Error("ngHref is not defined on element");
+                    throw new Error("ngHref is not defined on element");
                 }
             }
         };
@@ -34,10 +34,10 @@
             template: '<button tooltip-append-to-body="true" tooltip="{{description}}" class="btn btn-primary btn-icon"><i class="md mdi mdi-add"></i></button>',
             link: function (scope, element, attrs) {
                 if (!attrs.ngClick) {
-                    throw Error("ngClick is not defined on element");
+                    throw new Error("ngClick is not defined on element");
                 }
                 if (!attrs.description) {
-                    throw  Error("description is not defined on element");
+                    throw new Error("description is not defined on element");
                 }
             }
         };
@@ -54,7 +54,7 @@
             template: '<button tooltip="Edit" type="button" ng-click="action()" class="btn btn-icon btn-primary command-edit"><span class="md mdi mdi-edit"></span></button>',
             link: function (scope, element, attrs) {
                 if (!attrs.action) {
-                    throw Error("action is not defined on element");
+                    throw new Error("action is not defined on element");
                 }
             }
         };
@@ -73,7 +73,7 @@
             '<span class="md mdi mdi-delete"></span></button>',
             link: function (scope, element, attrs) {
                 if (!attrs.action) {
-                    throw Error("action is not defined on element");
+                    throw new Error("action is not defined on element");
                 }
                 scope.confirm = function() {
                     jasDialogs.ruSure("", scope.action);

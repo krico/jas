@@ -40,15 +40,15 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="activity in vm.activities | orderBy:'start'">
-            <td class="text-left">
-                <row-edit action="vm.viewActivity(activity.id)"></row-edit>
-                <row-delete action="vm.remove(activity.id)"></row-delete>
+        <tr class="animate-delete" ng-repeat="activity in vm.activities | orderBy:'start'">
+            <td class="row-commands">
+                <row-edit action="vm.viewActivity(activity)"></row-edit>
+                <row-delete action="vm.removeActivity(activity)"></row-delete>
             </td>
             <td>{{activity.activityType.name}}</td>
             <td>{{activity.location}}</td>
-            <td>{{activity.start | date:'yyyy-MM-dd HH:mm' }}</td>
-            <td>{{activity.finish | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{activity.start | amDateFormat: 'L LT' }}</td>
+            <td>{{activity.finish | amDateFormat: 'L LT' }}</td>
             <td>
                 {{activity.subscriptionCount||0}} of {{activity.maxSubscriptions||0}}
             </td>
@@ -77,7 +77,7 @@
 </div>
 <div class="card" ng-if="vm.organizations.length > 0 && vm.activities.length === 0">
     <div class="card-padding card-body text-center">
-        <p>No Activities are defined for {{vm.organization.name}}.</p>
+        <p>No Activities are defined for {{::vm.organization.name}}.</p>
         <button ng-click="vm.addActivity()" class="btn btn-primary waves-effect">Create Activity</button>
     </div>
 </div>
