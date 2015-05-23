@@ -16,42 +16,42 @@
         function query() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.query()
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function get(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.get({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function update(group) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.update(group)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function add(group) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.add(group)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function users(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.users({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function remove(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.remove({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -61,7 +61,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.groups.addUser({groupId: groupId, userId: userId})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -83,21 +83,12 @@
             function removeOneUser(groupId, userId) {
                 return Endpoint.jasify(function (jasify) {
                     return jasify.groups.removeUser({groupId: groupId, userId: userId})
-                        .then(resultHandler, errorHandler);
+                        .then(Endpoint.resultHandler, Endpoint.rejectHandler);
                 });
             }
 
             if (promises.length == 1) return promises[0];
             return $q.all(promises);
-        }
-
-
-        function errorHandler(e) {
-            return $q.reject(e);
-        }
-
-        function resultHandler(resp) {
-            return resp.result;
         }
 
         return Group;

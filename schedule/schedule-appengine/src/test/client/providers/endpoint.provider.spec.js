@@ -33,6 +33,31 @@ describe('EndpointProvider', function () {
             expect(Endpoint.googleClientUrl).toEqual('https://apis.google.com/js/client.js');
         });
 
+        it('fetch the id of an object', function () {
+            expect(Endpoint.fetchId({id: 'kkk'})).toEqual('kkk');
+        });
+
+        it('return the id of a non object', function () {
+            expect(Endpoint.fetchId('kkk')).toEqual('kkk');
+        });
+
+        it('should transform undefined response', function () {
+            expect(Endpoint.resultHandler()).toBeUndefined();
+        });
+
+        it('should not transform proper response', function () {
+            expect(Endpoint.resultHandler({result: 'abc'})).toEqual('abc');
+        });
+
+        it('should transform undefined items response', function () {
+            expect(Endpoint.itemsResultHandler()).toEqual({items: []});
+        });
+
+        it('should not transform proper items response', function () {
+            var expected = {result: {items: ['a']}};
+            expect(Endpoint.itemsResultHandler(expected)).toEqual(expected.result);
+        });
+
         it('load returns a promise', function () {
             var loadPromise = Endpoint.load();
             expect(loadPromise.then).toBeDefined();

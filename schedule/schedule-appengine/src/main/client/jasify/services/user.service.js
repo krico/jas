@@ -10,14 +10,6 @@
             add: add
         };
 
-        function errorHandler(e) {
-            return $q.reject(e);
-        }
-
-        function resultHandler(resp) {
-            return resp.result;
-        }
-
         /**
          * {offset, limit, query, field, orderBy, order
          * @param params
@@ -25,28 +17,28 @@
         function query(params) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.users.query(params)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function get(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.users.get({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function update(user) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.users.update(user)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function add(user, password) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.users.add({password: password, user: user})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 

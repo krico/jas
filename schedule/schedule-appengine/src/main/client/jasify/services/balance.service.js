@@ -25,7 +25,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.createPayment(request)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -42,35 +42,35 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.createCheckoutPayment(request)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function cancelPayment(paymentId) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.cancelPayment({id: paymentId})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function executePayment(paymentId) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.executePayment(paymentId)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function getAccount() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.getAccount()
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function getAccounts() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.getAccounts()
-                    .then(arrayHandler, errorHandler);
+                    .then(arrayHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -83,19 +83,15 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.getTransactions(params)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
-        function errorHandler(e) {
-            return $q.reject(e);
-        }
-
         function arrayHandler(resp) {
+            resp = resp || {};
+            resp.result = resp.result || {};
+            resp.result.items = resp.result.items || [];
             return resp.result.items;
-        }
-        function resultHandler(resp) {
-            return resp.result;
         }
 
         return Balance;

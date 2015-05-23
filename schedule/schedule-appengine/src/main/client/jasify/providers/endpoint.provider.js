@@ -67,11 +67,38 @@
                 deferred: null,
                 failed: false,
                 loadGoogleClient: loadGoogleClient,
+                /* BEGIN: Utility methods */
+                resultHandler: resultHandler,
+                itemsResultHandler: itemsResultHandler,
+                rejectHandler: rejectHandler,
+                fetchId: fetchId,
+                /* END: Utility methods */
                 googleClientLoaded: false,
                 settings: null
             };
 
             Endpoint.loadGoogleClient(); // Load the google client script when service is instantiated
+
+            function rejectHandler(resp) {
+                return $q.reject(resp);
+            }
+
+            function resultHandler(resp) {
+                resp = resp || {};
+                return resp.result;
+            }
+
+            function itemsResultHandler(resp) {
+                var ret = Endpoint.resultHandler(resp);
+                ret = ret || {};
+                ret.items = ret.items || [];
+                return ret;
+            }
+
+            function fetchId(o) {
+                if (angular.isObject(o)) return o.id;
+                return o;
+            }
 
             function verbose(msg) {
                 if (beVerbose) $log.debug(msg);

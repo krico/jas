@@ -20,28 +20,28 @@
         function query() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.query()
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function queryPublic() {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.queryPublic()
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function get(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.get({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function update(organization) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.update(organization)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -51,7 +51,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.addUser({organizationId: organizationId, userId: userId})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -73,7 +73,7 @@
             function removeOneUser(organizationId, userId) {
                 return Endpoint.jasify(function (jasify) {
                     return jasify.organizations.removeUser({organizationId: organizationId, userId: userId})
-                        .then(resultHandler, errorHandler);
+                        .then(Endpoint.resultHandler, Endpoint.rejectHandler);
                 });
             }
 
@@ -87,7 +87,7 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.addGroup({organizationId: organizationId, groupId: groupId})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -109,7 +109,7 @@
             function removeOneGroup(organizationId, groupId) {
                 return Endpoint.jasify(function (jasify) {
                     return jasify.organizations.removeGroup({organizationId: organizationId, groupId: groupId})
-                        .then(resultHandler, errorHandler);
+                        .then(Endpoint.resultHandler, Endpoint.rejectHandler);
                 });
             }
 
@@ -120,38 +120,29 @@
         function add(organization) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.add(organization)
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function users(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.users({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function groups(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.groups({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 
         function remove(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.organizations.remove({id: id})
-                    .then(resultHandler, errorHandler);
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
-        }
-
-
-        function errorHandler(e) {
-            return $q.reject(e);
-        }
-
-        function resultHandler(resp) {
-            return resp.result;
         }
 
         return Organization;
