@@ -55,10 +55,9 @@ public class MailParser {
 
     private static String getTimeZone(Activity activity) {
         // TODO: Temporary method as initial activities did not have TimeZone
-        if (activity.getTimeZone() == null)
-            return "Europe/Zurich";
-        return activity.getTimeZone();
+        return "Europe/Zurich";
     }
+
     private static MailParser createSubscriptionActivityDetails(MultiSubscription multiSubscription, Subscription subscription) throws IOException {
         Activity activity = subscription.getActivityRef().getModel();
         ActivityType activityType = activity.getActivityTypeRef().getModel();

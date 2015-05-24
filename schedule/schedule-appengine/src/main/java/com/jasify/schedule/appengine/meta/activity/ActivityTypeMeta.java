@@ -35,9 +35,6 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, java.lang.Integer> maxSubscriptions = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, java.lang.Integer>(this, "maxSubscriptions", "maxSubscriptions", int.class);
 
     /** */
-    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType> timeZone = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType>(this, "timeZone", "timeZone");
-
-    /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.common.Organization>, com.jasify.schedule.appengine.model.common.Organization> organizationRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.activity.ActivityType, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.common.Organization>, com.jasify.schedule.appengine.model.common.Organization>(this, "organizationRef", "organizationRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.common.Organization.class);
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
@@ -73,7 +70,6 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         model.setCurrency((java.lang.String) entity.getProperty("currency"));
         model.setLocation((java.lang.String) entity.getProperty("location"));
         model.setMaxSubscriptions(longToPrimitiveInt((java.lang.Long) entity.getProperty("maxSubscriptions")));
-        model.setTimeZone((java.lang.String) entity.getProperty("timeZone"));
         if (model.getOrganizationRef() == null) {
             throw new NullPointerException("The property(organizationRef) is null.");
         }
@@ -99,7 +95,6 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         entity.setProperty("currency", m.getCurrency());
         entity.setProperty("location", m.getLocation());
         entity.setProperty("maxSubscriptions", m.getMaxSubscriptions());
-        entity.setProperty("timeZone", m.getTimeZone());
         if (m.getOrganizationRef() == null) {
             throw new NullPointerException("The property(organizationRef) must not be null.");
         }
@@ -209,10 +204,6 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         }
         writer.setNextPropertyName("maxSubscriptions");
         encoder0.encode(writer, m.getMaxSubscriptions());
-        if(m.getTimeZone() != null){
-            writer.setNextPropertyName("timeZone");
-            encoder0.encode(writer, m.getTimeZone());
-        }
         if(m.getOrganizationRef() != null && m.getOrganizationRef().getKey() != null){
             writer.setNextPropertyName("organizationRef");
             encoder0.encode(writer, m.getOrganizationRef(), maxDepth, currentDepth);
@@ -245,8 +236,6 @@ public final class ActivityTypeMeta extends org.slim3.datastore.ModelMeta<com.ja
         m.setLocation(decoder0.decode(reader, m.getLocation()));
         reader = rootReader.newObjectReader("maxSubscriptions");
         m.setMaxSubscriptions(decoder0.decode(reader, m.getMaxSubscriptions()));
-        reader = rootReader.newObjectReader("timeZone");
-        m.setTimeZone(decoder0.decode(reader, m.getTimeZone()));
         reader = rootReader.newObjectReader("organizationRef");
         decoder0.decode(reader, m.getOrganizationRef(), maxDepth, currentDepth);
         return m;

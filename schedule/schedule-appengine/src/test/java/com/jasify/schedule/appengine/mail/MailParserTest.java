@@ -161,21 +161,6 @@ public class MailParserTest {
     }
 
     @Test
-    public void testTimeZoneConversion() throws Exception {
-        subscription1.getActivityRef().getModel().setTimeZone(TimeZone.getTimeZone("UTC").getID());
-        MailParser utcMailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
-        String utcText = utcMailParser.getText();
-        assert (utcText.contains("Start         : 30/03/2015 10:00"));
-        assert (utcText.contains("Finish        : 30/03/2015 10:45"));
-
-        subscription1.getActivityRef().getModel().setTimeZone(TimeZone.getTimeZone("Europe/Zurich").getID());
-        MailParser zurichMailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
-        String zurichText = zurichMailParser.getText();
-        assert (zurichText.contains("Start         : 30/03/2015 12:00"));
-        assert (zurichText.contains("Finish        : 30/03/2015 12:45"));
-    }
-
-    @Test
     public void testJasifyUserSignUpEmailAsText() throws Exception {
         MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
         String text = mailParser.getText();
