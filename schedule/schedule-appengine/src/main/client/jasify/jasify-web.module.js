@@ -8,6 +8,7 @@
         'ngSanitize',
         'ngMaterial',
         'ngAnimate',
+        'angularMoment',
         'ui.bootstrap',
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
@@ -28,6 +29,8 @@
     jasifyWeb.config(function (EndpointProvider, localStorageServiceProvider) {
         EndpointProvider.verbose(true);
         localStorageServiceProvider.setPrefix('Jasify');
+    }).run(function (amMoment) {
+        amMoment.changeLocale('de');
     });
 
     /**
@@ -40,7 +43,7 @@
             $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
         });
     }
-    
+
     angular.module("template/pagination/pagination.html", []).run(["$templateCache", function ($templateCache) {
         $templateCache.put("template/pagination/pagination.html",
             "<ul class=\"pagination\">\n" +

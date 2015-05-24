@@ -47,8 +47,8 @@
             </td>
             <td>{{activity.activityType.name}}</td>
             <td>{{activity.location}}</td>
-            <td>{{activity.start | date:'yyyy-MM-dd HH:mm' }}</td>
-            <td>{{activity.finish | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{activity.start | amDateFormat: 'L LT' }}</td>
+            <td>{{activity.finish | amDateFormat: 'L LT' }}</td>
             <td>
                 {{activity.subscriptionCount||0}} of {{activity.maxSubscriptions||0}}
             </td>

@@ -9,7 +9,8 @@
 
         var defaultOptions = {
                 format: 'LT',
-                stepping: 15
+                stepping: 15,
+                locale: moment().locale()
             },
             placeholder = 'HH:MM';
 
@@ -60,7 +61,7 @@
                     }
                 });
 
-                timePicker.on('click', function() {
+                timePicker.on('click', function () {
                     timePicker.data('DateTimePicker').show();
                 });
 
@@ -98,9 +99,10 @@
     bs3dp4ng.directive('datePicker', function () {
 
         var defaultOptions = {
-                format: 'DD/MM/YYYY',
+                format: 'L',
                 showClear: true,
-                showTodayButton: true
+                showTodayButton: true,
+                locale: moment().locale()
             },
             isoFormat = 'YYYY-MM-DDTHH:mm:ss';
 
@@ -122,7 +124,7 @@
                     datePickerOptions = angular.extend({}, defaultOptions, externalOptions),
                     datePicker = $(element).datetimepicker(datePickerOptions);
 
-                datePicker.attr('placeholder', datePickerOptions.format);
+                //datePicker.attr('placeholder', datePickerOptions.format);
 
                 datePicker.on('dp.change', function (e) {
                     if (e.date) {
@@ -136,7 +138,7 @@
                     }
                 });
 
-                datePicker.on('click', function() {
+                datePicker.on('click', function () {
                     datePicker.data('DateTimePicker').show();
                 });
 
@@ -144,12 +146,12 @@
 
                     var picker = datePicker.data('DateTimePicker'),
                         newMinDate = moment(newValue);
-                        
+
                     if (!newValue || !newMinDate.isValid()) {
                         picker.minDate(false);
                         return;
                     }
-                    
+
                     newMinDate.set('hour', 0);
                     newMinDate.set('minute', 0);
                     newMinDate.set('second', 0);
@@ -186,7 +188,7 @@
                     if (value) {
                         var newDate = moment(value);
                         datePicker.data('DateTimePicker').date(newDate);
-                        return newDate.format(datePickerOptions.format);
+                        return newDate.format('L');
                     }
                     return value;
                 });
