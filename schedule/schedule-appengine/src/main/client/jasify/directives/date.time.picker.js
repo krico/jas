@@ -124,7 +124,7 @@
                     datePickerOptions = angular.extend({}, defaultOptions, externalOptions),
                     datePicker = $(element).datetimepicker(datePickerOptions);
 
-                //datePicker.attr('placeholder', datePickerOptions.format);
+                datePicker.attr('placeholder', moment.localeData()._longDateFormat.L);
 
                 datePicker.on('dp.change', function (e) {
                     if (e.date) {
