@@ -197,8 +197,8 @@ public class MailParserTest {
 
     @Test
     public void testJasifySubscriptionEmailAsText() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
         MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
@@ -238,8 +238,8 @@ public class MailParserTest {
 
     @Test
     public void testJasifySubscriptionEmailAsHtml() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
 
         MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
@@ -296,8 +296,8 @@ public class MailParserTest {
 
     @Test
     public void testSubscriberSubscriptionEmailAsText() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
         MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
@@ -337,8 +337,8 @@ public class MailParserTest {
 
     @Test
     public void testSubscriberSubscriptionEmailAsHtml() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
 
         MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
