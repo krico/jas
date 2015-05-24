@@ -13,6 +13,7 @@ public class JasActivityType implements JasEndpointEntity {
     private String currency;
     private String location;
     private int maxSubscriptions;
+    private String timeZone;
 
     public String getId() {
         return id;
@@ -76,5 +77,13 @@ public class JasActivityType implements JasEndpointEntity {
 
     public void setMaxSubscriptions(int maxSubscriptions) {
         this.maxSubscriptions = maxSubscriptions;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 }

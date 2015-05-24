@@ -161,6 +161,21 @@ public class MailParserTest {
     }
 
     @Test
+    public void testTimeZoneConversion() throws Exception {
+        subscription1.getActivityRef().getModel().setTimeZone(TimeZone.getTimeZone("UTC").getID());
+        MailParser utcMailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
+        String utcText = utcMailParser.getText();
+        assert (utcText.contains("Start         : 30/03/2015 10:00"));
+        assert (utcText.contains("Finish        : 30/03/2015 10:45"));
+
+        subscription1.getActivityRef().getModel().setTimeZone(TimeZone.getTimeZone("Europe/Zurich").getID());
+        MailParser zurichMailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
+        String zurichText = zurichMailParser.getText();
+        assert (zurichText.contains("Start         : 30/03/2015 12:00"));
+        assert (zurichText.contains("Finish        : 30/03/2015 12:45"));
+    }
+
+    @Test
     public void testJasifyUserSignUpEmailAsText() throws Exception {
         MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
         String text = mailParser.getText();
@@ -180,8 +195,8 @@ public class MailParserTest {
 
     @Test
     public void testJasifySubscriptionEmailAsText() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
         MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
@@ -221,8 +236,8 @@ public class MailParserTest {
 
     @Test
     public void testJasifySubscriptionEmailAsHtml() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
 
         MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
@@ -279,8 +294,8 @@ public class MailParserTest {
 
     @Test
     public void testSubscriberSubscriptionEmailAsText() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
         MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
@@ -320,8 +335,8 @@ public class MailParserTest {
 
     @Test
     public void testSubscriberSubscriptionEmailAsHtml() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(new Subscription[]{subscription1, subscription2});
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(new ActivityPackageExecution[]{activityPackageExecution1,activityPackageExecution2});
+        List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
 
         MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
