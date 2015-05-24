@@ -28,7 +28,6 @@ public class JasActivityTypeTransformerTest {
         TestHelper.cleanupDatastore();
     }
 
-
     @Test
     public void testTransformTo() throws Exception {
         ActivityType internal = new ActivityType();
@@ -41,6 +40,7 @@ public class JasActivityTypeTransformerTest {
         internal.setPrice(12.0);
         internal.setCurrency("NZD");
         internal.setLocation("Location");
+        internal.setTimeZone("TimeZone");
         internal.setMaxSubscriptions(5);
         JasActivityType external = transformer.transformTo(internal);
         assertNotNull(external);
@@ -49,6 +49,7 @@ public class JasActivityTypeTransformerTest {
         assertEquals(12.0, external.getPrice());
         assertEquals("NZD", external.getCurrency());
         assertEquals("Location", external.getLocation());
+        assertEquals("TimeZone", external.getTimeZone());
         assertEquals(5, external.getMaxSubscriptions());
         assertEquals(id, KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getOrganizationId());
@@ -65,6 +66,7 @@ public class JasActivityTypeTransformerTest {
         external.setPrice(12.0);
         external.setCurrency("NZD");
         external.setLocation("Location");
+        external.setTimeZone("TimeZone");
         external.setMaxSubscriptions(5);
         ActivityType internal = transformer.transformFrom(external);
         assertNotNull(internal);
@@ -73,6 +75,7 @@ public class JasActivityTypeTransformerTest {
         assertEquals(12.0, internal.getPrice());
         assertEquals("NZD", internal.getCurrency());
         assertEquals("Location", internal.getLocation());
+        assertEquals("TimeZone", internal.getTimeZone());
         assertEquals(5, internal.getMaxSubscriptions());
         assertEquals(id, internal.getId());
     }

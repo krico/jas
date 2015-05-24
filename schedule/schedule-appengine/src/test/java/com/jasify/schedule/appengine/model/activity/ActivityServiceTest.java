@@ -251,6 +251,7 @@ public class ActivityServiceTest {
         activityType.setCurrency("NZD");
         activityType.setLocation("Location");
         activityType.setMaxSubscriptions(6);
+        activityType.setTimeZone("TimeZone");
         ActivityType updatedActivityType = activityService.updateActivityType(activityType);
         assertNotNull(updatedActivityType);
         assertEquals(id, updatedActivityType.getId());
@@ -260,6 +261,7 @@ public class ActivityServiceTest {
         assertEquals("NZD", updatedActivityType.getCurrency());
         assertEquals("Location", updatedActivityType.getLocation());
         assertEquals(6, updatedActivityType.getMaxSubscriptions());
+        assertEquals("TimeZone", updatedActivityType.getTimeZone());
         assertEquals("New Name", activityService.getActivityType(id).getName());
     }
 
