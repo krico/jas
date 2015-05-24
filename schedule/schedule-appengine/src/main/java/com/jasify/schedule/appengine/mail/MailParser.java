@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -52,13 +53,19 @@ public class MailParser {
         return mailParser;
     }
 
+    private static String getTimeZone(Activity activity) {
+        // TODO: Temporary method as initial activities did not have TimeZone
+        if (activity.getTimeZone() == null)
+            return "Europe/Zurich";
+        return activity.getTimeZone();
+    }
     private static MailParser createSubscriptionActivityDetails(MultiSubscription multiSubscription, Subscription subscription) throws IOException {
         Activity activity = subscription.getActivityRef().getModel();
         ActivityType activityType = activity.getActivityTypeRef().getModel();
         Organization organization = activityType.getOrganizationRef().getModel();
         String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
+        DateTime start = new DateTime(activity.getStart(), DateTimeZone.forID(getTimeZone(activity)));
+        DateTime finish = new DateTime(activity.getFinish(), DateTimeZone.forID(getTimeZone(activity)));
         MailParser mailParser = new MailParser(multiSubscription.activityDetails);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
         mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
@@ -91,8 +98,8 @@ public class MailParser {
 
     private static MailParser createSubscriptionActivityPackageActivityDetails(MultiSubscription multiSubscription, ActivityPackageSubscription activityPackageSubscription) throws IOException {
         Activity activity = activityPackageSubscription.getActivityRef().getModel();
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
+        DateTime start = new DateTime(activity.getStart(), DateTimeZone.forID(getTimeZone(activity)));
+        DateTime finish = new DateTime(activity.getFinish(), DateTimeZone.forID(getTimeZone(activity)));
         MailParser mailParser = new MailParser(multiSubscription.activityPackageActivityDetails);
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
         mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
@@ -159,8 +166,8 @@ public class MailParser {
 
         String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
         User user = subscription.getUserRef().getModel();
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
+        DateTime start = new DateTime(activity.getStart(), DateTimeZone.forID(getTimeZone(activity)));
+        DateTime finish = new DateTime(activity.getFinish(), DateTimeZone.forID(getTimeZone(activity)));
         MailParser mailParser = new MailParser("/publisher/Subscription");
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
         mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));
@@ -181,8 +188,8 @@ public class MailParser {
 
         String orderNumber = KeyUtil.toHumanReadableString(activityPackageExecution.getId());
         User user = activityPackageSubscription.getUserRef().getModel();
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
+        DateTime start = new DateTime(activity.getStart(), DateTimeZone.forID(getTimeZone(activity)));
+        DateTime finish = new DateTime(activity.getFinish(), DateTimeZone.forID(getTimeZone(activity)));
         MailParser mailParser = new MailParser("/publisher/Subscription");
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
         mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));

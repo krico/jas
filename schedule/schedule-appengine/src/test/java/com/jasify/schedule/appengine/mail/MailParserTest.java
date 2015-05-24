@@ -13,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import static junit.framework.TestCase.*;
+
 import java.util.*;
 
 /**
@@ -158,6 +160,21 @@ public class MailParserTest {
         text = mailParser.getText();
         assert (!text.contains("Subscriber    : " + user.getRealName()));
         assert (text.contains("Subscriber    : " + user.getName()));
+    }
+
+    @Test
+    public void testTimeZoneConversion() throws Exception {
+        subscription1.getActivityRef().getModel().setTimeZone(TimeZone.getTimeZone("UTC").getID());
+        MailParser utcMailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
+        String utcText = utcMailParser.getText();
+        assert (utcText.contains("Start         : 30/03/2015 10:00"));
+        assert (utcText.contains("Finish        : 30/03/2015 10:45"));
+
+        subscription1.getActivityRef().getModel().setTimeZone(TimeZone.getTimeZone("Europe/Zurich").getID());
+        MailParser zurichMailParser = MailParser.createPublisherSubscriptionEmail(subscription1);
+        String zurichText = zurichMailParser.getText();
+        assert (zurichText.contains("Start         : 30/03/2015 12:00"));
+        assert (zurichText.contains("Finish        : 30/03/2015 12:45"));
     }
 
     @Test
