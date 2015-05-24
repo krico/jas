@@ -35,11 +35,11 @@ public interface UserService {
 
     User get(long id);
 
-    // TODO: Perhaps this should be renamed for findUser and getExistingUser should be renamed to getUser - for consistency?
+    // TODO: Perhaps this should be renamed for findUser to indicate that it can return null?
     User get(Key id);
 
     @Nonnull
-    public User getExistingUser(Key id) throws EntityNotFoundException;
+    public User getUser(Key id) throws EntityNotFoundException;
 
     User findByLogin(String provider, String userId);
 

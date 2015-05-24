@@ -781,6 +781,24 @@ public class ActivityServiceTest {
         assertNull(Datastore.getOrNull(ids.get(0)));
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetSubscriptionWithNullIdThrowsEntityNotFoundException() throws Exception {
+        activityService.getSubscription(null);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetSubscriptionEntityNotFoundException() throws Exception {
+        activityService.getSubscription(Datastore.allocateId(Subscription.class));
+    }
+
+    @Test
+    public void testGetSubscription() throws Exception {
+        Subscription subscription = new Subscription();
+        Datastore.put(subscription);
+        Subscription result = activityService.getSubscription(subscription.getId());
+        assertNotNull(result);
+    }
+
     @Test
     public void testSubscribe() throws Exception {
         activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
@@ -1146,7 +1164,6 @@ public class ActivityServiceTest {
             assertNull(Datastore.getOrNull(subscription.getId()));
         }
         assertNull(Datastore.getOrNull(activityPackageExecution.getId()));
-
     }
 
     @Test
@@ -1241,6 +1258,26 @@ public class ActivityServiceTest {
         thrown.expectMessage("ActivityPackage.activities");
         activityPackage10Organization.setItemCount(1);
         activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1));
+    }
+
+    @Test
+    public void testGetActivityPackageActivities() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("ActivityPackage.activities");
+        activityPackage10Organization.setItemCount(2);
+        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
+        List<ActivityPackageActivity> activityPackageActivities = activityService.getActivityPackageActivities(activity1Organization1);
+        assertEquals(2, activityPackageActivities.size());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityPackageThrowsEntityNotFound() throws Exception {
+       activityService.getActivityPackage(Datastore.allocateId(ActivityPackage.class));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetActivityPackageThrowsNullPointerException() throws Exception {
+        activityService.getActivityPackage(null);
     }
 
 //    @Test

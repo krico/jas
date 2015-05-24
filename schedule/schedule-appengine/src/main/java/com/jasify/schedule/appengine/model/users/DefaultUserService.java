@@ -252,7 +252,7 @@ final class DefaultUserService implements UserService {
 
     @Nonnull
     @Override
-    public User getExistingUser(Key id) throws EntityNotFoundException {
+    public User getUser(Key id) throws EntityNotFoundException {
         try {
             return Datastore.get(userMeta, id);
         } catch (EntityNotFoundRuntimeException e) {

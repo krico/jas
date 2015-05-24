@@ -29,7 +29,6 @@ final class DefaultOrganizationService implements OrganizationService {
     private final OrganizationMeta organizationMeta;
     private final OrganizationMemberMeta organizationMemberMeta;
     private final UniqueConstraint uniqueOrganizationName;
-
     private final GroupMeta groupMeta;
 
     private DefaultOrganizationService() {
@@ -140,7 +139,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void addUserToOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
-        User dbUser = UserServiceFactory.getUserService().getExistingUser(user.getId());
+        User dbUser = UserServiceFactory.getUserService().getUser(user.getId());
 
         if (!dbOrganization.getUserKeys().contains(user.getId())) {
             OrganizationMember junction = new OrganizationMember(dbOrganization, dbUser);
@@ -151,22 +150,22 @@ final class DefaultOrganizationService implements OrganizationService {
 
     @Override
     public void addUserToOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        addUserToOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getExistingUser(userId));
+        addUserToOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
     public void removeUserFromOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        removeUserFromOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getExistingUser(userId));
+        removeUserFromOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
     public void addUserToGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        addUserToGroup(getGroup(groupId), UserServiceFactory.getUserService().getExistingUser(userId));
+        addUserToGroup(getGroup(groupId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
     public void removeUserFromGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        removeUserFromGroup(getGroup(groupId), UserServiceFactory.getUserService().getExistingUser(userId));
+        removeUserFromGroup(getGroup(groupId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
@@ -182,7 +181,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void removeUserFromOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
-        UserServiceFactory.getUserService().getExistingUser(user.getId());
+        UserServiceFactory.getUserService().getUser(user.getId());
 
         Set<Key> toRemove = new HashSet<>();
         List<OrganizationMember> list = dbOrganization.getOrganizationMemberListRef().getModelList();
@@ -297,7 +296,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void addUserToGroup(Group group, User user) throws EntityNotFoundException {
         Group dbGroup = getGroup(group.getId());
-        User dbUser = UserServiceFactory.getUserService().getExistingUser(user.getId());
+        User dbUser = UserServiceFactory.getUserService().getUser(user.getId());
 
         if (!dbGroup.getUserKeys().contains(dbUser.getId())) {
             GroupUser junction = new GroupUser(dbGroup, dbUser);
@@ -309,7 +308,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void removeUserFromGroup(Group group, User user) throws EntityNotFoundException {
         Group dbGroup = getGroup(group.getId());
-        UserServiceFactory.getUserService().getExistingUser(user.getId());
+        UserServiceFactory.getUserService().getUser(user.getId());
 
         Set<Key> toRemove = new HashSet<>();
         List<GroupUser> list = dbGroup.getGroupUserListRef().getModelList();
