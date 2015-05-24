@@ -176,6 +176,7 @@ class DefaultPaymentService implements PaymentService {
             }
 
             if (dbPayment.getState() == PaymentStateEnum.Canceled) {
+                log.warn("Cancelling a canceled payment", new Throwable().getStackTrace()); // How did this happen
                 return;
             }
 
@@ -213,5 +214,4 @@ class DefaultPaymentService implements PaymentService {
     private static class Singleton {
         private static final PaymentService INSTANCE = new DefaultPaymentService();
     }
-
 }

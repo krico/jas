@@ -38,6 +38,8 @@ public interface UserService {
     // TODO: Perhaps this should be renamed for findUser and getExistingUser should be renamed to getUser - for consistency?
     User get(Key id);
 
+    @Nonnull
+    public User getExistingUser(Key id) throws EntityNotFoundException;
 
     User findByLogin(String provider, String userId);
 
