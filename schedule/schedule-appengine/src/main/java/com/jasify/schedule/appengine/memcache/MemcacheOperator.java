@@ -2,15 +2,12 @@ package com.jasify.schedule.appengine.memcache;
 
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.base.Preconditions;
-import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.util.Threads;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.memcache.S3ErrorHandler;
 
 import java.util.ConcurrentModificationException;
 
@@ -48,8 +45,7 @@ public final class MemcacheOperator {
     }
 
     private <T> T updateImpl(MemcacheTransaction<T> operation) {
-        MemcacheService service = MemcacheServiceFactory.getMemcacheService();
-        service.setErrorHandler(new S3ErrorHandler());
+        MemcacheService service = Memcache.delegate();
 
         final Object key = operation.key();
 

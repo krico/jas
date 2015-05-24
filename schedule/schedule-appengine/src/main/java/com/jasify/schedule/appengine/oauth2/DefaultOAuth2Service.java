@@ -6,10 +6,10 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.memcache.Memcache;
 import com.jasify.schedule.appengine.oauth2.OAuth2Exception.CodeResponseException;
 import com.jasify.schedule.appengine.oauth2.OAuth2Exception.MissingStateException;
 import org.apache.commons.lang3.StringUtils;
-import org.slim3.memcache.Memcache;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
