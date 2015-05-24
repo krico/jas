@@ -97,6 +97,13 @@ public class BaseDaoTest {
     }
 
     @Test
+    public void testDelete() throws Exception {
+        Key id = dao.save(createExample());
+        dao.delete(id);
+        assertNull(dao.getOrNull(id));
+    }
+
+    @Test
     public void testCurrentTransaction() throws Exception {
 
         final Key id = Datastore.allocateId(Example.class);
@@ -112,6 +119,16 @@ public class BaseDaoTest {
         tx2.rollback();
         tx1.commit();
         assertNotNull(dao.getOrNull(id));
+
+        Transaction tx3 = beginTx();
+        dao.delete(id);
+        Transaction tx4 = beginTx();
+        assertNotNull(dao.getOrNull(id));
+        tx4.rollback();
+
+        tx3.commit();
+        assertNull(dao.getOrNull(id));
+
     }
 
 }

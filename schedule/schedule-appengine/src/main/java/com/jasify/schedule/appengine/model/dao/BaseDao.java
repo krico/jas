@@ -62,4 +62,14 @@ public abstract class BaseDao<T> {
     public Key save(@Nonnull T entity) {
         return Datastore.put(entity);
     }
+
+    /**
+     * Deletes the entity with primaryKey <code>id</code>
+     *
+     * @param id is the primary key of the entity to be deleted
+     */
+    @CurrentTransaction
+    public void delete(@Nonnull Key id) {
+        Datastore.delete(id);
+    }
 }
