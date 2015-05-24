@@ -15,6 +15,7 @@ import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -135,6 +136,7 @@ class DefaultActivityService implements ActivityService {
     @Nonnull
     @Override
     public Key addActivityType(final Organization organization, final ActivityType activityType) throws UniqueConstraintException {
+        Preconditions.checkArgument(StringUtils.isNotBlank(activityType.getName()));
         try {
             return TransactionOperator.execute(new ModelOperation<Key>() {
                 @Override
@@ -500,7 +502,9 @@ class DefaultActivityService implements ActivityService {
     @Override
     public ActivityPackageExecution subscribe(final Key userId, final Key activityPackageId, final List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
         Preconditions.checkState(!activityIds.isEmpty(), "Need at least 1 activity to subscribe");
-        final User user = getUser(userId);
+        if (userId == null) throw new EntityNotFoundException("User id=NULL");
+        final User user = UserServiceFactory.getUserService().getUser(userId);
+
         try {
             //I will implement this method with transactions, so we can use it as a reference for the other subscribe
             return TransactionOperator.execute(new ModelOperation<ActivityPackageExecution>() {

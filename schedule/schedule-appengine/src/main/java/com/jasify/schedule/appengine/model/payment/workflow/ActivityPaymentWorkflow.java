@@ -53,7 +53,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
         Payment payment = getPaymentRef().getModel();
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
-            User user = UserServiceFactory.getUserService().get(payment.getUserRef().getKey());
+            User user = UserServiceFactory.getUserService().getUser(payment.getUserRef().getKey());
             Activity activity = activityService.getActivity(activityId);
             Subscription subscribe = activityService.subscribe(user, activity);
             subscriptionId = subscribe.getId();

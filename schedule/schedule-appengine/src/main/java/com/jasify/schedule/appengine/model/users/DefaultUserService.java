@@ -18,10 +18,7 @@ import com.jasify.schedule.appengine.util.DigestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.datastore.Datastore;
-import org.slim3.datastore.InMemoryFilterCriterion;
-import org.slim3.datastore.ModelQuery;
-import org.slim3.datastore.SortCriterion;
+import org.slim3.datastore.*;
 
 import javax.annotation.Nonnull;
 import java.math.BigInteger;
@@ -251,6 +248,16 @@ final class DefaultUserService implements UserService {
     @Override
     public User get(Key id) {
         return Datastore.getOrNull(User.class, id);
+    }
+
+    @Nonnull
+    @Override
+    public User getUser(Key id) throws EntityNotFoundException {
+        try {
+            return Datastore.get(userMeta, id);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException("User id=" + id);
+        }
     }
 
     @Override

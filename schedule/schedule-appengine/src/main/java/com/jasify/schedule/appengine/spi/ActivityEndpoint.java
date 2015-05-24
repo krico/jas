@@ -283,7 +283,7 @@ public class ActivityEndpoint {
         checkFound(activityId);
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         try {
-            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(userId);
+            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().getUser(userId);
             Activity activity = activityService.getActivity(activityId);
             return activityService.subscribe(user, activity);
         } catch (EntityNotFoundException e) {

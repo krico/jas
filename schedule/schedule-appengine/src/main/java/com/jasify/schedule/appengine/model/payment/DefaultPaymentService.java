@@ -7,7 +7,6 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
-import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -35,11 +34,9 @@ class DefaultPaymentService implements PaymentService {
     private static final int DEFAULT_CANCEL_TASK_DELAY_IN_MILLISECONDS = 1800000;
 
     private final PaymentMeta paymentMeta;
-    private final SubscriptionMeta subscriptionMeta;
 
     private DefaultPaymentService() {
         paymentMeta = PaymentMeta.get();
-        subscriptionMeta = SubscriptionMeta.get();
     }
 
     static PaymentService instance() {
@@ -176,6 +173,7 @@ class DefaultPaymentService implements PaymentService {
             }
 
             if (dbPayment.getState() == PaymentStateEnum.Canceled) {
+                log.warn("Cancelling a canceled payment", new Throwable()); // How did this happen
                 return;
             }
 
