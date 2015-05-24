@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <table ng-if="vm.activities.length" class="table table-hover table-condensed table-vmiddle">
+    <table id="admin-activities-table" ng-if="vm.activities.length" class="table table-hover table-condensed table-vmiddle">
         <thead>
         <tr>
             <th>
@@ -44,9 +44,16 @@
             <td class="row-commands">
                 <row-edit action="vm.viewActivity(activity)"></row-edit>
                 <row-delete action="vm.removeActivity(activity)"></row-delete>
+                <div class="dropdown">
+                    <button type="button" tooltip="Subscriptions" class="btn btn-icon btn-primary command-edit" data-toggle="dropdown" aria-expanded="true"><i class="md mdi mdi-group"></i></button>
+                    <ul class="dropdown-menu fadeIn animated fadeOut">
+                        <li ng-if="activity.subscriptionCount > 0"><a href ng-click="vm.viewSubscribers(activity.id)">View Subscribers</a></li>
+                        <li><a href ng-click="vm.addSubscriber(activity.id)">Add Subscriber</a></li>
+                    </ul>
+                </div>
             </td>
-            <td>{{activity.activityType.name}}</td>
-            <td>{{activity.location}}</td>
+            <td class="activity-type">{{activity.activityType.name}}</td>
+            <td class="activity-location">{{activity.location}}</td>
             <td>{{activity.start | amDateFormat: 'L LT' }}</td>
             <td>{{activity.finish | amDateFormat: 'L LT' }}</td>
             <td>
@@ -55,22 +62,6 @@
             <td>
                 {{activity.price | currency:activity.currency}}
             </td>
-            <td>
-                <button type="button" class="btn btn-link btn-xs" ng-show="activity.subscriptionCount > 0"
-                        ng-click="vm.viewSubscribers(activity.id)">
-                    <span class="glyphicon glyphicon-user" tooltip="Subscribers"></span>
-                </button>
-            </td>
-            <td>
-                <button type="button" class="btn btn-link btn-xs"
-                        ng-disabled="activity.subscriptionCount == activity.maxSubscriptions"
-                        ng-click="vm.addSubscriber(activity.id)"><span
-                        class="glyphicon glyphicon-plus" tooltip="Add Subscriber"></span>
-                </button>
-            </td>
-        </tr>
-        <tr ng-if="vm.activities.length == 0">
-            <td colspan="8">No activities...</td>
         </tr>
         </tbody>
     </table>
