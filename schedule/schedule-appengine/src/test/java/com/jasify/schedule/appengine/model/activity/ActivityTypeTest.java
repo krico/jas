@@ -124,12 +124,4 @@ public class ActivityTypeTest {
         activityType.setMaxSubscriptions(12);
         assertEquals(12, activityType.getMaxSubscriptions());
     }
-
-    @Test
-    public void testTimeZone() {
-        ActivityType activityType = new ActivityType();
-        assertNull(activityType.getTimeZone());
-        activityType.setTimeZone("TimeZone");
-        assertEquals("TimeZone", activityType.getTimeZone());
-    }
 }

@@ -43,8 +43,6 @@ public class Activity {
 
     private String description;
 
-    private String timeZone;
-
     @Attribute(persistent = false)
     private InverseModelListRef<Subscription, Activity> subscriptionListRef =
             new InverseModelListRef<>(Subscription.class, SubscriptionMeta.get().activityRef.getName(), this);
@@ -166,13 +164,5 @@ public class Activity {
 
     public InverseModelListRef<Subscription, Activity> getSubscriptionListRef() {
         return subscriptionListRef;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
     }
 }

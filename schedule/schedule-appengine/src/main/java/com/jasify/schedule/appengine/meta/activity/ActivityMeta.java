@@ -46,9 +46,6 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity>(this, "description", "description");
 
-    /** */
-    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity> timeZone = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.activity.Activity>(this, "timeZone", "timeZone");
-
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
@@ -90,7 +87,6 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         model.setSubscriptionCount(longToPrimitiveInt((java.lang.Long) entity.getProperty("subscriptionCount")));
         model.setName((java.lang.String) entity.getProperty("name"));
         model.setDescription((java.lang.String) entity.getProperty("description"));
-        model.setTimeZone((java.lang.String) entity.getProperty("timeZone"));
         return model;
     }
 
@@ -122,7 +118,6 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         entity.setProperty("subscriptionCount", m.getSubscriptionCount());
         entity.setProperty("name", m.getName());
         entity.setProperty("description", m.getDescription());
-        entity.setProperty("timeZone", m.getTimeZone());
         return entity;
     }
 
@@ -244,10 +239,6 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
         }
-        if(m.getTimeZone() != null){
-            writer.setNextPropertyName("timeZone");
-            encoder0.encode(writer, m.getTimeZone());
-        }
         writer.endObject();
     }
 
@@ -284,8 +275,6 @@ public final class ActivityMeta extends org.slim3.datastore.ModelMeta<com.jasify
         m.setName(decoder0.decode(reader, m.getName()));
         reader = rootReader.newObjectReader("description");
         m.setDescription(decoder0.decode(reader, m.getDescription()));
-        reader = rootReader.newObjectReader("timeZone");
-        m.setTimeZone(decoder0.decode(reader, m.getTimeZone()));
         return m;
     }
 }

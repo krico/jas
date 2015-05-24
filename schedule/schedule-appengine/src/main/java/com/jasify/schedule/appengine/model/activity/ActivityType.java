@@ -38,8 +38,6 @@ public class ActivityType {
 
     private int maxSubscriptions;
 
-    private String timeZone;
-
     private ModelRef<Organization> organizationRef = new ModelRef<>(Organization.class);
 
     public ActivityType() {
@@ -132,13 +130,5 @@ public class ActivityType {
 
     public void setMaxSubscriptions(int maxSubscriptions) {
         this.maxSubscriptions = maxSubscriptions;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
     }
 }
