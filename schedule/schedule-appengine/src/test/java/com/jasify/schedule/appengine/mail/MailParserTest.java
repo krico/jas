@@ -13,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import static junit.framework.TestCase.*;
+
 import java.util.*;
 
 /**
