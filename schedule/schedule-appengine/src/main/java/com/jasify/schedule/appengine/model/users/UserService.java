@@ -35,6 +35,7 @@ public interface UserService {
 
     User get(long id);
 
+    // TODO: Perhaps this should be renamed for findUser and getExistingUser should be renamed to getUser - for consistency?
     User get(Key id);
 
 
