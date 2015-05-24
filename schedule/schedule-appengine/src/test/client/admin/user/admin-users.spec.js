@@ -22,7 +22,7 @@ describe('AdminUsersController', function () {
     it('can be instantiated', function () {
     });
 
-    it('pageChanged passes query parameters and reads X-Total', function () {
+    it('pageChanged passes query parameters and sets total to 0 if no results', function () {
         vm.searchBy('email');
         vm.page = 2;
         vm.query = 'foo';
@@ -36,7 +36,7 @@ describe('AdminUsersController', function () {
         $rootScope.$apply();
 
         expect(vm.page).toEqual(2);
-        expect(vm.total).toEqual(50);
+        expect(vm.total).toEqual(0);
         expect(User.query).toHaveBeenCalledWith({
             field: vm.searchBy(),
             offset: ((vm.page-1) * vm._perPage),
@@ -61,21 +61,21 @@ describe('AdminUsersController', function () {
 
     });
 
-    it('queryChanged moves back to page 1', function () {
+    it('queryChanged moves back to page 1 and set total to row count', function () {
         vm.searchBy('email');
         vm.page = 2;
         vm.query = 'foo';
         vm._perPage = 5;
         vm.sort = 'ASC';
 
-        User.query.and.returnValue($q.when({total: 50, users: []}));
+        User.query.and.returnValue($q.when({total: 50, users: [{}, {}]}));
 
         vm.queryChanged();
 
         $rootScope.$apply();
 
         expect(vm.page).toEqual(1);
-        expect(vm.total).toEqual(50);
+        expect(vm.total).toEqual(2);
     });
 
     it('perPage queries and stays on same record', function () {
@@ -85,23 +85,23 @@ describe('AdminUsersController', function () {
         vm._perPage = 4;
         vm.sort = 'ASC';
 
-        User.query.and.returnValue($q.when({total: 50, users: []}));
+        User.query.and.returnValue($q.when({total: 50, users: [{}, {}]}));
 
         vm.pageChanged();
 
         $rootScope.$apply();
 
         expect(vm.page).toEqual(2);
-        expect(vm.total).toEqual(50);
+        expect(vm.total).toEqual(2);
 
-        User.query.and.returnValue($q.when({total: 50, users: []}));
+        User.query.and.returnValue($q.when({total: 50, users: [{}, {}]}));
 
         vm.perPage(2);
 
         $rootScope.$apply();
 
         expect(vm.page).toEqual(3);
-        expect(vm.total).toEqual(50);
+        expect(vm.total).toEqual(2);
     });
 
     it('view users goes to /admin/user/:id', function () {

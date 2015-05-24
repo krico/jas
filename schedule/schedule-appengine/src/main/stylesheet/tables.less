@@ -50,3 +50,31 @@
     }
   }
 }
+
+#admin-organizations {
+  tbody {
+    td:not(.row-commands) {
+      white-space: nowrap;
+      width: 20%;
+    }
+    td.created, td.modified {
+      .min-size-column();
+    }
+    td.description {
+      .auto-width-column();
+    }
+  }
+}
+
+#users-list {
+  tbody {
+    td:not(.row-commands) {
+      white-space: nowrap;
+      width: 33%;
+    }
+
+    td.created {
+      .min-size-column();
+    }
+  }
+}
