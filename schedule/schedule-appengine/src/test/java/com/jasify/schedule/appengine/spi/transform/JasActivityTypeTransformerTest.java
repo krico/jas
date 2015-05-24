@@ -48,7 +48,6 @@ public class JasActivityTypeTransformerTest {
         assertEquals(12.0, external.getPrice());
         assertEquals("NZD", external.getCurrency());
         assertEquals("Location", external.getLocation());
-        assertEquals("TimeZone", external.getTimeZone());
         assertEquals(5, external.getMaxSubscriptions());
         assertEquals(id, KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getOrganizationId());
@@ -65,7 +64,6 @@ public class JasActivityTypeTransformerTest {
         external.setPrice(12.0);
         external.setCurrency("NZD");
         external.setLocation("Location");
-        external.setTimeZone("TimeZone");
         external.setMaxSubscriptions(5);
         ActivityType internal = transformer.transformFrom(external);
         assertNotNull(internal);
