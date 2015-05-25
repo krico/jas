@@ -1,0 +1,68 @@
+<div ng-if="vm.organizations.length > 0" class="card">
+    <div class="card-header">
+        <h2>Activitie Types
+            <small>
+                Add/edit/delete activity types.
+            </small>
+        </h2>
+    </div>
+    <div class="card-body card-padding-sm">
+        <div class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="organization" class="col-sm-2 control-label">Organization:</label>
+
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <div class="select">
+                            <select id="organization" class="form-control"
+                                    ng-model="vm.organization"
+                                    ng-options="organization as organization.name for organization in vm.organizations"
+                                    ng-change="vm.organizationSelected(vm.organization)">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <table id="admin-activityTypes-table" ng-if="vm.activityTypes.length" class="table table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th>
+                <row-add ng-click="vm.addActivityType()"  description="Add Activity Type"/>
+            </th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="animate-delete" ng-repeat="activityType in vm.activityTypes | orderBy:'name'">
+            <td class="row-commands">
+                <row-edit action="vm.viewActivityType(activityType)"></row-edit>
+                <row-delete action="vm.removeActivityType(activityType)"></row-delete>
+            </td>
+            <td class="activity-type-name">{{activityType.name}}</td>
+            <td class="activity-type-description">{{activityType.description}}</td>
+            <td class="activity-type-location">{{activityType.location}}</td>
+            <td>
+                {{activityType.price | currency:activityType.currency}}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="card" ng-if="vm.organizations.length > 0 && vm.activityTypes.length === 0">
+    <div class="card-padding card-body text-center">
+        <p>No Activities Types are defined for {{::vm.organization.name}}.</p>
+        <button ng-click="vm.addActivityType()" class="btn btn-primary waves-effect">Create Activity Type</button>
+    </div>
+</div>
+<div class="card" ng-if="vm.organizations.length === 0">
+    <div class="card-padding card-body text-center">
+        <p>Before you can create an Activities Type, you need to create an Organization.</p>
+        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
+    </div>
+</div>
+

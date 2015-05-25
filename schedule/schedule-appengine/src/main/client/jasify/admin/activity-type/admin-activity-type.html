@@ -1,0 +1,151 @@
+<form novalidate class="form-horizontal" name="vm.activityTypeForm"
+      ng-submit="vm.activityTypeForm.$valid && vm.saveOrUpdate()">
+    <div class="card">
+        <div class="card-header">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <button type="button" btn-href="/admin/activity-types" class="btn btn-default waves-effect">Cancel
+                </button>
+            </div>
+            <card-back href="#/admin/activity-types"></card-back>
+            <h2 ng-if="!vm.activityType.id">New Activity Type
+                <small>Create a new activity type.</small>
+            </h2>
+            <h2 ng-if="vm.activityType.id">Edit Activity Type
+                <small>Edit details of existing activity type. Note that existing activities will not be updated.</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4" for="organization">Organization:</label>
+
+                        <div class="col-sm-8" ng-show="!vm.activityType.id">
+                            <div class="fg-line">
+                                <div class="select">
+                                    <select id="organization" name="organization" class="form-control" required
+                                            ng-model="vm.organization"
+                                            ng-options="organization as organization.name for organization in vm.organizations">
+                                    </select>
+                                </div>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityTypeForm.organization"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityTypeForm.organization"
+                                                       form="vm.activityTypeForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityTypeForm.organization" form="vm.activityTypeForm">
+                                <span ng-message="required">Organization is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                        <div class="col-sm-8" ng-show="vm.activityType.id">
+                            <p class="form-control-static">{{vm.organization.name}}</p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="name" class="col-sm-4 control-label">Name:</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="name" name="name" required placeholder="Enter Name"
+                                       class="form-control"
+                                       ng-model="vm.activityType.name"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityTypeForm.name"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityTypeForm.name"
+                                                       form="vm.activityTypeForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityTypeForm.name" form="vm.activityTypeForm">
+                                <span ng-message="required">Name is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="location" class="col-sm-4 control-label">Location:</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="location" name="location" required placeholder="Enter location"
+                                       class="form-control"
+                                       ng-model="vm.activityType.location"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityTypeForm.location"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityTypeForm.location"
+                                                       form="vm.activityTypeForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityTypeForm.location" form="vm.activityTypeForm">
+                                <span ng-message="required">Location is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="price" class="col-sm-4 col-xs-12 control-label">Price:</label>
+
+                        <div jas-has-feedback class="col-sm-4 col-xs-7">
+                            <div class="fg-line">
+                                <input id="price" name="price" placeholder="Enter price" type="number"
+                                       class="form-control"
+                                       min="0" max="10000" required
+                                       ng-model="vm.activityType.price"
+                                       ng-change="vm.activityType.currency = 'CHF'"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityTypeForm.price"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityTypeForm.price"
+                                                       form="vm.activityTypeForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityTypeForm.price" form="vm.activityTypeForm">
+                                <span ng-message="required">Price is required.</span>
+                                <span ng-message="number">Invalid number.</span>
+                                <span ng-message="min">Value must be greater than or equal to 0.</span>
+                                <span ng-message="max">Value must be smaller than 10000.</span>
+                            </jas-error-help-block>
+                        </div>
+                        <div jas-has-feedback class="col-sm-4 col-xs-5">
+                            <div class="fg-line">
+                                <div class="select">
+                                    <select name="currency" id="currency" required class="form-control"
+                                            ng-model="vm.activityType.currency">
+                                        <option>CHF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityTypeForm.currency"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityTypeForm.currency"
+                                                       form="vm.activityTypeForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityTypeForm.currency" form="vm.activityTypeForm">
+                                <span ng-message="required">Currency is required.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="capacity" class="col-sm-4 control-label">Capacity:</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="capacity" name="capacity" type="number" placeholder="Enter capacity"
+                                       class="form-control" min="1" max="1000" required
+                                       ng-model="vm.activityType.maxSubscriptions"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.activityTypeForm.capacity"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.activityTypeForm.capacity"
+                                                       form="vm.activityTypeForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.activityTypeForm.capacity" form="vm.activityTypeForm">
+                                <span ng-message="required">Capacity is required.</span>
+                                <span ng-message="number">Invalid number.</span>
+                                <span ng-message="min">Value must be greater than 0.</span>
+                                <span ng-message="max">Value must be smaller than 1000.</span>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="col-sm-4 control-label">Description:</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <textarea class="form-control auto-size" id="description" name="description" rows="2"
+                                          placeholder="Enter description"
+                                          ng-model="vm.activityType.description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
