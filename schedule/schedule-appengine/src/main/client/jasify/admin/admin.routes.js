@@ -251,6 +251,94 @@
                     }
                 }
             })
+            .when('/admin/activity-types/:organizationId?', {
+                templateUrl: 'admin/activity-type/admin-activity-types.html',
+                controller: 'AdminActivityTypesController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($location, $route, $q, Allow, Organization) {
+
+                        var dfd = $q.defer();
+
+                        Allow.admin().then(
+                            function () {
+                                Organization.query().then(function (result) {
+                                    if ($route.current.params.organizationId) {
+                                        dfd.resolve(result);
+                                    } else {
+                                        if (result.items && result.items.length > 0) {
+                                            $location.path('/admin/activity-types/' + result.items[0].id);
+                                        } else {
+                                            dfd.resolve({items: []});
+                                        }
+                                    }
+                                });
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+
+                        return dfd.promise;
+                    },
+                    activityTypes: /*@ngInject*/ function ($q, $route, Allow, ActivityType) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.organizationId) {
+
+                                var dfd = $q.defer();
+
+                                ActivityType.query($route.current.params.organizationId).then(function (result) {
+                                    dfd.resolve(angular.extend({items: []}, result));
+                                });
+
+                                return dfd.promise;
+                            } else {
+                                return {items: []};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
+            .when('/admin/activity-type/:id?', {
+                templateUrl: 'admin/activity-type/admin-activity-type.html',
+                controller: 'AdminActivityTypeController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    },
+                    activityType: /*@ngInject*/ function ($q, $route, Allow, ActivityType) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.id) {
+                                return ActivityType.get($route.current.params.id);
+                            } else {
+                                return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
             .when('/admin/balances/:accountId?', {
                 templateUrl: 'admin/balance/admin-balances.html',
                 controller: 'AdminBalancesController',
