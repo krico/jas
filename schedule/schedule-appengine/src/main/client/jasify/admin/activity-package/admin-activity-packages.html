@@ -2,7 +2,7 @@
     <div class="card-header">
         <h2>Activity Packages
             <small>
-                Group your Activities with Activity Packages.
+                Group multiple activities into one activity package. You can add new activity packages or edit/delete existing packages as long as there are no subscribers
             </small>
         </h2>
     </div>
@@ -28,7 +28,7 @@
         <thead>
         <tr>
             <th class="row-commands">
-                <row-add action="vm.addActivityPackage()" description="Add Activity Package" />
+                <row-add ng-click="vm.addActivityPackage()" description="Add Activity Package" />
             </th>
             <th>ID</th>
             <th>Name</th>

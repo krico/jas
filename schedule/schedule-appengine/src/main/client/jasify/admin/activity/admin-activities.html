@@ -2,7 +2,7 @@
     <div class="card-header">
         <h2>Activities
             <small>
-                View list of activities grouped by Organization
+                Add/edit/delete activities. Check activity subscriptions or add/remove subscribers from an activity.
             </small>
         </h2>
     </div>
@@ -29,7 +29,7 @@
         <thead>
         <tr>
             <th>
-                <row-add btn-href="/admin/activity" description="Add Activity"/>
+                <row-add ng-click="vm.addActivity()"  description="Add Activity"/>
             </th>
             <th>Activity Type</th>
             <th>Location</th>
