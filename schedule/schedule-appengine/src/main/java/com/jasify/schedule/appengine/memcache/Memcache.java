@@ -43,6 +43,7 @@ public final class Memcache {
         delegate().put(key, value, expires);
     }
 
+
     public static boolean delete(Object key) throws IllegalArgumentException {
         return delegate().delete(key);
     }

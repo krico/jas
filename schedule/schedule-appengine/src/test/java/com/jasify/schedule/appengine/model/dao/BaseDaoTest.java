@@ -6,8 +6,6 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import io.github.benas.jpopulator.api.Populator;
-import io.github.benas.jpopulator.impl.PopulatorBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,13 +18,8 @@ import java.util.Map;
 import static junit.framework.TestCase.*;
 
 public class BaseDaoTest {
-    private BaseDao<Example> dao = createDao();
+    protected BaseDao<Example> dao = createDao();
     private List<Transaction> transactions = new ArrayList<>();
-
-    static Example createExample() {
-        Populator populator = new PopulatorBuilder().build();
-        return populator.populateBean(Example.class, "id");
-    }
 
     BaseDao<Example> createDao() {
         return new ExampleDao();
@@ -45,7 +38,7 @@ public class BaseDaoTest {
         TestHelper.cleanupDatastore();
     }
 
-    private Transaction beginTx() {
+    Transaction beginTx() {
         Transaction tx = Datastore.beginTransaction();
         transactions.add(tx);
         return tx;
@@ -54,7 +47,7 @@ public class BaseDaoTest {
     //If this test fails, you probably need to run mvn apt:test-process
     @Test
     public void rememberToRunAptTestProcess() {
-        Example expected = createExample();
+        Example expected = DaoUtilTest.createExample();
         String[] exclude = {"modified", "created", "id"};
         Map<Object, Object> expected1 = BeanUtil.beanMap(expected, exclude);
 
@@ -67,7 +60,7 @@ public class BaseDaoTest {
 
     @Test
     public void testGet() throws Exception {
-        Example expected = createExample();
+        Example expected = DaoUtilTest.createExample();
         Example fetched = dao.get(Datastore.put(expected));
         assertEquals(expected, fetched);
     }
@@ -80,7 +73,7 @@ public class BaseDaoTest {
     @Test
     public void testGetOrNull() throws Exception {
         final Key id = Datastore.allocateId(Example.class);
-        final Example example = createExample();
+        final Example example = DaoUtilTest.createExample();
         example.setId(id);
         assertNull(dao.getOrNull(id));
         dao.save(example);
@@ -94,7 +87,7 @@ public class BaseDaoTest {
 
     @Test
     public void testSave() throws Exception {
-        Example example = createExample();
+        Example example = DaoUtilTest.createExample();
         Key id = dao.save(example);
         Example fetched = dao.get(id);
         assertEquals(example, fetched);
@@ -102,7 +95,7 @@ public class BaseDaoTest {
 
     @Test
     public void testDelete() throws Exception {
-        Key id = dao.save(createExample());
+        Key id = dao.save(DaoUtilTest.createExample());
         dao.delete(id);
         assertNull(dao.getOrNull(id));
     }
@@ -111,7 +104,7 @@ public class BaseDaoTest {
     public void testCurrentTransaction() throws Exception {
 
         final Key id = Datastore.allocateId(Example.class);
-        Example example = createExample();
+        Example example = DaoUtilTest.createExample();
         example.setId(id);
         //This makes current transaction=tx1
         Transaction tx1 = beginTx();

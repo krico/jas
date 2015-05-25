@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.model.dao;
 
 import com.google.appengine.api.datastore.Key;
-import com.jasify.schedule.appengine.memcache.Memcache;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelMeta;
@@ -22,15 +21,6 @@ public class BaseCachingDao<T> extends BaseDao<T> {
         return Datastore.getCurrentTransaction() == null;
     }
 
-    private T cacheGet(@Nonnull Key id) {
-        return Memcache.get(id);
-    }
-
-    private T cachePut(@Nonnull Key id, T entity) {
-        Memcache.put(id, meta.modelToEntity(entity));
-        return entity;
-    }
-
     @Nonnull
     @Override
     public T get(@Nonnull Key id) throws EntityNotFoundException, IllegalArgumentException {
@@ -38,10 +28,10 @@ public class BaseCachingDao<T> extends BaseDao<T> {
             return super.get(id);
         }
 
-        T ret = cacheGet(id);
+        T ret = DaoUtil.cacheGet(id, meta);
 
         if (ret == null) {
-            ret = cachePut(id, super.get(id));
+            ret = DaoUtil.cachePut(id, meta, super.get(id));
         }
         return ret;
     }
@@ -53,14 +43,14 @@ public class BaseCachingDao<T> extends BaseDao<T> {
             return super.getOrNull(id);
         }
 
-        T ret = cacheGet(id);
+        T ret = DaoUtil.cacheGet(id, meta);
 
         if (ret == null) {
             ret = super.getOrNull(id);
             if (ret == null) {
                 return null;
             }
-            ret = cachePut(id, ret);
+            ret = DaoUtil.cachePut(id, meta, ret);
         }
         return ret;
     }
