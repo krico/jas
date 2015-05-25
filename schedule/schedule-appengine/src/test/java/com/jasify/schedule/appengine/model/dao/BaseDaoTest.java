@@ -20,12 +20,16 @@ import java.util.Map;
 import static junit.framework.TestCase.*;
 
 public class BaseDaoTest {
-    private ExampleDao dao = new ExampleDao();
+    private BaseDao<Example> dao = createDao();
     private List<Transaction> transactions = new ArrayList<>();
 
-    private static Example createExample() {
+    static Example createExample() {
         Populator populator = new PopulatorBuilder().build();
         return populator.populateBean(Example.class, "id");
+    }
+
+    BaseDao<Example> createDao() {
+        return new ExampleDao();
     }
 
     @Before

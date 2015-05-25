@@ -31,6 +31,10 @@ public final class Memcache {
         return cast(delegate().get(key));
     }
 
+    public static boolean contains(Object key) throws IllegalArgumentException {
+        return cast(delegate().contains(key));
+    }
+
     public static void put(Object key, Object value) throws IllegalArgumentException {
         delegate().put(key, value);
     }

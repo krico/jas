@@ -14,9 +14,9 @@ import javax.annotation.Nullable;
  * @since 23/05/15.
  */
 public abstract class BaseDao<T> {
-    private final ModelMeta<T> meta;
+    protected final ModelMeta<T> meta;
 
-    protected BaseDao(ModelMeta<T> meta) {
+    protected BaseDao(@Nonnull ModelMeta<T> meta) {
         this.meta = meta;
     }
 
