@@ -64,4 +64,12 @@ public class UserTest {
         User user = new User("Name");
         assertEquals(user.getName(), user.getDisplayName());
     }
+
+    @Test
+    public void testConstructor() {
+        User user = new User("name", "email", "realName");
+        assertEquals("name", user.getName());
+        assertEquals("email", user.getEmail());
+        assertEquals("realName", user.getRealName());
+    }
 }

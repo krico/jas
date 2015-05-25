@@ -35,8 +35,11 @@ public interface UserService {
 
     User get(long id);
 
+    // TODO: Perhaps this should be renamed for findUser to indicate that it can return null?
     User get(Key id);
 
+    @Nonnull
+    public User getUser(Key id) throws EntityNotFoundException;
 
     User findByLogin(String provider, String userId);
 

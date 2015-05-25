@@ -5,12 +5,12 @@ import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.meta.common.GroupMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
-import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
@@ -26,15 +26,12 @@ import java.util.Set;
  * @since 08/01/15.
  */
 final class DefaultOrganizationService implements OrganizationService {
-    private final UserMeta userMeta;
     private final OrganizationMeta organizationMeta;
     private final OrganizationMemberMeta organizationMemberMeta;
     private final UniqueConstraint uniqueOrganizationName;
-
     private final GroupMeta groupMeta;
 
     private DefaultOrganizationService() {
-        userMeta = UserMeta.get();
         organizationMeta = OrganizationMeta.get();
         organizationMemberMeta = OrganizationMemberMeta.get();
         uniqueOrganizationName = UniqueConstraint.create(organizationMeta, organizationMeta.name);
@@ -43,14 +40,6 @@ final class DefaultOrganizationService implements OrganizationService {
 
     static OrganizationService instance() {
         return Singleton.INSTANCE;
-    }
-
-    private User getUser(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        try {
-            return Datastore.get(userMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("User id=" + id);
-        }
     }
 
     @Nonnull
@@ -150,7 +139,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void addUserToOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
-        User dbUser = getUser(user.getId());
+        User dbUser = UserServiceFactory.getUserService().getUser(user.getId());
 
         if (!dbOrganization.getUserKeys().contains(user.getId())) {
             OrganizationMember junction = new OrganizationMember(dbOrganization, dbUser);
@@ -161,22 +150,22 @@ final class DefaultOrganizationService implements OrganizationService {
 
     @Override
     public void addUserToOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        addUserToOrganization(getOrganization(organizationId), getUser(userId));
+        addUserToOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
     public void removeUserFromOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        removeUserFromOrganization(getOrganization(organizationId), getUser(userId));
+        removeUserFromOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
     public void addUserToGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        addUserToGroup(getGroup(groupId), getUser(userId));
+        addUserToGroup(getGroup(groupId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
     public void removeUserFromGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        removeUserFromGroup(getGroup(groupId), getUser(userId));
+        removeUserFromGroup(getGroup(groupId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
@@ -192,7 +181,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void removeUserFromOrganization(Organization organization, User user) throws EntityNotFoundException {
         Organization dbOrganization = getOrganization(organization.getId());
-        getUser(user.getId());
+        UserServiceFactory.getUserService().getUser(user.getId());
 
         Set<Key> toRemove = new HashSet<>();
         List<OrganizationMember> list = dbOrganization.getOrganizationMemberListRef().getModelList();
@@ -307,7 +296,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void addUserToGroup(Group group, User user) throws EntityNotFoundException {
         Group dbGroup = getGroup(group.getId());
-        User dbUser = getUser(user.getId());
+        User dbUser = UserServiceFactory.getUserService().getUser(user.getId());
 
         if (!dbGroup.getUserKeys().contains(dbUser.getId())) {
             GroupUser junction = new GroupUser(dbGroup, dbUser);
@@ -319,7 +308,7 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void removeUserFromGroup(Group group, User user) throws EntityNotFoundException {
         Group dbGroup = getGroup(group.getId());
-        getUser(user.getId());
+        UserServiceFactory.getUserService().getUser(user.getId());
 
         Set<Key> toRemove = new HashSet<>();
         List<GroupUser> list = dbGroup.getGroupUserListRef().getModelList();

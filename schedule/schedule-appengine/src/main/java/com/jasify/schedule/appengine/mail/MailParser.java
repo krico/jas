@@ -22,7 +22,8 @@ import java.util.*;
  */
 public class MailParser {
 
-    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZoneUTC();
+
     /*
     Rather than two StringBuilders maybe it would be better to convert from html to text
     while maintaining new lines and tabs
@@ -52,19 +53,21 @@ public class MailParser {
         return mailParser;
     }
 
+    private static String formatDate(Date date) {
+        return new DateTime(date).toString(DTF);
+    }
+
     private static MailParser createSubscriptionActivityDetails(MultiSubscription multiSubscription, Subscription subscription) throws IOException {
         Activity activity = subscription.getActivityRef().getModel();
         ActivityType activityType = activity.getActivityTypeRef().getModel();
         Organization organization = activityType.getOrganizationRef().getModel();
         String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser(multiSubscription.activityDetails);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
         mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
-        mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
-        mailParser.substitute(SubstituteKey.ActivityFinish, finish.toString(dtf));
+        mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
+        mailParser.substitute(SubstituteKey.ActivityFinish, formatDate(activity.getFinish()));
         mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(activity.getPrice()));
         return mailParser;
     }
@@ -91,12 +94,10 @@ public class MailParser {
 
     private static MailParser createSubscriptionActivityPackageActivityDetails(MultiSubscription multiSubscription, ActivityPackageSubscription activityPackageSubscription) throws IOException {
         Activity activity = activityPackageSubscription.getActivityRef().getModel();
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser(multiSubscription.activityPackageActivityDetails);
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
-        mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
-        mailParser.substitute(SubstituteKey.ActivityFinish, finish.toString(dtf));
+        mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
+        mailParser.substitute(SubstituteKey.ActivityFinish, formatDate(activity.getFinish()));
         return mailParser;
     }
 
@@ -159,15 +160,13 @@ public class MailParser {
 
         String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
         User user = subscription.getUserRef().getModel();
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser("/publisher/Subscription");
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
         mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));
         mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
-        mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
-        mailParser.substitute(SubstituteKey.ActivityFinish, finish.toString(dtf));
+        mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
+        mailParser.substitute(SubstituteKey.ActivityFinish, formatDate(activity.getFinish()));
         mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(activity.getPrice()));
         return mailParser;
     }
@@ -181,15 +180,13 @@ public class MailParser {
 
         String orderNumber = KeyUtil.toHumanReadableString(activityPackageExecution.getId());
         User user = activityPackageSubscription.getUserRef().getModel();
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
         MailParser mailParser = new MailParser("/publisher/Subscription");
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
         mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));
         mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName() + " [" + activityPackage.getName() + "]");
-        mailParser.substitute(SubstituteKey.ActivityStart, start.toString(dtf));
-        mailParser.substitute(SubstituteKey.ActivityFinish, finish.toString(dtf));
+        mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
+        mailParser.substitute(SubstituteKey.ActivityFinish, formatDate(activity.getFinish()));
         mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(activityPackage.getPrice()));
         return mailParser;
     }

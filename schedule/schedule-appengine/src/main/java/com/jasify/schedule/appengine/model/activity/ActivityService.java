@@ -28,20 +28,17 @@ public interface ActivityService {
      * @param activityType to add to it
      * @return the key to the newly added activityType
      * @throws UniqueConstraintException if <code>organization</code> already contains an activityType with the name of the activityType being added.
-     * @throws EntityNotFoundException   if the organization doesn't exist.
-     * @throws FieldValueException       in case of invalid fields (e.g. empty name)
      */
     @Nonnull
-    public Key addActivityType(Organization organization, ActivityType activityType) throws EntityNotFoundException, UniqueConstraintException, FieldValueException;
+    public Key addActivityType(Organization organization, ActivityType activityType) throws UniqueConstraintException;
 
     /**
      * @param id to fetch
      * @return the activity type with that id
      * @throws EntityNotFoundException  if that activity type doesn't exist
-     * @throws IllegalArgumentException if the id is not of an ActivityType
      */
     @Nonnull
-    ActivityType getActivityType(Key id) throws EntityNotFoundException, IllegalArgumentException;
+    ActivityType getActivityType(Key id) throws EntityNotFoundException;
 
     /**
      * @param organization in which to get it
@@ -60,8 +57,6 @@ public interface ActivityService {
     @Nonnull
     List<ActivityType> getActivityTypes(Organization organization) throws EntityNotFoundException;
 
-    List<ActivityType> getActivityTypes(Key organizationId) throws EntityNotFoundException;
-
     /**
      * @param activityType to be updated
      * @return the updated ActivityType
@@ -73,22 +68,19 @@ public interface ActivityService {
     ActivityType updateActivityType(ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException;
 
     /**
-     * @param id of the activityType
-     * @throws EntityNotFoundException  if the activityType doesn't exist
-     * @throws IllegalArgumentException if the id is not of an ActivityType
-     * @throws OperationException       if the activityType has activities
+     * @param activityType to be removed
      */
-    void removeActivityType(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
+    void removeActivityType(ActivityType activityType);
 
     /**
+     * @param activityType to link with
      * @param activity      to add
      * @param repeatDetails information on adding repeat activities
      * @return list of ids of the added activities
-     * @throws EntityNotFoundException if not found
-     * @throws FieldValueException     if any fields are invalid
+     * @throws FieldValueException if any fields are invalid
      */
     @Nonnull
-    List<Key> addActivity(Activity activity, RepeatDetails repeatDetails) throws EntityNotFoundException, FieldValueException;
+    List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws FieldValueException;
 
     /**
      * @param id to fetch
@@ -102,20 +94,18 @@ public interface ActivityService {
     /**
      * @param organization to search within
      * @return all activities in that organization
-     * @throws EntityNotFoundException if the organization doesn't exist
      */
     @Nonnull
-    List<Activity> getActivities(Organization organization) throws EntityNotFoundException;
+    List<Activity> getActivities(Organization organization);
 
     /**
      * Get all activities of a certain type
      *
      * @param activityType to search by
      * @return all activities of this type
-     * @throws EntityNotFoundException if the type doesn't exist
      */
     @Nonnull
-    List<Activity> getActivities(ActivityType activityType) throws EntityNotFoundException;
+    List<Activity> getActivities(ActivityType activityType);
 
     /**
      * @param activity to updated
@@ -127,12 +117,9 @@ public interface ActivityService {
     Activity updateActivity(Activity activity) throws EntityNotFoundException, FieldValueException;
 
     /**
-     * @param id of the activity to remove
-     * @throws EntityNotFoundException  if the activity doesn't exist
-     * @throws IllegalArgumentException if the id is not of an Activity
-     * @throws OperationException       if activity has subscritpions
+     * @param activity to be removed
      */
-    void removeActivity(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
+    void removeActivity(Activity activity);
 
     /**
      * @param activityPackage to be created
@@ -166,33 +153,27 @@ public interface ActivityService {
 
     void addActivityToActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
 
-    void addActivityToActivityPackage(Key activityPackageId, Key activityId) throws EntityNotFoundException;
-
     void removeActivityFromActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
 
-    void removeActivityFromActivityPackage(Key activityPackageId, Key activityId) throws EntityNotFoundException;
-
-
     /**
-     * @param organizationId to fetch activity packages from
-     * @return the list of activity packages for this organization
+     * @param activity to find related ActivityPackageActivities
+     * @return the list of linked ActivityPackageActivities
      */
-    List<ActivityPackage> getActivityPackages(Key organizationId) throws EntityNotFoundException;
+    public List<ActivityPackageActivity> getActivityPackageActivities(Activity activity);
 
     /**
      * @param organization to fetch activity packages from
      * @return the list of activity packages for this organization
      */
-    List<ActivityPackage> getActivityPackages(Organization organization) throws EntityNotFoundException;
+    List<ActivityPackage> getActivityPackages(Organization organization);
 
     /**
      * @param id to fetch
      * @return the activityPackage
-     * @throws EntityNotFoundException  not found
-     * @throws IllegalArgumentException the id is not of an Activity
+     * @throws EntityNotFoundException not found
      */
     @Nonnull
-    ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException, IllegalArgumentException;
+    ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException;
 
     /**
      * Subscribe a user for an activity
@@ -200,27 +181,11 @@ public interface ActivityService {
      * @param user     to subscribe
      * @param activity to subscribe to
      * @return a newly created Subscription for this user to this activity
-     * @throws EntityNotFoundException   if any of the entities don't exist
      * @throws UniqueConstraintException user was already subscribed to this activity
      * @throws OperationException        if activity is fully subscribed
      */
     @Nonnull
-    Subscription subscribe(User user, Activity activity) throws EntityNotFoundException, UniqueConstraintException, OperationException;
-
-
-    /**
-     * Subscribe a user for an activity
-     *
-     * @param userId     to subscribe
-     * @param activityId to subscribe to
-     * @return a newly created Subscription for this user to this activity
-     * @throws EntityNotFoundException   if any of the entities don't exist
-     * @throws IllegalArgumentException  if any key is invalid
-     * @throws UniqueConstraintException user was already subscribed to this activity
-     * @throws OperationException        if activity is fully subscribed
-     */
-    @Nonnull
-    Subscription subscribe(Key userId, Key activityId) throws EntityNotFoundException, IllegalArgumentException, UniqueConstraintException, OperationException;
+    Subscription subscribe(User user, Activity activity) throws UniqueConstraintException, OperationException;
 
     /**
      * @param user            who is subscribing
@@ -254,21 +219,9 @@ public interface ActivityService {
      *
      * @param activity to get the subscriptions from
      * @return list of subscriptions
-     * @throws EntityNotFoundException if the activity doesn't exist
      */
     @Nonnull
-    List<Subscription> getSubscriptions(Activity activity) throws EntityNotFoundException;
-
-    /**
-     * List subscriptions for an activity
-     *
-     * @param activityId to get the subscriptions from
-     * @return list of subscriptions
-     * @throws EntityNotFoundException  if the activity doesn't exist
-     * @throws IllegalArgumentException if the key is invalid
-     */
-    @Nonnull
-    List<Subscription> getSubscriptions(Key activityId) throws EntityNotFoundException, IllegalArgumentException;
+    List<Subscription> getSubscriptions(Activity activity);
 
     /**
      * @param id of Subscription to get
@@ -302,13 +255,5 @@ public interface ActivityService {
      * @param activityPackageExecution to cancel
      * @throws EntityNotFoundException if eny entity doesn't exist
      */
-    void cancel(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException;
-
-    /**
-     * Cancel an activityPackageExecution, effectively reversing {@link #subscribe(com.jasify.schedule.appengine.model.users.User, ActivityPackage, java.util.List)}
-     *
-     * @param activityPackageExecutionId to cancel
-     * @throws EntityNotFoundException if eny entity doesn't exist
-     */
-    void cancelActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException;
+    void cancelActivityPackageExecution(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException;
 }

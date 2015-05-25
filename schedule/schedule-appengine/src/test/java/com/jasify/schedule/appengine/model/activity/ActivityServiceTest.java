@@ -161,16 +161,6 @@ public class ActivityServiceTest {
         activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
     }
 
-    @Test(expected = EntityNotFoundException.class)
-    public void testAddActivityTypeThrowsNotFound() throws Exception {
-        activityService.addActivityType(new Organization("any"), new ActivityType(TEST_ACTIVITY_TYPE));
-    }
-
-    @Test(expected = FieldValueException.class)
-    public void testAddActivityTypeThrowsFieldValueException() throws Exception {
-        activityService.addActivityType(organization1, new ActivityType());
-    }
-
     @Test
     public void testGetActivityTypeById() throws Exception {
         Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
@@ -251,18 +241,6 @@ public class ActivityServiceTest {
         assertTrue(added.isEmpty());
     }
 
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivityTypesThrowsNotFound() throws Exception {
-        activityService.getActivityTypes(new Organization("Foo"));
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivityTypesThrowsNotFoundWithId() throws Exception {
-        Organization foo = new Organization("Foo");
-        foo.setId(Datastore.allocateId(Organization.class));
-        activityService.getActivityTypes(foo);
-    }
-
     @Test
     public void testUpdateActivityType() throws Exception {
         ActivityType activityType = new ActivityType(TEST_ACTIVITY_TYPE);
@@ -309,7 +287,8 @@ public class ActivityServiceTest {
     @Test
     public void testRemoveActivityType() throws Exception {
         Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        activityService.removeActivityType(id);
+        ActivityType activityType = activityService.getActivityType(id);
+        activityService.removeActivityType(activityType);
         assertNull(Datastore.getOrNull(id));
     }
 
@@ -320,24 +299,8 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testRemoveActivityTypeThrowsEntityNotFoundException() throws Exception {
-        thrown.expect(EntityNotFoundException.class);
-        Key key = Datastore.allocateId(ActivityType.class);
-        thrown.expectMessage("ActivityType.id=" + key);
-        activityService.removeActivityType(key);
-    }
-
-    @Test
-    public void testRemoveActivityTypeThrowsOperationException() throws Exception {
-        thrown.expect(OperationException.class);
-        thrown.expectMessage("ActivityType has activities");
-        activityService.addActivity(activity1Organization1, new RepeatDetails());
-        activityService.removeActivityType(activityType1OfOrganization1.getId());
-    }
-
-    @Test
     public void testAddActivity() throws Exception {
-        List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         assertNotNull(ids);
         assertEquals(1, ids.size());
         Key parent = ids.get(0).getParent();
@@ -347,7 +310,7 @@ public class ActivityServiceTest {
 
     @Test
     public void testAddActivityWithNullRepeatDetails() throws Exception {
-        List<Key> ids = activityService.addActivity(activity1Organization1, null);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
         assertNotNull(ids);
         assertEquals(1, ids.size());
     }
@@ -359,7 +322,7 @@ public class ActivityServiceTest {
         RepeatDetails repeatDetails = new RepeatDetails();
         repeatDetails.setRepeatType(null);
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
-        activityService.addActivity(activity1Organization1, repeatDetails);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
     }
 
     @Test
@@ -367,7 +330,7 @@ public class ActivityServiceTest {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("Activity.start");
         activity1Organization1.setStart(null);
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
     }
 
     @Test
@@ -375,7 +338,7 @@ public class ActivityServiceTest {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("Activity.start");
         activity1Organization1.setStart(new DateTime(2000, 1, 1, 10, 0, 0).toDate());
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
     }
 
     @Test
@@ -383,7 +346,7 @@ public class ActivityServiceTest {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("Activity.finish");
         activity1Organization1.setFinish(null);
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
     }
 
     @Test
@@ -393,7 +356,7 @@ public class ActivityServiceTest {
         DateTime finish = new DateTime(activity1Organization1.getStart());
         finish = finish.minusDays(1);
         activity1Organization1.setFinish(finish.toDate());
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
     }
 
     @Test
@@ -401,7 +364,7 @@ public class ActivityServiceTest {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("Activity.price");
         activity1Organization1.setPrice(new Double("-1"));
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
     }
 
     @Test
@@ -409,7 +372,7 @@ public class ActivityServiceTest {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("Activity.maxSubscriptions");
         activity1Organization1.setMaxSubscriptions(-1);
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
     }
 
     @Test
@@ -420,7 +383,7 @@ public class ActivityServiceTest {
         repeatDetails.setRepeatType(RepeatType.Daily);
         repeatDetails.setRepeatEvery(0);
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
-        activityService.addActivity(activity1Organization1, repeatDetails);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
     }
 
     @Test
@@ -429,7 +392,7 @@ public class ActivityServiceTest {
         thrown.expectMessage("RepeatDetails.repeatUntilType");
         RepeatDetails repeatDetails = new RepeatDetails();
         repeatDetails.setRepeatType(RepeatType.Daily);
-        activityService.addActivity(activity1Organization1, repeatDetails);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
     }
 
     @Test
@@ -439,7 +402,7 @@ public class ActivityServiceTest {
         RepeatDetails repeatDetails = new RepeatDetails();
         repeatDetails.setRepeatType(RepeatType.Daily);
         repeatDetails.setRepeatUntilType(RepeatUntilType.Date);
-        activityService.addActivity(activity1Organization1, repeatDetails);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
     }
 
     @Test
@@ -450,7 +413,7 @@ public class ActivityServiceTest {
         repeatDetails.setRepeatType(RepeatType.Daily);
         repeatDetails.setRepeatUntilType(RepeatUntilType.Date);
         repeatDetails.setUntilDate(new Date(20));
-        activityService.addActivity(activity1Organization1, repeatDetails);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
     }
 
     @Test
@@ -461,7 +424,7 @@ public class ActivityServiceTest {
         repeatDetails.setRepeatType(RepeatType.Daily);
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
         repeatDetails.setUntilCount(0);
-        activityService.addActivity(activity1Organization1, repeatDetails);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
     }
 
     @Test
@@ -473,7 +436,7 @@ public class ActivityServiceTest {
         repeatDetails.setUntilCount(1);
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
         repeatDetails.setUntilCount(1);
-        activityService.addActivity(activity1Organization1, repeatDetails);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
     }
 
     @Test
@@ -486,7 +449,7 @@ public class ActivityServiceTest {
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
         repeatDetails.setUntilCount(2);
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -509,7 +472,7 @@ public class ActivityServiceTest {
         DateTime date2 = date1.plusDays(1);
         repeatDetails.setUntilDate(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate());
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -531,7 +494,7 @@ public class ActivityServiceTest {
         repeatDetails.setUntilCount(2);
         repeatDetails.setRepeatEvery(7); // Every 7 days
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -554,7 +517,7 @@ public class ActivityServiceTest {
         repeatDetails.setUntilCount(2);
         repeatDetails.setRepeatEvery(14); // Every two weeks
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -573,7 +536,7 @@ public class ActivityServiceTest {
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
         repeatDetails.setUntilCount(50);
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(ActivityService.MaximumRepeatCounter, ids.size());
     }
@@ -589,7 +552,7 @@ public class ActivityServiceTest {
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
         repeatDetails.setUntilCount(2);
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -613,7 +576,7 @@ public class ActivityServiceTest {
         DateTime date2 = date1.plusDays(8);
         repeatDetails.setUntilDate(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate());
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -637,7 +600,7 @@ public class ActivityServiceTest {
         repeatDetails.setUntilCount(2);
         repeatDetails.setRepeatEvery(2); // Every two weeks
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -662,7 +625,7 @@ public class ActivityServiceTest {
         repeatDetails.setUntilCount(4);
         repeatDetails.setRepeatEvery(2); // Every two weeks
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(4, ids.size());
         Activity activity1 = activityService.getActivity(ids.get(0));
@@ -691,14 +654,14 @@ public class ActivityServiceTest {
         repeatDetails.setRepeatUntilType(RepeatUntilType.Count);
         repeatDetails.setUntilCount(50);
 
-        List<Key> ids = activityService.addActivity(activity1Organization1, repeatDetails);
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(ActivityService.MaximumRepeatCounter, ids.size());
     }
 
     @Test
     public void testGetActivity() throws Exception {
-        List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         Activity activity = activityService.getActivity(ids.get(0));
         assertNotNull(activity);
         assertEquals(activityType1OfOrganization1.getName(), activity.getName());
@@ -710,16 +673,6 @@ public class ActivityServiceTest {
         activityService.getActivity(id);
     }
 
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivitiesByOrganizationNotFound() throws Exception {
-        try {
-            Datastore.delete(organization1.getId());
-        } catch (Exception e) {
-            fail();
-        }
-        activityService.getActivities(organization1);
-    }
-
     @Test
     public void testGetActivitiesByOrganization() throws Exception {
         List<Activity> activities = activityService.getActivities(organization1);
@@ -729,9 +682,9 @@ public class ActivityServiceTest {
         Set<Key> added = new HashSet<>();
         for (int i = 0; i < total; ++i) {
             if (i % 3 == 0) {
-                added.addAll(activityService.addActivity(activity1Organization1, new RepeatDetails()));
+                added.addAll(activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails()));
             } else {
-                added.addAll(activityService.addActivity(activity2Organization1, new RepeatDetails()));
+                added.addAll(activityService.addActivity(activityType2OfOrganization1, activity2Organization1, new RepeatDetails()));
             }
         }
 
@@ -743,16 +696,6 @@ public class ActivityServiceTest {
             assertTrue(added.remove(activity.getId()));
         }
         assertTrue(added.isEmpty());
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivitiesByActivityTypeNotFound() throws Exception {
-        try {
-            Datastore.delete(activityType1OfOrganization1.getId());
-        } catch (Exception e) {
-            fail();
-        }
-        activityService.getActivities(activityType1OfOrganization1);
     }
 
     @Test
@@ -770,9 +713,9 @@ public class ActivityServiceTest {
         Set<Key> addedType2 = new HashSet<>();
         for (int i = 0; i < total; ++i) {
             if (i % 3 == 0) {
-                addedType1.addAll(activityService.addActivity(activity1Organization1, new RepeatDetails()));
+                addedType1.addAll(activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails()));
             } else {
-                addedType2.addAll(activityService.addActivity(activity2Organization1, new RepeatDetails()));
+                addedType2.addAll(activityService.addActivity(activityType2OfOrganization1, activity2Organization1, new RepeatDetails()));
             }
         }
 
@@ -795,7 +738,7 @@ public class ActivityServiceTest {
 
     @Test
     public void testUpdateActivity() throws Exception {
-        List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         Date expected = activity1Organization1.getCreated();
         activity1Organization1.setName("New Name");
         activity1Organization1.setDescription("Description");
@@ -833,23 +776,32 @@ public class ActivityServiceTest {
 
     @Test
     public void testRemoveActivity() throws Exception {
-        List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
-        activityService.removeActivity(ids.get(0));
+        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
+        activityService.removeActivity(activity1Organization1);
         assertNull(Datastore.getOrNull(ids.get(0)));
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetSubscriptionWithNullIdThrowsEntityNotFoundException() throws Exception {
+        activityService.getSubscription(null);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetSubscriptionEntityNotFoundException() throws Exception {
+        activityService.getSubscription(Datastore.allocateId(Subscription.class));
+    }
+
     @Test
-    public void testRemoveActivityThrowsOperationException() throws Exception {
-        thrown.expect(OperationException.class);
-        thrown.expectMessage("Activity has subscriptions");
-        List<Key> ids = activityService.addActivity(activity1Organization1, new RepeatDetails());
-        activityService.subscribe(testUser1, activity1Organization1);
-        activityService.removeActivity(ids.get(0));
+    public void testGetSubscription() throws Exception {
+        Subscription subscription = new Subscription();
+        Datastore.put(subscription);
+        Subscription result = activityService.getSubscription(subscription.getId());
+        assertNotNull(result);
     }
 
     @Test
     public void testSubscribe() throws Exception {
-        activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         Subscription subscription = activityService.subscribe(testUser1, activity1Organization1);
         assertNotNull(subscription);
         assertEquals(testUser1.getId(), subscription.getUserRef().getKey());
@@ -862,7 +814,7 @@ public class ActivityServiceTest {
 
     @Test
     public void testSubscribeNotifiesIfUserNameIsNull() throws Exception {
-        activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
         User user = new User();
@@ -876,7 +828,7 @@ public class ActivityServiceTest {
     @Test
     public void testSubscribeNotifiesIfActivityNameIsNull() throws Exception {
         activity1Organization1.setName(null);
-        activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
         activityService.subscribe(testUser1, activity1Organization1);
@@ -890,7 +842,7 @@ public class ActivityServiceTest {
         thrown.expect(OperationException.class);
         thrown.expectMessage("Activity fully subscribed");
         activity1Organization1.setMaxSubscriptions(1);
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
         activityService.subscribe(testUser1, activity1Organization1);
         activityService.subscribe(testUser2, activity1Organization1);
     }
@@ -898,7 +850,7 @@ public class ActivityServiceTest {
     @Test
     public void testSubscribeForZeroMaxSubscriptions() throws Exception {
         activity1Organization1.setMaxSubscriptions(0);
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
         assertNotNull(activityService.subscribe(testUser1, activity1Organization1));
         assertNotNull(activityService.subscribe(testUser2, activity1Organization1));
         assertEquals(2, activityService.getActivity(activity1Organization1.getId()).getSubscriptionCount());
@@ -908,29 +860,22 @@ public class ActivityServiceTest {
     public void testSubscribeTwiceForSameUser() throws Exception {
         thrown.expect(UniqueConstraintException.class);
         thrown.expectMessage("User already subscribed");
-        activityService.addActivity(activity1Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
         activityService.subscribe(testUser1, activity1Organization1);
         activityService.subscribe(testUser1, activity1Organization1);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testSubscribeThrowsEntityNotFoundException() throws Exception {
-        User user = new User("TestUser");
-        user.setId(Datastore.allocateId(User.class));
-        activityService.subscribe(user, activity1Organization1);
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testSubscribeTwice() throws Exception {
-        activityService.addActivity(activity1Organization1, new RepeatDetails());
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         activityService.subscribe(testUser1, activity1Organization1);
         activityService.subscribe(testUser1, activity1Organization1);
     }
 
     @Test
     public void testCancel() throws Exception {
-        activityService.addActivity(activity1Organization1, new RepeatDetails());
-        Subscription subscription = activityService.subscribe(testUser1.getId(), activity1Organization1.getId());
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
+        Subscription subscription = activityService.subscribe(testUser1, activity1Organization1);
 
         // cache it in
         activity1Organization1.getSubscriptionListRef().getModelList();
@@ -954,8 +899,8 @@ public class ActivityServiceTest {
 
     @Test
     public void testGetActivities() throws Exception {
-        activityService.addActivity(activity1Organization1, new RepeatDetails());
-        Subscription subscription1 = activityService.subscribe(testUser1.getId(), activity1Organization1.getId());
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
+        Subscription subscription1 = activityService.subscribe(testUser1, activity1Organization1);
         Subscription subscription2 = activityService.subscribe(testUser2, activity1Organization1);
         List<Subscription> subscriptions = activityService.getSubscriptions(activity1Organization1);
         assertNotNull(subscriptions);
@@ -970,8 +915,8 @@ public class ActivityServiceTest {
 
     @Test
     public void testCreateActivityPackage() throws Exception {
-        activityService.addActivity(activity1Organization1, null);
-        activityService.addActivity(activity2Organization1, null);
+        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
+        activityService.addActivity(activityType2OfOrganization1, activity2Organization1, null);
 
         activityPackage10Organization.setItemCount(2);
 
@@ -1109,7 +1054,7 @@ public class ActivityServiceTest {
     public void testUpdateActivityPackageWithActivities() throws Exception {
         testCreateActivityPackage();
         Activity thirdActivity = createActivity(activityType1OfOrganization1);
-        activityService.addActivity(thirdActivity, null);
+        activityService.addActivity(activityType1OfOrganization1, thirdActivity, null);
 
         ActivityPackage fetched = activityService.updateActivityPackage(activityPackage10Organization, Arrays.asList(thirdActivity));
 
@@ -1135,7 +1080,6 @@ public class ActivityServiceTest {
         assertTrue(activityKeys.contains(activity1Organization1.getId()));
         assertTrue(activityKeys.contains(activity2Organization1.getId()));
     }
-
 
     @Test
     public void testCreateAddAndRemoveFromActivityPackage() throws Exception {
@@ -1206,7 +1150,7 @@ public class ActivityServiceTest {
             activities.add(activity);
             assertEquals(1, activity.getSubscriptionCount());
         }
-        activityService.cancel(activityPackageExecution);
+        activityService.cancelActivityPackageExecution(activityPackageExecution);
 
         activityPackage = activityService.getActivityPackage(activityPackage.getId());
         assertEquals(0, activityPackage.getExecutionCount());
@@ -1220,7 +1164,6 @@ public class ActivityServiceTest {
             assertNull(Datastore.getOrNull(subscription.getId()));
         }
         assertNull(Datastore.getOrNull(activityPackageExecution.getId()));
-
     }
 
     @Test
@@ -1260,7 +1203,7 @@ public class ActivityServiceTest {
         assertTrue(ids.contains(ap1Org1));
         assertTrue(ids.contains(ap2Org1));
 
-        activityPackages = activityService.getActivityPackages(organization2.getId());
+        activityPackages = activityService.getActivityPackages(organization2);
         assertNotNull(activityPackages);
         assertEquals(1, activityPackages.size());
         ids = Lists.transform(activityPackages, new Function<ActivityPackage, Key>() {
@@ -1315,6 +1258,26 @@ public class ActivityServiceTest {
         thrown.expectMessage("ActivityPackage.activities");
         activityPackage10Organization.setItemCount(1);
         activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1));
+    }
+
+    @Test
+    public void testGetActivityPackageActivities() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("ActivityPackage.activities");
+        activityPackage10Organization.setItemCount(2);
+        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
+        List<ActivityPackageActivity> activityPackageActivities = activityService.getActivityPackageActivities(activity1Organization1);
+        assertEquals(2, activityPackageActivities.size());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetActivityPackageThrowsEntityNotFound() throws Exception {
+       activityService.getActivityPackage(Datastore.allocateId(ActivityPackage.class));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetActivityPackageThrowsNullPointerException() throws Exception {
+        activityService.getActivityPackage(null);
     }
 
 //    @Test

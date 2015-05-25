@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -136,6 +137,11 @@ public class UserServiceTest {
         service.addLogin(user, login1);
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testRemoveLoginNotFoundThrowsEntityNotFoundException() throws Exception {
+        service.removeLogin(Datastore.allocateId(UserLogin.class));
+    }
+
     @Test
     public void testAddGetRemoveUserLogin() throws Exception {
         User user = service.newUser();
@@ -190,7 +196,6 @@ public class UserServiceTest {
         assertEquals(login3.getUserId(), logins.get(0).getUserId());
         assertEquals(login2.getProvider(), logins.get(1).getProvider());
         assertEquals(login2.getUserId(), logins.get(1).getUserId());
-
 
         //ensure we released this login
         service.addLogin(user, new UserLogin(login1.getProvider(), login1.getUserId()));
@@ -325,7 +330,13 @@ public class UserServiceTest {
         service.setPassword(login1, "newPassword");
         User login2 = service.login("test", "newPassword");
         assertNotNull(login2);
+    }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testUserNotFoundThrowsEntityNotFoundException() throws Exception {
+        User user = new User();
+        user.setId(Datastore.allocateId(User.class));
+        service.setPassword(user, "Password");
     }
 
     @Test

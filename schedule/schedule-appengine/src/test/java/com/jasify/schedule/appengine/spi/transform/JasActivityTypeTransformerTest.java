@@ -28,7 +28,6 @@ public class JasActivityTypeTransformerTest {
         TestHelper.cleanupDatastore();
     }
 
-
     @Test
     public void testTransformTo() throws Exception {
         ActivityType internal = new ActivityType();
