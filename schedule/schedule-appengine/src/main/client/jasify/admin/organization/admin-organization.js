@@ -13,6 +13,7 @@
         vm.reset = reset;
         vm.save = save;
         vm.viewActivities = viewActivities;
+        vm.viewActivityTypes = viewActivityTypes;
 
         vm.searchUsers = searchUsers;
         vm.userFilter = userFilter;
@@ -54,6 +55,12 @@
         function viewActivities(id) {
             if (id) {
                 $location.path('/admin/activities/' + id);
+            }
+        }
+
+        function viewActivityTypes(id) {
+            if (id) {
+                $location.path('/admin/activity-types/' + id);
             }
         }
 
