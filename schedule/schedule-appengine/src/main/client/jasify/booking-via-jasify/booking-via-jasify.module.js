@@ -1,5 +1,5 @@
 /*global window */
-(function (angular) {
+(function (angular, _, moment) {
 
     'use strict';
 
@@ -57,10 +57,19 @@
                             organizationId: $route.current.params.organizationId
                         });
                     },
-                    activityPackages: function ($route, ActivityPackage) {
+                    activityPackages: function ($q, $route, ActivityPackage) {
+
                         if ($route.current.params.organizationId) {
-                            return ActivityPackage.query($route.current.params.organizationId);
+                            var dfd = $q.defer();
+                            ActivityPackage.query($route.current.params.organizationId).then(function (result) {
+                                result.items = _.filter(result.items, function (item) {
+                                    return !item.validUntil || moment().isBefore(item.validUntil);
+                                });
+                                dfd.resolve(result);
+                            });
+                            return dfd.promise;
                         }
+
                         return {items: []};
                     }
                 }
@@ -75,4 +84,4 @@
         CheckoutProvider.popupMode(true);
     });
 
-}(window.angular));
+}(window.angular, window._, window.moment));

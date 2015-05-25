@@ -24,11 +24,7 @@
                                 class="btn btn-default waves-effect">Cancel
                         </button>
                     </div>
-                    <a class="back-button"
-                       ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}">
-                        <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
-                    </a>
-
+                    <card-back ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}"></card-back>
                     <h2>Edit Activity Package
                         <small>Group Activities into Package</small>
                     </h2>
@@ -107,9 +103,8 @@
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
-                <label for="itemCount" class="col-sm-3 control-label"
-                       tooltip="Number of activities a client can subscribe to">Item Count:</label>
-
+                <label for="itemCount" class="col-sm-3 control-label">
+                    <help-label help="Number of activities a client can subscribe to">Item Count:</help-label></label>
                 <div class="col-sm-5">
                     <div class="fg-line">
                         <input id="itemCount" name="itemCount" type="number"
@@ -125,6 +120,19 @@
                         <span ng-message="min">Value must be greater than 1.</span>
                         <span ng-message="max">Value must be smaller than 100.</span>
                     </jas-error-help-block>
+                </div>
+            </div>
+            <div jas-has-feedback class="form-group">
+                <label class="control-label col-sm-3" for="validUntil">
+                    <help-label help="This is the last day when this Package will be available.">Valid until:</help-label>
+                </label>
+                <div class="col-sm-5">
+                    <div class="fg-line">
+                        <input id="validUntil" name="validUntil" class="form-control date-picker"
+                               date-picker-options="vm.validUntilOptions"
+                               ng-model="vm.activityPackage.validUntil">
+                    </div>
+                    <jas-feedback-icon-valid field="vm.activityPackageForm.validUntil"></jas-feedback-icon-valid>
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
