@@ -169,7 +169,12 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
     }
 
     private void notifyJasify(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) {
-        User user = subscriptions.get(0).getUserRef().getModel();
+        User user;
+        if (!subscriptions.isEmpty()) {
+            user = subscriptions.get(0).getUserRef().getModel();
+        } else {
+            user = executions.get(0).getUserRef().getModel();
+        }
 
         String subject = String.format("[Jasify] Subscribe [%s]", user.getDisplayName());
 
