@@ -43,6 +43,8 @@ public class Activity {
 
     private String description;
 
+    private String colourTag;
+
     @Attribute(persistent = false)
     private InverseModelListRef<Subscription, Activity> subscriptionListRef =
             new InverseModelListRef<>(Subscription.class, SubscriptionMeta.get().activityRef.getName(), this);
@@ -164,5 +166,13 @@ public class Activity {
 
     public InverseModelListRef<Subscription, Activity> getSubscriptionListRef() {
         return subscriptionListRef;
+    }
+
+    public String getColourTag() {
+        return colourTag;
+    }
+
+    public void setColourTag(String colourTag) {
+        this.colourTag = colourTag;
     }
 }
