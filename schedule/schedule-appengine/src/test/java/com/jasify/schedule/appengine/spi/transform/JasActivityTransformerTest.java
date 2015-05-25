@@ -35,6 +35,7 @@ public class JasActivityTransformerTest {
         Key id = Datastore.createKey(Activity.class, 1);
         internal.setId(id);
         internal.setDescription("Desc");
+        internal.setColourTag("Colour");
         ActivityType at = new ActivityType();
         at.setId(Datastore.createKey(ActivityType.class, 9));
         internal.getActivityTypeRef().setModel(at);
@@ -42,6 +43,7 @@ public class JasActivityTransformerTest {
         JasActivity external = transformer.transformTo(internal);
         assertNotNull(external);
         assertEquals("Desc", external.getDescription());
+        assertEquals("Colour", external.getColourTag());
         assertEquals(id, KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getActivityType());
         assertNotNull(external.getActivityType().getId());
@@ -58,9 +60,11 @@ public class JasActivityTransformerTest {
         Key atId = Datastore.createKey(ActivityType.class, 99);
         external.getActivityType().setId(KeyUtil.keyToString(atId));
         external.setDescription("Desc");
+        external.setColourTag("Colour");
         Activity internal = transformer.transformFrom(external);
         assertNotNull(internal);
         assertEquals("Desc", internal.getDescription());
+        assertEquals("Colour", internal.getColourTag());
         assertEquals(id, internal.getId());
         assertNotNull(internal.getActivityTypeRef().getKey());
         assertEquals(atId, internal.getActivityTypeRef().getKey());
