@@ -39,7 +39,7 @@
                 } else {
                     $location.search({});
 
-                    if (result != null) {
+                    if (result !== null) {
                         jasDialogs.success('Activity Type was created.');
                         $location.path('/admin/activity-type/' + result.id);
                     } else {
