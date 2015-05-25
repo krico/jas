@@ -27,12 +27,11 @@
             <label for="price" class="col-sm-3 control-label input-sm">price:</label>
 
             <div class="col-sm-7">
-                <input class="form-control input-sm"
-                       id="price"
+                <input id="price" name="price" placeholder="Enter price" type="number"
+                       class="form-control"
+                       min="0" max="10000" required
                        ng-model="vm.activityType.price"
-                       placeholder="price"
-                       type="number"
-                       min="0"/>
+                       ng-change="vm.activityType.currency = 'CHF'"/>
             </div>
             <div class="col-sm-2 text-left">
                 <select ng-model="vm.activityType.currency" class="form-control input-sm" placeholder="currency">
