@@ -211,5 +211,4 @@ class DefaultPaymentService implements PaymentService {
     private static class Singleton {
         private static final PaymentService INSTANCE = new DefaultPaymentService();
     }
-
 }

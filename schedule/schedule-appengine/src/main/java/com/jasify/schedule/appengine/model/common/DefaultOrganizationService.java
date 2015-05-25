@@ -5,7 +5,6 @@ import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.meta.common.GroupMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
-import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
@@ -27,14 +26,12 @@ import java.util.Set;
  * @since 08/01/15.
  */
 final class DefaultOrganizationService implements OrganizationService {
-    private final UserMeta userMeta;
     private final OrganizationMeta organizationMeta;
     private final OrganizationMemberMeta organizationMemberMeta;
     private final UniqueConstraint uniqueOrganizationName;
     private final GroupMeta groupMeta;
 
     private DefaultOrganizationService() {
-        userMeta = UserMeta.get();
         organizationMeta = OrganizationMeta.get();
         organizationMemberMeta = OrganizationMemberMeta.get();
         uniqueOrganizationName = UniqueConstraint.create(organizationMeta, organizationMeta.name);
@@ -43,14 +40,6 @@ final class DefaultOrganizationService implements OrganizationService {
 
     static OrganizationService instance() {
         return Singleton.INSTANCE;
-    }
-
-    private User getUser(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        try {
-            return Datastore.get(userMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("User id=" + id);
-        }
     }
 
     @Nonnull
