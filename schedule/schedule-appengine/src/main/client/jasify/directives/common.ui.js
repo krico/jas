@@ -91,11 +91,11 @@
                 action: '&',
                 description: '@'
             },
-            template: '<button tooltip-append-to-body="true" tooltip="{{description}}" class="btn btn-primary btn-icon"><i class="md mdi mdi-add"></i></button>',
+            template: '<button tooltip-append-to-body="true" ng-click="action && action()" tooltip="{{description}}" class="btn btn-primary btn-icon"><i class="md mdi mdi-add"></i></button>',
             link: function (scope, element, attrs) {
-                //if (!attrs.action && !attrs.btnHref) {
-                //    throw new Error("action or btnHref is required on element");
-                //}
+                if (!attrs.action && !attrs.btnHref) {
+                    throw new Error("action or btnHref is required on element");
+                }
                 if (!attrs.description) {
                     throw new Error("description is not defined on element");
                 }
@@ -160,4 +160,3 @@
     });
 
 }(window.angular));
-

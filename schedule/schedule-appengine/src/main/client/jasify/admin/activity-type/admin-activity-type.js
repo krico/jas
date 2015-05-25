@@ -35,15 +35,16 @@
             function ok(result) {
                 if (activityTypeToSave.id) {
                     vm.activityType = result;
+                    jasDialogs.success('Activity Type updated.');
                 } else {
                     $location.search({});
 
-                    if (result.items.length === 1) {
+                    if (result != null) {
                         jasDialogs.success('Activity Type was created.');
-                        $location.path('/admin/activity-type/' + result.items[0].id);
+                        $location.path('/admin/activity-type/' + result.id);
                     } else {
                         jasDialogs.warning('Activity Type was not created.');
-                        $location.path("/admin/activit-types");
+                        $location.path("/admin/activity-types");
                     }
                 }
             }
