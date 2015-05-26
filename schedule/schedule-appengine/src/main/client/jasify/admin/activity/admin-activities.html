@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <table ng-if="vm.activities.length" class="table table-hover table-condensed table-vmiddle">
+    <table id="admin-activities-table" ng-if="vm.activities.length" class="table table-hover table-condensed table-vmiddle">
         <thead>
         <tr>
             <th>
@@ -52,8 +52,8 @@
                     </ul>
                 </div>
             </td>
-            <td>{{activity.activityType.name}}</td>
-            <td>{{activity.location}}</td>
+            <td class="activity-type">{{activity.activityType.name}}</td>
+            <td class="activity-location">{{activity.location}}</td>
             <td>{{activity.start | amDateFormat: 'L LT' }}</td>
             <td>{{activity.finish | amDateFormat: 'L LT' }}</td>
             <td>

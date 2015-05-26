@@ -1,0 +1,52 @@
+.auto-width-column() {
+  white-space: normal;
+  width: 50%;
+}
+
+.min-size-column() {
+  white-space: nowrap;
+  width: 0%;
+}
+
+.row-commands {
+
+  [class*='command-'] ~ [class*='dropdown'],
+  [class*='command-'] ~ [class*='command-'] {
+    margin-left: 4px;
+  }
+
+  .dropdown {
+    display: inline-block;
+    background: none;
+  }
+
+  .min-size-column();
+}
+
+#admin-activities-table {
+  tbody {
+    td {
+      .min-size-column();
+    }
+    .activity-type, .activity-location {
+      .auto-width-column();
+    }
+  }
+}
+
+#admin-activity-packages-table {
+  thead {
+    th {
+      white-space: nowrap;
+    }
+  }
+  tbody {
+    td:not(.row-commands) {
+      white-space: nowrap;
+      width: 20%;
+    }
+    td.package-name {
+      .auto-width-column();
+    }
+  }
+}

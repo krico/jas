@@ -24,12 +24,13 @@
             </div>
         </div>
     </div>
-    <table ng-if="vm.activityPackages.length > 0" class="table table-hover table-condensed">
+    <table id="admin-activity-packages-table" ng-if="vm.activityPackages.length > 0" class="table table-hover table-condensed table-vmiddle">
         <thead>
         <tr>
-            <th>
+            <th class="row-commands">
                 <add-row ng-click="vm.addActivityPackage()" description="Add Activity Package" />
             </th>
+            <th>ID</th>
             <th>Name</th>
             <th>Price</th>
             <th><span tooltip="How many subscriptions are allowed">No. items</span></th>
@@ -40,26 +41,23 @@
         </thead>
         <tbody>
         <tr ng-repeat="activityPackage in vm.activityPackages">
+            <td class="row-commands">
+                <row-edit action="vm.viewActivityPackage(activityPackage.id)"></row-edit>
+                <row-delete action="vm.remove(activityPackage.id)"></row-delete>
+            </td>
             <td>{{activityPackage.id}}</td>
-            <td ng-click="vm.viewActivityPackage(activityPackage.id)">{{activityPackage.name}}</td>
-            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+            <td class="package-name">{{activityPackage.name}}</td>
+            <td>
                 {{activityPackage.price | currency:activityPackage.currency}}
             </td>
-            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+            <td>
                 {{activityPackage.itemCount}}
             </td>
-            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
+            <td>
                 {{activityPackage.activityCount}}
             </td>
-            <td ng-click="vm.viewActivityPackage(activityPackage.id)">
-                {{activityPackage.executionCount || 0}}
-            </td>
             <td>
-                <button type="button" class="btn btn-danger btn-xs"
-                        ng-disabled="activityPackage.executions > 0"
-                        ng-click="vm.remove(activityPackage.id)"><span
-                        class="glyphicon glyphicon-remove" tooltip="Delete"></span>
-                </button>
+                {{activityPackage.executionCount || 0}}
             </td>
         </tr>
         </tbody>
