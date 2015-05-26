@@ -38,6 +38,8 @@ public class ActivityType {
 
     private int maxSubscriptions;
 
+    private String colourTag;
+
     private ModelRef<Organization> organizationRef = new ModelRef<>(Organization.class);
 
     public ActivityType() {
@@ -122,6 +124,14 @@ public class ActivityType {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getColourTag() {
+        return colourTag;
+    }
+
+    public void setColourTag(String colourTag) {
+        this.colourTag = colourTag;
     }
 
     public int getMaxSubscriptions() {

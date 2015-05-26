@@ -27,8 +27,6 @@ public class JasActivity implements JasEndpointEntity {
 
     private String description;
 
-    private String colourTag;
-
     private String bookItUrl;
 
     public String getId() {
@@ -109,14 +107,6 @@ public class JasActivity implements JasEndpointEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getColourTag() {
-        return colourTag;
-    }
-
-    public void setColourTag(String colourTag) {
-        this.colourTag = colourTag;
     }
 
     public String getBookItUrl() {

@@ -12,8 +12,8 @@ public class JasActivityType implements JasEndpointEntity {
     private Double price;
     private String currency;
     private String location;
+    private String colourTag;
     private int maxSubscriptions;
-    private String timeZone;
 
     public String getId() {
         return id;
@@ -71,19 +71,19 @@ public class JasActivityType implements JasEndpointEntity {
         this.location = location;
     }
 
+    public String getColourTag() {
+        return colourTag;
+    }
+
+    public void setColourTag(String colourTag) {
+        this.colourTag = colourTag;
+    }
+
     public int getMaxSubscriptions() {
         return maxSubscriptions;
     }
 
     public void setMaxSubscriptions(int maxSubscriptions) {
         this.maxSubscriptions = maxSubscriptions;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
     }
 }

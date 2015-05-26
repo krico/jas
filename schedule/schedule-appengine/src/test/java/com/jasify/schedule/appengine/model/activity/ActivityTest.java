@@ -142,16 +142,6 @@ public class ActivityTest {
     }
 
     @Test
-    public void testColourTag() {
-        Activity activity = new Activity();
-        activity.setColourTag("Blue");
-        assertEquals("Blue", activity.getColourTag());
-        Key key = Datastore.put(activity);
-        Activity dbActivity = Datastore.get(Activity.class, key);
-        assertEquals("Blue", dbActivity.getColourTag());
-    }
-
-    @Test
     public void testSubscriptionListRef() {
         Activity activity = new Activity();
         assertNotNull(activity.getSubscriptionListRef());

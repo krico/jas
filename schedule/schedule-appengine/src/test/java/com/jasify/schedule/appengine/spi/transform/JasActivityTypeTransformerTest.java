@@ -40,6 +40,7 @@ public class JasActivityTypeTransformerTest {
         internal.setPrice(12.0);
         internal.setCurrency("NZD");
         internal.setLocation("Location");
+        internal.setColourTag("Colour");
         internal.setMaxSubscriptions(5);
         JasActivityType external = transformer.transformTo(internal);
         assertNotNull(external);
@@ -48,6 +49,7 @@ public class JasActivityTypeTransformerTest {
         assertEquals(12.0, external.getPrice());
         assertEquals("NZD", external.getCurrency());
         assertEquals("Location", external.getLocation());
+        assertEquals("Colour", external.getColourTag());
         assertEquals(5, external.getMaxSubscriptions());
         assertEquals(id, KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getOrganizationId());
@@ -64,6 +66,7 @@ public class JasActivityTypeTransformerTest {
         external.setPrice(12.0);
         external.setCurrency("NZD");
         external.setLocation("Location");
+        external.setColourTag("Colour");
         external.setMaxSubscriptions(5);
         ActivityType internal = transformer.transformFrom(external);
         assertNotNull(internal);
@@ -72,6 +75,7 @@ public class JasActivityTypeTransformerTest {
         assertEquals(12.0, internal.getPrice());
         assertEquals("NZD", internal.getCurrency());
         assertEquals("Location", internal.getLocation());
+        assertEquals("Colour", internal.getColourTag());
         assertEquals(5, internal.getMaxSubscriptions());
         assertEquals(id, internal.getId());
     }
