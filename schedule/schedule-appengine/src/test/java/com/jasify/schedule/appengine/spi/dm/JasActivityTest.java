@@ -93,14 +93,4 @@ public class JasActivityTest {
         jasActivity.setBookItUrl(bookItUrl);
         assertEquals(bookItUrl, jasActivity.getBookItUrl());
     }
-
-
-    @Test
-    public void testColourTag() {
-        String colourTag = "test";
-        JasActivity jasActivity = new JasActivity();
-        assertNull(jasActivity.getColourTag());
-        jasActivity.setColourTag(colourTag);
-        assertEquals(colourTag, jasActivity.getColourTag());
-    }
 }

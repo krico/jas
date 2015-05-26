@@ -117,6 +117,17 @@ public class ActivityTypeTest {
         assertEquals("Location", activityType.getLocation());
     }
 
+
+    @Test
+    public void testColourTag() {
+        ActivityType activityType = new ActivityType();
+        activityType.setColourTag("Blue");
+        assertEquals("Blue", activityType.getColourTag());
+        Key key = Datastore.put(activityType);
+        ActivityType dbActivityType = Datastore.get(ActivityType.class, key);
+        assertEquals("Blue", dbActivityType.getColourTag());
+    }
+
     @Test
     public void testMaxSubscriptions() {
         ActivityType activityType = new ActivityType();
