@@ -74,6 +74,12 @@
             if (activityToSave.id) {
                 promise = Activity.update(activityToSave);
             } else {
+                if (vm.repeatDetails.untilDate !== undefined) {
+                    // Set to end of date
+                    var date = new Date(vm.repeatDetails.untilDate);
+                    date.setHours(23, 59, 59, 999);
+                    vm.repeatDetails.untilDate = date;
+                }
                 promise = Activity.add(activityToSave, vm.repeatDetails);
             }
 
@@ -161,9 +167,13 @@
         function initDates() {
 
             $scope.$watch('vm.activity.start', function () {
+                vm.activity.finish = vm.activity.start;
+            });
+
+            $scope.$watch('vm.activity.finish', function () {
                 vm.repeatUntilDateOptions.minDate =
                     vm.toDateOptions.minDate =
-                        vm.activity.start;
+                        vm.activity.finish;
             });
 
             vm.fromDateOptions = {
