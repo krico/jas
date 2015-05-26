@@ -12,15 +12,15 @@
                 <div class="actionBar">
                     <div class="col-sm-12 col-lg-6">
                         <div class="search form-group">
-                        <div class="input-group">
-                            <span class="input-group-addon glyphicon-search"></span>
-                            <input ng-change="vm.queryChanged()"
-                                   ng-model-options="{ debounce: 500 }"
-                                   ng-model="vm.query"
-                                   type="text" name="query" id="query" class="search-field form-control"
-                                   placeholder="Search">
+                            <div class="input-group">
+                                <span class="input-group-addon glyphicon-search"></span>
+                                <input ng-change="vm.queryChanged()"
+                                       ng-model-options="{ debounce: 500 }"
+                                       ng-model="vm.query"
+                                       type="text" name="query" id="query" class="search-field form-control"
+                                       placeholder="Search">
+                            </div>
                         </div>
-                    </div>
                     </div>
                     <div class="col-sm-12 col-lg-6">
                         <div class="actions btn-group">
@@ -53,7 +53,8 @@
                                         class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
-                                    <li ng-repeat="size in vm.pagerSizes" ng-class="{ 'active': vm.perPage() === size }">
+                                    <li ng-repeat="size in vm.pagerSizes"
+                                        ng-class="{ 'active': vm.perPage() === size }">
                                         <a href prevent="click" ng-click="vm.perPage(size)"
                                            class="dropdown-item dropdown-item-button">{{size}}</a>
                                     </li>
@@ -65,37 +66,30 @@
             </div>
         </div>
     </div>
-    <div class="table-responsive">
-        <table id="users-list" class="table table-condensed table-striped table-hover table-vmiddle ">
-            <thead>
-            <tr>
-                <th>
-                    <a href="#/admin/user">
-                        <button title="Add User" class="btn bgm-teal btn-icon"><i class="md mdi mdi-person-add"></i></button>
-                    </a>
-                </th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Admin</th>
-                <th>Created</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="user in vm.users track by user.id">
-                <td>
-                    <button title="Edit {{user.name}}" ng-click="vm.viewUser(user.id)" type="button" class="btn btn-sm btn-primary"
-                            data-row-id="{{user.id}}">
-                        <span class="mdi mdi-edit"></span> Edit
-                    </button>
-                </td>
-                <td>{{user.name}}</td>
-                <td>{{user.email}}</td>
-                <td><span ng-if="user.admin" class="ion-checkmark-round"></span></td>
-                <td>{{user.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+    <table id="users-list" class="table table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th>
+                <row-add btn-href="/admin/user" description="Add User" />
+            </th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Admin</th>
+            <th>Created</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="user in vm.users track by user.id">
+            <td class="row-commands">
+                <row-edit description="Edit {{user.name}}" action="vm.viewUser(user.id)" data-row-id="{{user.id}}"></row-edit>
+            </td>
+            <td>{{user.name}}</td>
+            <td>{{user.email}}</td>
+            <td><span ng-if="user.admin" class="ion-checkmark-round"></span></td>
+            <td class="created">{{user.created | amDateFormat:'L LT' }}</td>
+        </tr>
+        </tbody>
+    </table>
     <div class="bootgrid-footer container-fluid">
         <div class="row">
             <div class="col-sm-6">

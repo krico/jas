@@ -24,7 +24,7 @@
         };
     });
 
-    module.directive('addRow', function () {
+    module.directive('rowAdd', function () {
         return {
             restrict: 'E',
             replace: true,
@@ -33,8 +33,8 @@
             },
             template: '<button tooltip-append-to-body="true" tooltip="{{description}}" class="btn btn-primary btn-icon"><i class="md mdi mdi-add"></i></button>',
             link: function (scope, element, attrs) {
-                if (!attrs.ngClick) {
-                    throw new Error("ngClick is not defined on element");
+                if (!attrs.action && !attrs.btnHref) {
+                    throw new Error("action or btnHref is required on element");
                 }
                 if (!attrs.description) {
                     throw new Error("description is not defined on element");
@@ -43,7 +43,7 @@
         };
     });
 
-    module.directive('rowEdit', function(jasDialogs) {
+    module.directive('rowEdit', function () {
         return {
             restrict: 'E',
             replace: true,
@@ -51,11 +51,18 @@
                 description: '@',
                 action: '&'
             },
-            template: '<button tooltip="Edit" type="button" ng-click="action()" class="btn btn-icon btn-primary command-edit"><span class="md mdi mdi-edit"></span></button>',
+            template: '<button tooltip="{{tooltip}}" type="button" ng-click="action()" class="btn btn-icon btn-primary command-edit"><span class="md mdi mdi-edit"></span></button>',
             link: function (scope, element, attrs) {
+
+                scope.tooltip = 'Edit';
+
                 if (!attrs.action) {
                     throw new Error("action is not defined on element");
                 }
+
+                attrs.$observe('description', function (newValue) {
+                    scope.tooltip = newValue || 'Edit';
+                });
             }
         };
     });
@@ -75,7 +82,7 @@
                 if (!attrs.action) {
                     throw new Error("action is not defined on element");
                 }
-                scope.confirm = function() {
+                scope.confirm = function () {
                     jasDialogs.ruSure("", scope.action);
                 };
             }
