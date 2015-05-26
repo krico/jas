@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Jasify Schedule">
     <meta name="author" content="jasify.com">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no"/>
     <link rel="icon" href="build/img/favicon.ico">
     <script>
         (function (i, s, o, g, r, a, m) {
@@ -27,25 +27,19 @@
     <link href="build/css/dep-main.css" rel="stylesheet">
     <link href="build/css/jasify.css" rel="stylesheet">
 </head>
-<body layout="column" ng-controller="ApplicationController as appVm">
-<md-toolbar layout="row" class="md-whiteframe-z1" ng-controller="NavbarController as vm">
-    <div class="md-toolbar-tools">
-        <md-button ng-show="vm.isAuthenticated()" hide-gt-md ng-click="vm.toggleList()" class="md-icon-button"
-                   aria-label="Settings">
-            <md-icon md-svg-icon="build/img/menu.svg"></md-icon>
-        </md-button>
-        <h2>
-            Jasify
-        </h2>
-        <span flex></span>
-        <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Sign out</md-button>
-    </div>
-</md-toolbar>
-<div class="main-content" flex layout="row" ng-controller="NavbarController as navBarController">
-    <md-sidenav id="sidebar"
-                class="toggled md-sidenav-left md-whiteframe-z2"
-                md-component-id="left"
-                md-is-locked-open="$mdMedia('gt-md') && navBarController.isAuthenticated()">
+<body layout="row" ng-controller="ApplicationController as appVm">
+<md-sidenav id="sidebar"
+            class="toggled md-sidenav-left md-whiteframe-z2"
+            md-component-id="left"
+            md-is-locked-open="$mdMedia('gt-md') && appVm.isAuthenticated()">
+    <md-toolbar class="md-whiteframe-glow-z2">
+        <h1 class="md-toolbar-tools">
+            <a layout="row" flex class="jasify-logo" href="#/">
+                <div class="jasify-logotype">Jasify</div>
+            </a>
+        </h1>
+    </md-toolbar>
+    <md-content role="navigation" ng-controller="NavbarController as navBarController" flex>
         <ul class="main-menu" style="margin: 0">
             <li>
                 <a ng-href="#/profile"><i class="mdi mdi-home"></i> My Profile</a>
@@ -86,11 +80,23 @@
                 <a ng-href="#/logout"><i class="ion-android-exit"></i> Sign out</a>
             </li>
         </ul>
-    </md-sidenav>
-    <div class="container" layout="column" flex  ng-class="{ 'home-splash': !navBarController.isAuthenticated() } ">
-        <md-content ng-view id="content" flex>
-        </md-content>
-    </div>
+    </md-content>
+</md-sidenav>
+<div layout="column" flex>
+    <md-toolbar class="md-whiteframe-glow-z2" ng-controller="NavbarController as vm">
+        <div class="md-toolbar-tools">
+            <md-button hide-gt-md ng-click="vm.toggleList()" ng-show="vm.isAuthenticated()" class="md-icon-button" aria-label="Settings">
+                <md-icon md-svg-icon="build/img/menu.svg"></md-icon>
+            </md-button>
+            <h2 flex class="text-right">
+                <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Sign out</md-button>
+            </h2>
+        </div>
+    </md-toolbar>
+    <md-content id="content" ng-controller="NavbarController as vm" ng-class="{ 'home-splash': !vm.isAuthenticated() }" flex layout-padding md-scroll-y>
+        <div class="container-fluid" ng-view>
+        </div>
+    </md-content>
 </div>
 <footer class="footer">
     <div class="container">
