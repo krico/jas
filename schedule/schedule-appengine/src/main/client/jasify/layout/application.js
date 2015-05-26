@@ -24,6 +24,7 @@
         appVm.serverVersion = serverVersion;
         appVm.serverVersionString = serverVersionString;
         appVm.isLoaded = isLoaded;
+        appVm.isAuthenticated = isAuthenticated;
         appVm.SERVER_VERSION = null;
 
         $scope.$on(AUTH_EVENTS.notAuthenticated, appVm.notAuthenticated);
@@ -56,6 +57,10 @@
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                 });
             }
+        }
+
+        function isAuthenticated() {
+            return Auth.isAuthenticated();
         }
 
         function notAuthenticated() {
