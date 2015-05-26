@@ -26,7 +26,6 @@
 
         vm.pageChanged();
 
-
         function pageChanged() {
             var q;
 
@@ -37,7 +36,7 @@
             }
 
             User.query({
-                offset: vm._perPage * (vm.page-1),
+                offset: vm._perPage * (vm.page - 1),
                 limit: vm._perPage,
                 sort: vm.sort,
                 field: vm.searchBy(),
@@ -45,9 +44,13 @@
             }).then(ok, fail);
 
             function ok(r) {
-                if (r.total != vm.total)
+                if (r.total !== vm.total) {
                     vm.total = Math.floor(r.total);
-                vm.users = r.users;
+                }
+                vm.users = r.users || [];
+                if (vm.query) {
+                    vm.total = vm.users.length;
+                }
             }
 
             function fail(response) {

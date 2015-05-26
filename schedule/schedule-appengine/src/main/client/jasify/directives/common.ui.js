@@ -6,7 +6,66 @@
 
 (function (angular) {
 
+    'use strict';
+
     var module = angular.module('jasify.common.ui', []);
+
+    module.directive('paginationInfo', function () {
+
+        /**
+         * Helper class for computing pagination info
+         * @param totalSize
+         * @param currentPageSize
+         * @param itemsPerPage
+         * @param pageNumber
+         * @constructor
+         */
+        function PaginationInfo(totalSize, currentPageSize, itemsPerPage, pageNumber) {
+
+            var self = this;
+
+            self.start = function () {
+                if (currentPageSize === 0) {
+                    return 0;
+                }
+                return (itemsPerPage * (pageNumber - 1)) + 1;
+            };
+
+            self.end = function () {
+                if (currentPageSize === 0) {
+                    return 0;
+                }
+                return Math.min(self.all(), self.start() + currentPageSize - 1);
+            };
+
+            self.all = function () {
+                return totalSize;
+            };
+        }
+
+        return {
+            restrict: 'E',
+            replace: true,
+            template: '<div class="infos">Showing {{paginationInfo.start()}} to {{paginationInfo.end()}} of {{paginationInfo.all()}}</div>',
+            scope: {
+                'totalSize': '=',
+                'currentPageSize': '=',
+                'itemsPerPage': '=',
+                'page': '='
+            },
+            controller: function ($scope) {
+
+                function refresh() {
+                    $scope.paginationInfo = new PaginationInfo($scope.totalSize, $scope.currentPageSize, $scope.itemsPerPage, $scope.page);
+                }
+
+                $scope.$watch('page', refresh);
+                $scope.$watch('itemsPerPage', refresh);
+                $scope.$watch('currentPageSize', refresh);
+                $scope.$watch('totalSize', refresh);
+            }
+        };
+    });
 
     module.directive('cardBack', function () {
         return {
@@ -67,7 +126,6 @@
         };
     });
 
-
     module.directive('rowDelete', function (jasDialogs) {
         return {
             restrict: 'E',
@@ -88,7 +146,6 @@
             }
         };
     });
-
 
 }(window.angular));
 

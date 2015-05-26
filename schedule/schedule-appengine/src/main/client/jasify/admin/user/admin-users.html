@@ -70,7 +70,7 @@
         <thead>
         <tr>
             <th>
-                <row-add btn-href="/admin/user" description="Add User" />
+                <row-add btn-href="/admin/user" description="Add User"/>
             </th>
             <th>Name</th>
             <th>Email</th>
@@ -81,7 +81,8 @@
         <tbody>
         <tr ng-repeat="user in vm.users track by user.id">
             <td class="row-commands">
-                <row-edit description="Edit {{user.name}}" action="vm.viewUser(user.id)" data-row-id="{{user.id}}"></row-edit>
+                <row-edit description="Edit {{user.name}}" action="vm.viewUser(user.id)"
+                          data-row-id="{{user.id}}"></row-edit>
             </td>
             <td>{{user.name}}</td>
             <td>{{user.email}}</td>
@@ -99,9 +100,8 @@
                 </pagination>
             </div>
             <div class="col-sm-6 infoBar">
-                <div class="infos">Showing {{vm.perPage() * (vm.page - 1) + 1}} to {{[vm.users.length * vm.page ,
-                    vm.total] | min}} of {{vm.total}} entries
-                </div>
+                <pagination-info total-size="vm.total" current-page-size="vm.users.length"
+                                 items-per-page="vm.perPage()" page="vm.page"></pagination-info>
             </div>
         </div>
     </div>
