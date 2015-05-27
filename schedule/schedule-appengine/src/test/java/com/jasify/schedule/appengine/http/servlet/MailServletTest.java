@@ -1,8 +1,8 @@
 package com.jasify.schedule.appengine.http.servlet;
 
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.meta.MailMessageMeta;
-import com.jasify.schedule.appengine.model.MailMessage;
+import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
+import com.jasify.schedule.appengine.model.mail.MailMessage;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;

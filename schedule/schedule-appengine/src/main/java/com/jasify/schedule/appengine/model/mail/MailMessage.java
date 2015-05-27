@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.model;
+package com.jasify.schedule.appengine.model.mail;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Key;

@@ -1,7 +1,7 @@
 package com.jasify.schedule.appengine.http.servlet;
 
 import com.google.appengine.api.datastore.Blob;
-import com.jasify.schedule.appengine.model.MailMessage;
+import com.jasify.schedule.appengine.model.mail.MailMessage;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -23,7 +23,6 @@ class DaoDatastoreCallbacks {
         // Handle batches only once
         if (context.getCurrentIndex() == 0) {
             List<Key> keys = Lists.transform(context.getElements(), entityToKey);
-            log.info("POST-PUT index: {} keys: {}", context.getCurrentIndex(), keys);
             Memcache.deleteAll(keys);
         }
     }
@@ -33,7 +32,6 @@ class DaoDatastoreCallbacks {
         // Handle batches only once
         if (context.getCurrentIndex() == 0) {
             List<Key> keys = context.getElements();
-            log.info("POST-PUT index: {} keys: {}", context.getCurrentIndex(), keys);
             Memcache.deleteAll(keys);
         }
     }
