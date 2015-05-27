@@ -5,22 +5,15 @@
 
     angular.module('jasify.admin').controller('AdminActivityTypeController', AdminActivityTypeController);
 
-    function AdminActivityTypeController($scope, $location, getContrast,
-                                     jasDialogs, aButtonController, ActivityType,
-                                     activityType, organizations) {
+    function AdminActivityTypeController($location, getContrast,
+                                         jasDialogs, aButtonController, ActivityType,
+                                         activityType, organizations) {
         var vm = this;
 
         vm.saveBtn = aButtonController.createSave();
         vm.organizations = organizations.items;
         vm.activityType = activityType;
-
-        vm.updateTagStyle = function(color) {
-            vm.tagStyle = {
-                'backgroundColor': color || 'white',
-                color: getContrast.compute(color || 'white')
-            };
-        };
-
+        vm.updateTagStyle = updateTagStyle;
         vm.updateTagStyle(vm.activityType.colourTag);
 
         initOrganization();
@@ -78,9 +71,16 @@
                 if (vm.organizations.length === 1) {
                     vm.organization = vm.organizations[0];
                 } else {
-                    vm.organization = _.find(vm.organizations, { id: $location.search().organizationId});
+                    vm.organization = _.find(vm.organizations, {id: $location.search().organizationId});
                 }
             }
+        }
+
+        function updateTagStyle(color) {
+            vm.tagStyle = {
+                'backgroundColor': color || 'white',
+                color: getContrast.compute(color || 'white')
+            };
         }
     }
 
