@@ -23,6 +23,7 @@
         vm.addActivityType = addActivityType;
         vm.viewActivityType = viewActivityType;
         vm.removeActivityType = removeActivityType;
+        vm.getPreviewStyle = getPreviewStyle;
 
         function setSelectedOrganization(organizationId) {
             vm.organization = _.find(vm.organizations, {id: organizationId});
@@ -44,6 +45,10 @@
 
         function addActivityType() {
             $location.path('/admin/activity-type').search('organizationId', vm.organization.id);
+        }
+
+        function getPreviewStyle(color) {
+            return {'backgroundColor': color};
         }
     }
 

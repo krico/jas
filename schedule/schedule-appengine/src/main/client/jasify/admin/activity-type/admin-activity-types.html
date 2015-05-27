@@ -45,7 +45,7 @@
                 <row-delete action="vm.removeActivityType(activityType)"></row-delete>
             </td>
             <td class="activity-type-name">{{activityType.name}}</td>
-            <td><span class="tag-preview" style="background-color: {{activityType.colourTag}};" ></span></td>
+            <td><span class="tag-preview" ng-style="vm.getPreviewStyle(activityType.colourTag)" ></span></td>
             <td class="activity-type-description">{{activityType.description}}</td>
             <td class="activity-type-location">{{activityType.location}}</td>
             <td>
