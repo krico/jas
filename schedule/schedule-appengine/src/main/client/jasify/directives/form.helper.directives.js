@@ -1,4 +1,4 @@
-/*global autosize */
+/*global window,autosize */
 
 /**
  * Form directives:
@@ -112,7 +112,7 @@
                     }
                 }
 
-                var unwatch = scope.$watch(attrs.ngModel, function(newValue, oldValue) {
+                var unwatch = scope.$watch(attrs.ngModel, function (newValue, oldValue) {
                     initialize();
                     unwatch();
                 });
@@ -254,5 +254,37 @@
         };
     }]);
 
-}(angular, jQuery));
+    jasifyDirectivesFormModule.directive('colorPicker', function () {
+        return {
+            restrict: 'C',
+            link: function (scope, element) {
+
+                var $element = $(element),
+                    inputColorOutput = $element.closest('.cp-container').find('input.cp-value'),
+                    dropdownElement = $element.closest('.dropdown');
+
+                dropdownElement.on('hide.bs.dropdown', function () {
+                    return !dropdownElement.hasClass('keepopen');
+                });
+
+                dropdownElement.hover(function () {
+                    dropdownElement.addClass('keepopen');
+                }, function () {
+                    dropdownElement.removeClass('keepopen');
+                });
+
+                $element.farbtastic(function (color) {
+                    var ngModelController = angular.element(inputColorOutput).data('$ngModelController');
+                    ngModelController.$setViewValue(color);
+                    inputColorOutput.val(color);
+                });
+
+                angular.element(inputColorOutput).scope().$watch(inputColorOutput.attr('ng-model'), function (newValue) {
+                    $.farbtastic($element).setColor(newValue);
+                });
+            }
+        };
+    });
+
+}(window.angular, window.jQuery));
 
