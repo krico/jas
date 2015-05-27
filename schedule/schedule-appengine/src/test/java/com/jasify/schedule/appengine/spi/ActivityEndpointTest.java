@@ -678,6 +678,65 @@ public class ActivityEndpointTest {
         endpoint.getActivities(null, null, null, null, null, null, null);
     }
 
+    // TEST: GetActivitiesByIds
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsWithNullIdsThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getActivitiesByIds(null, null, null, null, null, null, null);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsWithBothIdsNotNullThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getActivitiesByIds(null, new Key[]{}, new Key[]{}, null, null, null, null);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsEmptyArrayOfActivityTypeKeysThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getActivitiesByIds(null, new Key[]{}, null, null, null, null, null);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsEmptyArrayOfOrganizationKeysThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getActivitiesByIds(null, null, new Key[]{}, null, null, null, null);
+    }
+
+    @Test
+    public void testGetActivitiesByActivityTypes() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityType activityType1 = new ActivityType();
+        ActivityType activityType2 = new ActivityType();
+        Datastore.put(activityType1, activityType2);
+        expect(activityService.getActivityType(activityType1.getId())).andReturn(activityType1);
+        expect(activityService.getActivities(activityType1)).andReturn(Arrays.asList(new Activity()));
+        expect(activityService.getActivityType(activityType2.getId())).andReturn(activityType2);
+        expect(activityService.getActivities(activityType2)).andReturn(Arrays.asList(new Activity()));
+        testActivityServiceFactory.replay();
+        List<Activity> result = endpoint.getActivitiesByIds(null, null, new Key[]{activityType1.getId(), activityType2.getId()}, null, null, null, null);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetActivitiesByOrganizations() throws Exception {
+        Organization organization1 = new Organization();
+        Organization organization2 = new Organization();
+        Datastore.put(organization1, organization2);
+        expect(organizationService.getOrganization(organization1.getId())).andReturn(organization1);
+        expect(activityService.getActivities(organization1)).andReturn(Arrays.asList(new Activity()));
+        expect(organizationService.getOrganization(organization2.getId())).andReturn(organization2);
+        expect(activityService.getActivities(organization2)).andReturn(Arrays.asList(new Activity()));
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        List<Activity> result = endpoint.getActivitiesByIds(null, new Key[]{organization1.getId(), organization2.getId()}, null, null, null, null, null);
+        assertEquals(2, result.size());
+    }
+
     // TEST: GetActivity
     @Test(expected = UnauthorizedException.class)
     public void testGetActivityNoUserThrowsUnauthorizedException() throws Exception {

@@ -140,6 +140,43 @@ public class ActivityEndpoint {
         }
     }
 
+    private List<Activity> filterActivities(List<Activity> activities, final Date fromDate,
+                                            final Date toDate,
+                                            Integer offset,
+                                            Integer limit) {
+        if (activities.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        ArrayList<Activity> filtered = new ArrayList<>();
+        filtered.addAll(Collections2.filter(activities, new Predicate<Activity>() {
+            @Override
+            public boolean apply(@Nullable Activity input) {
+                if (fromDate != null && input.getStart() != null && fromDate.after(input.getStart())) {
+                    return false;
+                }
+                if (toDate != null && input.getFinish() != null && toDate.before(input.getFinish())) {
+                    return false;
+                }
+                return true;
+            }
+        }));
+
+        if (offset == null) offset = 0;
+        if (limit == null) limit = 0;
+
+        if (offset > 0 || limit > 0) {
+            if (offset < filtered.size()) {
+                if (limit <= 0) limit = filtered.size();
+                return new ArrayList<>(filtered.subList(offset, Math.min(offset + limit, filtered.size())));
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
+        return filtered;
+    }
+
     @ApiMethod(name = "activities.query", path = "activities", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Activity> getActivities(User caller,
                                         @Nullable @Named("organizationId") Key organizationId,
@@ -168,34 +205,49 @@ public class ActivityEndpoint {
         }
 
         //TODO: I'm pretty sure this should be done on the Service implementation, but I'm in the bus and lazy and sleepy
+        return filterActivities(all, fromDate, toDate, offset, limit);
+    }
 
-        ArrayList<Activity> filtered = new ArrayList<>();
-        filtered.addAll(Collections2.filter(all, new Predicate<Activity>() {
-            @Override
-            public boolean apply(@Nullable Activity input) {
-                if (fromDate != null && input.getStart() != null && fromDate.after(input.getStart())) {
-                    return false;
-                }
-                if (toDate != null && input.getFinish() != null && toDate.before(input.getFinish())) {
-                    return false;
-                }
-                return true;
-            }
-        }));
+    // The hardest part is to get the name right!
+    @ApiMethod(name = "activities.mQuery", path = "activities", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Activity> getActivitiesByIds(User caller,
+                                        @Nullable @Named("organizationIds") Key organizationIds[],
+                                        @Nullable @Named("activityTypeIds") Key activityTypeIds[],
+                                        @Nullable @Named("fromDate") final Date fromDate,
+                                        @Nullable @Named("toDate") final Date toDate,
+                                        @Nullable @Named("offset") Integer offset,
+                                        @Nullable @Named("limit") Integer limit) throws BadRequestException, NotFoundException {
 
-        if (offset == null) offset = 0;
-        if (limit == null) limit = 0;
-
-        if (offset > 0 || limit > 0) {
-            if (offset < filtered.size()) {
-                if (limit <= 0) limit = filtered.size();
-                return new ArrayList<>(filtered.subList(offset, Math.min(offset + limit, filtered.size())));
-            } else {
-                return Collections.emptyList();
-            }
+        if (activityTypeIds != null && organizationIds != null) {
+            throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
+        } else if (activityTypeIds == null && organizationIds == null) {
+            throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
+        } else if (activityTypeIds != null && activityTypeIds.length == 0 ) {
+            throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
+        } else if (organizationIds != null && organizationIds.length == 0 ) {
+            throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
         }
 
-        return filtered;
+        final List<Activity> all = new ArrayList<>();
+        try {
+            if (activityTypeIds != null) {
+                for (Key activityTypeId : activityTypeIds) {
+                    checkFound(activityTypeId);
+                    ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(activityTypeId);
+                    all.addAll(ActivityServiceFactory.getActivityService().getActivities(activityType));
+                }
+            } else if (organizationIds != null) {
+                for (Key organizationId : organizationIds) {
+                    checkFound(organizationId);
+                    Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
+                    all.addAll(ActivityServiceFactory.getActivityService().getActivities(organization));
+                }
+            }
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+
+        return filterActivities(all, fromDate, toDate, offset, limit);
     }
 
     @ApiMethod(name = "activities.get", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.GET)
