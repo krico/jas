@@ -76,6 +76,33 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="colourTag" class="col-sm-4 control-label">Colour:</label>
+
+                        <div class="col-sm-4">
+                            <div class="cp-container">
+                                <div class="input-group form-group">
+                                    <span class="input-group-addon"><i class="md md-color-lens"></i></span>
+
+                                    <div class="fg-line dropdown">
+                                        <input id="colourTag" type="text" class="form-control cp-value" name="colourTag"
+                                               ng-model="vm.activityType.colourTag"
+                                               ng-change="vm.updateTagStyle(vm.activityType.colourTag)"
+                                               value="{{vm.activityType.colourTag}}"
+                                               data-toggle="dropdown">
+
+                                        <div class="dropdown-menu">
+                                            <div class="color-picker" data-cp-default="{{vm.activityType.colourTag}}"></div>
+                                        </div>
+                                        <i class="cp-value" ng-style="vm.tagStyle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="badge" ng-style="vm.tagStyle">{{vm.activityType.name}}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="price" class="col-sm-4 col-xs-12 control-label">Price:</label>
 
                         <div jas-has-feedback class="col-sm-4 col-xs-7">

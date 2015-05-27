@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityTypeController', AdminActivityTypeController);
 
-    function AdminActivityTypeController($scope, $location,
+    function AdminActivityTypeController($scope, $location, getContrast,
                                      jasDialogs, aButtonController, ActivityType,
                                      activityType, organizations) {
         var vm = this;
@@ -13,6 +13,15 @@
         vm.saveBtn = aButtonController.createSave();
         vm.organizations = organizations.items;
         vm.activityType = activityType;
+
+        vm.updateTagStyle = function(color) {
+            vm.tagStyle = {
+                'backgroundColor': color,
+                color: getContrast.compute(color)
+            };
+        };
+
+        vm.updateTagStyle(vm.activityType.colourTag);
 
         initOrganization();
 
