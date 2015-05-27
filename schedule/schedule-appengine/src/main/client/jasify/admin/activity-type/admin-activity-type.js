@@ -16,8 +16,8 @@
 
         vm.updateTagStyle = function(color) {
             vm.tagStyle = {
-                'backgroundColor': color,
-                color: getContrast.compute(color)
+                'backgroundColor': color || 'white',
+                color: getContrast.compute(color || 'white')
             };
         };
 
