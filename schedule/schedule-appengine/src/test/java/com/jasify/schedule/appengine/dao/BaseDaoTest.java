@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.model.dao;
+package com.jasify.schedule.appengine.dao;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;

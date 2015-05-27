@@ -1,20 +1,20 @@
-package com.jasify.schedule.appengine.meta.dao;
+package com.jasify.schedule.appengine.dao;
 
 //@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" })
 /** */
-public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.dao.Example> {
+public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.dao.Example> {
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.dao.Example, com.google.appengine.api.datastore.Key> id = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.dao.Example, com.google.appengine.api.datastore.Key>(this, "__key__", "id", com.google.appengine.api.datastore.Key.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, com.google.appengine.api.datastore.Key> id = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, com.google.appengine.api.datastore.Key>(this, "__key__", "id", com.google.appengine.api.datastore.Key.class);
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.dao.Example, java.util.Date> created = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.dao.Example, java.util.Date>(this, "created", "created", java.util.Date.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, java.util.Date> created = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, java.util.Date>(this, "created", "created", java.util.Date.class);
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.dao.Example, java.util.Date> modified = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.dao.Example, java.util.Date>(this, "modified", "modified", java.util.Date.class);
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, java.util.Date> modified = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, java.util.Date>(this, "modified", "modified", java.util.Date.class);
 
     /** */
-    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.dao.Example> data = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.dao.Example>(this, "data", "data");
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.dao.Example> data = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.dao.Example>(this, "data", "data");
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
@@ -31,12 +31,12 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
 
     /** */
     public ExampleMeta() {
-        super("Example", com.jasify.schedule.appengine.model.dao.Example.class);
+        super("Example", com.jasify.schedule.appengine.dao.Example.class);
     }
 
     @Override
-    public com.jasify.schedule.appengine.model.dao.Example entityToModel(com.google.appengine.api.datastore.Entity entity) {
-        com.jasify.schedule.appengine.model.dao.Example model = new com.jasify.schedule.appengine.model.dao.Example();
+    public com.jasify.schedule.appengine.dao.Example entityToModel(com.google.appengine.api.datastore.Entity entity) {
+        com.jasify.schedule.appengine.dao.Example model = new com.jasify.schedule.appengine.dao.Example();
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setModified((java.util.Date) entity.getProperty("modified"));
@@ -46,7 +46,7 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
 
     @Override
     public com.google.appengine.api.datastore.Entity modelToEntity(java.lang.Object model) {
-        com.jasify.schedule.appengine.model.dao.Example m = (com.jasify.schedule.appengine.model.dao.Example) model;
+        com.jasify.schedule.appengine.dao.Example m = (com.jasify.schedule.appengine.dao.Example) model;
         com.google.appengine.api.datastore.Entity entity = null;
         if (m.getId() != null) {
             entity = new com.google.appengine.api.datastore.Entity(m.getId());
@@ -61,20 +61,20 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
 
     @Override
     protected com.google.appengine.api.datastore.Key getKey(Object model) {
-        com.jasify.schedule.appengine.model.dao.Example m = (com.jasify.schedule.appengine.model.dao.Example) model;
+        com.jasify.schedule.appengine.dao.Example m = (com.jasify.schedule.appengine.dao.Example) model;
         return m.getId();
     }
 
     @Override
     protected void setKey(Object model, com.google.appengine.api.datastore.Key key) {
         validateKey(key);
-        com.jasify.schedule.appengine.model.dao.Example m = (com.jasify.schedule.appengine.model.dao.Example) model;
+        com.jasify.schedule.appengine.dao.Example m = (com.jasify.schedule.appengine.dao.Example) model;
         m.setId(key);
     }
 
     @Override
     protected long getVersion(Object model) {
-        throw new IllegalStateException("The version property of the model(com.jasify.schedule.appengine.model.dao.Example) is not defined.");
+        throw new IllegalStateException("The version property of the model(com.jasify.schedule.appengine.dao.Example) is not defined.");
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
 
     @Override
     protected void prePut(Object model) {
-        com.jasify.schedule.appengine.model.dao.Example m = (com.jasify.schedule.appengine.model.dao.Example) model;
+        com.jasify.schedule.appengine.dao.Example m = (com.jasify.schedule.appengine.dao.Example) model;
         m.setCreated(slim3_createdAttributeListener.prePut(m.getCreated()));
         m.setModified(slim3_modifiedAttributeListener.prePut(m.getModified()));
     }
@@ -113,7 +113,7 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
 
     @Override
     protected void modelToJson(org.slim3.datastore.json.JsonWriter writer, java.lang.Object model, int maxDepth, int currentDepth) {
-        com.jasify.schedule.appengine.model.dao.Example m = (com.jasify.schedule.appengine.model.dao.Example) model;
+        com.jasify.schedule.appengine.dao.Example m = (com.jasify.schedule.appengine.dao.Example) model;
         writer.beginObject();
         org.slim3.datastore.json.Default encoder0 = new org.slim3.datastore.json.Default();
         if(m.getId() != null){
@@ -136,8 +136,8 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
     }
 
     @Override
-    protected com.jasify.schedule.appengine.model.dao.Example jsonToModel(org.slim3.datastore.json.JsonRootReader rootReader, int maxDepth, int currentDepth) {
-        com.jasify.schedule.appengine.model.dao.Example m = new com.jasify.schedule.appengine.model.dao.Example();
+    protected com.jasify.schedule.appengine.dao.Example jsonToModel(org.slim3.datastore.json.JsonRootReader rootReader, int maxDepth, int currentDepth) {
+        com.jasify.schedule.appengine.dao.Example m = new com.jasify.schedule.appengine.dao.Example();
         org.slim3.datastore.json.JsonReader reader = null;
         org.slim3.datastore.json.Default decoder0 = new org.slim3.datastore.json.Default();
         reader = rootReader.newObjectReader("id");

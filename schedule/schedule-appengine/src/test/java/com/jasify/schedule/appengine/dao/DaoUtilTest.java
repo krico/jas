@@ -1,9 +1,8 @@
-package com.jasify.schedule.appengine.model.dao;
+package com.jasify.schedule.appengine.dao;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.meta.dao.ExampleMeta;
 import io.github.benas.jpopulator.api.Populator;
 import io.github.benas.jpopulator.impl.PopulatorBuilder;
 import org.junit.After;

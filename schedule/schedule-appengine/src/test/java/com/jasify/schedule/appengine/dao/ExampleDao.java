@@ -1,6 +1,4 @@
-package com.jasify.schedule.appengine.model.dao;
-
-import com.jasify.schedule.appengine.meta.dao.ExampleMeta;
+package com.jasify.schedule.appengine.dao;
 
 /**
  * @author krico

@@ -1,7 +1,6 @@
-package com.jasify.schedule.appengine.model.dao;
+package com.jasify.schedule.appengine.dao;
 
 import com.google.appengine.api.datastore.Transaction;
-import com.jasify.schedule.appengine.meta.dao.ExampleMeta;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 

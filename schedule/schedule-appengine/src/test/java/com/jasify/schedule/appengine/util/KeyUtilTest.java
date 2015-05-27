@@ -2,7 +2,7 @@ package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.dao.Example;
+import com.jasify.schedule.appengine.dao.Example;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.AfterClass;
