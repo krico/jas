@@ -1,13 +1,16 @@
 /*global window */
-(function (angular) {
+(function (angular, _) {
 
     angular.module('jasify.admin').controller('AdminActivityPackageController', AdminActivityPackageController);
 
-    function AdminActivityPackageController($location, jasDialogs, aButtonController, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
+    function AdminActivityPackageController(moment, $location, jasDialogs, aButtonController, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
 
         var vm = this;
         vm.organization = null;
 
+        vm.validUntilOptions = {
+            minDate: moment()
+        };
         vm.saveBtn = aButtonController.createSave();
         vm.resetBtn = aButtonController.createReset();
 
@@ -66,6 +69,8 @@
                 return;
             }
 
+            setValidUntilDate(vm.activityPackage, vm.selectedActivities);
+
             var promise = ActivityPackage.update(vm.activityPackage, vm.selectedActivities).then(ok, fail);
             vm.saveBtn.start(promise);
 
@@ -88,6 +93,8 @@
             }
 
             vm.activityPackage.organizationId = vm.organization.id;
+
+            setValidUntilDate(vm.activityPackage, vm.selectedActivities);
 
             ActivityPackage.add(vm.activityPackage, vm.selectedActivities).then(function (resp) {
                 jasDialogs.success('Activity Package was created.');
@@ -116,6 +123,14 @@
 
             if (!initialReset) {
                 vm.resetBtn.pulse();
+            }
+        }
+
+        function setValidUntilDate(activityPackage, activities) {
+            if (!activityPackage.validUntil) {
+                activityPackage.validUntil = moment(_.max(_.map(activities, function (activity) {
+                    return new Date(activity.start).getTime();
+                }))).format();
             }
         }
 
@@ -216,4 +231,4 @@
         }
     }
 
-})(window.angular);
+})(window.angular, window._);
