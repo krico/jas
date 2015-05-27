@@ -88,6 +88,7 @@
             restrict: 'E',
             replace: true,
             scope: {
+                action: '&',
                 description: '@'
             },
             template: '<button tooltip-append-to-body="true" ng-click="action && action()" tooltip="{{description}}" class="btn btn-primary btn-icon"><i class="md mdi mdi-add"></i></button>',
