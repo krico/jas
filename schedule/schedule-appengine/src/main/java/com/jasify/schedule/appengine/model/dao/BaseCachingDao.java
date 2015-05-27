@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.dao;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelMeta;
@@ -30,10 +31,11 @@ public class BaseCachingDao<T> extends BaseDao<T> {
 
         T ret = DaoUtil.cacheGet(id, meta);
 
-        if (ret == null) {
-            ret = DaoUtil.cachePut(id, meta, super.get(id));
+        if (ret != null) {
+            return ret;
         }
-        return ret;
+
+        return DaoUtil.cachePut(id, meta, super.get(id));
     }
 
     @Nullable
@@ -43,15 +45,11 @@ public class BaseCachingDao<T> extends BaseDao<T> {
             return super.getOrNull(id);
         }
 
-        T ret = DaoUtil.cacheGet(id, meta);
-
-        if (ret == null) {
-            ret = super.getOrNull(id);
-            if (ret == null) {
-                return null;
-            }
-            ret = DaoUtil.cachePut(id, meta, ret);
+        Optional<T> optional = DaoUtil.cacheGetOrNull(id, meta);
+        if (optional != null) {
+            return optional.isPresent() ? optional.get() : null;
         }
-        return ret;
+
+        return DaoUtil.cachePut(id, meta, super.getOrNull(id));
     }
 }

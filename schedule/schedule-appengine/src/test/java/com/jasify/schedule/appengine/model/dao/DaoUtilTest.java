@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.model.dao;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.dao.ExampleMeta;
 import io.github.benas.jpopulator.api.Populator;
@@ -9,10 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertSame;
+import static junit.framework.TestCase.*;
 
 public class DaoUtilTest {
+
+    public static final ExampleMeta META = ExampleMeta.get();
 
     static Example createExample() {
         Populator populator = new PopulatorBuilder().build();
@@ -38,10 +41,36 @@ public class DaoUtilTest {
     public void testMarshallAndUnMarshallMemcacheEntries() {
         Example example = createExample();
         example.setId(Datastore.allocateId(Example.class));
-        Example ret = DaoUtil.cachePut(example.getId(), ExampleMeta.get(), example);
+        Example ret = DaoUtil.cachePut(example.getId(), META, example);
         assertSame(example, ret);
-        Example fetched = DaoUtil.cacheGet(example.getId(), ExampleMeta.get());
+        Example fetched = DaoUtil.cacheGet(example.getId(), META);
         assertEquals(example, fetched);
 
+    }
+
+    @Test
+    public void testCacheGetOrNullReturnsNull() {
+        assertNull(DaoUtil.cacheGetOrNull(Datastore.allocateId(Example.class), META));
+    }
+
+    @Test
+    public void testCacheGetOrNullReturnsAbsent() {
+        Key id = Datastore.allocateId(Example.class);
+        DaoUtil.cachePut(id, META, null);
+        Optional<Example> optional = DaoUtil.cacheGetOrNull(id, META);
+        assertNotNull(optional);
+        assertFalse(optional.isPresent());
+    }
+
+    @Test
+    public void testCacheGetOrNullReturnsObject() {
+        Key id = Datastore.allocateId(Example.class);
+        Example example = createExample();
+        example.setId(id);
+        DaoUtil.cachePut(id, META, example);
+        Optional<Example> optional = DaoUtil.cacheGetOrNull(id, META);
+        assertNotNull(optional);
+        assertTrue(optional.isPresent());
+        assertEquals(example, optional.get());
     }
 }

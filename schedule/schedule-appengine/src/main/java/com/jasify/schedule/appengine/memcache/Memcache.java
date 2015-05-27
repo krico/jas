@@ -4,6 +4,9 @@ import com.google.appengine.api.memcache.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Set;
+
 /**
  * @author krico
  * @since 24/05/15.
@@ -46,6 +49,10 @@ public final class Memcache {
 
     public static boolean delete(Object key) throws IllegalArgumentException {
         return delegate().delete(key);
+    }
+
+    public static Set<?> deleteAll(Collection<?> keys) throws IllegalArgumentException {
+        return delegate().deleteAll(keys);
     }
 
     private static class TheErrorHandler implements ConsistentErrorHandler {
