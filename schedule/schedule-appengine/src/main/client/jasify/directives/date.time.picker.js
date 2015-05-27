@@ -170,7 +170,7 @@
                 ngModel.$parsers.push(function (viewValue) {
                     if (viewValue === '') {
                         ngModel.$setValidity('datetime', true);
-                        return undefined;
+                        return null;
                     }
 
                     var datetime = moment(viewValue, datePickerOptions.format);
