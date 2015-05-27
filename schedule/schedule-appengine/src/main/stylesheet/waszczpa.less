@@ -9,15 +9,17 @@
 body {
   padding: 0 !important;
   margin: 0 !important;
+  overflow: hidden;
 
   #content {
     background-color: inherit;
-    padding-right: 15px;
-  }
-}
+    padding: 10px !important;
 
-.main-content > .container {
-  padding-right: 0;
+    .container-fluid {
+      padding: 0;
+      margin: 0;
+    }
+  }
 }
 
 .home-splash {
@@ -375,3 +377,54 @@ td.actions-column {
 }
 
 @import 'tables';
+
+.jasify-logotype {
+  line-height: 40px;
+  text-indent: 15px;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.jasify-logo md-icon {
+  height: 40px;
+  margin: 0;
+  width: 40px;
+}
+
+.md-whiteframe-glow-z2 {
+  box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.2), 0px 0 4px 3px rgba(0, 0, 0, 0.14), 0px 0px 8px 1px rgba(0, 0, 0, 0.12);
+}
+
+/* Colour picker */
+
+.cp-container {
+  position: relative;
+
+  & > .input-group {
+
+    input.cp-value {
+      color: #000 !important;
+      background: transparent !important;
+    }
+
+    .dropdown-menu {
+      padding: 20px;
+      margin-left: 10px;
+    }
+  }
+
+  i.cp-value {
+    width: 25px;
+    height: 25px;
+    border-radius: 2px;
+    position: absolute;
+    top: 0;
+    right: 15px;
+  }
+}
+
+.tag-preview {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border-radius: 2px;
+}

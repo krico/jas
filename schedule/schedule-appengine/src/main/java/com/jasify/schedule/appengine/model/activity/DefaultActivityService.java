@@ -195,6 +195,7 @@ class DefaultActivityService implements ActivityService {
                             throw new UniqueConstraintException("ActivityType.name=" + name);
                         }
                     }
+                    dbActivityType.setColourTag(activityType.getColourTag());
                     dbActivityType.setDescription(activityType.getDescription());
                     dbActivityType.setPrice(activityType.getPrice());
                     dbActivityType.setCurrency(activityType.getCurrency());

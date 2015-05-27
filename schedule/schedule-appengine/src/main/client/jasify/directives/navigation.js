@@ -1,3 +1,5 @@
+/*global window */
+
 /**
  * Helper navigation code
  */
@@ -14,15 +16,15 @@
         });
     });
 
-    angular.module('jasifyComponents').directive('mainContent', function() {
+    angular.module('jasifyComponents').directive('mainMenu', function () {
         return {
             restrict: 'C',
-            link: function(scope, element, attrs, ctrl) {
-                $(element).on('click', '.main-menu a[href!=""]', function() {
+            link: function (scope, element) {
+                $(element).on('click', 'a[href!=""]', function () {
                     scope.navBarController.hide();
                 });
             }
         };
     });
 
-}(angular, jQuery));
+}(window.angular, window.jQuery));

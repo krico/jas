@@ -32,6 +32,7 @@
                 <row-add action="vm.addActivityType()" description="Add Activity Type"/>
             </th>
             <th>Name</th>
+            <th>Tag</th>
             <th>Description</th>
             <th>Location</th>
             <th>Price</th>
@@ -44,6 +45,7 @@
                 <row-delete action="vm.removeActivityType(activityType)"></row-delete>
             </td>
             <td class="activity-type-name">{{activityType.name}}</td>
+            <td><span class="tag-preview" ng-style="vm.getPreviewStyle(activityType.colourTag)" ></span></td>
             <td class="activity-type-description">{{activityType.description}}</td>
             <td class="activity-type-location">{{activityType.location}}</td>
             <td>
