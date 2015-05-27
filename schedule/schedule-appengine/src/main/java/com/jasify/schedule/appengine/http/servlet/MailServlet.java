@@ -1,12 +1,12 @@
 package com.jasify.schedule.appengine.http.servlet;
 
 import com.google.appengine.api.datastore.Blob;
+import com.jasify.schedule.appengine.dao.mail.MailMessageDao;
 import com.jasify.schedule.appengine.model.mail.MailMessage;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.datastore.Datastore;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -46,6 +46,6 @@ public class MailServlet extends HttpServlet {
         } catch (MessagingException e) {
             log.warn("Failed to handle incoming message", e);
         }
-        Datastore.put(save);
+        MailMessageDao.INSTANCE.save(save);
     }
 }
