@@ -6,7 +6,7 @@
         .controller('BookingViaJasify', BookingViaJasify);
 
     function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $location, $q, $timeout, localStorageService, sessionStorageKeys,
-                              BrowserData, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs) {
+                              BrowserData, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs, getContrast) {
 
         var vm = this;
         vm.wizardOptions = {
@@ -20,6 +20,20 @@
         vm.activityPackageActivities = {};
         vm.activityPackageSelection = {};
         vm.activityPackageSelectAllFlags = [];
+
+        vm.getStyle = function (activity) {
+            return {
+                'border-left': '1px solid ' + activity.activityType.colourTag,
+                'margin-bottom': '15px'
+            };
+        };
+
+        vm.getBadge = function (activity) {
+            return {
+                'background-color': activity.activityType.colourTag,
+                'color': getContrast.compute(activity.activityType.colourTag)
+            };
+        };
 
         wireUpSessionStorage();
 
@@ -46,6 +60,7 @@
         this.isActivitySelected = function (activity) {
             return _.find(vm.activitySelection, {'id': activity.id});
         };
+
         this.isSelectedActivityPackageItem = function (activity, activityPackage) {
             return vm.activityPackageSelection[activityPackage.id] &&
                 _.find(vm.activityPackageSelection[activityPackage.id], {'id': activity.id});

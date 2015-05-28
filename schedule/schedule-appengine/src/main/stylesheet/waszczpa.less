@@ -204,14 +204,27 @@ td.actions-column {
   }
 }
 
-.selectable-lv-item {
-  .media-body {
-    cursor: pointer;
+.tvb-stats {
+  li {
+    font-size: 12px;
   }
 }
 
-.lv-item.active {
-  background-color: #fffcbe;
+.activity-listview.for-activity-package {
+  .lv-header-alt {
+    background-color: darken(#f8f8f8, 10%);
+  }
+
+  .lv-body {
+    margin: 3px 5px;
+  }
+}
+
+.tv-header {
+  &.active {
+    background-color: #fffcbe;
+  }
+  cursor: pointer;
 }
 
 @media (max-width: @angularMaterialLayoutSm) {
