@@ -250,6 +250,7 @@ public class ActivityServiceTest {
         activityType.setPrice(55.0);
         activityType.setCurrency("NZD");
         activityType.setLocation("Location");
+        activityType.setColourTag("Blue");
         activityType.setMaxSubscriptions(6);
         ActivityType updatedActivityType = activityService.updateActivityType(activityType);
         assertNotNull(updatedActivityType);
@@ -259,6 +260,7 @@ public class ActivityServiceTest {
         assertEquals(55.0, updatedActivityType.getPrice());
         assertEquals("NZD", updatedActivityType.getCurrency());
         assertEquals("Location", updatedActivityType.getLocation());
+        assertEquals("Blue", updatedActivityType.getColourTag());
         assertEquals(6, updatedActivityType.getMaxSubscriptions());
         assertEquals("New Name", activityService.getActivityType(id).getName());
     }

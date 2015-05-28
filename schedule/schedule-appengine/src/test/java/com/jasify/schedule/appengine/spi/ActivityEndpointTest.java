@@ -17,6 +17,7 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
+import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -676,6 +677,74 @@ public class ActivityEndpointTest {
         testOrganizationServiceFactory.replay();
         testActivityServiceFactory.replay();
         endpoint.getActivities(null, null, null, null, null, null, null);
+    }
+
+    // TEST: GetActivitiesByIds
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsWithNullIdsThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        endpoint.getActivitiesByIds(null, null);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsWithBothIdsNotNullThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        endpoint.getActivitiesByIds(null, jasListQueryActivitiesRequest);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsEmptyArrayOfActivityTypeKeysThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        endpoint.getActivitiesByIds(null, jasListQueryActivitiesRequest);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testGetActivitiesByIdsEmptyArrayOfOrganizationKeysThrowsBadRequestException() throws Exception {
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        endpoint.getActivitiesByIds(null, jasListQueryActivitiesRequest);
+    }
+
+    @Test
+    public void testGetActivitiesByActivityTypes() throws Exception {
+        testOrganizationServiceFactory.replay();
+        ActivityType activityType1 = new ActivityType();
+        ActivityType activityType2 = new ActivityType();
+        Datastore.put(activityType1, activityType2);
+        expect(activityService.getActivityType(activityType1.getId())).andReturn(activityType1);
+        expect(activityService.getActivities(activityType1)).andReturn(Arrays.asList(new Activity()));
+        expect(activityService.getActivityType(activityType2.getId())).andReturn(activityType2);
+        expect(activityService.getActivities(activityType2)).andReturn(Arrays.asList(new Activity()));
+        testActivityServiceFactory.replay();
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        jasListQueryActivitiesRequest.getActivityTypeIds().add(activityType1.getId());
+        jasListQueryActivitiesRequest.getActivityTypeIds().add(activityType2.getId());
+        List<Activity> result = endpoint.getActivitiesByIds(null, jasListQueryActivitiesRequest);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetActivitiesByOrganizations() throws Exception {
+        Organization organization1 = new Organization();
+        Organization organization2 = new Organization();
+        Datastore.put(organization1, organization2);
+        expect(organizationService.getOrganization(organization1.getId())).andReturn(organization1);
+        expect(activityService.getActivities(organization1)).andReturn(Arrays.asList(new Activity()));
+        expect(organizationService.getOrganization(organization2.getId())).andReturn(organization2);
+        expect(activityService.getActivities(organization2)).andReturn(Arrays.asList(new Activity()));
+        testOrganizationServiceFactory.replay();
+        testActivityServiceFactory.replay();
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        jasListQueryActivitiesRequest.getOrganizationIds().add(organization1.getId());
+        jasListQueryActivitiesRequest.getOrganizationIds().add(organization2.getId());
+        List<Activity> result = endpoint.getActivitiesByIds(null, jasListQueryActivitiesRequest);
+        assertEquals(2, result.size());
     }
 
     // TEST: GetActivity
