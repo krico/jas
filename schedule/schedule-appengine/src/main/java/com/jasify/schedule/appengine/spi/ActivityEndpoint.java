@@ -22,6 +22,7 @@ import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
+import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -209,35 +210,28 @@ public class ActivityEndpoint {
     }
 
     // The hardest part is to get the name right!
-    @ApiMethod(name = "activities.mQuery", path = "activities", httpMethod = ApiMethod.HttpMethod.GET)
+    @ApiMethod(name = "activities.listQuery", path = "activities-list", httpMethod = ApiMethod.HttpMethod.POST)
     public List<Activity> getActivitiesByIds(User caller,
-                                        @Nullable @Named("organizationIds") Key organizationIds[],
-                                        @Nullable @Named("activityTypeIds") Key activityTypeIds[],
-                                        @Nullable @Named("fromDate") final Date fromDate,
-                                        @Nullable @Named("toDate") final Date toDate,
-                                        @Nullable @Named("offset") Integer offset,
-                                        @Nullable @Named("limit") Integer limit) throws BadRequestException, NotFoundException {
+                                             JasListQueryActivitiesRequest request) throws BadRequestException, NotFoundException {
 
-        if (activityTypeIds != null && organizationIds != null) {
+        if (request == null) {
             throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
-        } else if (activityTypeIds == null && organizationIds == null) {
+        } else if (request.getActivityTypeIds().isEmpty() && request.getOrganizationIds().isEmpty()) {
             throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
-        } else if (activityTypeIds != null && activityTypeIds.length == 0 ) {
-            throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
-        } else if (organizationIds != null && organizationIds.length == 0 ) {
+        } else if (!request.getActivityTypeIds().isEmpty() && !request.getOrganizationIds().isEmpty()) {
             throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
         }
 
         final List<Activity> all = new ArrayList<>();
         try {
-            if (activityTypeIds != null) {
-                for (Key activityTypeId : activityTypeIds) {
+            if (!request.getActivityTypeIds().isEmpty()) {
+                for (Key activityTypeId : request.getActivityTypeIds()) {
                     checkFound(activityTypeId);
                     ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(activityTypeId);
                     all.addAll(ActivityServiceFactory.getActivityService().getActivities(activityType));
                 }
-            } else if (organizationIds != null) {
-                for (Key organizationId : organizationIds) {
+            } else if (!request.getOrganizationIds().isEmpty()) {
+                for (Key organizationId : request.getOrganizationIds()) {
                     checkFound(organizationId);
                     Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
                     all.addAll(ActivityServiceFactory.getActivityService().getActivities(organization));
@@ -247,7 +241,7 @@ public class ActivityEndpoint {
             throw new NotFoundException(e.getMessage());
         }
 
-        return filterActivities(all, fromDate, toDate, offset, limit);
+        return filterActivities(all, request.getFromDate(), request.getToDate(), request.getOffset(), request.getLimit());
     }
 
     @ApiMethod(name = "activities.get", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.GET)
