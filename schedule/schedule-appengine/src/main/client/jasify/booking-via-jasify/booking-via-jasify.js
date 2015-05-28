@@ -60,14 +60,6 @@
         this.isActivitySelected = function (activity) {
             return _.find(vm.activitySelection, {'id': activity.id});
         };
-        this.toggleActivity = function(activity) {
-            var selectedActivity = _.find(vm.activitySelection, {'id': activity.id});
-            if (selectedActivity) {
-                vm.activitySelection.splice(vm.activitySelection.indexOf(selectedActivity), 1);
-            } else {
-                vm.activitySelection.push(activity);
-            }
-        };
 
         this.isSelectedActivityPackageItem = function (activity, activityPackage) {
             return vm.activityPackageSelection[activityPackage.id] &&
