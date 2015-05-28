@@ -1,12 +1,14 @@
 package com.jasify.schedule.appengine.dao;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.TestHelper;
 import io.github.benas.jpopulator.api.Populator;
 import io.github.benas.jpopulator.impl.PopulatorBuilder;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
@@ -45,6 +47,20 @@ public class DaoUtilTest {
         Example fetched = DaoUtil.cacheGet(example.getId(), META);
         assertEquals(example, fetched);
 
+    }
+
+    @Ignore("This test takes too long, but proves the point")
+    @Test
+    public void testPutWithExpiration() throws Exception {
+        final int milliDelay = 3000;
+        Example example = createExample();
+        example.setId(Datastore.allocateId(Example.class));
+        Example ret = DaoUtil.cachePut(example.getId(), META, example, Expiration.byDeltaMillis(milliDelay));
+        assertSame(example, ret);
+        Example fetched = DaoUtil.cacheGet(example.getId(), META);
+        assertEquals(example, fetched);
+        Thread.sleep(milliDelay + 100);
+        assertNull(DaoUtil.cacheGet(example.getId(), META));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.dao;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.memcache.Memcache;
 import org.slf4j.Logger;
@@ -20,14 +21,18 @@ public final class DaoUtil {
     private DaoUtil() {
     }
 
-    public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model) {
+    public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model, Expiration expiration) {
         try {
             Entity entity = model == null ? null : meta.modelToEntity(model);
-            Memcache.put(id, entity);
+            Memcache.put(id, entity, expiration);
         } catch (IllegalArgumentException e) {
             log.warn("Memcache exception IGNORED", e);
         }
         return model;
+    }
+
+    public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model) {
+        return cachePut(id, meta, model, null);
     }
 
     public static <T> T cacheGet(@Nonnull Key id, @Nonnull ModelMeta<T> meta) {
