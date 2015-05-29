@@ -26,6 +26,8 @@ public class Example {
 
     private String data;
 
+    private String dataType;
+
     public Key getId() {
         return id;
     }
@@ -58,6 +60,14 @@ public class Example {
         this.data = data;
     }
 
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -72,6 +82,7 @@ public class Example {
         result = 31 * result + (created != null ? created.hashCode() : 0);
         result = 31 * result + (modified != null ? modified.hashCode() : 0);
         result = 31 * result + (data != null ? data.hashCode() : 0);
+        result = 31 * result + (dataType != null ? dataType.hashCode() : 0);
         return result;
     }
 
@@ -82,6 +93,7 @@ public class Example {
                 ", created=" + created +
                 ", modified=" + modified +
                 ", data='" + data + '\'' +
+                ", dataType='" + dataType + '\'' +
                 '}';
     }
 }

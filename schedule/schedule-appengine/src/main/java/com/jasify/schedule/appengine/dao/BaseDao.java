@@ -1,7 +1,12 @@
 package com.jasify.schedule.appengine.dao;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.ModelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.EntityNotFoundRuntimeException;
 import org.slim3.datastore.ModelMeta;
@@ -14,10 +19,14 @@ import javax.annotation.Nullable;
  * @since 23/05/15.
  */
 public abstract class BaseDao<T> {
+    private static final Logger log = LoggerFactory.getLogger(BaseDao.class);
+
     protected final ModelMeta<T> meta;
 
     protected BaseDao(@Nonnull ModelMeta<T> meta) {
         this.meta = meta;
+        Preconditions.checkState(Datastore.getCurrentTransaction() == null,
+                "{} cannot be instantiated within a transaction", this);
     }
 
     /**
@@ -56,11 +65,28 @@ public abstract class BaseDao<T> {
      *
      * @param entity to be created or updated
      * @return the primaryKey of the entity
+     * @throws com.jasify.schedule.appengine.model.ModelException in case of exceptions
      */
     @CurrentTransaction
     @Nonnull
-    public Key save(@Nonnull T entity) {
+    public Key save(@Nonnull T entity) throws ModelException {
         return Datastore.put(entity);
+    }
+
+    /**
+     * Creates or updates the entity (propagates exceptions as runtime)
+     *
+     * @param entity to be created or updated
+     * @return the primaryKey of the entity
+     */
+    @CurrentTransaction
+    @Nonnull
+    public Key saveNoEx(@Nonnull T entity) {
+        try {
+            return save(entity);
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
     }
 
     /**

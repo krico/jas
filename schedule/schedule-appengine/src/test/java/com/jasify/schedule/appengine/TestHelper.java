@@ -41,6 +41,10 @@ public final class TestHelper {
     private static final Logger log = LoggerFactory.getLogger(TestHelper.class);
 
     static {
+        setSystemProperties();
+    }
+
+    public static void setSystemProperties() {
         System.setProperty("slim3.useXGTX", "true");
     }
 

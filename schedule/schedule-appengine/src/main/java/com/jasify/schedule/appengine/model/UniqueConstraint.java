@@ -1,6 +1,8 @@
 package com.jasify.schedule.appengine.model;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
@@ -28,7 +30,6 @@ public class UniqueConstraint {
     private static final String KIND_CLASSIFIER_SEPARATOR = ".";
     private static final Logger log = LoggerFactory.getLogger(UniqueConstraint.class);
     private static final String COUNT_PROPERTY_NAME = "jasify.UniqueConstraint.count";
-    private final DatastoreService datastore;
     private final ModelMeta<?> meta;
     private final String uniquePropertyName;
     private final String uniqueClassifierPropertyName;
@@ -44,7 +45,6 @@ public class UniqueConstraint {
     }
 
     UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, String uniqueClassifierPropertyName, boolean ignoreNullValues) throws UniqueConstraintException {
-        this.datastore = DatastoreServiceFactory.getDatastoreService();
         this.meta = meta;
         this.uniquePropertyName = uniquePropertyName;
         this.uniqueClassifierPropertyName = uniqueClassifierPropertyName;
@@ -89,7 +89,7 @@ public class UniqueConstraint {
             return kind;
         }
         ApplicationProperty indexProperty;
-        Transaction txn = datastore.beginTransaction();
+        Transaction txn = Datastore.beginTransaction();
         Key indexKey = applicationData.createPropertyKey(getEntityKindPropertyName());
         indexProperty = Datastore.getOrNull(txn, ApplicationProperty.class, indexKey);
 
@@ -187,40 +187,60 @@ public class UniqueConstraint {
         log.info("Successfully deleted all({}) entries index {} for {}", count, kindPrefix, getEntityKindPropertyName());
     }
 
-    public void reserve(String uniqueValue) throws UniqueConstraintException {
+    public void reserve(final String uniqueValue) throws UniqueConstraintException {
+        TransactionOperator.execute(new TransactionOperation<Void, UniqueConstraintException>() {
+            @Override
+            public Void execute(Transaction tx) throws UniqueConstraintException {
+                reserveInCurrentTransaction(uniqueValue);
+                tx.commit();
+                return null;
+            }
+        });
+    }
+
+    public void reserveInCurrentTransaction(String uniqueValue) throws UniqueConstraintException {
         Preconditions.checkArgument(uniqueClassifierPropertyName == null, "Classified UniqueConstraint MUST reserve(String, String)");
 
         if (StringUtils.isBlank(uniqueValue))
             throw new UniqueConstraintException("NULL uniqueValue not allowed");
 
-        Transaction tx = Datastore.beginTransaction();
-        try {
-            Key key = Datastore.createKey(uniqueKind, uniqueValue);
-            Entity entity = Datastore.getOrNull(tx, key);
-            if (entity != null) {
-                tx.rollback();
-                throw new UniqueConstraintException(meta, uniquePropertyName, uniqueValue);
-            }
-            Datastore.put(tx, new Entity(uniqueKind, uniqueValue));
-            tx.commit();
-        } finally {
-            if (tx.isActive()) tx.rollback();
-        }
-    }
-
-    public void release(String uniqueValue) {
-        Preconditions.checkArgument(uniqueClassifierPropertyName == null, "Classified UniqueConstraint MUST release(String, String)");
-
-        Transaction tx = Datastore.beginTransaction();
         Key key = Datastore.createKey(uniqueKind, uniqueValue);
-        Entity entity = Datastore.getOrNull(tx, key);
+        Entity entity = Datastore.getOrNull(key);
         if (entity != null) {
-            Datastore.delete(tx, key);
+            throw new UniqueConstraintException(meta, uniquePropertyName, uniqueValue);
         }
-        tx.commit();
+        Datastore.put(new Entity(uniqueKind, uniqueValue));
     }
 
-    public void reserve(String uniqueValue, String classifier) throws UniqueConstraintException {
+    public void release(final String uniqueValue) {
+        TransactionOperator.executeNoEx(new TransactionOperation<Void, Exception>() {
+            @Override
+            public Void execute(Transaction tx) throws Exception {
+                releaseInCurrentTransaction(uniqueValue);
+                tx.commit();
+                return null;
+            }
+        });
+    }
+
+    public void releaseInCurrentTransaction(String uniqueValue) {
+        Preconditions.checkArgument(uniqueClassifierPropertyName == null, "Classified UniqueConstraint MUST release(String, String)");
+        Key key = Datastore.createKey(uniqueKind, uniqueValue);
+        Datastore.delete(key);
+    }
+
+    public void reserve(final String uniqueValue, final String classifier) throws UniqueConstraintException {
+        TransactionOperator.execute(new TransactionOperation<Void, UniqueConstraintException>() {
+            @Override
+            public Void execute(Transaction tx) throws UniqueConstraintException {
+                reserveInCurrentTransaction(uniqueValue, classifier);
+                tx.commit();
+                return null;
+            }
+        });
+    }
+
+    public void reserveInCurrentTransaction(String uniqueValue, String classifier) throws UniqueConstraintException {
         Preconditions.checkArgument(uniqueClassifierPropertyName != null, "Non classified UniqueConstraint MUST reserve(String)");
 
 
@@ -230,30 +250,29 @@ public class UniqueConstraint {
         if (StringUtils.isBlank(classifier))
             throw new UniqueConstraintException("NULL classifier not allowed");
 
-        Transaction tx = Datastore.beginTransaction();
-        try {
-            Key key = Datastore.createKey(uniqueKind + KIND_CLASSIFIER_SEPARATOR + classifier, uniqueValue);
-            Entity entity = Datastore.getOrNull(tx, key);
-            if (entity != null) {
-                tx.rollback();
-                throw new UniqueConstraintException(meta, uniquePropertyName, uniqueClassifierPropertyName, uniqueValue, classifier);
-            }
-            Datastore.put(tx, new Entity(key));
-            tx.commit();
-        } finally {
-            if (tx.isActive()) tx.rollback();
+        Key key = Datastore.createKey(uniqueKind + KIND_CLASSIFIER_SEPARATOR + classifier, uniqueValue);
+        Entity entity = Datastore.getOrNull(key);
+        if (entity != null) {
+            throw new UniqueConstraintException(meta, uniquePropertyName, uniqueClassifierPropertyName, uniqueValue, classifier);
         }
+        Datastore.put(new Entity(key));
     }
 
-    public void release(String uniqueValue, String classifier) {
+    public void release(final String uniqueValue, final String classifier) {
+        TransactionOperator.executeNoEx(new TransactionOperation<Void, Exception>() {
+            @Override
+            public Void execute(Transaction tx) throws Exception {
+                releaseInCurrentTransaction(uniqueValue, classifier);
+                tx.commit();
+                return null;
+            }
+        });
+    }
+
+    public void releaseInCurrentTransaction(String uniqueValue, String classifier) {
         Preconditions.checkArgument(uniqueClassifierPropertyName != null, "Non classified UniqueConstraint MUST release(String)");
 
-        Transaction tx = Datastore.beginTransaction();
         Key key = Datastore.createKey(uniqueKind + KIND_CLASSIFIER_SEPARATOR + classifier, uniqueValue);
-        Entity entity = Datastore.getOrNull(tx, key);
-        if (entity != null) {
-            Datastore.delete(tx, key);
-        }
-        tx.commit();
+        Datastore.delete(key);
     }
 }

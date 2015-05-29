@@ -8,6 +8,7 @@ import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
@@ -23,6 +24,11 @@ public class BaseDaoTest {
 
     BaseDao<Example> createDao() {
         return new ExampleDao();
+    }
+
+    @BeforeClass
+    public static void initializeTestHelper() {
+        TestHelper.setSystemProperties();
     }
 
     @Before
@@ -56,6 +62,12 @@ public class BaseDaoTest {
         assertNotNull(entity);
         assertEquals(expected.getId(), entity.getId());
         assertEquals(expected1, BeanUtil.beanMap(entity, exclude));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testConstructorInsideTransaction() throws Exception {
+        beginTx();
+        new ExampleDao();
     }
 
     @Test

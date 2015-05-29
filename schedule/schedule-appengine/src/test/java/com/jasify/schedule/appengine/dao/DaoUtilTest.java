@@ -49,8 +49,8 @@ public class DaoUtilTest {
 
     }
 
-    @Ignore("This test takes too long, but proves the point")
-    @Test
+//    @Ignore("This test takes too long, but proves the point")
+//    @Test
     public void testPutWithExpiration() throws Exception {
         final int milliDelay = 3000;
         Example example = createExample();

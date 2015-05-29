@@ -46,6 +46,6 @@ public class MailServlet extends HttpServlet {
         } catch (MessagingException e) {
             log.warn("Failed to handle incoming message", e);
         }
-        MailMessageDao.INSTANCE.save(save);
+        MailMessageDao.INSTANCE.saveNoEx(save);
     }
 }
