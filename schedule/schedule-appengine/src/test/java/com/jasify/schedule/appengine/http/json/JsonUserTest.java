@@ -39,6 +39,7 @@ public class JsonUserTest {
         user.setRealName("Test Name");
         user.setEmail("Test@Email");
         user.setAbout("TestAbout");
+        user.setLocale("Here");
         user.setAdmin(false);
         return user;
     }
@@ -52,6 +53,7 @@ public class JsonUserTest {
         jsonUser.setName("test");
         jsonUser.setRealName("realName");
         jsonUser.setEmail("e@ma.il");
+        jsonUser.setLocale("There");
         jsonUser.setCreated(new Date(5));
         jsonUser.setModified(new Date(6));
 
@@ -64,6 +66,7 @@ public class JsonUserTest {
         user.setRealName("no realName");
         user.setEmail("no.e@ma.il");
         user.setName("real");
+        user.setLocale("Somewhere");
         user.setPassword(TypeUtil.toShortBlob(new byte[]{1, 2, 3}));
         user.setEmailVerified(true);
 
@@ -77,6 +80,7 @@ public class JsonUserTest {
         assertEquals("real", user.getName());
         assertEquals("realName", user.getRealName());
         assertEquals("e@ma.il", user.getEmail());
+        assertEquals("Somewhere", user.getLocale());
         assertEquals(7, user.getCreated().getTime());
         assertEquals(8, user.getModified().getTime());
         assertEquals(true, user.isEmailVerified());
@@ -94,6 +98,7 @@ public class JsonUserTest {
         assertEquals(user.getRealName(), jsonUser.getRealName());
         assertEquals(user.getEmail(), jsonUser.getEmail());
         assertEquals(user.getAbout(), jsonUser.getAbout());
+        assertEquals(user.getLocale(), jsonUser.getLocale());
         assertEquals(user.isAdmin(), jsonUser.isAdmin());
     }
 
@@ -110,6 +115,7 @@ public class JsonUserTest {
         assertEquals(user.getRealName(), jsonUser.getRealName());
         assertEquals(user.getEmail(), jsonUser.getEmail());
         assertEquals(user.getAbout(), jsonUser.getAbout());
+        assertEquals(user.getLocale(), jsonUser.getLocale());
         assertEquals(user.isAdmin(), jsonUser.isAdmin());
     }
 
@@ -126,6 +132,7 @@ public class JsonUserTest {
         assertEquals(user.getRealName(), jsonUser.getRealName());
         assertEquals(user.getEmail(), jsonUser.getEmail());
         assertEquals(user.getAbout(), jsonUser.getAbout());
+        assertEquals(user.getLocale(), jsonUser.getLocale());
         assertEquals(user.isAdmin(), jsonUser.isAdmin());
     }
 }

@@ -40,6 +40,8 @@ public class User {
 
     private boolean admin = false;
 
+    private String locale;
+
     private ModelRef<UserDetail> detailRef = new ModelRef<>(UserDetail.class);
 
     public User() {
@@ -152,6 +154,15 @@ public class User {
         //TODO: We need to save this
     }
 
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
     public ModelRef<UserDetail> getDetailRef() {
         return detailRef;
     }
@@ -179,6 +190,7 @@ public class User {
                 ", email=" + email +
                 ", emailVerified=" + emailVerified +
                 ", admin=" + admin +
+                ", locale=" + locale +
                 ", password=" + password +
                 '}';
     }
@@ -199,6 +211,7 @@ public class User {
         if (id != null ? !id.equals(user.id) : user.id != null) return false;
         if (modified != null ? !modified.equals(user.modified) : user.modified != null) return false;
         if (name != null ? !name.equals(user.name) : user.name != null) return false;
+        if (locale != null ? locale.equals(user.locale) : user.locale != null) return false;
         if (password != null ? !password.equals(user.password) : user.password != null) return false;
         if (realName != null ? !realName.equals(user.realName) : user.realName != null) return false;
 
@@ -216,6 +229,7 @@ public class User {
         result = 31 * result + (emailVerified ? 1 : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (admin ? 1 : 0);
+        result = 31 * result + (locale != null ? locale.hashCode() : 0);
         result = 31 * result + (detailRef != null ? detailRef.hashCode() : 0);
         return result;
     }

@@ -175,6 +175,7 @@ final class DefaultUserService implements UserService {
         }
         db.setAbout(user.getAbout());
         db.setEmail(StringUtils.lowerCase(user.getEmail()));
+        db.setLocale(user.getLocale());
         db.setAdmin(user.isAdmin());
         db.setRealName(user.getRealName());
 

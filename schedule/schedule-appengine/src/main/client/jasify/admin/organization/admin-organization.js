@@ -14,6 +14,7 @@
         vm.save = save;
         vm.viewActivities = viewActivities;
         vm.viewActivityTypes = viewActivityTypes;
+        vm.viewActivityPackages = viewActivityPackages;
 
         vm.searchUsers = searchUsers;
         vm.userFilter = userFilter;
@@ -61,6 +62,12 @@
         function viewActivityTypes(id) {
             if (id) {
                 $location.path('/admin/activity-types/' + id);
+            }
+        }
+
+        function viewActivityPackages(id) {
+            if (id) {
+                $location.path('/admin/activity-packages/' + id);
             }
         }
 
