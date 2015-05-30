@@ -1,0 +1,57 @@
+/**
+Set of animations for visual feedback
+*/
+
+/* Progress bar */
+
+.sample-show-hide {
+    -webkit-transition:all linear 0.5s;
+    transition:all linear 0.5s;
+}
+
+.sample-show-hide.ng-hide {
+    opacity:0;
+}
+
+/* Animation used on ngRepeat for rows that could be deleted */
+
+.animate-delete.ng-move,
+.animate-delete.ng-enter,
+.animate-delete.ng-leave {
+    -webkit-transition:all linear 0.5s;
+    transition:all linear 0.5s;
+}
+
+.animate-delete.ng-leave.ng-leave-active,
+.animate-delete.ng-move,
+.animate-delete.ng-enter {
+    background-color: inherit;
+    opacity:0;
+}
+
+.animate-delete.ng-leave,
+.animate-delete.ng-move.ng-move-active,
+.animate-delete.ng-enter.ng-enter-active {
+    background-color: rgba(255, 0, 0, 0.5);
+    opacity:1;
+}
+
+/* ng-view change animation feedback */
+
+.shuffle-animation.ng-enter {
+    position: relative;
+}
+
+.shuffle-animation.ng-enter {
+    -moz-transition: ease-out all 0.3s 0.4s;
+    -o-transition: ease-out all 0.3s 0.4s;
+    -webkit-transition: ease-out all 0.3s 0.4s;
+    transition: ease-out all 0.3s 0.4s;
+    left: 2em;
+    opacity: 0;
+}
+
+.shuffle-animation.ng-enter.ng-enter-active {
+    left: 0;
+    opacity: 1;
+}

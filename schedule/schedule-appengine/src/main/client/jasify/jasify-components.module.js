@@ -1,4 +1,7 @@
+/*global window */
 (function (angular) {
+
+    'use strict';
 
     var jasifyComponents = angular.module('jasifyComponents', [
         'ngRoute',
@@ -19,7 +22,7 @@
     });
 
     jasifyComponents.constant('jasPagerSettings', {
-        pages: [2,10,25,100]
+        pages: [2, 10, 25, 100]
     });
 
-})(angular);
+}(window.angular));

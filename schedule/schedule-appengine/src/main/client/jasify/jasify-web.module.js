@@ -26,6 +26,15 @@
         'bs3dp4ng'
     ]);
 
+    jasifyWeb.config(function ($mdThemingProvider) {
+        $mdThemingProvider.theme('default')
+            .primaryPalette('blue-grey')
+            .accentPalette('orange')
+            .warnPalette('red');
+
+        $mdThemingProvider.theme('default');
+    });
+
     jasifyWeb.config(function (EndpointProvider, localStorageServiceProvider) {
         EndpointProvider.verbose(true);
         localStorageServiceProvider.setPrefix('Jasify');
