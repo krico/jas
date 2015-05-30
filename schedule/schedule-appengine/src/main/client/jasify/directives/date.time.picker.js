@@ -9,7 +9,7 @@
 
         var defaultOptions = {
                 format: 'LT',
-                stepping: 15,
+                stepping: 1,
                 locale: moment().locale()
             },
             placeholder = 'HH:MM';
