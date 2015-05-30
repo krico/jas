@@ -85,7 +85,8 @@
 <div layout="column" flex>
     <md-toolbar class="md-whiteframe-glow-z2" ng-controller="NavbarController as vm">
         <div class="md-toolbar-tools">
-            <md-button hide-gt-md ng-click="vm.toggleList()" ng-show="vm.isAuthenticated()" class="md-icon-button" aria-label="Settings">
+            <md-button hide-gt-md ng-click="vm.toggleList()" ng-show="vm.isAuthenticated()" class="md-icon-button"
+                       aria-label="Settings">
                 <md-icon md-svg-icon="build/img/menu.svg"></md-icon>
             </md-button>
             <h2 flex class="text-right">
@@ -93,8 +94,11 @@
             </h2>
         </div>
     </md-toolbar>
-    <md-content id="content" ng-controller="NavbarController as vm" ng-class="{ 'home-splash': !vm.isAuthenticated() }" flex layout-padding md-scroll-y>
-        <div class="container-fluid" ng-view>
+    <md-content id="content" ng-controller="NavbarController as vm" ng-class="{ 'home-splash': !vm.isAuthenticated() }"
+                flex layout-padding md-scroll-y>
+        <md-progress-linear jas-progress ng-show="mode === 'buffer'" class="md-accent sample-show-hide" md-mode="buffer"
+                            value="{{determinateValue}}" md-buffer-value="{{determinateValue2}}"></md-progress-linear>
+        <div class="container-fluid shuffle-animation" ng-view>
         </div>
     </md-content>
 </div>

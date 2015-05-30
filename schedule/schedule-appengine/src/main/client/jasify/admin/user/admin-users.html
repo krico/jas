@@ -8,58 +8,56 @@
     </div>
     <div class="card-body">
         <div class="bootgrid-header container-fluid">
-            <div class="row">
-                <div class="actionBar">
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="search form-group">
-                            <div class="input-group">
-                                <span class="input-group-addon glyphicon-search"></span>
-                                <input ng-change="vm.queryChanged()"
-                                       ng-model-options="{ debounce: 500 }"
-                                       ng-model="vm.query"
-                                       type="text" name="query" id="query" class="search-field form-control"
-                                       placeholder="Search">
-                            </div>
+            <div class="actionBar">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="search form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon glyphicon-search"></span>
+                            <input ng-change="vm.queryChanged()"
+                                   ng-model-options="{ debounce: 500 }"
+                                   ng-model="vm.query"
+                                   type="text" name="query" id="query" class="search-field form-control"
+                                   placeholder="Search">
                         </div>
                     </div>
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="actions btn-group">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" value="">
-                                    <i class="input-helper"></i>
-                                    Regex
-                                </label>
-                            </div>
-                            <div class="dropdown btn-group">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                    <span class="dropdown-text">Search by: {{vm.searchBy()}}</span> <span
-                                        class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li ng-class="{ 'active': vm.searchBy() === 'name' }">
-                                        <a href prevent="click" ng-click="vm.searchBy('name')"
-                                           class="dropdown-item dropdown-item-button">Name</a>
-                                    </li>
-                                    <li ng-class="{ 'active': vm.searchBy() === 'email' }">
-                                        <a href prevent="click" ng-click="vm.searchBy('email')"
-                                           class="dropdown-item dropdown-item-button">Email</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="dropdown btn-group">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                    <span class="dropdown-text">Page Size: {{vm.perPage()}}</span> <span
-                                        class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li ng-repeat="size in vm.pagerSizes"
-                                        ng-class="{ 'active': vm.perPage() === size }">
-                                        <a href prevent="click" ng-click="vm.perPage(size)"
-                                           class="dropdown-item dropdown-item-button">{{size}}</a>
-                                    </li>
-                                </ul>
-                            </div>
+                </div>
+                <div class="col-sm-12 col-lg-6">
+                    <div class="actions btn-group">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="">
+                                <i class="input-helper"></i>
+                                Regex
+                            </label>
+                        </div>
+                        <div class="dropdown btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="dropdown-text">Search by: {{vm.searchBy()}}</span> <span
+                                    class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right" role="menu">
+                                <li ng-class="{ 'active': vm.searchBy() === 'name' }">
+                                    <a href prevent="click" ng-click="vm.searchBy('name')"
+                                       class="dropdown-item dropdown-item-button">Name</a>
+                                </li>
+                                <li ng-class="{ 'active': vm.searchBy() === 'email' }">
+                                    <a href prevent="click" ng-click="vm.searchBy('email')"
+                                       class="dropdown-item dropdown-item-button">Email</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="dropdown-text">Page Size: {{vm.perPage()}}</span> <span
+                                    class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right" role="menu">
+                                <li ng-repeat="size in vm.pagerSizes"
+                                    ng-class="{ 'active': vm.perPage() === size }">
+                                    <a href prevent="click" ng-click="vm.perPage(size)"
+                                       class="dropdown-item dropdown-item-button">{{size}}</a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
