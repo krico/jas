@@ -13,6 +13,7 @@ import org.slim3.datastore.ModelMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author krico
@@ -27,6 +28,12 @@ public abstract class BaseDao<T> {
         this.meta = meta;
         Preconditions.checkState(Datastore.getCurrentTransaction() == null,
                 "{} cannot be instantiated within a transaction", this);
+    }
+
+    //Syntax sugar
+    @SuppressWarnings("unchecked")
+    protected <X extends ModelMeta<T>> X getMeta() {
+        return (X) meta;
     }
 
     /**
@@ -97,5 +104,36 @@ public abstract class BaseDao<T> {
     @CurrentTransaction
     public void delete(@Nonnull Key id) {
         Datastore.delete(id);
+    }
+
+    @CurrentTransaction
+    @Nonnull
+    public List<T> get(@Nonnull List<Key> ids) throws EntityNotFoundException, IllegalArgumentException {
+        try {
+            return Datastore.get(meta, ids);
+        } catch (EntityNotFoundRuntimeException e) {
+            throw new EntityNotFoundException(e);
+        }
+    }
+
+    @CurrentTransaction
+    @Nonnull
+    public List<Key> save(@Nonnull List<T> entities) throws ModelException {
+        return Datastore.put(entities);
+    }
+
+    @CurrentTransaction
+    @Nonnull
+    public List<Key> saveNoEx(@Nonnull List<T> entities) {
+        try {
+            return save(entities);
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    @CurrentTransaction
+    public void delete(@Nonnull List<Key> ids) {
+        Datastore.delete(ids);
     }
 }

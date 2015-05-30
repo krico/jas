@@ -16,19 +16,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.jasify.schedule.appengine.dao.DaoUtilTest.createExample;
 import static junit.framework.TestCase.*;
 
 public class BaseDaoTest {
     protected BaseDao<Example> dao = createDao();
     private List<Transaction> transactions = new ArrayList<>();
 
-    BaseDao<Example> createDao() {
-        return new ExampleDao();
-    }
-
     @BeforeClass
     public static void initializeTestHelper() {
         TestHelper.setSystemProperties();
+    }
+
+    BaseDao<Example> createDao() {
+        return new ExampleDao();
     }
 
     @Before
@@ -53,7 +54,7 @@ public class BaseDaoTest {
     //If this test fails, you probably need to run mvn apt:test-process
     @Test
     public void rememberToRunAptTestProcess() {
-        Example expected = DaoUtilTest.createExample();
+        Example expected = createExample();
         String[] exclude = {"modified", "created", "id"};
         Map<Object, Object> expected1 = BeanUtil.beanMap(expected, exclude);
 
@@ -72,7 +73,7 @@ public class BaseDaoTest {
 
     @Test
     public void testGet() throws Exception {
-        Example expected = DaoUtilTest.createExample();
+        Example expected = createExample();
         Example fetched = dao.get(Datastore.put(expected));
         assertEquals(expected, fetched);
     }
@@ -85,7 +86,7 @@ public class BaseDaoTest {
     @Test
     public void testGetOrNull() throws Exception {
         final Key id = Datastore.allocateId(Example.class);
-        final Example example = DaoUtilTest.createExample();
+        final Example example = createExample();
         example.setId(id);
         assertNull(dao.getOrNull(id));
         dao.save(example);
@@ -99,7 +100,7 @@ public class BaseDaoTest {
 
     @Test
     public void testSave() throws Exception {
-        Example example = DaoUtilTest.createExample();
+        Example example = createExample();
         Key id = dao.save(example);
         Example fetched = dao.get(id);
         assertEquals(example, fetched);
@@ -107,7 +108,7 @@ public class BaseDaoTest {
 
     @Test
     public void testDelete() throws Exception {
-        Key id = dao.save(DaoUtilTest.createExample());
+        Key id = dao.save(createExample());
         dao.delete(id);
         assertNull(dao.getOrNull(id));
     }
@@ -116,7 +117,7 @@ public class BaseDaoTest {
     public void testCurrentTransaction() throws Exception {
 
         final Key id = Datastore.allocateId(Example.class);
-        Example example = DaoUtilTest.createExample();
+        Example example = createExample();
         example.setId(id);
         //This makes current transaction=tx1
         Transaction tx1 = beginTx();
@@ -140,4 +141,92 @@ public class BaseDaoTest {
 
     }
 
+    @Test
+    public void testQuery() throws Exception {
+        List<Example> examples = new ArrayList<>();
+
+        for (int i = 0; i < 10; ++i) {
+            Example example = createExample();
+            example.setData(String.format("TYPE-%d", i % 3));
+            dao.save(example);
+            examples.add(example);
+        }
+
+        for (int M = 0; M < 3; ++M) {
+            for (int i = 0; i < 3; ++i) {
+                String type = String.format("TYPE-%d", i % 3);
+                List<Example> expected = new ArrayList<>();
+                for (Example example : examples) {
+                    if (type.equals(example.getDataType())) {
+                        expected.add(example);
+                    }
+                }
+                List<Example> queryResult = ((AnyExampleDao) dao).byDataType(type);
+                assertNotNull(queryResult);
+                assertEquals(expected.size(), queryResult.size());
+                for (Example example : queryResult) {
+                    assertTrue("Missing: " + example, expected.contains(example));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSaveList() throws Exception {
+        List<Example> examples = new ArrayList<>();
+        examples.add(createExample());
+        examples.add(createExample());
+        examples.add(createExample());
+        List<Key> keys = dao.save(examples);
+        assertNotNull(keys);
+        assertEquals(examples.size(), keys.size());
+        for (int i = 0; i < keys.size(); ++i) {
+            Example example = dao.get(keys.get(i));
+            assertEquals(examples.get(i), example);
+        }
+    }
+
+    @Test
+    public void testSaveNoExList() throws Exception {
+        List<Example> examples = new ArrayList<>();
+        examples.add(createExample());
+        examples.add(createExample());
+        examples.add(createExample());
+        List<Key> keys = dao.saveNoEx(examples);
+        assertNotNull(keys);
+        assertEquals(examples.size(), keys.size());
+        for (int i = 0; i < keys.size(); ++i) {
+            Example example = dao.get(keys.get(i));
+            assertEquals(examples.get(i), example);
+        }
+    }
+
+    @Test
+    public void testGetList() throws Exception {
+        List<Example> examples = new ArrayList<>();
+        examples.add(createExample());
+        examples.add(createExample());
+        examples.add(createExample());
+        List<Key> keys = dao.save(examples);
+        List<Example> batch = dao.get(keys);
+        assertEquals(keys.size(), batch.size());
+
+        for (int i = 0; i < keys.size(); ++i) {
+            assertEquals(examples.get(i), batch.get(i));
+        }
+    }
+
+    @Test
+    public void testDeleteList() throws Exception {
+        List<Example> examples = new ArrayList<>();
+        examples.add(createExample());
+        examples.add(createExample());
+        examples.add(createExample());
+        List<Key> keys = dao.save(examples);
+        dao.delete(keys);
+
+        for (Key key : keys) {
+            assertNull(dao.getOrNull(key));
+        }
+    }
 }
