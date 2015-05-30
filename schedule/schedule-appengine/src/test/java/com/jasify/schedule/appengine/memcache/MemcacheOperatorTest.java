@@ -4,7 +4,6 @@ import com.google.appengine.api.ThreadManager;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.util.Threads;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.After;
@@ -104,7 +103,6 @@ public class MemcacheOperatorTest {
         try {
             List<Future<?>> jobs = new ArrayList<>();
             for (final String string : expected) {
-                final int pos = jobs.size();
                 Future<?> job = executor.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -115,7 +113,7 @@ public class MemcacheOperatorTest {
                                     public List<String> execute(@Nullable MemcacheService.IdentifiableValue identifiable) {
                                         List<String> data;
                                         if (identifiable == null) {
-                                            data = new ArrayList<String>();
+                                            data = new ArrayList<>();
                                         } else {
                                             //noinspection unchecked
                                             data = (List<String>) identifiable.getValue();

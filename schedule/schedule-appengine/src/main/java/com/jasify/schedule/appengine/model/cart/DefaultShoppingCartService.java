@@ -4,13 +4,13 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.memcache.BaseMemcacheTransaction;
+import com.jasify.schedule.appengine.memcache.Memcache;
 import com.jasify.schedule.appengine.memcache.MemcacheOperator;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.memcache.Memcache;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

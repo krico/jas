@@ -71,11 +71,16 @@ public final class BeanUtil {
     public static void copyPropertiesExcluding(Object destination, Object origin, String... excludedProperties) {
         Preconditions.checkNotNull(destination);
         Preconditions.checkNotNull(origin);
+        Map<Object, Object> beanMap = beanMap(origin, excludedProperties);
+        copyProperties(destination, beanMap);
+    }
+
+    public static Map<Object, Object> beanMap(Object origin, String... excludedProperties) {
         Map<Object, Object> beanMap = new HashMap<>(new BeanMap(origin));
         for (String excludedProperty : excludedProperties) {
             beanMap.remove(excludedProperty);
         }
-        copyProperties(destination, beanMap);
+        return beanMap;
     }
 
     private static class Singleton {

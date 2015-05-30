@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.dao.Example;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.AfterClass;
@@ -30,6 +31,10 @@ public class KeyUtilTest {
         for (Class<? extends ModelMeta> model : models) {
             Method get = model.getMethod("get");
             ModelMeta modelInstance = (ModelMeta) get.invoke(null);
+            if (modelInstance.getModelClass().equals(Example.class)) {
+                //Skip test class
+                continue;
+            }
             allModels.add(modelInstance);
         }
         Collections.sort(allModels, new Comparator<ModelMeta<?>>() {
