@@ -20,9 +20,7 @@
                     <a ng-href="mailto:{{subscription.user.email}}" target="_top"><span class="glyphicon glyphicon-envelope"></span></a>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-danger btn-xs" ng-click="vm.cancel(subscription.id)"><span
-                            class="glyphicon glyphicon-remove"></span>
-                    </button>
+                    <row-delete action="vm.cancel(subscription.id)"></row-delete>
                 </td>
             </tr>
             <tr ng-if="vm.activities.length == 0">
