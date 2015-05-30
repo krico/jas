@@ -433,6 +433,8 @@ public class UserServiceTest {
         User user = service.get(createdUsers.get(0).getId().getId());
         String expectedAbout = "About me";
         user.setAbout(expectedAbout);
+        String expectedLocale = "Here";
+        user.setLocale(expectedLocale);
         String expectedEmail = "test@test.com";
         user.setEmail("teSt@tesT.com");
         user.setRealName("Real Name");
@@ -441,6 +443,7 @@ public class UserServiceTest {
         User updated = service.get(user.getId().getId());
         assertNotNull(updated);
         assertEquals(expectedAbout, updated.getAbout());
+        assertEquals(expectedLocale, updated.getLocale());
         assertEquals(expectedEmail, updated.getEmail());
         assertEquals("Real Name", updated.getRealName());
         assertTrue(updated.isAdmin());

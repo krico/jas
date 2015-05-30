@@ -19,6 +19,7 @@ public class JsonUser extends JsonObject {
     private String realName;
     private String email;
     private String about;
+    private String locale;
     private boolean admin;
 
     public JsonUser() {
@@ -32,6 +33,7 @@ public class JsonUser extends JsonObject {
         realName = user.getRealName();
         email = user.getEmail();
         about = user.getAbout();
+        locale = user.getLocale();
         admin = user.isAdmin();
     }
 
@@ -105,6 +107,14 @@ public class JsonUser extends JsonObject {
 
     public void setAbout(String about) {
         this.about = about;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 
     public boolean isAdmin() {

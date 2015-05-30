@@ -32,6 +32,9 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.User, java.lang.Boolean> admin = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.users.User, java.lang.Boolean>(this, "admin", "admin", boolean.class);
 
     /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User> locale = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.users.User>(this, "locale", "locale");
+
+    /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.users.User, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.UserDetail>, com.jasify.schedule.appengine.model.users.UserDetail> detailRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.users.User, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.UserDetail>, com.jasify.schedule.appengine.model.users.UserDetail>(this, "detailRef", "detailRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.users.UserDetail.class);
 
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
@@ -68,6 +71,7 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         model.setEmailVerified(booleanToPrimitiveBoolean((java.lang.Boolean) entity.getProperty("emailVerified")));
         model.setPassword((com.google.appengine.api.datastore.ShortBlob) entity.getProperty("password"));
         model.setAdmin(booleanToPrimitiveBoolean((java.lang.Boolean) entity.getProperty("admin")));
+        model.setLocale((java.lang.String) entity.getProperty("locale"));
         if (model.getDetailRef() == null) {
             throw new NullPointerException("The property(detailRef) is null.");
         }
@@ -92,6 +96,7 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         entity.setProperty("emailVerified", m.isEmailVerified());
         entity.setProperty("password", m.getPassword());
         entity.setProperty("admin", m.isAdmin());
+        entity.setProperty("locale", m.getLocale());
         if (m.getDetailRef() == null) {
             throw new NullPointerException("The property(detailRef) must not be null.");
         }
@@ -196,6 +201,10 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         }
         writer.setNextPropertyName("admin");
         encoder0.encode(writer, m.isAdmin());
+        if(m.getLocale() != null){
+            writer.setNextPropertyName("locale");
+            encoder0.encode(writer, m.getLocale());
+        }
         if(m.getDetailRef() != null && m.getDetailRef().getKey() != null){
             writer.setNextPropertyName("detailRef");
             encoder0.encode(writer, m.getDetailRef(), maxDepth, currentDepth);
@@ -226,6 +235,8 @@ public final class UserMeta extends org.slim3.datastore.ModelMeta<com.jasify.sch
         m.setPassword(decoder0.decode(reader, m.getPassword()));
         reader = rootReader.newObjectReader("admin");
         m.setAdmin(decoder0.decode(reader, m.isAdmin()));
+        reader = rootReader.newObjectReader("locale");
+        m.setLocale(decoder0.decode(reader, m.getLocale()));
         reader = rootReader.newObjectReader("detailRef");
         decoder0.decode(reader, m.getDetailRef(), maxDepth, currentDepth);
         return m;
