@@ -22,6 +22,9 @@ public final class OrganizationMeta extends org.slim3.datastore.ModelMeta<com.ja
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.common.Organization> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.common.Organization>(this, "description", "description");
 
+    /** */
+    public final org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.common.Organization, java.util.Set<com.jasify.schedule.appengine.model.payment.PaymentTypeEnum>, com.jasify.schedule.appengine.model.payment.PaymentTypeEnum> paymentTypes = new org.slim3.datastore.CollectionAttributeMeta<com.jasify.schedule.appengine.model.common.Organization, java.util.Set<com.jasify.schedule.appengine.model.payment.PaymentTypeEnum>, com.jasify.schedule.appengine.model.payment.PaymentTypeEnum>(this, "paymentTypes", "paymentTypes", java.util.Set.class);
+
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
@@ -51,6 +54,7 @@ public final class OrganizationMeta extends org.slim3.datastore.ModelMeta<com.ja
         model.setName((java.lang.String) entity.getProperty("name"));
         model.setLcName((java.lang.String) entity.getProperty("lcName"));
         model.setDescription((java.lang.String) entity.getProperty("description"));
+        model.setPaymentTypes(new java.util.HashSet<com.jasify.schedule.appengine.model.payment.PaymentTypeEnum>(stringListToEnumList(com.jasify.schedule.appengine.model.payment.PaymentTypeEnum.class, entity.getProperty("paymentTypes"))));
         return model;
     }
 
@@ -68,6 +72,7 @@ public final class OrganizationMeta extends org.slim3.datastore.ModelMeta<com.ja
         entity.setProperty("name", m.getName());
         entity.setProperty("lcName", m.getLcName());
         entity.setProperty("description", m.getDescription());
+        entity.setProperty("paymentTypes", enumListToStringList(new java.util.ArrayList<com.jasify.schedule.appengine.model.payment.PaymentTypeEnum>(m.getPaymentTypes())));
         return entity;
     }
 
@@ -153,6 +158,14 @@ public final class OrganizationMeta extends org.slim3.datastore.ModelMeta<com.ja
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
         }
+        if(m.getPaymentTypes() != null){
+            writer.setNextPropertyName("paymentTypes");
+            writer.beginArray();
+            for(com.jasify.schedule.appengine.model.payment.PaymentTypeEnum v : m.getPaymentTypes()){
+                encoder0.encode(writer, v);
+            }
+            writer.endArray();
+        }
         writer.endObject();
     }
 
@@ -173,6 +186,20 @@ public final class OrganizationMeta extends org.slim3.datastore.ModelMeta<com.ja
         m.setLcName(decoder0.decode(reader, m.getLcName()));
         reader = rootReader.newObjectReader("description");
         m.setDescription(decoder0.decode(reader, m.getDescription()));
+        reader = rootReader.newObjectReader("paymentTypes");
+        {
+            java.util.HashSet<com.jasify.schedule.appengine.model.payment.PaymentTypeEnum> elements = new java.util.HashSet<com.jasify.schedule.appengine.model.payment.PaymentTypeEnum>();
+            org.slim3.datastore.json.JsonArrayReader r = rootReader.newArrayReader("paymentTypes");
+            if(r != null){
+                reader = r;
+                int n = r.length();
+                for(int i = 0; i < n; i++){
+                    r.setIndex(i);
+                    elements.add(decoder0.decode(reader, (com.jasify.schedule.appengine.model.payment.PaymentTypeEnum)null, com.jasify.schedule.appengine.model.payment.PaymentTypeEnum.class));
+                }
+                m.setPaymentTypes(elements);
+            }
+        }
         return m;
     }
 }

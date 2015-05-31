@@ -6,16 +6,20 @@ import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
 
 public class OrganizationServiceTest {
@@ -61,6 +65,7 @@ public class OrganizationServiceTest {
     public void testAddOrganization() throws Exception {
         Organization organization = new Organization(TEST_ORGANIZATION_NAME);
         organization.setDescription("Description");
+        organization.setPaymentTypes(new HashSet<>(Arrays.asList(PaymentTypeEnum.Cash)));
         Key badId = Datastore.allocateId(OrganizationMeta.get());
         organization.setId(badId);
 
@@ -73,6 +78,8 @@ public class OrganizationServiceTest {
         assertNotNull(fetched);
         assertEquals(TEST_ORGANIZATION_NAME, fetched.getName());
         assertEquals("Description", fetched.getDescription());
+        assertEquals(1, fetched.getPaymentTypes().size());
+        assertTrue(fetched.getPaymentTypes().contains(PaymentTypeEnum.Cash));
     }
 
     @Test
@@ -181,6 +188,19 @@ public class OrganizationServiceTest {
         assertEquals(id, returnedOrg.getId());
         Organization fetched = organizationService.getOrganization(id);
         assertEquals("New Description", fetched.getDescription());
+    }
+
+    @Test
+    public void testUpdateOrganizationPaymentTypes() throws Exception {
+        Organization organization = new Organization(TEST_ORGANIZATION_NAME);
+        Key id = organizationService.addOrganization(organization);
+        organization.setPaymentTypes(new HashSet<>(Arrays.asList(PaymentTypeEnum.PayPal)));
+        Organization returnedOrg = organizationService.updateOrganization(organization);
+        assertNotNull(returnedOrg);
+        assertEquals(id, returnedOrg.getId());
+        Organization fetched = organizationService.getOrganization(id);
+        assertEquals(1, fetched.getPaymentTypes().size());
+        assertTrue(fetched.getPaymentTypes().contains(PaymentTypeEnum.PayPal));
     }
 
     @Test(expected = FieldValueException.class)

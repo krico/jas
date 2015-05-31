@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminOrganizationController', AdminOrganizationController);
 
-    function AdminOrganizationController($log, $q, $modal, $location, User, Group, Organization, ActivityType, organization, Auth) {
+    function AdminOrganizationController($log, $q, $modal, $location, User, Group, Organization, organization, Auth) {
         var vm = this;
         vm.alerts = [];
         vm.alert = alert;
@@ -38,16 +38,28 @@
         vm.selectedGroups = [];
         vm.group = null;
 
-        vm.activityTypes = [];
-        vm.loadActivityTypes = loadActivityTypes;
-        vm.addActivityType = addActivityType;
-        vm.removeActivityType = removeActivityType;
+        vm.cashSet = false;
+        vm.payPalSet = false;
 
         vm.isAdmin = isAdmin;
 
-        vm.loadUsers();
-        vm.loadGroups();
-        vm.loadActivityTypes();
+        vm.init = init;
+
+        vm.init();
+
+        function init() {
+            vm.loadUsers();
+            vm.loadGroups();
+            if (vm.organization.paymentTypes !== null) {
+                for (var i in vm.organization.paymentTypes) {
+                    if (vm.organization.paymentTypes[i] == "Cash") {
+                        vm.cashSet = true;
+                    } else if (vm.organization.paymentTypes[i] == "PayPal") {
+                        vm.payPalSet = true;
+                    }
+                }
+            }
+        }
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -78,10 +90,7 @@
             if (user.email && user.email.indexOf(viewValue) != -1) {
                 return true;
             }
-            if (user.realName && user.realName.toLowerCase().indexOf(viewValue.toLowerCase()) != -1) {
-                return true;
-            }
-            return false;
+            return user.realName && user.realName.toLowerCase().indexOf(viewValue.toLowerCase()) != -1;
         }
 
         function displayUser(user) {
@@ -192,6 +201,13 @@
 
 
         function save() {
+            vm.organization.paymentTypes = [];
+            if (vm.cashSet === true) {
+                vm.organization.paymentTypes.push("Cash");
+            }
+            if (vm.payPalSet === true) {
+                vm.organization.paymentTypes.push("PayPal");
+            }
             Organization.update(vm.organization).then(ok, errorHandler);
             function ok(o) {
                 vm.organization = o;
@@ -209,44 +225,6 @@
                 vm.organization = o;
                 vm.organizationForm.$setPristine();
                 vm.alert('info', 'Form reset.');
-            }
-        }
-
-        function loadActivityTypes() {
-            ActivityType.query(vm.organization.id).then(ok, errorHandler);
-            function ok(resp) {
-                vm.activityTypes = resp.items;
-            }
-        }
-
-        function removeActivityType(activityType) {
-            ActivityType.remove(activityType).then(ok, errorHandler);
-            function ok() {
-                vm.alert('warning', 'Activity type "' + activityType.name + '" removed!');
-                vm.loadActivityTypes();
-            }
-        }
-
-        function addActivityType(organization) {
-            var modalInstance = $modal.open({
-                templateUrl: 'admin/organization/admin-organization-activity-type.html',
-                controller: 'AdminOrganizationActivityTypeController',
-                controllerAs: 'vm',
-                size: 'md',
-                resolve: {
-                    organization: function () {
-                        return organization;
-                    }
-                }
-            });
-
-            modalInstance.result.then(ok, cancel);
-            function ok(res) {
-                vm.loadActivityTypes();
-            }
-
-            function cancel() {
-                vm.alert('info', 'Add Activity Type canceled');
             }
         }
 

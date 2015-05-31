@@ -7,6 +7,7 @@ import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationService;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
@@ -51,6 +52,17 @@ class SchemaMigrationInitialLoad {
         }
     }
 
+    private Set<PaymentTypeEnum> getPaymentType(int i) {
+        Set<PaymentTypeEnum> paymentTypes = new HashSet<>();
+
+        if (i % 3 == 0) {
+            paymentTypes.add(PaymentTypeEnum.PayPal);
+        } else if (i % 3 == 1) {
+            paymentTypes.add(PaymentTypeEnum.Cash);
+        }
+        return paymentTypes;
+    }
+
     private void createInitialLoadE2E() throws Exception {
         ArrayList<User> users = new ArrayList<>();
         ArrayList<Organization> organizations = new ArrayList<>();
@@ -67,6 +79,7 @@ class SchemaMigrationInitialLoad {
             Organization organization = new Organization(String.format("Organization%d", i));
             User user = users.get(i);
             organization.setDescription("Organization administered by " + user);
+            organization.setPaymentTypes(getPaymentType(i));
             organizationService.addOrganization(organization);
             organizationService.addUserToOrganization(organization, user);
             organizations.add(organization);
@@ -89,6 +102,7 @@ class SchemaMigrationInitialLoad {
             Organization organization = new Organization(String.format("Organization%d", i));
             User user = users.get(i);
             organization.setDescription("Organization administered by " + user);
+            organization.setPaymentTypes(getPaymentType(i));
             organizationService.addOrganization(organization);
             organizationService.addUserToOrganization(organization, user);
             organizations.add(organization);
