@@ -43,11 +43,29 @@
         vm.addActivityType = addActivityType;
         vm.removeActivityType = removeActivityType;
 
+        vm.cashSet = false;
+        vm.payPalSet = false;
+
         vm.isAdmin = isAdmin;
 
-        vm.loadUsers();
-        vm.loadGroups();
-        vm.loadActivityTypes();
+        vm.init = init;
+
+        vm.init();
+
+        function init() {
+            vm.loadUsers();
+            vm.loadGroups();
+            vm.loadActivityTypes();
+            if (vm.organization.paymentTypes != null) {
+                for (var i = 0; i < vm.organization.paymentTypes.length; i++) {
+                    if (vm.organization.paymentTypes[i] === "Cash") {
+                        vm.cashSet = true;
+                    } else if (vm.organization.paymentTypes[i] === "PayPal") {
+                        vm.payPalSet = true;
+                    }
+                }
+            }
+        }
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -192,6 +210,13 @@
 
 
         function save() {
+            vm.organization.paymentTypes = [];
+            if (vm.cashSet === true) {
+                vm.organization.paymentTypes.push("Cash")
+            }
+            if (vm.payPalSet === true) {
+                vm.organization.paymentTypes.push("PayPal")
+            }
             Organization.update(vm.organization).then(ok, errorHandler);
             function ok(o) {
                 vm.organization = o;

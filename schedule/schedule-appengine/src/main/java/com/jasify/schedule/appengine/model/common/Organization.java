@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.common;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
+import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ public class Organization {
     private String lcName;
 
     private String description;
+
+    private Set<PaymentTypeEnum> paymentTypes = new HashSet<>();
 
     @Attribute(persistent = false)
     private InverseModelListRef<OrganizationMember, Organization> organizationMemberListRef =
@@ -154,5 +157,13 @@ public class Organization {
         }
 
         return ret;
+    }
+
+    public Set<PaymentTypeEnum> getPaymentTypes() {
+        return paymentTypes;
+    }
+
+    public void setPaymentTypes(Set<PaymentTypeEnum> paymentTypes) {
+        this.paymentTypes = paymentTypes;
     }
 }

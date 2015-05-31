@@ -129,6 +129,7 @@ final class DefaultOrganizationService implements OrganizationService {
             uniqueOrganizationName.reserve(StringUtils.lowerCase(name));
         }
         dbOrganization.setDescription(organization.getDescription());
+        dbOrganization.setPaymentTypes(organization.getPaymentTypes());
         Datastore.put(dbOrganization);
 
         if (oldName != null) uniqueOrganizationName.release(StringUtils.lowerCase(oldName));

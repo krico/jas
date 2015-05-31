@@ -31,34 +31,55 @@
                               rows="3" maxlength="255"></textarea>
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-8">
-                        <button type="button"
-                                ng-click="vm.save()"
-                                ng-disabled="!vm.organizationForm.$dirty || vm.organizationForm.$invalid"
-                                class="btn btn-default btn-sm btn-primary"><span
-                                class="glyphicon glyphicon-save"></span>
-                            save
-                        </button>
-                        <button type="button"
-                                ng-click="vm.reset()" ng-disabled="!vm.organizationForm.$dirty"
-                                class="btn btn-default btn-sm"><span class="glyphicon glyphicon-open"></span>
-                            reset
-                        </button>
-                        <span ng-show="vm.loading" us-spinner=""></span>
+                    <label fo="paymentType" class="col-sm-2 control-label input-sm">paymentType:</label>
+
+                    <div class="col-sm-8">
+                        <div class="checkbox m-t-25 m-b-25">
+                            <label>
+                                <input type="checkbox" ng-checked="vm.cashSet" ng-model="vm.cashSet"><i
+                                    class="input-helper"></i>Cash
+                            </label>
+                            <br>
+                            <label>
+                                <input type="checkbox" ng-checked="vm.payPalSet" ng-model="vm.payPalSet"><i
+                                    class="input-helper"></i>Pay Pal
+                            </label>
+                        </div>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-8">
+                            <button type="button"
+                                    ng-click="vm.save()"
+                                    ng-disabled="!vm.organizationForm.$dirty || vm.organizationForm.$invalid"
+                                    class="btn btn-default btn-sm btn-primary"><span
+                                    class="glyphicon glyphicon-save"></span>
+                                save
+                            </button>
+                            <button type="button"
+                                    ng-click="vm.reset()" ng-disabled="!vm.organizationForm.$dirty"
+                                    class="btn btn-default btn-sm"><span class="glyphicon glyphicon-open"></span>
+                                reset
+                            </button>
+                            <span ng-show="vm.loading" us-spinner=""></span>
+                        </div>
+                    </div>
             </fieldset>
         </form>
         <div>
-            <button ng-click="vm.viewActivityTypes(vm.organization.id)" class="btn btn-link"><span class="glyphicon glyphicon-chevron-right"></span> activity types of {{vm.organization.name}}</button>
+            <button ng-click="vm.viewActivityTypes(vm.organization.id)" class="btn btn-link"><span
+                    class="glyphicon glyphicon-chevron-right"></span> activity types of {{vm.organization.name}}
+            </button>
         </div>
         <div>
-            <button ng-click="vm.viewActivities(vm.organization.id)" class="btn btn-link"><span class="glyphicon glyphicon-chevron-right"></span> activities of {{vm.organization.name}}</button>
+            <button ng-click="vm.viewActivities(vm.organization.id)" class="btn btn-link"><span
+                    class="glyphicon glyphicon-chevron-right"></span> activities of {{vm.organization.name}}
+            </button>
         </div>
         <div>
-            <button ng-click="vm.viewActivityPackages(vm.organization.id)" class="btn btn-link"><span class="glyphicon glyphicon-chevron-right"></span> activities packages of {{vm.organization.name}}</button>
+            <button ng-click="vm.viewActivityPackages(vm.organization.id)" class="btn btn-link"><span
+                    class="glyphicon glyphicon-chevron-right"></span> activities packages of {{vm.organization.name}}
+            </button>
         </div>
     </div>
     <div class="col-sm-3" ng-if="vm.isAdmin()">

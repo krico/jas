@@ -36,7 +36,7 @@
 
         function init() {
             if (vm.subscriptions !== null) {
-                for (i = 0; i < vm.subscriptions.length; i++) {
+                for (var i = 0; i < vm.subscriptions.length; i++) {
                     vm.subscribedUsers[vm.subscriptions[i].user.id] = true;
                 }
             }
