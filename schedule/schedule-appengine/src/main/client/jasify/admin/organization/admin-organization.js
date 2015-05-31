@@ -58,9 +58,9 @@
             vm.loadActivityTypes();
             if (vm.organization.paymentTypes != null) {
                 for (var i = 0; i < vm.organization.paymentTypes.length; i++) {
-                    if (vm.organization.paymentTypes[i] === "Cash") {
+                    if (vm.organization.paymentTypes[i] == "Cash") {
                         vm.cashSet = true;
-                    } else if (vm.organization.paymentTypes[i] === "PayPal") {
+                    } else if (vm.organization.paymentTypes[i] == "PayPal") {
                         vm.payPalSet = true;
                     }
                 }
