@@ -56,7 +56,7 @@
             vm.loadUsers();
             vm.loadGroups();
             vm.loadActivityTypes();
-            if (vm.organization.paymentTypes != null) {
+            if (vm.organization.paymentTypes !== null) {
                 for (var i = 0; i < vm.organization.paymentTypes.length; i++) {
                     if (vm.organization.paymentTypes[i] == "Cash") {
                         vm.cashSet = true;
@@ -212,10 +212,10 @@
         function save() {
             vm.organization.paymentTypes = [];
             if (vm.cashSet === true) {
-                vm.organization.paymentTypes.push("Cash")
+                vm.organization.paymentTypes.push("Cash");
             }
             if (vm.payPalSet === true) {
-                vm.organization.paymentTypes.push("PayPal")
+                vm.organization.paymentTypes.push("PayPal");
             }
             Organization.update(vm.organization).then(ok, errorHandler);
             function ok(o) {
