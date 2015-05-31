@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine;
 
 import com.google.appengine.api.datastore.ShortBlob;
+import com.google.appengine.api.datastore.dev.LocalDatastoreService;
 import com.google.appengine.tools.development.testing.*;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
@@ -167,6 +168,7 @@ public final class TestHelper {
     }
 
     public static void cleanupDatastore(LocalServiceTestHelper datastoreHelper) {
+        LocalDatastoreServiceTestConfig.getLocalDatastoreService().stop();
         datastoreHelper.tearDown();
         DatastoreUtil.clearKeysCache();
         DatastoreUtil.clearActiveGlobalTransactions();
