@@ -180,9 +180,11 @@ public class BaseDaoTest {
         List<Key> keys = dao.save(examples);
         assertNotNull(keys);
         assertEquals(examples.size(), keys.size());
-        for (int i = 0; i < keys.size(); ++i) {
-            Example example = dao.get(keys.get(i));
-            assertEquals(examples.get(i), example);
+        for (int M = 0; M < 3; ++M) {
+            for (int i = 0; i < keys.size(); ++i) {
+                Example example = dao.get(keys.get(i));
+                assertEquals(examples.get(i), example);
+            }
         }
     }
 
@@ -208,11 +210,14 @@ public class BaseDaoTest {
         examples.add(createExample());
         examples.add(createExample());
         List<Key> keys = dao.save(examples);
-        List<Example> batch = dao.get(keys);
-        assertEquals(keys.size(), batch.size());
+        for (int M = 0; M < 3; ++M) {
 
-        for (int i = 0; i < keys.size(); ++i) {
-            assertEquals(examples.get(i), batch.get(i));
+            List<Example> batch = dao.get(keys);
+            assertEquals(keys.size(), batch.size());
+
+            for (int i = 0; i < keys.size(); ++i) {
+                assertEquals(examples.get(i), batch.get(i));
+            }
         }
     }
 
