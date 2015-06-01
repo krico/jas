@@ -44,6 +44,11 @@
             <version>${jasify.appengine.sdk.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-labs</artifactId>
+            <version>${jasify.appengine.sdk.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
