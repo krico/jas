@@ -14,9 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
-import static junit.framework.TestCase.*;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author wszarmach
@@ -24,7 +24,7 @@ import java.util.*;
  */
 public class MailParserTest {
 
-    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZoneUTC();
+    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("CET"));
 
     User user;
     ActivityType activityType;
@@ -36,11 +36,20 @@ public class MailParserTest {
     ActivityPackageExecution activityPackageExecution1;
     ActivityPackageExecution activityPackageExecution2;
 
+    private User createUser() {
+        User user = new User();
+        user.setName("Fred");
+        user.setRealName("James BlaBla");
+        Datastore.put(user);
+        return user;
+    }
+
     private Activity createActivity(ActivityType activityType, double price, DateTime start, DateTime finish) {
         Activity activity = new Activity(activityType);
         activity.setPrice(price);
         activity.setStart(start.toDate());
         activity.setFinish(finish.toDate());
+        Datastore.put(activity);
         return activity;
     }
 
@@ -48,7 +57,7 @@ public class MailParserTest {
         Subscription subscription = new Subscription();
         subscription.getActivityRef().setModel(activity);
         subscription.getUserRef().setModel(user);
-        subscription.setId(Datastore.allocateId(Subscription.class));
+        Datastore.put(subscription);
         return subscription;
     }
 
@@ -62,6 +71,7 @@ public class MailParserTest {
         for (Activity activity : activities) {
             activityPackage.getActivities().add(activity);
         }
+        Datastore.put(activityPackage);
         return activityPackage;
     }
 
@@ -69,13 +79,14 @@ public class MailParserTest {
         ActivityPackageSubscription activityPackageSubscription = new ActivityPackageSubscription();
         activityPackageSubscription.getUserRef().setModel(user);
         activityPackageSubscription.getActivityRef().setModel(activity);
+        Datastore.put(activityPackageSubscription);
         return activityPackageSubscription;
     }
 
     private ActivityPackageExecution createActivityPackageExecution(User user, ActivityType activityType) {
         List<Activity> activities = new ArrayList<>();
-        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 15, 13, 0, DateTimeZone.UTC), new DateTime(2015, 4, 15, 14, 0, DateTimeZone.UTC)));
-        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 16, 13, 0, DateTimeZone.UTC), new DateTime(2015, 4, 16, 14, 0, DateTimeZone.UTC)));
+        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 15, 13, 0), new DateTime(2015, 4, 15, 14, 0)));
+        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 16, 13, 0), new DateTime(2015, 4, 16, 14, 0)));
         ActivityPackage activityPackage = createActivityPackage(activityType, activities);
 
         ActivityPackageExecution activityPackageExecution = new ActivityPackageExecution();
@@ -83,11 +94,12 @@ public class MailParserTest {
         activityPackageExecution.getUserRef().setModel(user);
         activityPackageExecution.setId(Datastore.allocateId(ActivityPackageExecution.class));
 
-        for (Activity activity :  activities) {
+        for (Activity activity : activities) {
             ActivityPackageSubscription activityPackageSubscription = createActivityPackageSubscription(user, activity);
             activityPackageSubscription.getActivityPackageExecutionRef().setModel(activityPackageExecution);
             activityPackageExecution.getSubscriptionListRef().getModelList().add(activityPackageSubscription);
         }
+        Datastore.put(activityPackageExecution);
         return activityPackageExecution;
     }
 
@@ -98,19 +110,15 @@ public class MailParserTest {
         return (double) tmp / factor;
     }
 
-    private double random(double min, double max)
-    {
+    private double random(double min, double max) {
         double diff = max - min;
-        return round(min + Math.random( ) * diff, 2);
+        return round(min + Math.random() * diff, 2);
     }
 
     @Before
     public void initializeDatastore() {
         TestHelper.initializeJasify();
-        this.user = new User();
-        this.user.setName("Fred");
-        this.user.setRealName("James BlaBla");
-        this.user.setId(Datastore.allocateId(User.class));
+        this.user = createUser();
 
         this.organization = new Organization("Super Squash Courts");
 
@@ -184,7 +192,7 @@ public class MailParserTest {
     @Test
     public void testJasifySubscriptionEmailAsText() throws Exception {
         List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1, activityPackageExecution2);
         MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
@@ -204,7 +212,7 @@ public class MailParserTest {
             totalPrice += activity.getPrice();
         }
 
-        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+        for (ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
             assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
             ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
             Organization organization = activityPackage.getOrganizationRef().getModel();
@@ -225,7 +233,7 @@ public class MailParserTest {
     @Test
     public void testJasifySubscriptionEmailAsHtml() throws Exception {
         List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1, activityPackageExecution2);
 
         MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
@@ -246,7 +254,7 @@ public class MailParserTest {
             totalPrice += activity.getPrice();
         }
 
-        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+        for (ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
             assert (html.contains(": " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
             ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
             Organization organization = activityPackage.getOrganizationRef().getModel();
@@ -283,7 +291,7 @@ public class MailParserTest {
     @Test
     public void testSubscriberSubscriptionEmailAsText() throws Exception {
         List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1, activityPackageExecution2);
         MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String text = mailParser.getText();
 
@@ -303,7 +311,7 @@ public class MailParserTest {
             totalPrice += activity.getPrice();
         }
 
-        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+        for (ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
             assert (text.contains("Order        #: " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
             ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
             Organization organization = activityPackage.getOrganizationRef().getModel();
@@ -324,7 +332,7 @@ public class MailParserTest {
     @Test
     public void testSubscriberSubscriptionEmailAsHtml() throws Exception {
         List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
-        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1,activityPackageExecution2);
+        List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1, activityPackageExecution2);
 
         MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, activityPackageExecutions);
         String html = mailParser.getHtml();
@@ -345,7 +353,7 @@ public class MailParserTest {
             totalPrice += activity.getPrice();
         }
 
-        for(ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
+        for (ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
             assert (html.contains(": " + KeyUtil.toHumanReadableString(activityPackageExecution.getId())));
             ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
             Organization organization = activityPackage.getOrganizationRef().getModel();
@@ -486,7 +494,7 @@ public class MailParserTest {
     }
 
     @Test
-    public  void testNewVersionEmail() throws Exception {
+    public void testNewVersionEmail() throws Exception {
         MailParser mailParser = MailParser.createNewVersionEmail("Beta", "222", "ABC", "#2", "https://URL");
         String text = mailParser.getText();
 
