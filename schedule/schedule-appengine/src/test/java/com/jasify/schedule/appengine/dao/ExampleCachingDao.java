@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.dao;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import org.slim3.datastore.Datastore;
 
@@ -10,16 +11,36 @@ import java.util.List;
  * @since 25/05/15.
  */
 public class ExampleCachingDao extends BaseCachingDao<Example> implements AnyExampleDao {
+
     public ExampleCachingDao() {
         super(ExampleMeta.get());
     }
 
     @Override
     public List<Example> byDataType(String dataType) {
-        ExampleMeta meta = getMeta();
-        return Datastore
-                .query(meta)
-                .filter(meta.dataType.getName(), Query.FilterOperator.EQUAL, dataType)
-                .asList();
+        return query(new ByDataTypeQuery(dataType));
     }
+
+    private class ByDataTypeQuery implements CachedQuery {
+        private final String dataType;
+
+        private ByDataTypeQuery(String dataType) {
+            this.dataType = dataType;
+        }
+
+        @Override
+        public String key() {
+            return getClass().getSimpleName();
+        }
+
+        @Override
+        public List<Key> execute() {
+            ExampleMeta meta = getMeta();
+            return Datastore
+                    .query(meta)
+                    .filter(meta.dataType.getName(), Query.FilterOperator.EQUAL, dataType)
+                    .asKeyList();
+        }
+    }
+
 }

@@ -1,11 +1,15 @@
 package com.jasify.schedule.appengine.dao;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Optional;
+import com.jasify.schedule.appengine.memcache.Memcache;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelMeta;
 
@@ -21,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class BaseCachingDao<T> extends BaseDao<T> {
     public static final int DEFAULT_CACHE_EXPIRY_SECONDS = (int) TimeUnit.MINUTES.toSeconds(30);
+    private static final Logger log = LoggerFactory.getLogger(BaseCachingDao.class);
     private final int cacheExpirySeconds;
 
     protected BaseCachingDao(ModelMeta<T> meta, int cacheExpirySeconds) {
@@ -115,5 +120,20 @@ public class BaseCachingDao<T> extends BaseDao<T> {
         }
 
         return DaoUtil.cachePut(id, meta, super.getOrNull(id), expiration());
+    }
+
+    protected List<T> query(@Nonnull CachedQuery query) {
+        String key = query.key();
+        List<Key> ids = Memcache.get(key);
+        if (ids == null) {
+            ids = query.execute();
+            Memcache.put(key, ids, expiration());
+        }
+        try {
+            return get(ids);
+        } catch (EntityNotFoundException e) {
+            log.warn("A Query returned ids for non-existing entities", e);
+            throw Throwables.propagate(e);
+        }
     }
 }
