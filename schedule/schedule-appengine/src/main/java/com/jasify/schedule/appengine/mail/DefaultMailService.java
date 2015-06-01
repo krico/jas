@@ -81,25 +81,26 @@ public final class DefaultMailService implements MailService {
     @Override
     public boolean sendToApplicationOwners(String subject, String htmlBody, String textBody) {
         initialize();
-        return send(senderAddress, applicationOwners, subject, htmlBody, textBody);
+        return send(senderAddress, applicationOwners, new InternetAddress[]{}, subject, htmlBody, textBody);
     }
 
     @Override
     public boolean send(String toEmail, String subject, String htmlBody, String textBody) throws Exception {
         initialize();
         InternetAddress[] toAddress = {new InternetAddress(toEmail)};
-        return send(senderAddress, toAddress, subject, htmlBody, textBody);
+        return send(senderAddress, toAddress, applicationOwners, subject, htmlBody, textBody);
     }
 
-    private boolean send(InternetAddress fromAddress, InternetAddress[] toAddress, String subject, String htmlBody, String textBody) {
+    private boolean send(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody) {
         Preconditions.checkNotNull(fromAddress);
         Preconditions.checkNotNull(toAddress);
+        Preconditions.checkNotNull(bccAddress);
         Preconditions.checkNotNull(subject);
         Preconditions.checkNotNull(htmlBody);
         Preconditions.checkNotNull(textBody);
         try {
             log.debug("Sending e-mail [{}] as [{}] to {}", subject, fromAddress, Arrays.toString(toAddress));
-            Message message = createMessage(fromAddress, toAddress, subject, htmlBody, textBody);
+            Message message = createMessage(fromAddress, toAddress, bccAddress, subject, htmlBody, textBody);
             Transport.send(message);
             return true;
         } catch (Exception e) {
@@ -108,7 +109,7 @@ public final class DefaultMailService implements MailService {
         }
     }
 
-    private Message createMessage(InternetAddress fromAddress, InternetAddress[] toAddress, String subject, String htmlBody, String textBody) throws MessagingException {
+    private Message createMessage(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody) throws MessagingException {
 
         Message message = new MimeMessage(session);
 
@@ -116,6 +117,10 @@ public final class DefaultMailService implements MailService {
 
         for (InternetAddress owner : toAddress) {
             message.addRecipient(Message.RecipientType.TO, owner);
+        }
+
+        for (InternetAddress owner : bccAddress) {
+            message.addRecipient(Message.RecipientType.BCC, owner);
         }
 
         message.setSubject(subject);

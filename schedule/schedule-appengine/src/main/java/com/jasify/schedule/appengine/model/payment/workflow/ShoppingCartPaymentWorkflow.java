@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,7 +71,6 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         } else {
             notifyPublisher(subscriptions, executions);
             notifySubscriber(subscriptions, executions);
-            notifyJasify(subscriptions, executions);
         }
     }
 
@@ -163,24 +161,6 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         try {
             MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, executions);
             MailServiceFactory.getMailService().send(user.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
-        } catch (Exception e) {
-            log.error("Failed to notify application owners", e);
-        }
-    }
-
-    private void notifyJasify(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) {
-        User user;
-        if (!subscriptions.isEmpty()) {
-            user = subscriptions.get(0).getUserRef().getModel();
-        } else {
-            user = executions.get(0).getUserRef().getModel();
-        }
-
-        String subject = String.format("[Jasify] Subscribe [%s]", user.getDisplayName());
-
-        try {
-            MailParser mailParser = MailParser.createJasifySubscriptionEmail(subscriptions, executions);
-            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
             log.error("Failed to notify application owners", e);
         }

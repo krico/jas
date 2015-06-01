@@ -152,7 +152,7 @@ public class ShoppingCartPaymentWorkflowTest {
             List<MailServicePb.MailMessage> sentMessages = localMailService.getSentMessages();
             assertNotNull(sentMessages);
             // One for Jasify, One for Subscriber, Two for Publisher
-            assertEquals(4, sentMessages.size());
+            assertEquals(3, sentMessages.size());
         } finally {
             testShoppingCartServiceFactory.tearDown();
             testActivityServiceFactory.tearDown();
