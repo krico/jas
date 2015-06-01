@@ -13,4 +13,9 @@
         <!-- Enable incoming e-mails -->
         <service>mail</service>
     </inbound-services>
+
+    <admin-console>
+        <page name="Appstats" url="/appstats" />
+    </admin-console>
+
 </appengine-web-app>
