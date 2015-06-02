@@ -7,7 +7,8 @@
 
     module.factory('jasLocale', function ($log, localStorageService, amMoment) {
 
-        var localeKey = 'jas-locale';
+        var localeKey = 'jas-locale',
+            defaultLocale = 'de';
 
         return {
             locale: function (newLocale) {
@@ -22,12 +23,7 @@
             },
             initialize: function () {
                 $log.debug('Initializing locale');
-                var savedLocale = this.locale();
-                if (savedLocale) {
-                    this.locale(savedLocale);
-                } else {
-                    this.locale('de');
-                }
+                this.locale(this.locale() || defaultLocale);
             }
         };
     });

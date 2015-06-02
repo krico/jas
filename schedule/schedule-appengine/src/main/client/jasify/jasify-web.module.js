@@ -13,6 +13,7 @@
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
         'jasifyComponents',
+        'jasify.locale',
         'jasify.admin',
         'jasify.authenticate',
         'jasify.payment',
@@ -38,8 +39,8 @@
     jasifyWeb.config(function (EndpointProvider, localStorageServiceProvider) {
         EndpointProvider.verbose(true);
         localStorageServiceProvider.setPrefix('Jasify');
-    }).run(function (amMoment) {
-        amMoment.changeLocale('de');
+    }).run(function (jasLocale) {
+        jasLocale.initialize();
     });
 
     /**

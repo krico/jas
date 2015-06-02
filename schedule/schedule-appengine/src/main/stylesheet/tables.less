@@ -1,3 +1,5 @@
+@import "tables.small.less";
+
 .auto-width-column() {
   white-space: normal;
   width: 50%;
@@ -52,16 +54,62 @@
 }
 
 #admin-organizations {
-  tbody {
-    td:not(.row-commands) {
-      white-space: nowrap;
-      width: 20%;
+
+  @media (min-width: 600px) {
+    tbody {
+      td:not(.row-commands) {
+        white-space: nowrap;
+        width: 20%;
+      }
+      td.created, td.modified {
+        .min-size-column();
+      }
+      td.description {
+        .auto-width-column();
+      }
     }
-    td.created, td.modified {
-      .min-size-column();
-    }
-    td.description {
-      .auto-width-column();
+  }
+
+  @media (max-width: 600px) {
+
+    tbody {
+
+      tr {
+
+        // - make .name cell take whole row
+        .name {
+
+          border-top: 5px solid #f0f0f0;
+
+          display: block;
+          flex: 1 100%;
+
+          &:before {
+            content: "Name: ";
+          }
+        }
+
+        // - make .created & .modified share row
+        .created {
+          display: block;
+          flex: 1 auto;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Created:";
+          }
+        }
+
+        .modified {
+          display: block;
+          flex: 1 auto;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Modified:";
+          }
+        }
+      }
     }
   }
 }

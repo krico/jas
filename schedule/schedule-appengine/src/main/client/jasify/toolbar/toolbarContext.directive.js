@@ -9,6 +9,9 @@
     angular.module('jasify.common.ui').directive('toolbarContext', function ($mdMedia) {
         return {
             restrict: 'A',
+            link: function(scope, element) {
+                scope.toolbar = element.closest('md-toolbar');
+            },
             controller: function ($scope, toolbarContext) {
                 $scope.hasContext = false;
 
@@ -21,11 +24,13 @@
                 toolbarContext.subscribe(function (contextActions) {
                     $scope.hasContext = contextActions && contextActions.length > 0;
                     $scope.contextActions = contextActions;
+                    $scope.toolbar.toggleClass('md-accent', $scope.hasContext);
                 });
 
                 $scope.cancelContext = function () {
                     $scope.hasContext = false;
                     $scope.contextActions = [];
+                    $scope.toolbar.removeClass('md-accent');
                 };
             }
         };

@@ -94,7 +94,8 @@
         "bootstrap/dist/css/bootstrap.css",
         "jquery-bootgrid/dist/jquery.bootgrid.css",
         "bootstrap-sweetalert/lib/sweet-alert.css",
-        "../../src/main/vendor/farbtastic/farbtastic.css"
+        "../../src/main/vendor/farbtastic/farbtastic.css",
+        "bootstrap-language/languages.css"
       ],
       "booking": [
         "bootstrap-sweetalert/lib/sweet-alert.css"
