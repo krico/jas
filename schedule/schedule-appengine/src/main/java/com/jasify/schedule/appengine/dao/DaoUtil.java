@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.dao;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.labs.repackaged.com.google.common.base.Function;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
 import com.google.common.base.Optional;
@@ -29,7 +30,8 @@ public final class DaoUtil {
     public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model, Expiration expiration) {
         try {
             Entity entity = model == null ? null : meta.modelToEntity(model);
-            Memcache.put(id, entity, expiration);
+            /* This works together with DaoDatastoreCallbacks.purgeCache DEFAULT_MILLIS_NO_RE_ADD */
+            Memcache.put(id, entity, expiration, MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
         } catch (IllegalArgumentException e) {
             log.warn("Memcache exception IGNORED", e);
         }
@@ -53,7 +55,8 @@ public final class DaoUtil {
                     return model == null ? null : meta.modelToEntity(model);
                 }
             });
-            Memcache.putAll(keyEntityMap, expiration);
+            /* This works together with DaoDatastoreCallbacks.purgeCache DEFAULT_MILLIS_NO_RE_ADD */
+            Memcache.putAll(keyEntityMap, expiration, MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
         } catch (IllegalArgumentException e) {
             log.warn("Memcache exception IGNORED", e);
         }
