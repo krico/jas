@@ -123,11 +123,11 @@ public class BaseCachingDao<T> extends BaseDao<T> {
         return DaoUtil.cachePut(id, meta, super.getOrNull(id), expiration());
     }
 
-    protected List<T> query(@Nonnull CachedQuery query) {
-        CachedQueryMetadata.CacheQueryTransaction operation = CachedQueryMetadata
+    protected List<T> query(@Nonnull DaoQuery query) {
+        DaoQueryMetadata.CacheQueryTransaction operation = DaoQueryMetadata
                 .cacheQueryTransaction(query, meta.getKind(), expiration());
 
-        CachedQueryMetadata metadata = MemcacheOperator.update(operation);
+        DaoQueryMetadata metadata = MemcacheOperator.update(operation);
         List<Key> ids = metadata.getQueryResult(query);
         if (ids.isEmpty()) return Collections.emptyList();
         try {

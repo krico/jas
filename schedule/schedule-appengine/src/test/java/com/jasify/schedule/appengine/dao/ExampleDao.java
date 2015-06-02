@@ -1,8 +1,5 @@
 package com.jasify.schedule.appengine.dao;
 
-import com.google.appengine.api.datastore.Query;
-import org.slim3.datastore.Datastore;
-
 import java.util.List;
 
 /**
@@ -17,9 +14,6 @@ public class ExampleDao extends BaseDao<Example> implements AnyExampleDao {
     @Override
     public List<Example> byDataType(String dataType) {
         ExampleMeta meta = getMeta();
-        return Datastore
-                .query(meta)
-                .filter(meta.dataType.getName(), Query.FilterOperator.EQUAL, dataType)
-                .asList();
+        return query(new ExampleDaoQuery(meta, dataType));
     }
 }
