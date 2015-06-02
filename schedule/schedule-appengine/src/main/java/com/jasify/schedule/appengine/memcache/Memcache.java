@@ -65,8 +65,16 @@ public final class Memcache {
         delegate().put(key, value, expires);
     }
 
+    public static void put(Object key, Object value, Expiration expires, MemcacheService.SetPolicy policy) throws IllegalArgumentException {
+        delegate().put(key, value, expires, policy);
+    }
+
     public static void putAll(Map<?, ?> keyValues, Expiration expires) throws IllegalArgumentException {
         delegate().putAll(keyValues, expires);
+    }
+
+    public static void putAll(Map<?, ?> keyValues, Expiration expires, MemcacheService.SetPolicy policy) throws IllegalArgumentException {
+        delegate().putAll(keyValues, expires, policy);
     }
 
 
@@ -76,6 +84,10 @@ public final class Memcache {
 
     public static Set<?> deleteAll(Collection<?> keys) throws IllegalArgumentException {
         return delegate().deleteAll(keys);
+    }
+
+    public static Set<?> deleteAll(Collection<?> keys, long millisNoReAdd) throws IllegalArgumentException {
+        return delegate().deleteAll(keys, millisNoReAdd);
     }
 
     private static class TheErrorHandler implements ConsistentErrorHandler {
