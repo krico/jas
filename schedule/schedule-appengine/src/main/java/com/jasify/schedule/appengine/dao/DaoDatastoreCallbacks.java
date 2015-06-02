@@ -63,7 +63,7 @@ class DaoDatastoreCallbacks {
         @Nullable
         @Override
         public String apply(Key input) {
-            return CachedQueryMetadata.kindToId(input.getKind());
+            return DaoQueryMetadata.kindToId(input.getKind());
         }
     }
 }

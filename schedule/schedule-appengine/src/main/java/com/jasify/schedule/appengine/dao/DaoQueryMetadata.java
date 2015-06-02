@@ -16,40 +16,40 @@ import java.util.List;
  * @author krico
  * @since 02/06/15.
  */
-public class CachedQueryMetadata implements Serializable {
+public class DaoQueryMetadata implements Serializable {
     public static final String SUFFIX = ".cqm";
-    private HashMap<Pair<? extends Class<? extends CachedQuery>, CachedQuery.Parameters>, List<Key>> resultCache = new HashMap<>();
+    private HashMap<Pair<? extends Class<? extends DaoQuery>, QueryParameters>, List<Key>> resultCache = new HashMap<>();
 
     public static String kindToId(String kind) {
         return kind + SUFFIX;
     }
 
-    public static CacheQueryTransaction cacheQueryTransaction(CachedQuery query, String kind, Expiration expiration) {
+    public static CacheQueryTransaction cacheQueryTransaction(DaoQuery query, String kind, Expiration expiration) {
         return new CacheQueryTransaction(query, kind, expiration);
     }
 
-    private static Pair<? extends Class<? extends CachedQuery>, CachedQuery.Parameters> key(CachedQuery query) {
+    private static Pair<? extends Class<? extends DaoQuery>, QueryParameters> key(DaoQuery query) {
         return Pair.of(query.getClass(), query.parameters());
     }
 
-    private boolean containsQueryResult(CachedQuery query) {
+    private boolean containsQueryResult(DaoQuery query) {
         return resultCache.containsKey(key(query));
     }
 
-    public List<Key> getQueryResult(CachedQuery query) {
+    public List<Key> getQueryResult(DaoQuery query) {
         return resultCache.get(key(query));
     }
 
-    private void putQueryResult(CachedQuery query, List<Key> results) {
+    private void putQueryResult(DaoQuery query, List<Key> results) {
         resultCache.put(key(query), results);
     }
 
-    protected static class CacheQueryTransaction extends BaseMemcacheTransaction<CachedQueryMetadata> {
-        private final CachedQuery query;
+    protected static class CacheQueryTransaction extends BaseMemcacheTransaction<DaoQueryMetadata> {
+        private final DaoQuery query;
         private List<Key> results;
         private boolean skip = false;
 
-        public CacheQueryTransaction(CachedQuery query, String kind, Expiration expiration) {
+        public CacheQueryTransaction(DaoQuery query, String kind, Expiration expiration) {
             super(kindToId(kind), expiration);
             this.query = query;
         }
@@ -61,8 +61,8 @@ public class CachedQueryMetadata implements Serializable {
 
         @Nonnull
         @Override
-        public CachedQueryMetadata execute(@Nullable MemcacheService.IdentifiableValue identifiable) {
-            CachedQueryMetadata metadata = identifiable == null ? new CachedQueryMetadata() : (CachedQueryMetadata) identifiable.getValue();
+        public DaoQueryMetadata execute(@Nullable MemcacheService.IdentifiableValue identifiable) {
+            DaoQueryMetadata metadata = identifiable == null ? new DaoQueryMetadata() : (DaoQueryMetadata) identifiable.getValue();
             if (metadata.containsQueryResult(query)) {
                 skip = true;
                 return metadata;
