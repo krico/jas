@@ -9,6 +9,7 @@
 
         var vm = this;
 
+        vm.setLocale = setLocale;
         vm.saveBtn = aButtonController.createProfileSave();
         vm.resetBtn = aButtonController.createProfileReset();
 
@@ -18,6 +19,10 @@
         vm.user = {};
 
         vm.reset(true);
+
+        function setLocale(locale) {
+            
+        }
 
         function save() {
 
