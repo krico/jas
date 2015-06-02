@@ -100,11 +100,9 @@
                        class="toolbar-animate md-icon-button" aria-label="Settings">
                 <md-icon md-svg-icon="build/img/{{contextAction.type}}.svg"></md-icon>
             </md-button>
-            <!--<h2 flex class="text-right">-->
-                <!--<md-button class="md-raised"  ng-click="vm.changeLocale('en-US')">EN</md-button>-->
-                <!--<md-button class="md-raised"  ng-click="vm.changeLocale('de')">DE</md-button>-->
-                <!--<md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Sign out</md-button>-->
-            <!--</h2>-->
+            <md-button class="md-raised"  ng-click="vm.changeLocale('en-US')">EN</md-button>
+            <md-button class="md-raised"  ng-click="vm.changeLocale('de')">DE</md-button>
+            <md-button ng-show="vm.isAuthenticated()" class="md-raised" ng-href="#/logout">Sign out</md-button>
         </div>
     </md-toolbar>
     <md-content id="content" ng-controller="NavbarController as vm" ng-class="{ 'home-splash': !vm.isAuthenticated() }"
