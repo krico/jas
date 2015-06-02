@@ -36,6 +36,7 @@ public class JasUserTransformerTest {
         internal.setEmailVerified(true);
         internal.setAdmin(true);
         internal.setRealName("Real Name");
+        internal.setLocale("Locale");
         internal.setPassword(TypeUtil.toShortBlob(new byte[]{1, 2, 3, 4}));
         internal.setCreated(new Date(1)); //readonly
         internal.setModified(new Date(2)); //readonly
@@ -50,6 +51,7 @@ public class JasUserTransformerTest {
         assertEquals(internal.isEmailVerified(), transformed.isEmailVerified());
         assertEquals(internal.isAdmin(), transformed.isAdmin());
         assertEquals(internal.getRealName(), transformed.getRealName());
+        assertEquals(internal.getLocale(), transformed.getLocale());
         assertEquals(internal.getCreated(), transformed.getCreated());
         assertEquals(internal.getModified(), transformed.getModified());
     }
@@ -63,6 +65,7 @@ public class JasUserTransformerTest {
         external.setEmailVerified(true);
         external.setAdmin(true);
         external.setRealName("Real Name");
+        external.setLocale("Locale");
         external.setCreated(new Date(1)); //readonly
         external.setModified(new Date(2)); //readonly
 
@@ -74,6 +77,7 @@ public class JasUserTransformerTest {
         assertEquals(external.isEmailVerified(), transformed.isEmailVerified());
         assertEquals(external.isAdmin(), transformed.isAdmin());
         assertEquals(external.getRealName(), transformed.getRealName());
+        assertEquals(external.getLocale(), transformed.getLocale());
         assertNull(transformed.getCreated());
         assertNull(transformed.getModified());
     }

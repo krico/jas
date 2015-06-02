@@ -15,6 +15,7 @@ public class JasUser implements JasEndpointEntity {
     private String realName;
     private String email;
     private boolean emailVerified;
+    private String locale;
     private boolean admin = false;
 
     public String getId() {
@@ -79,6 +80,14 @@ public class JasUser implements JasEndpointEntity {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 
     public boolean isAdmin() {
