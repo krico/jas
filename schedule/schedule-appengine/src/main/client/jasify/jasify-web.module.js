@@ -8,6 +8,7 @@
         'ngSanitize',
         'ngMaterial',
         'ngAnimate',
+        'pascalprecht.translate',
         'angularMoment',
         'ui.bootstrap',
         'angularSpinner',
@@ -36,9 +37,19 @@
         $mdThemingProvider.theme('default');
     });
 
-    jasifyWeb.config(function (EndpointProvider, localStorageServiceProvider) {
+    jasifyWeb.config(function ($translateProvider, EndpointProvider, localStorageServiceProvider) {
         EndpointProvider.verbose(true);
         localStorageServiceProvider.setPrefix('Jasify');
+
+        // TODO: extract is somwehere
+        $translateProvider.translations('en-US', {
+            SIGN_OUT: 'Sign Out '
+        });
+        $translateProvider.translations('de', {
+            SIGN_OUT: 'Abmelden'
+        });
+        $translateProvider.preferredLanguage('en');
+
     }).run(function (jasLocale) {
         jasLocale.initialize();
     });

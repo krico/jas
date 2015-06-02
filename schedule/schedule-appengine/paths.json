@@ -74,6 +74,7 @@
         "lodash/lodash.js",
         "autosize/dist/autosize.js",
         "eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js",
+        "angular-translate/angular-translate.js",
         "../../src/main/vendor/farbtastic/farbtastic.js"
       ],
       "iframecontentwindow": [

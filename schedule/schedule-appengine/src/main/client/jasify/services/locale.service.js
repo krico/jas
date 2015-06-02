@@ -5,7 +5,7 @@
 
     var module = angular.module('jasify.locale', ['angularMoment', 'LocalStorageModule']);
 
-    module.factory('jasLocale', function ($log, localStorageService, amMoment) {
+    module.factory('jasLocale', function ($log, $translate, localStorageService, amMoment) {
 
         var localeKey = 'jas-locale',
             defaultLocale = 'de';
@@ -16,6 +16,7 @@
                     $log.debug('Locale changed: ' + newLocale);
                     localStorageService.set(localeKey, newLocale);
                     amMoment.changeLocale(newLocale);
+                    $translate.use(newLocale);
                     return newLocale;
                 }
 
