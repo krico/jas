@@ -53,6 +53,9 @@ public final class MemcacheOperator {
         do {
             MemcacheService.IdentifiableValue identifiable = service.getIdentifiable(key);
             final T newVal = operation.execute(identifiable);
+            if (operation.skipMemcacheUpdate()) {
+                return newVal;
+            }
             Preconditions.checkNotNull(newVal, "MemcacheUpdate cannot return NULL");
             Expiration expiration = operation.expiration();
 
