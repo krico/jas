@@ -6,7 +6,7 @@ import com.google.api.client.util.Maps;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Optional;
-import com.jasify.schedule.appengine.memcache.Memcache;
+import com.jasify.schedule.appengine.memcache.MemcacheOperator;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +15,7 @@ import org.slim3.datastore.ModelMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -123,12 +124,12 @@ public class BaseCachingDao<T> extends BaseDao<T> {
     }
 
     protected List<T> query(@Nonnull CachedQuery query) {
-        String key = query.key();
-        List<Key> ids = Memcache.get(key);
-        if (ids == null) {
-            ids = query.execute();
-            Memcache.put(key, ids, expiration());
-        }
+        CachedQueryMetadata.CacheQueryTransaction operation = CachedQueryMetadata
+                .cacheQueryTransaction(query, meta.getKind(), expiration());
+
+        CachedQueryMetadata metadata = MemcacheOperator.update(operation);
+        List<Key> ids = metadata.getQueryResult(query);
+        if (ids.isEmpty()) return Collections.emptyList();
         try {
             return get(ids);
         } catch (EntityNotFoundException e) {
