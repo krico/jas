@@ -81,7 +81,7 @@ public final class DefaultMailService implements MailService {
     @Override
     public boolean sendToApplicationOwners(String subject, String htmlBody, String textBody) {
         initialize();
-        return send(senderAddress, applicationOwners, new InternetAddress[]{}, subject, htmlBody, textBody);
+        return send(senderAddress, applicationOwners, new InternetAddress[0], subject, htmlBody, textBody);
     }
 
     @Override

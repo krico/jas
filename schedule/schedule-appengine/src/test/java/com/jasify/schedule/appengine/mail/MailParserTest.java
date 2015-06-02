@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class MailParserTest {
 
-    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("CET"));
+    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("Europe/Zurich"));
 
     User user;
     ActivityType activityType;
