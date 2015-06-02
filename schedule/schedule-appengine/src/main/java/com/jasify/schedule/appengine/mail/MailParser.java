@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class MailParser {
 
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("CET"));
+    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("Europe/Zurich"));
 
     /*
     Rather than two StringBuilders maybe it would be better to convert from html to text
