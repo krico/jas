@@ -18,7 +18,7 @@
             <small>This is an admin only screen. Here you can add/view/delete organisations</small>
         </h2>
     </div>
-    <table id="admin-organizations" class="table table-hover table-condensed table-vmiddle">
+    <table id="admin-organizations" class="table responsive table-hover table-condensed table-vmiddle">
         <thead>
         <tr>
             <th></th>
@@ -29,15 +29,17 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="organization in vm.organizations">
+        <tr ng-repeat="organization in vm.organizations"
+            ng-class="{ 'selected': vm.selection.id === organization.id }"
+            ng-click="vm.selectRow(organization)">
             <td class="row-commands">
                 <row-edit action="vm.viewOrganization(organization.id)"></row-edit>
                 <row-delete action="vm.remove(organization.id)" ng-if="vm.isAdmin()"></row-delete>
             </td>
-            <td ng-click="vm.viewOrganization(organization.id)">{{organization.name}}</td>
-            <td class="description" ng-click="vm.viewOrganization(organization.id)">{{organization.description | limitTo: 40}}</td>
-            <td class="created" ng-click="vm.viewOrganization(organization.id)">{{organization.created | amDateFormat:'L LT' }}</td>
-            <td class="modified" ng-click="vm.viewOrganization(organization.id)">{{organization.modified | amDateFormat:'L LT' }}
+            <td class="name">{{organization.name}}</td>
+            <td class="description">{{organization.description | limitTo: 40}}</td>
+            <td class="created">{{organization.created | amDateFormat:'L LT' }}</td>
+            <td class="modified">{{organization.modified | amDateFormat:'L LT' }}
             </td>
         </tr>
         </tbody>

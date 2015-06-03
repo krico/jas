@@ -74,6 +74,7 @@
         "lodash/lodash.js",
         "autosize/dist/autosize.js",
         "eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js",
+        "angular-translate/angular-translate.js",
         "../../src/main/vendor/farbtastic/farbtastic.js"
       ],
       "iframecontentwindow": [
@@ -94,7 +95,8 @@
         "bootstrap/dist/css/bootstrap.css",
         "jquery-bootgrid/dist/jquery.bootgrid.css",
         "bootstrap-sweetalert/lib/sweet-alert.css",
-        "../../src/main/vendor/farbtastic/farbtastic.css"
+        "../../src/main/vendor/farbtastic/farbtastic.css",
+        "bootstrap-language/languages.css"
       ],
       "booking": [
         "bootstrap-sweetalert/lib/sweet-alert.css"

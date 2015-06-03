@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminOrganizationsController', AdminOrganizationsController);
 
-    function AdminOrganizationsController($location, Organization, Auth, organizations) {
+    function AdminOrganizationsController($location, Organization, Auth, organizations, toolbarContext) {
         var vm = this;
         vm.organizations = organizations.items;
         vm.organization = {};
@@ -15,6 +15,7 @@
         vm.viewOrganization = viewOrganization;
         vm.alert = alert;
         vm.isAdmin = isAdmin;
+        vm.selectRow = selectRow;
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -43,15 +44,31 @@
             Organization.update(org).then(ok, errorHandler);
         }
 
-        function remove(id) {
-            Organization.remove(id).then(ok, errorHandler);
-            function ok(){
-                vm.alert('warning', 'Organization removed!');
-                vm.reload();
+        function selectRow(organization) {
+            if (toolbarContext.contextEnabled()) {
+                var actions = [
+                    {
+                        type: 'edit',
+                        action: function () {
+                            viewOrganization(organization.id);
+                        }
+                    },
+                    {
+                        type: 'bin',
+                        action: function () {
+                            remove(organization.id);
+                        }
+                    }];
+                vm.selection = organization;
+                toolbarContext.setContext(actions);
             }
         }
 
-        function viewOrganization(id){
+        function remove(id) {
+            Organization.remove(id).then(vm.reload);
+        }
+
+        function viewOrganization(id) {
             $location.path('/admin/organization/' + id);
         }
 

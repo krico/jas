@@ -1,0 +1,49 @@
+/**
+  Common styling for all tables on small devices. For guidelines check comments.
+**/
+
+@media (max-width: 600px) {
+
+  table.responsive {
+    // - by default hide & footers
+    > thead, > tfoot {
+      display: none;
+    }
+
+    > tbody {
+
+      // - make tbody a flexbox container
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+
+      > tr {
+        // - use flexbox row layout to display cells
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        // - by default hide all cells, if you want to display it on small devices,  do it explicitly
+        //   (check #admin-organizations for details)
+        td {
+          padding: 7px !important;
+          display: none;
+        }
+      }
+    }
+  }
+
+  // - add accent to selected rows
+  .responsive.table-hover, table.responsive {
+    tr.selected {
+      background-color: #ECEFF1;
+
+      &:hover {
+        background-color: #CFD8DC !important;
+        td {
+          border-color: #CFD8DC;
+        }
+      }
+    }
+  }
+}

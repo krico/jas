@@ -8,11 +8,13 @@
         'ngSanitize',
         'ngMaterial',
         'ngAnimate',
+        'pascalprecht.translate',
         'angularMoment',
         'ui.bootstrap',
         'angularSpinner',
         'ui.bootstrap.datetimepicker',
         'jasifyComponents',
+        'jasify.locale',
         'jasify.admin',
         'jasify.authenticate',
         'jasify.payment',
@@ -35,11 +37,25 @@
         $mdThemingProvider.theme('default');
     });
 
-    jasifyWeb.config(function (EndpointProvider, localStorageServiceProvider) {
+    jasifyWeb.config(function ($translateProvider, EndpointProvider, localStorageServiceProvider) {
         EndpointProvider.verbose(true);
         localStorageServiceProvider.setPrefix('Jasify');
-    }).run(function (amMoment) {
-        amMoment.changeLocale('de');
+
+        // TODO: extract is somwehere
+        $translateProvider
+            .translations('en', {
+                SIGN_OUT: 'Sign Out '
+            }).translations('de', {
+                SIGN_OUT: 'Abmelden'
+            }).registerAvailableLanguageKeys(['en', 'de'], {
+                'en_US': 'en',
+                'en_UK': 'en',
+                'de_DE': 'de',
+                'de_CH': 'de'
+            }).fallbackLanguage('en');
+
+    }).run(function (jasLocale) {
+        jasLocale.initialize();
     });
 
     /**
