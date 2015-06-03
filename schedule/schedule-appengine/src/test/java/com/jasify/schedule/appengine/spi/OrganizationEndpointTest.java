@@ -321,20 +321,6 @@ public class OrganizationEndpointTest {
     }
 
     @Test
-    public void testGetOrganizationsForAdmin() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        ArrayList<Organization> expected = new ArrayList<>();
-        expect(service.getOrganizations()).andReturn(expected);
-        testOrganizationServiceFactory.replay(); //recording finished
-
-        JasifyEndpointUser caller = newAdminCaller(55); //Helper method to create a fake caller (true means admin)
-
-        List<Organization> organizations = endpoint.getOrganizations(caller);
-        // I use == here since I know the method returns it directly
-        assertNotNull(organizations == expected);
-    }
-
-    @Test
     public void testGetOrganizationsForUser() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
         JasifyEndpointUser caller = newOrgMemberCaller(55);
