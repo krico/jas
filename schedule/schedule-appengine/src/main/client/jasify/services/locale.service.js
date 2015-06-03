@@ -1,5 +1,5 @@
 /*global window */
-(function (angular) {
+(function (angular, navigator) {
 
     'use strict';
 
@@ -8,7 +8,17 @@
     module.factory('jasLocale', function ($log, $translate, localStorageService, amMoment) {
 
         var localeKey = 'jas-locale',
-            defaultLocale = 'de';
+            defaultLocale;
+
+        if (navigator.languages && navigator.languages[0]) {
+            defaultLocale = navigator.languages[0];
+        } else if (navigator.language) {
+            defaultLocale = navigator.language;
+        } else {
+            defaultLocale = 'en';
+        }
+
+        $log.debug('Default locale: ' + defaultLocale);
 
         return {
             locale: function (newLocale) {
@@ -23,11 +33,16 @@
                 return localStorageService.get(localeKey);
             },
             initialize: function () {
-                $log.debug('Initializing locale');
-                this.locale(this.locale() || defaultLocale);
+                var previousLocale = this.locale();
+                if (previousLocale) {
+                    $log.debug('Initializing locale to previous locale: ' + previousLocale);
+                } else {
+                    $log.debug('Initializing locale to default locale: ' + defaultLocale);
+                }
+                this.locale(previousLocale || defaultLocale);
             }
         };
     });
 
-}(window.angular));
+}(window.angular, window.navigator));
 

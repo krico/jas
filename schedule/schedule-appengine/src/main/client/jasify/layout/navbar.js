@@ -13,7 +13,6 @@
         vm.isAuthenticated = isAuthenticated;
         vm.isAdmin = isAdmin;
         vm.isAdminOrOrgMember = isAdminOrOrgMember;
-        vm.changeLocale = changeLocale;
 
         vm.menuActive = menuActive;
         vm.collapse = collapse;
@@ -40,10 +39,6 @@
         $scope.$on(AUTH_EVENTS.loginSuccess, vm.loginSucceeded);
         $scope.$on(AUTH_EVENTS.logoutSuccess, vm.logoutSucceeded);
         $scope.$watch(pathWatch, onPathChanged);
-
-        function changeLocale(locale) {
-            jasLocale.locale(locale);
-        }
 
         function isAuthenticated() {
             return Auth.isAuthenticated();

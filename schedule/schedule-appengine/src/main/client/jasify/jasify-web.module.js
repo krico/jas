@@ -42,13 +42,17 @@
         localStorageServiceProvider.setPrefix('Jasify');
 
         // TODO: extract is somwehere
-        $translateProvider.translations('en-US', {
-            SIGN_OUT: 'Sign Out '
-        });
-        $translateProvider.translations('de', {
-            SIGN_OUT: 'Abmelden'
-        });
-        $translateProvider.preferredLanguage('en');
+        $translateProvider
+            .translations('en-US', {
+                SIGN_OUT: 'Sign Out '
+            }).translations('de', {
+                SIGN_OUT: 'Abmelden'
+            }).registerAvailableLanguageKeys(['en', 'de'], {
+                'en_US': 'en',
+                'en_UK': 'en',
+                'de_DE': 'de',
+                'de_CH': 'de'
+            }).fallbackLanguage('en');
 
     }).run(function (jasLocale) {
         jasLocale.initialize();
