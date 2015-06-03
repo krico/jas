@@ -43,7 +43,7 @@
 
         // TODO: extract is somwehere
         $translateProvider
-            .translations('en-US', {
+            .translations('en', {
                 SIGN_OUT: 'Sign Out '
             }).translations('de', {
                 SIGN_OUT: 'Abmelden'
