@@ -33,4 +33,9 @@ public abstract class BaseMemcacheTransaction<T> implements MemcacheTransaction<
     public Expiration expiration() {
         return expiration;
     }
+
+    @Override
+    public boolean skipMemcacheUpdate() {
+        return false;
+    }
 }

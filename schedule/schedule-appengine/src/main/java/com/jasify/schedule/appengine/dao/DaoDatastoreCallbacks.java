@@ -8,7 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author krico
@@ -17,13 +20,25 @@ import java.util.List;
 class DaoDatastoreCallbacks {
     private static final Logger log = LoggerFactory.getLogger(DaoDatastoreCallbacks.class);
     private static final EntityToKey entityToKey = new EntityToKey();
+    private static final KeyToKindQueryMetadata keyToKindQueryMetadata = new KeyToKindQueryMetadata();
+    private static final long DEFAULT_MILLIS_NO_RE_ADD = 50;
+
+    private static void purgeCache(List<Key> elementKeys) {
+        Set<String> cqmKeys = new HashSet<>(Lists.transform(elementKeys, keyToKindQueryMetadata));
+
+        ArrayList<Object> deleteKeys = new ArrayList<Object>(cqmKeys);
+        deleteKeys.addAll(elementKeys);
+
+        /* This works together with DaoUtil.cachePut using MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT */
+        Memcache.deleteAll(deleteKeys, DEFAULT_MILLIS_NO_RE_ADD);
+    }
 
     @PostPut
     void postPut(PutContext context) {
         // Handle batches only once
         if (context.getCurrentIndex() == 0) {
-            List<Key> keys = Lists.transform(context.getElements(), entityToKey);
-            Memcache.deleteAll(keys);
+            List<Key> elementKeys = Lists.transform(context.getElements(), entityToKey);
+            purgeCache(elementKeys);
         }
     }
 
@@ -31,8 +46,8 @@ class DaoDatastoreCallbacks {
     void postDelete(DeleteContext context) {
         // Handle batches only once
         if (context.getCurrentIndex() == 0) {
-            List<Key> keys = context.getElements();
-            Memcache.deleteAll(keys);
+            List<Key> elementKeys = context.getElements();
+            purgeCache(elementKeys);
         }
     }
 
@@ -41,6 +56,14 @@ class DaoDatastoreCallbacks {
         @Override
         public Key apply(Entity entity) {
             return entity.getKey();
+        }
+    }
+
+    private static class KeyToKindQueryMetadata implements Function<Key, String> {
+        @Nullable
+        @Override
+        public String apply(Key input) {
+            return DaoQueryMetadata.kindToId(input.getKind());
         }
     }
 }

@@ -24,6 +24,15 @@ public interface MemcacheTransaction<T> {
     Expiration expiration();
 
     /**
+     * This method is checked after the execution of  {@link #execute} to determine the returned value
+     * should be updated in memcache or not.
+     *
+     * @return false instructs that the value should be updated in memcache, true means "no update necessary"
+     * (usually if the value didn't change)
+     */
+    boolean skipMemcacheUpdate();
+
+    /**
      * An idempotent manipulation of the entity in memcache.  If the entity is updated by a different thread, the
      * operation will be executed again.
      *

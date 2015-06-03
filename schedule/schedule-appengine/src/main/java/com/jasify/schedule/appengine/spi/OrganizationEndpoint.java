@@ -7,6 +7,7 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -52,16 +53,18 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 packagePath = ""))
 public class OrganizationEndpoint {
 
+    private final OrganizationDao organizationDao = new OrganizationDao();
+
     @ApiMethod(name = "organizations.queryPublic", path = "organizations-public", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Organization> getPublicOrganizations(User caller) throws UnauthorizedException, ForbiddenException, EntityNotFoundException {
-        return OrganizationServiceFactory.getOrganizationService().getOrganizations();
+        return organizationDao.getAll();
     }
 
     @ApiMethod(name = "organizations.query", path = "organizations", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Organization> getOrganizations(User caller) throws UnauthorizedException, ForbiddenException, EntityNotFoundException {
         JasifyEndpointUser jasUser = mustBeLoggedIn(caller);
         // Admin sees all
-        if (jasUser.isAdmin()) return OrganizationServiceFactory.getOrganizationService().getOrganizations();
+        if (jasUser.isAdmin()) return organizationDao.getAll();
         if (jasUser.isOrgMember()) {
             return OrganizationServiceFactory.getOrganizationService().getOrganizationsForUser(jasUser.getUserId());
         }

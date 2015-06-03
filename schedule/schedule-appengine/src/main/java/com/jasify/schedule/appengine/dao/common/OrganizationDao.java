@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
+import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.dao.UniqueIndex;
 import com.jasify.schedule.appengine.dao.UniqueIndexCache;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
@@ -9,8 +10,11 @@ import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.common.Organization;
 import org.apache.commons.lang3.StringUtils;
+import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author krico
@@ -58,5 +62,15 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
             nameIndex.release(found.getLcName());
         }
         super.delete(id);
+    }
+
+    public List<Organization> getAll() {
+        OrganizationMeta meta = getMeta();
+        return query(new BaseDaoQuery<Organization, OrganizationMeta>(meta, new Serializable[0]) {
+            @Override
+            public List<Key> execute() {
+                return Datastore.query(meta).asKeyList();
+            }
+        });
     }
 }

@@ -3,6 +3,9 @@ package com.jasify.schedule.appengine.dao;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.labs.repackaged.com.google.common.base.Function;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
 import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.memcache.Memcache;
 import org.slf4j.Logger;
@@ -10,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.slim3.datastore.ModelMeta;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author krico
@@ -24,7 +30,8 @@ public final class DaoUtil {
     public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model, Expiration expiration) {
         try {
             Entity entity = model == null ? null : meta.modelToEntity(model);
-            Memcache.put(id, entity, expiration);
+            /* This works together with DaoDatastoreCallbacks.purgeCache DEFAULT_MILLIS_NO_RE_ADD */
+            Memcache.put(id, entity, expiration, MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
         } catch (IllegalArgumentException e) {
             log.warn("Memcache exception IGNORED", e);
         }
@@ -33,6 +40,26 @@ public final class DaoUtil {
 
     public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model) {
         return cachePut(id, meta, model, null);
+    }
+
+    public static <T> void cachePutAll(@Nonnull Map<Key, T> kvp, @Nonnull final ModelMeta<T> meta) {
+        cachePutAll(kvp, meta, null);
+    }
+
+    public static <T> void cachePutAll(@Nonnull Map<Key, T> kvp, @Nonnull final ModelMeta<T> meta, Expiration expiration) {
+        try {
+            Map<Key, Entity> keyEntityMap = Maps.transformValues(kvp, new Function<T, Entity>() {
+                @Nullable
+                @Override
+                public Entity apply(@Nullable T model) {
+                    return model == null ? null : meta.modelToEntity(model);
+                }
+            });
+            /* This works together with DaoDatastoreCallbacks.purgeCache DEFAULT_MILLIS_NO_RE_ADD */
+            Memcache.putAll(keyEntityMap, expiration, MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+        } catch (IllegalArgumentException e) {
+            log.warn("Memcache exception IGNORED", e);
+        }
     }
 
     public static <T> T cacheGet(@Nonnull Key id, @Nonnull ModelMeta<T> meta) {
@@ -46,6 +73,23 @@ public final class DaoUtil {
             log.warn("Memcache exception IGNORED", e);
         }
         return ret;
+    }
+
+    public static <T> Map<Key, T> cacheGet(@Nonnull List<Key> ids, @Nonnull final ModelMeta<T> meta) {
+        Map<Key, T> modelMap = Maps.newHashMap();
+        try {
+            Map<Key, Entity> cached = Memcache.getAll(ids);
+            modelMap = Maps.transformValues(cached, new Function<Entity, T>() {
+                @Nullable
+                @Override
+                public T apply(Entity entity) {
+                    return meta.entityToModel(entity);
+                }
+            });
+        } catch (IllegalArgumentException e) {
+            log.warn("Memcache exception IGNORED", e);
+        }
+        return modelMap;
     }
 
     /**

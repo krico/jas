@@ -147,7 +147,7 @@ public class BaseDaoTest {
 
         for (int i = 0; i < 10; ++i) {
             Example example = createExample();
-            example.setData(String.format("TYPE-%d", i % 3));
+            example.setDataType(String.format("TYPE-%d", i % 3));
             dao.save(example);
             examples.add(example);
         }
@@ -161,6 +161,7 @@ public class BaseDaoTest {
                         expected.add(example);
                     }
                 }
+                assertFalse(expected.isEmpty());
                 List<Example> queryResult = ((AnyExampleDao) dao).byDataType(type);
                 assertNotNull(queryResult);
                 assertEquals(expected.size(), queryResult.size());
@@ -172,6 +173,43 @@ public class BaseDaoTest {
     }
 
     @Test
+    public void testQueryDetectsChanges() throws Exception {
+        Example example1 = createExample();
+        example1.setDataType("odd");
+        dao.save(example1);
+        Example example2 = createExample();
+        example2.setDataType("even");
+        dao.save(example2);
+        Example example3 = createExample();
+        example3.setDataType("odd");
+        dao.save(example3);
+
+        List<Example> odd = ((AnyExampleDao) dao).byDataType("odd");
+        assertEquals(2, odd.size());
+        assertTrue(odd.contains(example1));
+        assertTrue(odd.contains(example3));
+        List<Example> even = ((AnyExampleDao) dao).byDataType("even");
+        assertEquals(1, even.size());
+        assertTrue(even.contains(example2));
+
+        Example example4 = createExample();
+        example4.setDataType("even");
+        dao.save(example4);
+
+        odd = ((AnyExampleDao) dao).byDataType("odd");
+        assertEquals(2, odd.size());
+        assertTrue(odd.contains(example1));
+        assertTrue(odd.contains(example3));
+
+        even = ((AnyExampleDao) dao).byDataType("even");
+        assertEquals("stale cache?", 2, even.size());
+        assertTrue("stale cache?", even.contains(example2));
+        assertTrue("stale cache?", even.contains(example4));
+
+
+    }
+
+    @Test
     public void testSaveList() throws Exception {
         List<Example> examples = new ArrayList<>();
         examples.add(createExample());
@@ -180,9 +218,11 @@ public class BaseDaoTest {
         List<Key> keys = dao.save(examples);
         assertNotNull(keys);
         assertEquals(examples.size(), keys.size());
-        for (int i = 0; i < keys.size(); ++i) {
-            Example example = dao.get(keys.get(i));
-            assertEquals(examples.get(i), example);
+        for (int M = 0; M < 3; ++M) {
+            for (int i = 0; i < keys.size(); ++i) {
+                Example example = dao.get(keys.get(i));
+                assertEquals(examples.get(i), example);
+            }
         }
     }
 
@@ -208,11 +248,14 @@ public class BaseDaoTest {
         examples.add(createExample());
         examples.add(createExample());
         List<Key> keys = dao.save(examples);
-        List<Example> batch = dao.get(keys);
-        assertEquals(keys.size(), batch.size());
+        for (int M = 0; M < 3; ++M) {
 
-        for (int i = 0; i < keys.size(); ++i) {
-            assertEquals(examples.get(i), batch.get(i));
+            List<Example> batch = dao.get(keys);
+            assertEquals(keys.size(), batch.size());
+
+            for (int i = 0; i < keys.size(); ++i) {
+                assertEquals(examples.get(i), batch.get(i));
+            }
         }
     }
 

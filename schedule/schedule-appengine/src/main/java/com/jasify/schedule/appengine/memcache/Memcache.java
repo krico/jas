@@ -1,10 +1,15 @@
 package com.jasify.schedule.appengine.memcache;
 
 import com.google.appengine.api.memcache.*;
+import com.google.appengine.labs.repackaged.com.google.common.base.Function;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,8 +35,22 @@ public final class Memcache {
         return (T) whatever;
     }
 
+    private static <K, V> Map<K, V> castAll(Map<K, Object> all) {
+        return Maps.transformValues(all, new Function<Object, V>() {
+            @Nullable
+            @Override
+            public V apply(Object o) {
+                return cast(o);
+            }
+        });
+    }
+
     public static <T> T get(Object key) throws IllegalArgumentException {
         return cast(delegate().get(key));
+    }
+
+    public static <K, V> Map<K, V> getAll(List<K> keys) throws IllegalArgumentException {
+        return castAll(delegate().getAll(keys));
     }
 
     public static boolean contains(Object key) throws IllegalArgumentException {
@@ -46,6 +65,18 @@ public final class Memcache {
         delegate().put(key, value, expires);
     }
 
+    public static void put(Object key, Object value, Expiration expires, MemcacheService.SetPolicy policy) throws IllegalArgumentException {
+        delegate().put(key, value, expires, policy);
+    }
+
+    public static void putAll(Map<?, ?> keyValues, Expiration expires) throws IllegalArgumentException {
+        delegate().putAll(keyValues, expires);
+    }
+
+    public static void putAll(Map<?, ?> keyValues, Expiration expires, MemcacheService.SetPolicy policy) throws IllegalArgumentException {
+        delegate().putAll(keyValues, expires, policy);
+    }
+
 
     public static boolean delete(Object key) throws IllegalArgumentException {
         return delegate().delete(key);
@@ -53,6 +84,10 @@ public final class Memcache {
 
     public static Set<?> deleteAll(Collection<?> keys) throws IllegalArgumentException {
         return delegate().deleteAll(keys);
+    }
+
+    public static Set<?> deleteAll(Collection<?> keys, long millisNoReAdd) throws IllegalArgumentException {
+        return delegate().deleteAll(keys, millisNoReAdd);
     }
 
     private static class TheErrorHandler implements ConsistentErrorHandler {

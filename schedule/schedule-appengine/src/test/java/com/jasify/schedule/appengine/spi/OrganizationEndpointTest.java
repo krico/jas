@@ -49,13 +49,13 @@ public class OrganizationEndpointTest {
      * The endpoint we are testing.  Currently the Endpoints are basically controlling permissions and calling through to
      * the actual data model.
      */
-    private OrganizationEndpoint endpoint = new OrganizationEndpoint();
+    private OrganizationEndpoint endpoint;
 
     @Before
     public void datastore() {
         TestHelper.initializeDatastore(); // Starts a inMemory AppEngine datastore
         testOrganizationServiceFactory.setUp(); // see comment above
-
+        endpoint = new OrganizationEndpoint();
     }
 
     @After
@@ -318,20 +318,6 @@ public class OrganizationEndpointTest {
 
         Organization result = endpoint.updateOrganization(newAdminCaller(55), key, organization);
         assertEquals(result, organization);
-    }
-
-    @Test
-    public void testGetOrganizationsForAdmin() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        ArrayList<Organization> expected = new ArrayList<>();
-        expect(service.getOrganizations()).andReturn(expected);
-        testOrganizationServiceFactory.replay(); //recording finished
-
-        JasifyEndpointUser caller = newAdminCaller(55); //Helper method to create a fake caller (true means admin)
-
-        List<Organization> organizations = endpoint.getOrganizations(caller);
-        // I use == here since I know the method returns it directly
-        assertNotNull(organizations == expected);
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.slim3.datastore.ModelMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -136,4 +137,16 @@ public abstract class BaseDao<T> {
     public void delete(@Nonnull List<Key> ids) {
         Datastore.delete(ids);
     }
+
+    protected List<T> query(@Nonnull DaoQuery query) {
+        List<Key> ids = query.execute();
+        if (ids.isEmpty()) return Collections.emptyList();
+        try {
+            return get(ids);
+        } catch (EntityNotFoundException e) {
+            log.warn("A Query returned ids for non-existing entities", e);
+            throw Throwables.propagate(e);
+        }
+    }
+
 }
