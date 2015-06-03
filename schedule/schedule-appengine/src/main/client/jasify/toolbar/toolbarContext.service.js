@@ -3,7 +3,7 @@
 
     'use strict';
 
-    angular.module('jasify.common.ui').service('toolbarContext', function ($rootScope, jasDialogs) {
+    angular.module('jasify.common.ui').service('toolbarContext', function ($rootScope, $mdMedia, jasDialogs) {
         var listeners = [];
 
         /**
@@ -14,6 +14,11 @@
          */
         function setContext(contextDescription) {
             var contextActions = [];
+
+            if (!$mdMedia('sm')) {
+                return;
+            }
+
             angular.forEach(contextDescription, function (value) {
 
                 var decorateHandler = null;
