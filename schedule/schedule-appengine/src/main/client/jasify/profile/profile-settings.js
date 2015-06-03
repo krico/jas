@@ -21,7 +21,7 @@
         vm.reset(true);
 
         function setLocale(locale) {
-            
+            vm.user.locale = locale;
         }
 
         function save() {
