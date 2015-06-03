@@ -49,13 +49,13 @@ public class OrganizationEndpointTest {
      * The endpoint we are testing.  Currently the Endpoints are basically controlling permissions and calling through to
      * the actual data model.
      */
-    private OrganizationEndpoint endpoint = new OrganizationEndpoint();
+    private OrganizationEndpoint endpoint;
 
     @Before
     public void datastore() {
         TestHelper.initializeDatastore(); // Starts a inMemory AppEngine datastore
         testOrganizationServiceFactory.setUp(); // see comment above
-
+        endpoint = new OrganizationEndpoint();
     }
 
     @After
