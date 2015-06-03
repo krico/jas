@@ -19,18 +19,27 @@
                     return $mdMedia('sm');
                 }, function (newValue) {
                     $scope.showContext = newValue;
+                    updateAccent();
                 });
+
+                function updateAccent() {
+                    if ($scope.hasContext && $scope.showContext) {
+                        $scope.toolbar.addClass('md-accent');
+                    } else {
+                        $scope.toolbar.removeClass('md-accent');
+                    }
+                }
 
                 toolbarContext.subscribe(function (contextActions) {
                     $scope.hasContext = contextActions && contextActions.length > 0;
                     $scope.contextActions = contextActions;
-                    $scope.toolbar.toggleClass('md-accent', $scope.hasContext);
+                    updateAccent();
                 });
 
                 $scope.cancelContext = function () {
                     $scope.hasContext = false;
                     $scope.contextActions = [];
-                    $scope.toolbar.removeClass('md-accent');
+                    updateAccent();
                 };
             }
         };
