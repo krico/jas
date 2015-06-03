@@ -16,7 +16,7 @@
                 $scope.hasContext = false;
 
                 $scope.$watch(function () {
-                    return $mdMedia('sm');
+                    return toolbarContext.contextEnabled();
                 }, function (newValue) {
                     $scope.showContext = newValue;
                     updateAccent();

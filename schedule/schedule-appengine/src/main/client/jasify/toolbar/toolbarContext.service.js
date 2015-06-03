@@ -15,7 +15,7 @@
         function setContext(contextDescription) {
             var contextActions = [];
 
-            if (!$mdMedia('sm')) {
+            if (!contextEnabled()) {
                 return;
             }
 
@@ -43,6 +43,14 @@
         }
 
         /**
+         * Determines if contextual actions are enabled
+         * @returns {boolean}
+         */
+        function contextEnabled() {
+            return $mdMedia('sm');
+        }
+
+        /**
          *
          * Method to register listeners that will will be called on context change.
          * One candidate for listener is toolbar-context directive which is notified to update toolbar buttons
@@ -64,7 +72,8 @@
         return {
             clearContext: clearContext,
             setContext: setContext,
-            subscribe: subscribe
+            subscribe: subscribe,
+            contextEnabled: contextEnabled
         };
     });
 }(window.angular));

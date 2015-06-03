@@ -45,21 +45,23 @@
         }
 
         function selectRow(organization) {
-            var actions = [
-                {
-                    type: 'edit',
-                    action: function () {
-                        viewOrganization(organization.id);
-                    }
-                },
-                {
-                    type: 'bin',
-                    action: function () {
-                        remove(organization.id);
-                    }
-                }];
-            vm.selection = organization;
-            toolbarContext.setContext(actions);
+            if (toolbarContext.contextEnabled()) {
+                var actions = [
+                    {
+                        type: 'edit',
+                        action: function () {
+                            viewOrganization(organization.id);
+                        }
+                    },
+                    {
+                        type: 'bin',
+                        action: function () {
+                            remove(organization.id);
+                        }
+                    }];
+                vm.selection = organization;
+                toolbarContext.setContext(actions);
+            }
         }
 
         function remove(id) {
