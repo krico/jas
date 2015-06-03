@@ -100,7 +100,7 @@
                        class="toolbar-animate md-icon-button" aria-label="Settings">
                 <md-icon md-svg-icon="build/img/{{contextAction.type}}.svg"></md-icon>
             </md-button>
-            <md-button ng-show="vm.isAuthenticated()" class="md-raised" translate="SIGN_OUT" ng-href="#/logout"></md-button>
+            <md-button ng-show="vm.isAuthenticated() && (!showContext || !hasContext)" class="md-raised" translate="SIGN_OUT" ng-href="#/logout"></md-button>
         </div>
     </md-toolbar>
     <md-content id="content" ng-controller="NavbarController as vm" ng-class="{ 'home-splash': !vm.isAuthenticated() }"
