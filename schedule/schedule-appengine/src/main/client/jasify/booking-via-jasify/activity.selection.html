@@ -1,0 +1,48 @@
+<div class="card">
+    <div class="card-header bgm-bluegray">
+        <h2 class="pull-left">Activities
+            <small>Select activities you would like to join.</small>
+        </h2>
+        <button wizard-trigger="#activity-packages"
+                class="pull-right btn bgm-blue waves-effect">
+            Continue to Activity Packages <i
+                class="md mdi mdi-send"></i></button>
+        <button wizard-trigger="#checkout"
+                class="pull-right btn bgm-blue waves-effect">
+            Continue to Checkout <i
+                class="md mdi mdi-send"></i></button>
+    </div>
+    <div class="card-body card-padding-sm">
+        <div ng-repeat="activity in vm.activities | orderBy: 'start'" class="t-view selectable-lv-item"
+             ng-style="vm.getStyle(activity)">
+            <div class="tv-header clearfix" ng-class="{ 'active' : vm.isActivitySelected(activity) }">
+
+                <div class="checkbox pull-left" ng-class="{ 'disabled': vm.isFullyBooked(activity) }">
+                    <label>
+                        <input ng-disabled="vm.isActivityFullyBooked(activity)" type="checkbox"
+                               checklist-model="vm.activitySelection"
+                               checklist-value="activity"/>
+                        <i class="input-helper"></i>
+                    </label>
+                </div>
+                <div class="pull-left media-body p-t-5">
+                    <strong class="d-block"><span class="badge" ng-style="vm.getBadge(activity)">{{activity.activityType.name}}</span></strong>
+                    <small class="c-gray">{{[activity.start, activity.finish] | tableShortDateTime}}
+                    </small>
+                    <br/>
+                    <small class="c-gray">{{activity.location}}</small>
+                </div>
+                <ul class="tvb-stats pull-right">
+                    <li ng-show="vm.isActivityFullyBooked(activity)" class="tvbs-views">Fully Booked
+                    </li>
+                    <li ng-show="!vm.isActivityFullyBooked(activity)">Price: {{activity.price}}
+                        {{activity.currency}}
+                    </li>
+                    <li ng-show="!vm.isActivityFullyBooked(activity)">Places left:
+                        {{activity.maxSubscriptions - activity.subscriptionCount}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
