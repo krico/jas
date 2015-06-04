@@ -1,10 +1,11 @@
 @import (reference) "bootstrap.less";
 
-@import "inline-images";
-
 @facebookBgColor: #3b5998;
 @googleBgColor: #dd4b39;
 @angularMaterialLayoutSm: 600px;
+
+@import "inline-images";
+@import 'tables';
 
 .jas-visible-xs {
   @media (min-width: @angularMaterialLayoutSm) {
@@ -18,6 +19,7 @@
   margin: auto;
   text-align: center;
 }
+
 /* BEGIN: OAuth buttons */
 
 #create-new {
@@ -193,15 +195,6 @@ td.actions-column {
   width: 100%;
 }
 
-.btn-float.btn-float-text {
-  border-radius: 0;
-  width: auto;
-}
-
-.card .card-header.card-header-with-icon {
-  padding-bottom: 26px;
-}
-
 .card-with-icon {
   display: flex;
   flex-direction: row;
@@ -350,19 +343,22 @@ td.actions-column {
   right: 0;
 }
 
-.card .card-header [wizard-trigger].btn-float {
-  @media (max-width: @angularMaterialLayoutSm) {
-    font-size: smaller;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
+#wizard {
+  .card .card-header {
 
-  position: relative;
-  bottom: 0;
-  right: 0;
+    padding-bottom: 5px;
+    .clearfix;
 
-  &:last-of-type {
-    margin-right: 10px;
+    .pull-left[wizard-trigger],
+    .pull-right[wizard-trigger] {
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+
+    .pull-left[wizard-trigger] + .pull-left[wizard-trigger],
+    .pull-right[wizard-trigger] + .pull-right[wizard-trigger] {
+      clear: both;
+    }
   }
 }
 
@@ -410,8 +406,6 @@ td.actions-column {
 .help-label {
   border-bottom: 1px dotted #000000;
 }
-
-@import 'tables';
 
 .jasify-logotype {
   line-height: 40px;
