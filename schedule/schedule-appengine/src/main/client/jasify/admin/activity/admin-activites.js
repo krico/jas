@@ -44,6 +44,7 @@
         function removeActivity(activity) {
             Activity.remove(activity.id).then(function () {
                 vm.activities.splice(vm.activities.indexOf(activity), 1);
+                vm.selectActivity(null);
             });
         }
 
@@ -60,7 +61,7 @@
         }
 
         function selectActivity(activity) {
-            if (toolbarContext.contextEnabled()) {
+            if (activity && toolbarContext.contextEnabled()) {
                 var actions = [
                     {
                         type: 'edit',
@@ -76,6 +77,9 @@
                     }];
                 vm.selection = activity;
                 toolbarContext.setContext(actions);
+            } else {
+                delete vm.selection;
+                toolbarContext.clearContext();
             }
         }
     }

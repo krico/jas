@@ -15,7 +15,7 @@
         vm.viewOrganization = viewOrganization;
         vm.alert = alert;
         vm.isAdmin = isAdmin;
-        vm.selectRow = selectRow;
+        vm.selectOrganization = selectOrganization;
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -44,8 +44,8 @@
             Organization.update(org).then(ok, errorHandler);
         }
 
-        function selectRow(organization) {
-            if (toolbarContext.contextEnabled()) {
+        function selectOrganization(organization) {
+            if (organization && toolbarContext.contextEnabled()) {
                 var actions = [
                     {
                         type: 'edit',
@@ -61,11 +61,15 @@
                     }];
                 vm.selection = organization;
                 toolbarContext.setContext(actions);
+            } else {
+                toolbarContext.clearContext();
+                delete vm.selection;
             }
         }
 
         function remove(id) {
             Organization.remove(id).then(vm.reload);
+            selectRow(null);
         }
 
         function viewOrganization(id) {

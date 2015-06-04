@@ -31,7 +31,7 @@
         <tbody>
         <tr ng-repeat="organization in vm.organizations"
             ng-class="{ 'selected': vm.selection.id === organization.id }"
-            ng-click="vm.selectRow(organization)">
+            ng-click="vm.selectOrganization(organization)">
             <td class="row-commands">
                 <row-edit action="vm.viewOrganization(organization.id)"></row-edit>
                 <row-delete action="vm.remove(organization.id)" ng-if="vm.isAdmin()"></row-delete>
