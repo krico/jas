@@ -26,12 +26,69 @@
 }
 
 #admin-activities-table {
-  tbody {
-    td {
-      .min-size-column();
+
+  @media (min-width: 600px) {
+    tbody {
+      td {
+        .min-size-column();
+      }
+      .activity-type, .activity-location {
+        .auto-width-column();
+      }
     }
-    .activity-type, .activity-location {
-      .auto-width-column();
+  }
+
+  @media (max-width: 600px) {
+
+    tbody {
+
+      tr {
+
+        // - make .name cell take whole row
+        .activity-type {
+
+          border-top: 5px solid #f0f0f0;
+
+          display: block;
+          flex: 1 100%;
+        }
+
+        .activity-subscription-info {
+          display: block;
+          flex-grow: 1;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Subscriptions:";
+          }
+        }
+
+        .activity-start {
+          display: block;
+          flex-grow: 1;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Start:";
+          }
+        }
+
+        .activity-finish {
+          display: block;
+          flex-grow: 1;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Finish:";
+          }
+        }
+
+        .view-subscribers, .add-subscriber {
+          display: block;
+          flex: 1 100%;
+          font-size: smaller;
+        }
+      }
     }
   }
 }

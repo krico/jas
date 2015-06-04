@@ -83,6 +83,22 @@
         };
     });
 
+    module.directive('composeNew', function () {
+        return {
+            restrict: 'E',
+            replase: true,
+            scope: {
+                action: '&'
+            },
+            template: '<a href class="btn btn-primary btn-float waves-effect waves-button" ng-click="action && action()" id="create-new"><i class="md mdi mdi-add"></i></a>',
+            link: function (scope, element, attrs) {
+                if (!attrs.action) {
+                    throw new Error("action is not defined on element");
+                }
+            }
+        };
+    })
+
     module.directive('rowAdd', function () {
         return {
             restrict: 'E',
