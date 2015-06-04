@@ -13,7 +13,7 @@
 
     var jasifyDirectivesFormModule = angular.module('jasifyComponents');
 
-    jasifyDirectivesFormModule.run(function () {
+    jasifyDirectivesFormModule.run(function ($rootScope) {
 
         $('body').on('focus', '.form-control', function () {
             $(this).closest('.fg-line').addClass('fg-toggled');
@@ -33,7 +33,9 @@
             }
         });
 
-
+        $rootScope.$on("$routeChangeSuccess", function () {
+            $('md-content').scrollTop(0);
+        });
     });
 
     jasifyDirectivesFormModule.provider('$moment', function () {
