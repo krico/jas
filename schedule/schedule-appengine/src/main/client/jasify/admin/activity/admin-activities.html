@@ -50,9 +50,7 @@
                 <row-delete action="vm.removeActivity(activity)"></row-delete>
                 <div class="dropdown">
                     <button type="button" tooltip="Subscriptions" class="btn btn-icon btn-primary command-edit" data-toggle="dropdown" aria-expanded="true"><i class="md mdi mdi-group"></i></button>
-                    <ul class="dropdown-menu fadeIn animated fadeOut">
-                        <li ng-if="activity.subscriptionCount > 0"><a href ng-click="vm.viewSubscribers(activity.id)">View Subscribers</a></li>
-                        <li><a href ng-click="vm.addSubscriber(activity.id)">Add Subscriber</a></li>
+                    <ul class="dropdown-menu fadeIn animated fadeOut" ng-include="'subscribtion-actions'">
                     </ul>
                 </div>
             </td>
@@ -63,10 +61,9 @@
             <td class="activity-subscription-info">
                 {{activity.subscriptionCount||0}} of {{activity.maxSubscriptions||0}}
             </td>
-            <td class="view-subscribers jas-visible-xs">
-                <ul class="sm-actions-list">
-                    <li><a href ng-click="vm.viewSubscribers(activity.id)">View Subscribers</a></li>
-                    <li><a href ng-click="vm.addSubscriber(activity.id)">Add Subscriber</a></li>
+            <td class="subscribers-actions jas-visible-xs">
+                <ul class="sm-actions-list" ng-include="'subscribtion-actions'">
+
                 </ul>
             </td>
             <td class="activity-price">
@@ -88,4 +85,7 @@
         <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
     </div>
 </div>
-
+<script id="subscribtion-actions" type="text/ng-template">
+    <li ng-if="activity.subscriptionCount > 0"><a href ng-click="vm.viewSubscribers(activity.id)">View Subscribers</a></li>
+    <li><a href ng-click="vm.addSubscriber(activity.id)">Add Subscriber</a></li>
+</script>
