@@ -25,13 +25,113 @@
   .min-size-column();
 }
 
-#admin-activities-table {
-  tbody {
-    td {
-      .min-size-column();
+#admin-activity-types {
+  @media (min-width: 600px) {
+    tbody {
+      td {
+        .min-size-column();
+      }
+      .activity-type-name, .activity-type-description {
+        .auto-width-column();
+      }
     }
-    .activity-type, .activity-location {
-      .auto-width-column();
+  }
+
+  @media (max-width: 600px) {
+
+    tbody {
+
+      tr {
+
+        .activity-type-tag {
+          display: inline-block;
+          border-top: 5px solid #f0f0f0;
+          order: 1;
+        }
+        .activity-type-name {
+          display: inline-block;
+          border-top: 5px solid #f0f0f0;
+          order: 2;
+          flex: 1;
+        }
+
+        .activity-type-price {
+          &:before {
+            display: block;
+            content: "Price:";
+          }
+          display: block;
+          order: 3;
+          flex: 1 100%;
+        }
+      }
+    }
+  }
+}
+
+#admin-activities-table {
+
+  @media (min-width: 600px) {
+    tbody {
+      td {
+        .min-size-column();
+      }
+      .activity-type, .activity-location {
+        .auto-width-column();
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+
+    tbody {
+
+      tr {
+
+        .activity-type {
+
+          border-top: 5px solid #f0f0f0;
+
+          display: block;
+          flex: 1 100%;
+        }
+
+        .activity-subscription-info {
+          display: block;
+          flex-grow: 1;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Subscriptions:";
+          }
+        }
+
+        .activity-start {
+          display: block;
+          flex-grow: 1;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Start:";
+          }
+        }
+
+        .activity-finish {
+          display: block;
+          flex-grow: 1;
+          font-size: smaller;
+          &:before {
+            display: block;
+            content: "Finish:";
+          }
+        }
+
+        .subscribers-actions {
+          display: block;
+          flex: 1 100%;
+          font-size: smaller;
+        }
+      }
     }
   }
 }

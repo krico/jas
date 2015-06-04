@@ -1,13 +1,16 @@
 <script type="text/ng-template" id="checkoutButton.html">
     <button ng-if="vm.paymentType == 'PayPal'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
             ng-click="vm.createPayment()"
-            class="btn btn-primary grow-on-small pull-right">
+            class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
         Continue to PayPal
     </button>
     <button ng-if="vm.paymentType == 'Cash'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
             ng-click="vm.createPayment()"
-            class="btn btn-primary grow-on-small pull-right">
+            class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
         Continue and pay later
+    </button>
+    <button class="btn grow-on-small btn-default pull-right m-r-10 m-b-5 m-t-5" ng-show="vm.cancel" btn-href="{{vm.cancel}}">
+        Cancel
     </button>
 </script>
 <div class="row">

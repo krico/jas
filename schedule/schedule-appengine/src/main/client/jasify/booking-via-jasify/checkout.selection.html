@@ -1,0 +1,132 @@
+<div ng-if="!vm.auth.isAuthenticated()">
+    <div class="card">
+        <div class="card-body card-padding-sm card-with-icon">
+            <i class="md mdi mdi-info-outline"></i>
+            Booking is done via Jasify. <br/>Sign In or Create Account in order to finish booking
+            process.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Sign In
+                        <small>Sign in with already created Jasify account</small>
+                    </h2>
+                </div>
+                <div class="card-body card-padding-sm">
+                    <div ng-controller="SignInController as vm"
+                         ng-include="'authenticate/sign-in.html'"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Create Account
+                        <small>If you don't have Jasify account, create it</small>
+                    </h2>
+                </div>
+                <div class="card-body card-padding-sm">
+                    <div ng-controller="CreateAccountController as vm"
+                         ng-init="vm.onCreated = vm.accountCreated"
+                         ng-include="'authenticate/create-account.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-if="vm.auth.isAuthenticated()">
+    <div class="card">
+        <div ng-show="!!vm.activitySelection.length || vm.hasCompletedActivityPackages()"
+             class="clearfix bgm-bluegray card-header card-header-with-icon">
+            <h2>Your Selection summary
+                <small>Review selected activities & activity packages. If everything is OK, submit it.
+                </small>
+            </h2>
+            <button ng-click="vm.bookIt()" class="btn bgm-blue pull-right waves-effect btn-float-text">
+                Submit <i class="md mdi mdi-shopping-cart"></i></button>
+            <button wizard-trigger="#activity-packages"
+                    class="btn bgm-blue waves-effect pull-left">
+                <i class="md mdi mdi-undo"></i> Back to Activity Packages
+            </button>
+            <button wizard-trigger="#activities"
+                    class="btn bgm-blue waves-effect pull-left">
+                <i class="md mdi mdi-undo"></i> Back to Activities
+            </button>
+        </div>
+        <div ng-show="!vm.activitySelection.length && !vm.hasCompletedActivityPackages()"
+             class="clearfix bgm-amber card-header card-header-with-icon">
+            <h2>No Items selected
+                <small>You did not select any activities nor activity packages.</small>
+            </h2>
+            <button wizard-trigger="#activity-packages"
+                    class="btn bgm-blue waves-effect pull-left">
+                <i class="md mdi mdi-undo"></i> Back to Activity Packages
+            </button>
+            <button wizard-trigger="#activities"
+                    class="btn bgm-blue waves-effect pull-left">
+                <i class="md mdi mdi-undo"></i> Back to Activities
+            </button>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div ng-show="vm.hasCompletedActivityPackages()"
+                 class="activity-listview listview lv-bordered lv-lg">
+                <div class="lv-header-alt">
+                    <h2 class="lvh-label">Selected Activity Packages</h2>
+                </div>
+                <div class="lv-body">
+                    <div class="lv-item media"
+                         ng-repeat="activityPackage in vm.activityPackages | filter:vm.packageSelectionComplete">
+                        <div class="media-body">
+                            <div class="lv-title">
+                                {{$index + 1}}. {{activityPackage.name}}
+                            </div>
+                            <ul class="lv-attrs">
+                                <li>Activities in Package: {{activityPackage.itemCount}}</li>
+                                <li>Price: {{activityPackage.price}} {{activityPackage.currency}}</li>
+                            </ul>
+                            <div class="lv-actions actions">
+                                <button tooltip="Remove"
+                                        ng-click="vm.confirmRemoveActivityPackage(activityPackage)"
+                                        class="btn btn-warning btn-icon"><i
+                                        class="md mdi mdi-close"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="vm.activitySelection.length"
+                 class="activity-listview listview lv-bordered lv-lg">
+                <div class="lv-header-alt">
+                    <h2 class="lvh-label">Selected Activities</h2>
+                </div>
+                <div class="lv-body">
+                    <div class="lv-item media" ng-repeat="activity in vm.activitySelection">
+                        <div class="media-body">
+                            <div class="lv-title">
+                                {{$index + 1}}. <span class="badge" ng-style="vm.getBadge(activity)">{{activity.activityType.name}}</span>
+                            </div>
+                            <ul class="lv-attrs">
+                                <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
+                                <li ng-if="activity.maxSubscriptions < activity.subscriptionCount">
+                                    Places left: {{activity.maxSubscriptions -
+                                    activity.subscriptionCount}}
+                                </li>
+                                <li>Price: {{activity.price}} {{activity.currency}}</li>
+                                <li ng-if="activity.location">Location: {{activity.location}}</li>
+                            </ul>
+                            <div class="lv-actions actions">
+                                <button tooltip="Remove" ng-click="vm.confirmRemoveActivity(activity)"
+                                        class="btn btn-warning btn-icon"><i
+                                        class="md mdi mdi-close"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

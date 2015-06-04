@@ -11,6 +11,7 @@
         vm.alerts = [];
         vm.createPayment = Checkout.popupMode ? createPaymentPopup : createPayment;
         vm.cart = cart;
+        vm.cancel = BrowserData.getPaymentCancelRedirect();
         vm.inProgress = false;
         vm.redirecting = false;
         vm.paymentType = 'PayPal';

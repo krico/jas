@@ -25,41 +25,49 @@
             </div>
         </div>
     </div>
-    <table id="admin-activities-table" ng-if="vm.activities.length" class="table table-hover table-condensed table-vmiddle">
+    <compose-new ng-show="vm.activities.length > 0" action="vm.addActivity()"></compose-new>
+    <table id="admin-activities-table" ng-if="vm.activities.length" class="table responsive table-hover table-condensed table-vmiddle">
         <thead>
         <tr>
             <th>
                 <row-add action="vm.addActivity()"  description="Add Activity"/>
             </th>
             <th>Activity Type</th>
-            <th>Location</th>
-            <th>Start</th>
-            <th>Finish</th>
-            <th>Subscriptions</th>
+            <th class="visible-lg" translate="LOCATION"></th>
+            <th translate="START"></th>
+            <th translate="FINISH"></th>
+            <th translate="SUBSCRIPTIONS"></th>
             <th>Price</th>
+            <th class="jas-visible-xs" colspan="2"></th>
         </tr>
         </thead>
         <tbody>
-        <tr class="animate-delete" ng-repeat="activity in vm.activities | orderBy:'start'">
+        <tr class="animate-delete"
+            ng-repeat="activity in vm.activities | orderBy:'start'"
+            ng-class="{ 'selected': vm.selection.id === activity.id }"
+            row-select="vm.selectActivity(activity)">
             <td class="row-commands">
                 <row-edit action="vm.viewActivity(activity)"></row-edit>
                 <row-delete action="vm.removeActivity(activity)"></row-delete>
                 <div class="dropdown">
                     <button type="button" tooltip="Subscriptions" class="btn btn-icon btn-primary command-edit" data-toggle="dropdown" aria-expanded="true"><i class="md mdi mdi-group"></i></button>
-                    <ul class="dropdown-menu fadeIn animated fadeOut">
-                        <li ng-if="activity.subscriptionCount > 0"><a href ng-click="vm.viewSubscribers(activity.id)">View Subscribers</a></li>
-                        <li><a href ng-click="vm.addSubscriber(activity.id)">Add Subscriber</a></li>
+                    <ul class="dropdown-menu fadeIn animated fadeOut" ng-include="'subscribtion-actions'">
                     </ul>
                 </div>
             </td>
             <td class="activity-type">{{activity.activityType.name}}</td>
-            <td class="activity-location">{{activity.location}}</td>
-            <td>{{activity.start | amDateFormat: 'L LT' }}</td>
-            <td>{{activity.finish | amDateFormat: 'L LT' }}</td>
-            <td>
+            <td class="activity-location visible-lg">{{activity.location}}</td>
+            <td class="activity-start">{{activity.start | amDateFormat: 'L LT' }}</td>
+            <td class="activity-finish">{{activity.finish | amDateFormat: 'L LT' }}</td>
+            <td class="activity-subscription-info">
                 {{activity.subscriptionCount||0}} of {{activity.maxSubscriptions||0}}
             </td>
-            <td>
+            <td class="subscribers-actions jas-visible-xs">
+                <ul class="sm-actions-list" ng-include="'subscribtion-actions'">
+
+                </ul>
+            </td>
+            <td class="activity-price">
                 {{activity.price | currency:activity.currency}}
             </td>
         </tr>
@@ -78,4 +86,7 @@
         <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
     </div>
 </div>
-
+<script id="subscribtion-actions" type="text/ng-template">
+    <li ng-if="activity.subscriptionCount > 0"><a href ng-click="vm.viewSubscribers(activity.id)">View Subscribers</a></li>
+    <li><a href ng-click="vm.addSubscriber(activity.id)">Add Subscriber</a></li>
+</script>

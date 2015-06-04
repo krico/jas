@@ -2,6 +2,19 @@
   Common styling for all tables on small devices. For guidelines check comments.
 **/
 
+.sm-actions-list {
+
+  padding-left: 0;
+  list-style: none;
+  
+  > li {
+    display: inline-block;
+    &:not(:last-child) {
+      margin-right: 10px;
+    }
+  }
+}
+
 @media (max-width: 600px) {
 
   table.responsive {

@@ -43,10 +43,18 @@
 
         // TODO: extract is somwehere
         $translateProvider
-            .translations('en', {
-                SIGN_OUT: 'Sign Out '
+            .translations('en-US', {
+                SIGN_OUT: 'Sign Out ',
+                LOCATION: 'Location',
+                START: 'Start',
+                FINISH: 'Finish',
+                SUBSCRIPTIONS: 'Subscriptions'
             }).translations('de', {
-                SIGN_OUT: 'Abmelden'
+                SIGN_OUT: 'Abmelden',
+                LOCATION: 'Lage',
+                START: 'Start',
+                FINISH: 'Fertig',
+                SUBSCRIPTIONS: 'Abonnements'
             }).registerAvailableLanguageKeys(['en', 'de'], {
                 'en_US': 'en',
                 'en_UK': 'en',

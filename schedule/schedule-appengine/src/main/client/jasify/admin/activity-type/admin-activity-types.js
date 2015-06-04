@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityTypesController', AdminActivityTypesController);
 
-    function AdminActivityTypesController($location, $routeParams, ActivityType, organizations, activityTypes) {
+    function AdminActivityTypesController($location, $routeParams, ActivityType, organizations, activityTypes, toolbarContext) {
 
         var vm = this;
 
@@ -20,6 +20,7 @@
         vm.activityTypes = activityTypes.items;
         vm.organizationSelected = organizationSelected;
 
+        vm.selectActivityType = selectActivityType;
         vm.addActivityType = addActivityType;
         vm.viewActivityType = viewActivityType;
         vm.removeActivityType = removeActivityType;
@@ -40,6 +41,7 @@
         function removeActivityType(activityType) {
             ActivityType.remove(activityType.id).then(function () {
                 vm.activityTypes.splice(vm.activityTypes.indexOf(activityType), 1);
+                vm.selectActivityType(null);
             });
         }
 
@@ -49,6 +51,29 @@
 
         function getPreviewStyle(color) {
             return {'backgroundColor': color};
+        }
+
+        function selectActivityType(activityType) {
+            if (activityType && toolbarContext.contextEnabled()) {
+                var actions = [
+                    {
+                        type: 'edit',
+                        action: function () {
+                            viewActivityType(activityType);
+                        }
+                    },
+                    {
+                        type: 'bin',
+                        action: function () {
+                            removeActivityType(activityType);
+                        }
+                    }];
+                vm.selection = activityType;
+                toolbarContext.setContext(actions);
+            } else {
+                delete vm.selection;
+                toolbarContext.clearContext();
+            }
         }
     }
 
