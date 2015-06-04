@@ -25,7 +25,8 @@
             </div>
         </div>
     </div>
-    <table id="admin-activityTypes-table" ng-if="vm.activityTypes.length" class="table table-hover table-condensed table-vmiddle">
+    <compose-new ng-show="vm.activityTypes.length > 0" action="vm.addActivityType()"></compose-new>
+    <table id="admin-activity-types" ng-if="vm.activityTypes.length" class="table responsive table-hover table-condensed table-vmiddle">
         <thead>
         <tr>
             <th>
@@ -33,24 +34,27 @@
             </th>
             <th>Name</th>
             <th>Tag</th>
-            <th>Description</th>
             <th>Location</th>
             <th>Price</th>
+            <th>Description</th>
         </tr>
         </thead>
         <tbody>
-        <tr class="animate-delete" ng-repeat="activityType in vm.activityTypes | orderBy:'name'">
+        <tr class="animate-delete"
+            ng-repeat="activityType in vm.activityTypes | orderBy:'name'"
+            ng-class="{ 'selected': vm.selection.id === activityType.id }"
+            row-select="vm.selectActivityType(activityType)">
             <td class="row-commands">
                 <row-edit action="vm.viewActivityType(activityType)"></row-edit>
                 <row-delete action="vm.removeActivityType(activityType)"></row-delete>
             </td>
             <td class="activity-type-name">{{activityType.name}}</td>
-            <td><span class="tag-preview" ng-style="vm.getPreviewStyle(activityType.colourTag)" ></span></td>
-            <td class="activity-type-description">{{activityType.description}}</td>
+            <td class="activity-type-tag"><span class="tag-preview" ng-style="vm.getPreviewStyle(activityType.colourTag)" ></span></td>
             <td class="activity-type-location">{{activityType.location}}</td>
-            <td>
+            <td class="activity-type-price">
                 {{activityType.price | currency:activityType.currency}}
             </td>
+            <td class="activity-type-description">{{activityType.description}}</td>
         </tr>
         </tbody>
     </table>
