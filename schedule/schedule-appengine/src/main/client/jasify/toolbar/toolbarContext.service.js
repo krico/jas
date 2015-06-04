@@ -67,7 +67,7 @@
 
         $rootScope.$on('$routeChangeStart', function () {
             clearContext();
-        })
+        });
 
         return {
             clearContext: clearContext,
