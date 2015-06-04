@@ -44,7 +44,7 @@
         <tbody>
         <tr class="animate-delete" ng-repeat="activity in vm.activities | orderBy:'start'"
             ng-class="{ 'selected': vm.selection.id === activity.id }"
-            ng-click="vm.selectActivity(activity)">
+            row-select="vm.selectActivity(activity)">
             <td class="row-commands">
                 <row-edit action="vm.viewActivity(activity)"></row-edit>
                 <row-delete action="vm.removeActivity(activity)"></row-delete>

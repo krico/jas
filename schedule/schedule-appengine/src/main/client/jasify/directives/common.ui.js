@@ -97,7 +97,19 @@
                 }
             }
         };
-    })
+    });
+
+    module.directive('rowSelect', function () {
+        return function (scope, element, attrs) {
+            element.on('click', function (event) {
+                if (event.target.nodeName !== 'A') {
+                    scope.$apply(function () {
+                        scope.$eval(attrs.rowSelect);
+                    });
+                }
+            });
+        };
+    });
 
     module.directive('rowAdd', function () {
         return {
