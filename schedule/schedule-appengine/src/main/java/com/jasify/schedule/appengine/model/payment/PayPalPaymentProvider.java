@@ -180,7 +180,6 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         PayPalInterface payPal = getPayPalInterface();
         com.paypal.api.payments.Payment createdPayment = payPal.create(paymentToCreate);
 
-
         payment.setExternalId(createdPayment.getId());
         payment.setExternalState(createdPayment.getState());
 
@@ -244,6 +243,17 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         log.debug("Executed Payment: {}", executedPayment);
     }
 
+    public String getPayerId(PayPalPayment payment) throws PaymentException {
+        String paymentId = Preconditions.checkNotNull(payment.getExternalId(), "payment.externalId");
+
+        PayPalInterface payPal = getPayPalInterface();
+        com.paypal.api.payments.Payment executedPayment = payPal.get(paymentId);
+        if (executedPayment != null && executedPayment.getPayer() != null && executedPayment.getPayer().getPayerInfo() != null) {
+            return executedPayment.getPayer().getPayerInfo().getPayerId();
+        }
+        return null;
+    }
+
     private void setPayerInfo(PayPalPayment payment, com.paypal.api.payments.Payment executedPayment) {
         Payer payer = executedPayment.getPayer();
         if (payer != null) {
@@ -302,6 +312,8 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         com.paypal.api.payments.Payment create(com.paypal.api.payments.Payment payment) throws PaymentException;
 
         com.paypal.api.payments.Payment execute(com.paypal.api.payments.Payment payment, PaymentExecution execution) throws PaymentException;
+
+        com.paypal.api.payments.Payment get(String externalId) throws PaymentException;
     }
 
     private static final class Singleton {
@@ -366,6 +378,15 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         public com.paypal.api.payments.Payment execute(com.paypal.api.payments.Payment payment, PaymentExecution execution) throws PaymentException {
             try {
                 return payment.execute(getAccessToken(), execution);
+            } catch (PayPalRESTException e) {
+                throw new PaymentException(e);
+            }
+        }
+
+        @Override
+        public com.paypal.api.payments.Payment get(String paymentId) throws PaymentException {
+            try {
+                return com.paypal.api.payments.Payment.get(getAccessToken(), paymentId);
             } catch (PayPalRESTException e) {
                 throw new PaymentException(e);
             }
