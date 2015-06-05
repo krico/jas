@@ -222,7 +222,7 @@ public class PaymentServiceTest {
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
-        expect(payPalInterface.getWebProfiles()).andReturn(Collections.EMPTY_LIST);
+        expect(payPalInterface.getWebProfiles()).andReturn(Collections.<WebProfile>emptyList());
         expect(payPalInterface.create(isA(WebProfile.class))).andReturn("PROFILE");
         com.paypal.api.payments.Payment payment = createPayPalPayment();
         payment.setId("ExternalId");
@@ -260,7 +260,7 @@ public class PaymentServiceTest {
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
-        expect(payPalInterface.getWebProfiles()).andReturn(Collections.EMPTY_LIST);
+        expect(payPalInterface.getWebProfiles()).andReturn(Collections.<WebProfile>emptyList());
         expect(payPalInterface.create(isA(WebProfile.class))).andReturn("PROFILE");
         com.paypal.api.payments.Payment payment = createPayPalPayment();
         payment.setId("ExternalId");
@@ -298,7 +298,7 @@ public class PaymentServiceTest {
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
-        expect(payPalInterface.getWebProfiles()).andReturn(Collections.EMPTY_LIST);
+        expect(payPalInterface.getWebProfiles()).andReturn(Collections.<WebProfile>emptyList());
         expect(payPalInterface.create(isA(WebProfile.class))).andReturn("PROFILE");
         com.paypal.api.payments.Payment payment = createPayPalPayment();
         payment.setId("ExternalId");
