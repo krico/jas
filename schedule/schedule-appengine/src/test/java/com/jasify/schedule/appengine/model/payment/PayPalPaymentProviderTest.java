@@ -99,7 +99,6 @@ public class PayPalPaymentProviderTest {
         assertEquals(PAYER_EMAIL, jasPayment.getPayerEmail());
         assertEquals(PAYER_FIRST_NAME, jasPayment.getPayerFirstName());
         assertEquals(PAYER_LAST_NAME, jasPayment.getPayerLastName());
-
     }
 
     @Test

@@ -9,23 +9,28 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowFactory;
 import com.jasify.schedule.appengine.model.users.User;
-import org.easymock.EasyMock;
+import com.paypal.api.payments.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
+import static org.easymock.EasyMock.*;
 
 public class PaymentServiceTest {
 
@@ -100,11 +105,18 @@ public class PaymentServiceTest {
         return user;
     }
 
-    private CashPayment createCashPayment(PaymentProvider<CashPayment> cashPaymentPaymentProvider) {
-        CashPayment cashPayment = cashPaymentPaymentProvider.newPayment();
+    private CashPayment createCashPayment(PaymentProvider<CashPayment> cashPaymentProvider) {
+        CashPayment cashPayment = cashPaymentProvider.newPayment();
         cashPayment.setAmount(19.95);
         cashPayment.setCurrency("NZD");
         return cashPayment;
+    }
+
+    private PayPalPayment createPayPalPayment(PaymentProvider<PayPalPayment> payPalPaymentProvider) {
+        PayPalPayment payPalPayment = payPalPaymentProvider.newPayment();
+        payPalPayment.setAmount(19.95);
+        payPalPayment.setCurrency("NZD");
+        return payPalPayment;
     }
 
     @Test
@@ -113,14 +125,14 @@ public class PaymentServiceTest {
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
 
         @SuppressWarnings("unchecked")
-        PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
+        PaymentProvider<PayPalPayment> mockProvider = createMock(PaymentProvider.class);
         mockProvider.createPayment(payment, baseUrl);
-        EasyMock.expectLastCall();
-        EasyMock.replay(mockProvider);
+        expectLastCall();
+        replay(mockProvider);
 
         paymentService.createPayment(mockProvider, payment, baseUrl);
 
-        EasyMock.verify(mockProvider);
+        verify(mockProvider);
     }
 
     @Test
@@ -130,14 +142,14 @@ public class PaymentServiceTest {
         Datastore.put(payment);
 
         @SuppressWarnings("unchecked")
-        PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
+        PaymentProvider<PayPalPayment> mockProvider = createMock(PaymentProvider.class);
         mockProvider.executePayment(payment);
-        EasyMock.expectLastCall();
-        EasyMock.replay(mockProvider);
+        expectLastCall();
+        replay(mockProvider);
 
         paymentService.executePayment(mockProvider, payment);
 
-        EasyMock.verify(mockProvider);
+        verify(mockProvider);
     }
 
     @Test
@@ -156,21 +168,21 @@ public class PaymentServiceTest {
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
 
         @SuppressWarnings("unchecked")
-        PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
+        PaymentProvider<PayPalPayment> mockProvider = createMock(PaymentProvider.class);
         mockProvider.createPayment(payment, baseUrl);
-        EasyMock.expectLastCall();
-        EasyMock.replay(mockProvider);
+        expectLastCall();
+        replay(mockProvider);
 
         Queue paymentQueue = QueueFactory.getQueue("payment-queue");
         LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
 
-        assert(localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
         paymentService.createPayment(mockProvider, payment, baseUrl);
         assertEquals(1, localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().size());
     }
 
     @Test
-    public void testActivityCancelTaskCancelsPayment() throws Exception {
+    public void testActivityCancelTaskCancelsCashPayment() throws Exception {
         PaymentProvider<CashPayment> paymentProvider = CashPaymentProvider.instance();
         CashPayment payment = createCashPayment(paymentProvider);
 
@@ -189,12 +201,147 @@ public class PaymentServiceTest {
         LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
         localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
 
-        assert(localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
 
         payment = Datastore.get(CashPayment.class, payment.getId());
         assertEquals(PaymentStateEnum.Canceled, payment.getState());
         activity = Datastore.get(Activity.class, activity.getId());
         assertEquals(0, activity.getSubscriptionCount());
+    }
+
+    @Test
+    public void testActivityCancelTaskCancelsPayPalPayment() throws Exception {
+        PayPalPaymentProvider.PayPalInterface payPalInterface = createPayPalInterface();
+
+        PaymentProvider<PayPalPayment> paymentProvider = PayPalPaymentProvider.instance();
+        PayPalPayment payPalPayment = createPayPalPayment(paymentProvider);
+
+        User user = createUser();
+        Activity activity = createActivity(createActivityType());
+
+        PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
+        paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
+        GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
+        expect(payPalInterface.getWebProfiles()).andReturn(Collections.<WebProfile>emptyList());
+        expect(payPalInterface.create(isA(WebProfile.class))).andReturn("PROFILE");
+        com.paypal.api.payments.Payment payment = createPayPalPayment();
+        payment.setId("ExternalId");
+        expect(payPalInterface.create(isA(com.paypal.api.payments.Payment.class))).andReturn(payment);
+        expect(payPalInterface.get(payment.getId())).andReturn(null);
+//        expect(payPalInterface.execute(isA(Payment.class), isA(PaymentExecution.class))).andReturn(payment);
+        replay(payPalInterface);
+        paymentService.createPayment(paymentProvider, payPalPayment, baseUrl);
+        activity = Datastore.get(Activity.class, activity.getId());
+        assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity.getSubscriptionCount());
+
+        Queue paymentQueue = QueueFactory.getQueue("payment-queue");
+        LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
+        localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
+
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+
+        Payment dbPayment = Datastore.get(Payment.class, payPalPayment.getId());
+        assertEquals(PaymentStateEnum.Canceled, dbPayment.getState());
+        activity = Datastore.get(Activity.class, activity.getId());
+        assertEquals(0, activity.getSubscriptionCount());
+    }
+
+    @Test
+    public void testActivityCancelTaskExecutesPayPalPayment() throws Exception {
+        PayPalPaymentProvider.PayPalInterface payPalInterface = createPayPalInterface();
+
+        PaymentProvider<PayPalPayment> paymentProvider = PayPalPaymentProvider.instance();
+        PayPalPayment payPalPayment = createPayPalPayment(paymentProvider);
+
+        User user = createUser();
+        Activity activity = createActivity(createActivityType());
+
+        PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
+        paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
+        GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
+        expect(payPalInterface.getWebProfiles()).andReturn(Collections.<WebProfile>emptyList());
+        expect(payPalInterface.create(isA(WebProfile.class))).andReturn("PROFILE");
+        com.paypal.api.payments.Payment payment = createPayPalPayment();
+        payment.setId("ExternalId");
+        expect(payPalInterface.create(isA(com.paypal.api.payments.Payment.class))).andReturn(payment);
+        expect(payPalInterface.get(payment.getId())).andReturn(payment);
+        expect(payPalInterface.execute(isA(com.paypal.api.payments.Payment.class), isA(PaymentExecution.class))).andReturn(payment);
+        replay(payPalInterface);
+        paymentService.createPayment(paymentProvider, payPalPayment, baseUrl);
+        activity = Datastore.get(Activity.class, activity.getId());
+        assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity.getSubscriptionCount());
+
+        Queue paymentQueue = QueueFactory.getQueue("payment-queue");
+        LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
+        localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
+
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+
+        Payment dbPayment = Datastore.get(Payment.class, payPalPayment.getId());
+        assertEquals(PaymentStateEnum.Completed, dbPayment.getState());
+        activity = Datastore.get(Activity.class, activity.getId());
+        assertEquals(1, activity.getSubscriptionCount());
+    }
+
+    @Test
+    public void testActivityCancelTaskExecuteThrowsCancels() throws Exception {
+        PayPalPaymentProvider.PayPalInterface payPalInterface = createPayPalInterface();
+
+        PaymentProvider<PayPalPayment> paymentProvider = PayPalPaymentProvider.instance();
+        PayPalPayment payPalPayment = createPayPalPayment(paymentProvider);
+
+        User user = createUser();
+        Activity activity = createActivity(createActivityType());
+
+        PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
+        paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
+        GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
+        expect(payPalInterface.getWebProfiles()).andReturn(Collections.<WebProfile>emptyList());
+        expect(payPalInterface.create(isA(WebProfile.class))).andReturn("PROFILE");
+        com.paypal.api.payments.Payment payment = createPayPalPayment();
+        payment.setId("ExternalId");
+        expect(payPalInterface.create(isA(com.paypal.api.payments.Payment.class))).andReturn(payment);
+        expect(payPalInterface.get(payment.getId())).andReturn(payment);
+        expect(payPalInterface.execute(isA(com.paypal.api.payments.Payment.class), isA(PaymentExecution.class))).andThrow(new PaymentException(""));
+        replay(payPalInterface);
+        paymentService.createPayment(paymentProvider, payPalPayment, baseUrl);
+        activity = Datastore.get(Activity.class, activity.getId());
+        assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity.getSubscriptionCount());
+
+        Queue paymentQueue = QueueFactory.getQueue("payment-queue");
+        LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
+        localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
+
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+
+        Payment dbPayment = Datastore.get(Payment.class, payPalPayment.getId());
+        assertEquals(PaymentStateEnum.Canceled, dbPayment.getState());
+        activity = Datastore.get(Activity.class, activity.getId());
+        assertEquals(0, activity.getSubscriptionCount());
+    }
+
+    private PayPalPaymentProvider.PayPalInterface createPayPalInterface() {
+        PayPalPaymentProvider.PayPalInterface payPalInterface = createMock(PayPalPaymentProvider.PayPalInterface.class);
+        TestHelper.initializeOAuthProviderProperties();
+        PayPalPaymentProvider payPalPaymentProvider = PayPalPaymentProvider.instance();
+        payPalPaymentProvider.setPayPalInterface(payPalInterface);
+        return payPalInterface;
+    }
+
+    private com.paypal.api.payments.Payment createPayPalPayment() {
+        com.paypal.api.payments.Payment payment = new com.paypal.api.payments.Payment();
+        ArrayList<Links> links = new ArrayList<>();
+        links.add(new Links("approvalUrl", "approval_url"));
+        links.add(new Links("selfUrl", "self"));
+        links.add(new Links("executefUrl", "execute"));
+        payment.setLinks(links);
+        payment.setPayer(new Payer());
+        payment.getPayer().setPayerInfo(new PayerInfo());
+        payment.getPayer().getPayerInfo().setPayerId("PayerId");
+        return payment;
     }
 
     @Test
@@ -218,7 +365,7 @@ public class PaymentServiceTest {
         LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
         localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
 
-        assert(localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
 
         payment = Datastore.get(CashPayment.class, payment.getId());
         assertEquals(PaymentStateEnum.Completed, payment.getState());
@@ -256,7 +403,7 @@ public class PaymentServiceTest {
         LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
         localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
 
-        assert(localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
 
         payment = Datastore.get(CashPayment.class, payment.getId());
         assertEquals(PaymentStateEnum.Completed, payment.getState());
@@ -297,7 +444,7 @@ public class PaymentServiceTest {
         LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
         localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
 
-        assert(localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
 
         payment = Datastore.get(CashPayment.class, payment.getId());
         assertEquals(PaymentStateEnum.Canceled, payment.getState());
@@ -316,7 +463,7 @@ public class PaymentServiceTest {
     }
 
     @Test(expected = PaymentException.class)
-    public void testCreatePaymentThrowsIfPaymentNotInNewState () throws Exception {
+    public void testCreatePaymentThrowsIfPaymentNotInNewState() throws Exception {
         PayPalPayment payment = new PayPalPayment();
         payment.setCurrency("USD");
         payment.setAmount(30.35);
@@ -325,10 +472,10 @@ public class PaymentServiceTest {
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
 
         @SuppressWarnings("unchecked")
-        PaymentProvider<PayPalPayment> mockProvider = EasyMock.createMock(PaymentProvider.class);
+        PaymentProvider<PayPalPayment> mockProvider = createMock(PaymentProvider.class);
         mockProvider.createPayment(payment, baseUrl);
-        EasyMock.expectLastCall();
-        EasyMock.replay(mockProvider);
+        expectLastCall();
+        replay(mockProvider);
 
         paymentService.createPayment(mockProvider, payment, baseUrl);
     }

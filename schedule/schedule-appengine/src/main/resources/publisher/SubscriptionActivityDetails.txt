@@ -1,5 +1,4 @@
 Order        #: %OrderNumber%
-Publisher     : %PublisherName%
 Activity      : %ActivityName%
 Start         : %ActivityStart%
 Finish        : %ActivityFinish%

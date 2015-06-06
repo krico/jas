@@ -1,5 +1,4 @@
 Order        #: %OrderNumber%
-Publisher     : %PublisherName%
 Package       : %ActivityPackageName%
 Price         : %ActivityPackagePrice%
 %ActivityPackageActivityDetails%

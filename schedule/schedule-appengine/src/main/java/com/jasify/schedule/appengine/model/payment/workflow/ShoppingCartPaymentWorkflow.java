@@ -15,8 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author krico
@@ -109,41 +108,49 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
     }
 
     private void notifyPublisher(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) {
-        // A Publisher gets an email per subscription
+        Collection<Organization> organizations = new HashSet<>();
+        Map<Organization, Collection<Subscription>> subscriptionMap = new HashMap<>();
+        Map<Organization, Collection<ActivityPackageExecution>> executionMap = new HashMap<>();
+
+        User user = null;
         for (Subscription subscription : subscriptions) {
-            User user = subscription.getUserRef().getModel();
             Activity activity = subscription.getActivityRef().getModel();
             ActivityType activityType = activity.getActivityTypeRef().getModel();
             Organization organization = activityType.getOrganizationRef().getModel();
+            if (!subscriptionMap.containsKey(organization)) {
+                organizations.add(organization);
+                subscriptionMap.put(organization, new ArrayList<Subscription>());
+            }
+            subscriptionMap.get(organization).add(subscription);
+            if (user == null) {
+                user = subscription.getUserRef().getModel();
+            }
+        }
 
+        for (ActivityPackageExecution execution : executions) {
+            ActivityPackage activityPackage = execution.getActivityPackageRef().getModel();
+            Organization organization = activityPackage.getOrganizationRef().getModel();
+            if (!executionMap.containsKey(organization)) {
+                organizations.add(organization);
+                executionMap.put(organization, new ArrayList<ActivityPackageExecution>());
+            }
+            executionMap.get(organization).add(execution);
+            if (user == null) {
+                user = execution.getUserRef().getModel();
+            }
+        }
+
+        for (Organization organization : organizations) {
             String subject = String.format("[Jasify] Subscribe [%s]", user.getDisplayName());
-
             try {
-                MailParser mailParser = MailParser.createPublisherSubscriptionEmail(subscription);
+                Collection<Subscription> orgSubscriptions = subscriptionMap.containsKey(organization) ? subscriptionMap.get(organization) : Collections.<Subscription>emptyList();
+                Collection<ActivityPackageExecution> orgExecutions = executionMap.containsKey(organization) ? executionMap.get(organization) : Collections.<ActivityPackageExecution>emptyList();
+                MailParser mailParser = MailParser.createPublisherSubscriptionEmail(orgSubscriptions, orgExecutions);
                 for (User orgUser : organization.getUsers()) {
                     MailServiceFactory.getMailService().send(orgUser.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
                 }
             } catch (Exception e) {
                 log.error("Failed to notify publisher", e);
-            }
-        }
-
-        for (ActivityPackageExecution execution : executions) {
-            User user = execution.getUserRef().getModel();
-            ActivityPackage activityPackage = execution.getActivityPackageRef().getModel();
-            Organization organization = activityPackage.getOrganizationRef().getModel();
-            List<ActivityPackageSubscription> packageSubscriptions = execution.getSubscriptionListRef().getModelList();
-            for (int i = 0; i < packageSubscriptions.size(); ++i) {
-                String subject = String.format("[Jasify] Activity Package Subscribe (%d/%d) [%s]", i, packageSubscriptions.size(), user.getDisplayName());
-
-                try {
-                    MailParser mailParser = MailParser.createPublisherSubscriptionEmail(packageSubscriptions.get(i));
-                    for (User orgUser : organization.getUsers()) {
-                        MailServiceFactory.getMailService().send(orgUser.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
-                    }
-                } catch (Exception e) {
-                    log.error("Failed to notify publisher", e);
-                }
             }
         }
     }

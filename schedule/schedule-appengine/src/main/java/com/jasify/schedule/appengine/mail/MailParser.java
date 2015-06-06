@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * @author wszarmach
@@ -58,14 +60,43 @@ public class MailParser {
         return new DateTime(date).toString(DTF);
     }
 
-    private static MailParser createSubscriptionActivityDetails(MultiSubscription multiSubscription, Subscription subscription) throws IOException {
-        Activity activity = subscription.getActivityRef().getModel();
+    private static String getOrganisationName(Activity activity) {
         ActivityType activityType = activity.getActivityTypeRef().getModel();
         Organization organization = activityType.getOrganizationRef().getModel();
+        return organization.getName();
+    }
+
+    private static String getOrganisationName(ActivityPackage activityPackage) {
+        Organization organization = activityPackage.getOrganizationRef().getModel();
+        return organization.getName();
+    }
+
+    private static String getOrganizationNameFromSubscriptions(Collection<Subscription> subscriptions) {
+        for (Subscription subscription : subscriptions) {
+            String name = getOrganisationName(subscription.getActivityRef().getModel());
+            if (name != null) {
+                return name;
+            }
+        }
+        return null;
+    }
+
+    private static String getOrganizationNameFromActivityPackageExecutions(Collection<ActivityPackageExecution> executions) {
+        for (ActivityPackageExecution execution : executions) {
+            String name = getOrganisationName(execution.getActivityPackageRef().getModel());
+            if (name != null) {
+                return name;
+            }
+        }
+        return null;
+    }
+
+    private static MailParser createSubscriptionActivityDetails(MultiSubscription multiSubscription, Subscription subscription) throws IOException {
+        Activity activity = subscription.getActivityRef().getModel();
         String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
         MailParser mailParser = new MailParser(multiSubscription.activityDetails);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
-        mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
+        mailParser.substitute(SubstituteKey.PublisherName, getOrganisationName(activity));
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
         mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
         mailParser.substitute(SubstituteKey.ActivityFinish, formatDate(activity.getFinish()));
@@ -75,15 +106,14 @@ public class MailParser {
 
     private static MailParser createSubscriptionActivityPackageDetails(MultiSubscription multiSubscription, ActivityPackageExecution activityPackageExecution) throws IOException {
         ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
-        Organization organization = activityPackage.getOrganizationRef().getModel();
         String orderNumber = KeyUtil.toHumanReadableString(activityPackageExecution.getId());
         MailParser mailParser = new MailParser(multiSubscription.activityPackageDetails);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
-        mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
+        mailParser.substitute(SubstituteKey.PublisherName, getOrganisationName(activityPackage));
         mailParser.substitute(SubstituteKey.ActivityPackageName, activityPackage.getName());
         mailParser.substitute(SubstituteKey.ActivityPackagePrice, formatPrice(activityPackage.getPrice()));
 
-        List<MailParser> activityPackageActivityDetails = new ArrayList<>();
+        Collection<MailParser> activityPackageActivityDetails = new ArrayList<>();
         for (ActivityPackageSubscription activityPackageSubscription : activityPackageExecution.getSubscriptionListRef().getModelList()) {
             activityPackageActivityDetails.add(MailParser.createSubscriptionActivityPackageActivityDetails(multiSubscription, activityPackageSubscription));
         }
@@ -109,10 +139,10 @@ public class MailParser {
         return user.getName();
     }
 
-    private static MailParser createSubscriptionEmail(MultiSubscription multiSubscription, List<Subscription> subscriptions, List<ActivityPackageExecution> activityPackageExecutions) throws Exception {
+    private static MailParser createSubscriptionEmail(MultiSubscription multiSubscription, Collection<Subscription> subscriptions, Collection<ActivityPackageExecution> activityPackageExecutions) throws Exception {
         double totalPrice = 0;
         String subscriberName = null;
-        List<MailParser> activityDetails = new ArrayList<>();
+        Collection<MailParser> activityDetails = new ArrayList<>();
         for (Subscription subscription : subscriptions) {
             Double subscriptionPrice = subscription.getActivityRef().getModel().getPrice();
             if (subscriptionPrice != null) {
@@ -150,49 +180,20 @@ public class MailParser {
         return mailParser;
     }
 
-    public static MailParser createJasifySubscriptionEmail(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) throws Exception {
-        return createSubscriptionEmail(MultiSubscription.Jasify, subscriptions, executions);
-    }
-
-    public static MailParser createPublisherSubscriptionEmail(Subscription subscription) throws Exception {
-        Activity activity = subscription.getActivityRef().getModel();
-        ActivityType activityType = activity.getActivityTypeRef().getModel();
-        Organization organization = activityType.getOrganizationRef().getModel();
-
-        String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
-        User user = subscription.getUserRef().getModel();
-        MailParser mailParser = new MailParser("/publisher/Subscription");
-        mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
-        mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));
-        mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
-        mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
-        mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
-        mailParser.substitute(SubstituteKey.ActivityFinish, formatDate(activity.getFinish()));
-        mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(activity.getPrice()));
+    public static MailParser createPublisherSubscriptionEmail(Collection<Subscription> subscriptions, Collection<ActivityPackageExecution> executions) throws Exception {
+        String organizationName = getOrganizationNameFromSubscriptions(subscriptions);
+        if (organizationName == null) {
+            organizationName = getOrganizationNameFromActivityPackageExecutions(executions);
+        }
+        if (organizationName == null) {
+            throw new Exception("Could not find organization name");
+        }
+        MailParser mailParser = createSubscriptionEmail(MultiSubscription.Publisher, subscriptions, executions);
+        mailParser.substitute(SubstituteKey.PublisherName, organizationName);
         return mailParser;
     }
 
-    public static MailParser createPublisherSubscriptionEmail(ActivityPackageSubscription activityPackageSubscription) throws Exception {
-        Activity activity = activityPackageSubscription.getActivityRef().getModel();
-        ActivityType activityType = activity.getActivityTypeRef().getModel();
-        Organization organization = activityType.getOrganizationRef().getModel();
-        ActivityPackageExecution activityPackageExecution = activityPackageSubscription.getActivityPackageExecutionRef().getModel();
-        ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
-
-        String orderNumber = KeyUtil.toHumanReadableString(activityPackageExecution.getId());
-        User user = activityPackageSubscription.getUserRef().getModel();
-        MailParser mailParser = new MailParser("/publisher/Subscription");
-        mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
-        mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));
-        mailParser.substitute(SubstituteKey.PublisherName, organization.getName());
-        mailParser.substitute(SubstituteKey.ActivityName, activity.getName() + " [" + activityPackage.getName() + "]");
-        mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
-        mailParser.substitute(SubstituteKey.ActivityFinish, formatDate(activity.getFinish()));
-        mailParser.substitute(SubstituteKey.ActivityPrice, formatPrice(activityPackage.getPrice()));
-        return mailParser;
-    }
-
-    public static MailParser createSubscriberSubscriptionEmail(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) throws Exception {
+    public static MailParser createSubscriberSubscriptionEmail(Collection<Subscription> subscriptions, Collection<ActivityPackageExecution> executions) throws Exception {
         return createSubscriptionEmail(MultiSubscription.Subscriber, subscriptions, executions);
     }
 
@@ -314,8 +315,8 @@ public class MailParser {
     }
 
     private enum MultiSubscription {
-        Jasify("/jasify/Subscription", "/jasify/SubscriptionActivityDetails", "/jasify/SubscriptionActivityPackageDetails", "/jasify/SubscriptionActivityPackageActivityDetails"),
-        Subscriber("/subscriber/Subscription", "/subscriber/SubscriptionActivityDetails", "/subscriber/SubscriptionActivityPackageDetails", "/subscriber/SubscriptionActivityPackageActivityDetails");
+        Publisher("/publisher/Subscription", "/publisher/SubscriptionActivityDetails", "/publisher/SubscriptionActivityPackageDetails", "/common/SubscriptionActivityPackageActivityDetails"),
+        Subscriber("/subscriber/Subscription", "/subscriber/SubscriptionActivityDetails", "/subscriber/SubscriptionActivityPackageDetails", "/common/SubscriptionActivityPackageActivityDetails");
 
         String subscription;
         String activityDetails;
