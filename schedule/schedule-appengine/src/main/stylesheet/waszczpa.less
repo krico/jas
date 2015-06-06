@@ -346,6 +346,15 @@ td.actions-column {
 }
 
 #wizard {
+
+  @media (max-width: @angularMaterialLayoutSm) {
+    > .tab-nav {
+      li:not(.active) > {
+        display: none;
+      }
+    }
+  }
+
   .card .card-header {
 
     padding-bottom: 5px;
