@@ -1,9 +1,12 @@
+/*global window */
 (function (angular) {
+
+    'use strict';
 
     angular.module('jasifyWeb').controller('ApplicationController', ApplicationController);
 
-    function ApplicationController($scope, $rootScope, $modal, $log, $location, $filter, Auth, ApiSettings, BrowserData,
-                                   Endpoint, AUTH_EVENTS, VERSION) {
+    function ApplicationController($timeout, $scope, $rootScope, $modal, $log, $location, $filter,
+                                   Auth, ApiSettings, BrowserData, Endpoint, AUTH_EVENTS, VERSION) {
         var appVm = this;
 
         $scope.currentUser = null;
@@ -35,7 +38,7 @@
 
         appVm.restore();
 
-        function isLoaded(){
+        function isLoaded() {
             return Endpoint.isLoaded();
         }
 
@@ -44,7 +47,7 @@
         }
 
         function menuActive(path) {
-            if (path == $location.path()) {
+            if (path === $location.path()) {
                 return 'active';
             }
             return false;
@@ -89,7 +92,7 @@
                 scope: scope
             });
 
-            modalInstance.result.then(function (reason) {
+            modalInstance.result.then(function () {
                 Auth.restore(true).then(ok, fail);
                 function ok(u) {
                     $scope.setCurrentUser(u);
@@ -119,7 +122,7 @@
                 size: 'sm'
             });
 
-            modalInstance.result.then(function (reason) {
+            modalInstance.result.then(function () {
                 $log.info('Modal accepted at: ' + new Date());
             }, function () {
                 $log.info('Modal dismissed at: ' + new Date());
@@ -166,9 +169,10 @@
                 appVm.SERVER_VERSION = resp;
             }
 
-            function fail(resp) {
+            function fail() {
                 $log.debug("Failed to get server version");
             }
+
             return appVm.SERVER_VERSION;
         }
 
@@ -176,6 +180,9 @@
             appVm.longVersion = !appVm.longVersion;
         }
 
+        $timeout(function () {
+            appVm.hideSplash = true;
+        }, 2000);
     }
 
-})(angular);
+})(window.angular);
