@@ -26,8 +26,47 @@
     </script>
     <link href="build/css/dep-main.css" rel="stylesheet">
     <link href="build/css/jasify.css" rel="stylesheet">
+    <style>
+        #splash-page {
+            opacity: 1;
+            z-index: 99999 !important;
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-color: white;
+            -webkit-transition: all 0.5s linear;
+            -moz-transition: all 0.5s linear;
+            -o-transition: all 0.5s linear;
+            transition: all 0.5s linear;
+        }
+
+        #splash-page.loaded {
+            opacity: 0;
+            visibility: hidden;
+            z-index: -1 !important;
+        }
+
+        .page-splash-message {
+            text-align: center;
+            margin: 20% auto 0 auto;
+            padding: 0;
+            -webkit-transition: all 0.5s linear;
+            -moz-transition: all 0.5s linear;
+            -o-transition: all 0.5s linear;
+            transition: all 0.5s linear;
+        }
+
+        .loaded > .page-splash-message {
+            opacity: 0;
+        }
+    </style>
 </head>
 <body layout="row" ng-controller="ApplicationController as appVm">
+<div id="splash-page" ng-class="{ loaded: true }">
+    <h1 class="page-splash-message"> Launching <em class=type-accent>Jasify!</em></h1>
+</div>
 <md-sidenav id="sidebar"
             class="toggled md-sidenav-left md-whiteframe-z2"
             md-component-id="left"
@@ -120,7 +159,7 @@
         </p>
     </div>
 </footer>
-<div mask></div>
+<!--<div mask></div>-->
 <!-- These three hidden inputs are for protractor -->
 <input type="hidden" id="auth.status" ng-value="vm.isAuthenticated() ? 'authenticated' : 'anonymous'"/>
 <input type="hidden" id="auth.name" ng-value="currentUser.name"/>
