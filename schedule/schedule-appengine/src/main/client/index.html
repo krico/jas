@@ -1,5 +1,16 @@
+<!--[if gt IE 8]><![endif]-->
 <!DOCTYPE html>
-<html lang="en" ng-app="jasifyWeb" ng-strict-di>
+<!--[if lt IE 7]>
+<html lang="en" class="lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html lang="en" class="lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html lang="en" class="lt-ie9"> <![endif]-->
+<!--[if IE 9]>
+<html lang="en" class="lt-ie10"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html lang="en" class="gt-ie9" xmlns:ng="http://angularjs.org">
+<!--<![endif]-->
 <head>
     <title>Jasify Schedule</title>
     <meta charset="utf-8">
@@ -50,7 +61,6 @@
 
         .page-splash-message {
             text-align: center;
-            margin: 20% auto 0 auto;
             padding: 0;
             -webkit-transition: all 0.5s linear;
             -moz-transition: all 0.5s linear;
@@ -63,9 +73,13 @@
         }
     </style>
 </head>
-<body layout="row" ng-controller="ApplicationController as appVm">
-<div id="splash-page" ng-class="{ loaded: true }">
-    <h1 class="page-splash-message"> Launching <em class=type-accent>Jasify!</em></h1>
+<body layout="row" ng-app="jasifyWeb" ng-strict-di ng-controller="ApplicationController as appVm">
+<div id="splash-page" ng-class="{ loaded: appVm.hideSplash }" layout="row" layout-align="center center">
+    <div layout="column" layout-align="center center" class="page-splash-message">
+        <md-progress-circular class="md-warn md-hue-3" md-mode="indeterminate"></md-progress-circular>
+        <div class="md-headline">Launching</div>
+        <div class="md-display-1">Jasify!</div>
+    </div>
 </div>
 <md-sidenav id="sidebar"
             class="toggled md-sidenav-left md-whiteframe-z2"
@@ -122,9 +136,10 @@
     </md-content>
 </md-sidenav>
 <div layout="column" flex>
-    <md-toolbar class="md-whiteframe-glow-z2" ng-controller="NavbarController as vm">
+    <md-toolbar class="md-whiteframe-glow-z2" ng-controller="NavbarController as vm" ng-show="vm.isAuthenticated()">
         <div class="md-toolbar-tools" toolbar-context>
-            <md-button hide-gt-md ng-click="vm.toggleList()" ng-show="vm.isAuthenticated() && (!showContext || !hasContext)" class="md-icon-button"
+            <md-button hide-gt-md ng-click="vm.toggleList()"
+                       ng-show="(!showContext || !hasContext)" class="md-icon-button"
                        aria-label="Settings">
                 <md-icon md-svg-icon="build/img/menu.svg"></md-icon>
             </md-button>
@@ -139,13 +154,25 @@
                        class="toolbar-animate md-icon-button" aria-label="Settings">
                 <md-icon md-svg-icon="build/img/{{contextAction.type}}.svg"></md-icon>
             </md-button>
-            <md-button ng-show="vm.isAuthenticated() && (!showContext || !hasContext)" class="md-raised" translate="SIGN_OUT" ng-href="#/logout"></md-button>
+            <md-button ng-show="(!showContext || !hasContext)" class="md-raised"
+                       translate="SIGN_OUT" ng-href="#/logout"></md-button>
         </div>
     </md-toolbar>
     <md-content id="content" ng-controller="NavbarController as vm" ng-class="{ 'home-splash': !vm.isAuthenticated() }"
                 flex layout-padding md-scroll-y>
         <md-progress-linear jas-progress ng-show="mode === 'buffer'" class="md-accent sample-show-hide" md-mode="buffer"
                             value="{{determinateValue}}" md-buffer-value="{{determinateValue2}}"></md-progress-linear>
+        <!--[if lt IE 10]>
+        <div ng-show="!vm.isAuthenticated()" class="alert text-center alert-warning alert-dismissable">
+            <button class="close" data-dismiss="alert">&times;</button>
+            <div>Jasify <strong>no longer supports</strong> Internet Explorer versions <strong>older than 10</strong>.
+            </div>
+            <div>
+                We recommend upgrading <a href="https://browser-update.org/update.html">Internet Explorer</a>, or
+                downloading <a href="https://browser-update.org/update.html">Google Chrome, Firefox or Opera</a>.
+            </div>
+        </div>
+        <![endif]-->
         <div class="container-fluid shuffle-animation" ng-view>
         </div>
     </md-content>
@@ -167,5 +194,15 @@
 <script src="build/js/dep-main.js"></script>
 <script src="build/js/jasify.js"></script>
 <script src="build/js/jasify.tpl.js"></script>
+<script>
+    var $buoop = {c:2};
+    function $buo_f(){
+        var e = document.createElement("script");
+        e.src = "//browser-update.org/update.min.js";
+        document.body.appendChild(e);
+    };
+    try {document.addEventListener("DOMContentLoaded", $buo_f,false)}
+    catch(e){window.attachEvent("onload", $buo_f)}
+</script>
 </body>
 </html>
