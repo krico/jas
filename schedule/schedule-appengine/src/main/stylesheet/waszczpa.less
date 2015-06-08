@@ -7,6 +7,12 @@
 @import "inline-images";
 @import 'tables';
 
+.lt-ie10 {
+  .md-toolbar-tools, .main-menu, #content, #splash-page, #sidebar {
+    display: none !important;
+  }
+}
+
 .jas-visible-xs {
   @media (min-width: @angularMaterialLayoutSm) {
     display: none !important;

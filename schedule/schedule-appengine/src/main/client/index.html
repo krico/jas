@@ -1,15 +1,15 @@
 <!--[if gt IE 8]><![endif]-->
 <!DOCTYPE html>
 <!--[if lt IE 7]>
-<html lang="en" class="lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<html lang="en" class="lt-ie10 lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>
-<html lang="en" class="lt-ie9 lt-ie8"> <![endif]-->
+<html lang="en" class="lt-ie10 lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>
-<html lang="en" class="lt-ie9"> <![endif]-->
+<html lang="en" class="lt-ie10 lt-ie9"> <![endif]-->
 <!--[if IE 9]>
 <html lang="en" class="lt-ie10"> <![endif]-->
 <!--[if gt IE 9]><!-->
-<html lang="en" class="gt-ie9" xmlns:ng="http://angularjs.org">
+<html lang="en" ng-app="jasifyWeb" ng-strict-di class="gt-ie9" xmlns:ng="http://angularjs.org">
 <!--<![endif]-->
 <head>
     <title>Jasify Schedule</title>
@@ -73,7 +73,18 @@
         }
     </style>
 </head>
-<body layout="row" ng-app="jasifyWeb" ng-strict-di ng-controller="ApplicationController as appVm">
+<body layout="row" ng-controller="ApplicationController as appVm">
+<!--[if lt IE 10]>
+<div ng-show="!vm.isAuthenticated()" class="alert text-center alert-warning alert-dismissable">
+    <button class="close" data-dismiss="alert">&times;</button>
+    <div>Jasify <strong>no longer supports</strong> Internet Explorer versions <strong>older than 10</strong>.
+    </div>
+    <div>
+        We recommend upgrading <a href="https://browser-update.org/update.html">Internet Explorer</a>, or
+        downloading <a href="https://browser-update.org/update.html">Google Chrome, Firefox or Opera</a>.
+    </div>
+</div>
+<![endif]-->
 <div id="splash-page" ng-class="{ loaded: appVm.hideSplash }" layout="row" layout-align="center center">
     <div layout="column" layout-align="center center" class="page-splash-message">
         <md-progress-circular class="md-warn md-hue-3" md-mode="indeterminate"></md-progress-circular>
@@ -162,17 +173,6 @@
                 flex layout-padding md-scroll-y>
         <md-progress-linear jas-progress ng-show="mode === 'buffer'" class="md-accent sample-show-hide" md-mode="buffer"
                             value="{{determinateValue}}" md-buffer-value="{{determinateValue2}}"></md-progress-linear>
-        <!--[if lt IE 10]>
-        <div ng-show="!vm.isAuthenticated()" class="alert text-center alert-warning alert-dismissable">
-            <button class="close" data-dismiss="alert">&times;</button>
-            <div>Jasify <strong>no longer supports</strong> Internet Explorer versions <strong>older than 10</strong>.
-            </div>
-            <div>
-                We recommend upgrading <a href="https://browser-update.org/update.html">Internet Explorer</a>, or
-                downloading <a href="https://browser-update.org/update.html">Google Chrome, Firefox or Opera</a>.
-            </div>
-        </div>
-        <![endif]-->
         <div class="container-fluid shuffle-animation" ng-view>
         </div>
     </md-content>
