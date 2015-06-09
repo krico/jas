@@ -272,84 +272,84 @@ public final class TestHelper {
             String fieldName = declaredField.getName();
             if (excluded.contains(fieldName)) continue;
             if (fieldType.equals(ShortBlob.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new ShortBlob(RandomUtils.nextBytes(RandomUtils.nextInt(10, 500)));
                     }
                 });
             } else if (fieldType.equals(Text.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new Text(RandomStringUtils.randomAscii(RandomUtils.nextInt(10, 500)));
                     }
                 });
             } else if (fieldType.equals(Blob.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new Blob(RandomUtils.nextBytes(RandomUtils.nextInt(128, 1024)));
                     }
                 });
             } else if (fieldType.equals(Key.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return Datastore.allocateId("RandomKind");
                     }
                 });
             } else if (fieldType.equals(Category.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new Category(RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(3, 16)));
                     }
                 });
             } else if (fieldType.equals(Email.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new Email("a" + RandomStringUtils.randomNumeric(RandomUtils.nextInt(3, 8)) + "@random.com");
                     }
                 });
             } else if (fieldType.equals(GeoPt.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new GeoPt(RandomUtils.nextFloat(0, 90), RandomUtils.nextFloat(0, 180));
                     }
                 });
             } else if (fieldType.equals(IMHandle.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new IMHandle(IMHandle.Scheme.xmpp, "a" + RandomStringUtils.randomNumeric(RandomUtils.nextInt(3, 8)) + "@random.com");
                     }
                 });
             } else if (fieldType.equals(Link.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new Link("http://a" + RandomStringUtils.randomNumeric(RandomUtils.nextInt(3, 8)) + ".random.com");
                     }
                 });
             } else if (fieldType.equals(PhoneNumber.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new PhoneNumber("555-" + RandomStringUtils.randomNumeric(4));
                     }
                 });
             } else if (fieldType.equals(PostalAddress.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new PostalAddress("Street, " + RandomStringUtils.randomNumeric(4));
                     }
                 });
             } else if (fieldType.equals(Rating.class)) {
-                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                registerRandomizer(type, builder, fieldType, fieldName, new Randomizer() {
                     @Override
                     public Object getRandomValue() {
                         return new Rating(RandomUtils.nextInt(Rating.MIN_VALUE, Rating.MAX_VALUE));
@@ -359,5 +359,20 @@ public final class TestHelper {
         }
 
         return builder.build().populateBean(type, excludedFields);
+    }
+
+    private static <T> void registerRandomizer(final Class<T> type, PopulatorBuilder builder, final Class<?> fieldType, final String fieldName, final Randomizer randomizer) {
+        builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+            @Override
+            public Object getRandomValue() {
+                try {
+                    return randomizer.getRandomValue();
+                } catch (Exception e) {
+                    System.err.println("Exception on randomizer [type="+type+", fieldType="+fieldType +", fieldName="+fieldName+"]: " +e);
+                    e.printStackTrace(System.err);
+                    throw Throwables.propagate(e);
+                }
+            }
+        });
     }
 }
