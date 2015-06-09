@@ -5,8 +5,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.TestHelper;
-import io.github.benas.jpopulator.api.Populator;
-import io.github.benas.jpopulator.impl.PopulatorBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +20,7 @@ public class DaoUtilTest {
     public static final ExampleMeta META = ExampleMeta.get();
 
     static Example createExample() {
-        Populator populator = new PopulatorBuilder().build();
-        return populator.populateBean(Example.class, "id");
+        return TestHelper.populateBean(Example.class, "id");
     }
 
     @Before

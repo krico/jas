@@ -14,6 +14,8 @@ import org.slim3.datastore.ModelMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,11 +29,34 @@ public final class DaoUtil {
     private DaoUtil() {
     }
 
+    private static <T> Serializable marshall(@Nonnull ModelMeta<T> meta, T model) {
+        if (model == null) return null;
+        Entity entity = meta.modelToEntity(model);
+        Map<String, Object> newValues = new HashMap<>();
+        for (Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof Short) {
+                newValues.put(entry.getKey(), ((Short) value).longValue());
+            } else if (value instanceof Integer) {
+                newValues.put(entry.getKey(), ((Integer) value).longValue());
+            } else if (value instanceof Float) {
+                newValues.put(entry.getKey(), ((Float) value).doubleValue());
+            }
+        }
+        for (Map.Entry<String, Object> entry : newValues.entrySet()) {
+            entity.setProperty(entry.getKey(), entry.getValue());
+        }
+        return entity;
+    }
+
+    private static <T> T unMarshall(@Nonnull ModelMeta<T> meta, Serializable cached) {
+        return meta.entityToModel((Entity) cached);
+    }
+
     public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model, Expiration expiration) {
         try {
-            Entity entity = model == null ? null : meta.modelToEntity(model);
             /* This works together with DaoDatastoreCallbacks.purgeCache DEFAULT_MILLIS_NO_RE_ADD */
-            Memcache.put(id, entity, expiration, MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+            Memcache.put(id, marshall(meta, model), expiration, MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
         } catch (IllegalArgumentException e) {
             log.warn("Memcache exception IGNORED", e);
         }
@@ -48,11 +73,11 @@ public final class DaoUtil {
 
     public static <T> void cachePutAll(@Nonnull Map<Key, T> kvp, @Nonnull final ModelMeta<T> meta, Expiration expiration) {
         try {
-            Map<Key, Entity> keyEntityMap = Maps.transformValues(kvp, new Function<T, Entity>() {
+            Map<Key, Serializable> keyEntityMap = Maps.transformValues(kvp, new Function<T, Serializable>() {
                 @Nullable
                 @Override
-                public Entity apply(@Nullable T model) {
-                    return model == null ? null : meta.modelToEntity(model);
+                public Serializable apply(@Nullable T model) {
+                    return marshall(meta, model);
                 }
             });
             /* This works together with DaoDatastoreCallbacks.purgeCache DEFAULT_MILLIS_NO_RE_ADD */
@@ -65,9 +90,9 @@ public final class DaoUtil {
     public static <T> T cacheGet(@Nonnull Key id, @Nonnull ModelMeta<T> meta) {
         T ret = null;
         try {
-            Entity entity = Memcache.get(id);
-            if (entity != null) {
-                ret = meta.entityToModel(entity);
+            Serializable cached = Memcache.get(id);
+            if (cached != null) {
+                ret = unMarshall(meta, cached);
             }
         } catch (IllegalArgumentException e) {
             log.warn("Memcache exception IGNORED", e);
@@ -78,12 +103,12 @@ public final class DaoUtil {
     public static <T> Map<Key, T> cacheGet(@Nonnull List<Key> ids, @Nonnull final ModelMeta<T> meta) {
         Map<Key, T> modelMap = Maps.newHashMap();
         try {
-            Map<Key, Entity> cached = Memcache.getAll(ids);
-            modelMap = Maps.transformValues(cached, new Function<Entity, T>() {
+            Map<Key, Serializable> cached = Memcache.getAll(ids);
+            modelMap = Maps.transformValues(cached, new Function<Serializable, T>() {
                 @Nullable
                 @Override
-                public T apply(Entity entity) {
-                    return meta.entityToModel(entity);
+                public T apply(Serializable cached) {
+                    return unMarshall(meta, cached);
                 }
             });
         } catch (IllegalArgumentException e) {
@@ -102,14 +127,14 @@ public final class DaoUtil {
      * if no key was present, null is returned
      */
     public static <T> Optional<T> cacheGetOrNull(@Nonnull Key id, @Nonnull ModelMeta<T> meta) {
-        Entity entity = Memcache.get(id);
-        if (entity == null) {
+        Serializable cached = Memcache.get(id);
+        if (cached == null) {
             if (Memcache.contains(id)) {
                 return Optional.absent();
             } else {
                 return null;
             }
         }
-        return Optional.of(meta.entityToModel(entity));
+        return Optional.of(unMarshall(meta, cached));
     }
 }

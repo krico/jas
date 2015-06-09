@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine;
 
-import com.google.appengine.api.datastore.ShortBlob;
-import com.google.appengine.api.datastore.dev.LocalDatastoreService;
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.tools.development.testing.*;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
@@ -13,7 +12,11 @@ import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.meterware.servletunit.ServletRunner;
+import io.github.benas.jpopulator.api.Randomizer;
+import io.github.benas.jpopulator.impl.PopulatorBuilder;
 import junit.framework.AssertionFailedError;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -24,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -45,28 +49,24 @@ public final class TestHelper {
         setSystemProperties();
     }
 
-    public static void setSystemProperties() {
-        System.setProperty("slim3.useXGTX", "true");
-    }
-
     private static final LocalServiceTestHelper mailHelper = new LocalServiceTestHelper(
             createDatastoreServiceTestConfig(),
             new LocalMailServiceTestConfig()
                     .setLogMailBody(false)
                     .setLogMailLevel(Level.OFF)
     );
-
     private static final LocalServiceTestHelper appIdentityHelper = new LocalServiceTestHelper(new LocalAppIdentityServiceTestConfig());
-
     private static final LocalServiceTestHelper datastoreHelper = new LocalServiceTestHelper(
             createDatastoreServiceTestConfig()
     );
-
     private static final LocalServiceTestHelper memcacheWithDatastoreHelper = new LocalServiceTestHelper(createDatastoreServiceTestConfig(), new LocalMemcacheServiceTestConfig());
-
     private static ServletRunner servletRunner;
 
     private TestHelper() {
+    }
+
+    public static void setSystemProperties() {
+        System.setProperty("slim3.useXGTX", "true");
     }
 
     public static LocalDatastoreServiceTestConfig createDatastoreServiceTestConfig() {
@@ -261,5 +261,104 @@ public final class TestHelper {
         } catch (Exception e) {
             fail("NOT SERIALIZABLE [" + anyObject.getClass().getName() + "]: " + e);
         }
+    }
+
+    public static <T> T populateBean(final Class<T> type, final String... excludedFields) {
+
+        PopulatorBuilder builder = new PopulatorBuilder();
+
+        ArrayList<Field> declaredFields = new ArrayList<>(Arrays.asList(type.getDeclaredFields()));
+
+        for (Field declaredField : declaredFields) {
+            Class<?> fieldType = declaredField.getType();
+            String fieldName = declaredField.getName();
+            if (fieldType.equals(ShortBlob.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new ShortBlob(RandomUtils.nextBytes(RandomUtils.nextInt(10, 500)));
+                    }
+                });
+            } else if (fieldType.equals(Text.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new Text(RandomStringUtils.randomAscii(RandomUtils.nextInt(10, 500)));
+                    }
+                });
+            } else if (fieldType.equals(Blob.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new Blob(RandomUtils.nextBytes(RandomUtils.nextInt(128, 1024)));
+                    }
+                });
+            } else if (fieldType.equals(Key.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return Datastore.allocateId("RandomKind");
+                    }
+                });
+            } else if (fieldType.equals(Category.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new Category(RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(3, 16)));
+                    }
+                });
+            } else if (fieldType.equals(Email.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new Email("a" + RandomStringUtils.randomNumeric(RandomUtils.nextInt(3, 8)) + "@random.com");
+                    }
+                });
+            } else if (fieldType.equals(GeoPt.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new GeoPt(RandomUtils.nextFloat(0, 90), RandomUtils.nextFloat(0, 180));
+                    }
+                });
+            } else if (fieldType.equals(IMHandle.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new IMHandle(IMHandle.Scheme.xmpp, "a" + RandomStringUtils.randomNumeric(RandomUtils.nextInt(3, 8)) + "@random.com");
+                    }
+                });
+            } else if (fieldType.equals(Link.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new Link("http://a" + RandomStringUtils.randomNumeric(RandomUtils.nextInt(3, 8)) + ".random.com");
+                    }
+                });
+            } else if (fieldType.equals(PhoneNumber.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new PhoneNumber("555-" + RandomStringUtils.randomNumeric(4));
+                    }
+                });
+            } else if (fieldType.equals(PostalAddress.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new PostalAddress("Street, " + RandomStringUtils.randomNumeric(4));
+                    }
+                });
+            } else if (fieldType.equals(Rating.class)) {
+                builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
+                    @Override
+                    public Object getRandomValue() {
+                        return new Rating(RandomUtils.nextInt(Rating.MIN_VALUE, Rating.MAX_VALUE));
+                    }
+                });
+            }
+        }
+
+        return builder.build().populateBean(type, excludedFields);
     }
 }
