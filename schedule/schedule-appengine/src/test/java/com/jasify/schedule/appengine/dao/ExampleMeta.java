@@ -19,6 +19,9 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
     /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.dao.Example> dataType = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.dao.Example>(this, "dataType", "dataType");
 
+    /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, java.lang.Integer> nativeInt = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.dao.Example, java.lang.Integer>(this, "nativeInt", "nativeInt", int.class);
+
     private static final org.slim3.datastore.CreationDate slim3_createdAttributeListener = new org.slim3.datastore.CreationDate();
 
     private static final org.slim3.datastore.ModificationDate slim3_modifiedAttributeListener = new org.slim3.datastore.ModificationDate();
@@ -45,6 +48,7 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         model.setModified((java.util.Date) entity.getProperty("modified"));
         model.setData((java.lang.String) entity.getProperty("data"));
         model.setDataType((java.lang.String) entity.getProperty("dataType"));
+        model.setNativeInt(longToPrimitiveInt((java.lang.Long) entity.getProperty("nativeInt")));
         return model;
     }
 
@@ -61,6 +65,7 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         entity.setProperty("modified", m.getModified());
         entity.setProperty("data", m.getData());
         entity.setProperty("dataType", m.getDataType());
+        entity.setProperty("nativeInt", m.getNativeInt());
         return entity;
     }
 
@@ -141,6 +146,8 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             writer.setNextPropertyName("dataType");
             encoder0.encode(writer, m.getDataType());
         }
+        writer.setNextPropertyName("nativeInt");
+        encoder0.encode(writer, m.getNativeInt());
         writer.endObject();
     }
 
@@ -159,6 +166,8 @@ public final class ExampleMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         m.setData(decoder0.decode(reader, m.getData()));
         reader = rootReader.newObjectReader("dataType");
         m.setDataType(decoder0.decode(reader, m.getDataType()));
+        reader = rootReader.newObjectReader("nativeInt");
+        m.setNativeInt(decoder0.decode(reader, m.getNativeInt()));
         return m;
     }
 }

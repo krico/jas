@@ -28,6 +28,8 @@ public class Example {
 
     private String dataType;
 
+    private int nativeInt;
+
     public Key getId() {
         return id;
     }
@@ -76,6 +78,14 @@ public class Example {
         return BeanUtil.beanMap(this).equals(BeanUtil.beanMap(o));
     }
 
+    public int getNativeInt() {
+        return nativeInt;
+    }
+
+    public void setNativeInt(int nativeInt) {
+        this.nativeInt = nativeInt;
+    }
+
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
@@ -94,6 +104,8 @@ public class Example {
                 ", modified=" + modified +
                 ", data='" + data + '\'' +
                 ", dataType='" + dataType + '\'' +
+                ", nativeInt=" + nativeInt +
                 '}';
     }
+
 }
