@@ -30,10 +30,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
 import static junit.framework.TestCase.*;
@@ -268,10 +265,12 @@ public final class TestHelper {
         PopulatorBuilder builder = new PopulatorBuilder();
 
         ArrayList<Field> declaredFields = new ArrayList<>(Arrays.asList(type.getDeclaredFields()));
+        Set<String> excluded = new HashSet<>(Arrays.asList(excludedFields));
 
         for (Field declaredField : declaredFields) {
             Class<?> fieldType = declaredField.getType();
             String fieldName = declaredField.getName();
+            if (excluded.contains(fieldName)) continue;
             if (fieldType.equals(ShortBlob.class)) {
                 builder.registerRandomizer(type, fieldType, fieldName, new Randomizer() {
                     @Override
