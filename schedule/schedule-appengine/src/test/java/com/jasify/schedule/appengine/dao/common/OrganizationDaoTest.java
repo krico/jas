@@ -120,7 +120,7 @@ public class OrganizationDaoTest {
         Organization org1 = createExample();
         Organization org2 = createExample();
         Organization org3 = createExample();
-        User user = TestHelper.populateBean(User.class, "id", "lcName", "detailRef");
+        User user = TestHelper.populateBean(User.class, "id", "lcName", "detailRef", "created");
         assertNotNull(org1);
         assertNotNull(org2);
         assertNotNull(org3);
