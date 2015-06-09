@@ -1,4 +1,7 @@
+/*global window */
 (function (angular) {
+
+    'use strict';
 
     /**
      * Version information (values are replaced by gulp build)
@@ -9,4 +12,4 @@
         timestamp: '@TIMESTAMP@',
         version: '@VERSION@'
     });
-})(angular);
+})(window.angular);

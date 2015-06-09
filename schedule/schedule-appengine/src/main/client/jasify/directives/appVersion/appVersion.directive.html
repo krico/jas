@@ -1,0 +1,24 @@
+<div class="version-info" class="text-muted">
+    <div ng-show="longVersion" class="client-version">
+        <a tooltip="less details" href ng-click="longVersion = !longVersion">(-)</a>&nbsp;
+        <strong>version:</strong> {{::vm.VERSION.version}}
+        <strong>number:</strong> {{::vm.VERSION.number}}
+        <strong>branch:</strong> {{::vm.VERSION.branch}}
+        <strong>built on:</strong> {{::vm.VERSION.timestamp | tsToDate: 'L LT' }}
+    </div>
+    <div ng-show="longVersion" class="server-version">
+        <strong>server:</strong> {{vm.SERVER_VERSION.version}}
+        <strong>number:</strong> {{vm.SERVER_VERSION.number}}
+        <strong>branch:</strong> {{vm.SERVER_VERSION.branch}}
+        <strong>built on:</strong> {{vm.SERVER_VERSION.timestamp | tsToDate: 'L LT' }}
+    </div>
+    <div ng-show="!longVersion" class="client-version short">
+        <a tooltip="more details" href ng-click="longVersion = !longVersion">(+)</a>&nbsp;
+        <strong>version:</strong>
+        {{::vm.VERSION.version}} ({{::vm.VERSION.timestamp | tsToDate: 'L' }})
+    </div>
+    <div ng-show="!longVersion" class="server-version short">
+        <strong>&nbsp;server:</strong>
+        {{vm.SERVER_VERSION.version}} ({{vm.SERVER_VERSION.timestamp | tsToDate: 'L' }})
+    </div>
+</div>
