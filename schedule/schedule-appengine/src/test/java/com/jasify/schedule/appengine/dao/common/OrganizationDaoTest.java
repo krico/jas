@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.ModelOperation;
@@ -9,6 +10,7 @@ import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
+import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
@@ -129,6 +131,12 @@ public class OrganizationDaoTest {
             assertEquals(2, organizations.size());
             assertTrue(organizations.get(0).getId().equals(org1.getId()) || organizations.get(0).getId().equals(org3.getId()));
             assertTrue(organizations.get(1).getId().equals(org1.getId()) || organizations.get(1).getId().equals(org3.getId()));
+
+            //TODO: This is only temporary as a proof of concept
+            List<Organization> organizationsForUser = OrganizationServiceFactory.getOrganizationService().getOrganizationsForUser(user.getId());
+            assertEquals(organizations.size(), organizationsForUser.size());
+            assertTrue(organizations.get(0).getId().equals(organizationsForUser.get(0).getId()) || organizations.get(0).getId().equals(organizationsForUser.get(1).getId()));
+            assertTrue(organizations.get(1).getId().equals(organizationsForUser.get(0).getId()) || organizations.get(1).getId().equals(organizationsForUser.get(1).getId()));
         }
     }
 }
