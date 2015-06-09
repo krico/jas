@@ -16,13 +16,5 @@ public class LoggingConfiguration {
     public LoggingConfiguration() {
         Logger jasifyRoot = Logger.getLogger("com.jasify.schedule");
         jasifyRoot.setLevel(Level.WARNING);
-
-        Logger populator = Logger.getLogger("io.github.benas");
-        populator.setLevel(Level.INFO);
-
-        final ConsoleHandler consoleHandler = new ConsoleHandler();
-        consoleHandler.setLevel(Level.INFO);
-        consoleHandler.setFormatter(new SimpleFormatter());
-        populator.addHandler(consoleHandler);
     }
 }
