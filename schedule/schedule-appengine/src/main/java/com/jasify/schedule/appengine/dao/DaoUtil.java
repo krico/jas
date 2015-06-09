@@ -1,6 +1,5 @@
 package com.jasify.schedule.appengine.dao;
 
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
@@ -15,7 +14,6 @@ import org.slim3.datastore.ModelMeta;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,26 +29,11 @@ public final class DaoUtil {
 
     private static <T> Serializable marshall(@Nonnull ModelMeta<T> meta, T model) {
         if (model == null) return null;
-        Entity entity = meta.modelToEntity(model);
-        Map<String, Object> newValues = new HashMap<>();
-        for (Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof Short) {
-                newValues.put(entry.getKey(), ((Short) value).longValue());
-            } else if (value instanceof Integer) {
-                newValues.put(entry.getKey(), ((Integer) value).longValue());
-            } else if (value instanceof Float) {
-                newValues.put(entry.getKey(), ((Float) value).doubleValue());
-            }
-        }
-        for (Map.Entry<String, Object> entry : newValues.entrySet()) {
-            entity.setProperty(entry.getKey(), entry.getValue());
-        }
-        return entity;
+        return meta.modelToJson(model);
     }
 
     private static <T> T unMarshall(@Nonnull ModelMeta<T> meta, Serializable cached) {
-        return meta.entityToModel((Entity) cached);
+        return meta.jsonToModel((String) cached);
     }
 
     public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model, Expiration expiration) {
