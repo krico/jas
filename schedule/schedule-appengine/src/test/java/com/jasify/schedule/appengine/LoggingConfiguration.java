@@ -3,8 +3,10 @@ package com.jasify.schedule.appengine;
 
 import io.github.benas.jpopulator.impl.PopulatorImpl;
 
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Configure the logging
@@ -18,5 +20,10 @@ public class LoggingConfiguration {
         jasifyRoot.setLevel(Level.WARNING);
         Logger populator = Logger.getLogger("io.github.benas.jpopulator.impl.PopulatorImpl");
         populator.setLevel(Level.WARNING);
+        final ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.INFO);
+        consoleHandler.setFormatter(new SimpleFormatter());
+        jasifyRoot.addHandler(consoleHandler);
+        populator.addHandler(consoleHandler);
     }
 }
