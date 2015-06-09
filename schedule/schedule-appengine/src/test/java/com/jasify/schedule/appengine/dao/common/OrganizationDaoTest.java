@@ -121,6 +121,10 @@ public class OrganizationDaoTest {
         Organization org2 = createExample();
         Organization org3 = createExample();
         User user = TestHelper.populateBean(User.class, "id", "lcName", "detailRef");
+        assertNotNull(org1);
+        assertNotNull(org2);
+        assertNotNull(org3);
+        assertNotNull(user);
         Datastore.put(org1, org2, org3, user);
         OrganizationMember om1 = new OrganizationMember(org1, user);
         OrganizationMember om3 = new OrganizationMember(org3, user);
