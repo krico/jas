@@ -51,13 +51,9 @@
                             return;
                         }
 
-                        if (!$scope.$$phase) {
-                            $scope.$apply(function () {
-                                setValue($scope, attr.ngModel, newTime);
-                            });
-                        } else {
+                        safeApply.call($scope, function () {
                             setValue($scope, attr.ngModel, newTime);
-                        }
+                        });
                     }
                 });
 
@@ -68,7 +64,7 @@
                 ngModel.$parsers.push(function (viewValue) {
                     if (viewValue === '') {
                         ngModel.$setValidity('datetime', true);
-                        return undefined;
+                        return null;
                     }
 
                     var datetime = moment(viewValue, timePickerOptions.format);
@@ -127,15 +123,9 @@
                 datePicker.attr('placeholder', moment.localeData()._longDateFormat.L);
 
                 datePicker.on('dp.change', function (e) {
-                    if (e.date) {
-                        if (!$scope.$$phase) {
-                            $scope.$apply(function () {
-                                setValue($scope, attr.ngModel, e.date.format());
-                            });
-                        } else {
-                            setValue($scope, attr.ngModel, e.date.format());
-                        }
-                    }
+                    safeApply.call($scope, function () {
+                        setValue($scope, attr.ngModel, e.date ? e.date.format() : null);
+                    });
                 });
 
                 datePicker.on('click', function () {
@@ -226,5 +216,16 @@
         }
         return o;
     };
+
+    function safeApply(fn) {
+        var phase = this.$root.$$phase; // jshint ignore:line
+        if (phase === '$apply' || phase === '$digest') {
+            if (fn && (typeof(fn) === 'function')) {
+                fn();
+            }
+        } else {
+            this.$apply(fn); // jshint ignore:line
+        }
+    }
 
 }(window.angular, window.jQuery, window.moment));
