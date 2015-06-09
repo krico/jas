@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.ModelOperation;
@@ -120,7 +119,7 @@ public class OrganizationDaoTest {
         Organization org1 = createExample();
         Organization org2 = createExample();
         Organization org3 = createExample();
-        User user = TestHelper.populateBean(User.class, "id", "lcName", "detailRef", "created");
+        User user = new User("a@b.com");
         assertNotNull(org1);
         assertNotNull(org2);
         assertNotNull(org3);
