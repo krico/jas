@@ -2,7 +2,7 @@
 (function(angular) {
     'use strict';
 
-    angular.module('jasifyWeb').directive('appVersion', function($log, VERSION) {
+    angular.module('jasifyWeb').directive('appVersion', function() {
 
         return {
             restrict: 'E',
@@ -10,7 +10,7 @@
             scope: {},
             templateUrl: 'directives/appVersion/appVersion.directive.html',
             controllerAs: 'vm',
-            controller: function(ApiSettings) {
+            controller: function($log, VERSION, ApiSettings) {
 
                 var self = this;
 
