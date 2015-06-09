@@ -5,8 +5,8 @@
 
     angular.module('jasifyWeb').controller('ApplicationController', ApplicationController);
 
-    function ApplicationController($timeout, $scope, $rootScope, $modal, $log, $location, $filter,
-                                   Auth, ApiSettings, BrowserData, Endpoint, AUTH_EVENTS, VERSION) {
+    function ApplicationController($timeout, $scope, $rootScope, $modal, $log, $location,
+                                   Auth, BrowserData, Endpoint, AUTH_EVENTS) {
         var appVm = this;
 
         $scope.currentUser = null;
@@ -21,14 +21,8 @@
         appVm.loginFailed = loginFailed;
         appVm.notAuthorized = notAuthorized;
         appVm.authenticate = authenticate;
-        appVm.versionString = versionString;
-        appVm.longVersion = false;
-        appVm.toggleVersion = toggleVersion;
-        appVm.serverVersion = serverVersion;
-        appVm.serverVersionString = serverVersionString;
         appVm.isLoaded = isLoaded;
         appVm.isAuthenticated = isAuthenticated;
-        appVm.SERVER_VERSION = null;
 
         $scope.$on(AUTH_EVENTS.notAuthenticated, appVm.notAuthenticated);
         $scope.$on(AUTH_EVENTS.signIn, appVm.signIn);
@@ -127,57 +121,6 @@
             }, function () {
                 $log.info('Modal dismissed at: ' + new Date());
             });
-        }
-
-        function versionString() {
-            var ts = new Date(Number(VERSION.timestamp));
-            if (appVm.longVersion) {
-                return '<span class="client-version">' +
-                    '<strong>version:</strong> ' + VERSION.version +
-                    ' <strong>number:</strong> ' + VERSION.number +
-                    ' <strong>branch:</strong> ' + VERSION.branch +
-                    ' <strong>built on:</strong> ' + $filter('date')(ts, 'yyyy-MM-dd HH:mm:ss') +
-                    '</span>';
-            }
-            return '<span class="client-version"><strong>version:</strong> ' + VERSION.version + ' (' + $filter('date')(ts, 'yy.MM.dd') + ')</span> ';
-        }
-
-        function serverVersionString() {
-            var VERSION = serverVersion();
-            if (!(VERSION && VERSION.version)) {
-                return ' <span class="server-version"><strong>server:</strong> fetching...</span>';
-            }
-
-            var ts = new Date(Number(VERSION.timestamp));
-            if (appVm.longVersion) {
-                return '<span class="server-version">' +
-                    '<strong>server:</strong> ' + VERSION.version +
-                    ' <strong>number:</strong> ' + VERSION.number +
-                    ' <strong>branch:</strong> ' + VERSION.branch +
-                    ' <strong>built on:</strong> ' + $filter('date')(ts, 'yyyy-MM-dd HH:mm:ss') +
-                    '</span>';
-            }
-            return '<span class="server-version"><strong>server:</strong> ' + VERSION.version + ' (' + $filter('date')(ts, 'yy.MM.dd') + ')</span> ';
-        }
-
-        function serverVersion() {
-            if (appVm.SERVER_VERSION === null) {
-                appVm.SERVER_VERSION = {};
-                ApiSettings.getVersion().then(ok, fail);
-            }
-            function ok(resp) {
-                appVm.SERVER_VERSION = resp;
-            }
-
-            function fail() {
-                $log.debug("Failed to get server version");
-            }
-
-            return appVm.SERVER_VERSION;
-        }
-
-        function toggleVersion() {
-            appVm.longVersion = !appVm.longVersion;
         }
 
         $timeout(function () {

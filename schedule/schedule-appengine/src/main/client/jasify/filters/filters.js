@@ -1,10 +1,23 @@
+/*global window */
 (function (angular) {
+
+    'use strict';
 
     angular.module('jasify.filters', [])
         .filter('tableShortDateTime', tableShortDateTime)
-        .filter('calendarLong', calendarLong);
+        .filter('calendarLong', calendarLong)
+        .filter('tsToDate', tsToDate);
 
-    function calendarLong($filter) {
+    function tsToDate(moment) {
+        return function(input, format) {
+            if (input) {
+                return moment(new Date(Number(input))).format(format);
+            }
+            return "";
+        };
+    }
+
+    function calendarLong($filter, moment) {
         return function (value) {
             var mValue = moment(value).format(),
                 weekBefore = moment().add('day', -6).format(),
@@ -33,4 +46,4 @@
         };
     }
 
-})(angular);
+}(window.angular));

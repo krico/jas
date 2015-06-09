@@ -178,13 +178,7 @@
     </md-content>
 </div>
 <footer class="footer">
-    <div class="container">
-        <p class="text-muted small">
-            <span ng-bind-html="appVm.versionString()"></span>
-            <span ng-bind-html="appVm.serverVersionString()"></span>
-            (<a tooltip="more details" ng-click="appVm.toggleVersion()">+</a>)
-        </p>
-    </div>
+    <app-version></app-version>
 </footer>
 <!--<div mask></div>-->
 <!-- These three hidden inputs are for protractor -->
@@ -195,14 +189,18 @@
 <script src="build/js/jasify.js"></script>
 <script src="build/js/jasify.tpl.js"></script>
 <script>
-    var $buoop = {c:2};
-    function $buo_f(){
+    var $buoop = {c: 2};
+    function $buo_f() {
         var e = document.createElement("script");
         e.src = "//browser-update.org/update.min.js";
         document.body.appendChild(e);
-    };
-    try {document.addEventListener("DOMContentLoaded", $buo_f,false)}
-    catch(e){window.attachEvent("onload", $buo_f)}
+    }
+    try {
+        document.addEventListener("DOMContentLoaded", $buo_f, false)
+    }
+    catch (e) {
+        window.attachEvent("onload", $buo_f)
+    }
 </script>
 </body>
 </html>
