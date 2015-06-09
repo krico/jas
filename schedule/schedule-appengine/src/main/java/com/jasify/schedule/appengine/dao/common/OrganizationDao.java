@@ -6,14 +6,19 @@ import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.dao.UniqueIndex;
 import com.jasify.schedule.appengine.dao.UniqueIndexCache;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationMember;
+import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,5 +77,21 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
                 return Datastore.query(meta).asKeyList();
             }
         });
+    }
+
+    public List<Organization> forUser(User user) throws EntityNotFoundException {
+        return forUser(user.getId());
+    }
+
+    public List<Organization> forUser(Key userId) throws EntityNotFoundException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        List<OrganizationMember> organizationMembers = organizationMemberDao.byUserId(userId);
+        if (organizationMembers.isEmpty()) return Collections.emptyList();
+        List<Key> organizationIds = new ArrayList<>();
+        for (OrganizationMember organizationMember : organizationMembers) {
+            Key key = organizationMember.getOrganizationRef().getKey();
+            if (key != null) organizationIds.add(key);
+        }
+        return get(organizationIds);
     }
 }

@@ -8,22 +8,24 @@ import com.jasify.schedule.appengine.model.ModelOperation;
 import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.common.Organization;
-import io.github.benas.jpopulator.api.Populator;
-import io.github.benas.jpopulator.impl.PopulatorBuilder;
+import com.jasify.schedule.appengine.model.common.OrganizationMember;
+import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slim3.datastore.Datastore;
 
-import static junit.framework.TestCase.assertNotNull;
+import java.util.List;
+
+import static junit.framework.TestCase.*;
 
 
 public class OrganizationDaoTest {
     private OrganizationDao dao;
 
     static Organization createExample() {
-        Populator populator = new PopulatorBuilder().build();
-        return populator.populateBean(Organization.class, "id", "lcName");
+        return TestHelper.populateBean(Organization.class, "id", "lcName", "organizationMemberListRef");
     }
 
     @BeforeClass
@@ -109,5 +111,24 @@ public class OrganizationDaoTest {
             }
         });
         save(example2);
+    }
+
+    @Test
+    public void testForUser() throws Exception {
+        Organization org1 = createExample();
+        Organization org2 = createExample();
+        Organization org3 = createExample();
+        User user = TestHelper.populateBean(User.class, "id", "lcName", "detailRef");
+        Datastore.put(org1, org2, org3, user);
+        OrganizationMember om1 = new OrganizationMember(org1, user);
+        OrganizationMember om3 = new OrganizationMember(org3, user);
+        Datastore.put(om1, om3);
+
+        for (int M = 0; M < 3; ++M) {
+            List<Organization> organizations = dao.forUser(user.getId());
+            assertEquals(2, organizations.size());
+            assertTrue(organizations.get(0).getId().equals(org1.getId()) || organizations.get(0).getId().equals(org3.getId()));
+            assertTrue(organizations.get(1).getId().equals(org1.getId()) || organizations.get(1).getId().equals(org3.getId()));
+        }
     }
 }
