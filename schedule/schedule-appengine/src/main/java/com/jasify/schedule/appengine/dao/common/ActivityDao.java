@@ -21,14 +21,6 @@ public class ActivityDao extends BaseCachingDao<Activity> {
         super(ActivityMeta.get());
     }
 
-    private ActivityType getActivityType(Activity activity) {
-        return activity.getActivityTypeRef().getModel();
-    }
-
-    private Organization getOrganization(Activity activity) {
-        return getActivityType(activity).getOrganizationRef().getModel();
-    }
-
     public List<Activity> getBy(final ActivityType activityType) {
         ActivityMeta meta = getMeta();
         return query(new BaseDaoQuery<Activity, ActivityMeta>(meta, new Serializable[0]) {

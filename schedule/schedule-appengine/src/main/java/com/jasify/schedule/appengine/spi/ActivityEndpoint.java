@@ -10,6 +10,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.OperationException;
@@ -63,6 +66,9 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class ActivityEndpoint {
+
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
@@ -195,11 +201,11 @@ public class ActivityEndpoint {
             if (activityTypeId != null) {
                 checkFound(activityTypeId);
                 ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(activityTypeId);
-                all.addAll(ActivityServiceFactory.getActivityService().getActivities(activityType));
+                all.addAll(activityDao.getBy(activityType));
             } else {
                 checkFound(organizationId);
                 Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
-                all.addAll(ActivityServiceFactory.getActivityService().getActivities(organization));
+                all.addAll(activityDao.getBy(organization));
             }
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
@@ -228,13 +234,13 @@ public class ActivityEndpoint {
                 for (Key activityTypeId : request.getActivityTypeIds()) {
                     checkFound(activityTypeId);
                     ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(activityTypeId);
-                    all.addAll(ActivityServiceFactory.getActivityService().getActivities(activityType));
+                    all.addAll(activityDao.getBy(activityType));
                 }
             } else if (!request.getOrganizationIds().isEmpty()) {
                 for (Key organizationId : request.getOrganizationIds()) {
                     checkFound(organizationId);
                     Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
-                    all.addAll(ActivityServiceFactory.getActivityService().getActivities(organization));
+                    all.addAll(activityDao.getBy(organization));
                 }
             }
         } catch (EntityNotFoundException e) {
@@ -389,7 +395,7 @@ public class ActivityEndpoint {
         checkFound(organizationId);
         try {
             Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
-            return ActivityServiceFactory.getActivityService().getActivityPackages(organization);
+            return activityPackageDao.getBy(organization);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
