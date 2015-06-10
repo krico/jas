@@ -64,12 +64,13 @@ public class OrganizationEndpoint {
     public List<Organization> getOrganizations(User caller) throws UnauthorizedException, ForbiddenException, EntityNotFoundException {
         JasifyEndpointUser jasUser = mustBeLoggedIn(caller);
         // Admin sees all
-        if (jasUser.isAdmin()) return organizationDao.getAll();
+        if (jasUser.isAdmin()) {
+            return organizationDao.getAll();
+        }
         if (jasUser.isOrgMember()) {
-            return OrganizationServiceFactory.getOrganizationService().getOrganizationsForUser(jasUser.getUserId());
+            return organizationDao.forUser(jasUser.getUserId());
         }
         throw new ForbiddenException("Must be admin");
-
     }
 
     @ApiMethod(name = "organizations.get", path = "organizations/{id}", httpMethod = ApiMethod.HttpMethod.GET)

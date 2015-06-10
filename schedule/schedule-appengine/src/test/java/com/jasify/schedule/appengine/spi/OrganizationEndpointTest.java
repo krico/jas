@@ -23,11 +23,9 @@ import org.slim3.datastore.Datastore;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newOrgMemberCaller;
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.*;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 import static org.easymock.EasyMock.*;
 
 public class OrganizationEndpointTest {
@@ -93,7 +91,7 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.addOrganization(null, null);
     }
-    
+
     @Test(expected = ForbiddenException.class)
     public void testAddOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
@@ -111,7 +109,7 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.removeOrganization(null, null);
     }
-    
+
     @Test(expected = ForbiddenException.class)
     public void testGetOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
@@ -123,7 +121,7 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.addUserToOrganization(null, null, null);
     }
-    
+
     @Test(expected = ForbiddenException.class)
     public void testAddUserToOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
@@ -322,14 +320,25 @@ public class OrganizationEndpointTest {
 
     @Test
     public void testGetOrganizationsForUser() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        JasifyEndpointUser caller = newOrgMemberCaller(55);
-        ArrayList<Organization> expected = new ArrayList<>();
-        expect(service.getOrganizationsForUser(caller.getUserId())).andReturn(expected);
         testOrganizationServiceFactory.replay(); //recording finished
+
+        Organization o1 = new Organization("Org1");
+        Organization o2 = new Organization("Org2");
+        Organization o3 = new Organization("Org3");
+        User user = new User("user1");
+
+        Datastore.put(o1, o2, o3, user);
+
+        OrganizationMember om1 = new OrganizationMember(o1, user);
+        OrganizationMember om3 = new OrganizationMember(o3, user);
+
+        Datastore.put(om1, om3);
+
+        JasifyEndpointUser caller = newOrgMemberCaller(user.getId().getId());
         List<Organization> organizations = endpoint.getOrganizations(caller);
-        // I use == here since I know the method returns it directly
-        assertNotNull(organizations == expected);
+        assertEquals(2, organizations.size());
+        assertTrue(organizations.get(0).getId().equals(o1.getId()) || organizations.get(0).getId().equals(o3.getId()));
+        assertTrue(organizations.get(1).getId().equals(o1.getId()) || organizations.get(1).getId().equals(o3.getId()));
     }
 
     @Test

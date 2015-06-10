@@ -79,8 +79,8 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         });
     }
 
-    public List<Organization> forUser(User user) throws EntityNotFoundException {
-        return forUser(user.getId());
+    public List<Organization> forUser(long userId) throws EntityNotFoundException {
+        return forUser(Datastore.createKey(User.class, userId));
     }
 
     public List<Organization> forUser(Key userId) throws EntityNotFoundException {
