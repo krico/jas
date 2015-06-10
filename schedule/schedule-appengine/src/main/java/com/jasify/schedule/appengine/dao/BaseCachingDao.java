@@ -124,6 +124,10 @@ public class BaseCachingDao<T> extends BaseDao<T> {
     }
 
     protected List<T> query(@Nonnull DaoQuery query) {
+        if (!canCache()) {
+            return super.query(query);
+        }
+
         DaoQueryMetadata.CacheQueryTransaction operation = DaoQueryMetadata
                 .cacheQueryTransaction(query, meta.getKind(), expiration());
 

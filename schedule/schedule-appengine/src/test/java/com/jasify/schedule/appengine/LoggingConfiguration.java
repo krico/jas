@@ -1,8 +1,10 @@
 package com.jasify.schedule.appengine;
 
 
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Configure the logging

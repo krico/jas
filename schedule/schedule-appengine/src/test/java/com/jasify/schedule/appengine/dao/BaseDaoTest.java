@@ -205,8 +205,6 @@ public class BaseDaoTest {
         assertEquals("stale cache?", 2, even.size());
         assertTrue("stale cache?", even.contains(example2));
         assertTrue("stale cache?", even.contains(example4));
-
-
     }
 
     @Test
@@ -270,6 +268,67 @@ public class BaseDaoTest {
 
         for (Key key : keys) {
             assertNull(dao.getOrNull(key));
+        }
+    }
+
+    @Test
+    public void testAncestorQuery() throws Exception {
+        Key ancestor = Datastore.allocateId("Ancestor");
+        List<Example> examples = new ArrayList<>();
+        examples.add(createExample());
+        examples.add(createExample());
+        examples.add(createExample());
+        for (Example example : examples) {
+            example.setId(Datastore.allocateId(ancestor, Example.class));
+        }
+        examples.add(createExample());
+
+        dao.save(examples);
+        for (int M = 0; M < 3; ++M) {
+            List<Example> children = ((AnyExampleDao) dao).byAncestor(ancestor);
+            assertNotNull(children);
+            assertEquals(3, children.size());
+            for (int i = 0; i < 3; ++i) {
+                boolean found = false;
+                for (Example child : children) {
+                    found |= child.getId().equals(examples.get(i).getId());
+                }
+                assertTrue(found);
+            }
+        }
+    }
+
+    @Test
+    public void testAncestorQueryInTransaction() throws Exception {
+        Key ancestor = Datastore.allocateId("Ancestor");
+        List<Example> examples = new ArrayList<>();
+        examples.add(createExample());
+        examples.add(createExample());
+        examples.add(createExample());
+        for (Example example : examples) {
+            example.setId(Datastore.allocateId(ancestor, Example.class));
+        }
+        examples.add(createExample());
+
+        dao.save(examples);
+
+        for (int M = 0; M < 3; ++M) {
+            Transaction tx = beginTx();
+            try {
+                List<Example> children = ((AnyExampleDao) dao).byAncestor(ancestor);
+                assertNotNull(children);
+                assertEquals(3, children.size());
+                for (int i = 0; i < 3; ++i) {
+                    boolean found = false;
+                    for (Example child : children) {
+                        found |= child.getId().equals(examples.get(i).getId());
+                    }
+                    assertTrue(found);
+                }
+                tx.commit();
+            } finally {
+                if (tx.isActive()) tx.rollback();
+            }
         }
     }
 }

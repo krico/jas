@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.dao;
 
+import com.google.appengine.api.datastore.Key;
+
 import java.util.List;
 
 /**
@@ -9,4 +11,6 @@ import java.util.List;
 public interface AnyExampleDao {
 
     List<Example> byDataType(String dataType);
+
+    List<Example> byAncestor(Key ancestor);
 }

@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.dao;
 
+import com.google.appengine.api.datastore.Key;
+
 import java.util.List;
 
 /**
@@ -18,4 +20,9 @@ public class ExampleCachingDao extends BaseCachingDao<Example> implements AnyExa
         return query(new ExampleDaoQuery(meta, dataType));
     }
 
+    @Override
+    public List<Example> byAncestor(Key ancestor) {
+        ExampleMeta meta = getMeta();
+        return query(new ExampleDaoAncestorQuery(meta, ancestor));
+    }
 }
