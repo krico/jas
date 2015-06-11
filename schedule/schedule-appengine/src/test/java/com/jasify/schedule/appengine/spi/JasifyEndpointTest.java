@@ -4,22 +4,17 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.common.OrganizationService;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.common.TestOrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.TestUserServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserService;
-import com.jasify.schedule.appengine.spi.JasifyEndpoint.OrgMemberChecker;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasApiInfo;
 import org.easymock.EasyMockRunner;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.slim3.datastore.Datastore;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.expect;
@@ -129,6 +124,7 @@ public class JasifyEndpointTest {
         final User user = new User("Bob");
         user.setId(Datastore.allocateId(User.class));
         Organization organization = new Organization("Org");
+        Datastore.put(organization);
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
         Activity activity = new Activity(activityType);
@@ -138,7 +134,7 @@ public class JasifyEndpointTest {
         testActivityServiceFactory.replay();
         expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
-        OrgMemberChecker orgMemberChecker = JasifyEndpoint.createFromActivityId(activity.getId());
+        OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityId(activity.getId());
         assertFalse(orgMemberChecker.isOrgMember(user.getId().getId()));
     }
 
@@ -146,13 +142,9 @@ public class JasifyEndpointTest {
     public void testOrgMemberCheckerViaActivityId() throws Exception {
         testOrganizationServiceFactory.replay();
         final User user = new User("Bob");
-        user.setId(Datastore.allocateId(User.class));
-        Organization organization = new Organization("Org") {
-            @Override
-            public List<User> getUsers() {
-                return Arrays.asList(user);
-            }
-        };
+        Organization organization = new Organization("Org");
+        Datastore.put(organization, user);
+        Datastore.put(new OrganizationMember(organization, user));
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
         Activity activity = new Activity(activityType);
@@ -162,7 +154,7 @@ public class JasifyEndpointTest {
         testActivityServiceFactory.replay();
         expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
-        OrgMemberChecker orgMemberChecker = JasifyEndpoint.createFromActivityId(activity.getId());
+        OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityId(activity.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));
     }
 
@@ -170,13 +162,10 @@ public class JasifyEndpointTest {
     public void testOrgMemberCheckerViaActivityTypeId() throws Exception {
         testOrganizationServiceFactory.replay();
         final User user = new User("Bob");
-        user.setId(Datastore.allocateId(User.class));
-        Organization organization = new Organization("Org") {
-            @Override
-            public List<User> getUsers() {
-                return Arrays.asList(user);
-            }
-        };
+        Organization organization = new Organization("Org");
+        Datastore.put(user, organization);
+        Datastore.put(new OrganizationMember(organization, user));
+
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
         ActivityService activityService = ActivityServiceFactory.getActivityService();
@@ -184,7 +173,7 @@ public class JasifyEndpointTest {
         testActivityServiceFactory.replay();
         expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
-        OrgMemberChecker orgMemberChecker = JasifyEndpoint.createFromActivityTypeId(activityType.getId());
+        OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityTypeId(activityType.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));
     }
 
@@ -192,13 +181,9 @@ public class JasifyEndpointTest {
     public void testOrgMemberCheckerViaSubscriptionId() throws Exception {
         testOrganizationServiceFactory.replay();
         final User user = new User("Bob");
-        user.setId(Datastore.allocateId(User.class));
-        Organization organization = new Organization("Org") {
-            @Override
-            public List<User> getUsers() {
-                return Arrays.asList(user);
-            }
-        };
+        Organization organization = new Organization("Org");
+        Datastore.put(user, organization);
+        Datastore.put(new OrganizationMember(organization, user));
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
         Activity activity = new Activity(activityType);
@@ -211,7 +196,7 @@ public class JasifyEndpointTest {
         testActivityServiceFactory.replay();
         expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
-        OrgMemberChecker orgMemberChecker = JasifyEndpoint.createFromSubscriptionId(subscription.getId());
+        OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromSubscriptionId(subscription.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));
     }
 
@@ -219,20 +204,14 @@ public class JasifyEndpointTest {
     public void testOrgMemberCheckerViaOrganizationId() throws Exception {
         testActivityServiceFactory.replay();
         final User user = new User("Bob");
-        user.setId(Datastore.allocateId(User.class));
-        Organization organization = new Organization("Org") {
-            @Override
-            public List<User> getUsers() {
-                return Arrays.asList(user);
-            }
-        };
-        organization.setId(Datastore.allocateId(Organization.class));
-        OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService();
-        expect(organizationService.getOrganization(organization.getId())).andReturn(organization);
+        Organization organization = new Organization("Org");
+        Datastore.put(user, organization);
+        Datastore.put(new OrganizationMember(organization, user));
+
         testOrganizationServiceFactory.replay();
         expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
-        OrgMemberChecker orgMemberChecker = JasifyEndpoint.createFromOrganizationId(organization.getId());
+        OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromOrganizationId(organization.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));
     }
 }

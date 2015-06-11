@@ -114,27 +114,13 @@ public class JasifyEndpointNotMockedTest {
 
     @Test(expected = ForbiddenException.class)
     public void mustBeAdminOrOrgMemberThrowsForbiddenException() throws NotFoundException, UnauthorizedException, ForbiddenException {
-        JasifyEndpoint.mustBeAdminOrOrgMember(newCaller(1), new JasifyEndpoint.OrgMemberChecker(null) {
-            @Override
-            Organization getOrganization() throws EntityNotFoundException {
-                return null;
-            }
-            @Override
-            public boolean isOrgMember(long userId) throws EntityNotFoundException {
-                return false;
-            }
-        });
+        JasifyEndpoint.mustBeAdminOrOrgMember(newCaller(1), OrgMemberChecker.createFalse());
     }
 
 
     @Test(expected = NotFoundException.class)
     public void mustBeAdminOrOrgMemberThrowsNotFoundException() throws NotFoundException, UnauthorizedException, ForbiddenException {
-        JasifyEndpoint.mustBeAdminOrOrgMember(newOrgMemberCaller(1), new JasifyEndpoint.OrgMemberChecker(null) {
-            @Override
-            Organization getOrganization() throws EntityNotFoundException {
-                throw new EntityNotFoundException();
-            }
-        });
+        JasifyEndpoint.mustBeAdminOrOrgMember(newOrgMemberCaller(1), OrgMemberChecker.createNotFound());
     }
 
     @Test(expected = NotFoundException.class)
