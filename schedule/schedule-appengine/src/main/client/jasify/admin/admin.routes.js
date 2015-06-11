@@ -260,7 +260,7 @@
 
                         var dfd = $q.defer();
 
-                        Allow.admin().then(
+                        Allow.adminOrOrgMember().then(
                             function () {
                                 Organization.query().then(function (result) {
                                     if ($route.current.params.organizationId) {
@@ -283,7 +283,7 @@
                     },
                     activityTypes: /*@ngInject*/ function ($q, $route, Allow, ActivityType) {
 
-                        return Allow.admin().then(allowed, forbidden);
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
 
                         function allowed() {
                             if ($route.current.params.organizationId) {
@@ -312,7 +312,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     organizations: /*@ngInject*/ function ($q, Allow, Organization) {
-                        return Allow.admin().then(
+                        return Allow.adminOrOrgMember().then(
                             function () {
                                 return Organization.query();
                             },
@@ -323,7 +323,7 @@
                     },
                     activityType: /*@ngInject*/ function ($q, $route, Allow, ActivityType) {
 
-                        return Allow.admin().then(allowed, forbidden);
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
 
                         function allowed() {
                             if ($route.current.params.id) {
