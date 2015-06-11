@@ -10,7 +10,6 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasApiInfo;
@@ -46,70 +45,6 @@ import com.jasify.schedule.appengine.spi.transform.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class JasifyEndpoint {
-    abstract static class OrgMemberChecker {
-        protected final Key id;
-        protected OrgMemberChecker(Key id) {
-            this.id = id;
-        }
-        public boolean isOrgMember(long userId) throws EntityNotFoundException {
-            Organization organization = getOrganization();
-            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(userId);
-            return organization.getUsers().contains(user);
-        }
-        abstract Organization getOrganization() throws EntityNotFoundException;
-    }
-
-    static OrgMemberChecker createFromActivityId(Key id) {
-        return new OrgMemberChecker(id) {
-            @Override
-            Organization getOrganization() throws EntityNotFoundException {
-                Activity activity = ActivityServiceFactory.getActivityService().getActivity(this.id);
-                ActivityType activityType = activity.getActivityTypeRef().getModel();
-                return activityType.getOrganizationRef().getModel();
-            }
-        };
-    }
-
-    static OrgMemberChecker createFromActivityTypeId(Key id) {
-        return new OrgMemberChecker(id) {
-            @Override
-            Organization getOrganization() throws EntityNotFoundException {
-                ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(this.id);
-                return activityType.getOrganizationRef().getModel();
-            }
-        };
-    }
-
-    static OrgMemberChecker createFromActivityPackageId(Key id) {
-        return new OrgMemberChecker(id) {
-            @Override
-            Organization getOrganization() throws EntityNotFoundException {
-                ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(this.id);
-                return activityPackage.getOrganizationRef().getModel();
-            }
-        };
-    }
-
-    static OrgMemberChecker createFromSubscriptionId(Key id) {
-        return new OrgMemberChecker(id) {
-            @Override
-            Organization getOrganization() throws EntityNotFoundException {
-                Subscription subscription = ActivityServiceFactory.getActivityService().getSubscription(this.id);
-                Activity activity = subscription.getActivityRef().getModel();
-                ActivityType activityType = activity.getActivityTypeRef().getModel();
-                return activityType.getOrganizationRef().getModel();
-            }
-        };
-    }
-
-    static OrgMemberChecker createFromOrganizationId(Key id) {
-        return new OrgMemberChecker(id) {
-            @Override
-            Organization getOrganization() throws EntityNotFoundException {
-                return OrganizationServiceFactory.getOrganizationService().getOrganization(this.id);
-            }
-        };
-    }
 
     static JasifyEndpointUser mustBeLoggedIn(User caller) throws UnauthorizedException {
         if (caller instanceof JasifyEndpointUser) return (JasifyEndpointUser) caller;

@@ -14,8 +14,8 @@ import org.slim3.datastore.Datastore;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 public class JasOrganizationTransformerTest {
     private JasOrganizationTransformer transformer = new JasOrganizationTransformer();

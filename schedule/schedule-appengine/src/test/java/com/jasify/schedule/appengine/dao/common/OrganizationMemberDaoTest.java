@@ -13,7 +13,9 @@ import org.slim3.datastore.Datastore;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.*;
+import static com.jasify.schedule.appengine.AssertionHelper.assertIdsEqual;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
 
 public class OrganizationMemberDaoTest {
     private OrganizationMemberDao dao;
@@ -52,9 +54,7 @@ public class OrganizationMemberDaoTest {
             List<OrganizationMember> results = dao.byUserId(key);
             assertNotNull(results);
             assertEquals(2, results.size());
-
-            assertTrue(member1.getId().equals(results.get(0).getId()) || member3.getId().equals(results.get(0).getId()));
-            assertTrue(member1.getId().equals(results.get(1).getId()) || member3.getId().equals(results.get(1).getId()));
+            assertIdsEqual(Arrays.asList(member1, member3), results);
         }
     }
 }

@@ -23,11 +23,9 @@ import org.slim3.datastore.Datastore;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newOrgMemberCaller;
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.*;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 import static org.easymock.EasyMock.*;
 
 public class OrganizationEndpointTest {
@@ -93,7 +91,7 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.addOrganization(null, null);
     }
-    
+
     @Test(expected = ForbiddenException.class)
     public void testAddOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
@@ -111,7 +109,7 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.removeOrganization(null, null);
     }
-    
+
     @Test(expected = ForbiddenException.class)
     public void testGetOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
@@ -123,7 +121,7 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.addUserToOrganization(null, null, null);
     }
-    
+
     @Test(expected = ForbiddenException.class)
     public void testAddUserToOrganizationNotAdmin() throws Exception {
         testOrganizationServiceFactory.replay();
@@ -225,17 +223,6 @@ public class OrganizationEndpointTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testGetOrganizationNotFound() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key key = Datastore.allocateId(Organization.class);
-        service.getOrganization(key);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.getOrganization(newAdminCaller(55), key);
-    }
-
-
-    @Test(expected = NotFoundException.class)
     public void testUpdateOrganizationNotFoundViaEntityNotFoundException() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
         Key key = Datastore.allocateId(Organization.class);
@@ -268,38 +255,6 @@ public class OrganizationEndpointTest {
         endpoint.updateOrganization(newAdminCaller(55), key, organization);
     }
 
-    @Test(expected = NotFoundException.class)
-    public void testAddOrganizationNotFoundViaEntityNotFoundException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Organization organization = new Organization();
-        Key key = Datastore.allocateId(Organization.class);
-        expect(service.addOrganization(organization)).andReturn(key);
-        service.getOrganization(key);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.addOrganization(newAdminCaller(55), organization);
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testAddOrganizationNotFoundViaFieldValueException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Organization organization = new Organization();
-        service.addOrganization(organization);
-        expectLastCall().andThrow(new FieldValueException(null));
-        testOrganizationServiceFactory.replay();
-        endpoint.addOrganization(newAdminCaller(55), organization);
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testAddOrganizationNotFoundViaUniqueConstraintException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Organization organization = new Organization();
-        service.addOrganization(organization);
-        expectLastCall().andThrow(new UniqueConstraintException(null));
-        testOrganizationServiceFactory.replay();
-        endpoint.addOrganization(newAdminCaller(55), organization);
-    }
-
     @Test
     public void testUpdateOrganization() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
@@ -318,39 +273,6 @@ public class OrganizationEndpointTest {
 
         Organization result = endpoint.updateOrganization(newAdminCaller(55), key, organization);
         assertEquals(result, organization);
-    }
-
-    @Test
-    public void testGetOrganizationsForUser() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        JasifyEndpointUser caller = newOrgMemberCaller(55);
-        ArrayList<Organization> expected = new ArrayList<>();
-        expect(service.getOrganizationsForUser(caller.getUserId())).andReturn(expected);
-        testOrganizationServiceFactory.replay(); //recording finished
-        List<Organization> organizations = endpoint.getOrganizations(caller);
-        // I use == here since I know the method returns it directly
-        assertNotNull(organizations == expected);
-    }
-
-    @Test
-    public void testGetOrganization() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Organization organization = new Organization();
-        expect(service.getOrganization(organization.getId())).andReturn(organization);
-        testOrganizationServiceFactory.replay();
-        Organization result = endpoint.getOrganization(newAdminCaller(55), organization.getId());
-        assertEquals(organization, result);
-    }
-
-    @Test
-    public void testAddOrganization() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Organization organization = new Organization();
-        expect(service.addOrganization(organization)).andReturn(organization.getId());
-        expect(service.getOrganization(organization.getId())).andReturn(organization);
-        testOrganizationServiceFactory.replay();
-        Organization result = endpoint.addOrganization(newAdminCaller(55), organization);
-        assertEquals(organization, result);
     }
 
     @Test

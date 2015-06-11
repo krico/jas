@@ -77,7 +77,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.get", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public ActivityType getActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
         try {
             return ActivityServiceFactory.getActivityService().getActivityType(id);
@@ -88,7 +88,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.update", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public ActivityType updateActivityType(User caller, @Named("id") Key id, ActivityType activityType) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
         activityType.setId(id);
         try {
@@ -102,7 +102,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.add", path = "activity-types", httpMethod = ApiMethod.HttpMethod.POST)
     public ActivityType addActivityType(User caller, JasAddActivityTypeRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
-        mustBeAdminOrOrgMember(caller, createFromOrganizationId(request.getOrganizationId()));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(request.getOrganizationId()));
         checkFound(request.getActivityType());
         checkFound(request.getOrganizationId());
         Key id;
@@ -126,7 +126,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.remove", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
         try {
             // Check if the ActivityType has linked Activities
@@ -257,7 +257,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.update", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public Activity updateActivity(User caller, @Named("id") Key id, Activity activity) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityId(activity.getId()));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activity.getId()));
         checkFound(id);
         activity.setId(id);
         // In case client does not set the Name field we force the set here
@@ -279,7 +279,7 @@ public class ActivityEndpoint {
         checkFound(request.getActivity().getActivityTypeRef());
         checkFound(request.getActivity().getActivityTypeRef().getKey());
         checkFound(request.getActivity().getActivityTypeRef().getModel());
-        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(request.getActivity().getActivityTypeRef().getKey()));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(request.getActivity().getActivityTypeRef().getKey()));
 
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
@@ -303,7 +303,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.remove", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityId(id));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(id));
         checkFound(id);
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
@@ -324,7 +324,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.add", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.POST)
     public Subscription addSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
-        mustBeSameUserOrAdminOrOrgMember(caller, userId, createFromActivityId(activityId));
+        mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(userId);
         checkFound(activityId);
         ActivityService activityService = ActivityServiceFactory.getActivityService();
@@ -343,7 +343,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.query", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.GET)
     public Subscription getSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
-        mustBeSameUserOrAdminOrOrgMember(caller, userId, createFromActivityId(activityId));
+        mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(userId);
         checkFound(activityId);
         try {
@@ -363,7 +363,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.subscribers", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Subscription> getSubscriptions(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
-        mustBeAdminOrOrgMember(caller, createFromActivityId(activityId));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(activityId);
         try {
             Activity activity = ActivityServiceFactory.getActivityService().getActivity(activityId);
@@ -375,7 +375,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void cancelSubscription(User caller, @Named("subscriptionId") Key subscriptionId) throws UnauthorizedException, ForbiddenException, NotFoundException {
-        mustBeAdminOrOrgMember(caller, createFromSubscriptionId(subscriptionId));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromSubscriptionId(subscriptionId));
         checkFound(subscriptionId);
         try {
             ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
@@ -407,7 +407,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(id));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(id));
         checkFound(id);
         ActivityPackage activityPackage = Preconditions.checkNotNull(request.getActivityPackage(), "request.ActivityPackage is NULL");
         List<Activity> activities = Preconditions.checkNotNull(request.getActivities(), "request.Activities is NULL");
@@ -430,7 +430,7 @@ public class ActivityEndpoint {
         if (activities.isEmpty())
             throw new BadRequestException("request.activities.isEmpty");
 
-        mustBeAdminOrOrgMember(caller, createFromOrganizationId(organizationId));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organizationId));
 
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         try {
@@ -445,7 +445,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityPackages.remove", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityTypeId(id));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
         try {
             ActivityServiceFactory.getActivityService().removeActivityPackage(id);
@@ -469,7 +469,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityPackages.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
     public void addActivityToActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(activityPackageId));
         checkFound(activityPackageId);
         checkFound(activityId);
         try {
@@ -484,7 +484,7 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityPackages.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, createFromActivityPackageId(activityPackageId));
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(activityPackageId));
         checkFound(activityPackageId);
         checkFound(activityId);
         try {

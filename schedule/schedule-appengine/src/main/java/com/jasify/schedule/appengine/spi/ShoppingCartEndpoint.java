@@ -139,7 +139,7 @@ public class ShoppingCartEndpoint {
         ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
         return cartService.addItem(cartId, new ShoppingCart.ItemBuilder()
                 .activityPackage(activityPackage)
-                .data(new ArrayList<Key>(uniqueKeys))
+                .data(new ArrayList<>(uniqueKeys))
                 .build())
                 .calculate();
     }
