@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.common;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.HasId;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.Model;
@@ -13,7 +14,7 @@ import org.slim3.datastore.ModelRef;
  * @since 08/01/15.
  */
 @Model
-public class OrganizationMember {
+public class OrganizationMember implements HasId {
     @Attribute(primaryKey = true)
     private Key id;
 

@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.common;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
+import com.jasify.schedule.appengine.model.HasId;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
@@ -16,7 +17,7 @@ import java.util.*;
  * @since 08/01/15.
  */
 @Model
-public class Organization {
+public class Organization implements HasId {
     private static final Logger log = LoggerFactory.getLogger(Organization.class);
 
     @Attribute(primaryKey = true)

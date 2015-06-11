@@ -1,9 +1,14 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.NotFoundException;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationMember;
+import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import io.github.benas.jpopulator.api.Populator;
 import io.github.benas.jpopulator.impl.PopulatorBuilder;
@@ -13,9 +18,12 @@ import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static com.jasify.schedule.appengine.AssertionHelper.assertIdsEqual;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newOrgMemberCaller;
 import static junit.framework.TestCase.*;
 
 /**
@@ -95,4 +103,67 @@ public class OrganizationEndpointWithDaoTest {
             assertTrue(found);
         }
     }
+
+    @Test
+    public void testGetOrganizationsForUser() throws Exception {
+        Organization o1 = new Organization("Org1");
+        Organization o2 = new Organization("Org2");
+        Organization o3 = new Organization("Org3");
+        User user = new User("user1");
+
+        Datastore.put(o1, o2, o3, user);
+
+        OrganizationMember om1 = new OrganizationMember(o1, user);
+        OrganizationMember om3 = new OrganizationMember(o3, user);
+
+        Datastore.put(om1, om3);
+
+        JasifyEndpointUser caller = newOrgMemberCaller(user.getId().getId());
+        List<Organization> organizations = endpoint.getOrganizations(caller);
+        assertIdsEqual(Arrays.asList(o1, o3), organizations);
+    }
+
+    @Test
+    public void testGetOrganization() throws Exception {
+        Organization organization = new Organization();
+        organization.setName("Org");
+
+        organization = endpoint.addOrganization(newAdminCaller(55), organization);
+
+        Organization result = endpoint.getOrganization(newAdminCaller(55), organization.getId());
+        assertEquals(organization.getId(), result.getId());
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetOrganizationNotFound() throws Exception {
+        Key key = Datastore.allocateId(Organization.class);
+        endpoint.getOrganization(newAdminCaller(55), key);
+    }
+
+    @Test
+    public void testAddOrganization() throws Exception {
+        Organization organization = new Organization();
+        organization.setName("Org");
+
+        Organization result = endpoint.addOrganization(newAdminCaller(55), organization);
+        assertEquals(organization, result);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testAddOrganizationNotFoundViaUniqueConstraintException() throws Exception {
+        Organization organization = new Organization();
+        organization.setName("Org");
+        Organization dupOrganization = new Organization();
+        dupOrganization.setName("Org");
+        endpoint.addOrganization(newAdminCaller(55), organization);
+        endpoint.addOrganization(newAdminCaller(55), dupOrganization);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testAddOrganizationNotFoundViaFieldValueException() throws Exception {
+        Organization organization = new Organization();
+        endpoint.addOrganization(newAdminCaller(55), organization);
+    }
+
+
 }

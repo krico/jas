@@ -7,10 +7,9 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
@@ -77,7 +76,7 @@ public class OrganizationEndpoint {
     public Organization getOrganization(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdminOrOrgMember(caller, createFromOrganizationId(id));
         try {
-            return checkFound(OrganizationServiceFactory.getOrganizationService().getOrganization(id));
+            return organizationDao.get(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
@@ -120,18 +119,20 @@ public class OrganizationEndpoint {
     }
 
     @ApiMethod(name = "organizations.add", path = "organizations", httpMethod = ApiMethod.HttpMethod.POST)
-    public Organization addOrganization(User caller, Organization organization) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public Organization addOrganization(User caller, final Organization organization) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         mustBeAdmin(caller);
         Key id;
         try {
-            id = OrganizationServiceFactory.getOrganizationService().addOrganization(organization);
-        } catch (UniqueConstraintException | FieldValueException e) {
+            return TransactionOperator.execute(new ModelOperation<Organization>() {
+                @Override
+                public Organization execute(Transaction tx) throws ModelException {
+                    organizationDao.save(organization);
+                    tx.commit();
+                    return organization;
+                }
+            });
+        } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
-        }
-        try {
-            return OrganizationServiceFactory.getOrganizationService().getOrganization(id);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
         }
     }
 
