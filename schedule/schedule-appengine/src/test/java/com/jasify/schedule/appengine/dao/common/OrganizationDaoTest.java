@@ -17,6 +17,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.TestCase.*;
@@ -91,6 +93,16 @@ public class OrganizationDaoTest {
         save(example2);
     }
 
+    @Test(expected = UniqueConstraintException.class)
+    public void testBatchSaveUniqueIndex() throws Exception {
+        Organization example1 = createExample();
+        Organization example2 = createExample();
+        Organization example3 = createExample();
+        example3.setName(example1.getName());
+        dao.save(Arrays.asList(example1, example2));
+        save(example3);
+    }
+
     @Test
     public void testDelete() throws Exception {
         Key id = save(createExample());
@@ -112,6 +124,33 @@ public class OrganizationDaoTest {
             }
         });
         save(example2);
+    }
+
+    @Test
+    public void testBatchDeleteFreesIndex() throws Exception {
+        Organization example1 = createExample();
+        Organization example2 = createExample();
+        Organization example3 = createExample();
+
+        save(example1);
+        save(example2);
+
+
+        example3.setName(example1.getName());
+
+        final List<Key> batchDelete = new ArrayList<>();
+        batchDelete.add(example1.getId());
+        batchDelete.add(example2.getId());
+
+        TransactionOperator.execute(new ModelOperation<Void>() {
+            @Override
+            public Void execute(Transaction tx) throws ModelException {
+                dao.delete(batchDelete);
+                tx.commit();
+                return null;
+            }
+        });
+        save(example3);
     }
 
     @Test

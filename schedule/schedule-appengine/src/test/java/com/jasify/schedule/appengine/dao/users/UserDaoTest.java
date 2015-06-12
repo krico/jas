@@ -6,13 +6,19 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.ModelOperation;
 import com.jasify.schedule.appengine.model.TransactionOperator;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.EmailExistsException;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.model.users.UserLoginExistsException;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
@@ -175,4 +181,40 @@ public class UserDaoTest {
         // make sure previous update cleared name index
         save(example2);
     }
-}
+
+    @Test(expected = UsernameExistsException.class)
+    public void testBatchSaveUniqueIndex() throws Exception {
+        User example1 = createExample();
+        User example2 = createExample();
+        User example3 = createExample();
+        example3.setName(example1.getName());
+        dao.save(Arrays.asList(example1, example2));
+        save(example3);
+    }
+
+    @Test
+    public void testBatchDeleteFreesIndex() throws Exception {
+        User example1 = createExample();
+        User example2 = createExample();
+        User example3 = createExample();
+
+        save(example1);
+        save(example2);
+
+
+        example3.setName(example1.getName());
+
+        final List<Key> batchDelete = new ArrayList<>();
+        batchDelete.add(example1.getId());
+        batchDelete.add(example2.getId());
+
+        TransactionOperator.execute(new ModelOperation<Void>() {
+            @Override
+            public Void execute(Transaction tx) throws ModelException {
+                dao.delete(batchDelete);
+                tx.commit();
+                return null;
+            }
+        });
+        save(example3);
+    }}

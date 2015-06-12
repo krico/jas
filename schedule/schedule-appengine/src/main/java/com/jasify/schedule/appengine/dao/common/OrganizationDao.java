@@ -69,6 +69,23 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         super.delete(id);
     }
 
+    @Nonnull
+    @Override
+    public List<Key> save(@Nonnull List<Organization> entities) throws ModelException {
+        List<Key> ret = new ArrayList<>();
+        for (Organization entity : entities) {
+            ret.add(save(entity));
+        }
+        return ret;
+    }
+
+    @Override
+    public void delete(@Nonnull List<Key> ids) {
+        for (Key id : ids) {
+            delete(id);
+        }
+    }
+
     public List<Organization> getAll() {
         OrganizationMeta meta = getMeta();
         return query(new BaseDaoQuery<Organization, OrganizationMeta>(meta, new Serializable[0]) {

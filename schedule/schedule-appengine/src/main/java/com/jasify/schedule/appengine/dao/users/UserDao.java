@@ -8,12 +8,15 @@ import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.EmailExistsException;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author krico
@@ -78,6 +81,23 @@ public class UserDao extends BaseCachingDao<User> {
             }
         }
         super.delete(id);
+    }
+
+    @Nonnull
+    @Override
+    public List<Key> save(@Nonnull List<User> entities) throws ModelException {
+        List<Key> ret = new ArrayList<>();
+        for (User entity : entities) {
+            ret.add(save(entity));
+        }
+        return ret;
+    }
+
+    @Override
+    public void delete(@Nonnull List<Key> ids) {
+        for (Key id : ids) {
+            delete(id);
+        }
     }
 
     private void reserveEmail(User entity) throws EmailExistsException {
