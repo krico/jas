@@ -4,6 +4,8 @@ import com.google.api.client.util.Maps;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.util.BeanUtil;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
@@ -80,7 +82,7 @@ public class BaseCachingDaoTest extends BaseDaoTest {
         for (int i = 0; i < examples.length; i++) {
             examples[i] = createExample();
             examples[i].setId(Datastore.createKey(Example.class, i + 1));
-            DaoUtil.cachePut(examples[i].getId(), ExampleMeta.get(), examples[i]); //put on cache
+            DaoUtil.cachePut(examples[i].getId(), ExampleMeta.get(), BeanUtil.clone(examples[i])); //put on cache
             dao.save(examples[i]);
         }
         tx.rollback();

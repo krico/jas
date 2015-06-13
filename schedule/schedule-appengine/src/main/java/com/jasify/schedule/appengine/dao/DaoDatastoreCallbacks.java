@@ -3,7 +3,6 @@ package com.jasify.schedule.appengine.dao;
 import com.google.appengine.api.datastore.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.jasify.schedule.appengine.memcache.Memcache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,6 @@ class DaoDatastoreCallbacks {
     private static final Logger log = LoggerFactory.getLogger(DaoDatastoreCallbacks.class);
     private static final EntityToKey entityToKey = new EntityToKey();
     private static final KeyToKindQueryMetadata keyToKindQueryMetadata = new KeyToKindQueryMetadata();
-    private static final long DEFAULT_MILLIS_NO_RE_ADD = 50;
 
     private static void purgeCache(List<Key> elementKeys) {
         Set<String> cqmKeys = new HashSet<>(Lists.transform(elementKeys, keyToKindQueryMetadata));
@@ -29,8 +27,7 @@ class DaoDatastoreCallbacks {
         ArrayList<Object> deleteKeys = new ArrayList<Object>(cqmKeys);
         deleteKeys.addAll(elementKeys);
 
-        /* This works together with DaoUtil.cachePut using MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT */
-        Memcache.deleteAll(deleteKeys, DEFAULT_MILLIS_NO_RE_ADD);
+        DaoUtil.deleteAll(deleteKeys);
     }
 
     @PostPut

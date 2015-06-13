@@ -7,6 +7,7 @@ import com.google.appengine.labs.repackaged.com.google.common.base.Function;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Maps;
 import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.memcache.Memcache;
+import com.jasify.schedule.appengine.model.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.ModelMeta;
@@ -14,6 +15,7 @@ import org.slim3.datastore.ModelMeta;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 public final class DaoUtil {
     private static final Logger log = LoggerFactory.getLogger(DaoUtil.class);
+    private static final long DEFAULT_MILLIS_NO_RE_ADD = 50;
 
     private DaoUtil() {
     }
@@ -38,6 +41,7 @@ public final class DaoUtil {
 
     public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model, Expiration expiration) {
         try {
+            ContextCache.put(id, model);
             /* This works together with DaoDatastoreCallbacks.purgeCache DEFAULT_MILLIS_NO_RE_ADD */
             Memcache.put(id, marshall(meta, model), expiration, MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
         } catch (IllegalArgumentException e) {
@@ -56,6 +60,7 @@ public final class DaoUtil {
 
     public static <T> void cachePutAll(@Nonnull Map<Key, T> kvp, @Nonnull final ModelMeta<T> meta, Expiration expiration) {
         try {
+            ContextCache.putAll(kvp);
             Map<Key, Serializable> keyEntityMap = Maps.transformValues(kvp, new Function<T, Serializable>() {
                 @Nullable
                 @Override
@@ -71,31 +76,44 @@ public final class DaoUtil {
     }
 
     public static <T> T cacheGet(@Nonnull Key id, @Nonnull ModelMeta<T> meta) {
-        T ret = null;
-        try {
-            Serializable cached = Memcache.get(id);
-            if (cached != null) {
-                ret = unMarshall(meta, cached);
+        T ret = ContextCache.get(id);
+        if (ret == null) {
+            try {
+                Serializable cached = Memcache.get(id);
+                if (cached != null) {
+                    ret = unMarshall(meta, cached);
+                    if (ret != null) {
+                        ContextCache.put(id, ret);
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                log.warn("Memcache exception IGNORED", e);
             }
-        } catch (IllegalArgumentException e) {
-            log.warn("Memcache exception IGNORED", e);
         }
         return ret;
     }
 
     public static <T> Map<Key, T> cacheGet(@Nonnull List<Key> ids, @Nonnull final ModelMeta<T> meta) {
         Map<Key, T> modelMap = Maps.newHashMap();
-        try {
-            Map<Key, Serializable> cached = Memcache.getAll(ids);
-            modelMap = Maps.transformValues(cached, new Function<Serializable, T>() {
-                @Nullable
-                @Override
-                public T apply(Serializable cached) {
-                    return unMarshall(meta, cached);
-                }
-            });
-        } catch (IllegalArgumentException e) {
-            log.warn("Memcache exception IGNORED", e);
+        for (Key id : ids) {
+            T o = ContextCache.get(id);
+            if (o == null) break;
+            modelMap.put(id, o);
+        }
+        if (modelMap.size() != ids.size()) {
+            try {
+                Map<Key, Serializable> cached = Memcache.getAll(ids);
+                modelMap = Maps.transformValues(cached, new Function<Serializable, T>() {
+                    @Nullable
+                    @Override
+                    public T apply(Serializable cached) {
+                        return unMarshall(meta, cached);
+                    }
+                });
+                ContextCache.putAll(modelMap);
+            } catch (IllegalArgumentException e) {
+                log.warn("Memcache exception IGNORED", e);
+            }
         }
         return modelMap;
     }
@@ -110,6 +128,10 @@ public final class DaoUtil {
      * if no key was present, null is returned
      */
     public static <T> Optional<T> cacheGetOrNull(@Nonnull Key id, @Nonnull ModelMeta<T> meta) {
+        T ret = ContextCache.get(id);
+        if (ret != null) {
+            return Optional.of(ret);
+        }
         Serializable cached = Memcache.get(id);
         if (cached == null) {
             if (Memcache.contains(id)) {
@@ -118,6 +140,36 @@ public final class DaoUtil {
                 return null;
             }
         }
-        return Optional.of(unMarshall(meta, cached));
+        ret = unMarshall(meta, cached);
+        ContextCache.put(id, ret);
+        return Optional.of(ret);
+    }
+
+    public static void deleteAll(ArrayList<Object> deleteKeys) {
+        for (Object deleteKey : deleteKeys) {
+            ContextCache.delete(deleteKey);
+        }
+        /* This works together with DaoUtil.cachePut using MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT */
+        Memcache.deleteAll(deleteKeys, DEFAULT_MILLIS_NO_RE_ADD);
+    }
+
+    private static class ContextCache {
+
+        static void put(Object key, Object value) {
+            UserContext.getCache().put(key, value);
+        }
+
+        static void putAll(Map<?, ?> kvp) {
+            UserContext.getCache().putAll(kvp);
+        }
+
+        @SuppressWarnings("unchecked")
+        public static <T> T get(Object key) throws IllegalArgumentException {
+            return (T) UserContext.getCache().get(key);
+        }
+
+        public static void delete(Object deleteKey) {
+            UserContext.getCache().remove(deleteKey);
+        }
     }
 }
