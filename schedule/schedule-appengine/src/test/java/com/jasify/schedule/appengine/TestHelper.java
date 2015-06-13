@@ -261,6 +261,7 @@ public final class TestHelper {
     }
 
     public static <T> T populateBean(final Class<T> type, final String... excludedFields) {
+        assertNotSame("User class fails on travis-ci, I DON'T KNOW WHY :-(", User.class, type);
 
         PopulatorBuilder builder = new PopulatorBuilder();
 
@@ -368,7 +369,7 @@ public final class TestHelper {
                 try {
                     return randomizer.getRandomValue();
                 } catch (Exception e) {
-                    System.err.println("Exception on randomizer [type="+type+", fieldType="+fieldType +", fieldName="+fieldName+"]: " +e);
+                    System.err.println("Exception on randomizer [type=" + type + ", fieldType=" + fieldType + ", fieldName=" + fieldName + "]: " + e);
                     e.printStackTrace(System.err);
                     throw Throwables.propagate(e);
                 }

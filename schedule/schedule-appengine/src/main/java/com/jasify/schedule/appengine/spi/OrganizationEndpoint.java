@@ -67,7 +67,7 @@ public class OrganizationEndpoint {
             return organizationDao.getAll();
         }
         if (jasUser.isOrgMember()) {
-            return organizationDao.forUser(jasUser.getUserId());
+            return organizationDao.byMemberUserId(jasUser.getUserId());
         }
         throw new ForbiddenException("Must be admin");
     }

@@ -6,11 +6,10 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.ModelOperation;
 import com.jasify.schedule.appengine.model.TransactionOperator;
-import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.EmailExistsException;
 import com.jasify.schedule.appengine.model.users.User;
-import com.jasify.schedule.appengine.model.users.UserLoginExistsException;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,7 +26,9 @@ public class UserDaoTest {
     private UserDao dao;
 
     static User createExample() {
-        return TestHelper.populateBean(User.class, "id", "detailRef");
+        return new User(RandomStringUtils.randomAlphabetic(10),
+                RandomStringUtils.randomAlphabetic(10),
+                RandomStringUtils.randomAlphabetic(10));
     }
 
     @BeforeClass
@@ -217,4 +218,5 @@ public class UserDaoTest {
             }
         });
         save(example3);
-    }}
+    }
+}

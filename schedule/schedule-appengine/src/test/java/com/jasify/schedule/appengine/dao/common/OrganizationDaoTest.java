@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.jasify.schedule.appengine.AssertionHelper.assertIdsEqual;
 import static junit.framework.TestCase.*;
 
 
@@ -154,7 +155,7 @@ public class OrganizationDaoTest {
     }
 
     @Test
-    public void testForUser() throws Exception {
+    public void testByMemberUserId() throws Exception {
         Organization org1 = createExample();
         Organization org2 = createExample();
         Organization org3 = createExample();
@@ -169,7 +170,7 @@ public class OrganizationDaoTest {
         Datastore.put(om1, om3);
 
         for (int M = 0; M < 3; ++M) {
-            List<Organization> organizations = dao.forUser(user.getId());
+            List<Organization> organizations = dao.byMemberUserId(user.getId());
             assertEquals(2, organizations.size());
             assertTrue(organizations.get(0).getId().equals(org1.getId()) || organizations.get(0).getId().equals(org3.getId()));
             assertTrue(organizations.get(1).getId().equals(org1.getId()) || organizations.get(1).getId().equals(org3.getId()));
@@ -179,6 +180,31 @@ public class OrganizationDaoTest {
             assertEquals(organizations.size(), organizationsForUser.size());
             assertTrue(organizations.get(0).getId().equals(organizationsForUser.get(0).getId()) || organizations.get(0).getId().equals(organizationsForUser.get(1).getId()));
             assertTrue(organizations.get(1).getId().equals(organizationsForUser.get(0).getId()) || organizations.get(1).getId().equals(organizationsForUser.get(1).getId()));
+        }
+    }
+
+    @Test
+    public void testByOrganizationId() throws Exception {
+        Organization org1 = createExample();
+        Organization org2 = createExample();
+        User user1 = new User("a@b.com");
+        User user2 = new User("b@b.com");
+        User user3 = new User("c@b.com");
+        assertNotNull(org1);
+        assertNotNull(org2);
+
+        Datastore.put(org1, org2, user1, user2, user3);
+
+        Datastore.put(
+                new OrganizationMember(org1, user1),
+                new OrganizationMember(org1, user2),
+                new OrganizationMember(org1, user3),
+                new OrganizationMember(org2, user2)
+        );
+
+        for (int M = 0; M < 3; ++M) {
+            assertIdsEqual(Arrays.asList(user1, user2, user3), dao.getUsersOfOrganization(org1.getId()));
+            assertIdsEqual(Arrays.asList(user2), dao.getUsersOfOrganization(org2.getId()));
         }
     }
 }
