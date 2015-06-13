@@ -103,6 +103,12 @@ public class Organization implements HasId {
         return organizationMemberListRef;
     }
 
+    /**
+     * @return the users
+     * @deprecated You should use
+     * {@link com.jasify.schedule.appengine.dao.common.OrganizationDao#getUsersOfOrganization(com.google.appengine.api.datastore.Key)}
+     */
+    @Deprecated
     public List<User> getUsers() {
         List<User> ret = new ArrayList<>();
         List<OrganizationMember> members = organizationMemberListRef.getModelList();
