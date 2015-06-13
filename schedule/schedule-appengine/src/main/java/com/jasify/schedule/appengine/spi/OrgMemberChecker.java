@@ -103,10 +103,6 @@ abstract class OrgMemberChecker {
     private OrgMemberChecker() {
     }
 
-    private OrgMemberChecker(Key id) {
-        this.id = id;
-    }
-
     public static OrgMemberChecker createFromActivityId(Key id) {
         return ACTIVITY.get().withId(id);
     }

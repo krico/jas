@@ -6,6 +6,7 @@ import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
@@ -158,6 +159,7 @@ public final class TestHelper {
 
     public static void initializeDatastore(LocalServiceTestHelper datastoreHelper) {
         datastoreHelper.setUp();
+        UserContext.clearContext();
     }
 
     public static void cleanupDatastore() {
