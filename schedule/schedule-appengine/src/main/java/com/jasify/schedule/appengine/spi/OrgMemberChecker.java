@@ -5,7 +5,9 @@ import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.model.users.User;
+
+import java.util.List;
 
 /**
  * @author krico
@@ -140,8 +142,11 @@ abstract class OrgMemberChecker {
 
     public boolean isOrgMember(long userId) throws EntityNotFoundException {
         Organization organization = getOrganization();
-        com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(userId);
-        return organization.getUsers().contains(user);
+        List<User> users = organizationDao.getUsersOfOrganization(organization.getId());
+        for (User user : users) {
+            if (user.getId().getId() == userId) return true;
+        }
+        return false;
     }
 
     protected Organization getOrganization(Key id) throws EntityNotFoundException {
