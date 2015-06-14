@@ -162,64 +162,6 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testGetActivityTypeById() throws Exception {
-        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        ActivityType activityType = activityService.getActivityType(id);
-        assertNotNull(activityType);
-        assertEquals(id, activityType.getId());
-        assertEquals(TEST_ACTIVITY_TYPE, activityType.getName());
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivityTypeByIdThrowsEntityNotFound() throws Exception {
-        activityService.getActivityType(Datastore.allocateId(ActivityType.class));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetActivityTypeByIdThrowsIllegalArgumentException() throws Exception {
-        activityService.getActivityType(organization1.getId());
-    }
-
-    @Test
-    public void testGetActivityTypeByName() throws Exception {
-        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        ActivityType activityType = activityService.getActivityType(organization1, TEST_ACTIVITY_TYPE);
-        assertNotNull(activityType);
-        assertEquals(id, activityType.getId());
-        assertEquals(TEST_ACTIVITY_TYPE, activityType.getName());
-    }
-
-    @Test
-    public void testGetActivityTypeByNameCaseInsensitive() throws Exception {
-        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        activityService.getActivityType(organization1, TEST_ACTIVITY_TYPE.toLowerCase());
-    }
-
-    @Test
-    public void testGetActivityTypeByNameWithTwoOrganizations() throws Exception {
-        Key id1 = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        Key id2 = activityService.addActivityType(organization2, new ActivityType(TEST_ACTIVITY_TYPE));
-        ActivityType activityType1 = activityService.getActivityType(organization1, TEST_ACTIVITY_TYPE.toLowerCase());
-        ActivityType activityType2 = activityService.getActivityType(organization2, TEST_ACTIVITY_TYPE.toLowerCase());
-        assertNotNull(activityType1);
-        assertNotNull(activityType2);
-        assertEquals(id1, activityType1.getId());
-        assertEquals(id2, activityType2.getId());
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivityTypeByNameWithNoOrganization() throws Exception {
-        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        activityService.getActivityType(new Organization("foo"), TEST_ACTIVITY_TYPE);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivityTypeByNameWithNoName() throws Exception {
-        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        activityService.getActivityType(organization1, "x" + TEST_ACTIVITY_TYPE);
-    }
-
-    @Test
     public void testGetActivityTypes() throws Exception {
         Datastore.delete(activityType1OfOrganization1.getId(), activityType2OfOrganization1.getId()); //clean slate ;-)
         List<ActivityType> activityTypes = activityService.getActivityTypes(organization1);
@@ -262,7 +204,7 @@ public class ActivityServiceTest {
         assertEquals("Location", updatedActivityType.getLocation());
         assertEquals("Blue", updatedActivityType.getColourTag());
         assertEquals(6, updatedActivityType.getMaxSubscriptions());
-        assertEquals("New Name", activityService.getActivityType(id).getName());
+        assertEquals("New Name", Datastore.get(ActivityTypeMeta.get(), id).getName());
     }
 
     @Test(expected = UniqueConstraintException.class)
@@ -289,7 +231,7 @@ public class ActivityServiceTest {
     @Test
     public void testRemoveActivityType() throws Exception {
         Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        ActivityType activityType = activityService.getActivityType(id);
+        ActivityType activityType = Datastore.get(ActivityTypeMeta.get(), id);
         activityService.removeActivityType(activityType);
         assertNull(Datastore.getOrNull(id));
     }

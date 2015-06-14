@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.dao.common;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
+import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -26,22 +27,21 @@ public class ActivityDaoTest {
     private ActivityType activityType;
 
     @BeforeClass
-    public static void initialize() {
+    public static void beforeClass() {
         TestHelper.setSystemProperties();
     }
 
     @After
-    public void cleanup() {
+    public void after() {
         TestHelper.cleanupDatastore();
     }
 
     @Before
-    public void resetCache() {
+    public void before() {
         TestHelper.initializeDatastore();
         dao = new ActivityDao();
         organization = createOrganization();
         activityType = createActivityType(organization);
-
     }
 
     private Organization createOrganization() {
@@ -53,6 +53,7 @@ public class ActivityDaoTest {
     private ActivityType createActivityType(Organization organization) {
         ActivityType activityType = new ActivityType("ActType");
         activityType.getOrganizationRef().setModel(organization);
+        activityType.setId(Datastore.allocateId(organization.getId(), ActivityTypeMeta.get()));
         Datastore.put(activityType);
         return activityType;
     }
@@ -71,13 +72,28 @@ public class ActivityDaoTest {
     }
 
     @Test
-    public void testOrganizationQuery() throws Exception {
+    public void testGetByOrganization() throws Exception {
         for (int i = 0; i < 5; i++) {
             createActivity(activityType);
         }
+        assertEquals(5, dao.getBy(organization).size());
+    }
 
-        assertEquals(5, Datastore.query(ActivityMeta.get(), organization.getId()).count());
-        assertEquals(5, dao.getBy(organization).size());
-        assertEquals(5, dao.getBy(organization).size());
+    @Test
+    public void testGetByActivityType() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            createActivity(activityType);
+        }
+        assertEquals(5, dao.getBy(activityType).size());
+    }
+
+
+    @Test
+    public void testGetCachedValue() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            createActivity(activityType);
+        }
+        assertEquals(5, dao.getBy(activityType).size());
+        assertEquals(5, dao.getBy(activityType).size());
     }
 }

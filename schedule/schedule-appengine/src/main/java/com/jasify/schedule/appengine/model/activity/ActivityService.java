@@ -33,23 +33,6 @@ public interface ActivityService {
     public Key addActivityType(Organization organization, ActivityType activityType) throws UniqueConstraintException;
 
     /**
-     * @param id to fetch
-     * @return the activity type with that id
-     * @throws EntityNotFoundException  if that activity type doesn't exist
-     */
-    @Nonnull
-    ActivityType getActivityType(Key id) throws EntityNotFoundException;
-
-    /**
-     * @param organization in which to get it
-     * @param name         of the activity type
-     * @return the activity type with that name in that organization
-     * @throws EntityNotFoundException if not found, or if the organization doesn't eist
-     */
-    @Nonnull
-    ActivityType getActivityType(Organization organization, String name) throws EntityNotFoundException;
-
-    /**
      * @param organization in which to search
      * @return the list of activity type in that organization
      * @throws EntityNotFoundException if that organization doesn't exist
@@ -125,10 +108,9 @@ public interface ActivityService {
      * @param activityPackage to be created
      * @param activities      that are allowed in this package
      * @return the key to the new package
-     * @throws EntityNotFoundException if not found
      * @throws FieldValueException     if fields are invalid
      */
-    Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException;
+    Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException;
 
     /**
      * @param activityPackage with the data to be updated
@@ -145,9 +127,8 @@ public interface ActivityService {
      * @param activities      new list of activities for this package
      * @return the updated activity package
      * @throws EntityNotFoundException
-     * @throws FieldValueException
      */
-    ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException;
+    ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException;
 
     void removeActivityPackage(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
 

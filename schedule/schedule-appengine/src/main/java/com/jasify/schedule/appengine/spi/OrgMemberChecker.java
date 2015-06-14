@@ -1,6 +1,9 @@
 package com.jasify.schedule.appengine.spi;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
@@ -32,6 +35,10 @@ abstract class OrgMemberChecker {
         }
     };
     private final OrganizationDao organizationDao = new OrganizationDao();
+    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+
     protected Key id;
     private static final ThreadLocal<OrgMemberChecker> ACTIVITY = new ThreadLocal<OrgMemberChecker>() {
         @Override
@@ -39,8 +46,8 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    Activity activity = ActivityServiceFactory.getActivityService().getActivity(id);
-                    ActivityType activityType = activity.getActivityTypeRef().getModel();
+                    Activity activity = getActivity(id);
+                    ActivityType activityType = getActivityType(activity.getActivityTypeRef().getKey());
                     return getOrganization(activityType.getOrganizationRef().getKey());
                 }
             };
@@ -53,7 +60,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(id);
+                    ActivityType activityType = getActivityType(id);
                     return getOrganization(activityType.getOrganizationRef().getKey());
                 }
             };
@@ -66,7 +73,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(id);
+                    ActivityPackage activityPackage = getActivityPackage(id);
                     return getOrganization(activityPackage.getOrganizationRef().getKey());
                 }
             };
@@ -79,9 +86,10 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
+                    // TODO: Possible mini optimisation using subscriptionDao
                     Subscription subscription = ActivityServiceFactory.getActivityService().getSubscription(id);
-                    Activity activity = subscription.getActivityRef().getModel();
-                    ActivityType activityType = activity.getActivityTypeRef().getModel();
+                    Activity activity = getActivity(subscription.getActivityRef().getKey());
+                    ActivityType activityType = getActivityType(activity.getActivityTypeRef().getKey());
                     return getOrganization(activityType.getOrganizationRef().getKey());
                 }
             };
@@ -148,6 +156,21 @@ abstract class OrgMemberChecker {
     protected Organization getOrganization(Key id) throws EntityNotFoundException {
         if (id == null) return null;
         return organizationDao.get(id);
+    }
+
+    protected ActivityType getActivityType(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        return activityTypeDao.get(id);
+    }
+
+    protected Activity getActivity(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        return activityDao.get(id);
+    }
+
+    protected ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        return activityPackageDao.get(id);
     }
 
     abstract Organization getOrganization() throws EntityNotFoundException;
