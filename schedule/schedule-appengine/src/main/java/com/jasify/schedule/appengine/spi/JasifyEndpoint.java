@@ -6,6 +6,10 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -63,7 +67,7 @@ public class JasifyEndpoint {
         return new OrgMemberChecker(id) {
             @Override
             Organization getOrganization() throws EntityNotFoundException {
-                Activity activity = ActivityServiceFactory.getActivityService().getActivity(this.id);
+                Activity activity = new ActivityDao().get(this.id);
                 ActivityType activityType = activity.getActivityTypeRef().getModel();
                 return activityType.getOrganizationRef().getModel();
             }
@@ -74,7 +78,7 @@ public class JasifyEndpoint {
         return new OrgMemberChecker(id) {
             @Override
             Organization getOrganization() throws EntityNotFoundException {
-                ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(this.id);
+                ActivityType activityType = new ActivityTypeDao().get(this.id);
                 return activityType.getOrganizationRef().getModel();
             }
         };
@@ -84,7 +88,7 @@ public class JasifyEndpoint {
         return new OrgMemberChecker(id) {
             @Override
             Organization getOrganization() throws EntityNotFoundException {
-                ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(this.id);
+                ActivityPackage activityPackage = new ActivityPackageDao().get(this.id);
                 return activityPackage.getOrganizationRef().getModel();
             }
         };
@@ -106,7 +110,7 @@ public class JasifyEndpoint {
         return new OrgMemberChecker(id) {
             @Override
             Organization getOrganization() throws EntityNotFoundException {
-                return OrganizationServiceFactory.getOrganizationService().getOrganization(this.id);
+                return new OrganizationDao().get(this.id);
             }
         };
     }

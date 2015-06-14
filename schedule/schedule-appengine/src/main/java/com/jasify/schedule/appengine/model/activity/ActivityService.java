@@ -125,10 +125,9 @@ public interface ActivityService {
      * @param activityPackage to be created
      * @param activities      that are allowed in this package
      * @return the key to the new package
-     * @throws EntityNotFoundException if not found
      * @throws FieldValueException     if fields are invalid
      */
-    Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException;
+    Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException;
 
     /**
      * @param activityPackage with the data to be updated
@@ -145,9 +144,8 @@ public interface ActivityService {
      * @param activities      new list of activities for this package
      * @return the updated activity package
      * @throws EntityNotFoundException
-     * @throws FieldValueException
      */
-    ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException;
+    ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException;
 
     void removeActivityPackage(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
 

@@ -661,9 +661,8 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException {
-        Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
-        activities = Preconditions.checkNotNull(activities);
+    public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException {
+        Key organizationId = activityPackage.getOrganizationRef().getKey();
 
         if (activityPackage.getItemCount() <= 0) throw new FieldValueException("ActivityPackage.itemCount");
         if (activities.isEmpty() || activities.size() == 1 || activities.size() < activityPackage.getItemCount()) {
@@ -714,7 +713,7 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws EntityNotFoundException, FieldValueException {
+    public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws EntityNotFoundException {
         try {
             return TransactionOperator.execute(new ModelOperation<ActivityPackage>() {
                 @Override
@@ -774,7 +773,7 @@ class DefaultActivityService implements ActivityService {
                     return dbActivityPackage;
                 }
             });
-        } catch (EntityNotFoundException | FieldValueException e) {
+        } catch (EntityNotFoundException e) {
             throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
