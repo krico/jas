@@ -23,7 +23,7 @@ describe('Sign In with Email', function () {
         modal.submitSignInWithEmail(credentials);
 
         var welcome = new WelcomePage();
-        expect(welcome.getWelcomeText()).toEqual('Welcome `' + credentials.user + '`');
+        expect(welcome.getWelcomeText()).toEqual('Hi `' + credentials.user + '`');
         welcome.clickLogout();
 
         page = new HomePage();

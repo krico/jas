@@ -2,6 +2,8 @@ package com.jasify.schedule.appengine.model;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author krico
@@ -47,12 +49,22 @@ public final class UserContext {
         return (T) CURRENT_USER.get().response;
     }
 
+    /**
+     * This is a cache that lasts for a request lifecycle.  It gets cleared after a request completes.
+     *
+     * @return a request cache
+     */
+    public static Map<Object, Object> getCache() {
+        return CURRENT_USER.get().cache;
+    }
+
     public static boolean isCurrentUserAdmin() {
         UserSession currentUser = getCurrentUser();
         return currentUser != null && currentUser.isAdmin();
     }
 
     private static class Context {
+        private final Map<Object, Object> cache = new HashMap<>();
         private UserSession userSession;
         private ServletRequest request;
         private ServletResponse response;
@@ -61,6 +73,7 @@ public final class UserContext {
             userSession = null;
             request = null;
             response = null;
+            cache.clear();
         }
     }
 

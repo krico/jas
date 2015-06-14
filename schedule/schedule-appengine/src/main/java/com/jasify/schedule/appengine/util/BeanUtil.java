@@ -1,7 +1,7 @@
 package com.jasify.schedule.appengine.util;
 
-import com.google.common.base.Preconditions;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.beanutils.*;
 
@@ -65,6 +65,17 @@ public final class BeanUtil {
         } catch (InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException("Failed to copy properties "
                     + origin.getClass().getName() + " -> " + destination.getClass().getName());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T clone(T src) throws CloneNotSupportedException {
+        try {
+            T ret = (T) src.getClass().newInstance();
+            copyProperties(ret, src);
+            return ret;
+        } catch (Exception e) {
+            throw new CloneNotSupportedException(e.getMessage());
         }
     }
 

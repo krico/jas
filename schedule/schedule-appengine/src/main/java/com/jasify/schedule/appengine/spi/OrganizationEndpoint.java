@@ -67,7 +67,7 @@ public class OrganizationEndpoint {
             return organizationDao.getAll();
         }
         if (jasUser.isOrgMember()) {
-            return organizationDao.forUser(jasUser.getUserId());
+            return organizationDao.byMemberUserId(jasUser.getUserId());
         }
         throw new ForbiddenException("Must be admin");
     }
@@ -103,8 +103,7 @@ public class OrganizationEndpoint {
     public List<com.jasify.schedule.appengine.model.users.User> getOrganizationUsers(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(id));
         try {
-            Organization organization = checkFound(OrganizationServiceFactory.getOrganizationService().getOrganization(id));
-            return organization.getUsers();
+            return organizationDao.getUsersOfOrganization(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

@@ -5,6 +5,7 @@ import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.dao.UniqueIndex;
 import com.jasify.schedule.appengine.dao.UniqueIndexCache;
+import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
@@ -60,6 +61,16 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         return super.save(entity);
     }
 
+    @Nonnull
+    @Override
+    public List<Key> save(@Nonnull List<Organization> entities) throws ModelException {
+        List<Key> ret = new ArrayList<>();
+        for (Organization entity : entities) {
+            ret.add(save(entity));
+        }
+        return ret;
+    }
+
     @Override
     public void delete(@Nonnull Key id) {
         Organization found = getOrNull(id);
@@ -67,6 +78,13 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
             nameIndex.release(found.getLcName());
         }
         super.delete(id);
+    }
+
+    @Override
+    public void delete(@Nonnull List<Key> ids) {
+        for (Key id : ids) {
+            delete(id);
+        }
     }
 
     public List<Organization> getAll() {
@@ -79,11 +97,11 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         });
     }
 
-    public List<Organization> forUser(long userId) throws EntityNotFoundException {
-        return forUser(Datastore.createKey(User.class, userId));
+    public List<Organization> byMemberUserId(long userId) throws EntityNotFoundException {
+        return byMemberUserId(Datastore.createKey(User.class, userId));
     }
 
-    public List<Organization> forUser(Key userId) throws EntityNotFoundException {
+    public List<Organization> byMemberUserId(Key userId) throws EntityNotFoundException {
         OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
         List<OrganizationMember> organizationMembers = organizationMemberDao.byUserId(userId);
         if (organizationMembers.isEmpty()) return Collections.emptyList();
@@ -92,6 +110,21 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
             Key key = organizationMember.getOrganizationRef().getKey();
             if (key != null) organizationIds.add(key);
         }
+        if (organizationIds.isEmpty()) return Collections.emptyList();
         return get(organizationIds);
+    }
+
+    public List<User> getUsersOfOrganization(Key organizationId) throws EntityNotFoundException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        UserDao userDao = new UserDao();
+        List<OrganizationMember> organizationMembers = organizationMemberDao.byOrganizationId(organizationId);
+        if (organizationMembers.isEmpty()) return Collections.emptyList();
+        List<Key> userIds = new ArrayList<>();
+        for (OrganizationMember organizationMember : organizationMembers) {
+            Key key = organizationMember.getUserRef().getKey();
+            if (key != null) userIds.add(key);
+        }
+        if (userIds.isEmpty()) return Collections.emptyList();
+        return userDao.get(userIds);
     }
 }

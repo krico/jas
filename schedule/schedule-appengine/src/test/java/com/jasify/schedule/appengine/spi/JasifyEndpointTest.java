@@ -132,7 +132,6 @@ public class JasifyEndpointTest {
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         expect(activityService.getActivity(activity.getId())).andReturn(activity);
         testActivityServiceFactory.replay();
-        expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityId(activity.getId());
         assertFalse(orgMemberChecker.isOrgMember(user.getId().getId()));
@@ -152,7 +151,6 @@ public class JasifyEndpointTest {
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         expect(activityService.getActivity(activity.getId())).andReturn(activity);
         testActivityServiceFactory.replay();
-        expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityId(activity.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));
@@ -171,7 +169,6 @@ public class JasifyEndpointTest {
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         expect(activityService.getActivityType(activityType.getId())).andReturn(activityType);
         testActivityServiceFactory.replay();
-        expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityTypeId(activityType.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));
@@ -194,7 +191,6 @@ public class JasifyEndpointTest {
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         expect(activityService.getSubscription(subscription.getId())).andReturn(subscription);
         testActivityServiceFactory.replay();
-        expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromSubscriptionId(subscription.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));
@@ -209,7 +205,6 @@ public class JasifyEndpointTest {
         Datastore.put(new OrganizationMember(organization, user));
 
         testOrganizationServiceFactory.replay();
-        expect(userService.get(user.getId().getId())).andReturn(user);
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromOrganizationId(organization.getId());
         assertTrue(orgMemberChecker.isOrgMember(user.getId().getId()));

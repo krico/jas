@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
 import com.jasify.schedule.appengine.Constants;
+import com.jasify.schedule.appengine.model.HasId;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +17,7 @@ import java.util.Date;
  * @since 08/11/14.
  */
 @Model(schemaVersionName = Constants.SCHEMA_VERSION_NAME, schemaVersion = 2)
-public class User {
+public class User implements HasId {
     @Attribute(primaryKey = true)
     private Key id;
 

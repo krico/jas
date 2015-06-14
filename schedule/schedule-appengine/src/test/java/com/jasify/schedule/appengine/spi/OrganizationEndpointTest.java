@@ -374,36 +374,6 @@ public class OrganizationEndpointTest {
     }
 
     @Test
-    public void testGetOrganizationUsers() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-
-        Organization mockOrganization = createMock(Organization.class);
-        List<User> userList = new ArrayList<>();
-        userList.add(new User());
-        expect(mockOrganization.getUsers()).andReturn(userList);
-        replay(mockOrganization);
-
-        Key organizationId = Datastore.allocateId(Organization.class);
-        expect(service.getOrganization(organizationId)).andReturn(mockOrganization);
-        expectLastCall().once();
-        testOrganizationServiceFactory.replay();
-
-        List<User> result = endpoint.getOrganizationUsers(newAdminCaller(55), organizationId);
-
-        assertEquals(userList, result);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void testGetOrganizationUsersNotFoundException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key organizationId = Datastore.allocateId(Organization.class);
-        service.getOrganization(organizationId);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.getOrganizationUsers(newAdminCaller(55), organizationId);
-    }
-
-    @Test
     public void testGetOrganizationGroups() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
 

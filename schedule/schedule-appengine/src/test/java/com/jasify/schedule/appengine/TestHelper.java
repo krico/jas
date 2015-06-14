@@ -6,6 +6,7 @@ import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
@@ -158,6 +159,7 @@ public final class TestHelper {
 
     public static void initializeDatastore(LocalServiceTestHelper datastoreHelper) {
         datastoreHelper.setUp();
+        UserContext.clearContext();
     }
 
     public static void cleanupDatastore() {
@@ -261,6 +263,7 @@ public final class TestHelper {
     }
 
     public static <T> T populateBean(final Class<T> type, final String... excludedFields) {
+        assertNotSame("User class fails on travis-ci, I DON'T KNOW WHY :-(", User.class, type);
 
         PopulatorBuilder builder = new PopulatorBuilder();
 
@@ -368,7 +371,7 @@ public final class TestHelper {
                 try {
                     return randomizer.getRandomValue();
                 } catch (Exception e) {
-                    System.err.println("Exception on randomizer [type="+type+", fieldType="+fieldType +", fieldName="+fieldName+"]: " +e);
+                    System.err.println("Exception on randomizer [type=" + type + ", fieldType=" + fieldType + ", fieldName=" + fieldName + "]: " + e);
                     e.printStackTrace(System.err);
                     throw Throwables.propagate(e);
                 }

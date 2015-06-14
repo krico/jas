@@ -165,5 +165,10 @@ public class OrganizationEndpointWithDaoTest {
         endpoint.addOrganization(newAdminCaller(55), organization);
     }
 
-
+    @Test
+    public void testGetOrganizationUsers() throws Exception {
+        Key organizationId = Datastore.allocateId(Organization.class);
+        List<User> result = endpoint.getOrganizationUsers(newAdminCaller(55), organizationId);
+        assertTrue(result.isEmpty());
+    }
 }
