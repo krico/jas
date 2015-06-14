@@ -6,8 +6,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
-import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.common.OrganizationMember;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.common.*;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import io.github.benas.jpopulator.api.Populator;
@@ -25,6 +25,7 @@ import static com.jasify.schedule.appengine.AssertionHelper.assertIdsEqual;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newOrgMemberCaller;
 import static junit.framework.TestCase.*;
+import static org.easymock.EasyMock.expectLastCall;
 
 /**
  * @author krico
@@ -169,6 +170,13 @@ public class OrganizationEndpointWithDaoTest {
     public void testGetOrganizationUsers() throws Exception {
         Key organizationId = Datastore.allocateId(Organization.class);
         List<User> result = endpoint.getOrganizationUsers(newAdminCaller(55), organizationId);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetOrganizationGroups() throws Exception {
+        Key organizationId = Datastore.allocateId(Organization.class);
+        List<Group> result = endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
         assertTrue(result.isEmpty());
     }
 }

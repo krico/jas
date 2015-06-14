@@ -113,8 +113,7 @@ public class OrganizationEndpoint {
     public List<Group> getOrganizationGroups(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(id));
         try {
-            Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(id);
-            return organization.getGroups();
+            return organizationDao.getGroupsOfOrganization(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

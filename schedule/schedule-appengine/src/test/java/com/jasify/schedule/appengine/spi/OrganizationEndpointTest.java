@@ -372,34 +372,4 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.removeGroupFromOrganization(newAdminCaller(55), organizationId, groupId);
     }
-
-    @Test
-    public void testGetOrganizationGroups() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-
-        Organization mockOrganization = createMock(Organization.class);
-        List<Group> groupList = new ArrayList<>();
-        groupList.add(new Group());
-        expect(mockOrganization.getGroups()).andReturn(groupList);
-        replay(mockOrganization);
-
-        Key organizationId = Datastore.allocateId(Organization.class);
-        expect(service.getOrganization(organizationId)).andReturn(mockOrganization);
-        expectLastCall().once();
-        testOrganizationServiceFactory.replay();
-
-        List<Group> result = endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
-
-        assertEquals(groupList, result);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void testGetOrganizationGroupsNotFoundException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key organizationId = Datastore.allocateId(Organization.class);
-        service.getOrganization(organizationId);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
-    }
 }

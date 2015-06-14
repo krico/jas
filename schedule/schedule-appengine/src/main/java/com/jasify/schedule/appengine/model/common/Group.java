@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.common;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.meta.common.GroupUserMeta;
+import com.jasify.schedule.appengine.model.HasId;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slim3.datastore.*;
@@ -13,7 +14,7 @@ import java.util.*;
  * @since 08/01/15.
  */
 @Model
-public class Group {
+public class Group implements HasId {
     @Attribute(primaryKey = true)
     private Key id;
 

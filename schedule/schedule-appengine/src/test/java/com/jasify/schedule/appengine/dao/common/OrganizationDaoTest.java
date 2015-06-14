@@ -7,6 +7,7 @@ import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.ModelOperation;
 import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
@@ -184,7 +185,7 @@ public class OrganizationDaoTest {
     }
 
     @Test
-    public void testByOrganizationId() throws Exception {
+    public void testGetUsersOfOrganization() throws Exception {
         Organization org1 = createExample();
         Organization org2 = createExample();
         User user1 = new User("a@b.com");
@@ -205,6 +206,31 @@ public class OrganizationDaoTest {
         for (int M = 0; M < 3; ++M) {
             assertIdsEqual(Arrays.asList(user1, user2, user3), dao.getUsersOfOrganization(org1.getId()));
             assertIdsEqual(Arrays.asList(user2), dao.getUsersOfOrganization(org2.getId()));
+        }
+    }
+
+    @Test
+    public void testGetGroupsOfOrganization() throws Exception {
+        Organization org1 = createExample();
+        Organization org2 = createExample();
+        Group group1 = new Group("a@b.com");
+        Group group2 = new Group("b@b.com");
+        Group group3 = new Group("c@b.com");
+        assertNotNull(org1);
+        assertNotNull(org2);
+
+        Datastore.put(org1, org2, group1, group2, group3);
+
+        Datastore.put(
+                new OrganizationMember(org1, group1),
+                new OrganizationMember(org1, group2),
+                new OrganizationMember(org1, group3),
+                new OrganizationMember(org2, group2)
+        );
+
+        for (int M = 0; M < 3; ++M) {
+            assertIdsEqual(Arrays.asList(group1, group2, group3), dao.getGroupsOfOrganization(org1.getId()));
+            assertIdsEqual(Arrays.asList(group2), dao.getGroupsOfOrganization(org2.getId()));
         }
     }
 }
