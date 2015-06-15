@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.users.User;
@@ -126,5 +127,19 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         }
         if (userIds.isEmpty()) return Collections.emptyList();
         return userDao.get(userIds);
+    }
+
+    public List<Group> getGroupsOfOrganization(Key organizationId) throws EntityNotFoundException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        GroupDao groupDao = new GroupDao();
+        List<OrganizationMember> organizationMembers = organizationMemberDao.byOrganizationId(organizationId);
+        if (organizationMembers.isEmpty()) return Collections.emptyList();
+        List<Key> groupIds = new ArrayList<>();
+        for (OrganizationMember organizationMember : organizationMembers) {
+            Key key = organizationMember.getGroupRef().getKey();
+            if (key != null) groupIds.add(key);
+        }
+        if (groupIds.isEmpty()) return Collections.emptyList();
+        return groupDao.get(groupIds);
     }
 }

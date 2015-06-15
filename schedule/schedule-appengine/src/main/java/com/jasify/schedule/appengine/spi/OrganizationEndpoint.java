@@ -9,13 +9,17 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
-import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.ModelOperation;
+import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
+import com.jasify.schedule.appengine.util.BeanUtil;
 
 import java.util.List;
 
@@ -113,23 +117,33 @@ public class OrganizationEndpoint {
     public List<Group> getOrganizationGroups(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(id));
         try {
-            Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(id);
-            return organization.getGroups();
+            return organizationDao.getGroupsOfOrganization(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "organizations.update", path = "organizations/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public Organization updateOrganization(User caller, @Named("id") Key id, Organization organization) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public Organization updateOrganization(User caller, @Named("id") final Key id, final Organization organization) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organization.getId()));
         checkFound(id);
         organization.setId(id);
+
         try {
-            return OrganizationServiceFactory.getOrganizationService().updateOrganization(organization);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
-        } catch (UniqueConstraintException | FieldValueException e) {
+            return TransactionOperator.execute(new ModelOperation<Organization>() {
+                @Override
+                public Organization execute(Transaction tx) throws ModelException {
+                    Organization org = organizationDao.get(id);
+                    BeanUtil.copyPropertiesExcluding(org, organization,
+                            "id", "created", "modified", "organizationMemberListRef", "lcName");
+                    organizationDao.save(org);
+                    tx.commit();
+                    return org;
+                }
+            });
+        } catch (EntityNotFoundException enfe) {
+            throw new NotFoundException("Organization not found");
+        } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
         }
     }

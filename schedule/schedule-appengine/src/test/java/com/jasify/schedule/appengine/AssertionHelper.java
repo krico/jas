@@ -4,6 +4,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.model.HasId;
+import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.util.BeanUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -40,5 +42,9 @@ public final class AssertionHelper {
         for (int i = 0; i < expectedKeys.size(); ++i) {
             assertEquals("key[" + i + "]", expectedKeys.get(i), realKeys.get(i));
         }
+    }
+
+    public static void assertAttributesEquals(Organization expected, Organization real) {
+        assertEquals(BeanUtil.beanMap(expected), BeanUtil.beanMap(real));
     }
 }

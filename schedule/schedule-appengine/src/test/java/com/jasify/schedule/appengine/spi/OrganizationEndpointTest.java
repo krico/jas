@@ -222,59 +222,6 @@ public class OrganizationEndpointTest {
         endpoint.removeOrganization(newAdminCaller(55), key);
     }
 
-    @Test(expected = NotFoundException.class)
-    public void testUpdateOrganizationNotFoundViaEntityNotFoundException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key key = Datastore.allocateId(Organization.class);
-        Organization organization = new Organization();
-        service.updateOrganization(organization);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newAdminCaller(55), key, organization);
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testUpdateOrganizationNotFoundViaFieldValueException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key key = Datastore.allocateId(Organization.class);
-        Organization organization = new Organization();
-        service.updateOrganization(organization);
-        expectLastCall().andThrow(new FieldValueException(null));
-        testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newAdminCaller(55), key, organization);
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testUpdateOrganizationNotFoundViaUniqueConstraintException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key key = Datastore.allocateId(Organization.class);
-        Organization organization = new Organization();
-        service.updateOrganization(organization);
-        expectLastCall().andThrow(new UniqueConstraintException(null));
-        testOrganizationServiceFactory.replay();
-        endpoint.updateOrganization(newAdminCaller(55), key, organization);
-    }
-
-    @Test
-    public void testUpdateOrganization() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Organization organization = new Organization();
-        final Key key = Datastore.allocateId(Organization.class);
-        final Capture<Organization> capture = newCapture();
-
-        expect(service.updateOrganization(EasyMock.capture(capture))).andAnswer(new IAnswer<Organization>() {
-            public Organization answer() throws Throwable {
-                assertEquals(key, capture.getValue().getId());
-                return capture.getValue();
-            }
-        });
-
-        testOrganizationServiceFactory.replay();
-
-        Organization result = endpoint.updateOrganization(newAdminCaller(55), key, organization);
-        assertEquals(result, organization);
-    }
-
     @Test
     public void testRemoveOrganization() throws Exception {
         OrganizationService service = OrganizationServiceFactory.getOrganizationService();
@@ -371,35 +318,5 @@ public class OrganizationEndpointTest {
         expectLastCall().andThrow(new EntityNotFoundException());
         testOrganizationServiceFactory.replay();
         endpoint.removeGroupFromOrganization(newAdminCaller(55), organizationId, groupId);
-    }
-
-    @Test
-    public void testGetOrganizationGroups() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-
-        Organization mockOrganization = createMock(Organization.class);
-        List<Group> groupList = new ArrayList<>();
-        groupList.add(new Group());
-        expect(mockOrganization.getGroups()).andReturn(groupList);
-        replay(mockOrganization);
-
-        Key organizationId = Datastore.allocateId(Organization.class);
-        expect(service.getOrganization(organizationId)).andReturn(mockOrganization);
-        expectLastCall().once();
-        testOrganizationServiceFactory.replay();
-
-        List<Group> result = endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
-
-        assertEquals(groupList, result);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void testGetOrganizationGroupsNotFoundException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key organizationId = Datastore.allocateId(Organization.class);
-        service.getOrganization(organizationId);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
     }
 }
