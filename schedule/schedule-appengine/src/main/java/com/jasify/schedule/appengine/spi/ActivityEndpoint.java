@@ -487,7 +487,6 @@ public class ActivityEndpoint {
         checkFound(activityPackageId);
         checkFound(activityId);
         try {
-            ActivityService activityService = ActivityServiceFactory.getActivityService();
             ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
             Activity activity = activityDao.get(activityId);
             ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(activityPackage, activity);
