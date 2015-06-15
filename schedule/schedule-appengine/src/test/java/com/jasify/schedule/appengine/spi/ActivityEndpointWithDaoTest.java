@@ -6,6 +6,7 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -30,6 +31,7 @@ import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
@@ -41,6 +43,7 @@ import static junit.framework.TestCase.*;
  */
 public class ActivityEndpointWithDaoTest {
     private ActivityEndpoint endpoint;
+    private Random generator = new Random();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -76,13 +79,19 @@ public class ActivityEndpointWithDaoTest {
         Populator populator = populatorBuilder.build();
 
         ActivityType activityType = populator.populateBean(ActivityType.class, "id", "organizationRef", "lcName");
-        activityType.getOrganizationRef().setKey(organization.getId());
         activityType.setLcName(StringUtils.lowerCase(activityType.getName()));
         if (store) {
+            // TODO: ActivityType requires the model not to be set but Activity requires the model to be set??
+            activityType.getOrganizationRef().setModel(organization);
             activityType.setId(Datastore.allocateId(organization.getId(), ActivityTypeMeta.get()));
             Datastore.put(activityType);
         }
         return activityType;
+    }
+
+    private ActivityType createActivityType(boolean store) {
+        Organization organization = createOrganization(true);
+        return createActivityType(organization, store);
     }
 
     private Activity createActivity(ActivityType activityType, boolean store) {
@@ -98,6 +107,7 @@ public class ActivityEndpointWithDaoTest {
         activity.setFinish(new DateTime(activity.getStart().getTime()).plusHours(1).toDate());
         activity.getActivityTypeRef().setModel(activityType);
         if (store) {
+            activity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), ActivityMeta.get()));
             Datastore.put(activity);
         }
         return activity;
@@ -467,6 +477,82 @@ public class ActivityEndpointWithDaoTest {
     }
 
     @Test
+    public void testGetActivitiesByUnknownOrganizationId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        endpoint.getActivities(newCaller(1), Datastore.allocateId(Organization.class), null, null, null, null, null);
+    }
+
+    @Test
+    public void testGetActivitiesByUnknownActivityTypeId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        endpoint.getActivities(newCaller(1), null, Datastore.allocateId(ActivityType.class), null, null, null, null);
+    }
+
+    @Test
+    public void testGetActivitiesByOrganizationId() throws Exception {
+        Organization organization = createOrganization(true);
+        int count = generator.nextInt(5) + 1;
+        for (int i = 0; i < count; i++) {
+            createActivity(organization, true);
+        }
+        List<Activity> result = endpoint.getActivities(newCaller(1), organization.getId(), null, null, null, null, null);
+        assertEquals(count, result.size());
+    }
+
+    @Test
+    public void testGetActivitiesByActivityId() throws Exception {
+        ActivityType activityType = createActivityType(true);
+        int count = generator.nextInt(5) + 1;
+        for (int i = 0; i < count; i++) {
+            createActivity(activityType, true);
+        }
+        List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, null, null);
+        assertEquals(count, result.size());
+    }
+
+    // FilterActivities
+    @Test
+    public void testFilterOffset() throws Exception {
+        ActivityType activityType = createActivityType(true);
+        for (int i = 0; i < 5; i++) {
+            createActivity(activityType, true);
+        }
+        List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, 3, null);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testFilterOffsetGreaterSize() throws Exception {
+        ActivityType activityType = createActivityType(true);
+        for (int i = 0; i < 5; i++) {
+            createActivity(activityType, true);
+        }
+        List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, 7, null);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testFilterLimit() throws Exception {
+        ActivityType activityType = createActivityType(true);
+        for (int i = 0; i < 5; i++) {
+            createActivity(activityType, true);
+        }
+        List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, null, 3);
+        assertEquals(3, result.size());
+    }
+
+    // TODO Add following tests
+    // Zero Offset
+    // Zero Limit
+    // Negative Offset
+    // Negative Limit
+    // FromDate After last activity
+    // FromDate Before first activity
+    // ToDate After last activity
+    // ToDate Before first activity
+
+    // GetActivitiesByIds
+    @Test
     public void getActivitiesByIdsNullRequest() throws Exception {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Must choose one: activityTypeIds or organizationIds");
@@ -489,6 +575,76 @@ public class ActivityEndpointWithDaoTest {
         thrown.expectMessage("Must choose one: activityTypeIds or organizationIds");
         JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
         endpoint.getActivitiesByIds(newCaller(1), jasListQueryActivitiesRequest);
+    }
+
+    @Test
+    public void getActivitiesByIdsUnknownOrganizationId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        jasListQueryActivitiesRequest.getOrganizationIds().add(Datastore.allocateId(Organization.class));
+        endpoint.getActivitiesByIds(newCaller(1), jasListQueryActivitiesRequest);
+    }
+
+    @Test
+    public void getActivitiesByIdsUnknownActivityTypeId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        jasListQueryActivitiesRequest.getActivityTypeIds().add(Datastore.allocateId(ActivityType.class));
+        endpoint.getActivitiesByIds(newCaller(1), jasListQueryActivitiesRequest);
+    }
+
+    @Test
+    public void getActivitiesByIdsByOrganizationId() throws Exception {
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        Organization organization = createOrganization(true);
+        int count = generator.nextInt(5) + 1;
+        for (int i = 0; i < count; i++) {
+            createActivity(organization, true);
+        }
+        jasListQueryActivitiesRequest.getOrganizationIds().add(organization.getId());
+        List<Activity> result = endpoint.getActivitiesByIds(newCaller(1), jasListQueryActivitiesRequest);
+        assertEquals(count, result.size());
+    }
+
+    @Test
+    public void getActivitiesByIdsByActivityId() throws Exception {
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+        ActivityType activityType = createActivityType(true);
+        int count = generator.nextInt(5) + 1;
+        for (int i = 0; i < count; i++) {
+            createActivity(activityType, true);
+        }
+        jasListQueryActivitiesRequest.getActivityTypeIds().add(activityType.getId());
+        List<Activity> result = endpoint.getActivitiesByIds(newCaller(1), jasListQueryActivitiesRequest);
+        assertEquals(count, result.size());
+    }
+
+    @Test
+    public void getActivitiesByIdsByOrganizationIds() throws Exception {
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+
+        int count = generator.nextInt(5) + 1;
+        for (int i = 0; i < count; i++) {
+            Organization organization = createOrganization(true);
+            createActivity(organization, true);
+            jasListQueryActivitiesRequest.getOrganizationIds().add(organization.getId());
+        }
+        List<Activity> result = endpoint.getActivitiesByIds(newCaller(1), jasListQueryActivitiesRequest);
+        assertEquals(count, result.size());
+    }
+
+    @Test
+    public void getActivitiesByIdsByActivityIds() throws Exception {
+        JasListQueryActivitiesRequest jasListQueryActivitiesRequest = new JasListQueryActivitiesRequest();
+
+        int count = generator.nextInt(5) + 1;
+        for (int i = 0; i < count; i++) {
+            ActivityType activityType = createActivityType(true);
+            createActivity(activityType, true);
+            jasListQueryActivitiesRequest.getActivityTypeIds().add(activityType.getId());
+        }
+        List<Activity> result = endpoint.getActivitiesByIds(newCaller(1), jasListQueryActivitiesRequest);
+        assertEquals(count, result.size());
     }
 
     // TODO: Expand
@@ -1268,6 +1424,106 @@ public class ActivityEndpointWithDaoTest {
     }
 
     // AddActivityToActivityPackage
+    @Test
+    public void testAddActivityToActivityPackagePackageNulUser() throws Exception {
+        thrown.expect(UnauthorizedException.class);
+        thrown.expectMessage("Only authenticated users can call this method");
+        endpoint.addActivityToActivityPackage(null, null, null);
+    }
+
+    @Test
+    public void testAddActivityToActivityPackageNotAdmin() throws Exception {
+        thrown.expect(ForbiddenException.class);
+        thrown.expectMessage("Must be admin");
+        endpoint.addActivityToActivityPackage(newCaller(1), null, null);
+    }
+
+    @Test
+    public void testAddActivityToActivityPackageNullKeyActivityPackageId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("Not found");
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), null, null);
+    }
+
+    @Test
+    public void testAddActivityToActivityPackageNullKeyActivityId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("Not found");
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), null);
+    }
+
+    @Test
+    public void testAddActivityToActivityPackageUnknownActivityPackageId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
+    }
+
+    @Test
+    public void testAddActivityToActivityPackageUnknownActivityId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), Datastore.allocateId(Activity.class));
+    }
+
+    @Test
+    public void testAddActivityToActivityPackage() throws Exception {
+        Organization organization = createOrganization(true);
+        ActivityPackage activityPackage = createActivityPackage(organization, true);
+        Activity activity = createActivity(organization, true);
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), activityPackage.getId(), activity.getId());
+        List<Activity> result = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        assertEquals(1, result.size());
+        equals(activity, result.get(0));
+    }
 
     // RemoveActivityFromActivityPackage
+    @Test
+    public void testRemoveActivityFromActivityPackagePackageNulUser() throws Exception {
+        thrown.expect(UnauthorizedException.class);
+        thrown.expectMessage("Only authenticated users can call this method");
+        endpoint.removeActivityFromActivityPackage(null, null, null);
+    }
+
+    @Test
+    public void testRemoveActivityFromActivityPackageNotAdmin() throws Exception {
+        thrown.expect(ForbiddenException.class);
+        thrown.expectMessage("Must be admin");
+        endpoint.removeActivityFromActivityPackage(newCaller(1), null, null);
+    }
+
+    @Test
+    public void testRemoveActivityFromActivityPackageNullKeyActivityPackageId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("Not found");
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), null, null);
+    }
+
+    @Test
+    public void testRemoveActivityFromActivityPackageNullKeyActivityId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("Not found");
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), null);
+    }
+
+    @Test
+    public void testRemoveActivityFromActivityPackageUnknownActivityPackageId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
+    }
+
+    @Test
+    public void testRemoveActivityFromActivityPackageUnknownActivityId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), Datastore.allocateId(Activity.class));
+    }
+
+    @Test
+    public void testRemoveActivityFromActivityPackage() throws Exception {
+        Organization organization = createOrganization(true);
+        ActivityPackage activityPackage = createActivityPackage(organization, true);
+        Activity activity = createActivity(organization, true);
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), activityPackage.getId(), activity.getId());
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), activityPackage.getId(), activity.getId());
+        List<Activity> result = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        assertTrue(result.isEmpty());
+    }
 }
