@@ -4,14 +4,19 @@ import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.jasify.schedule.appengine.AssertionHelper;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.common.*;
+import com.jasify.schedule.appengine.dao.common.OrganizationDaoTest;
+import com.jasify.schedule.appengine.model.common.Group;
+import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.common.OrganizationMember;
+import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import io.github.benas.jpopulator.api.Populator;
 import io.github.benas.jpopulator.impl.PopulatorBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,13 +24,13 @@ import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static com.jasify.schedule.appengine.AssertionHelper.assertIdsEqual;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newOrgMemberCaller;
 import static junit.framework.TestCase.*;
-import static org.easymock.EasyMock.expectLastCall;
 
 /**
  * @author krico
@@ -178,5 +183,63 @@ public class OrganizationEndpointWithDaoTest {
         Key organizationId = Datastore.allocateId(Organization.class);
         List<Group> result = endpoint.getOrganizationGroups(newAdminCaller(55), organizationId);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testUpdateOrganization() throws Exception {
+        Organization organization = OrganizationDaoTest.createExample();
+        OrganizationDao dao = new OrganizationDao();
+        HashSet<PaymentTypeEnum> pt = new HashSet<>();
+        pt.add(PaymentTypeEnum.PayPal);
+        organization.setPaymentTypes(pt);
+        dao.save(organization);
+
+        Organization update = new Organization(organization.getName());
+        update.setLcName("THIS SHOULD BE IGNORED");
+        update.setName("New Org Name");
+        update.getPaymentTypes().add(PaymentTypeEnum.Cash);
+        update.setDescription("Update description");
+
+        Organization updatedResponse = endpoint.updateOrganization(newAdminCaller(11), organization.getId(), update);
+
+        //Make sure datastore and response are the same
+        AssertionHelper.assertAttributesEquals(Datastore.get(Organization.class, organization.getId()), updatedResponse);
+
+        //make sure stuff was really updated
+        assertEquals(update.getName(), updatedResponse.getName());
+        assertEquals(StringUtils.lowerCase(update.getName()), updatedResponse.getLcName());
+        assertEquals(update.getDescription(), updatedResponse.getDescription());
+        assertEquals(update.getPaymentTypes(), updatedResponse.getPaymentTypes());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testUpdateOrganizationNameAlreadyExists() throws Exception {
+        Organization organization1 = OrganizationDaoTest.createExample();
+        Organization organization2 = OrganizationDaoTest.createExample();
+        OrganizationDao dao = new OrganizationDao();
+        dao.save(organization1);
+        dao.save(organization2);
+
+        organization2.setName(organization1.getName());
+
+        endpoint.updateOrganization(newAdminCaller(55), organization2.getId(), organization2);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testUpdateNonExisting() throws Exception {
+        Organization organization = new Organization();
+        organization.setId(Datastore.allocateId(Organization.class));
+        endpoint.updateOrganization(newAdminCaller(55), organization.getId(), organization);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testUpdateOrganizationNullName() throws Exception {
+        Organization organization1 = OrganizationDaoTest.createExample();
+        OrganizationDao dao = new OrganizationDao();
+        dao.save(organization1);
+
+        organization1.setName(null);
+
+        endpoint.updateOrganization(newAdminCaller(55), organization1.getId(), organization1);
     }
 }

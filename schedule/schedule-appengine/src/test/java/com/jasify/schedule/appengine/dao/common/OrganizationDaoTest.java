@@ -29,7 +29,7 @@ import static junit.framework.TestCase.*;
 public class OrganizationDaoTest {
     private OrganizationDao dao;
 
-    static Organization createExample() {
+    public static Organization createExample() {
         return TestHelper.populateBean(Organization.class, "id", "lcName", "organizationMemberListRef");
     }
 
