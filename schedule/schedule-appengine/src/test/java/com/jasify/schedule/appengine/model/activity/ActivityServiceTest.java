@@ -9,6 +9,7 @@ import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
@@ -159,28 +160,6 @@ public class ActivityServiceTest {
     public void testAddActivityTypeThrowsUniqueNameConstraint() throws Exception {
         activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
         activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-    }
-
-    @Test
-    public void testGetActivityTypes() throws Exception {
-        Datastore.delete(activityType1OfOrganization1.getId(), activityType2OfOrganization1.getId()); //clean slate ;-)
-        List<ActivityType> activityTypes = activityService.getActivityTypes(organization1);
-        assertNotNull(activityTypes);
-        assertTrue(activityTypes.isEmpty());
-        int total = 20;
-        Set<Key> added = new HashSet<>();
-        for (int i = 0; i < total; ++i) {
-            added.add(activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE + i)));
-        }
-
-        activityTypes = activityService.getActivityTypes(organization1);
-        assertNotNull(activityTypes);
-        assertEquals(20, activityTypes.size());
-        assertEquals(20, added.size());
-        for (ActivityType activityType : activityTypes) {
-            assertTrue(added.remove(activityType.getId()));
-        }
-        assertTrue(added.isEmpty());
     }
 
     @Test
@@ -396,10 +375,10 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         date = date.plusDays(1);
         assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
@@ -419,10 +398,10 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
     }
@@ -441,10 +420,10 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         DateTime date2 = date1.plusDays(7);
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
@@ -464,10 +443,10 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         DateTime date2 = date1.plusDays(14);
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
@@ -499,10 +478,10 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         DateTime date2 = date1.plusDays(7);
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
@@ -523,10 +502,10 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         DateTime date3 = date1.plusDays(7);
         assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
@@ -547,10 +526,10 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(2, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         DateTime date3 = date1.plusDays(14);
         assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
@@ -572,19 +551,19 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(4, ids.size());
-        Activity activity1 = activityService.getActivity(ids.get(0));
+        Activity activity1 = Datastore.get(ActivityMeta.get(), ids.get(0));
         DateTime date2 = date1.plusDays(1);
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
         assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
-        Activity activity2 = activityService.getActivity(ids.get(1));
+        Activity activity2 = Datastore.get(ActivityMeta.get(), ids.get(1));
         DateTime date3 = date2.plusDays(2);
         assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
         assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
-        Activity activity3 = activityService.getActivity(ids.get(2));
+        Activity activity3 = Datastore.get(ActivityMeta.get(), ids.get(2));
         DateTime date4 = date2.plusDays(14);
         assertEquals(new DateTime(date4.getYear(), date4.getMonthOfYear(), date4.getDayOfMonth(), 10, 0, 0).toDate(), activity3.getStart());
         assertEquals(new DateTime(date4.getYear(), date4.getMonthOfYear(), date4.getDayOfMonth(), 11, 0, 0).toDate(), activity3.getFinish());
-        Activity activity4 = activityService.getActivity(ids.get(3));
+        Activity activity4 = Datastore.get(ActivityMeta.get(), ids.get(3));
         DateTime date5 = date4.plusDays(2);
         assertEquals(new DateTime(date5.getYear(), date5.getMonthOfYear(), date5.getDayOfMonth(), 10, 0, 0).toDate(), activity4.getStart());
         assertEquals(new DateTime(date5.getYear(), date5.getMonthOfYear(), date5.getDayOfMonth(), 11, 0, 0).toDate(), activity4.getFinish());
@@ -601,20 +580,6 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, repeatDetails);
         assertNotNull(ids);
         assertEquals(ActivityService.MaximumRepeatCounter, ids.size());
-    }
-
-    @Test
-    public void testGetActivity() throws Exception {
-        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
-        Activity activity = activityService.getActivity(ids.get(0));
-        assertNotNull(activity);
-        assertEquals(activityType1OfOrganization1.getName(), activity.getName());
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivityThrowsEntityNotFoundException() throws Exception {
-        Key id = Datastore.allocateId(Activity.class);
-        activityService.getActivity(id);
     }
 
     @Test
@@ -705,7 +670,7 @@ public class ActivityServiceTest {
         assertEquals("New Name", updatedActivity.getName());
         assertEquals("Description", updatedActivity.getDescription());
 
-        Activity fetched = activityService.getActivity(ids.get(0));
+        Activity fetched = Datastore.get(ActivityMeta.get(), ids.get(0));
         assertEquals("New Name", fetched.getName());
         assertEquals("Description", fetched.getDescription());
         assertEquals("CHF", fetched.getCurrency());
@@ -797,7 +762,7 @@ public class ActivityServiceTest {
         activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
         assertNotNull(activityService.subscribe(testUser1, activity1Organization1));
         assertNotNull(activityService.subscribe(testUser2, activity1Organization1));
-        assertEquals(2, activityService.getActivity(activity1Organization1.getId()).getSubscriptionCount());
+        assertEquals(2, Datastore.get(ActivityMeta.get(), activity1Organization1.getId()).getSubscriptionCount());
     }
 
     @Test
@@ -826,7 +791,7 @@ public class ActivityServiceTest {
 
         activityService.cancel(subscription);
 
-        activity1Organization1 = activityService.getActivity(activity1Organization1.getId());
+        activity1Organization1 = Datastore.get(ActivityMeta.get(), activity1Organization1.getId());
 
         assertEquals(0, activity1Organization1.getSubscriptionCount());
         List<Subscription> modelList = activity1Organization1.getSubscriptionListRef().getModelList();
@@ -1100,7 +1065,7 @@ public class ActivityServiceTest {
         assertEquals(0, activityPackage.getExecutionCount());
 
         for (Activity activity : activities) {
-            activity = activityService.getActivity(activity.getId());
+            activity = Datastore.get(ActivityMeta.get(), activity.getId());
             assertEquals(0, activity.getSubscriptionCount());
         }
 

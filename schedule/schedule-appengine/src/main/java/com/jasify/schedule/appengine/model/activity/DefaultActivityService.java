@@ -7,6 +7,7 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
@@ -61,6 +62,7 @@ class DefaultActivityService implements ActivityService {
     private final ActivityPackageExecutionMeta activityPackageExecutionMeta;
 
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private final ActivityDao activityDao = new ActivityDao();
 
     private DefaultActivityService() {
         activityTypeMeta = ActivityTypeMeta.get();
@@ -136,11 +138,6 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
-    @Nonnull
-    @Override
-    public List<ActivityType> getActivityTypes(Organization organization) {
-        return Datastore.query(activityTypeMeta, organization.getId()).asList();
-    }
 
     @Override
     public List<ActivityPackage> getActivityPackages(Organization organization) {
@@ -341,16 +338,6 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Activity getActivity(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        try {
-            return Datastore.get(activityMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Activity.id=" + id);
-        }
-    }
-
-    @Nonnull
-    @Override
     public List<Activity> getActivities(Organization organization) {
         return Datastore.query(activityMeta, organization.getId()).asList();
     }
@@ -367,7 +354,7 @@ class DefaultActivityService implements ActivityService {
     @Override
     public Activity updateActivity(Activity activity) throws EntityNotFoundException, FieldValueException {
         validateActivity(activity);
-        Activity dbActivity = getActivity(activity.getId());
+        Activity dbActivity = activityDao.get(activity.getId());
         BeanUtil.copyPropertiesExcluding(dbActivity, activity, "created", "modified", "id", "activityTypeRef");
         Datastore.put(dbActivity);
         return dbActivity;

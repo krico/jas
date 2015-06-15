@@ -33,14 +33,6 @@ public interface ActivityService {
     public Key addActivityType(Organization organization, ActivityType activityType) throws UniqueConstraintException;
 
     /**
-     * @param organization in which to search
-     * @return the list of activity type in that organization
-     * @throws EntityNotFoundException if that organization doesn't exist
-     */
-    @Nonnull
-    List<ActivityType> getActivityTypes(Organization organization) throws EntityNotFoundException;
-
-    /**
      * @param activityType to be updated
      * @return the updated ActivityType
      * @throws EntityNotFoundException   if it didn't exist
@@ -64,15 +56,6 @@ public interface ActivityService {
      */
     @Nonnull
     List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws FieldValueException;
-
-    /**
-     * @param id to fetch
-     * @return the activity
-     * @throws EntityNotFoundException  not found
-     * @throws IllegalArgumentException the id is not of an Activity
-     */
-    @Nonnull
-    Activity getActivity(Key id) throws EntityNotFoundException, IllegalArgumentException;
 
     /**
      * @param organization to search within
