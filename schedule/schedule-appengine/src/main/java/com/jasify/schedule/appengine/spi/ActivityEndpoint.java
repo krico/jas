@@ -408,7 +408,7 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(id));
         checkFound(id);
         ActivityPackage activityPackage = Preconditions.checkNotNull(request.getActivityPackage(), "request.ActivityPackage is NULL");
