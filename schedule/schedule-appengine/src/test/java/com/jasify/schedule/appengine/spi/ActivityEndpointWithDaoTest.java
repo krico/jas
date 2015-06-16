@@ -129,8 +129,7 @@ public class ActivityEndpointWithDaoTest {
     }
 
     private User createUser() {
-        Populator populator = new PopulatorBuilder().build();
-        User user = populator.populateBean(User.class, "id", "detailRef", "password");
+        User user = new User("@email.com");
         Datastore.put(user);
         return user;
     }
