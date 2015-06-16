@@ -9,6 +9,7 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
@@ -63,6 +64,7 @@ import java.util.Set;
 public class ShoppingCartEndpoint {
 
     private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
 
     @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
     public ShoppingCart getUserCart(User caller) throws UnauthorizedException, ForbiddenException {
@@ -106,7 +108,7 @@ public class ShoppingCartEndpoint {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
         ActivityPackage activityPackage;
         try {
-            activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(activityPackageId);
+            activityPackage = activityPackageDao.get(activityPackageId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("activityPackageId=" + activityPackageId);
         }

@@ -125,19 +125,6 @@ public interface ActivityService {
      */
     public List<ActivityPackageActivity> getActivityPackageActivities(Activity activity);
 
-    /**
-     * @param organization to fetch activity packages from
-     * @return the list of activity packages for this organization
-     */
-    List<ActivityPackage> getActivityPackages(Organization organization);
-
-    /**
-     * @param id to fetch
-     * @return the activityPackage
-     * @throws EntityNotFoundException not found
-     */
-    @Nonnull
-    ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException;
 
     /**
      * Subscribe a user for an activity

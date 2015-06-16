@@ -8,6 +8,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
@@ -63,6 +64,7 @@ class DefaultActivityService implements ActivityService {
 
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
 
     private DefaultActivityService() {
         activityTypeMeta = ActivityTypeMeta.get();
@@ -136,15 +138,6 @@ class DefaultActivityService implements ActivityService {
         } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-
-    @Override
-    public List<ActivityPackage> getActivityPackages(Organization organization) {
-        return Datastore.query(activityPackageMeta)
-                .filter(activityPackageMeta.organizationRef.equal(organization.getId()))
-                .sort(activityPackageMeta.created.desc)
-                .asList();
     }
 
     @Nonnull
@@ -659,7 +652,7 @@ class DefaultActivityService implements ActivityService {
 
     @Override
     public ActivityPackage updateActivityPackage(ActivityPackage activityPackage) throws EntityNotFoundException, FieldValueException {
-        ActivityPackage dbActivityPackage = getActivityPackage(activityPackage.getId());
+        ActivityPackage dbActivityPackage = activityPackageDao.get(activityPackage.getId());
 
         copyProperties(activityPackage, dbActivityPackage);
 
@@ -738,16 +731,6 @@ class DefaultActivityService implements ActivityService {
             throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
-        }
-    }
-
-    @Nonnull
-    @Override
-    public ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException {
-        try {
-            return Datastore.get(activityPackageMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("ActivityPackage.id=" + id);
         }
     }
 

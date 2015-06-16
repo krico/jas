@@ -10,6 +10,7 @@ import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
+import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
@@ -831,7 +832,7 @@ public class ActivityServiceTest {
 
         Key id = activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
         assertNotNull(id);
-        ActivityPackage ap = activityService.getActivityPackage(id);
+        ActivityPackage ap = Datastore.get(ActivityPackageMeta.get(), id);
         Set<Key> keys = ap.getActivityKeys();
         assertNotNull(keys);
         assertEquals(2, keys.size());
@@ -881,7 +882,7 @@ public class ActivityServiceTest {
 
         long modified = System.currentTimeMillis();
 
-        fetchedPackages.add(activityService.getActivityPackage(activityPackage10Organization.getId()));
+        fetchedPackages.add(Datastore.get(ActivityPackageMeta.get(), activityPackage10Organization.getId()));
         for (ActivityPackage fetched : fetchedPackages) {
             assertNotNull(fetched);
             assertEquals("New Desc", fetched.getDescription());
@@ -996,14 +997,14 @@ public class ActivityServiceTest {
 
         activityService.removeActivityFromActivityPackage(activityPackage10Organization, activity2Organization1);
 
-        ActivityPackage activityPackage = activityService.getActivityPackage(activityPackage10Organization.getId());
+        ActivityPackage activityPackage = Datastore.get(ActivityPackageMeta.get(), activityPackage10Organization.getId());
         Set<Key> keys = activityPackage.getActivityKeys();
         assertEquals(1, keys.size());
         assertTrue(keys.contains(activity1Organization1.getId()));
 
         activityService.addActivityToActivityPackage(activityPackage, activity2Organization1);
 
-        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        activityPackage = Datastore.get(ActivityPackageMeta.get(), activityPackage.getId());
         keys = activityPackage.getActivityKeys();
         assertEquals(2, keys.size());
         assertTrue(keys.contains(activity1Organization1.getId()));
@@ -1049,7 +1050,7 @@ public class ActivityServiceTest {
     @Test
     public void testCancelActivityPackageExecution() throws Exception {
         testSubscribeToActivityPackage();
-        ActivityPackage activityPackage = activityService.getActivityPackage(activityPackage10Organization.getId());
+        ActivityPackage activityPackage = Datastore.get(ActivityPackageMeta.get(), activityPackage10Organization.getId());
         assertEquals(1, activityPackage.getExecutionCount());
 
         List<ActivityPackageSubscription> subscriptions = activityPackageExecution.getSubscriptionListRef().getModelList();
@@ -1061,7 +1062,7 @@ public class ActivityServiceTest {
         }
         activityService.cancelActivityPackageExecution(activityPackageExecution);
 
-        activityPackage = activityService.getActivityPackage(activityPackage.getId());
+        activityPackage = Datastore.get(ActivityPackageMeta.get(), activityPackage.getId());
         assertEquals(0, activityPackage.getExecutionCount());
 
         for (Activity activity : activities) {
@@ -1073,56 +1074,6 @@ public class ActivityServiceTest {
             assertNull(Datastore.getOrNull(subscription.getId()));
         }
         assertNull(Datastore.getOrNull(activityPackageExecution.getId()));
-    }
-
-    @Test
-    public void testGetActivityPackages() throws Exception {
-        testCreateActivityPackage();
-        Key ap1Org1 = activityPackage10Organization.getId();
-        testCreateActivityPackage();
-        Key ap2Org1 = activityPackage10Organization.getId();
-
-        ActivityPackage ap = new ActivityPackage();
-        ap.getOrganizationRef().setKey(organization2.getId());
-        ap.setCurrency("USD");
-        ap.setDescription("Super package");
-        ap.setMaxExecutions(0);
-        ap.setName("Supa");
-        ap.setPrice(20d);
-        ap.setItemCount(2);
-        ActivityType activityType = new ActivityType("ATO2");
-        activityType.setId(Datastore.allocateId(organization2.getId(), ActivityTypeMeta.get()));
-        activityType.getOrganizationRef().setKey(organization2.getId());
-        Datastore.put(activityType);
-
-        Key ap1Org2 = activityService.addActivityPackage(ap, Arrays.asList(activity2Organization1, activity1Organization1));
-
-
-        //Now we do the real test work
-        List<ActivityPackage> activityPackages = activityService.getActivityPackages(organization1);
-        assertNotNull(activityPackages);
-        assertEquals(2, activityPackages.size());
-        List<Key> ids = Lists.transform(activityPackages, new Function<ActivityPackage, Key>() {
-            @Nullable
-            @Override
-            public Key apply(ActivityPackage activityPackage) {
-                return activityPackage.getId();
-            }
-        });
-        assertTrue(ids.contains(ap1Org1));
-        assertTrue(ids.contains(ap2Org1));
-
-        activityPackages = activityService.getActivityPackages(organization2);
-        assertNotNull(activityPackages);
-        assertEquals(1, activityPackages.size());
-        ids = Lists.transform(activityPackages, new Function<ActivityPackage, Key>() {
-            @Nullable
-            @Override
-            public Key apply(ActivityPackage activityPackage) {
-                return activityPackage.getId();
-            }
-        });
-        assertTrue(ids.contains(ap1Org2));
     }
 
     @Test
@@ -1177,16 +1128,6 @@ public class ActivityServiceTest {
         activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
         List<ActivityPackageActivity> activityPackageActivities = activityService.getActivityPackageActivities(activity1Organization1);
         assertEquals(2, activityPackageActivities.size());
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetActivityPackageThrowsEntityNotFound() throws Exception {
-       activityService.getActivityPackage(Datastore.allocateId(ActivityPackage.class));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testGetActivityPackageThrowsNullPointerException() throws Exception {
-        activityService.getActivityPackage(null);
     }
 
 //    @Test
