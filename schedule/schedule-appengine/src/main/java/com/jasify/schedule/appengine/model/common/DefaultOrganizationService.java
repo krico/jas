@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.model.common;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.meta.common.GroupMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
@@ -44,26 +43,6 @@ final class DefaultOrganizationService implements OrganizationService {
 
     @Nonnull
     @Override
-    public Key addOrganization(Organization organization) throws UniqueConstraintException, FieldValueException {
-        String name = StringUtils.trimToNull(organization.getName());
-        if (name == null) {
-            throw new FieldValueException("Organization.name");
-        }
-        organization.setName(name);
-
-        uniqueOrganizationName.reserve(StringUtils.lowerCase(name));
-
-        organization.setId(null);
-
-        Transaction tx = Datastore.beginTransaction();
-        Key ret = Datastore.put(tx, organization);
-        tx.commit();
-
-        return ret;
-    }
-
-    @Nonnull
-    @Override
     public Organization getOrganization(Key id) throws EntityNotFoundException, IllegalArgumentException {
         try {
             return Datastore.get(organizationMeta, id);
@@ -80,12 +59,6 @@ final class DefaultOrganizationService implements OrganizationService {
         return !result.isEmpty();
     }
 
-    @Override
-    public List<Organization> getOrganizationsForUser(long userId) throws EntityNotFoundException {
-        Key key = Datastore.createKey(com.jasify.schedule.appengine.model.users.User.class, userId);
-        return getOrganizationsForUser(key);
-    }
-
     @Nonnull
     @Override
     public List<Organization> getOrganizationsForUser(Key userId) throws EntityNotFoundException {
@@ -100,63 +73,9 @@ final class DefaultOrganizationService implements OrganizationService {
         return result;
     }
 
-    @Nonnull
-    @Override
-    public Organization getOrganization(String name) throws EntityNotFoundException {
-        Organization ret = Datastore.query(organizationMeta).filter(organizationMeta.lcName.equal(StringUtils.lowerCase(name))).asSingle();
-        if (ret == null) throw new EntityNotFoundException("Organization name=" + name);
-        return ret;
-    }
-
     @Override
     public List<Organization> getOrganizations() {
         return Datastore.query(organizationMeta).asList();
-    }
-
-    @Nonnull
-    @Override
-    public Organization updateOrganization(Organization organization) throws EntityNotFoundException, FieldValueException, UniqueConstraintException {
-        String name = StringUtils.trimToNull(organization.getName());
-        if (name == null) {
-            throw new FieldValueException("Organization.name");
-        }
-
-        Organization dbOrganization = getOrganization(organization.getId());
-        String oldName = null;
-        if (!StringUtils.equalsIgnoreCase(dbOrganization.getName(), name)) {
-            oldName = dbOrganization.getLcName();
-            dbOrganization.setName(name);
-            uniqueOrganizationName.reserve(StringUtils.lowerCase(name));
-        }
-        dbOrganization.setDescription(organization.getDescription());
-        dbOrganization.setPaymentTypes(organization.getPaymentTypes());
-        Datastore.put(dbOrganization);
-
-        if (oldName != null) uniqueOrganizationName.release(StringUtils.lowerCase(oldName));
-
-        return dbOrganization;
-    }
-
-    @Override
-    public void addUserToOrganization(Organization organization, User user) throws EntityNotFoundException {
-        Organization dbOrganization = getOrganization(organization.getId());
-        User dbUser = UserServiceFactory.getUserService().getUser(user.getId());
-
-        if (!dbOrganization.getUserKeys().contains(user.getId())) {
-            OrganizationMember junction = new OrganizationMember(dbOrganization, dbUser);
-            Datastore.put(junction);
-            organization.getOrganizationMemberListRef().clear(); // might be cached
-        }
-    }
-
-    @Override
-    public void addUserToOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        addUserToOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getUser(userId));
-    }
-
-    @Override
-    public void removeUserFromOrganization(Key organizationId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
-        removeUserFromOrganization(getOrganization(organizationId), UserServiceFactory.getUserService().getUser(userId));
     }
 
     @Override
@@ -167,75 +86,6 @@ final class DefaultOrganizationService implements OrganizationService {
     @Override
     public void removeUserFromGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
         removeUserFromGroup(getGroup(groupId), UserServiceFactory.getUserService().getUser(userId));
-    }
-
-    @Override
-    public void removeGroupFromOrganization(Key organizationId, Key groupId) throws EntityNotFoundException, IllegalArgumentException {
-        removeGroupFromOrganization(getOrganization(organizationId), getGroup(groupId));
-    }
-
-    @Override
-    public void addGroupToOrganization(Key organizationId, Key groupId) throws EntityNotFoundException, IllegalArgumentException {
-        addGroupToOrganization(getOrganization(organizationId), getGroup(groupId));
-    }
-
-    @Override
-    public void removeUserFromOrganization(Organization organization, User user) throws EntityNotFoundException {
-        Organization dbOrganization = getOrganization(organization.getId());
-        UserServiceFactory.getUserService().getUser(user.getId());
-
-        Set<Key> toRemove = new HashSet<>();
-        List<OrganizationMember> list = dbOrganization.getOrganizationMemberListRef().getModelList();
-        for (OrganizationMember organizationMember : list) {
-            if (user.getId().equals(organizationMember.getUserRef().getKey())) {
-                toRemove.add(organizationMember.getId());
-            }
-        }
-
-        Datastore.delete(toRemove);
-        organization.getOrganizationMemberListRef().clear();
-    }
-
-    @Override
-    public void removeGroupFromOrganization(Organization organization, Group group) throws EntityNotFoundException {
-        Organization dbOrganization = getOrganization(organization.getId());
-        getGroup(group.getId());
-
-        Set<Key> toRemove = new HashSet<>();
-        List<OrganizationMember> list = dbOrganization.getOrganizationMemberListRef().getModelList();
-        for (OrganizationMember organizationMember : list) {
-            if (group.getId().equals(organizationMember.getGroupRef().getKey())) {
-                toRemove.add(organizationMember.getId());
-            }
-        }
-
-        Datastore.delete(toRemove);
-        organization.getOrganizationMemberListRef().clear();
-    }
-
-    @Override
-    public void addGroupToOrganization(Organization organization, Group group) throws EntityNotFoundException {
-        Organization dbOrganization = getOrganization(organization.getId());
-        Group dbGroup = getGroup(group.getId());
-
-        if (!dbOrganization.getGroupKeys().contains(dbGroup.getId())) {
-            OrganizationMember junction = new OrganizationMember(dbOrganization, dbGroup);
-            Datastore.put(junction);
-            organization.getOrganizationMemberListRef().clear(); // might be cached
-        }
-    }
-
-    @Override
-    public void removeOrganization(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        Organization dbOrganization = getOrganization(id);
-        List<OrganizationMember> list = dbOrganization.getOrganizationMemberListRef().getModelList();
-        List<Key> toDel = new ArrayList<>();
-        for (OrganizationMember member : list) {
-            toDel.add(member.getId());
-        }
-        Datastore.delete(toDel);
-        Datastore.delete(dbOrganization.getId());
-        uniqueOrganizationName.release(dbOrganization.getLcName());
     }
 
     @Nonnull

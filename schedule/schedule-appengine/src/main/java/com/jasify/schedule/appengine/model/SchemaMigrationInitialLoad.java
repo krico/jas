@@ -3,10 +3,9 @@ package com.jasify.schedule.appengine.model;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.common.OrganizationService;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserService;
@@ -74,14 +73,14 @@ class SchemaMigrationInitialLoad {
             users.add(user);
         }
 
-        OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService();
+        OrganizationDao organizationDao = new OrganizationDao();
         for (int i = 0; i < 20; ++i) {
             Organization organization = new Organization(String.format("Organization%d", i));
             User user = users.get(i);
             organization.setDescription("Organization administered by " + user);
             organization.setPaymentTypes(getPaymentType(i));
-            organizationService.addOrganization(organization);
-            organizationService.addUserToOrganization(organization, user);
+            organizationDao.save(organization);
+            organizationDao.addUserToOrganization(organization.getId(), user.getId());
             organizations.add(organization);
         }
     }
@@ -97,14 +96,14 @@ class SchemaMigrationInitialLoad {
             users.add(user);
         }
 
-        OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService();
+        OrganizationDao organizationDao = new OrganizationDao();
         for (int i = 0; i < 5; ++i) {
             Organization organization = new Organization(String.format("Organization%d", i));
             User user = users.get(i);
             organization.setDescription("Organization administered by " + user);
             organization.setPaymentTypes(getPaymentType(i));
-            organizationService.addOrganization(organization);
-            organizationService.addUserToOrganization(organization, user);
+            organizationDao.save(organization);
+            organizationDao.addUserToOrganization(organization.getId(), user.getId());
             organizations.add(organization);
         }
 
