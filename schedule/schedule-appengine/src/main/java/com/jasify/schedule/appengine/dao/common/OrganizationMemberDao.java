@@ -46,7 +46,14 @@ class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
                         .asKeyList();
             }
         });
-
     }
 
+    public OrganizationMember byOrganizationIdAndUserId(Key organizationId, Key userId) {
+        OrganizationMemberMeta meta = getMeta();
+        return Datastore
+                .query(meta)
+                .filter(meta.organizationRef.equal(organizationId),
+                        meta.userRef.equal(userId))
+                .asSingle();
+    }
 }

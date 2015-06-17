@@ -60,11 +60,12 @@ public class OrganizationMemberDaoTest {
         }
     }
 
-    private void createMember(Key userId, Key organizationId) throws ModelException {
+    private OrganizationMember createMember(Key userId, Key organizationId) throws ModelException {
         OrganizationMember om = new OrganizationMember();
         om.getUserRef().setKey(userId);
         om.getOrganizationRef().setKey(organizationId);
         dao.save(om);
+        return om;
     }
 
     @Test
@@ -104,6 +105,38 @@ public class OrganizationMemberDaoTest {
             assertTrue(userIds.contains(userId3));
 
         }
+    }
+
+    @Test
+    public void testByOrganizationIdAndUserId() throws Exception {
+        Key userId1 = Datastore.allocateId(User.class);
+        Key userId2 = Datastore.allocateId(User.class);
+        Key userId3 = Datastore.allocateId(User.class);
+        Key organizationId1 = Datastore.allocateId(Organization.class);
+        Key organizationId2 = Datastore.allocateId(Organization.class);
+        Key organizationId3 = Datastore.allocateId(Organization.class);
+
+        OrganizationMember mu1o1 = createMember(userId1, organizationId1);
+        OrganizationMember mu1o2 = createMember(userId1, organizationId2);
+        OrganizationMember mu1o3 = createMember(userId1, organizationId3);
+
+        OrganizationMember mu2o1 = createMember(userId2, organizationId1);
+        OrganizationMember mu2o3 = createMember(userId2, organizationId3);
+
+        OrganizationMember mu3o2 = createMember(userId3, organizationId2);
+        OrganizationMember mu3o3 = createMember(userId3, organizationId3);
+
+        assertIdsEqual(mu1o1, dao.byOrganizationIdAndUserId(organizationId1, userId1));
+        assertIdsEqual(mu1o2, dao.byOrganizationIdAndUserId(organizationId2, userId1));
+        assertIdsEqual(mu1o3, dao.byOrganizationIdAndUserId(organizationId3, userId1));
+
+        assertIdsEqual(mu2o1, dao.byOrganizationIdAndUserId(organizationId1, userId2));
+        assertNull(dao.byOrganizationIdAndUserId(organizationId2, userId2));
+        assertIdsEqual(mu2o3, dao.byOrganizationIdAndUserId(organizationId3, userId2));
+
+        assertNull(dao.byOrganizationIdAndUserId(organizationId1, userId3));
+        assertIdsEqual(mu3o2, dao.byOrganizationIdAndUserId(organizationId2, userId3));
+        assertIdsEqual(mu3o3, dao.byOrganizationIdAndUserId(organizationId3, userId3));
     }
 
     private HashSet<Key> toUserKeys(List<OrganizationMember> members) {

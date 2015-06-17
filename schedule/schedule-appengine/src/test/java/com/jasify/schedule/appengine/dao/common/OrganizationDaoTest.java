@@ -229,4 +229,41 @@ public class OrganizationDaoTest {
             assertIdsEqual(Arrays.asList(group2), dao.getGroupsOfOrganization(org2.getId()));
         }
     }
+
+    @Test
+    public void testAddUserToOrganization() throws Exception {
+        Organization org1 = createExample();
+        Organization org2 = createExample();
+        User user1 = new User("whatever");
+        User user2 = new User("whoever");
+        Datastore.put(org1, org2, user1, user2);
+
+        assertTrue(dao.addUserToOrganization(org1.getId(), user1.getId()));
+        assertTrue(dao.addUserToOrganization(org1.getId(), user2.getId()));
+        assertFalse("double add1", dao.addUserToOrganization(org1.getId(), user1.getId()));
+        assertFalse("double add1", dao.addUserToOrganization(org1.getId(), user2.getId()));
+        assertTrue(dao.addUserToOrganization(org2.getId(), user1.getId()));
+        assertFalse("double add1.2", dao.addUserToOrganization(org1.getId(), user1.getId()));
+        assertFalse("double add2", dao.addUserToOrganization(org2.getId(), user1.getId()));
+
+        assertIdsEqual(Arrays.asList(user1, user2), dao.getUsersOfOrganization(org1.getId()));
+        assertIdsEqual(Arrays.asList(user1), dao.getUsersOfOrganization(org2.getId()));
+    }
+
+    @Test
+    public void testRemoveUserFromOrganization() throws Exception {
+        Organization org1 = createExample();
+        Organization org2 = createExample();
+        User user1 = new User("whatever");
+        User user2 = new User("whoever");
+        Datastore.put(org1, org2, user1, user2);
+
+        assertTrue(dao.addUserToOrganization(org1.getId(), user1.getId()));
+        assertTrue(dao.addUserToOrganization(org1.getId(), user2.getId()));
+        assertIdsEqual(Arrays.asList(user1, user2), dao.getUsersOfOrganization(org1.getId()));
+        dao.removeUserFromOrganization(org1.getId(), user1.getId());
+        assertIdsEqual(Arrays.asList(user2), dao.getUsersOfOrganization(org1.getId()));
+        dao.removeUserFromOrganization(org1.getId(), user2.getId());
+        assertTrue(dao.getUsersOfOrganization(org1.getId()).isEmpty());
+    }
 }

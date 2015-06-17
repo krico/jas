@@ -23,10 +23,18 @@ public final class AssertionHelper {
     private AssertionHelper() {
     }
 
-    public static <T extends HasId> void assertIdsEqual(List<T> expected, List<T> real) {
+    public static <T extends HasId> void assertIdsEqual(T expected, T actual) {
+        assertNotNull("expected", expected);
+        assertNotNull("actual", actual);
+        assertNotNull("expected.Id is NULL", expected.getId());
+        assertNotNull("actual.Id is NULL", actual.getId());
+        assertEquals(expected.getId(), actual.getId());
+    }
+
+    public static <T extends HasId> void assertIdsEqual(List<T> expected, List<T> actual) {
         assertNotNull("expected is NULL", expected);
-        assertNotNull("real is NULL", real);
-        assertEquals("expected.size != real.size", expected.size(), real.size());
+        assertNotNull("actual is NULL", actual);
+        assertEquals("expected.size != actual.size", expected.size(), actual.size());
 
         Function<T, Key> toKey = new Function<T, Key>() {
             @Nullable
@@ -36,7 +44,7 @@ public final class AssertionHelper {
             }
         };
         List<Key> expectedKeys = new ArrayList<>(Lists.transform(expected, toKey));
-        List<Key> realKeys = new ArrayList<>(Lists.transform(real, toKey));
+        List<Key> realKeys = new ArrayList<>(Lists.transform(actual, toKey));
         Collections.sort(expectedKeys);
         Collections.sort(realKeys);
         for (int i = 0; i < expectedKeys.size(); ++i) {
@@ -44,7 +52,7 @@ public final class AssertionHelper {
         }
     }
 
-    public static void assertAttributesEquals(Organization expected, Organization real) {
-        assertEquals(BeanUtil.beanMap(expected), BeanUtil.beanMap(real));
+    public static void assertAttributesEquals(Organization expected, Organization actual) {
+        assertEquals(BeanUtil.beanMap(expected), BeanUtil.beanMap(actual));
     }
 }
