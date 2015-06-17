@@ -6,6 +6,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.AssertionHelper;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.dao.common.GroupDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.common.Group;
@@ -254,7 +255,6 @@ public class OrganizationEndpointWithDaoTest {
         assertTrue(endpoint.getOrganizationUsers(newAdminCaller(55), organizationId).isEmpty());
         endpoint.addUserToOrganization(newAdminCaller(55), organizationId, userId);
         assertFalse(endpoint.getOrganizationUsers(newAdminCaller(55), organizationId).isEmpty());
-
     }
 
     @Test
@@ -266,5 +266,29 @@ public class OrganizationEndpointWithDaoTest {
         endpoint.removeUserFromOrganization(newAdminCaller(55), organization.getId(), user.getId());
 
         assertTrue(endpoint.getOrganizationUsers(newAdminCaller(55), organization.getId()).isEmpty());
+    }
+
+    @Test
+    public void testAddGroupToOrganization() throws Exception {
+        Organization organization1 = OrganizationDaoTest.createExample();
+        OrganizationDao organizationDao = new OrganizationDao();
+        Key organizationId = organizationDao.save(organization1);
+        GroupDao group = new GroupDao();
+        Group group1 = new Group("myUser");
+        Key groupId = group.save(group1);
+        assertTrue(endpoint.getOrganizationGroups(newAdminCaller(55), organizationId).isEmpty());
+        endpoint.addGroupToOrganization(newAdminCaller(55), organizationId, groupId);
+        assertFalse(endpoint.getOrganizationGroups(newAdminCaller(55), organizationId).isEmpty());
+    }
+
+    @Test
+    public void testRemoveGroupFromOrganization() throws Exception {
+        testAddGroupToOrganization();
+        Organization organization = endpoint.getOrganizations(newAdminCaller(55)).get(0);
+        Group group = endpoint.getOrganizationGroups(newAdminCaller(55), organization.getId()).get(0);
+
+        endpoint.removeGroupFromOrganization(newAdminCaller(55), organization.getId(), group.getId());
+
+        assertTrue(endpoint.getOrganizationGroups(newAdminCaller(55), organization.getId()).isEmpty());
     }
 }

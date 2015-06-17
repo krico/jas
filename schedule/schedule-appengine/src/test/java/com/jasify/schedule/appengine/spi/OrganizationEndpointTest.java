@@ -231,48 +231,4 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.removeOrganization(newAdminCaller(55), key);
     }
-
-    @Test
-    public void testAddGroupToOrganization() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key organizationId = Datastore.allocateId(Organization.class);
-        Key groupId = Datastore.allocateId(Group.class);
-        service.addGroupToOrganization(organizationId, groupId);
-        expectLastCall().once();
-        testOrganizationServiceFactory.replay();
-        endpoint.addGroupToOrganization(newAdminCaller(55), organizationId, groupId);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void testAddGroupToOrganizationNotFoundException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key organizationId = Datastore.allocateId(Organization.class);
-        Key groupId = Datastore.allocateId(Group.class);
-        service.addGroupToOrganization(organizationId, groupId);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.addGroupToOrganization(newAdminCaller(55), organizationId, groupId);
-    }
-
-    @Test
-    public void testRemoveGroupFromOrganization() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key organizationId = Datastore.allocateId(Organization.class);
-        Key groupId = Datastore.allocateId(Group.class);
-        service.removeGroupFromOrganization(organizationId, groupId);
-        expectLastCall().once();
-        testOrganizationServiceFactory.replay();
-        endpoint.removeGroupFromOrganization(newAdminCaller(55), organizationId, groupId);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void testRemoveGroupFromOrganizationNotFoundException() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key organizationId = Datastore.allocateId(Organization.class);
-        Key groupId = Datastore.allocateId(Group.class);
-        service.removeGroupFromOrganization(organizationId, groupId);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.removeGroupFromOrganization(newAdminCaller(55), organizationId, groupId);
-    }
 }

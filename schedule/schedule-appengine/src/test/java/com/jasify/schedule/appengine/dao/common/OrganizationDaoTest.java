@@ -303,9 +303,4 @@ public class OrganizationDaoTest {
         dao.removeGroupFromOrganization(org1.getId(), group2.getId());
         assertTrue(dao.getGroupsOfOrganization(org1.getId()).isEmpty());
     }
-
-    @Test
-    public void wantFail() {
-        fail("Need this one to fail");
-    }
 }

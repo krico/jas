@@ -165,7 +165,7 @@ public class OrganizationEndpoint {
         mustBeAdmin(caller);
         try {
             if (!organizationDao.removeUserFromOrganization(organizationId, userId)) {
-                log.info("Did not remove (not a member) user [{}] to organization [{}]", userId, organizationId);
+                log.info("Did not remove (not a member) user [{}] from organization [{}]", userId, organizationId);
             }
         } catch (ModelException e) {
             throw new InternalServerErrorException(e.getMessage());
@@ -173,22 +173,26 @@ public class OrganizationEndpoint {
     }
 
     @ApiMethod(name = "organizations.addGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public void addGroupToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public void addGroupToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, InternalServerErrorException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organizationId));
         try {
-            OrganizationServiceFactory.getOrganizationService().addGroupToOrganization(organizationId, groupId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+            if (!organizationDao.addGroupToOrganization(organizationId, groupId)) {
+                log.info("Did not add (already member) group [{}] to organization [{}]", groupId, organizationId);
+            }
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "organizations.removeGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeGroupFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public void removeGroupFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, InternalServerErrorException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organizationId));
         try {
-            OrganizationServiceFactory.getOrganizationService().removeGroupFromOrganization(organizationId, groupId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+            if (!organizationDao.removeGroupFromOrganization(organizationId, groupId)) {
+                log.info("Did not remove (not a member) group [{}] from organization [{}]", groupId, organizationId);
+            }
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 
