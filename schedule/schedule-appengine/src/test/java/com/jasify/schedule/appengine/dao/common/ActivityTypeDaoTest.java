@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.dao.common;
 
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import org.junit.*;
@@ -10,9 +9,7 @@ import org.slim3.datastore.Datastore;
 
 import java.util.List;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 
 /**
  * @author szarmawa
@@ -41,54 +38,31 @@ public class ActivityTypeDaoTest {
         dao = new ActivityTypeDao();
     }
 
-    private Organization createOrganization() {
-        Organization organization = new Organization("OrgName");
-        Datastore.put(organization);
-        return organization;
-    }
-
-    private ActivityType createActivityType(Organization organization) {
-        ActivityType activityType = new ActivityType("ActType");
-        activityType.getOrganizationRef().setModel(organization);
-        activityType.setId(Datastore.allocateId(organization.getId(), ActivityTypeMeta.get()));
-        Datastore.put(activityType);
-        return activityType;
-    }
-
     @Test
     public void testGetByOrganizationWithNullOrganization() throws Exception {
         thrown.expect(NullPointerException.class);
-        dao.getBy(null);
-    }
-
-    @Test
-    public void testGetByOrganizationWithNullId() throws Exception {
-        thrown.expect(NullPointerException.class);
-        dao.getBy(new Organization());
+        dao.getByOrganization(null);
     }
 
     @Test
     public void testGetByOrganizationWithUnknownlId() throws Exception {
-        Organization organization = new Organization();
-        organization.setId(Datastore.allocateId(Organization.class));
-        List<ActivityType> result = dao.getBy(organization);
+        List<ActivityType> result = dao.getByOrganization(Datastore.allocateId(Organization.class));
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testGetByOrganizationWithNoActivities() throws Exception {
-        Organization organization = createOrganization();
-        List<ActivityType> result = dao.getBy(organization);
+        List<ActivityType> result = dao.getByOrganization(TestHelper.createOrganization(true).getId());
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testGetByOrganizationWithActivities() throws Exception {
-        Organization organization = createOrganization();
-        createActivityType(organization);
-        createActivityType(organization);
-        createActivityType(createOrganization());
-        List<ActivityType> result = dao.getBy(organization);
+        Organization organization = TestHelper.createOrganization(true);
+        TestHelper.createActivityType(organization, true);
+        TestHelper.createActivityType(organization, true);
+        TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        List<ActivityType> result = dao.getByOrganization(organization.getId());
         assertEquals(2, result.size());
     }
 
@@ -100,24 +74,24 @@ public class ActivityTypeDaoTest {
 
     @Test
     public void testGetAll() throws Exception {
-        createActivityType(createOrganization());
-        createActivityType(createOrganization());
+        TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        TestHelper.createActivityType(TestHelper.createOrganization(true), true);
         List<ActivityType> result = dao.getAll();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testExistsForSameOrganisation() throws Exception {
-        Organization organization = createOrganization();
-        ActivityType activityType = createActivityType(organization);
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
         boolean result = dao.exists(activityType.getLcName(), organization);
         assertTrue(result);
     }
 
     @Test
     public void testExistsForDifferentOrganisation() throws Exception {
-        ActivityType activityType = createActivityType(createOrganization());
-        boolean result = dao.exists(activityType.getLcName(), createOrganization());
+        ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        boolean result = dao.exists(activityType.getLcName(), TestHelper.createOrganization(true));
         assertFalse(result);
     }
 }

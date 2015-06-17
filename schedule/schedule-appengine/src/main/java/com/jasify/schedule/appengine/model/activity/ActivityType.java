@@ -4,7 +4,6 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
 import com.jasify.schedule.appengine.model.common.Organization;
-import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.*;
 
 import java.util.Date;
@@ -80,7 +79,7 @@ public class ActivityType {
 
     public void setName(String name) {
         this.name = name;
-        setLcName(StringUtils.lowerCase(name));
+        setLcName(name);
     }
 
     public String getLcName() {

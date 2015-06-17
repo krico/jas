@@ -32,7 +32,7 @@ public class ActivityTypeTest {
     public void testConstructorWithName() {
         ActivityType activityType = new ActivityType("Type");
         assertEquals("Type", activityType.getName());
-        assertEquals("type", activityType.getLcName());
+        assertEquals("Type", activityType.getLcName());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class ActivityTypeTest {
         assertNull(activityType.getName());
         assertNull(activityType.getLcName());
         activityType.setName("Test1");
-        assertEquals("test1", activityType.getLcName());
+        assertEquals("Test1", activityType.getLcName());
         activityType.setLcName("Test2");
         assertEquals("Test2", activityType.getLcName());
         assertEquals("Test1", activityType.getName());

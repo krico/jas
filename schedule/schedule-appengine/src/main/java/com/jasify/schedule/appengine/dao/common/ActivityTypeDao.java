@@ -39,12 +39,12 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
         });
     }
 
-    public List<ActivityType> getBy(final Organization organization) {
+    public List<ActivityType> getByOrganization(final Key organizationId) {
         ActivityTypeMeta meta = getMeta();
         return query(new BaseDaoQuery<ActivityType, ActivityTypeMeta>(meta, new Serializable[0]) {
             @Override
             public List<Key> execute() {
-                return Datastore.query(meta, organization.getId()).asKeyList();
+                return Datastore.query(Datastore.getCurrentTransaction(), meta, organizationId).asKeyList();
             }
         });
     }

@@ -5,8 +5,6 @@ import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityType;
-import com.jasify.schedule.appengine.model.common.Organization;
 import org.slim3.datastore.Datastore;
 
 import java.io.Serializable;
@@ -21,23 +19,23 @@ public class ActivityDao extends BaseCachingDao<Activity> {
         super(ActivityMeta.get());
     }
 
-    public List<Activity> getBy(final ActivityType activityType) {
+    public List<Activity> getByActivityTypeId(final Key activityTypeId) {
         ActivityMeta meta = getMeta();
         return query(new BaseDaoQuery<Activity, ActivityMeta>(meta, new Serializable[0]) {
             @Override
             public List<Key> execute() {
                 return Datastore.query(meta)
-                        .filter(meta.activityTypeRef.equal(activityType.getId())).asKeyList();
+                        .filter(meta.activityTypeRef.equal(activityTypeId)).asKeyList();
             }
         });
     }
 
-    public List<Activity> getBy(final Organization organization) {
+    public List<Activity> getByOrganizationId(final Key organizationId) {
         ActivityMeta meta = getMeta();
         return query(new BaseDaoQuery<Activity, ActivityMeta>(meta, new Serializable[0]) {
             @Override
             public List<Key> execute() {
-                return Datastore.query(meta, organization.getId()).asKeyList();
+                return Datastore.query(Datastore.getCurrentTransaction(), meta, organizationId).asKeyList();
             }
         });
     }

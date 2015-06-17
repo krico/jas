@@ -6,7 +6,6 @@ import com.jasify.schedule.appengine.model.HasId;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.*;
@@ -81,7 +80,7 @@ public class Organization implements HasId {
 
     public void setName(String name) {
         this.name = name;
-        setLcName(StringUtils.lowerCase(name));
+        setLcName(name);
     }
 
     public String getLcName() {

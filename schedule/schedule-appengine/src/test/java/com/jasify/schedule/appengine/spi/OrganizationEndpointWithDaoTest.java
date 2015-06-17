@@ -7,7 +7,6 @@ import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.AssertionHelper;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
-import com.jasify.schedule.appengine.dao.common.OrganizationDaoTest;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
@@ -187,7 +186,7 @@ public class OrganizationEndpointWithDaoTest {
 
     @Test
     public void testUpdateOrganization() throws Exception {
-        Organization organization = OrganizationDaoTest.createExample();
+        Organization organization = TestHelper.createOrganization(false);
         OrganizationDao dao = new OrganizationDao();
         HashSet<PaymentTypeEnum> pt = new HashSet<>();
         pt.add(PaymentTypeEnum.PayPal);
@@ -214,8 +213,8 @@ public class OrganizationEndpointWithDaoTest {
 
     @Test(expected = BadRequestException.class)
     public void testUpdateOrganizationNameAlreadyExists() throws Exception {
-        Organization organization1 = OrganizationDaoTest.createExample();
-        Organization organization2 = OrganizationDaoTest.createExample();
+        Organization organization1 = TestHelper.createOrganization(false);
+        Organization organization2 = TestHelper.createOrganization(false);
         OrganizationDao dao = new OrganizationDao();
         dao.save(organization1);
         dao.save(organization2);
@@ -234,7 +233,7 @@ public class OrganizationEndpointWithDaoTest {
 
     @Test(expected = BadRequestException.class)
     public void testUpdateOrganizationNullName() throws Exception {
-        Organization organization1 = OrganizationDaoTest.createExample();
+        Organization organization1 = TestHelper.createOrganization(false);
         OrganizationDao dao = new OrganizationDao();
         dao.save(organization1);
 

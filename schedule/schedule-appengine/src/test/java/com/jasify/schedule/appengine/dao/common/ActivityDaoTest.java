@@ -40,60 +40,32 @@ public class ActivityDaoTest {
     public void before() {
         TestHelper.initializeDatastore();
         dao = new ActivityDao();
-        organization = createOrganization();
-        activityType = createActivityType(organization);
-    }
-
-    private Organization createOrganization() {
-        Organization organization = new Organization("OrgName");
-        Datastore.put(organization);
-        return organization;
-    }
-
-    private ActivityType createActivityType(Organization organization) {
-        ActivityType activityType = new ActivityType("ActType");
-        activityType.getOrganizationRef().setModel(organization);
-        activityType.setId(Datastore.allocateId(organization.getId(), ActivityTypeMeta.get()));
-        Datastore.put(activityType);
-        return activityType;
-    }
-
-    private Activity createActivity(ActivityType activityType) {
-        Activity activity = new Activity(activityType);
-        activity.setName("Name");
-        activity.setStart(new Date());
-        activity.setFinish(new Date());
-        activity.setPrice(22.2);
-        activity.setCurrency("CHF");
-        activity.setMaxSubscriptions(2);
-        activity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), ActivityMeta.get()));
-        Datastore.put(activity);
-        return activity;
+        organization = TestHelper.createOrganization(true);
+        activityType = TestHelper.createActivityType(organization, true);
     }
 
     @Test
     public void testGetByOrganization() throws Exception {
         for (int i = 0; i < 5; i++) {
-            createActivity(activityType);
+            TestHelper.createActivity(activityType, true);
         }
-        assertEquals(5, dao.getBy(organization).size());
+        assertEquals(5, dao.getByOrganizationId(organization.getId()).size());
     }
 
     @Test
     public void testGetByActivityType() throws Exception {
         for (int i = 0; i < 5; i++) {
-            createActivity(activityType);
+            TestHelper.createActivity(activityType, true);
         }
-        assertEquals(5, dao.getBy(activityType).size());
+        assertEquals(5, dao.getByActivityTypeId(activityType.getId()).size());
     }
-
 
     @Test
     public void testGetCachedValue() throws Exception {
         for (int i = 0; i < 5; i++) {
-            createActivity(activityType);
+            TestHelper.createActivity(activityType, true);
         }
-        assertEquals(5, dao.getBy(activityType).size());
-        assertEquals(5, dao.getBy(activityType).size());
+        assertEquals(5, dao.getByActivityTypeId(activityType.getId()).size());
+        assertEquals(5, dao.getByActivityTypeId(activityType.getId()).size());
     }
 }

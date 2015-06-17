@@ -73,12 +73,8 @@ public class ActivityEndpoint {
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         checkFound(organizationId);
-        try {
-            Organization organization = organizationDao.get(organizationId);
-            return activityTypeDao.getBy(organization);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return activityTypeDao.getByOrganization(organizationId);
+
     }
 
     @ApiMethod(name = "activityTypes.get", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.GET)
@@ -130,12 +126,11 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
         try {
-            // Check if the ActivityType has linked Activities
-            ActivityType activityType = activityTypeDao.get(id);
             // TODO: Possible race condition? Need to protect
-            if (!activityDao.getBy(activityType).isEmpty()) {
+            if (!activityDao.getByActivityTypeId(id).isEmpty()) {
                 throw new BadRequestException("ActivityType has activities");
             }
+            ActivityType activityType = activityTypeDao.get(id);
             ActivityServiceFactory.getActivityService().removeActivityType(activityType);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
@@ -195,18 +190,15 @@ public class ActivityEndpoint {
         }
 
         final List<Activity> all = new ArrayList<>();
-        try {
-            if (activityTypeId != null) {
-                ActivityType activityType = activityTypeDao.get(activityTypeId);
-                all.addAll(activityDao.getBy(activityType));
-            } else {
-                checkFound(organizationId);
-                Organization organization = organizationDao.get(organizationId);
-                all.addAll(activityDao.getBy(organization));
-            }
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+
+        if (activityTypeId != null) {
+            checkFound(activityTypeId);
+            all.addAll(activityDao.getByActivityTypeId(activityTypeId));
+        } else {
+            checkFound(organizationId);
+            all.addAll(activityDao.getByOrganizationId(organizationId));
         }
+
 
         //TODO: I'm pretty sure this should be done on the Service implementation, but I'm in the bus and lazy and sleepy
         return filterActivities(all, fromDate, toDate, offset, limit);
@@ -226,22 +218,17 @@ public class ActivityEndpoint {
         }
 
         final List<Activity> all = new ArrayList<>();
-        try {
-            if (!request.getActivityTypeIds().isEmpty()) {
-                for (Key activityTypeId : request.getActivityTypeIds()) {
-                    checkFound(activityTypeId);
-                    ActivityType activityType = activityTypeDao.get(activityTypeId);
-                    all.addAll(activityDao.getBy(activityType));
-                }
-            } else if (!request.getOrganizationIds().isEmpty()) {
-                for (Key organizationId : request.getOrganizationIds()) {
-                    checkFound(organizationId);
-                    Organization organization = organizationDao.get(organizationId);
-                    all.addAll(activityDao.getBy(organization));
-                }
+
+        if (!request.getActivityTypeIds().isEmpty()) {
+            for (Key activityTypeId : request.getActivityTypeIds()) {
+                checkFound(activityTypeId);
+                all.addAll(activityDao.getByActivityTypeId(activityTypeId));
             }
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+        } else if (!request.getOrganizationIds().isEmpty()) {
+            for (Key organizationId : request.getOrganizationIds()) {
+                checkFound(organizationId);
+                all.addAll(activityDao.getByOrganizationId(organizationId));
+            }
         }
 
         return filterActivities(all, request.getFromDate(), request.getToDate(), request.getOffset(), request.getLimit());
@@ -317,7 +304,7 @@ public class ActivityEndpoint {
             if (!subscriptions.isEmpty()) {
                 throw new BadRequestException("Activity has subscriptions");
             }
-            if (!activityPackageActivityDao.getBy(activity).isEmpty()) {
+            if (!activityPackageActivityDao.getByActivityId(id).isEmpty()) {
                 throw new BadRequestException("Activity is linked to Activity Package");
             }
             activityService.removeActivity(activity);
@@ -389,12 +376,7 @@ public class ActivityEndpoint {
     @ApiMethod(name = "activityPackages.query", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityPackage> getActivityPackages(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         checkFound(organizationId);
-        try {
-            Organization organization = organizationDao.get(organizationId);
-            return activityPackageDao.getBy(organization);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return activityPackageDao.getByOrganization(organizationId);
     }
 
     @ApiMethod(name = "activityPackages.get", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.GET)

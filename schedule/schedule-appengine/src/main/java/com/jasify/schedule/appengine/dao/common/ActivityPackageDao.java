@@ -5,7 +5,6 @@ import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
-import com.jasify.schedule.appengine.model.common.Organization;
 import org.slim3.datastore.Datastore;
 
 import java.io.Serializable;
@@ -20,13 +19,13 @@ public class ActivityPackageDao extends BaseCachingDao<ActivityPackage> {
         super(ActivityPackageMeta.get());
     }
 
-    public List<ActivityPackage> getBy(final Organization organization) {
+    public List<ActivityPackage> getByOrganization(final Key organizationId) {
         ActivityPackageMeta meta = getMeta();
         return query(new BaseDaoQuery<ActivityPackage, ActivityPackageMeta>(meta, new Serializable[0]) {
             @Override
             public List<Key> execute() {
                 return Datastore.query(meta)
-                        .filter(meta.organizationRef.equal(organization.getId()))
+                        .filter(meta.organizationRef.equal(organizationId))
                         .sort(meta.created.desc).asKeyList();
             }
         });
