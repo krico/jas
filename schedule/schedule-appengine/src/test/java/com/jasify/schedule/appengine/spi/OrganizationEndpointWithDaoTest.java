@@ -7,6 +7,7 @@ import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.AssertionHelper;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
+import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
@@ -240,5 +241,30 @@ public class OrganizationEndpointWithDaoTest {
         organization1.setName(null);
 
         endpoint.updateOrganization(newAdminCaller(55), organization1.getId(), organization1);
+    }
+
+    @Test
+    public void testAddUserToOrganization() throws Exception {
+        Organization organization1 = TestHelper.createOrganization(false);
+        OrganizationDao organizationDao = new OrganizationDao();
+        Key organizationId = organizationDao.save(organization1);
+        UserDao userDao = new UserDao();
+        User user1 = new User("myUser");
+        Key userId = userDao.save(user1);
+        assertTrue(endpoint.getOrganizationUsers(newAdminCaller(55), organizationId).isEmpty());
+        endpoint.addUserToOrganization(newAdminCaller(55), organizationId, userId);
+        assertFalse(endpoint.getOrganizationUsers(newAdminCaller(55), organizationId).isEmpty());
+
+    }
+
+    @Test
+    public void testRemoveUserFromOrganization() throws Exception {
+        testAddUserToOrganization();
+        Organization organization = endpoint.getOrganizations(newAdminCaller(55)).get(0);
+        User user = endpoint.getOrganizationUsers(newAdminCaller(55), organization.getId()).get(0);
+
+        endpoint.removeUserFromOrganization(newAdminCaller(55), organization.getId(), user.getId());
+
+        assertTrue(endpoint.getOrganizationUsers(newAdminCaller(55), organization.getId()).isEmpty());
     }
 }
