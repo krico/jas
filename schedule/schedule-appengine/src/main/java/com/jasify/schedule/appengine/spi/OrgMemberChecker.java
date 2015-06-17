@@ -46,9 +46,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    Activity activity = getActivity(id);
-                    ActivityType activityType = getActivityType(activity.getActivityTypeRef().getKey());
-                    return getOrganization(activityType.getOrganizationRef().getKey());
+                    return getOrganizationFromActivity(id);
                 }
             };
         }
@@ -60,8 +58,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    ActivityType activityType = getActivityType(id);
-                    return getOrganization(activityType.getOrganizationRef().getKey());
+                    return getOrganizationFromActivityType(id);
                 }
             };
         }
@@ -73,8 +70,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    ActivityPackage activityPackage = getActivityPackage(id);
-                    return getOrganization(activityPackage.getOrganizationRef().getKey());
+                    return getOrganizationFromActivityPackage(id);
                 }
             };
         }
@@ -86,11 +82,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    // TODO: Possible mini optimisation using subscriptionDao
-                    Subscription subscription = ActivityServiceFactory.getActivityService().getSubscription(id);
-                    Activity activity = getActivity(subscription.getActivityRef().getKey());
-                    ActivityType activityType = getActivityType(activity.getActivityTypeRef().getKey());
-                    return getOrganization(activityType.getOrganizationRef().getKey());
+                    return getOrganizationFromASubscription(id);
                 }
             };
         }
@@ -171,6 +163,44 @@ abstract class OrgMemberChecker {
     protected ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException {
         if (id == null) return null;
         return activityPackageDao.get(id);
+    }
+
+    protected Subscription getSubscription(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        // TODO: Optimisation to use SubscriptionDao
+        return ActivityServiceFactory.getActivityService().getSubscription(id);
+    }
+
+    protected Organization getOrganizationFromActivityType(Key id) throws EntityNotFoundException {
+        ActivityType activityType = getActivityType(id);
+        if (activityType != null) {
+            return getOrganization(activityType.getOrganizationRef().getKey());
+        }
+        return null;
+    }
+
+    protected Organization getOrganizationFromActivity(Key id) throws EntityNotFoundException {
+        Activity activity = getActivity(id);
+        if (activity != null) {
+            return getOrganizationFromActivityType(activity.getActivityTypeRef().getKey());
+        }
+        return null;
+    }
+
+    protected Organization getOrganizationFromActivityPackage(Key id) throws EntityNotFoundException {
+        ActivityPackage activityPackage = getActivityPackage(id);
+        if (activityPackage != null) {
+            return getOrganizationFromActivityType(activityPackage.getOrganizationRef().getKey());
+        }
+        return null;
+    }
+
+    protected Organization getOrganizationFromASubscription(Key id) throws EntityNotFoundException {
+        Subscription subscription = getSubscription(id);
+        if (subscription != null) {
+            return getOrganizationFromActivity(subscription.getActivityRef().getKey());
+        }
+        return null;
     }
 
     abstract Organization getOrganization() throws EntityNotFoundException;
