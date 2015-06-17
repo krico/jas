@@ -13,7 +13,7 @@ import java.util.List;
 public class OrganizationConsistency implements EntityConsistency<Organization> {
 
     @BeforeDelete(entityClass = Organization.class)
-    public void checkNoMember(Key id) throws InconsistentModelStateException {
+    public void ensureOrganizationHasNoMembers(Key id) throws InconsistentModelStateException {
         List<Key> memberKeys = new OrganizationMemberDao().byOrganizationIdAsKeys(id);
         if (!memberKeys.isEmpty()) {
             throw new InconsistentModelStateException("Cannot delete organization with members! " +

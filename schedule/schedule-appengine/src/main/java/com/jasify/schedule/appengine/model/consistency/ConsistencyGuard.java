@@ -40,7 +40,7 @@ public final class ConsistencyGuard {
             log.debug("Initializing");
             URL resource = ConsistencyGuard.class.getResource("/" + CACHE_PATH);
             Reflections reflections;
-            if (resource != null) {
+            if (useCache(resource)) {
                 reflections = createCachedReflections(resource);
             } else {
                 reflections = createDynamicReflections();
@@ -55,6 +55,16 @@ public final class ConsistencyGuard {
             initialized = true;
         }
         log.debug("ConsistencyGuard initialized: BEFORE_DELETE: {}", BEFORE_DELETE);
+    }
+
+    private static boolean useCache(URL resource) {
+        if (resource == null) return false;
+        if (resource.getProtocol().equals("file")) {
+            String file = resource.getFile();
+            //So that we don't use cache in dev
+            return !file.matches(".*target/schedule-appengine.*");
+        }
+        return true;
     }
 
     private static Reflections createCachedReflections(URL resource) {
