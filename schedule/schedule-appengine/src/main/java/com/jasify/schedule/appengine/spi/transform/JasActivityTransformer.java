@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.spi.transform;
 
 import com.google.api.server.spi.config.Transformer;
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
@@ -25,7 +24,6 @@ public class JasActivityTransformer implements Transformer<Activity, JasActivity
     public JasActivity transformTo(Activity internal) {
         JasActivity external = new JasActivity();
         BeanUtil.copyProperties(external, internal);
-        internal.getActivityTypeRef().getKey();
         ActivityType activityType = getActivityType(internal);
         if (activityType != null) {
             external.setActivityType(typeTransformer.transformTo(activityType));
