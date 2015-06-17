@@ -30,6 +30,7 @@ public final class ConsistencyGuard {
     private static final Logger log = LoggerFactory.getLogger(ConsistencyGuard.class);
     private static boolean initialized = false;
     private static ListMultimap<Class<?>, Call> BEFORE_DELETE;
+    public static final String PACKAGE_NAME = "com.jasify.schedule.appengine";
 
     private ConsistencyGuard() {
     }
@@ -80,9 +81,8 @@ public final class ConsistencyGuard {
 
     private static Reflections createDynamicReflections() {
         log.info("Creating dynamic reflections...");
-        String packageName = ConsistencyGuard.class.getPackage().getName();
         ConfigurationBuilder configuration = new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forPackage(packageName))
+                .setUrls(ClasspathHelper.forPackage(PACKAGE_NAME))
                 .setScanners(
                         new SubTypesScanner().filterResultsBy(new FilterBuilder().include(EntityConsistency.class.getName())),
                         new MethodAnnotationsScanner().filterResultsBy(new FilterBuilder().include(BeforeDelete.class.getName()))
