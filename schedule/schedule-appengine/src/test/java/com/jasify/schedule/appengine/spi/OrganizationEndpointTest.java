@@ -211,24 +211,4 @@ public class OrganizationEndpointTest {
         testOrganizationServiceFactory.replay();
         endpoint.removeOrganization(newAdminCaller(1), null);
     }
-
-    @Test(expected = NotFoundException.class)
-    public void testRemoveOrganizationNotFound() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key key = Datastore.allocateId(Organization.class);
-        service.removeOrganization(key);
-        expectLastCall().andThrow(new EntityNotFoundException());
-        testOrganizationServiceFactory.replay();
-        endpoint.removeOrganization(newAdminCaller(55), key);
-    }
-
-    @Test
-    public void testRemoveOrganization() throws Exception {
-        OrganizationService service = OrganizationServiceFactory.getOrganizationService();
-        Key key = Datastore.allocateId(Organization.class);
-        service.removeOrganization(key);
-        expectLastCall().once();
-        testOrganizationServiceFactory.replay();
-        endpoint.removeOrganization(newAdminCaller(55), key);
-    }
 }

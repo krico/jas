@@ -16,7 +16,7 @@ import java.util.List;
  * @author krico
  * @since 08/06/15.
  */
-class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
+public class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
     public OrganizationMemberDao() {
         super(OrganizationMemberMeta.get());
     }
@@ -35,17 +35,14 @@ class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
 
     }
 
+    public List<Key> byOrganizationIdAsKeys(Key organizationId) {
+        OrganizationMemberMeta meta = getMeta();
+        return queryKeys(new AllMembersQuery(meta, organizationId));
+    }
+
     public List<OrganizationMember> byOrganizationId(Key organizationId) {
         OrganizationMemberMeta meta = getMeta();
-        return query(new BaseDaoQuery<OrganizationMember, OrganizationMemberMeta>(meta, new Serializable[]{organizationId}) {
-            @Override
-            public List<Key> execute() {
-                Key organizationId = parameters.get(0);
-                return Datastore
-                        .query(meta).filter(meta.organizationRef.equal(organizationId))
-                        .asKeyList();
-            }
-        });
+        return query(new AllMembersQuery(meta, organizationId));
     }
 
     public OrganizationMember byOrganizationIdAndUserId(Key organizationId, Key userId) {
@@ -64,5 +61,19 @@ class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
                 .filter(meta.organizationRef.equal(organizationId),
                         meta.groupRef.equal(groupId))
                 .asSingle();
+    }
+
+    private static class AllMembersQuery extends BaseDaoQuery<OrganizationMember, OrganizationMemberMeta> {
+        public AllMembersQuery(OrganizationMemberMeta meta, Key organizationId) {
+            super(meta, new Serializable[]{organizationId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key organizationId = parameters.get(0);
+            return Datastore
+                    .query(meta).filter(meta.organizationRef.equal(organizationId))
+                    .asKeyList();
+        }
     }
 }

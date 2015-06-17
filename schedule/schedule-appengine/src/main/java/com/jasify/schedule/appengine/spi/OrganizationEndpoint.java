@@ -12,7 +12,8 @@ import com.jasify.schedule.appengine.model.ModelOperation;
 import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
+import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
@@ -197,13 +198,30 @@ public class OrganizationEndpoint {
     }
 
     @ApiMethod(name = "organizations.remove", path = "organizations/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeOrganization(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public void removeOrganization(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
         mustBeAdmin(caller);
         checkFound(id);
+        //TODO: This method needs a lot more checks to determine if an organization can be deleted
+        //TODO: Not sure where this should go
+
         try {
-            OrganizationServiceFactory.getOrganizationService().removeOrganization(id);
+            ConsistencyGuard.beforeDelete(Organization.class, id);
+
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    organizationDao.get(id); //Throws not found if this organization doesn't exist
+                    organizationDao.delete(id);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (InconsistentModelStateException e) {
+            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 }

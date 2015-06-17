@@ -291,4 +291,53 @@ public class OrganizationEndpointWithDaoTest {
 
         assertTrue(endpoint.getOrganizationGroups(newAdminCaller(55), organization.getId()).isEmpty());
     }
+
+    @Test(expected = NotFoundException.class)
+    public void testRemoveOrganizationNotFound() throws Exception {
+        Key key = Datastore.allocateId(Organization.class);
+        endpoint.removeOrganization(newAdminCaller(55), key);
+    }
+
+    @Test
+    public void testRemoveOrganization() throws Exception {
+        Organization organization1 = OrganizationDaoTest.createExample();
+        OrganizationDao organizationDao = new OrganizationDao();
+        Key organizationId = organizationDao.save(organization1);
+        endpoint.removeOrganization(newAdminCaller(55), organizationId);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testRemoveOrganizationWithMembers() throws Exception {
+        OrganizationDao organizationDao = new OrganizationDao();
+        UserDao userDao = new UserDao();
+        GroupDao groupDao = new GroupDao();
+        Key organizationId = organizationDao.save(OrganizationDaoTest.createExample());
+        Key userId = userDao.save(new User("user1"));
+        Key groupId = groupDao.save(new Group("group1"));
+
+        organizationDao.addUserToOrganization(organizationId, userId);
+        organizationDao.addGroupToOrganization(organizationId, groupId);
+
+        endpoint.removeOrganization(newAdminCaller(55), organizationId);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testRemoveOrganizationWithManyMembers() throws Exception {
+        OrganizationDao organizationDao = new OrganizationDao();
+        UserDao userDao = new UserDao();
+        GroupDao groupDao = new GroupDao();
+        Key organizationId = organizationDao.save(OrganizationDaoTest.createExample());
+        final int memberNumber = 50;
+
+        for (int i = 0; i < memberNumber; ++i) {
+            Key userId = userDao.save(new User("user" + i));
+            Key groupId = groupDao.save(new Group("group" + i));
+
+            organizationDao.addUserToOrganization(organizationId, userId);
+            organizationDao.addGroupToOrganization(organizationId, groupId);
+        }
+
+        endpoint.removeOrganization(newAdminCaller(55), organizationId);
+    }
+
 }
