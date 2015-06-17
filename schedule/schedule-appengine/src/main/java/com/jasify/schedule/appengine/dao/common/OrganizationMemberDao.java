@@ -56,4 +56,13 @@ class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
                         meta.userRef.equal(userId))
                 .asSingle();
     }
+
+    public OrganizationMember byOrganizationIdAndGroupId(Key organizationId, Key groupId) {
+        OrganizationMemberMeta meta = getMeta();
+        return Datastore
+                .query(meta)
+                .filter(meta.organizationRef.equal(organizationId),
+                        meta.groupRef.equal(groupId))
+                .asSingle();
+    }
 }

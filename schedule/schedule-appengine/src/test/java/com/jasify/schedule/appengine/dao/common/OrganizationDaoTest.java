@@ -266,4 +266,46 @@ public class OrganizationDaoTest {
         dao.removeUserFromOrganization(org1.getId(), user2.getId());
         assertTrue(dao.getUsersOfOrganization(org1.getId()).isEmpty());
     }
+
+    @Test
+    public void testAddGroupToOrganization() throws Exception {
+        Organization org1 = createExample();
+        Organization org2 = createExample();
+        Group group1 = new Group("whatever");
+        Group group2 = new Group("whoever");
+        Datastore.put(org1, org2, group1, group2);
+
+        assertTrue(dao.addGroupToOrganization(org1.getId(), group1.getId()));
+        assertTrue(dao.addGroupToOrganization(org1.getId(), group2.getId()));
+        assertFalse("double add1", dao.addGroupToOrganization(org1.getId(), group1.getId()));
+        assertFalse("double add1", dao.addGroupToOrganization(org1.getId(), group2.getId()));
+        assertTrue(dao.addGroupToOrganization(org2.getId(), group1.getId()));
+        assertFalse("double add1.2", dao.addGroupToOrganization(org1.getId(), group1.getId()));
+        assertFalse("double add2", dao.addGroupToOrganization(org2.getId(), group1.getId()));
+
+        assertIdsEqual(Arrays.asList(group1, group2), dao.getGroupsOfOrganization(org1.getId()));
+        assertIdsEqual(Arrays.asList(group1), dao.getGroupsOfOrganization(org2.getId()));
+    }
+
+    @Test
+    public void testRemoveGroupFromOrganization() throws Exception {
+        Organization org1 = createExample();
+        Organization org2 = createExample();
+        Group group1 = new Group("whatever");
+        Group group2 = new Group("whoever");
+        Datastore.put(org1, org2, group1, group2);
+
+        assertTrue(dao.addGroupToOrganization(org1.getId(), group1.getId()));
+        assertTrue(dao.addGroupToOrganization(org1.getId(), group2.getId()));
+        assertIdsEqual(Arrays.asList(group1, group2), dao.getGroupsOfOrganization(org1.getId()));
+        dao.removeGroupFromOrganization(org1.getId(), group1.getId());
+        assertIdsEqual(Arrays.asList(group2), dao.getGroupsOfOrganization(org1.getId()));
+        dao.removeGroupFromOrganization(org1.getId(), group2.getId());
+        assertTrue(dao.getGroupsOfOrganization(org1.getId()).isEmpty());
+    }
+
+    @Test
+    public void wantFail() {
+        fail("Need this one to fail");
+    }
 }

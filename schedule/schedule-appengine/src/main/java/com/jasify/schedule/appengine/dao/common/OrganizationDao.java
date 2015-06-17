@@ -161,4 +161,23 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         organizationMemberDao.delete(existing.getId());
         return true;
     }
+
+    public boolean addGroupToOrganization(Key organizationId, Key groupId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndGroupId(organizationId, groupId);
+        if (existing != null) return false;
+        existing = new OrganizationMember();
+        existing.getOrganizationRef().setKey(organizationId);
+        existing.getGroupRef().setKey(groupId);
+        organizationMemberDao.save(existing);
+        return true;
+    }
+
+    public boolean removeGroupFromOrganization(Key organizationId, Key groupId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndGroupId(organizationId, groupId);
+        if (existing == null) return false;
+        organizationMemberDao.delete(existing.getId());
+        return true;
+    }
 }

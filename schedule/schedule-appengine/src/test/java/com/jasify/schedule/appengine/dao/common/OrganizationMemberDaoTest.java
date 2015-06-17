@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.dao.common;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.users.User;
@@ -38,6 +39,15 @@ public class OrganizationMemberDaoTest {
         dao = new OrganizationMemberDao();
     }
 
+    private HashSet<Key> toUserKeys(List<OrganizationMember> members) {
+        HashSet<Key> userIds = new HashSet<>();
+        for (OrganizationMember member : members) {
+            assertNotNull(member.getUserRef().getKey());
+            userIds.add(member.getUserRef().getKey());
+        }
+        return userIds;
+    }
+
     @Test
     public void testByUserId() throws Exception {
         Key key = Datastore.allocateId(User.class);
@@ -60,9 +70,17 @@ public class OrganizationMemberDaoTest {
         }
     }
 
-    private OrganizationMember createMember(Key userId, Key organizationId) throws ModelException {
+    private OrganizationMember createUserMember(Key userId, Key organizationId) throws ModelException {
         OrganizationMember om = new OrganizationMember();
         om.getUserRef().setKey(userId);
+        om.getOrganizationRef().setKey(organizationId);
+        dao.save(om);
+        return om;
+    }
+
+    private OrganizationMember createGroupMember(Key userId, Key organizationId) throws ModelException {
+        OrganizationMember om = new OrganizationMember();
+        om.getGroupRef().setKey(userId);
         om.getOrganizationRef().setKey(organizationId);
         dao.save(om);
         return om;
@@ -77,15 +95,15 @@ public class OrganizationMemberDaoTest {
         Key organizationId2 = Datastore.allocateId(Organization.class);
         Key organizationId3 = Datastore.allocateId(Organization.class);
 
-        createMember(userId1, organizationId1);
-        createMember(userId1, organizationId2);
-        createMember(userId1, organizationId3);
+        createUserMember(userId1, organizationId1);
+        createUserMember(userId1, organizationId2);
+        createUserMember(userId1, organizationId3);
 
-        createMember(userId2, organizationId1);
-        createMember(userId2, organizationId3);
+        createUserMember(userId2, organizationId1);
+        createUserMember(userId2, organizationId3);
 
-        createMember(userId3, organizationId2);
-        createMember(userId3, organizationId3);
+        createUserMember(userId3, organizationId2);
+        createUserMember(userId3, organizationId3);
 
         for (int M = 0; M < 3; ++M) {
             HashSet<Key> userIds = toUserKeys(dao.byOrganizationId(organizationId1));
@@ -116,15 +134,15 @@ public class OrganizationMemberDaoTest {
         Key organizationId2 = Datastore.allocateId(Organization.class);
         Key organizationId3 = Datastore.allocateId(Organization.class);
 
-        OrganizationMember mu1o1 = createMember(userId1, organizationId1);
-        OrganizationMember mu1o2 = createMember(userId1, organizationId2);
-        OrganizationMember mu1o3 = createMember(userId1, organizationId3);
+        OrganizationMember mu1o1 = createUserMember(userId1, organizationId1);
+        OrganizationMember mu1o2 = createUserMember(userId1, organizationId2);
+        OrganizationMember mu1o3 = createUserMember(userId1, organizationId3);
 
-        OrganizationMember mu2o1 = createMember(userId2, organizationId1);
-        OrganizationMember mu2o3 = createMember(userId2, organizationId3);
+        OrganizationMember mu2o1 = createUserMember(userId2, organizationId1);
+        OrganizationMember mu2o3 = createUserMember(userId2, organizationId3);
 
-        OrganizationMember mu3o2 = createMember(userId3, organizationId2);
-        OrganizationMember mu3o3 = createMember(userId3, organizationId3);
+        OrganizationMember mu3o2 = createUserMember(userId3, organizationId2);
+        OrganizationMember mu3o3 = createUserMember(userId3, organizationId3);
 
         assertIdsEqual(mu1o1, dao.byOrganizationIdAndUserId(organizationId1, userId1));
         assertIdsEqual(mu1o2, dao.byOrganizationIdAndUserId(organizationId2, userId1));
@@ -139,12 +157,35 @@ public class OrganizationMemberDaoTest {
         assertIdsEqual(mu3o3, dao.byOrganizationIdAndUserId(organizationId3, userId3));
     }
 
-    private HashSet<Key> toUserKeys(List<OrganizationMember> members) {
-        HashSet<Key> userIds = new HashSet<>();
-        for (OrganizationMember member : members) {
-            assertNotNull(member.getUserRef().getKey());
-            userIds.add(member.getUserRef().getKey());
-        }
-        return userIds;
+    @Test
+    public void testByOrganizationIdAndGroupId() throws Exception {
+        Key groupId1 = Datastore.allocateId(Group.class);
+        Key groupId2 = Datastore.allocateId(Group.class);
+        Key groupId3 = Datastore.allocateId(Group.class);
+        Key organizationId1 = Datastore.allocateId(Organization.class);
+        Key organizationId2 = Datastore.allocateId(Organization.class);
+        Key organizationId3 = Datastore.allocateId(Organization.class);
+
+        OrganizationMember mg1o1 = createGroupMember(groupId1, organizationId1);
+        OrganizationMember mg1o2 = createGroupMember(groupId1, organizationId2);
+        OrganizationMember mg1o3 = createGroupMember(groupId1, organizationId3);
+
+        OrganizationMember mg2o1 = createGroupMember(groupId2, organizationId1);
+        OrganizationMember mg2o3 = createGroupMember(groupId2, organizationId3);
+
+        OrganizationMember mg3o2 = createGroupMember(groupId3, organizationId2);
+        OrganizationMember mg3o3 = createGroupMember(groupId3, organizationId3);
+
+        assertIdsEqual(mg1o1, dao.byOrganizationIdAndGroupId(organizationId1, groupId1));
+        assertIdsEqual(mg1o2, dao.byOrganizationIdAndGroupId(organizationId2, groupId1));
+        assertIdsEqual(mg1o3, dao.byOrganizationIdAndGroupId(organizationId3, groupId1));
+
+        assertIdsEqual(mg2o1, dao.byOrganizationIdAndGroupId(organizationId1, groupId2));
+        assertNull(dao.byOrganizationIdAndGroupId(organizationId2, groupId2));
+        assertIdsEqual(mg2o3, dao.byOrganizationIdAndGroupId(organizationId3, groupId2));
+
+        assertNull(dao.byOrganizationIdAndGroupId(organizationId1, groupId3));
+        assertIdsEqual(mg3o2, dao.byOrganizationIdAndGroupId(organizationId2, groupId3));
+        assertIdsEqual(mg3o3, dao.byOrganizationIdAndGroupId(organizationId3, groupId3));
     }
 }
