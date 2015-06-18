@@ -11,7 +11,6 @@ import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.oauth2.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
@@ -70,6 +69,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrA
                 packagePath = ""))
 public class AuthEndpoint {
     private static final Logger log = LoggerFactory.getLogger(AuthEndpoint.class);
+    private final OrganizationDao organizationDao = new OrganizationDao();
 
     @ApiMethod(name = "auth.changePassword", path = "auth/change-password", httpMethod = ApiMethod.HttpMethod.POST)
     public void changePassword(User caller, JasChangePasswordRequest request)
@@ -105,7 +105,7 @@ public class AuthEndpoint {
 
         try {
             com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().login(request.getUsername(), request.getPassword());
-            boolean isOrgMember = new OrganizationDao().isUserMemberOfAnyOrganization(user.getId());
+            boolean isOrgMember = organizationDao.isUserMemberOfAnyOrganization(user.getId());
             HttpUserSession userSession = new HttpUserSession(user, isOrgMember).put(httpServletRequest);
             log.info("[{}] user={} logged in!", httpServletRequest.getRemoteAddr(), user.getName());
 
@@ -209,7 +209,7 @@ public class AuthEndpoint {
                 }
             }
 
-            boolean isOrgMember = new OrganizationDao().isUserMemberOfAnyOrganization(existingUser.getId());
+            boolean isOrgMember = organizationDao.isUserMemberOfAnyOrganization(existingUser.getId());
             //LOGIN!
             HttpUserSession userSession = new HttpUserSession(existingUser, isOrgMember).put(httpServletRequest);//todo: simulate log in
             return new JasProviderAuthenticateResponse(existingUser, userSession, Objects.toString(oAuth2Info.getState()));

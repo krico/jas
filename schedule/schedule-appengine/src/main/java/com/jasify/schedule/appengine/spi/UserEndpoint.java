@@ -13,7 +13,6 @@ import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -58,6 +57,8 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class UserEndpoint {
+
+    private final OrganizationDao organizationDao = new OrganizationDao();
 
     /*
      * A reminder on REST
@@ -145,7 +146,7 @@ public class UserEndpoint {
         }
 
         if (caller == null) {
-            boolean isOrgMember = new OrganizationDao().isUserMemberOfAnyOrganization(user.getId());
+            boolean isOrgMember = organizationDao.isUserMemberOfAnyOrganization(user.getId());
             new HttpUserSession(user, isOrgMember).put(servletRequest); //login
         }
 
