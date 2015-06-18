@@ -80,7 +80,7 @@ public class Organization implements HasId {
 
     public void setName(String name) {
         this.name = name;
-        this.lcName = name;
+        setLcName(name);
     }
 
     public String getLcName() {

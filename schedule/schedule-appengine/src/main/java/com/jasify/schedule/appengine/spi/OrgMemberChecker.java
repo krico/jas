@@ -1,6 +1,9 @@
 package com.jasify.schedule.appengine.spi;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
@@ -32,6 +35,10 @@ abstract class OrgMemberChecker {
         }
     };
     private final OrganizationDao organizationDao = new OrganizationDao();
+    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+
     protected Key id;
     private static final ThreadLocal<OrgMemberChecker> ACTIVITY = new ThreadLocal<OrgMemberChecker>() {
         @Override
@@ -39,9 +46,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    Activity activity = ActivityServiceFactory.getActivityService().getActivity(id);
-                    ActivityType activityType = activity.getActivityTypeRef().getModel();
-                    return getOrganization(activityType.getOrganizationRef().getKey());
+                    return getOrganizationFromActivity(id);
                 }
             };
         }
@@ -53,8 +58,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(id);
-                    return getOrganization(activityType.getOrganizationRef().getKey());
+                    return getOrganizationFromActivityType(id);
                 }
             };
         }
@@ -66,8 +70,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(id);
-                    return getOrganization(activityPackage.getOrganizationRef().getKey());
+                    return getOrganizationFromActivityPackage(id);
                 }
             };
         }
@@ -79,10 +82,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    Subscription subscription = ActivityServiceFactory.getActivityService().getSubscription(id);
-                    Activity activity = subscription.getActivityRef().getModel();
-                    ActivityType activityType = activity.getActivityTypeRef().getModel();
-                    return getOrganization(activityType.getOrganizationRef().getKey());
+                    return getOrganizationFromASubscription(id);
                 }
             };
         }
@@ -148,6 +148,59 @@ abstract class OrgMemberChecker {
     protected Organization getOrganization(Key id) throws EntityNotFoundException {
         if (id == null) return null;
         return organizationDao.get(id);
+    }
+
+    protected ActivityType getActivityType(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        return activityTypeDao.get(id);
+    }
+
+    protected Activity getActivity(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        return activityDao.get(id);
+    }
+
+    protected ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        return activityPackageDao.get(id);
+    }
+
+    protected Subscription getSubscription(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        // TODO: Optimisation to use SubscriptionDao
+        return ActivityServiceFactory.getActivityService().getSubscription(id);
+    }
+
+    protected Organization getOrganizationFromActivityType(Key id) throws EntityNotFoundException {
+        ActivityType activityType = getActivityType(id);
+        if (activityType != null) {
+            return getOrganization(activityType.getOrganizationRef().getKey());
+        }
+        return null;
+    }
+
+    protected Organization getOrganizationFromActivity(Key id) throws EntityNotFoundException {
+        Activity activity = getActivity(id);
+        if (activity != null) {
+            return getOrganizationFromActivityType(activity.getActivityTypeRef().getKey());
+        }
+        return null;
+    }
+
+    protected Organization getOrganizationFromActivityPackage(Key id) throws EntityNotFoundException {
+        ActivityPackage activityPackage = getActivityPackage(id);
+        if (activityPackage != null) {
+            return getOrganizationFromActivityType(activityPackage.getOrganizationRef().getKey());
+        }
+        return null;
+    }
+
+    protected Organization getOrganizationFromASubscription(Key id) throws EntityNotFoundException {
+        Subscription subscription = getSubscription(id);
+        if (subscription != null) {
+            return getOrganizationFromActivity(subscription.getActivityRef().getKey());
+        }
+        return null;
     }
 
     abstract Organization getOrganization() throws EntityNotFoundException;

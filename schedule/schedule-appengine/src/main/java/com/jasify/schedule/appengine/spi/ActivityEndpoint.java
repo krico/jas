@@ -10,13 +10,13 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
@@ -64,15 +64,17 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 packagePath = ""))
 public class ActivityEndpoint {
 
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+    private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
+    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private final OrganizationDao organizationDao = new OrganizationDao();
+
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         checkFound(organizationId);
-        try {
-            Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
-            return ActivityServiceFactory.getActivityService().getActivityTypes(organization);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return activityTypeDao.getByOrganization(organizationId);
+
     }
 
     @ApiMethod(name = "activityTypes.get", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.GET)
@@ -80,7 +82,7 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
         try {
-            return ActivityServiceFactory.getActivityService().getActivityType(id);
+            return activityTypeDao.get(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
@@ -94,7 +96,7 @@ public class ActivityEndpoint {
         try {
             return ActivityServiceFactory.getActivityService().updateActivityType(activityType);
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException(e.getMessage());
         } catch (FieldValueException | UniqueConstraintException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -109,16 +111,11 @@ public class ActivityEndpoint {
         try {
             final String name = StringUtils.trimToNull(request.getActivityType().getName());
             if (name == null) throw new BadRequestException("ActivityType.name");
-            Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(request.getOrganizationId());
+            Organization organization = organizationDao.get(request.getOrganizationId());
             id = ActivityServiceFactory.getActivityService().addActivityType(organization, request.getActivityType());
+            return activityTypeDao.get(id);
         } catch (UniqueConstraintException e) {
             throw new BadRequestException(e.getMessage());
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        }
-
-        try {
-            return ActivityServiceFactory.getActivityService().getActivityType(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
@@ -129,12 +126,11 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
         try {
-            // Check if the ActivityType has linked Activities
-            ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(id);
             // TODO: Possible race condition? Need to protect
-            if (!ActivityServiceFactory.getActivityService().getActivities(activityType).isEmpty()) {
+            if (!activityDao.getByActivityTypeId(id).isEmpty()) {
                 throw new BadRequestException("ActivityType has activities");
             }
+            ActivityType activityType = activityTypeDao.get(id);
             ActivityServiceFactory.getActivityService().removeActivityType(activityType);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
@@ -189,21 +185,20 @@ public class ActivityEndpoint {
 
         if (activityTypeId != null && organizationId != null) {
             throw new BadRequestException("Must choose one: activityTypeId or organizationId");
+        } else if (activityTypeId == null && organizationId == null) {
+            throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
         }
+
         final List<Activity> all = new ArrayList<>();
-        try {
-            if (activityTypeId != null) {
-                checkFound(activityTypeId);
-                ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(activityTypeId);
-                all.addAll(ActivityServiceFactory.getActivityService().getActivities(activityType));
-            } else {
-                checkFound(organizationId);
-                Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
-                all.addAll(ActivityServiceFactory.getActivityService().getActivities(organization));
-            }
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+
+        if (activityTypeId != null) {
+            checkFound(activityTypeId);
+            all.addAll(activityDao.getByActivityTypeId(activityTypeId));
+        } else {
+            checkFound(organizationId);
+            all.addAll(activityDao.getByOrganizationId(organizationId));
         }
+
 
         //TODO: I'm pretty sure this should be done on the Service implementation, but I'm in the bus and lazy and sleepy
         return filterActivities(all, fromDate, toDate, offset, limit);
@@ -223,22 +218,17 @@ public class ActivityEndpoint {
         }
 
         final List<Activity> all = new ArrayList<>();
-        try {
-            if (!request.getActivityTypeIds().isEmpty()) {
-                for (Key activityTypeId : request.getActivityTypeIds()) {
-                    checkFound(activityTypeId);
-                    ActivityType activityType = ActivityServiceFactory.getActivityService().getActivityType(activityTypeId);
-                    all.addAll(ActivityServiceFactory.getActivityService().getActivities(activityType));
-                }
-            } else if (!request.getOrganizationIds().isEmpty()) {
-                for (Key organizationId : request.getOrganizationIds()) {
-                    checkFound(organizationId);
-                    Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
-                    all.addAll(ActivityServiceFactory.getActivityService().getActivities(organization));
-                }
+
+        if (!request.getActivityTypeIds().isEmpty()) {
+            for (Key activityTypeId : request.getActivityTypeIds()) {
+                checkFound(activityTypeId);
+                all.addAll(activityDao.getByActivityTypeId(activityTypeId));
             }
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+        } else if (!request.getOrganizationIds().isEmpty()) {
+            for (Key organizationId : request.getOrganizationIds()) {
+                checkFound(organizationId);
+                all.addAll(activityDao.getByOrganizationId(organizationId));
+            }
         }
 
         return filterActivities(all, request.getFromDate(), request.getToDate(), request.getOffset(), request.getLimit());
@@ -249,7 +239,7 @@ public class ActivityEndpoint {
         mustBeLoggedIn(caller);
         checkFound(id);
         try {
-            return ActivityServiceFactory.getActivityService().getActivity(id);
+            return activityDao.get(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
@@ -260,14 +250,16 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activity.getId()));
         checkFound(id);
         activity.setId(id);
-        // In case client does not set the Name field we force the set here
-        if (activity.getName() == null) {
-            activity.setName(activity.getActivityTypeRef().getModel().getName());
-        }
+
         try {
+            // In case client does not set the Name field we force the set here
+            if (activity.getName() == null) {
+                ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
+                activity.setName(activityType.getName());
+            }
             return ActivityServiceFactory.getActivityService().updateActivity(activity);
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Activity not found");
         } catch (FieldValueException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -276,14 +268,13 @@ public class ActivityEndpoint {
     @ApiMethod(name = "activities.add", path = "activities", httpMethod = ApiMethod.HttpMethod.POST)
     public List<Activity> addActivity(User caller, JasAddActivityRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         checkFound(request.getActivity());
-        checkFound(request.getActivity().getActivityTypeRef());
         checkFound(request.getActivity().getActivityTypeRef().getKey());
         checkFound(request.getActivity().getActivityTypeRef().getModel());
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(request.getActivity().getActivityTypeRef().getKey()));
 
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
-            ActivityType activityType = activityService.getActivityType(request.getActivity().getActivityTypeRef().getKey());
+            ActivityType activityType = activityTypeDao.get(request.getActivity().getActivityTypeRef().getKey());
             // In case client does not set the Name field we force the set here
             if (request.getActivity().getName() == null) {
                 request.getActivity().setName(activityType.getName());
@@ -291,7 +282,7 @@ public class ActivityEndpoint {
             List<Key> keys = activityService.addActivity(activityType, request.getActivity(), request.getRepeatDetails());
             List<Activity> result = new ArrayList<>();
             for (Key key : keys) {
-                result.add(activityService.getActivity(key));
+                result.add(activityDao.get(key));
             }
             return result;
         } catch (FieldValueException e) {
@@ -307,13 +298,13 @@ public class ActivityEndpoint {
         checkFound(id);
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
-            Activity activity = activityService.getActivity(id);
+            Activity activity = activityDao.get(id);
             // TODO: Possible race condition? Need to protect
             List<Subscription> subscriptions = activityService.getSubscriptions(activity);
             if (!subscriptions.isEmpty()) {
                 throw new BadRequestException("Activity has subscriptions");
             }
-            if (!activityService.getActivityPackageActivities(activity).isEmpty()) {
+            if (!activityPackageActivityDao.getByActivityId(id).isEmpty()) {
                 throw new BadRequestException("Activity is linked to Activity Package");
             }
             activityService.removeActivity(activity);
@@ -327,11 +318,10 @@ public class ActivityEndpoint {
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(userId);
         checkFound(activityId);
-        ActivityService activityService = ActivityServiceFactory.getActivityService();
         try {
             com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().getUser(userId);
-            Activity activity = activityService.getActivity(activityId);
-            return activityService.subscribe(user, activity);
+            Activity activity = activityDao.get(activityId);
+            return ActivityServiceFactory.getActivityService().subscribe(user, activity);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (UniqueConstraintException e) {
@@ -342,14 +332,13 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activitySubscriptions.query", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.GET)
-    public Subscription getSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+    public Subscription getSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(userId);
         checkFound(activityId);
         try {
-            ActivityService activityService = ActivityServiceFactory.getActivityService();
-            Activity activity = activityService.getActivity(activityId);
-            List<Subscription> subscriptions = activityService.getSubscriptions(activity);
+            Activity activity = activityDao.get(activityId);
+            List<Subscription> subscriptions = ActivityServiceFactory.getActivityService().getSubscriptions(activity);
             for (Subscription subscription : subscriptions) {
                 if (userId.equals(subscription.getUserRef().getKey())) {
                     return subscription;
@@ -366,7 +355,7 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(activityId);
         try {
-            Activity activity = ActivityServiceFactory.getActivityService().getActivity(activityId);
+            Activity activity = activityDao.get(activityId);
             return ActivityServiceFactory.getActivityService().getSubscriptions(activity);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
@@ -387,26 +376,21 @@ public class ActivityEndpoint {
     @ApiMethod(name = "activityPackages.query", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityPackage> getActivityPackages(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         checkFound(organizationId);
-        try {
-            Organization organization = OrganizationServiceFactory.getOrganizationService().getOrganization(organizationId);
-            return ActivityServiceFactory.getActivityService().getActivityPackages(organization);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return activityPackageDao.getByOrganization(organizationId);
     }
 
     @ApiMethod(name = "activityPackages.get", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public ActivityPackage getActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         checkFound(id);
         try {
-            return ActivityServiceFactory.getActivityService().getActivityPackage(id);
+            return activityPackageDao.get(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(id));
         checkFound(id);
         ActivityPackage activityPackage = Preconditions.checkNotNull(request.getActivityPackage(), "request.ActivityPackage is NULL");
@@ -416,8 +400,6 @@ public class ActivityEndpoint {
             return ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage, activities);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Not found");
-        } catch (FieldValueException e) {
-            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -427,20 +409,22 @@ public class ActivityEndpoint {
         Key organizationId = checkFound(activityPackage.getOrganizationRef().getKey(), "request.activityPackage.organization == NULL");
         List<Activity> activities = checkFound(request.getActivities(), "request.activities == NULL");
 
-        if (activities.isEmpty())
+        if (activities.isEmpty()) {
             throw new BadRequestException("request.activities.isEmpty");
+        }
 
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organizationId));
 
-        ActivityService activityService = ActivityServiceFactory.getActivityService();
         try {
-            Key id = activityService.addActivityPackage(activityPackage, activities);
-            return activityService.getActivityPackage(id);
+            organizationDao.get(activityPackage.getOrganizationRef().getKey());
+            Key id = ActivityServiceFactory.getActivityService().addActivityPackage(activityPackage, activities);
+            return activityPackageDao.get(id);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (FieldValueException e) {
             throw new BadRequestException(e.getMessage());
         }
+
     }
 
     @ApiMethod(name = "activityPackages.remove", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
@@ -460,7 +444,7 @@ public class ActivityEndpoint {
     public List<Activity> getActivityPackageActivities(User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         checkFound(activityPackageId);
         try {
-            ActivityPackage activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(activityPackageId);
+            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
             return activityPackage.getActivities();
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("User not found");
@@ -473,9 +457,8 @@ public class ActivityEndpoint {
         checkFound(activityPackageId);
         checkFound(activityId);
         try {
-            ActivityService activityService = ActivityServiceFactory.getActivityService();
-            ActivityPackage activityPackage = activityService.getActivityPackage(activityPackageId);
-            Activity activity = activityService.getActivity(activityId);
+            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
+            Activity activity = activityDao.get(activityId);
             ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackage, activity);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("User not found");
@@ -488,9 +471,8 @@ public class ActivityEndpoint {
         checkFound(activityPackageId);
         checkFound(activityId);
         try {
-            ActivityService activityService = ActivityServiceFactory.getActivityService();
-            ActivityPackage activityPackage = activityService.getActivityPackage(activityPackageId);
-            Activity activity = activityService.getActivity(activityId);
+            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
+            Activity activity = activityDao.get(activityId);
             ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(activityPackage, activity);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("User not found");

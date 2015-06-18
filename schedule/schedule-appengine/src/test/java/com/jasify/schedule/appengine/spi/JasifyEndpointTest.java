@@ -127,10 +127,9 @@ public class JasifyEndpointTest {
         Datastore.put(organization);
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
+        Datastore.put(activityType);
         Activity activity = new Activity(activityType);
-        activity.setId(Datastore.allocateId(Activity.class));
-        ActivityService activityService = ActivityServiceFactory.getActivityService();
-        expect(activityService.getActivity(activity.getId())).andReturn(activity);
+        Datastore.put(activity);
         testActivityServiceFactory.replay();
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityId(activity.getId());
@@ -146,10 +145,9 @@ public class JasifyEndpointTest {
         Datastore.put(new OrganizationMember(organization, user));
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
+        Datastore.put(activityType);
         Activity activity = new Activity(activityType);
-        activity.setId(Datastore.allocateId(Activity.class));
-        ActivityService activityService = ActivityServiceFactory.getActivityService();
-        expect(activityService.getActivity(activity.getId())).andReturn(activity);
+        Datastore.put(activity);
         testActivityServiceFactory.replay();
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityId(activity.getId());
@@ -166,8 +164,7 @@ public class JasifyEndpointTest {
 
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
-        ActivityService activityService = ActivityServiceFactory.getActivityService();
-        expect(activityService.getActivityType(activityType.getId())).andReturn(activityType);
+        Datastore.put(activityType);
         testActivityServiceFactory.replay();
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromActivityTypeId(activityType.getId());
@@ -183,11 +180,12 @@ public class JasifyEndpointTest {
         Datastore.put(new OrganizationMember(organization, user));
         ActivityType activityType = new ActivityType("Type");
         activityType.getOrganizationRef().setModel(organization);
+        Datastore.put(activityType);
         Activity activity = new Activity(activityType);
-        activity.setId(Datastore.allocateId(Activity.class));
+        Datastore.put(activity);
         Subscription subscription = new Subscription();
-        subscription.setId(Datastore.allocateId(Subscription.class));
         subscription.getActivityRef().setModel(activity);
+        Datastore.put(subscription);
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         expect(activityService.getSubscription(subscription.getId())).andReturn(subscription);
         testActivityServiceFactory.replay();

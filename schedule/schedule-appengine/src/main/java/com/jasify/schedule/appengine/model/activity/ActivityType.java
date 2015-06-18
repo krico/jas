@@ -79,7 +79,7 @@ public class ActivityType {
 
     public void setName(String name) {
         this.name = name;
-        this.lcName = name;
+        setLcName(name);
     }
 
     public String getLcName() {

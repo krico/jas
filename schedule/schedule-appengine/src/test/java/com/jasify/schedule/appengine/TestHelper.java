@@ -1,23 +1,34 @@
 package com.jasify.schedule.appengine;
 
 import com.google.appengine.api.datastore.*;
+import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.tools.development.testing.*;
 import com.google.common.base.Throwables;
+import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
+import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.UserContext;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
 import com.jasify.schedule.appengine.util.DigestUtil;
 import com.meterware.servletunit.ServletRunner;
+import io.github.benas.jpopulator.api.Populator;
 import io.github.benas.jpopulator.api.Randomizer;
 import io.github.benas.jpopulator.impl.PopulatorBuilder;
+import io.github.benas.jpopulator.randomizers.DateRangeRandomizer;
 import junit.framework.AssertionFailedError;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
@@ -377,5 +388,78 @@ public final class TestHelper {
                 }
             }
         });
+    }
+
+    public static class PriceRandomizer implements Randomizer<Double> {
+        @Override
+        public Double getRandomValue() {
+            return new Double((new RandomDataGenerator()).nextLong(0, (long) Double.MAX_VALUE));
+        }
+    }
+
+    public static class MaxCountRandomizer implements Randomizer<Integer> {
+        @Override
+        public Integer getRandomValue() {
+            return new Long(((new RandomDataGenerator()).nextLong(1, (long) Integer.MAX_VALUE))).intValue();
+        }
+    }
+
+    public static Organization createOrganization(boolean store) {
+        Organization organization = com.jasify.schedule.appengine.TestHelper.populateBean(Organization.class, "id", "lcName", "organizationMemberListRef");
+        if (store) {
+            Datastore.put(organization);
+        }
+        return organization;
+    }
+
+    public static ActivityType createActivityType(Organization organization, boolean store) {
+        PopulatorBuilder populatorBuilder = new PopulatorBuilder();
+        populatorBuilder.registerRandomizer(ActivityType.class, Double.class, "price", new PriceRandomizer());
+        populatorBuilder.registerRandomizer(ActivityType.class, int.class, "maxSubscriptions", new MaxCountRandomizer());
+        Populator populator = populatorBuilder.build();
+
+        ActivityType activityType = populator.populateBean(ActivityType.class, "id", "organizationRef", "lcName");
+        activityType.setLcName(StringUtils.lowerCase(activityType.getName()));
+        if (store) {
+            // TODO: ActivityType requires the model not to be set but Activity requires the model to be set??
+            activityType.getOrganizationRef().setModel(organization);
+            activityType.setId(Datastore.allocateId(organization.getId(), ActivityTypeMeta.get()));
+            Datastore.put(activityType);
+        }
+        return activityType;
+    }
+
+    public static Activity createActivity(ActivityType activityType, boolean store) {
+        PopulatorBuilder populatorBuilder = new PopulatorBuilder();
+        populatorBuilder.registerRandomizer(Activity.class, Double.class, "price", new PriceRandomizer());
+        populatorBuilder.registerRandomizer(Activity.class, int.class, "maxSubscriptions", new MaxCountRandomizer());
+        DateTime start = new DateTime().plusHours(1);
+        DateTime finish = new DateTime().plusYears(10);
+
+        populatorBuilder.registerRandomizer(Activity.class, Date.class, "start", new DateRangeRandomizer(start.toDate(), finish.toDate()));
+        Populator populator = populatorBuilder.build();
+        Activity activity = populator.populateBean(Activity.class, "id", "activityTypeRef", "repeatDetailsRef", "subscriptionListRef", "finish", "subscriptionCount");
+        activity.setFinish(new DateTime(activity.getStart().getTime()).plusHours(1).toDate());
+        activity.getActivityTypeRef().setModel(activityType);
+        if (store) {
+            activity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), ActivityMeta.get()));
+            Datastore.put(activity);
+        }
+        return activity;
+    }
+
+    public static ActivityPackage createActivityPackage(Organization organization, boolean store) {
+        PopulatorBuilder populatorBuilder = new PopulatorBuilder();
+        populatorBuilder.registerRandomizer(ActivityPackage.class, Double.class, "price", new PriceRandomizer());
+        populatorBuilder.registerRandomizer(ActivityPackage.class, int.class, "maxSubscriptions", new MaxCountRandomizer());
+        populatorBuilder.registerRandomizer(ActivityPackage.class, int.class, "maxExecutions", new MaxCountRandomizer());
+        populatorBuilder.registerRandomizer(ActivityPackage.class, int.class, "itemCount", new MaxCountRandomizer());
+        Populator populator = populatorBuilder.build();
+        ActivityPackage activityPackage = populator.populateBean(ActivityPackage.class, "id", "organizationRef", "activityPackageActivityListRef", "executionCount");
+        activityPackage.getOrganizationRef().setModel(organization);
+        if (store) {
+            Datastore.put(activityPackage);
+        }
+        return activityPackage;
     }
 }

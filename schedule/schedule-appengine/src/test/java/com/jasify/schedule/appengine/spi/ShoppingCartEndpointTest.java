@@ -6,9 +6,11 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.TestActivityServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.cart.TestShoppingCartServiceFactory;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasItemDetails;
 import com.jasify.schedule.appengine.util.FormatUtil;
@@ -109,11 +111,16 @@ public class ShoppingCartEndpointTest {
             activityPackage.setCurrency("USD");
             activityPackage.setId(Datastore.allocateId(ActivityPackage.class));
 
-            Activity activity = new Activity();
+            Organization organization = new Organization();
+            Datastore.put(organization);
+            ActivityType activityType = new ActivityType();
+            activityType.getOrganizationRef().setModel(organization);
+            Datastore.put(activityType);
+            Activity activity = new Activity(activityType);
             activity.setPrice(200d);
             activity.setCurrency("USD");
-            activity.setId(Datastore.allocateId(Activity.class));
-
+            activity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), ActivityMeta.get()));
+            Datastore.put(activity);
 
             ArrayList<Key> data = new ArrayList<Key>();
             data.add(activity.getId());
@@ -121,8 +128,6 @@ public class ShoppingCartEndpointTest {
                     .activityPackage(activityPackage)
                     .data(data)
                     .build());
-
-            EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().getActivity(activity.getId())).andReturn(activity);
 
             testActivityServiceFactory.replay();
 

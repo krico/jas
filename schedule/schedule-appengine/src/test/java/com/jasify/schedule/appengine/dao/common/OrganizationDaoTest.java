@@ -29,10 +29,6 @@ import static junit.framework.TestCase.*;
 public class OrganizationDaoTest {
     private OrganizationDao dao;
 
-    public static Organization createExample() {
-        return TestHelper.populateBean(Organization.class, "id", "lcName", "organizationMemberListRef");
-    }
-
     @BeforeClass
     public static void initialize() {
         TestHelper.setSystemProperties();
@@ -62,14 +58,14 @@ public class OrganizationDaoTest {
 
     @Test
     public void testSave() throws Exception {
-        Key id = save(createExample());
+        Key id = save(TestHelper.createOrganization(false));
         assertNotNull(id);
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testSaveChecksUniquenessOfName() throws Exception {
-        Organization example = createExample();
-        Organization example2 = createExample();
+        Organization example = TestHelper.createOrganization(false);
+        Organization example2 = TestHelper.createOrganization(false);
         example2.setName(example.getName());
         save(example);
         save(example2);
@@ -77,7 +73,7 @@ public class OrganizationDaoTest {
 
     @Test
     public void testUpdateWithNoNameChange() throws Exception {
-        final Key id = save(createExample());
+        final Key id = save(TestHelper.createOrganization(false));
         Organization organization = dao.get(id);
         assertNotNull(organization);
         organization.setDescription("New desc");
@@ -86,8 +82,8 @@ public class OrganizationDaoTest {
 
     @Test
     public void testSaveUpdatesUniqueIndex() throws Exception {
-        Organization example = createExample();
-        Organization example2 = createExample();
+        Organization example = TestHelper.createOrganization(false);
+        Organization example2 = TestHelper.createOrganization(false);
         example2.setName(example.getName());
         save(example);
         example.setName("Another Name");
@@ -97,9 +93,9 @@ public class OrganizationDaoTest {
 
     @Test(expected = UniqueConstraintException.class)
     public void testBatchSaveUniqueIndex() throws Exception {
-        Organization example1 = createExample();
-        Organization example2 = createExample();
-        Organization example3 = createExample();
+        Organization example1 = TestHelper.createOrganization(false);
+        Organization example2 = TestHelper.createOrganization(false);
+        Organization example3 = TestHelper.createOrganization(false);
         example3.setName(example1.getName());
         dao.save(Arrays.asList(example1, example2));
         save(example3);
@@ -107,14 +103,14 @@ public class OrganizationDaoTest {
 
     @Test
     public void testDelete() throws Exception {
-        Key id = save(createExample());
+        Key id = save(TestHelper.createOrganization(false));
         dao.delete(id);
     }
 
     @Test
     public void testDeleteFreesIndex() throws Exception {
-        final Organization example = createExample();
-        Organization example2 = createExample();
+        final Organization example = TestHelper.createOrganization(false);
+        Organization example2 = TestHelper.createOrganization(false);
         example2.setName(example.getName());
         save(example);
         TransactionOperator.execute(new ModelOperation<Void>() {
@@ -130,9 +126,9 @@ public class OrganizationDaoTest {
 
     @Test
     public void testBatchDeleteFreesIndex() throws Exception {
-        Organization example1 = createExample();
-        Organization example2 = createExample();
-        Organization example3 = createExample();
+        Organization example1 = TestHelper.createOrganization(false);
+        Organization example2 = TestHelper.createOrganization(false);
+        Organization example3 = TestHelper.createOrganization(false);
 
         save(example1);
         save(example2);
@@ -157,9 +153,9 @@ public class OrganizationDaoTest {
 
     @Test
     public void testByMemberUserId() throws Exception {
-        Organization org1 = createExample();
-        Organization org2 = createExample();
-        Organization org3 = createExample();
+        Organization org1 = TestHelper.createOrganization(false);
+        Organization org2 = TestHelper.createOrganization(false);
+        Organization org3 = TestHelper.createOrganization(false);
         User user = new User("a@b.com");
         assertNotNull(org1);
         assertNotNull(org2);
@@ -186,8 +182,8 @@ public class OrganizationDaoTest {
 
     @Test
     public void testGetUsersOfOrganization() throws Exception {
-        Organization org1 = createExample();
-        Organization org2 = createExample();
+        Organization org1 = TestHelper.createOrganization(false);
+        Organization org2 = TestHelper.createOrganization(false);
         User user1 = new User("a@b.com");
         User user2 = new User("b@b.com");
         User user3 = new User("c@b.com");
@@ -211,8 +207,8 @@ public class OrganizationDaoTest {
 
     @Test
     public void testGetGroupsOfOrganization() throws Exception {
-        Organization org1 = createExample();
-        Organization org2 = createExample();
+        Organization org1 = TestHelper.createOrganization(false);
+        Organization org2 = TestHelper.createOrganization(false);
         Group group1 = new Group("a@b.com");
         Group group2 = new Group("b@b.com");
         Group group3 = new Group("c@b.com");

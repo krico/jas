@@ -7,6 +7,9 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
@@ -58,6 +61,10 @@ class DefaultActivityService implements ActivityService {
     private final ActivityPackageMeta activityPackageMeta;
     private final ActivityPackageActivityMeta activityPackageActivityMeta;
     private final ActivityPackageExecutionMeta activityPackageExecutionMeta;
+
+    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
 
     private DefaultActivityService() {
         activityTypeMeta = ActivityTypeMeta.get();
@@ -135,55 +142,12 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public ActivityType getActivityType(Key id) throws EntityNotFoundException {
-        try {
-
-            return Datastore.get(activityTypeMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("ActivityType.id=" + id);
-        }
-    }
-
-    @Nonnull
-    @Override
-    public ActivityType getActivityType(Organization organization, String name) throws EntityNotFoundException {
-        // TODO: This method needs cleanup
-        name = StringUtils.trimToEmpty(name);
-        if (organization.getId() == null) throw new EntityNotFoundException("Organization.id=NULL");
-        OrganizationServiceFactory.getOrganizationService().getOrganization(organization.getId());
-
-        ActivityType ret = Datastore.query(activityTypeMeta, organization.getId())
-                .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
-                .asSingle();
-
-        if (ret == null)
-            throw new EntityNotFoundException("ActivityType.name=" + name + " Organization.id=" + organization.getId());
-
-        return ret;
-    }
-
-    @Nonnull
-    @Override
-    public List<ActivityType> getActivityTypes(Organization organization) {
-        return Datastore.query(activityTypeMeta, organization.getId()).asList();
-    }
-
-    @Override
-    public List<ActivityPackage> getActivityPackages(Organization organization) {
-        return Datastore.query(activityPackageMeta)
-                .filter(activityPackageMeta.organizationRef.equal(organization.getId()))
-                .sort(activityPackageMeta.created.desc)
-                .asList();
-    }
-
-    @Nonnull
-    @Override
     public ActivityType updateActivityType(final ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException {
         final String name = StringUtils.trimToNull(activityType.getName());
         if (name == null) {
             throw new FieldValueException("ActivityType.name");
         }
-        final ActivityType dbActivityType = getActivityType(activityType.getId());
+        final ActivityType dbActivityType = activityTypeDao.get(activityType.getId());
 
         try {
             TransactionOperator.execute(new ModelOperation<Void>() {
@@ -367,16 +331,6 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Activity getActivity(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        try {
-            return Datastore.get(activityMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Activity.id=" + id);
-        }
-    }
-
-    @Nonnull
-    @Override
     public List<Activity> getActivities(Organization organization) {
         return Datastore.query(activityMeta, organization.getId()).asList();
     }
@@ -393,7 +347,7 @@ class DefaultActivityService implements ActivityService {
     @Override
     public Activity updateActivity(Activity activity) throws EntityNotFoundException, FieldValueException {
         validateActivity(activity);
-        Activity dbActivity = getActivity(activity.getId());
+        Activity dbActivity = activityDao.get(activity.getId());
         BeanUtil.copyPropertiesExcluding(dbActivity, activity, "created", "modified", "id", "activityTypeRef");
         Datastore.put(dbActivity);
         return dbActivity;
@@ -661,9 +615,8 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, FieldValueException {
-        Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
-        activities = Preconditions.checkNotNull(activities);
+    public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException {
+        Key organizationId = activityPackage.getOrganizationRef().getKey();
 
         if (activityPackage.getItemCount() <= 0) throw new FieldValueException("ActivityPackage.itemCount");
         if (activities.isEmpty() || activities.size() == 1 || activities.size() < activityPackage.getItemCount()) {
@@ -699,7 +652,7 @@ class DefaultActivityService implements ActivityService {
 
     @Override
     public ActivityPackage updateActivityPackage(ActivityPackage activityPackage) throws EntityNotFoundException, FieldValueException {
-        ActivityPackage dbActivityPackage = getActivityPackage(activityPackage.getId());
+        ActivityPackage dbActivityPackage = activityPackageDao.get(activityPackage.getId());
 
         copyProperties(activityPackage, dbActivityPackage);
 
@@ -714,7 +667,7 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws EntityNotFoundException, FieldValueException {
+    public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws EntityNotFoundException {
         try {
             return TransactionOperator.execute(new ModelOperation<ActivityPackage>() {
                 @Override
@@ -774,20 +727,10 @@ class DefaultActivityService implements ActivityService {
                     return dbActivityPackage;
                 }
             });
-        } catch (EntityNotFoundException | FieldValueException e) {
+        } catch (EntityNotFoundException e) {
             throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
-        }
-    }
-
-    @Nonnull
-    @Override
-    public ActivityPackage getActivityPackage(Key id) throws EntityNotFoundException {
-        try {
-            return Datastore.get(activityPackageMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("ActivityPackage.id=" + id);
         }
     }
 

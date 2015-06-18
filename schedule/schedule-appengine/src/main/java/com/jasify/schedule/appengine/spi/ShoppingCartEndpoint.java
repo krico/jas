@@ -8,11 +8,12 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
-import com.jasify.schedule.appengine.model.activity.ActivityService;
 import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.cart.ShoppingCartService;
@@ -62,6 +63,9 @@ import java.util.Set;
                 packagePath = ""))
 public class ShoppingCartEndpoint {
 
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+
     @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
     public ShoppingCart getUserCart(User caller) throws UnauthorizedException, ForbiddenException {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
@@ -81,7 +85,7 @@ public class ShoppingCartEndpoint {
 
         Activity activity;
         try {
-            activity = ActivityServiceFactory.getActivityService().getActivity(activityId);
+            activity = activityDao.get(activityId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("activityId=" + activityId);
         }
@@ -104,7 +108,7 @@ public class ShoppingCartEndpoint {
         JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
         ActivityPackage activityPackage;
         try {
-            activityPackage = ActivityServiceFactory.getActivityService().getActivityPackage(activityPackageId);
+            activityPackage = activityPackageDao.get(activityPackageId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("activityPackageId=" + activityPackageId);
         }
@@ -129,7 +133,7 @@ public class ShoppingCartEndpoint {
         for (Key activityId : uniqueKeys) {
             try {
                 //simply validate that it exists
-                ActivityServiceFactory.getActivityService().getActivity(activityId);
+                activityDao.get(activityId);
             } catch (EntityNotFoundException e) {
                 throw new NotFoundException("activityId=" + activityId);
             }
@@ -171,11 +175,9 @@ public class ShoppingCartEndpoint {
                     List<String> subItems = new ArrayList<>();
                     List<String> subItemTypes = new ArrayList<>();
 
-                    ActivityService activityService = ActivityServiceFactory.getActivityService();
-
                     //noinspection unchecked
                     for (Key key : (Iterable<Key>) item.getData()) {
-                        Activity activity = activityService.getActivity(key);
+                        Activity activity = activityDao.get(key);
                         subItemIds.add(key);
                         subItems.add(FormatUtil.toString(activity));
                         subItemTypes.add(key.getKind());

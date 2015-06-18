@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.payment.workflow;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -22,6 +23,7 @@ import org.slim3.datastore.Model;
 @Model
 public class ActivityPaymentWorkflow extends PaymentWorkflow {
 
+    private final ActivityDao activityDao = new ActivityDao();
     private Key activityId;
     private Key subscriptionId;
 
@@ -54,7 +56,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
             User user = UserServiceFactory.getUserService().getUser(payment.getUserRef().getKey());
-            Activity activity = activityService.getActivity(activityId);
+            Activity activity = activityDao.get(activityId);
             Subscription subscribe = activityService.subscribe(user, activity);
             subscriptionId = subscribe.getId();
         } catch (EntityNotFoundException | UniqueConstraintException | OperationException e) {
