@@ -9,6 +9,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.Constants;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
@@ -144,7 +145,7 @@ public class UserEndpoint {
         }
 
         if (caller == null) {
-            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(user.getId());
+            boolean isOrgMember = new OrganizationDao().isUserMemberOfAnyOrganization(user.getId());
             new HttpUserSession(user, isOrgMember).put(servletRequest); //login
         }
 

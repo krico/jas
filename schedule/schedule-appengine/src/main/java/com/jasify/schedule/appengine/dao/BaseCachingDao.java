@@ -123,22 +123,16 @@ public class BaseCachingDao<T> extends BaseDao<T> {
         return DaoUtil.cachePut(id, meta, super.getOrNull(id), expiration());
     }
 
-    protected List<T> query(@Nonnull DaoQuery query) {
+    @Override
+    protected List<Key> queryKeys(@Nonnull DaoQuery query) {
         if (!canCache()) {
-            return super.query(query);
+            return super.queryKeys(query);
         }
 
         DaoQueryMetadata.CacheQueryTransaction operation = DaoQueryMetadata
                 .cacheQueryTransaction(query, meta.getKind(), expiration());
 
         DaoQueryMetadata metadata = MemcacheOperator.update(operation);
-        List<Key> ids = metadata.getQueryResult(query);
-        if (ids.isEmpty()) return Collections.emptyList();
-        try {
-            return get(ids);
-        } catch (EntityNotFoundException e) {
-            log.warn("A Query returned ids for non-existing entities", e);
-            throw Throwables.propagate(e);
-        }
+        return metadata.getQueryResult(query);
     }
 }

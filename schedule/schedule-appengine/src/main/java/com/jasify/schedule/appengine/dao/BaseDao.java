@@ -138,8 +138,12 @@ public abstract class BaseDao<T> {
         Datastore.delete(ids);
     }
 
+    protected List<Key> queryKeys(@Nonnull DaoQuery query) {
+        return query.execute();
+    }
+
     protected List<T> query(@Nonnull DaoQuery query) {
-        List<Key> ids = query.execute();
+        List<Key> ids = queryKeys(query);
         if (ids.isEmpty()) return Collections.emptyList();
         try {
             return get(ids);
@@ -148,5 +152,4 @@ public abstract class BaseDao<T> {
             throw Throwables.propagate(e);
         }
     }
-
 }

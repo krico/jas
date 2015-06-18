@@ -115,6 +115,11 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         return get(organizationIds);
     }
 
+    public boolean isUserMemberOfAnyOrganization(Key userId) {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        return !organizationMemberDao.byUserIdKeys(userId).isEmpty();
+    }
+
     public List<User> getUsersOfOrganization(Key organizationId) throws EntityNotFoundException {
         OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
         UserDao userDao = new UserDao();
@@ -141,5 +146,43 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         }
         if (groupIds.isEmpty()) return Collections.emptyList();
         return groupDao.get(groupIds);
+    }
+
+    public boolean addUserToOrganization(Key organizationId, Key userId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndUserId(organizationId, userId);
+        if (existing != null) return false;
+        existing = new OrganizationMember();
+        existing.getOrganizationRef().setKey(organizationId);
+        existing.getUserRef().setKey(userId);
+        organizationMemberDao.save(existing);
+        return true;
+    }
+
+    public boolean removeUserFromOrganization(Key organizationId, Key userId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndUserId(organizationId, userId);
+        if (existing == null) return false;
+        organizationMemberDao.delete(existing.getId());
+        return true;
+    }
+
+    public boolean addGroupToOrganization(Key organizationId, Key groupId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndGroupId(organizationId, groupId);
+        if (existing != null) return false;
+        existing = new OrganizationMember();
+        existing.getOrganizationRef().setKey(organizationId);
+        existing.getGroupRef().setKey(groupId);
+        organizationMemberDao.save(existing);
+        return true;
+    }
+
+    public boolean removeGroupFromOrganization(Key organizationId, Key groupId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndGroupId(organizationId, groupId);
+        if (existing == null) return false;
+        organizationMemberDao.delete(existing.getId());
+        return true;
     }
 }

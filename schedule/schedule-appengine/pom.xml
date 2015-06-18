@@ -189,6 +189,13 @@
             <version>1.2.0</version>
         </dependency>
 
+        <!-- Reflections -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -227,12 +234,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.github.benas</groupId>
             <artifactId>jpopulator</artifactId>
             <version>1.2.0</version>
@@ -253,6 +254,7 @@
             </resource>
         </resources>
         <plugins>
+            <!-- build number plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -271,6 +273,28 @@
                     <shortRevisionLength>10</shortRevisionLength>
                 </configuration>
             </plugin>
+
+            <!-- maven-exec-plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>cache</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.jasify.schedule.appengine.model.consistency.ConsistencyGuard</mainClass>
+                            <arguments>
+                                <argument>${project.build.outputDirectory}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!--
             apt-maven-plugin
             NOTE: To generate the Meta classes we use apt to run slim3-gen.  To get this to be generated run
@@ -345,6 +369,7 @@
                 <version>0.0.23</version>
                 <executions>
 
+                    <!-- install node -->
                     <execution>
                         <id>install node and npm</id>
                         <goals>
@@ -356,6 +381,7 @@
                         </configuration>
                     </execution>
 
+                    <!-- npm prune -->
                     <execution>
                         <id>npm prune</id>
                         <goals>

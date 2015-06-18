@@ -2,10 +2,7 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
-import com.google.api.server.spi.response.BadRequestException;
-import com.google.api.server.spi.response.ForbiddenException;
-import com.google.api.server.spi.response.NotFoundException;
-import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
@@ -15,11 +12,14 @@ import com.jasify.schedule.appengine.model.ModelOperation;
 import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
+import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
+import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -55,6 +55,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class OrganizationEndpoint {
+    private static final Logger log = LoggerFactory.getLogger(OrganizationEndpoint.class);
 
     private final OrganizationDao organizationDao = new OrganizationDao();
 
@@ -149,53 +150,78 @@ public class OrganizationEndpoint {
     }
 
     @ApiMethod(name = "organizations.addUser", path = "organizations/{organizationId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public void addUserToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public void addUserToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
         mustBeAdmin(caller);
         try {
-            OrganizationServiceFactory.getOrganizationService().addUserToOrganization(organizationId, userId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+            if (!organizationDao.addUserToOrganization(organizationId, userId)) {
+                log.info("Did not add (already member) user [{}] to organization [{}]", userId, organizationId);
+            }
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "organizations.removeUser", path = "organizations/{organizationId}/users/{userId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeUserFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public void removeUserFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("userId") Key userId) throws UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
         mustBeAdmin(caller);
         try {
-            OrganizationServiceFactory.getOrganizationService().removeUserFromOrganization(organizationId, userId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+            if (!organizationDao.removeUserFromOrganization(organizationId, userId)) {
+                log.info("Did not remove (not a member) user [{}] from organization [{}]", userId, organizationId);
+            }
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "organizations.addGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public void addGroupToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public void addGroupToOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, InternalServerErrorException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organizationId));
         try {
-            OrganizationServiceFactory.getOrganizationService().addGroupToOrganization(organizationId, groupId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+            if (!organizationDao.addGroupToOrganization(organizationId, groupId)) {
+                log.info("Did not add (already member) group [{}] to organization [{}]", groupId, organizationId);
+            }
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "organizations.removeGroup", path = "organizations/{organizationId}/groups/{groupId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeGroupFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public void removeGroupFromOrganization(User caller, @Named("organizationId") Key organizationId, @Named("groupId") Key groupId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, InternalServerErrorException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organizationId));
         try {
-            OrganizationServiceFactory.getOrganizationService().removeGroupFromOrganization(organizationId, groupId);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
+            if (!organizationDao.removeGroupFromOrganization(organizationId, groupId)) {
+                log.info("Did not remove (not a member) group [{}] from organization [{}]", groupId, organizationId);
+            }
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "organizations.remove", path = "organizations/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeOrganization(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public void removeOrganization(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
         mustBeAdmin(caller);
         checkFound(id);
+        //TODO: This method needs a lot more checks to determine if an organization can be deleted
+        //TODO: Not sure where this should go
+
         try {
-            OrganizationServiceFactory.getOrganizationService().removeOrganization(id);
+            ConsistencyGuard.beforeDelete(Organization.class, id);
+
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    organizationDao.get(id); //Throws not found if this organization doesn't exist
+                    organizationDao.delete(id);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (InconsistentModelStateException e) {
+            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 }
