@@ -37,7 +37,7 @@ public class ConsistencyGuardTest {
     @Test
     public void testBeforeDeleteOrganization() throws Exception {
         OrganizationDao organizationDao = new OrganizationDao();
-        Organization organization = OrganizationDaoTest.createExample();
+        Organization organization = TestHelper.createOrganization(false);
         organizationDao.save(organization);
         ConsistencyGuard.beforeDelete(organization);
     }
@@ -47,7 +47,7 @@ public class ConsistencyGuardTest {
         ConsistencyGuard.beforeDelete(Organization.class, Datastore.allocateId(Organization.class));
         OrganizationDao organizationDao = new OrganizationDao();
         OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
-        Organization organization = OrganizationDaoTest.createExample();
+        Organization organization = TestHelper.createOrganization(false);
         organizationDao.save(organization);
         OrganizationMember m = new OrganizationMember();
         m.getOrganizationRef().setKey(organization.getId());

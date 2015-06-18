@@ -177,7 +177,7 @@ public class OrganizationEndpointTest {
         for (int i = 0; i < 20; ++i) {
             Transaction tx = Datastore.beginTransaction();
             try {
-                Organization organization = OrganizationDaoTest.createExample();
+                Organization organization = TestHelper.createOrganization(false);
                 dao.save(organization);
                 tx.commit();
                 organizations.add(organization);
@@ -294,7 +294,7 @@ public class OrganizationEndpointTest {
 
     @Test
     public void testUpdateOrganization() throws Exception {
-        Organization organization = OrganizationDaoTest.createExample();
+        Organization organization = TestHelper.createOrganization(false);
         OrganizationDao dao = new OrganizationDao();
         HashSet<PaymentTypeEnum> pt = new HashSet<>();
         pt.add(PaymentTypeEnum.PayPal);
@@ -321,8 +321,8 @@ public class OrganizationEndpointTest {
 
     @Test(expected = BadRequestException.class)
     public void testUpdateOrganizationNameAlreadyExists() throws Exception {
-        Organization organization1 = OrganizationDaoTest.createExample();
-        Organization organization2 = OrganizationDaoTest.createExample();
+        Organization organization1 = TestHelper.createOrganization(false);
+        Organization organization2 = TestHelper.createOrganization(false);
         OrganizationDao dao = new OrganizationDao();
         dao.save(organization1);
         dao.save(organization2);
@@ -341,7 +341,7 @@ public class OrganizationEndpointTest {
 
     @Test(expected = BadRequestException.class)
     public void testUpdateOrganizationNullName() throws Exception {
-        Organization organization1 = OrganizationDaoTest.createExample();
+        Organization organization1 = TestHelper.createOrganization(false);
         OrganizationDao dao = new OrganizationDao();
         dao.save(organization1);
 
@@ -352,7 +352,7 @@ public class OrganizationEndpointTest {
 
     @Test
     public void testAddUserToOrganization() throws Exception {
-        Organization organization1 = OrganizationDaoTest.createExample();
+        Organization organization1 = TestHelper.createOrganization(false);
         OrganizationDao organizationDao = new OrganizationDao();
         Key organizationId = organizationDao.save(organization1);
         UserDao userDao = new UserDao();
@@ -376,7 +376,7 @@ public class OrganizationEndpointTest {
 
     @Test
     public void testAddGroupToOrganization() throws Exception {
-        Organization organization1 = OrganizationDaoTest.createExample();
+        Organization organization1 = TestHelper.createOrganization(false);
         OrganizationDao organizationDao = new OrganizationDao();
         Key organizationId = organizationDao.save(organization1);
         GroupDao group = new GroupDao();
@@ -406,7 +406,7 @@ public class OrganizationEndpointTest {
 
     @Test
     public void testRemoveOrganization() throws Exception {
-        Organization organization1 = OrganizationDaoTest.createExample();
+        Organization organization1 = TestHelper.createOrganization(false);
         OrganizationDao organizationDao = new OrganizationDao();
         Key organizationId = organizationDao.save(organization1);
         endpoint.removeOrganization(newAdminCaller(55), organizationId);
@@ -417,7 +417,7 @@ public class OrganizationEndpointTest {
         OrganizationDao organizationDao = new OrganizationDao();
         UserDao userDao = new UserDao();
         GroupDao groupDao = new GroupDao();
-        Key organizationId = organizationDao.save(OrganizationDaoTest.createExample());
+        Key organizationId = organizationDao.save(TestHelper.createOrganization(false));
         Key userId = userDao.save(new User("user1"));
         Key groupId = groupDao.save(new Group("group1"));
 
@@ -432,7 +432,7 @@ public class OrganizationEndpointTest {
         OrganizationDao organizationDao = new OrganizationDao();
         UserDao userDao = new UserDao();
         GroupDao groupDao = new GroupDao();
-        Key organizationId = organizationDao.save(OrganizationDaoTest.createExample());
+        Key organizationId = organizationDao.save(TestHelper.createOrganization(false));
         final int memberNumber = 50;
 
         for (int i = 0; i < memberNumber; ++i) {

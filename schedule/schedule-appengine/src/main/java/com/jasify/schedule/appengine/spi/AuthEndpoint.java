@@ -6,6 +6,7 @@ import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
@@ -104,7 +105,7 @@ public class AuthEndpoint {
 
         try {
             com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().login(request.getUsername(), request.getPassword());
-            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(user.getId());
+            boolean isOrgMember = new OrganizationDao().isUserMemberOfAnyOrganization(user.getId());
             HttpUserSession userSession = new HttpUserSession(user, isOrgMember).put(httpServletRequest);
             log.info("[{}] user={} logged in!", httpServletRequest.getRemoteAddr(), user.getName());
 
@@ -208,7 +209,7 @@ public class AuthEndpoint {
                 }
             }
 
-            boolean isOrgMember = OrganizationServiceFactory.getOrganizationService().isOrganizationMember(existingUser.getId());
+            boolean isOrgMember = new OrganizationDao().isUserMemberOfAnyOrganization(existingUser.getId());
             //LOGIN!
             HttpUserSession userSession = new HttpUserSession(existingUser, isOrgMember).put(httpServletRequest);//todo: simulate log in
             return new JasProviderAuthenticateResponse(existingUser, userSession, Objects.toString(oAuth2Info.getState()));

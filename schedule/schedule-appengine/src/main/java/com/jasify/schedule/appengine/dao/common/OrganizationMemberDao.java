@@ -21,18 +21,14 @@ public class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
         super(OrganizationMemberMeta.get());
     }
 
+    public List<Key> byUserIdKeys(Key userId) {
+        OrganizationMemberMeta meta = getMeta();
+        return queryKeys(new UserMembershipQuery(meta, userId));
+    }
+
     public List<OrganizationMember> byUserId(Key userId) {
         OrganizationMemberMeta meta = getMeta();
-        return query(new BaseDaoQuery<OrganizationMember, OrganizationMemberMeta>(meta, new Serializable[]{userId}) {
-            @Override
-            public List<Key> execute() {
-                Key userId = parameters.get(0);
-                return Datastore
-                        .query(meta).filter(meta.userRef.equal(userId))
-                        .asKeyList();
-            }
-        });
-
+        return query(new UserMembershipQuery(meta, userId));
     }
 
     public List<Key> byOrganizationIdAsKeys(Key organizationId) {
@@ -73,6 +69,20 @@ public class OrganizationMemberDao extends BaseCachingDao<OrganizationMember> {
             Key organizationId = parameters.get(0);
             return Datastore
                     .query(meta).filter(meta.organizationRef.equal(organizationId))
+                    .asKeyList();
+        }
+    }
+
+    private static class UserMembershipQuery extends BaseDaoQuery<OrganizationMember, OrganizationMemberMeta> {
+        public UserMembershipQuery(OrganizationMemberMeta meta, Key userId) {
+            super(meta, new Serializable[]{userId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key userId = parameters.get(0);
+            return Datastore
+                    .query(meta).filter(meta.userRef.equal(userId))
                     .asKeyList();
         }
     }

@@ -16,32 +16,6 @@ import java.util.List;
 public interface OrganizationService {
 
     /**
-     * @param id of the organization
-     * @return the organization
-     * @throws EntityNotFoundException  if the organization doesn't exist
-     * @throws IllegalArgumentException if <code>id</code> is not the key to an Organization
-     */
-    @Nonnull
-    public Organization getOrganization(Key id) throws EntityNotFoundException, IllegalArgumentException;
-
-    /**
-     * @return all organizations
-     */
-    public List<Organization> getOrganizations();
-
-    /**
-     * @param userId to check for
-     * @return true if user is part of one or more organizations
-     */
-    public boolean isOrganizationMember(Key userId);
-
-    /**
-     * @param userId to check for
-     * @return all organizations that have the userId as a member
-     */
-    public List<Organization> getOrganizationsForUser(Key userId) throws EntityNotFoundException;
-
-    /**
      * @param group to be added
      * @return the ide of the newly created group
      * @throws UniqueConstraintException if the group name already existed withing this context (not so sure ATM)

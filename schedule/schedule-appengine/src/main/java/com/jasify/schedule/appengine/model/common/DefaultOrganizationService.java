@@ -41,43 +41,6 @@ final class DefaultOrganizationService implements OrganizationService {
         return Singleton.INSTANCE;
     }
 
-    @Nonnull
-    @Override
-    public Organization getOrganization(Key id) throws EntityNotFoundException, IllegalArgumentException {
-        try {
-            return Datastore.get(organizationMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Organization id=" + id);
-        }
-    }
-
-    @Override
-    public boolean isOrganizationMember(Key userId) {
-        List<Key> result = Datastore.query(organizationMemberMeta)
-                .filter(organizationMemberMeta.userRef.equal(userId))
-                .asKeyList();
-        return !result.isEmpty();
-    }
-
-    @Nonnull
-    @Override
-    public List<Organization> getOrganizationsForUser(Key userId) throws EntityNotFoundException {
-        List<OrganizationMember> organizationMembers = Datastore.query(organizationMemberMeta)
-                .filter(organizationMemberMeta.userRef.equal(userId))
-                .asList();
-
-        List<Organization> result = new ArrayList<>();
-        for (OrganizationMember organizationMember : organizationMembers) {
-            result.add(organizationMember.getOrganizationRef().getModel());
-        }
-        return result;
-    }
-
-    @Override
-    public List<Organization> getOrganizations() {
-        return Datastore.query(organizationMeta).asList();
-    }
-
     @Override
     public void addUserToGroup(Key groupId, Key userId) throws EntityNotFoundException, IllegalArgumentException {
         addUserToGroup(getGroup(groupId), UserServiceFactory.getUserService().getUser(userId));

@@ -115,6 +115,11 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         return get(organizationIds);
     }
 
+    public boolean isUserMemberOfAnyOrganization(Key userId) {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        return !organizationMemberDao.byUserIdKeys(userId).isEmpty();
+    }
+
     public List<User> getUsersOfOrganization(Key organizationId) throws EntityNotFoundException {
         OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
         UserDao userDao = new UserDao();
