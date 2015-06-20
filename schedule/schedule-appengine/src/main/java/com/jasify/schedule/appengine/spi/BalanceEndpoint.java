@@ -9,14 +9,13 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.AccountUtil;
 import com.jasify.schedule.appengine.model.balance.BalanceService;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
-import com.jasify.schedule.appengine.model.cart.ShoppingCartService;
-import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowFactory;
@@ -68,6 +67,8 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 packagePath = ""))
 public class BalanceEndpoint {
 
+    private final ShoppingCartDao shoppingCartDao = new ShoppingCartDao();
+
     @ApiMethod(name = "balance.createPayment", path = "balance/create-payment", httpMethod = ApiMethod.HttpMethod.POST)
     public JasPaymentResponse createPayment(User caller, JasPaymentRequest paymentRequest) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
@@ -116,8 +117,7 @@ public class BalanceEndpoint {
         GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(request.getBaseUrl()));
         String cartId = Preconditions.checkNotNull(StringUtils.trimToNull(request.getCartId()));
 
-        ShoppingCartService cartService = ShoppingCartServiceFactory.getShoppingCartService();
-        ShoppingCart cart = cartService.getCart(cartId);
+        ShoppingCart cart = shoppingCartDao.get(cartId);
         if (cart == null) {
             throw new NotFoundException("Cart id: [" + cartId + "] not found.");
         }

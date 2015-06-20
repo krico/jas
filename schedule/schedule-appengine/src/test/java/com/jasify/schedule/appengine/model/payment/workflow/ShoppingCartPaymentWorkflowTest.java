@@ -4,9 +4,12 @@ import com.google.appengine.api.mail.MailServicePb;
 import com.google.appengine.api.mail.dev.LocalMailService;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.activity.TestActivityServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
-import com.jasify.schedule.appengine.model.cart.TestShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.payment.*;
@@ -98,16 +101,19 @@ public class ShoppingCartPaymentWorkflowTest {
 
         newPayment(Arrays.asList(new PaymentWorkflow[]{workflow}));
 
+        ShoppingCartDao shoppingCartDao = new ShoppingCartDao();
+        ShoppingCart cart = new ShoppingCart(SOME_CART);
+        cart.setCurrency("BRL");
+        shoppingCartDao.put(cart);
+
+
         PaymentWorkflowEngine.transition(workflow.getId(), PaymentStateEnum.Created);
-        TestShoppingCartServiceFactory testShoppingCartServiceFactory = new TestShoppingCartServiceFactory();
-        try {
-            testShoppingCartServiceFactory.setUp();
-            EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().clearCart(SOME_CART)).andReturn(new ShoppingCart(SOME_CART));
-            testShoppingCartServiceFactory.replay();
-            PaymentWorkflowEngine.transition(workflow.getId(), PaymentStateEnum.Completed);
-        } finally {
-            testShoppingCartServiceFactory.tearDown();
-        }
+
+        assertEquals("BRL", shoppingCartDao.get(SOME_CART).getCurrency());
+
+        PaymentWorkflowEngine.transition(workflow.getId(), PaymentStateEnum.Completed);
+
+        assertEquals("CHF", shoppingCartDao.get(SOME_CART).getCurrency());
     }
 
     @Test
@@ -131,18 +137,13 @@ public class ShoppingCartPaymentWorkflowTest {
         newPayment(workflows);
 
         PaymentWorkflowEngine.transition(shoppingCartPaymentWorkflow.getId(), PaymentStateEnum.Created);
-        TestShoppingCartServiceFactory testShoppingCartServiceFactory = new TestShoppingCartServiceFactory();
         TestActivityServiceFactory testActivityServiceFactory = new TestActivityServiceFactory();
-
         try {
-            testShoppingCartServiceFactory.setUp();
             testActivityServiceFactory.setUp();
 
             EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().getSubscription(subscription1.getId())).andReturn(subscription1);
             EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().getSubscription(subscription2.getId())).andReturn(subscription2);
-            EasyMock.expect(testShoppingCartServiceFactory.getShoppingCartServiceMock().clearCart(SOME_CART)).andReturn(new ShoppingCart(SOME_CART));
 
-            testShoppingCartServiceFactory.replay();
             testActivityServiceFactory.replay();
 
             LocalMailService localMailService = LocalMailServiceTestConfig.getLocalMailService();
@@ -153,8 +154,8 @@ public class ShoppingCartPaymentWorkflowTest {
             assertNotNull(sentMessages);
             // One for Jasify, One for Subscriber, Two for Publisher
             assertEquals(3, sentMessages.size());
+
         } finally {
-            testShoppingCartServiceFactory.tearDown();
             testActivityServiceFactory.tearDown();
         }
     }

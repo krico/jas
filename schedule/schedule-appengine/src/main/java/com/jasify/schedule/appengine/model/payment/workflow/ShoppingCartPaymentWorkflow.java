@@ -2,11 +2,12 @@ package com.jasify.schedule.appengine.model.payment.workflow;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.mail.MailParser;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
-import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
+import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
@@ -55,7 +56,9 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
     @Override
     public void onCompleted() throws PaymentWorkflowException {
         if (StringUtils.isNotBlank(cartId)) {
-            ShoppingCartServiceFactory.getShoppingCartService().clearCart(cartId);
+            ShoppingCartDao dao = new ShoppingCartDao();
+            ShoppingCart cleanCart = new ShoppingCart(cartId);
+            dao.put(cleanCart);
         }
 
         sendNotifications();
