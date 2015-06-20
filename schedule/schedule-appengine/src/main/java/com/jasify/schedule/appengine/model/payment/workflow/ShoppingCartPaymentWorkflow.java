@@ -8,7 +8,6 @@ import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
-import com.jasify.schedule.appengine.model.cart.ShoppingCartServiceFactory;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
