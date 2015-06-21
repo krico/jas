@@ -6,7 +6,7 @@
     angular.module('jasifyWeb').controller('ApplicationController', ApplicationController);
 
     function ApplicationController($timeout, $scope, $rootScope, $window, $location,
-                                   Auth, BrowserData, AUTH_EVENTS) {
+                                   localStorageService, Auth, BrowserData, AUTH_EVENTS) {
 
         var appVm = this;
 
@@ -20,12 +20,16 @@
 
         function gotoLogin() {
             if ($location.path() &&
-                $location.path() !== '/' &&
-                $location.path().indexOf('logout') === -1) {
-                $window.location = "login.html#?back=" + $location.path();
+                $location.path() !== '/') {
+                if ($location.path().indexOf('oauth') === -1 &&
+                    $location.path().indexOf('logout') === -1) {
+                    localStorageService.set('loginBackPath', $location.path());
+                }
             } else {
-                $window.location = "login.html";
+                localStorageService.remove('loginBackPath');
             }
+
+            $window.location = "login.html";
         }
 
         function menuActive(path) {

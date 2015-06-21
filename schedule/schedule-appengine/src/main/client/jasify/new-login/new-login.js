@@ -3,7 +3,7 @@
     'use strict';
 
     angular.module('jasifyWeb').controller('LoginPageController', function ($mdDialog, $rootScope, $location, $window,
-                                                                            AUTH_EVENTS, Auth, BrowserData) {
+                                                                            localStorageService, AUTH_EVENTS, Auth, BrowserData) {
         var vm = this;
 
         vm.recoverPassword = recoverPassword;
@@ -18,7 +18,8 @@
         restore();
 
         function onLoginSuccess() {
-            var backPage = $location.search().back;
+            var backPage = localStorageService.get('loginBackPath');
+            localStorageService.remove('loginBackPath');
             if (backPage) {
                 $window.location = "/#" + backPage;
             } else {
