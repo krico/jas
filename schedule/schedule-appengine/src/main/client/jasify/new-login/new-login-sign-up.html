@@ -1,0 +1,74 @@
+<div class="title">Create Account</div>
+<hr/>
+<div>
+    I already have an account.&nbsp;<a href ng-click="loginPage.signInMode()"> Sign In</a>
+</div>
+<hr/>
+<div id="oauth-options">
+    <md-button ng-click="vm.oauth('Google')" id="button-goggle" class="md-raised btn-google btn-block">
+        <i class="fa fa-google"></i>
+        Create Account with Google
+    </md-button>
+    <md-button ng-click="vm.oauth('Facebook')" id="button-facebook" class="md-raised btn-google btn-block">
+        <i class="fa fa-facebook-square"></i>
+        Create Account with Facebook
+    </md-button>
+</div>
+<div class="strike">
+    <span>or create account with email</span>
+</div>
+<form name="vm.authenticateForm" role="form" novalidate
+      ng-submit="vm.authenticateForm.$valid && vm.create(vm.onCreated)">
+    <div class="form-group">
+        <input autofocus placeholder="Email" type="email" class="form-control" id="email" name="email" required
+               ng-model-options="{ debounce: { 'default': 1000, 'blur': 0 } }"
+                ng-model="vm.user.email" jas-email/>
+        <div class="has-error"
+             ng-show="vm.authenticateForm.$submitted || vm.authenticateForm.email.$dirty"
+             ng-messages="vm.authenticateForm.email.$error">
+            <small class="help-block" ng-message="required">Email address is required.</small>
+            <small class="help-block" ng-message="email">This is not a valid email.</small>
+            <small class="help-block" ng-message="jasEmail">This email is already registered or is invalid.
+            </small>
+        </div>
+    </div>
+    <div class="form-group">
+        <input placeholder="Password" type="password" class="form-control" id="password" name="password"
+               ng-model="vm.user.password" required/>
+        <div class="has-error"
+             ng-show="vm.authenticateForm.$submitted || vm.authenticateForm.password.$dirty"
+             ng-messages="vm.authenticateForm.password.$error">
+            <small class="help-block" ng-message="required">Choose a password.</small>
+        </div>
+        <small class="has-error"
+               ng-show="vm.passwordStrengthText"
+               ng-class="{ 'has-success': vm.passwordStrength === 'good', 'has-warning': vm.passwordStrength === 'average', 'has-error': vm.passwordStrength === 'weak' }">
+            <span class="help-block">Password strength: {{vm.passwordStrengthText}}</span>
+        </small>
+        <jas-password-strength callback="vm.passwordStrengthCallback"
+                               ng-show="vm.authenticateForm.password.$valid"
+                               password="vm.authenticateForm.password"/>
+    </div>
+    <div class="form-group">
+        <input placeholder="Confirm Password" type="password" class="form-control" id="confirm" name="confirm"
+               ng-model="vm.user.confirm"
+               ng-model-options="{ debounce: { 'default': 1000, 'blur': 0 } }"
+               required jas-confirm-field="vm.authenticateForm.password"/>
+
+        <div class="has-error" ng-show="vm.authenticateForm.$submitted || vm.authenticateForm.confirm.$dirty"
+             ng-messages="vm.authenticateForm.confirm.$error">
+            <small class="help-block" ng-message="required">Password confirmation is required.</small>
+            <small class="help-block" ng-message="jasConfirmField">Passwords do not match.</small>
+        </div>
+    </div>
+    <md-checkbox name="termsAndConditions" required ng-model="vm.termsAndConditions" aria-label="Remember me">
+    </md-checkbox>
+    I have read and agree with the <a href="/terms-and-conditions.html" target="_blank">&nbsp;GTC</a>
+    <div class="has-error" ng-show="vm.authenticateForm.$submitted || vm.authenticateForm.termsAndConditions.$dirty"
+         ng-messages="vm.authenticateForm.termsAndConditions.$error">
+        <small class="help-block" ng-message="required">In order to use our services, you must agree to General Terms & Conditions.</small>
+    </div>
+    <md-button class="md-raised md-accent">
+        Create Account
+    </md-button>
+</form>

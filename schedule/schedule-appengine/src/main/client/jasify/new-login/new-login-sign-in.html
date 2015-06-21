@@ -1,0 +1,39 @@
+<div class="title">Sign In</div>
+<hr/>
+<div>
+    I don't have an account.&nbsp;<a href ng-click="loginPage.createAccountMode()"> Create Account</a>
+</div>
+<hr/>
+<div id="oauth-options">
+    <md-button ng-click="vm.oauth('Google')" id="button-goggle" class="md-raised btn-google btn-block">
+        <i class="fa fa-google"></i>
+        Sign In with Google
+    </md-button>
+    <md-button ng-click="vm.oauth('Facebook')" id="button-facebook" class="md-raised btn-google btn-block">
+        <i class="fa fa-facebook-square"></i>
+        Sign In with Facebook
+    </md-button>
+</div>
+<div class="strike">
+    <span>or sign in with Email / Username</span>
+</div>
+<form name="vm.authenticateForm" role="form" novalidate ng-submit="vm.signIn()">
+    <div class="form-group">
+        <input name="name" class="form-control" ng-model="vm.user.email"
+               autofocus
+               placeholder="Your Email or Username">
+    </div>
+    <div class="form-group">
+        <input name="name" type="password" ng-model="vm.user.password" class="form-control"
+               placeholder="Password">
+    </div>
+    <div>
+        <a href ng-click="loginPage.forgotMode()">Forgot your password?</a>
+    </div>
+    <md-checkbox aria-label="Remember me">
+        Remember me
+    </md-checkbox>
+    <md-button class="md-raised md-accent">
+        Sign In
+    </md-button>
+</form>
