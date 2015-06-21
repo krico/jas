@@ -42,7 +42,7 @@
         function restore() {
             if (BrowserData.getLoggedIn()) {
                 Auth.restore().then(function (u) {
-                    appVm.setCurrentUser(u);
+                    setCurrentUser(u);
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                 }, gotoLogin);
             }

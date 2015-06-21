@@ -1,3 +1,3 @@
 <div layout="column" flex layout-align="center center">
-    <h1 class="md-title hi-message">Hi `{{appVm.currentUser.name}}`</h1>
+    <h1 class="md-title hi-message">Hi `{{appVm.currentUser.name || appVm.currentUser.email}}`</h1>
 </div>
