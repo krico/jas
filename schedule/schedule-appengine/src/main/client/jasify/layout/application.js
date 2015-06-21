@@ -15,6 +15,7 @@
         appVm.menuActive = menuActive;
 
         $scope.$on(AUTH_EVENTS.logoutSuccess, gotoLogin);
+        $scope.$on(AUTH_EVENTS.notAuthenticated, gotoLogin);
 
         if (!$location.path() || $location.path().indexOf('/oauth/') === -1) {
             //don't restore if we are doing oauth

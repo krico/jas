@@ -13,7 +13,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
-                        return Allow.all();
+                        return Allow.user();
                     }
                 }
             })
@@ -22,7 +22,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
-                        return Allow.all();
+                        return Allow.user();
                     }
                 }
             })
@@ -31,9 +31,6 @@
                 controller: 'WidgetsController',
                 controllerAs: 'vm',
                 resolve: {
-                    allow: /*@ngInject*/ function (Allow) {
-                        return Allow.all();
-                    },
                     organizations: /*@ngInject*/ function ($q, Allow, Organization) {
                         return Allow.adminOrOrgMember().then(
                             function () {
@@ -43,7 +40,7 @@
                                 return $q.reject(reason);
                             }
                         );
-                    },
+                    }
                 }
             })
             .when('/logout', {
