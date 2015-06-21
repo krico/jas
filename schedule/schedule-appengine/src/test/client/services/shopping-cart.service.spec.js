@@ -168,4 +168,21 @@ describe('ShoppingCartService', function () {
         expect($gapiMock.client.jasify.carts.addUserActivity).toHaveBeenCalledWith({activityId: activity.id});
     });
 
+    it('should add user activity to cart by id', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'createAnonymousCart').and.returnValue($q.when({result: expected}));
+        var request = {foo: 'bar'};
+        ShoppingCart.createAnonymousCart(request)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.createAnonymousCart).toHaveBeenCalledWith(request);
+    });
+
 });
