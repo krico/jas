@@ -245,16 +245,18 @@
         };
     });
 
-    jasifyDirectivesFormModule.directive('autofocus', ['$timeout', function ($timeout) {
+    jasifyDirectivesFormModule.directive('autofocus', function ($timeout, $window) {
         return {
             restrict: 'A',
             link: function ($scope, $element) {
-                $timeout(function () {
-                    $element[0].focus();
-                });
+                if (typeof $window.orientation === 'undefined') {
+                    $timeout(function () {
+                        $element[0].focus();
+                    });
+                }
             }
         };
-    }]);
+    });
 
     jasifyDirectivesFormModule.directive('colorPicker', function () {
         return {
