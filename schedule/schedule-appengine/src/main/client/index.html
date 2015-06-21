@@ -75,7 +75,7 @@
 </head>
 <body layout="row" ng-controller="ApplicationController as appVm">
 <!--[if lt IE 10]>
-<div ng-show="!vm.isAuthenticated()" class="alert text-center alert-warning alert-dismissable">
+<div class="alert text-center alert-warning alert-dismissable">
     <button class="close" data-dismiss="alert">&times;</button>
     <div>Jasify <strong>no longer supports</strong> Internet Explorer versions <strong>older than 10</strong>.
     </div>
@@ -95,7 +95,7 @@
 <md-sidenav id="sidebar"
             class="toggled md-sidenav-left md-whiteframe-z2"
             md-component-id="left"
-            md-is-locked-open="$mdMedia('gt-md') && appVm.isAuthenticated()">
+            md-is-locked-open="$mdMedia('gt-md')">
     <md-toolbar class="md-whiteframe-glow-z2">
         <h1 class="md-toolbar-tools">
             <a layout="row" flex class="jasify-logo" href="#/">
@@ -147,7 +147,7 @@
     </md-content>
 </md-sidenav>
 <div layout="column" flex>
-    <md-toolbar class="md-whiteframe-glow-z2" ng-controller="NavbarController as vm" ng-show="vm.isAuthenticated()">
+    <md-toolbar class="md-whiteframe-glow-z2" ng-controller="NavbarController as vm">
         <div class="md-toolbar-tools" toolbar-context>
             <md-button hide-gt-md ng-click="vm.toggleList()"
                        ng-show="(!showContext || !hasContext)" class="md-icon-button"
@@ -169,7 +169,7 @@
                        translate="SIGN_OUT" ng-href="#/logout"></md-button>
         </div>
     </md-toolbar>
-    <md-content id="content" ng-controller="NavbarController as vm" ng-class="{ 'home-splash': !vm.isAuthenticated() }"
+    <md-content id="content" ng-controller="NavbarController as vm"
                 flex layout-padding md-scroll-y>
         <md-progress-linear jas-progress ng-show="mode === 'buffer'" class="md-accent sample-show-hide" md-mode="buffer"
                             value="{{determinateValue}}" md-buffer-value="{{determinateValue2}}"></md-progress-linear>
@@ -182,7 +182,7 @@
 </footer>
 <!--<div mask></div>-->
 <!-- These three hidden inputs are for protractor -->
-<input type="hidden" id="auth.status" ng-value="vm.isAuthenticated() ? 'authenticated' : 'anonymous'"/>
+<input type="hidden" id="auth.status" ng-value="'authenticated'"/>
 <input type="hidden" id="auth.name" ng-value="currentUser.name"/>
 <input type="hidden" id="auth.id" ng-value="currentUser.id"/>
 <script src="build/js/dep-main.js"></script>
