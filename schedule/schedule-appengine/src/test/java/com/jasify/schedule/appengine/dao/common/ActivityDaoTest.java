@@ -1,18 +1,12 @@
 package com.jasify.schedule.appengine.dao.common;
 
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
-import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
-import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slim3.datastore.Datastore;
-
-import java.util.Date;
 
 import static junit.framework.TestCase.assertEquals;
 

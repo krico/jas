@@ -69,6 +69,7 @@ public class ActivityEndpoint {
     private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final OrganizationDao organizationDao = new OrganizationDao();
+    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
@@ -94,6 +95,11 @@ public class ActivityEndpoint {
         checkFound(id);
         activityType.setId(id);
         try {
+            final ActivityType dbActivityType = activityTypeDao.get(activityType.getId());
+            final Key organizationId = dbActivityType.getOrganizationRef().getKey();
+            if (activityTypeDao.exists(activityType.getName(), organizationId)) {
+                throw new BadRequestException("ActivityType.name=" + activityType.getName() + ", Organization.id=" + organizationId);
+            }
             return ActivityServiceFactory.getActivityService().updateActivityType(activityType);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
@@ -106,12 +112,18 @@ public class ActivityEndpoint {
     public ActivityType addActivityType(User caller, JasAddActivityTypeRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(request.getOrganizationId()));
         checkFound(request.getActivityType());
-        checkFound(request.getOrganizationId());
+        Key organizationId = checkFound(request.getOrganizationId());
         Key id;
         try {
             final String name = StringUtils.trimToNull(request.getActivityType().getName());
-            if (name == null) throw new BadRequestException("ActivityType.name");
-            Organization organization = organizationDao.get(request.getOrganizationId());
+            if (name == null) {
+                throw new BadRequestException("ActivityType.name");
+            }
+
+            if (activityTypeDao.exists(name, organizationId)) {
+                throw new BadRequestException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
+            }
+            Organization organization = organizationDao.get(organizationId);
             id = ActivityServiceFactory.getActivityService().addActivityType(organization, request.getActivityType());
             return activityTypeDao.get(id);
         } catch (UniqueConstraintException e) {
@@ -300,7 +312,7 @@ public class ActivityEndpoint {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
             Activity activity = activityDao.get(id);
             // TODO: Possible race condition? Need to protect
-            List<Subscription> subscriptions = activityService.getSubscriptions(activity);
+            List<Subscription> subscriptions = subscriptionDao.getByActivity(id);
             if (!subscriptions.isEmpty()) {
                 throw new BadRequestException("Activity has subscriptions");
             }
@@ -336,17 +348,14 @@ public class ActivityEndpoint {
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(userId);
         checkFound(activityId);
-        try {
-            Activity activity = activityDao.get(activityId);
-            List<Subscription> subscriptions = ActivityServiceFactory.getActivityService().getSubscriptions(activity);
-            for (Subscription subscription : subscriptions) {
-                if (userId.equals(subscription.getUserRef().getKey())) {
-                    return subscription;
-                }
+
+        List<Subscription> subscriptions = subscriptionDao.getByActivity(activityId);
+        for (Subscription subscription : subscriptions) {
+            if (userId.equals(subscription.getUserRef().getKey())) {
+                return subscription;
             }
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
         }
+
         throw new NotFoundException("No such subscription");
     }
 
@@ -354,12 +363,8 @@ public class ActivityEndpoint {
     public List<Subscription> getSubscriptions(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activityId));
         checkFound(activityId);
-        try {
-            Activity activity = activityDao.get(activityId);
-            return ActivityServiceFactory.getActivityService().getSubscriptions(activity);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return subscriptionDao.getByActivity(activityId);
+
     }
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)

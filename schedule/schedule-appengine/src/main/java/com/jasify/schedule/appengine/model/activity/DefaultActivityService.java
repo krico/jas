@@ -7,15 +7,12 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
-import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
-import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
+import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.common.OrganizationServiceFactory;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
@@ -65,6 +62,8 @@ class DefaultActivityService implements ActivityService {
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+    private final ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
+    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     private DefaultActivityService() {
         activityTypeMeta = ActivityTypeMeta.get();
@@ -80,12 +79,12 @@ class DefaultActivityService implements ActivityService {
         return Singleton.INSTANCE;
     }
 
-    private boolean isActivityTypeNameUnique(Transaction tx, Key organizationId, String name) {
-        return Datastore.query(tx, activityTypeMeta, organizationId)
-                .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
-                .asKeyList()
-                .isEmpty();
-    }
+//    private boolean isActivityTypeNameUnique(Transaction tx, Key organizationId, String name) {
+//        return Datastore.query(tx, activityTypeMeta, organizationId)
+//                .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
+//                .asKeyList()
+//                .isEmpty();
+//    }
 
     private void validateActivity(Activity activity) throws FieldValueException {
         if (activity.getStart() == null) throw new FieldValueException("Activity.start");
@@ -122,7 +121,8 @@ class DefaultActivityService implements ActivityService {
             return TransactionOperator.execute(new ModelOperation<Key>() {
                 @Override
                 public Key execute(Transaction tx) throws ModelException {
-                    if (!isActivityTypeNameUnique(tx, organization.getId(), activityType.getName())) {
+                    if (activityTypeDao.exists(activityType.getName(), organization.getId())) {
+          //          if (!isActivityTypeNameUnique(tx, organization.getId(), activityType.getName())) {
                         throw new UniqueConstraintException("ActivityType.name=" + activityType.getName() + ", Organization.id=" + organization.getId());
                     }
                     activityType.setId(Datastore.allocateId(organization.getId(), activityTypeMeta));
@@ -154,10 +154,11 @@ class DefaultActivityService implements ActivityService {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
                     if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), name)) {
-                        dbActivityType.setName(name);
-                        if (!isActivityTypeNameUnique(tx, dbActivityType.getOrganizationRef().getKey(), name)) {
+                        if (activityTypeDao.exists(name, dbActivityType.getOrganizationRef().getKey())) {
+                 //       if (!isActivityTypeNameUnique(tx, dbActivityType.getOrganizationRef().getKey(), name)) {
                             throw new UniqueConstraintException("ActivityType.name=" + name);
                         }
+                        dbActivityType.setName(name);
                     }
                     dbActivityType.setColourTag(activityType.getColourTag());
                     dbActivityType.setDescription(activityType.getDescription());
@@ -331,20 +332,6 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public List<Activity> getActivities(Organization organization) {
-        return Datastore.query(activityMeta, organization.getId()).asList();
-    }
-
-    @Nonnull
-    @Override
-    public List<Activity> getActivities(ActivityType activityType) {
-        return Datastore.query(activityMeta)
-                .filter(activityMeta.activityTypeRef.equal(activityType.getId()))
-                .asList();
-    }
-
-    @Nonnull
-    @Override
     public Activity updateActivity(Activity activity) throws EntityNotFoundException, FieldValueException {
         validateActivity(activity);
         Activity dbActivity = activityDao.get(activity.getId());
@@ -364,7 +351,7 @@ class DefaultActivityService implements ActivityService {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
-                    ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, id);
+                    ActivityPackage activityPackage = activityPackageDao.get(id);
                     if (activityPackage.getExecutionCount() != 0) {
                         throw new OperationException("ActivityPackage has executions");
                     }
@@ -445,7 +432,7 @@ class DefaultActivityService implements ActivityService {
                 public ActivityPackageExecution execute(Transaction tx) throws ModelException {
                     ActivityPackageExecution execution = new ActivityPackageExecution();
 
-                    ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
+                    ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
                     if (activityPackage.getItemCount() < activityIds.size()) {
                         throw new OperationException("ActivityPackage[" + activityPackage.getId() + "] itemCount=" +
                                 activityPackage.getItemCount() + ", activities.size=" + activityIds.size());
@@ -512,8 +499,9 @@ class DefaultActivityService implements ActivityService {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
-                    ActivityPackageExecution execution = Datastore.get(tx, activityPackageExecutionMeta, activityPackageExecution.getId());
-                    ActivityPackage activityPackage = Datastore.get(tx, activityPackageMeta, execution.getActivityPackageRef().getKey());
+
+                    ActivityPackageExecution execution = activityPackageExecutionDao.get(activityPackageExecution.getId());
+                    ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
                     activityPackage.setExecutionCount(activityPackage.getExecutionCount() - 1);
                     Datastore.put(tx, activityPackage);
 
@@ -579,36 +567,15 @@ class DefaultActivityService implements ActivityService {
 
     private void cancelSubscription(Transaction tx, Key subscriptionId) throws EntityNotFoundException {
         if (subscriptionId == null) throw new EntityNotFoundException("Subscription id=NULL");
-        Subscription dbSubscription = Datastore.get(tx, subscriptionMeta, subscriptionId);
-        Activity dbActivity = Datastore.get(tx, activityMeta, dbSubscription.getActivityRef().getKey());
+        Subscription dbSubscription = subscriptionDao.get(subscriptionId);
+        Activity dbActivity = activityDao.get(dbSubscription.getActivityRef().getKey());
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
         Datastore.put(tx, dbActivity);
         Datastore.delete(tx, subscriptionId);
     }
 
     @Nonnull
-    @Override
-    public Subscription getSubscription(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("Subscription id=NULL");
-        try {
-            return Datastore.get(subscriptionMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("Subscription id=" + id);
-        }
-    }
-
-    @Override
-    public ActivityPackageExecution getActivityPackageExecution(Key id) throws EntityNotFoundException {
-        if (id == null) throw new EntityNotFoundException("ActivityPackageExecution id=NULL");
-        try {
-            return Datastore.get(activityPackageExecutionMeta, id);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("ActivityPackageExecution id=" + id);
-        }
-    }
-
-    @Nonnull
-    @Override
+ // TODO   @Override
     public List<Subscription> getSubscriptions(Activity activity) {
         // This assumes that you have the latest version of activity
         return activity.getSubscriptionListRef().getModelList();
@@ -674,7 +641,7 @@ class DefaultActivityService implements ActivityService {
                 public ActivityPackage execute(Transaction tx) throws ModelException {
 
                     Key activityPackageId = activityPackage.getId();
-                    ActivityPackage dbActivityPackage = Datastore.get(tx, activityPackageMeta, activityPackageId);
+                    ActivityPackage dbActivityPackage = activityPackageDao.get(activityPackageId);
                     List<Key> newKeys = Lists.transform(activities, ACTIVITY_TO_KEY_FUNCTION);
                     Set<Key> existingKeys = dbActivityPackage.getActivityKeys();
 
@@ -735,7 +702,7 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Nonnull
-    @Override
+ //TODO   @Override
     public List<ActivityPackageActivity> getActivityPackageActivities(Activity activity) {
         Organization organization = activity.getActivityTypeRef().getModel().getOrganizationRef().getModel();
         return Datastore
@@ -752,7 +719,7 @@ class DefaultActivityService implements ActivityService {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
-                    Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackage.getId()).getOrganizationRef().getKey();
+                    Key organizationId = activityPackageDao.get(activityPackage.getId()).getOrganizationRef().getKey();
 
                     ActivityPackageActivity activityPackageActivity = Datastore
                             .query(tx, activityPackageActivityMeta, organizationId)
@@ -789,7 +756,7 @@ class DefaultActivityService implements ActivityService {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
-                    Key organizationId = Datastore.get(tx, activityPackageMeta, activityPackage.getId()).getOrganizationRef().getKey();
+                    Key organizationId = activityPackageDao.get(activityPackage.getId()).getOrganizationRef().getKey();
 
                     ActivityPackageActivity activityPackageActivity = Datastore
                             .query(tx, activityPackageActivityMeta, organizationId)

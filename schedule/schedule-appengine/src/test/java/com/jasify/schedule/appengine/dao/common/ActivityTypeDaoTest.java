@@ -84,14 +84,14 @@ public class ActivityTypeDaoTest {
     public void testExistsForSameOrganisation() throws Exception {
         Organization organization = TestHelper.createOrganization(true);
         ActivityType activityType = TestHelper.createActivityType(organization, true);
-        boolean result = dao.exists(activityType.getLcName(), organization);
+        boolean result = dao.exists(activityType.getLcName(), organization.getId());
         assertTrue(result);
     }
 
     @Test
     public void testExistsForDifferentOrganisation() throws Exception {
         ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
-        boolean result = dao.exists(activityType.getLcName(), TestHelper.createOrganization(true));
+        boolean result = dao.exists(activityType.getLcName(), TestHelper.createOrganization(true).getId());
         assertFalse(result);
     }
 }

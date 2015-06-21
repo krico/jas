@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.payment.workflow;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -22,6 +23,8 @@ public class ActivityPackagePaymentWorkflow extends PaymentWorkflow {
     private Key activityPackageId;
     private List<Key> activityIds;
     private Key activityPackageExecutionId;
+
+    private final ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
 
     public ActivityPackagePaymentWorkflow() {
     }
@@ -70,7 +73,7 @@ public class ActivityPackagePaymentWorkflow extends PaymentWorkflow {
     public void onCanceled() throws PaymentWorkflowException {
         if (activityPackageExecutionId != null) {
             try {
-                ActivityPackageExecution activityPackageExecution = ActivityServiceFactory.getActivityService().getActivityPackageExecution(activityPackageExecutionId);
+                ActivityPackageExecution activityPackageExecution = activityPackageExecutionDao.get(activityPackageExecutionId);
                 ActivityServiceFactory.getActivityService().cancelActivityPackageExecution(activityPackageExecution);
             } catch (EntityNotFoundException e) {
                 throw new PaymentWorkflowException(e);

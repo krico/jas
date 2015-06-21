@@ -107,23 +107,15 @@ public class ActivityPackagePaymentWorkflowTest {
 
     @Test
     public void testOnCanceledAfterCreated() throws Exception {
-        testOnCreated();
-
-        testActivityServiceFactory.setUp();
-        try {
-            ActivityService activityService = testActivityServiceFactory.getActivityServiceMock();
-            expect(activityService.getActivityPackageExecution(activityPackageExecution.getId())).andReturn(activityPackageExecution);
-            activityService.cancelActivityPackageExecution(activityPackageExecution);
-            expectLastCall();
-            testActivityServiceFactory.replay();
-            ActivityPackagePaymentWorkflow transition = PaymentWorkflowEngine.transition(activityPackagePaymentWorkflow.getId(), PaymentStateEnum.Canceled);
-            assertNotNull(transition);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            fail(e.toString());
-        } finally {
-            TestHelper.tearDown(testActivityServiceFactory);
-        }
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
+        ActivityPackageExecution activityPackageExecution = TestHelper.createActivityPackageExecution(TestHelper.createUser(true), activityPackage, true);
+        // Now you see me.
+        int executionCount = activityPackage.getExecutionCount();
+        assertNotNull(Datastore.get(activityPackageExecution.getId()));
+        ActivityServiceFactory.getActivityService().cancelActivityPackageExecution(activityPackageExecution);
+        // Now you don't
+        assertEquals(executionCount - 1, Datastore.get(ActivityPackage.class, activityPackage.getId()).getExecutionCount());
+        assertNull(Datastore.getOrNull(activityPackageExecution.getId()));
     }
 
     @Test

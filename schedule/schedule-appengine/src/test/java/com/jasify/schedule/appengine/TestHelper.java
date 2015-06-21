@@ -5,14 +5,14 @@ import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.tools.development.testing.*;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
+import com.jasify.schedule.appengine.meta.activity.ActivityPackageExecutionMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
+import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.UserContext;
-import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityPackage;
-import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
@@ -461,5 +461,45 @@ public final class TestHelper {
             Datastore.put(activityPackage);
         }
         return activityPackage;
+    }
+
+    public static ActivityPackageExecution createActivityPackageExecution(User user, ActivityPackage activityPackage, boolean store) {
+        PopulatorBuilder populatorBuilder = new PopulatorBuilder();
+        Populator populator = populatorBuilder.build();
+        ActivityPackageExecution activityPackageExecution = populator.populateBean(ActivityPackageExecution.class, "id", "activityPackageRef", "subscriptionListRef", "transferRef", "userRef");
+        activityPackageExecution.setId(Datastore.allocateId(user.getId(), ActivityPackageExecutionMeta.get()));
+        activityPackageExecution.getActivityPackageRef().setModel(activityPackage);
+        activityPackageExecution.getUserRef().setModel(user);
+        if (store) {
+            Datastore.put(activityPackageExecution);
+        }
+        return activityPackageExecution;
+    }
+
+    public static Subscription createSubscription(User user, Activity activity, boolean store) {
+        PopulatorBuilder populatorBuilder = new PopulatorBuilder();
+        Populator populator = populatorBuilder.build();
+        Subscription subscription = populator.populateBean(Subscription.class, "id", "activityRef", "userRef", "transferRef");
+        subscription.setId(Datastore.allocateId(user.getId(), SubscriptionMeta.get()));
+        subscription.getActivityRef().setModel(activity);
+        subscription.getUserRef().setModel(user);
+        if (store) {
+            Datastore.put(subscription);
+        }
+        return subscription;
+    }
+
+    public static Activity createActivity(boolean storeAll) {
+        Organization organization = createOrganization(storeAll);
+        ActivityType activityType = createActivityType(organization, storeAll);
+        return createActivity(activityType, storeAll);
+    }
+
+    public static User createUser(boolean store) {
+        User user = new User("fred", "Em@il.com", "Real Name");
+        if (store) {
+            Datastore.put(user);
+        }
+        return user;
     }
 }

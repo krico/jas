@@ -989,8 +989,8 @@ public class ActivityEndpointTest {
 
     @Test
     public void testGetSubscriptionsUnknownId() throws Exception {
-        thrown.expect(NotFoundException.class);
-        endpoint.getSubscriptions(newAdminCaller(1), Datastore.allocateId(ActivityType.class));
+        List<Subscription> result = endpoint.getSubscriptions(newAdminCaller(1), Datastore.allocateId(ActivityType.class));
+        assertTrue(result.isEmpty());
     }
 
     @Test
