@@ -10,7 +10,6 @@
         $routeProvider
             .when('/', {
                 templateUrl: 'home/home.html',
-                controller: 'HomeController',
                 controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
@@ -20,7 +19,6 @@
             })
             .when('/home', {
                 templateUrl: 'home/home.html',
-                controller: 'HomeController',
                 controllerAs: 'vm',
                 resolve: {
                     allow: /*@ngInject*/ function (Allow) {
