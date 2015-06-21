@@ -53,8 +53,6 @@
                     setCurrentUser(u);
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                 }, gotoLogin);
-            } else {
-                gotoLogin();
             }
         }
 

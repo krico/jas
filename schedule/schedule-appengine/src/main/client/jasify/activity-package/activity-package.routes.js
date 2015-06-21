@@ -9,7 +9,7 @@
                 controllerAs: 'vm',
                 resolve: {
                     organizations: /*@ngInject*/ function ($q, Allow, Organization) {
-                        return Allow.all().then(ok, nok);
+                        return Allow.user().then(ok, nok);
 
                         function ok() {
                             return Organization.queryPublic();
@@ -44,7 +44,7 @@
                 resolve: {
                     activityPackage: /*@ngInject*/ function ($q, $route, Allow, ActivityPackage) {
 
-                        return Allow.all().then(allowed, forbidden);
+                        return Allow.user().then(allowed, forbidden);
 
                         function allowed() {
                             return ActivityPackage.get($route.current.params.activityPackageId);
