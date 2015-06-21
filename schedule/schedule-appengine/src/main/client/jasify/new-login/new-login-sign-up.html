@@ -20,7 +20,7 @@
 <form name="vm.authenticateForm" role="form" novalidate
       ng-submit="vm.authenticateForm.$valid && vm.create(vm.onCreated)">
     <div class="form-group">
-        <input autofocus placeholder="Email" type="email" class="form-control" id="email" name="email" required
+        <input placeholder="Email" type="email" class="form-control" id="email" name="email" required
                ng-model-options="{ debounce: { 'default': 1000, 'blur': 0 } }"
                 ng-model="vm.user.email" jas-email/>
         <div class="has-error"
