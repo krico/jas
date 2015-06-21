@@ -32,12 +32,12 @@ public class ActivityPackageDao extends BaseCachingDao<ActivityPackage> {
         @Override
         public List<Key> execute() {
             Key organizationId = parameters.get(0);
-            return Datastore.query(
-                    Datastore.getCurrentTransaction(), meta, organizationId)
-                    .sort(meta.created.desc).asKeyList();
-//            return Datastore.query(meta)
-//                    .filter(meta.organizationRef.equal(organizationId))
+//            return Datastore.query(
+//                    Datastore.getCurrentTransaction(), meta, organizationId)
 //                    .sort(meta.created.desc).asKeyList();
+            return Datastore.query(meta)
+                    .filter(meta.organizationRef.equal(organizationId))
+                    .sort(meta.created.desc).asKeyList();
         }
     }
 }
