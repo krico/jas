@@ -19,7 +19,13 @@
         restore();
 
         function gotoLogin() {
-            $window.location = "login.html";
+            if ($location.path() &&
+                $location.path() !== '/' &&
+                $location.path().indexOf('logout') === -1) {
+                $window.location = "login.html#?back=" + $location.path();
+            } else {
+                $window.location = "login.html";
+            }
         }
 
         function menuActive(path) {

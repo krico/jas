@@ -2,7 +2,7 @@
 
     'use strict';
 
-    angular.module('jasifyWeb').controller('LoginPageController', function ($mdDialog, $rootScope, $window,
+    angular.module('jasifyWeb').controller('LoginPageController', function ($mdDialog, $rootScope, $location, $window,
                                                                             AUTH_EVENTS, Auth, BrowserData) {
         var vm = this;
 
@@ -18,9 +18,12 @@
         restore();
 
         function onLoginSuccess() {
-            //noinspection JSPrimitiveTypeWrapperUsage
-            $window.location.href = "/";
-
+            var backPage = $location.search().back;
+            if (backPage) {
+                $window.location = "/#" + backPage;
+            } else {
+                $window.location = "/";
+            }
         }
 
         function onLoginFailed() {
