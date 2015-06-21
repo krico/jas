@@ -1,5 +1,5 @@
 describe('ApplicationController', function () {
-    var $controller, $rootScope, $location, $modalMock, $scope, vm, AUTH_EVENTS;
+    var $controller, $rootScope, $location, $modalMock, $scope, vm, AUTH_EVENTS, $window = {};
 
     beforeEach(module('jasifyWeb'));
     beforeEach(module('jasify.mocks'));
@@ -12,20 +12,8 @@ describe('ApplicationController', function () {
         AUTH_EVENTS = _AUTH_EVENTS_;
 
         $scope = $rootScope.$new();
-        vm = $controller('ApplicationController', {$scope: $scope});
+        vm = $controller('ApplicationController', {$scope: $scope, $window : $window});
     }));
-
-    it('keeps a reference to the current user', function () {
-
-        expect($scope.currentUser).toBe(null);
-
-        var u = {test: 'test'};
-
-        $scope.setCurrentUser(u);
-
-        expect($scope.currentUser).toEqual(u);
-
-    });
 
     it('can determine if a menu is active ', function () {
 
@@ -35,19 +23,5 @@ describe('ApplicationController', function () {
 
         expect(vm.menuActive('/profile')).toBe('active');
 
-    });
-
-    it('reacts on AUTH_EVENT.notAuthorized', function () {
-        $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-        $rootScope.$apply();
-        expect($modalMock.data.open.confirmCallback).toBeDefined();
-        expect($modalMock.data.open.cancelCallback).toBeDefined();
-    });
-
-    it('reacts on AUTH_EVENT.notAuthorized', function () {
-        $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-        $rootScope.$apply();
-        expect($modalMock.data.open.confirmCallback).toBeDefined();
-        expect($modalMock.data.open.cancelCallback).toBeDefined();
     });
 });

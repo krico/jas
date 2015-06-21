@@ -1,11 +1,11 @@
+/*global window */
 (function (angular) {
+
+    'use strict';
 
     angular.module('jasifyWeb').controller('ProfileSettingsController', ProfileSettingsController);
 
     function ProfileSettingsController($scope, $routeParams, Session, User, aButtonController, jasLocale) {
-
-        // Uncomment to see how mask works
-        // $timeout(mask.show, 2000);
 
         var vm = this;
 
@@ -52,4 +52,4 @@
         }
     }
 
-})(angular);
+})(window.angular);

@@ -1,5 +1,5 @@
 describe('LogoutController', function () {
-    var $scope, vm, Session, $q, $applicationScope, Auth, $rootScope, AUTH_EVENTS;
+    var $scope, vm, Session, $q, $applicationScope, Auth, $rootScope, AUTH_EVENTS, $window = {};
 
     beforeEach(module('jasifyWeb'));
 
@@ -10,17 +10,20 @@ describe('LogoutController', function () {
         AUTH_EVENTS = _AUTH_EVENTS_;
         $rootScope = _$rootScope_;
         $applicationScope = $rootScope.$new();
-        $controller('ApplicationController', {$scope: $applicationScope});
+        $controller('ApplicationController', {
+            $scope: $applicationScope,
+            $window: $window
+        });
         $scope = $applicationScope.$new();
 
         vm = $controller('LogoutController', {
-            $scope: $scope
+            $scope: $scope,
+            $window: $window
         });
     }));
 
     it('can logout', function () {
 
-        $scope.setCurrentUser({});
         var defer = $q.defer();
         defer.resolve();
         spyOn(Auth, 'logout').and.returnValue(defer.promise);
@@ -30,12 +33,11 @@ describe('LogoutController', function () {
         vm.logout();
 
         expect($rootScope.$broadcast).not.toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
-        expect($scope.currentUser).not.toBe(null);
 
         $rootScope.$apply();
 
         expect($rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
-        expect($scope.currentUser).toBe(null);
+        expect($window.location).toBe("login.html");
     });
 
 });

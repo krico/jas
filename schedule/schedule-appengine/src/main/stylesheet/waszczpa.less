@@ -6,6 +6,41 @@
 
 @import "inline-images";
 @import 'tables';
+@import 'login';
+
+.strike {
+  margin: 20px 0;
+  display: block;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+
+  > span {
+    color: rgb(220, 218, 212);
+    position: relative;
+    display: inline-block;
+  }
+
+  > span:before, > span:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 9999px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  > span:before {
+    right: 100%;
+    margin-right: 15px;
+  }
+
+  > span:after {
+    left: 100%;
+    margin-left: 15px;
+  }
+}
+
 
 .lt-ie10 {
   .md-toolbar-tools, .main-menu, #content, #splash-page, #sidebar {
@@ -42,9 +77,9 @@
 }
 
 body {
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  overflow: hidden !important;
 
   #content {
     background-color: inherit;
@@ -55,13 +90,6 @@ body {
       margin: 0;
     }
   }
-}
-
-.home-splash {
-  background-position: 50% 50%;
-  background-size: cover;
-  background-repeat: none;
-  background-image: url(http://d3nn82uaxijpm6.cloudfront.net/assets/website/backgrounds/unlock_your_potential-run-2ec3ce8df18718b9c5a6f1eb1c36696f.jpg)
 }
 
 .actions-group {
@@ -134,21 +162,23 @@ td.actions-column {
   }
 }
 
-.btn.btn-default.btn-facebook {
+.btn.btn-default.btn-facebook, #button-facebook {
   background-color: @facebookBgColor;
   color: white;
 
   &:hover {
     color: white;
+    background-color: darken(@facebookBgColor, 5%);
   }
 }
 
-.btn.btn-default.btn-google {
+.btn.btn-default.btn-google, #button-goggle {
   background-color: @googleBgColor;
   color: white;
 
   &:hover {
     color: white;
+    background-color: darken(@googleBgColor, 5%);
   }
 }
 
