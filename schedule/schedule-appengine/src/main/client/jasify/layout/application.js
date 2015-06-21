@@ -10,7 +10,7 @@
 
         var appVm = this;
 
-        appVm.currentUser = $rootScope.setCurrentUser = setCurrentUser;
+        appVm.setCurrentUser = $rootScope.setCurrentUser = setCurrentUser;
         appVm.currentUser = null;
         appVm.menuActive = menuActive;
 
