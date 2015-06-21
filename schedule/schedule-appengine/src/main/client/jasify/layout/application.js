@@ -10,6 +10,7 @@
 
         var appVm = this;
 
+        appVm.currentUser = $rootScope.setCurrentUser = setCurrentUser;
         appVm.currentUser = null;
         appVm.menuActive = menuActive;
 
@@ -28,10 +29,14 @@
             return false;
         }
 
+        function setCurrentUser(user) {
+            appVm.currentUser = $rootScope.currentUser = user;
+        }
+
         function restore() {
             if (BrowserData.getLoggedIn()) {
                 Auth.restore().then(function (u) {
-                    appVm.currentUser = u;
+                    appVm.setCurrentUser(u);
                     $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                 }, gotoLogin);
             }
