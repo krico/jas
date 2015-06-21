@@ -16,7 +16,10 @@
 
         $scope.$on(AUTH_EVENTS.logoutSuccess, gotoLogin);
 
-        restore();
+        if (!$location.path() || $location.path().indexOf('/oauth/') === -1) {
+            //don't restore if we are doing oauth
+            restore();
+        }
 
         function gotoLogin() {
             if ($location.path() &&
