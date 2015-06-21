@@ -19,7 +19,6 @@ import java.util.*;
 public class ActivityPackage {
     private static final Logger log = LoggerFactory.getLogger(ActivityPackage.class);
 
-    private final ActivityDao activityDao = new ActivityDao();
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -180,6 +179,7 @@ public class ActivityPackage {
 
         for (ActivityPackageActivity link : activityLinks) {
             try {
+                ActivityDao activityDao = new ActivityDao();
                 Activity activity = activityDao.get(link.getActivityRef().getKey());
                 ret.add(activity);
             } catch (EntityNotFoundException e) {

@@ -79,13 +79,6 @@ class DefaultActivityService implements ActivityService {
         return Singleton.INSTANCE;
     }
 
-//    private boolean isActivityTypeNameUnique(Transaction tx, Key organizationId, String name) {
-//        return Datastore.query(tx, activityTypeMeta, organizationId)
-//                .filter(activityTypeMeta.lcName.equal(StringUtils.lowerCase(name)))
-//                .asKeyList()
-//                .isEmpty();
-//    }
-
     private void validateActivity(Activity activity) throws FieldValueException {
         if (activity.getStart() == null) throw new FieldValueException("Activity.start");
         if (activity.getStart().getTime() < System.currentTimeMillis()) throw new FieldValueException("Activity.start");

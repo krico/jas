@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.spi.transform;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.dm.JasSubscription;
@@ -32,14 +33,12 @@ public class JasSubscriptionTransformerTest {
 
     @Test
     public void testTransformTo() throws Exception {
-        Subscription internal = new Subscription();
-        Key id = Datastore.allocateId(Subscription.class);
-        internal.setId(id);
-        internal.setCreated(new Date());
-        internal.getUserRef().setModel(new User("Fred"));
+        User user = TestHelper.createUser(true);
+        Activity activity = TestHelper.createActivity(true);
+        Subscription internal =  TestHelper.createSubscription(user, activity, true);
         JasSubscription external = transformer.transformTo(internal);
 
-        assertEquals(KeyUtil.keyToString(id), external.getId());
+        assertEquals(KeyUtil.keyToString(internal.getId()), external.getId());
         assertEquals(internal.getCreated(), external.getCreated());
         assertEquals(internal.getUserRef().getModel().getName(), external.getUser().getName());
     }

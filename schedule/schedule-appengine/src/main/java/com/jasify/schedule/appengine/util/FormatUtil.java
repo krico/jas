@@ -28,10 +28,6 @@ import java.util.Objects;
 public final class FormatUtil {
     private static final Logger log = LoggerFactory.getLogger(FormatUtil.class);
 
-    private static final ActivityDao activityDao = new ActivityDao();
-    private static final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
-    private static final UserDao userDao = new UserDao();
-
     private static final ThreadLocal<SimpleDateFormat> START_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -52,10 +48,12 @@ public final class FormatUtil {
     public static String toString(Subscription subscription) {
         try {
             if (subscription.getActivityRef().getKey() != null) {
+                ActivityDao activityDao = new ActivityDao();
                 Activity activity = activityDao.get(subscription.getActivityRef().getKey());
                 StringBuilder builder = new StringBuilder().append(activity);
 
                 if (subscription.getUserRef().getKey() != null) {
+                    UserDao userDao = new UserDao();
                     User user = userDao.get(subscription.getUserRef().getKey());
                     builder.append(" (").append(toString(user)).append(')');
                 }
@@ -71,9 +69,11 @@ public final class FormatUtil {
     public static String toString(ActivityPackageExecution activityPackageExecution) {
         try {
             if (activityPackageExecution.getActivityPackageRef().getKey() != null) {
+                ActivityPackageDao activityPackageDao = new ActivityPackageDao();
                 ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
                 StringBuilder builder = new StringBuilder().append(toString(activityPackage));
                 if (activityPackageExecution.getUserRef().getKey() != null) {
+                    UserDao userDao = new UserDao();
                     User user = userDao.get(activityPackageExecution.getUserRef().getKey());
                     builder.append(" (").append(toString(user)).append(')');
                 }
