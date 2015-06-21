@@ -1,0 +1,116 @@
+html.login-page {
+  background: url(../img/bg_horizontal.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+
+  body   {
+    background: transparent;
+    overflow: auto !important;
+  }
+}
+
+.jasify-logo {
+  @media (max-width: @angularMaterialLayoutSm) {
+    zoom: 0.5;
+  }
+}
+
+.login-sub-page {
+  padding: 0 20px;
+
+  &.ng-enter, &.ng-leave {
+    -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+    transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  }
+
+  &.ng-enter {
+    opacity:0;
+  }
+
+  &.ng-leave,
+  &.ng-leave.ng-leave-active {
+    display: none;
+  }
+
+  &.ng-enter.ng-enter-active {
+    opacity:1;
+  }
+}
+
+#sign-in-up {
+
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.8);
+  padding-top: 10px;
+  padding-bottom: 20px;
+  max-width: 350px;
+  min-width: 300px;
+  width: 50vw;
+  margin: 0 auto 10px auto;
+  position: relative;
+
+  border-radius: 6px;
+  background-color: rgba(25, 21, 30, 0.8);
+
+  md-checkbox {
+    margin-left: 0;
+    color: rgb(168, 168, 167);
+  }
+
+  md-checkbox.md-default-theme:not(.md-checked) .md-icon {
+    border-color: white;
+    background-color: white;
+  }
+
+  md-checkbox[name='termsAndConditions'] {
+    display: inline;
+  }
+
+  .form-control {
+    border-radius: 3px;
+    padding-left: 15px;
+    height: 35px;
+  }
+
+  .md-button {
+    margin-left: 0;
+  }
+
+  @media (max-width: @angularMaterialLayoutSm) {
+    .md-button span {
+      font-size: smaller;
+    }
+  }
+
+  .md-raised.md-accent.md-button.md-default-theme {
+    color: white;
+    background-color: rgb(245, 124, 0);
+  }
+
+  hr {
+    border-top-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 24px;
+    color: rgb(220, 218, 212);
+    text-align: center;
+  }
+
+  #oauth-options {
+
+    i.fa {
+      font-size: 1.5em;
+      float: left;
+      position: relative;
+      top: 8px;
+      left: 5px;
+    }
+  }
+}
