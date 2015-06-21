@@ -268,6 +268,7 @@ function clientDependenciesCssFun(key) {
     fonts.push('src/main/fonts' + '/**/*.*');
     fonts.push(path.join(paths.bower, 'ionicons', 'fonts') + '/**/*.*');
     fonts.push(path.join(paths.bower, 'bootstrap', 'fonts') + '/**/*.*');
+    fonts.push(path.join(paths.bower, 'font-awesome', 'fonts') + '/**/*.*');
     return function (cb) {
 
         gulp.src(fonts)
