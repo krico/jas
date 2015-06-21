@@ -1,11 +1,3 @@
-<div layout="column" flex layout-align="center center" ng-hide="currentUser">
-    <h1 class="md-display-3">Jasify!</h1>
-    <p class="text-center">
-        <md-button ng-click="vm.createAccount()" class="md-raised md-primary">Create Account</md-button>
-        or
-        <md-button ng-click="vm.signIn()" class="md-raised md-primary">Sign In</md-button>
-    </p>
-</div>
-<div layout="column" flex layout-align="center center"  ng-show="currentUser">
-    <h1 class="md-title hi-message">Hi `{{currentUser.name}}`</h1>
+<div layout="column" flex layout-align="center center">
+    <h1 class="md-title hi-message">Hi `{{appVm.currentUser.name}}`</h1>
 </div>
