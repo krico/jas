@@ -584,69 +584,6 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testGetActivitiesByOrganization() throws Exception {
-        List<Activity> activities = activityService.getActivities(organization1);
-        assertNotNull(activities);
-        assertTrue(activities.isEmpty());
-        int total = 20;
-        Set<Key> added = new HashSet<>();
-        for (int i = 0; i < total; ++i) {
-            if (i % 3 == 0) {
-                added.addAll(activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails()));
-            } else {
-                added.addAll(activityService.addActivity(activityType2OfOrganization1, activity2Organization1, new RepeatDetails()));
-            }
-        }
-
-        activities = activityService.getActivities(organization1);
-        assertNotNull(activities);
-        assertEquals(20, activities.size());
-        assertEquals(20, added.size());
-        for (Activity activity : activities) {
-            assertTrue(added.remove(activity.getId()));
-        }
-        assertTrue(added.isEmpty());
-    }
-
-    @Test
-    public void testGetActivitiesByActivityType() throws Exception {
-        List<Activity> activities = activityService.getActivities(activityType1OfOrganization1);
-        assertNotNull(activities);
-        assertTrue(activities.isEmpty());
-
-        activities = activityService.getActivities(activityType2OfOrganization1);
-        assertNotNull(activities);
-        assertTrue(activities.isEmpty());
-
-        int total = 20;
-        Set<Key> addedType1 = new HashSet<>();
-        Set<Key> addedType2 = new HashSet<>();
-        for (int i = 0; i < total; ++i) {
-            if (i % 3 == 0) {
-                addedType1.addAll(activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails()));
-            } else {
-                addedType2.addAll(activityService.addActivity(activityType2OfOrganization1, activity2Organization1, new RepeatDetails()));
-            }
-        }
-
-        activities = activityService.getActivities(activityType1OfOrganization1);
-        assertNotNull(activities);
-        assertEquals(addedType1.size(), activities.size());
-        for (Activity activity : activities) {
-            assertTrue(addedType1.remove(activity.getId()));
-        }
-        assertTrue(addedType1.isEmpty());
-
-        activities = activityService.getActivities(activityType2OfOrganization1);
-        assertNotNull(activities);
-        assertEquals(addedType2.size(), activities.size());
-        for (Activity activity : activities) {
-            assertTrue(addedType2.remove(activity.getId()));
-        }
-        assertTrue(addedType2.isEmpty());
-    }
-
-    @Test
     public void testUpdateActivity() throws Exception {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         Date expected = activity1Organization1.getCreated();
@@ -689,24 +626,6 @@ public class ActivityServiceTest {
         List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         activityService.removeActivity(activity1Organization1);
         assertNull(Datastore.getOrNull(ids.get(0)));
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetSubscriptionWithNullIdThrowsEntityNotFoundException() throws Exception {
-        activityService.getSubscription(null);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testGetSubscriptionEntityNotFoundException() throws Exception {
-        activityService.getSubscription(Datastore.allocateId(Subscription.class));
-    }
-
-    @Test
-    public void testGetSubscription() throws Exception {
-        Subscription subscription = new Subscription();
-        Datastore.put(subscription);
-        Subscription result = activityService.getSubscription(subscription.getId());
-        assertNotNull(result);
     }
 
     @Test
@@ -805,22 +724,6 @@ public class ActivityServiceTest {
         Subscription subscription = new Subscription();
         subscription.setId(Datastore.allocateId(Subscription.class));
         activityService.cancel(subscription);
-    }
-
-    @Test
-    public void testGetActivities() throws Exception {
-        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
-        Subscription subscription1 = activityService.subscribe(testUser1, activity1Organization1);
-        Subscription subscription2 = activityService.subscribe(testUser2, activity1Organization1);
-        List<Subscription> subscriptions = activityService.getSubscriptions(activity1Organization1);
-        assertNotNull(subscriptions);
-        assertEquals(2, subscriptions.size());
-        Set<Key> ids = new HashSet<>();
-        for (Subscription subscription : subscriptions) {
-            ids.add(subscription.getId());
-        }
-        assertTrue(ids.contains(subscription1.getId()));
-        assertTrue(ids.contains(subscription2.getId()));
     }
 
     @Test
@@ -1118,16 +1021,6 @@ public class ActivityServiceTest {
         thrown.expectMessage("ActivityPackage.activities");
         activityPackage10Organization.setItemCount(1);
         activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1));
-    }
-
-    @Test
-    public void testGetActivityPackageActivities() throws Exception {
-        thrown.expect(FieldValueException.class);
-        thrown.expectMessage("ActivityPackage.activities");
-        activityPackage10Organization.setItemCount(2);
-        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
-        List<ActivityPackageActivity> activityPackageActivities = activityService.getActivityPackageActivities(activity1Organization1);
-        assertEquals(2, activityPackageActivities.size());
     }
 
 //    @Test

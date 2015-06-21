@@ -7,14 +7,17 @@ import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.spi.dm.JasActivity;
 import com.jasify.schedule.appengine.util.BeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author krico
  * @since 07/01/15.
  */
 public class JasActivityTransformer implements Transformer<Activity, JasActivity> {
-    private final JasActivityTypeTransformer typeTransformer = new JasActivityTypeTransformer();
+    private static final Logger log = LoggerFactory.getLogger(JasActivityTransformer.class);
 
+    private final JasActivityTypeTransformer typeTransformer = new JasActivityTypeTransformer();
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
 
     public JasActivityTransformer() {
@@ -36,7 +39,7 @@ public class JasActivityTransformer implements Transformer<Activity, JasActivity
         try {
             return activityTypeDao.get(activity.getActivityTypeRef().getKey());
         } catch (EntityNotFoundException e) {
-            // Is this possible?
+            log.error("Entity not found", e);
             return activity.getActivityTypeRef().getModel();
         }
     }

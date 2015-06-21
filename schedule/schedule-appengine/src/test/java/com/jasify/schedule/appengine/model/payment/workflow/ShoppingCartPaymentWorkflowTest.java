@@ -8,13 +8,11 @@ import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.Subscription;
-import com.jasify.schedule.appengine.model.activity.TestActivityServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.model.users.User;
-import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,40 +28,18 @@ import static junit.framework.TestCase.assertNotNull;
 public class ShoppingCartPaymentWorkflowTest {
     public static final String SOME_CART = "someCart";
 
-    private PayPalPayment newPayment(List<PaymentWorkflow> workflows) throws PaymentException {
+    private PayPalPayment newPayment(List<PaymentWorkflow> paymentWorkflow) throws PaymentException {
         PayPalPayment payment = new PayPalPayment();
         payment.setCurrency("USD");
         payment.setAmount(30.35);
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
-        paymentService.newPayment(Datastore.allocateId(User.class), payment, workflows);
+        paymentService.newPayment(Datastore.allocateId(User.class), payment, paymentWorkflow);
         return payment;
     }
 
-    private User createUser() {
-        User user = new User();
-        user.setRealName("Real Name");
-        user.setName("Name");
-        user.setEmail("Em@il.com");
-        Datastore.put(user);
-        return user;
-    }
-
-    private Subscription createSubscription() throws Exception {
-        Organization organization = new Organization("Org");
-        organization.setId(Datastore.allocateId(Organization.class));
-        Datastore.put(new OrganizationMember(organization, createUser()));
-        ActivityType activityType = new ActivityType("AT");
-        activityType.getOrganizationRef().setModel(organization);
-        Activity activity = new Activity(activityType);
-        Subscription subscription = new Subscription();
-        subscription.setId(Datastore.allocateId(Subscription.class));
-        subscription.getActivityRef().setModel(activity);
-        subscription.getUserRef().setModel(createUser());
-        return subscription;
-    }
-
-    private ActivityPaymentWorkflow createActivityPaymentWorkflow() {
+    private ActivityPaymentWorkflow createActivityPaymentWorkflow(Subscription subscription) {
         ActivityPaymentWorkflow activityPaymentWorkflow = new ActivityPaymentWorkflow();
+        activityPaymentWorkflow.setSubscriptionId(subscription.getId());
         Datastore.put(activityPaymentWorkflow);
         return activityPaymentWorkflow;
     }
@@ -119,44 +95,37 @@ public class ShoppingCartPaymentWorkflowTest {
     @Test
     public void testOnCompletedSendsEmails() throws Exception {
         // This test looks too big :(
-        ActivityPaymentWorkflow activityPaymentWorkflow1 = createActivityPaymentWorkflow();
-        Subscription subscription1 = createSubscription();
-        activityPaymentWorkflow1.setSubscriptionId(subscription1.getId());
 
-        ActivityPaymentWorkflow activityPaymentWorkflow2 = createActivityPaymentWorkflow();
-        Subscription subscription2 = createSubscription();
-        activityPaymentWorkflow2.setSubscriptionId(subscription2.getId());
+        List<PaymentWorkflow> paymentWorkflow = new ArrayList<>();
+
+        User subscriber = TestHelper.createUser(true);
+        Organization organization = TestHelper.createOrganization(true);
+        OrganizationMember organizationMember = new OrganizationMember(organization, TestHelper.createUser(true));
+        Datastore.put(organizationMember);
+
+        for (int i = 0; i < 2; i++) {
+            ActivityType activityType = TestHelper.createActivityType(organization, true);
+            Activity activity = TestHelper.createActivity(activityType, true);
+            Subscription subscription = TestHelper.createSubscription(subscriber, activity, true);
+            ActivityPaymentWorkflow activityPaymentWorkflow = createActivityPaymentWorkflow(subscription);
+            paymentWorkflow.add(activityPaymentWorkflow);
+        }
 
         ShoppingCartPaymentWorkflow shoppingCartPaymentWorkflow = new ShoppingCartPaymentWorkflow(SOME_CART);
         Datastore.put(shoppingCartPaymentWorkflow);
 
-        List<PaymentWorkflow> workflows = new ArrayList<>();
-        workflows.add(activityPaymentWorkflow1);
-        workflows.add(activityPaymentWorkflow2);
-        workflows.add(shoppingCartPaymentWorkflow);
-        newPayment(workflows);
+        paymentWorkflow.add(shoppingCartPaymentWorkflow);
+        newPayment(paymentWorkflow);
 
         PaymentWorkflowEngine.transition(shoppingCartPaymentWorkflow.getId(), PaymentStateEnum.Created);
-        TestActivityServiceFactory testActivityServiceFactory = new TestActivityServiceFactory();
-        try {
-            testActivityServiceFactory.setUp();
 
-            EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().getSubscription(subscription1.getId())).andReturn(subscription1);
-            EasyMock.expect(testActivityServiceFactory.getActivityServiceMock().getSubscription(subscription2.getId())).andReturn(subscription2);
+        LocalMailService localMailService = LocalMailServiceTestConfig.getLocalMailService();
+        localMailService.clearSentMessages();
 
-            testActivityServiceFactory.replay();
-
-            LocalMailService localMailService = LocalMailServiceTestConfig.getLocalMailService();
-            localMailService.clearSentMessages();
-
-            PaymentWorkflowEngine.transition(shoppingCartPaymentWorkflow.getId(), PaymentStateEnum.Completed);
-            List<MailServicePb.MailMessage> sentMessages = localMailService.getSentMessages();
-            assertNotNull(sentMessages);
-            // One for Jasify, One for Subscriber, Two for Publisher
-            assertEquals(3, sentMessages.size());
-
-        } finally {
-            testActivityServiceFactory.tearDown();
-        }
+        PaymentWorkflowEngine.transition(shoppingCartPaymentWorkflow.getId(), PaymentStateEnum.Completed);
+        List<MailServicePb.MailMessage> sentMessages = localMailService.getSentMessages();
+        assertNotNull(sentMessages);
+        // One for Subscriber, One for Publisher
+        assertEquals(2, sentMessages.size());
     }
 }

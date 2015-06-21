@@ -18,7 +18,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
-import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import java.util.List;
 import java.util.Random;
@@ -694,16 +693,6 @@ public class ActivityEndpointTest {
     }
 
     @Test
-    public void testAddActivityNullActivityTypeModel() throws Exception {
-        thrown.expect(EntityNotFoundRuntimeException.class);
-        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        Activity activity = new Activity();
-        activity.getActivityTypeRef().setKey(Datastore.allocateId(ActivityType.class));
-        jasAddActivityRequest.setActivity(activity);
-        endpoint.addActivity(null, jasAddActivityRequest);
-    }
-
-    @Test
     public void testAddActivityNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
@@ -989,8 +978,8 @@ public class ActivityEndpointTest {
 
     @Test
     public void testGetSubscriptionsUnknownId() throws Exception {
-        thrown.expect(NotFoundException.class);
-        endpoint.getSubscriptions(newAdminCaller(1), Datastore.allocateId(ActivityType.class));
+        List<Subscription> result = endpoint.getSubscriptions(newAdminCaller(1), Datastore.allocateId(ActivityType.class));
+        assertTrue(result.isEmpty());
     }
 
     @Test

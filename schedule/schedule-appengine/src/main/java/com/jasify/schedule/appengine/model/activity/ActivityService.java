@@ -58,22 +58,6 @@ public interface ActivityService {
     List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws FieldValueException;
 
     /**
-     * @param organization to search within
-     * @return all activities in that organization
-     */
-    @Nonnull
-    List<Activity> getActivities(Organization organization);
-
-    /**
-     * Get all activities of a certain type
-     *
-     * @param activityType to search by
-     * @return all activities of this type
-     */
-    @Nonnull
-    List<Activity> getActivities(ActivityType activityType);
-
-    /**
      * @param activity to updated
      * @return the updated activity
      * @throws EntityNotFoundException if it doesn't exist
@@ -120,13 +104,6 @@ public interface ActivityService {
     void removeActivityFromActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
 
     /**
-     * @param activity to find related ActivityPackageActivities
-     * @return the list of linked ActivityPackageActivities
-     */
-    public List<ActivityPackageActivity> getActivityPackageActivities(Activity activity);
-
-
-    /**
      * Subscribe a user for an activity
      *
      * @param user     to subscribe
@@ -164,25 +141,6 @@ public interface ActivityService {
      *                                   if any of the keys is not the type they should be
      */
     ActivityPackageExecution subscribe(Key userId, Key activityPackageId, List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException;
-
-    /**
-     * List subscriptions for an activity
-     *
-     * @param activity to get the subscriptions from
-     * @return list of subscriptions
-     */
-    @Nonnull
-    List<Subscription> getSubscriptions(Activity activity);
-
-    /**
-     * @param id of Subscription to get
-     * @return Subscription
-     * @throws EntityNotFoundException if subscription with id could be found
-     */
-    @Nonnull
-    Subscription getSubscription(Key id) throws EntityNotFoundException;
-
-    ActivityPackageExecution getActivityPackageExecution(Key id) throws EntityNotFoundException;
 
     /**
      * Cancel a subscription, effectively doing the reverse of {@link #subscribe}

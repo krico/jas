@@ -186,8 +186,6 @@ public class JasifyEndpointTest {
         Subscription subscription = new Subscription();
         subscription.getActivityRef().setModel(activity);
         Datastore.put(subscription);
-        ActivityService activityService = ActivityServiceFactory.getActivityService();
-        expect(activityService.getSubscription(subscription.getId())).andReturn(subscription);
         testActivityServiceFactory.replay();
         replay(userService);
         OrgMemberChecker orgMemberChecker = OrgMemberChecker.createFromSubscriptionId(subscription.getId());

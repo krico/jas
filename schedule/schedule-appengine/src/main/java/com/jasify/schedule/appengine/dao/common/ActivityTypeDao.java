@@ -5,7 +5,6 @@ import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
-import com.jasify.schedule.appengine.model.common.Organization;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 
@@ -22,10 +21,10 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
         super(ActivityTypeMeta.get());
     }
 
-    public boolean exists(String lcName, Organization organization) {
+    public boolean exists(String name, Key organizationId) {
         ActivityTypeMeta meta = getMeta();
-        return Datastore.query(Datastore.getCurrentTransaction(), meta, organization.getId())
-                .filter(meta.lcName.equal(StringUtils.lowerCase(lcName)))
+        return Datastore.query(Datastore.getCurrentTransaction(), meta, organizationId)
+                .filter(meta.lcName.equal(StringUtils.lowerCase(name)))
                 .count() > 0;
     }
 

@@ -1,10 +1,7 @@
 package com.jasify.schedule.appengine.spi;
 
 import com.google.appengine.api.datastore.Key;
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
-import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
-import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
-import com.jasify.schedule.appengine.dao.common.OrganizationDao;
+import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -38,6 +35,7 @@ abstract class OrgMemberChecker {
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     protected Key id;
     private static final ThreadLocal<OrgMemberChecker> ACTIVITY = new ThreadLocal<OrgMemberChecker>() {
@@ -167,8 +165,7 @@ abstract class OrgMemberChecker {
 
     protected Subscription getSubscription(Key id) throws EntityNotFoundException {
         if (id == null) return null;
-        // TODO: Optimisation to use SubscriptionDao
-        return ActivityServiceFactory.getActivityService().getSubscription(id);
+        return subscriptionDao.get(id);
     }
 
     protected Organization getOrganizationFromActivityType(Key id) throws EntityNotFoundException {
