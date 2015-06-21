@@ -40,16 +40,24 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
             return Collections.emptyList();
         }
 
-        final Key organizationId = activityType.getOrganizationRef().getKey();
+        Key organizationId = activityType.getOrganizationRef().getKey();
 
-        return query(new BaseDaoQuery<ActivityPackageActivity, ActivityPackageActivityMeta>(meta, new Serializable[0]) {
-            @Override
-            public List<Key> execute() {
-                return Datastore.query(
-                        Datastore.getCurrentTransaction(), meta, organizationId)
-                        .filter(meta.activityRef.equal(activityId))
-                        .asKeyList();
-            }
-        });
+        return query(new ByOrganizationAndActivityQuery(meta, organizationId, activityId));
+    }
+
+    private static class ByOrganizationAndActivityQuery extends BaseDaoQuery<ActivityPackageActivity, ActivityPackageActivityMeta> {
+        public ByOrganizationAndActivityQuery(ActivityPackageActivityMeta meta, Key organizationId, Key activityId) {
+            super(meta, new Serializable[]{organizationId, activityId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key organizationId = parameters.get(0);
+            Key activityId = parameters.get(1);
+            return Datastore.query(
+                    Datastore.getCurrentTransaction(), meta, organizationId)
+                    .filter(meta.activityRef.equal(activityId))
+                    .asKeyList();
+        }
     }
 }

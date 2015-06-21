@@ -21,13 +21,23 @@ public class ActivityPackageDao extends BaseCachingDao<ActivityPackage> {
 
     public List<ActivityPackage> getByOrganization(final Key organizationId) {
         ActivityPackageMeta meta = getMeta();
-        return query(new BaseDaoQuery<ActivityPackage, ActivityPackageMeta>(meta, new Serializable[0]) {
-            @Override
-            public List<Key> execute() {
-                return Datastore.query(meta)
-                        .filter(meta.organizationRef.equal(organizationId))
-                        .sort(meta.created.desc).asKeyList();
-            }
-        });
+        return query(new ByOrganizationQuery(meta, organizationId));
+    }
+
+    private static class ByOrganizationQuery extends BaseDaoQuery<ActivityPackage, ActivityPackageMeta> {
+        public ByOrganizationQuery(ActivityPackageMeta meta, Key organizationId) {
+            super(meta, new Serializable[]{organizationId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key organizationId = parameters.get(0);
+            return Datastore.query(
+                    Datastore.getCurrentTransaction(), meta, organizationId)
+                    .sort(meta.created.desc).asKeyList();
+//            return Datastore.query(meta)
+//                    .filter(meta.organizationRef.equal(organizationId))
+//                    .sort(meta.created.desc).asKeyList();
+        }
     }
 }
