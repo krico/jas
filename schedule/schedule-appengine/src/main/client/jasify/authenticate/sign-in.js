@@ -1,5 +1,7 @@
 (function (angular) {
 
+    'use strict';
+
     angular.module('jasify.authenticate').controller('SignInController', SignInController);
 
     function SignInController($rootScope, $window, $location, AUTH_EVENTS, Auth, BrowserData) {
@@ -44,6 +46,7 @@
                 } else {
                     BrowserData.clearRememberUser();
                 }
+                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
                 if (angular.isFunction(onSuccess)) {
                     onSuccess();
                 }
@@ -52,4 +55,4 @@
             });
         }
     }
-})(angular);
+})(window.angular);
