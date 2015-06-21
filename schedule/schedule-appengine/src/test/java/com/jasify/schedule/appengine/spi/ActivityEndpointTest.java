@@ -18,7 +18,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
-import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import java.util.List;
 import java.util.Random;
@@ -690,16 +689,6 @@ public class ActivityEndpointTest {
         thrown.expectMessage("Not found");
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(new Activity());
-        endpoint.addActivity(null, jasAddActivityRequest);
-    }
-
-    @Test
-    public void testAddActivityNullActivityTypeModel() throws Exception {
-        thrown.expect(EntityNotFoundRuntimeException.class);
-        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        Activity activity = new Activity();
-        activity.getActivityTypeRef().setKey(Datastore.allocateId(ActivityType.class));
-        jasAddActivityRequest.setActivity(activity);
         endpoint.addActivity(null, jasAddActivityRequest);
     }
 

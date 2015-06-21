@@ -37,14 +37,6 @@ public class MailParserTest {
     ActivityPackageExecution activityPackageExecution1;
     ActivityPackageExecution activityPackageExecution2;
 
-    private User createUser() {
-        User user = new User();
-        user.setName("Fred");
-        user.setRealName("James BlaBla");
-        Datastore.put(user);
-        return user;
-    }
-
     private Activity createActivity(ActivityType activityType, double price, DateTime start, DateTime finish) {
         Activity activity = new Activity(activityType);
         activity.setPrice(price);
@@ -119,12 +111,10 @@ public class MailParserTest {
     @Before
     public void initializeDatastore() {
         TestHelper.initializeJasify();
-        this.user = createUser();
+        this.user = TestHelper.createUser(true);
 
-        this.organization = new Organization("Super Squash Courts");
-
-        this.activityType = new ActivityType("Squash");
-        this.activityType.getOrganizationRef().setModel(this.organization);
+        this.organization = TestHelper.createOrganization(true);
+        this.activityType = TestHelper.createActivityType(organization, true);
 
         this.activity1 = createActivity(this.activityType, random(10.0, 20.0), new DateTime(2015, 3, 30, 12, 0, DateTimeZone.UTC), new DateTime(2015, 3, 30, 12, 45, DateTimeZone.UTC));
         this.subscription1 = createSubscription(this.user, this.activity1);
@@ -149,14 +139,17 @@ public class MailParserTest {
     @Test
     public void testDecimalFormatting() throws Exception {
         this.activity1.setPrice(20.0000001);
+        Datastore.put(this.activity1);
         MailParser mailParser1 = MailParser.createPublisherSubscriptionEmail(Arrays.asList(subscription1), Collections.<ActivityPackageExecution>emptyList());
         assert (mailParser1.getText().contains("20.00"));
 
         this.activity1.setPrice(1.234444);
+        Datastore.put(this.activity1);
         MailParser mailParser2 = MailParser.createPublisherSubscriptionEmail(Arrays.asList(subscription1), Collections.<ActivityPackageExecution>emptyList());
         assert (mailParser2.getText().contains("1.23"));
 
         this.activity1.setPrice(0.12345);
+        Datastore.put(this.activity1);
         MailParser mailParser3 = MailParser.createPublisherSubscriptionEmail(Arrays.asList(subscription1), Collections.<ActivityPackageExecution>emptyList());
         assert (mailParser3.getText().contains("0.12"));
     }
@@ -169,6 +162,7 @@ public class MailParserTest {
         assert (text.contains("Subscriber    : " + user.getRealName()));
         assert (!text.contains("Subscriber    : " + user.getName()));
         user.setRealName(null);
+        Datastore.put(user);
         mailParser = MailParser.createPublisherSubscriptionEmail(Arrays.asList(subscription1), Collections.<ActivityPackageExecution>emptyList());
         text = mailParser.getText();
         assert (!text.contains("Subscriber    : " + user.getRealName()));
@@ -334,6 +328,7 @@ public class MailParserTest {
         List<Subscription> subscriptions = Arrays.asList(subscription1, subscription2);
         List<ActivityPackageExecution> activityPackageExecutions = Arrays.asList(activityPackageExecution1, activityPackageExecution2);
         organization.setName(null);
+        Datastore.put(organization);
         MailParser.createPublisherSubscriptionEmail(subscriptions, activityPackageExecutions);
     }
 

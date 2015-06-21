@@ -1,6 +1,12 @@
 package com.jasify.schedule.appengine.mail;
 
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
+import com.jasify.schedule.appengine.dao.users.UserDao;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
@@ -26,6 +32,12 @@ import java.util.Date;
 public class MailParser {
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("Europe/Zurich"));
+
+    private static final OrganizationDao organizationDao = new OrganizationDao();
+    private static final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private static final ActivityDao activityDao = new ActivityDao();
+    private static final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+    private static final UserDao userDao = new UserDao();
 
     /*
     Rather than two StringBuilders maybe it would be better to convert from html to text
@@ -60,20 +72,21 @@ public class MailParser {
         return new DateTime(date).toString(DTF);
     }
 
-    private static String getOrganisationName(Activity activity) {
-        ActivityType activityType = activity.getActivityTypeRef().getModel();
-        Organization organization = activityType.getOrganizationRef().getModel();
+    private static String getOrganisationName(Activity activity) throws EntityNotFoundException {
+        ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
+        Organization organization = organizationDao.get(activityType.getOrganizationRef().getKey());
         return organization.getName();
     }
 
-    private static String getOrganisationName(ActivityPackage activityPackage) {
-        Organization organization = activityPackage.getOrganizationRef().getModel();
+    private static String getOrganisationName(ActivityPackage activityPackage) throws EntityNotFoundException {
+        Organization organization = organizationDao.get(activityPackage.getOrganizationRef().getKey());
         return organization.getName();
     }
 
-    private static String getOrganizationNameFromSubscriptions(Collection<Subscription> subscriptions) {
+    private static String getOrganizationNameFromSubscriptions(Collection<Subscription> subscriptions) throws EntityNotFoundException {
         for (Subscription subscription : subscriptions) {
-            String name = getOrganisationName(subscription.getActivityRef().getModel());
+            Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+            String name = getOrganisationName(activity);
             if (name != null) {
                 return name;
             }
@@ -81,9 +94,10 @@ public class MailParser {
         return null;
     }
 
-    private static String getOrganizationNameFromActivityPackageExecutions(Collection<ActivityPackageExecution> executions) {
+    private static String getOrganizationNameFromActivityPackageExecutions(Collection<ActivityPackageExecution> executions) throws EntityNotFoundException {
         for (ActivityPackageExecution execution : executions) {
-            String name = getOrganisationName(execution.getActivityPackageRef().getModel());
+            ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
+            String name = getOrganisationName(activityPackage);
             if (name != null) {
                 return name;
             }
@@ -91,8 +105,8 @@ public class MailParser {
         return null;
     }
 
-    private static MailParser createSubscriptionActivityDetails(MultiSubscription multiSubscription, Subscription subscription) throws IOException {
-        Activity activity = subscription.getActivityRef().getModel();
+    private static MailParser createSubscriptionActivityDetails(MultiSubscription multiSubscription, Subscription subscription) throws IOException, EntityNotFoundException {
+        Activity activity = activityDao.get(subscription.getActivityRef().getKey());
         String orderNumber = KeyUtil.toHumanReadableString(subscription.getId());
         MailParser mailParser = new MailParser(multiSubscription.activityDetails);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
@@ -104,8 +118,8 @@ public class MailParser {
         return mailParser;
     }
 
-    private static MailParser createSubscriptionActivityPackageDetails(MultiSubscription multiSubscription, ActivityPackageExecution activityPackageExecution) throws IOException {
-        ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+    private static MailParser createSubscriptionActivityPackageDetails(MultiSubscription multiSubscription, ActivityPackageExecution activityPackageExecution) throws IOException, EntityNotFoundException {
+        ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
         String orderNumber = KeyUtil.toHumanReadableString(activityPackageExecution.getId());
         MailParser mailParser = new MailParser(multiSubscription.activityPackageDetails);
         mailParser.substitute(SubstituteKey.OrderNumber, orderNumber);
@@ -115,6 +129,7 @@ public class MailParser {
 
         Collection<MailParser> activityPackageActivityDetails = new ArrayList<>();
         for (ActivityPackageSubscription activityPackageSubscription : activityPackageExecution.getSubscriptionListRef().getModelList()) {
+            // TODO
             activityPackageActivityDetails.add(MailParser.createSubscriptionActivityPackageActivityDetails(multiSubscription, activityPackageSubscription));
         }
 
@@ -123,8 +138,8 @@ public class MailParser {
         return mailParser;
     }
 
-    private static MailParser createSubscriptionActivityPackageActivityDetails(MultiSubscription multiSubscription, ActivityPackageSubscription activityPackageSubscription) throws IOException {
-        Activity activity = activityPackageSubscription.getActivityRef().getModel();
+    private static MailParser createSubscriptionActivityPackageActivityDetails(MultiSubscription multiSubscription, ActivityPackageSubscription activityPackageSubscription) throws IOException, EntityNotFoundException {
+        Activity activity = activityDao.get(activityPackageSubscription.getActivityRef().getKey());
         MailParser mailParser = new MailParser(multiSubscription.activityPackageActivityDetails);
         mailParser.substitute(SubstituteKey.ActivityName, activity.getName());
         mailParser.substitute(SubstituteKey.ActivityStart, formatDate(activity.getStart()));
@@ -144,25 +159,28 @@ public class MailParser {
         String subscriberName = null;
         Collection<MailParser> activityDetails = new ArrayList<>();
         for (Subscription subscription : subscriptions) {
-            Double subscriptionPrice = subscription.getActivityRef().getModel().getPrice();
+            Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+            Double subscriptionPrice = activity.getPrice();
             if (subscriptionPrice != null) {
                 totalPrice += subscriptionPrice;
             }
             activityDetails.add(MailParser.createSubscriptionActivityDetails(multiSubscription, subscription));
             if (subscriberName == null) {
-                subscriberName = getSubscriberName(subscription.getUserRef().getModel());
+                User user = userDao.get(subscription.getUserRef().getKey());
+                subscriberName = getSubscriberName(user);
             }
         }
 
         for (ActivityPackageExecution activityPackageExecution : activityPackageExecutions) {
-            ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+            ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
             Double activityPackagePrice = activityPackage.getPrice();
             if (activityPackagePrice != null) {
                 totalPrice += activityPackagePrice;
             }
             activityDetails.add(MailParser.createSubscriptionActivityPackageDetails(multiSubscription, activityPackageExecution));
             if (subscriberName == null) {
-                subscriberName = getSubscriberName(activityPackageExecution.getUserRef().getModel());
+                User user = userDao.get(activityPackageExecution.getUserRef().getKey());
+                subscriberName = getSubscriberName(user);
             }
         }
 

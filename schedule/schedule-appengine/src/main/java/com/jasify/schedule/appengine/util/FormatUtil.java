@@ -1,6 +1,10 @@
 package com.jasify.schedule.appengine.util;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.users.UserDao;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
@@ -11,6 +15,8 @@ import com.jasify.schedule.appengine.model.balance.UserAccount;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Objects;
@@ -20,6 +26,12 @@ import java.util.Objects;
  * @since 06/04/15.
  */
 public final class FormatUtil {
+    private static final Logger log = LoggerFactory.getLogger(FormatUtil.class);
+
+    private static final ActivityDao activityDao = new ActivityDao();
+    private static final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+    private static final UserDao userDao = new UserDao();
+
     private static final ThreadLocal<SimpleDateFormat> START_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -38,33 +50,39 @@ public final class FormatUtil {
     }
 
     public static String toString(Subscription subscription) {
-        if (subscription.getActivityRef().getKey() == null) {
-            return toShortString(subscription.getId());
+        try {
+            if (subscription.getActivityRef().getKey() != null) {
+                Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+                StringBuilder builder = new StringBuilder().append(activity);
+
+                if (subscription.getUserRef().getKey() != null) {
+                    User user = userDao.get(subscription.getUserRef().getKey());
+                    builder.append(" (").append(toString(user)).append(')');
+                }
+
+                return builder.toString();
+            }
+        } catch (EntityNotFoundException e)  {
+            log.error("Failed to find entity", e);
         }
-
-        StringBuilder builder = new StringBuilder()
-                .append(toString(subscription.getActivityRef().getModel()));
-
-        if (subscription.getUserRef().getKey() != null) {
-            builder.append(" (").append(toString(subscription.getUserRef().getModel())).append(')');
-        }
-
-        return builder.toString();
+        return toShortString(subscription.getId());
     }
 
     public static String toString(ActivityPackageExecution activityPackageExecution) {
-        if (activityPackageExecution.getActivityPackageRef().getKey() == null) {
-            return toShortString(activityPackageExecution.getId());
+        try {
+            if (activityPackageExecution.getActivityPackageRef().getKey() != null) {
+                ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
+                StringBuilder builder = new StringBuilder().append(toString(activityPackage));
+                if (activityPackageExecution.getUserRef().getKey() != null) {
+                    User user = userDao.get(activityPackageExecution.getUserRef().getKey());
+                    builder.append(" (").append(toString(user)).append(')');
+                }
+                return builder.toString();
+            }
+        } catch (EntityNotFoundException e) {
+            log.error("Failed to find entity", e);
         }
-
-        StringBuilder builder = new StringBuilder()
-                .append(toString(activityPackageExecution.getActivityPackageRef().getModel()));
-
-        if (activityPackageExecution.getUserRef().getKey() != null) {
-            builder.append(" (").append(toString(activityPackageExecution.getUserRef().getModel())).append(')');
-        }
-
-        return builder.toString();
+        return toShortString(activityPackageExecution.getId());
     }
 
     public static String toString(Activity activity) {

@@ -11,13 +11,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.jasify.schedule.appengine.dao.common.*;
+import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
@@ -70,6 +70,7 @@ public class ActivityEndpoint {
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final OrganizationDao organizationDao = new OrganizationDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
+    private final UserDao userDao = new UserDao();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
@@ -281,7 +282,6 @@ public class ActivityEndpoint {
     public List<Activity> addActivity(User caller, JasAddActivityRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         checkFound(request.getActivity());
         checkFound(request.getActivity().getActivityTypeRef().getKey());
-        checkFound(request.getActivity().getActivityTypeRef().getModel());
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(request.getActivity().getActivityTypeRef().getKey()));
 
         try {
@@ -331,7 +331,7 @@ public class ActivityEndpoint {
         checkFound(userId);
         checkFound(activityId);
         try {
-            com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().getUser(userId);
+            com.jasify.schedule.appengine.model.users.User user = userDao.get(userId);
             Activity activity = activityDao.get(activityId);
             return ActivityServiceFactory.getActivityService().subscribe(user, activity);
         } catch (EntityNotFoundException e) {

@@ -701,18 +701,6 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
-    @Nonnull
- //TODO   @Override
-    public List<ActivityPackageActivity> getActivityPackageActivities(Activity activity) {
-        Organization organization = activity.getActivityTypeRef().getModel().getOrganizationRef().getModel();
-        return Datastore
-                .query(activityPackageActivityMeta, organization.getId())
-                .filter(new CompositeCriterion(activityPackageActivityMeta,
-                        Query.CompositeFilterOperator.AND,
-                        activityPackageActivityMeta.activityRef.equal(activity.getId())))
-                .asList();
-    }
-
     @Override
     public void addActivityToActivityPackage(final ActivityPackage activityPackage, final Activity activity) throws EntityNotFoundException {
         try {

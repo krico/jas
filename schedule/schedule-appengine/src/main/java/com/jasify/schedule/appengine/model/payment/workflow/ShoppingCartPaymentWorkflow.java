@@ -3,8 +3,8 @@ package com.jasify.schedule.appengine.model.payment.workflow;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
-import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
-import com.jasify.schedule.appengine.dao.common.SubscriptionDao;
+import com.jasify.schedule.appengine.dao.common.*;
+import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.mail.MailParser;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
@@ -28,8 +28,13 @@ import java.util.*;
 public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
     private static final Logger log = LoggerFactory.getLogger(ShoppingCartPaymentWorkflow.class);
 
-    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
     private final ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
+    private final OrganizationDao organizationDao = new OrganizationDao();
+    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
+    private final UserDao userDao = new UserDao();
 
     private String cartId;
 
@@ -121,31 +126,35 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         Map<Key, Collection<ActivityPackageExecution>> executionMap = new HashMap<>();
 
         User user = null;
-        for (Subscription subscription : subscriptions) {
-            Activity activity = subscription.getActivityRef().getModel();
-            ActivityType activityType = activity.getActivityTypeRef().getModel();
-            Organization organization = activityType.getOrganizationRef().getModel();
-            if (!subscriptionMap.containsKey(organization.getId())) {
-                organizations.put(organization.getId(), organization);
-                subscriptionMap.put(organization.getId(), new ArrayList<Subscription>());
+        try {
+            for (Subscription subscription : subscriptions) {
+                Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+                ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
+                Organization organization = organizationDao.get(activityType.getOrganizationRef().getKey());
+                if (!subscriptionMap.containsKey(organization.getId())) {
+                    organizations.put(organization.getId(), organization);
+                    subscriptionMap.put(organization.getId(), new ArrayList<Subscription>());
+                }
+                subscriptionMap.get(organization.getId()).add(subscription);
+                if (user == null) {
+                    user = userDao.get(subscription.getUserRef().getKey());
+                }
             }
-            subscriptionMap.get(organization.getId()).add(subscription);
-            if (user == null) {
-                user = subscription.getUserRef().getModel();
-            }
-        }
 
-        for (ActivityPackageExecution execution : executions) {
-            ActivityPackage activityPackage = execution.getActivityPackageRef().getModel();
-            Organization organization = activityPackage.getOrganizationRef().getModel();
-            if (!executionMap.containsKey(organization.getId())) {
-                organizations.put(organization.getId(), organization);
-                executionMap.put(organization.getId(), new ArrayList<ActivityPackageExecution>());
+            for (ActivityPackageExecution execution : executions) {
+                ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
+                Organization organization = organizationDao.get(activityPackage.getOrganizationRef().getKey());
+                if (!executionMap.containsKey(organization.getId())) {
+                    organizations.put(organization.getId(), organization);
+                    executionMap.put(organization.getId(), new ArrayList<ActivityPackageExecution>());
+                }
+                executionMap.get(organization.getId()).add(execution);
+                if (user == null) {
+                    user = userDao.get(execution.getUserRef().getKey());
+                }
             }
-            executionMap.get(organization.getId()).add(execution);
-            if (user == null) {
-                user = execution.getUserRef().getModel();
-            }
+        } catch (EntityNotFoundException e) {
+            log.error("Failed to notify publishers", e);
         }
 
         for (Organization organization : organizations.values()) {
@@ -165,15 +174,16 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
 
     private void notifySubscriber(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) {
         Preconditions.checkArgument(!(subscriptions.isEmpty() && executions.isEmpty()));
-        User user;
-        if (!subscriptions.isEmpty()) {
-            user = subscriptions.get(0).getUserRef().getModel();
-        } else {
-            user = executions.get(0).getUserRef().getModel();
-        }
-        String subject = String.format("[Jasify] Subscribe [%s]", user.getDisplayName());
 
         try {
+            User user;
+            if (!subscriptions.isEmpty()) {
+                user = userDao.get(subscriptions.get(0).getUserRef().getKey());
+            } else {
+                user = userDao.get(executions.get(0).getUserRef().getKey());
+            }
+            String subject = String.format("[Jasify] Subscribe [%s]", user.getDisplayName());
+
             MailParser mailParser = MailParser.createSubscriberSubscriptionEmail(subscriptions, executions);
             MailServiceFactory.getMailService().send(user.getEmail(), subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {

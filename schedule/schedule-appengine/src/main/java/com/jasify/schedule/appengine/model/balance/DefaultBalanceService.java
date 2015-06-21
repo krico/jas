@@ -5,6 +5,9 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageExecutionMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.balance.*;
@@ -41,6 +44,10 @@ public class DefaultBalanceService implements BalanceService {
     private final ActivityPackageExecutionMeta activityPackageExecutionMeta;
     private final Key custodialAccountKey;
 
+    private final ActivityDao activityDao = new ActivityDao();
+    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+
     private DefaultBalanceService() {
         accountMeta = AccountMeta.get();
         userAccountMeta = UserAccountMeta.get();
@@ -60,8 +67,8 @@ public class DefaultBalanceService implements BalanceService {
     @Override
     public void unpaidSubscription(Key subscriptionId) throws EntityNotFoundException {
         Subscription subscription = Datastore.get(subscriptionMeta, subscriptionId);
-        Activity activity = subscription.getActivityRef().getModel();
-        ActivityType activityType = activity.getActivityTypeRef().getModel();
+        Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+        ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
         Key organizationId = activityType.getOrganizationRef().getKey();
         Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
         Account payer = AccountUtil.memberAccountMustExist(subscription.getUserRef().getKey());
@@ -74,15 +81,15 @@ public class DefaultBalanceService implements BalanceService {
 
     @Override
     public void subscription(Subscription subscription) throws EntityNotFoundException {
-        Activity activity = subscription.getActivityRef().getModel();
-        ActivityType activityType = activity.getActivityTypeRef().getModel();
+        Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+        ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
         Key organizationId = activityType.getOrganizationRef().getKey();
         Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
         Account payer = AccountUtil.memberAccountMustExist(subscription.getUserRef().getKey());
         subscription(subscription, payer, beneficiary, false);
     }
 
-    private void subscription(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) {
+    private void subscription(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
 
         //TODO: Validate balance is there before we start.
 
@@ -99,7 +106,7 @@ public class DefaultBalanceService implements BalanceService {
     @Override
     public void unpaidActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException {
         ActivityPackageExecution activityPackageExecution = Datastore.get(activityPackageExecutionMeta, activityPackageExecutionId);
-        ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+        ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
         Key organizationId = activityPackage.getOrganizationRef().getKey();
         Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
         Account payer = AccountUtil.memberAccountMustExist(activityPackageExecution.getUserRef().getKey());
@@ -115,14 +122,14 @@ public class DefaultBalanceService implements BalanceService {
     @Override
     public void activityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException {
         ActivityPackageExecution activityPackageExecution = Datastore.get(activityPackageExecutionMeta, activityPackageExecutionId);
-        ActivityPackage activityPackage = activityPackageExecution.getActivityPackageRef().getModel();
+        ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
         Key organizationId = activityPackage.getOrganizationRef().getKey();
         Account beneficiary = AccountUtil.memberAccountMustExist(organizationId);
         Account payer = AccountUtil.memberAccountMustExist(activityPackageExecution.getUserRef().getKey());
         activityPackageExecution(activityPackageExecution, payer, beneficiary, false);
     }
 
-    private void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) {
+    private void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
 
         //TODO: Validate balance is there before we start.
 
@@ -235,13 +242,13 @@ public class DefaultBalanceService implements BalanceService {
         return transfer;
     }
 
-    private Transfer createActivityPackageExecutionTransfer(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) {
+    private Transfer createActivityPackageExecutionTransfer(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
         Transfer transfer;
         com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
         try {
             transfer = Datastore.getOrNull(tx, transferMeta, execution.getTransferRef().getKey());
             if (transfer == null) {
-                ActivityPackage activityPackage = execution.getActivityPackageRef().getModel();
+                ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
                 Double amount = activityPackage.getPrice();
                 transfer = new Transfer();
                 transfer.setId(execution.getTransferRef().getKey());
@@ -268,13 +275,13 @@ public class DefaultBalanceService implements BalanceService {
         return transfer;
     }
 
-    private Transfer createSubscriptionTransfer(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) {
+    private Transfer createSubscriptionTransfer(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
         Transfer transfer;
         com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
         try {
             transfer = Datastore.getOrNull(tx, transferMeta, subscription.getTransferRef().getKey());
             if (transfer == null) {
-                Activity activity = subscription.getActivityRef().getModel();
+                Activity activity = activityDao.get(subscription.getActivityRef().getKey());
                 Double amount = activity.getPrice();
                 transfer = new Transfer();
                 transfer.setId(subscription.getTransferRef().getKey());

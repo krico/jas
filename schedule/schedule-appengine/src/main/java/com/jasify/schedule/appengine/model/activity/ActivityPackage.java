@@ -1,8 +1,12 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageActivityMeta;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.common.Organization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.*;
 
 import java.util.*;
@@ -13,6 +17,9 @@ import java.util.*;
  */
 @Model
 public class ActivityPackage {
+    private static final Logger log = LoggerFactory.getLogger(ActivityPackage.class);
+
+    private final ActivityDao activityDao = new ActivityDao();
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -172,8 +179,12 @@ public class ActivityPackage {
         if (activityLinks == null) return ret;
 
         for (ActivityPackageActivity link : activityLinks) {
-            Activity activity = link.getActivityRef().getModel();
-            if (activity != null) ret.add(activity);
+            try {
+                Activity activity = activityDao.get(link.getActivityRef().getKey());
+                ret.add(activity);
+            } catch (EntityNotFoundException e) {
+                log.error("Failed to find activity with key", e);
+            }
         }
         Collections.sort(ret, new Comparator<Activity>() {
             @Override
