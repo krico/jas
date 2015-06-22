@@ -21,22 +21,36 @@ public class ActivityDao extends BaseCachingDao<Activity> {
 
     public List<Activity> getByActivityTypeId(final Key activityTypeId) {
         ActivityMeta meta = getMeta();
-        return query(new BaseDaoQuery<Activity, ActivityMeta>(meta, new Serializable[0]) {
-            @Override
-            public List<Key> execute() {
-                return Datastore.query(meta)
-                        .filter(meta.activityTypeRef.equal(activityTypeId)).asKeyList();
-            }
-        });
+        return query(new ByActivityTypeQuery(meta, activityTypeId));
     }
 
     public List<Activity> getByOrganizationId(final Key organizationId) {
         ActivityMeta meta = getMeta();
-        return query(new BaseDaoQuery<Activity, ActivityMeta>(meta, new Serializable[0]) {
-            @Override
-            public List<Key> execute() {
-                return Datastore.query(Datastore.getCurrentTransaction(), meta, organizationId).asKeyList();
-            }
-        });
+        return query(new ByOrganizationQuery(meta, organizationId));
+    }
+
+    private static class ByActivityTypeQuery extends BaseDaoQuery<Activity, ActivityMeta> {
+        public ByActivityTypeQuery(ActivityMeta meta, Key activityTypeId) {
+            super(meta, new Serializable[]{activityTypeId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key activityTypeId = parameters.get(0);
+            return Datastore.query(meta)
+                    .filter(meta.activityTypeRef.equal(activityTypeId)).asKeyList();
+        }
+    }
+
+    private static class ByOrganizationQuery extends BaseDaoQuery<Activity, ActivityMeta> {
+        public ByOrganizationQuery(ActivityMeta meta, Key organizationId) {
+            super(meta, new Serializable[]{organizationId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key organizationId = parameters.get(0);
+            return Datastore.query(Datastore.getCurrentTransaction(), meta, organizationId).asKeyList();
+        }
     }
 }

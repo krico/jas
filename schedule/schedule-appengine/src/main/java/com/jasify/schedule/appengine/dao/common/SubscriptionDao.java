@@ -19,15 +19,22 @@ public class SubscriptionDao extends BaseCachingDao<Subscription> {
         super(SubscriptionMeta.get());
     }
 
-    public List<Subscription> getByActivity(final Key activityId) {
+    public List<Subscription> getByActivity(Key activityId) {
         SubscriptionMeta meta = getMeta();
-        return query(new BaseDaoQuery<Subscription, SubscriptionMeta>(meta, new Serializable[0]) {
-            @Override
-            public List<Key> execute() {
-                return Datastore.query(meta)
-                        .filter(meta.activityRef.equal(activityId))
-                        .asKeyList();
-            }
-        });
+        return query(new ByActivityQuery(meta, activityId));
+    }
+
+    private static class ByActivityQuery extends BaseDaoQuery<Subscription, SubscriptionMeta> {
+        public ByActivityQuery(SubscriptionMeta meta, Key activityId) {
+            super(meta, new Serializable[]{activityId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key activityId = parameters.get(0);
+            return Datastore.query(meta)
+                    .filter(meta.activityRef.equal(activityId))
+                    .asKeyList();
+        }
     }
 }
