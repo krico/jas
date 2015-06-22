@@ -31,7 +31,7 @@
 
         scope.ok = function() {
             modalInstance.close();
-        }
+        };
 
         $rootScope.$on(AUTH_EVENTS.loginFailed, function() {
             modalInstance = $modal.open({
@@ -40,7 +40,7 @@
                 scope: scope
             });
         });
-    })
+    });
     
     bookingViaJasify.config(bookingViaRoutes);
     bookingViaJasify.constant('sessionStorageKeys', {

@@ -19,9 +19,10 @@
         notGuest: 'auth-not-guest'
     }).run(function ($rootScope, $log, AUTH_EVENTS) {
         for (var eventName in AUTH_EVENTS) {
-            $rootScope.$on(AUTH_EVENTS[eventName], function logger(event) {
-                $log.debug("Jasify broadcast", event);
-            });
+            $rootScope.$on(AUTH_EVENTS[eventName], logger);
+        }
+        function logger(event) {
+            $log.debug("Jasify broadcast", event);
         }
     });
 
