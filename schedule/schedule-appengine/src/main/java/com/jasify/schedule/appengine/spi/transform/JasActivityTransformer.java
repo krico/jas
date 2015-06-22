@@ -40,7 +40,7 @@ public class JasActivityTransformer implements Transformer<Activity, JasActivity
             return activityTypeDao.get(activity.getActivityTypeRef().getKey());
         } catch (EntityNotFoundException e) {
             log.error("Entity not found", e);
-            return activity.getActivityTypeRef().getModel();
+            return null;
         }
     }
 
