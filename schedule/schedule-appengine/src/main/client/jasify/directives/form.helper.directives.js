@@ -36,6 +36,29 @@
         $rootScope.$on("$routeChangeSuccess", function () {
             $('md-content').scrollTop(0);
         });
+
+        $.fn.scrollTo = function (target, options, callback) {
+            if (typeof options === 'function' && arguments.length === 2) {
+                callback = options;
+                options = target;
+            }
+            var settings = $.extend({
+                scrollTarget: target,
+                offsetTop: 150,
+                duration: 300,
+                easing: 'swing'
+            }, options);
+            return this.each(function () {
+                var scrollPane = $(this);
+                var scrollTarget = (typeof settings.scrollTarget === "number") ? settings.scrollTarget : $(settings.scrollTarget);
+                var scrollY = (typeof scrollTarget === "number") ? scrollTarget : scrollTarget.offset().top + scrollPane.scrollTop() - parseInt(settings.offsetTop, 10);
+                scrollPane.animate({scrollTop: scrollY}, parseInt(settings.duration, 10), settings.easing, function () {
+                    if (typeof callback === 'function') {
+                        callback.call(this);
+                    }
+                });
+            });
+        };
     });
 
     jasifyDirectivesFormModule.provider('$moment', function () {
@@ -43,6 +66,35 @@
             return $window.moment;
         }];
     });
+
+    jasifyDirectivesFormModule.directive('jasifySubmit', function ($parse) {
+        return {
+            restrict: 'A',
+            require: 'form',
+            compile: function ($element, attr) {
+                var fn = $parse(attr.jasifySubmit, null, true);
+                return function jasifySubmitEventHandler(scope, element, attrs, controller) {
+                    var invalidElement;
+
+                    element.on('submit', function (event) {
+                        if (controller.$valid) {
+                            var callback = function () {
+                                fn(scope, {$event: event});
+                            };
+                            scope.$apply(callback);
+                        } else {
+                            invalidElement = $('.ng-invalid:visible', element).eq(0);
+                            if (invalidElement.length === 1) {
+                                $('md-content').scrollTo(invalidElement, {}, function () {
+                                    invalidElement.focus();
+                                });
+                            }
+                        }
+                    });
+                };
+            }
+        };
+    })
 
     jasifyDirectivesFormModule.directive('btnHref', function ($location) {
         return function (scope, element, attrs) {
