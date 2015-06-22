@@ -8,7 +8,7 @@
         .controller('BookingViaJasify', BookingViaJasify);
 
     function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $location, $q, $timeout, localStorageService, sessionStorageKeys,
-                              BrowserData, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs, getContrast) {
+                              PopupWindow, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs, getContrast) {
 
         var vm = this;
         vm.wizardOptions = {
@@ -76,7 +76,6 @@
         function onWizardClick(tab, navigation, index) {
             $timeout(function () {
                 var v = activeTab();
-                $log.debug('Active tab: ' + v);
                 localStorageService.set(sessionStorageKeys.selectedTabIndex, v);
             }, 500);
         }
@@ -218,31 +217,46 @@
         }
 
         function bookIt() {
-            ShoppingCart.clearUserCart().then(function () {
-                var promises = [];
+            var request = {activityIds: [], activityPackageSubscriptions: []};
 
-                angular.forEach(vm.activitySelection, function (value) {
-                    $log.debug("Adding activity to shopping cart: " + value.id);
-                    promises.push(ShoppingCart.addUserActivity(value.id));
+            angular.forEach(vm.activitySelection, function (value) {
+                $log.debug("Adding activity to shopping cart: " + value.id);
+                this.activityIds.push(value.id);
+            }, request);
+
+            var completeActivityPackagesList = _.filter(vm.activityPackages, vm.packageSelectionComplete);
+
+            angular.forEach(completeActivityPackagesList, function (value) {
+                $log.debug("Adding activity package to shopping cart: " + value.id);
+
+                var activityIds = [];
+                angular.forEach(vm.activityPackageSelection[value.id], function (activity) {
+                    this.push(activity.id);
+                }, activityIds);
+
+                this.activityPackageSubscriptions.push({
+                    activityPackageId: value.id,
+                    activityIds: activityIds
                 });
+            }, request);
 
-                var completeActivityPackagesList = _.filter(vm.activityPackages, vm.packageSelectionComplete);
+            ShoppingCart.createAnonymousCart(request).then(confirmPopup, error);
 
-                angular.forEach(completeActivityPackagesList, function (value) {
-                    $log.debug("Adding activity package to shopping cart: " + value.id);
-                    promises.push(ShoppingCart.addUserActivityPackage(value, vm.activityPackageSelection[value.id]));
-                });
+            function error(r) {
+                jasDialogs.error(r.statusText + ' (' + r.status + ')');
+            }
+        }
 
-                $q.all(promises).then(function () {
-                    $log.debug('Shopping cart is ready');
-                    BrowserData.setPaymentAcceptRedirect('done');
-                    BrowserData.setPaymentCancelRedirect($location.path());
-                    $location.path('/checkout');
-                }, function () {
-                    // TODO
-                });
-
-            });
+        function confirmPopup(r) {
+            jasDialogs.ok('Open new window', 'To continue with your checkout we need to open a new window.', onOk);
+            function onOk() {
+                PopupWindow.open('/checkout-window.html#/anonymous/' + r.id, {width: 820})
+                    .then(function () {
+                        jasDialogs.success('Checkout complete!');
+                    }, function (res) {
+                        jasDialogs.error(res);
+                    })
+            }
         }
     }
 
