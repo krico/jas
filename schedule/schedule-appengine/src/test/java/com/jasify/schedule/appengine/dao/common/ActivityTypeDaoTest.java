@@ -39,13 +39,13 @@ public class ActivityTypeDaoTest {
     }
 
     @Test
-    public void testGetByOrganizationWithNullOrganization() throws Exception {
+    public void testGetByOrganizationWithNullKey() throws Exception {
         thrown.expect(NullPointerException.class);
         dao.getByOrganization(null);
     }
 
     @Test
-    public void testGetByOrganizationWithUnknownlId() throws Exception {
+    public void testGetByOrganizationWithUnknownKey() throws Exception {
         List<ActivityType> result = dao.getByOrganization(Datastore.allocateId(Organization.class));
         assertTrue(result.isEmpty());
     }
@@ -58,12 +58,14 @@ public class ActivityTypeDaoTest {
 
     @Test
     public void testGetByOrganizationWithActivities() throws Exception {
-        Organization organization = TestHelper.createOrganization(true);
-        TestHelper.createActivityType(organization, true);
-        TestHelper.createActivityType(organization, true);
-        TestHelper.createActivityType(TestHelper.createOrganization(true), true);
-        List<ActivityType> result = dao.getByOrganization(organization.getId());
-        assertEquals(2, result.size());
+        Organization organization1 = TestHelper.createOrganization(true);
+        TestHelper.createActivityType(organization1, true);
+        TestHelper.createActivityType(organization1, true);
+        Organization organization2 = TestHelper.createOrganization(true);
+        TestHelper.createActivityType(organization2, true);
+        assertEquals(2, dao.getByOrganization(organization1.getId()).size());
+        assertEquals(1, dao.getByOrganization(organization2.getId()).size());
+        assertEquals(2, dao.getByOrganization(organization1.getId()).size());
     }
 
     @Test

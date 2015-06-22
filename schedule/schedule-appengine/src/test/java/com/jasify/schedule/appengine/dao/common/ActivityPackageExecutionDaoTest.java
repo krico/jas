@@ -36,11 +36,18 @@ public class ActivityPackageExecutionDaoTest {
 
     @Test
     public void testGetActivityPackageExecution() throws Exception {
-        ActivityPackage activityPackage = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
-        ActivityPackageExecution activityPackageExecution = TestHelper.createActivityPackageExecution(TestHelper.createUser(true), activityPackage, true);
-        ActivityPackageExecution result = dao.get(activityPackageExecution.getId());
-        assertNotNull(result);
-        assertEquals(activityPackageExecution.getCreated(), result.getCreated());
-        assertEquals(activityPackageExecution.getModified(), result.getModified());
+        ActivityPackage activityPackage1 = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
+        ActivityPackageExecution activityPackageExecution1 = TestHelper.createActivityPackageExecution(TestHelper.createUser(true), activityPackage1, true);
+        ActivityPackageExecution result1 = dao.get(activityPackageExecution1.getId());
+        assertEquals(activityPackageExecution1.getCreated(), result1.getCreated());
+        assertEquals(activityPackageExecution1.getModified(), result1.getModified());
+
+        ActivityPackage activityPackage2 = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
+        ActivityPackageExecution activityPackageExecution2 = TestHelper.createActivityPackageExecution(TestHelper.createUser(true), activityPackage2, true);
+        ActivityPackageExecution result2 = dao.get(activityPackageExecution2.getId());
+        assertEquals(activityPackageExecution2.getCreated(), result2.getCreated());
+        assertEquals(activityPackageExecution2.getModified(), result2.getModified());
+
+        assertNotNull(dao.get(activityPackageExecution1.getId()));
     }
 }

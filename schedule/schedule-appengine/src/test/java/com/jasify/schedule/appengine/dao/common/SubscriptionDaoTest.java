@@ -1,6 +1,5 @@
 package com.jasify.schedule.appengine.dao.common;
 
-import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
@@ -10,9 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static junit.framework.TestCase.*;
 
@@ -50,7 +47,7 @@ public class SubscriptionDaoTest {
     }
 
     @Test
-    public void testGetByActivityNullKey() throws Exception {
+    public void testGetByActivityWithNullKey() throws Exception {
         Activity activity = TestHelper.createActivity(true);
         TestHelper.createSubscription(TestHelper.createUser(true), activity, true);
         List<Subscription> result = dao.getByActivity(null);
@@ -58,7 +55,7 @@ public class SubscriptionDaoTest {
     }
 
     @Test
-    public void testGetByActivityUnknownKey() throws Exception {
+    public void testGetByActivityWithUnknownKey() throws Exception {
         Activity activity = TestHelper.createActivity(true);
         TestHelper.createSubscription(TestHelper.createUser(true), activity, true);
         List<Subscription> result = dao.getByActivity(Datastore.allocateId(Activity.class));
@@ -67,21 +64,18 @@ public class SubscriptionDaoTest {
 
     @Test
     public void testGetByActivity() throws Exception {
-        Activity activity = TestHelper.createActivity(true);
-        Map<Key, Subscription> subscriptionMap = new HashMap<>();
-        for (int i = 0; i < 3; i++) {
-            Subscription subscription = TestHelper.createSubscription(TestHelper.createUser(true), activity, true);
-            subscriptionMap.put(subscription.getId(), subscription);
+        Activity activity1 = TestHelper.createActivity(true);
+        for (int i = 0; i < 2; i++) {
+            TestHelper.createSubscription(TestHelper.createUser(true), activity1, true);
         }
 
-        List<Subscription> result = dao.getByActivity(activity.getId());
-        assertEquals(subscriptionMap.size(), result.size());
-        for (int i = 0; i < result.size(); i++) {
-            Subscription actual = result.get(i);
-            assertTrue(subscriptionMap.containsKey(actual.getId()));
-            Subscription expected = subscriptionMap.get(actual.getId());
-            assertEquals(expected.getCreated(), actual.getCreated());
-            assertEquals(expected.getModified(), actual.getModified());
+        Activity activity2 = TestHelper.createActivity(true);
+        for (int i = 0; i < 3; i++) {
+            TestHelper.createSubscription(TestHelper.createUser(true), activity2, true);
         }
+
+        assertEquals(2, dao.getByActivity(activity1.getId()).size());
+        assertEquals(3, dao.getByActivity(activity2.getId()).size());
+        assertEquals(2, dao.getByActivity(activity1.getId()).size());
     }
 }

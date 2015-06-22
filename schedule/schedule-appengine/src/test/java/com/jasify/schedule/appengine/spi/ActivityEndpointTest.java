@@ -1212,18 +1212,6 @@ public class ActivityEndpointTest {
     }
 
     @Test
-    public void testAddActivityPackageUnknownOrganizationId() throws Exception {
-        thrown.expect(NotFoundException.class);
-        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
-        Organization organization = TestHelper.createOrganization(true);
-        ActivityPackage activityPackage = TestHelper.createActivityPackage(null, true);
-        activityPackage.getOrganizationRef().setKey(Datastore.allocateId(Organization.class));
-        jasActivityPackageRequest.setActivityPackage(activityPackage);
-        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
-        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
-    }
-
-    @Test
     public void testAddActivityPackageInvalidValue() throws Exception {
         thrown.expect(BadRequestException.class);
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();

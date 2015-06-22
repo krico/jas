@@ -38,24 +38,29 @@ public class ActivityPackageDaoTest {
     }
 
     @Test
-    public void testGetByNullOrganizationId() throws Exception {
-        TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
-        List<ActivityPackage> result = dao.getByOrganization(null);
-        assertTrue(result.isEmpty());
+    public void testGetByOrganizationWithNullKey() throws Exception {
+        thrown.expect(NullPointerException.class);
+        dao.getByOrganization(null);
     }
 
     @Test
-    public void testGetByUnknownOrganizationId() throws Exception {
+    public void testGetByOrganizationWithUnknownKey() throws Exception {
         TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
         List<ActivityPackage> result = dao.getByOrganization(Datastore.allocateId(Organization.class));
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void testGetByOrganizationId() throws Exception {
-        Organization organization = TestHelper.createOrganization(true);
-        TestHelper.createActivityPackage(organization, true);
-        List<ActivityPackage> result = dao.getByOrganization(organization.getId());
-        assertEquals(1, result.size());
+    public void testGetByOrganization() throws Exception {
+        Organization organization1 = TestHelper.createOrganization(true);
+        TestHelper.createActivityPackage(organization1, true);
+
+        Organization organization2 = TestHelper.createOrganization(true);
+        TestHelper.createActivityPackage(organization2, true);
+        TestHelper.createActivityPackage(organization2, true);
+
+        assertEquals(1, dao.getByOrganization(organization1.getId()).size());
+        assertEquals(2, dao.getByOrganization(organization2.getId()).size());
+        assertEquals(1, dao.getByOrganization(organization1.getId()).size());
     }
 }
