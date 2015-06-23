@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Jasify API client example</title>
+    <script language="JavaScript">
+        function clientLoaded() {
+            debug('Client library loaded');
+            var URL = 'http://localhost:8080/_ah/api'; // Dev
+            gapi.auth.setToken({access_token: 'mywayfit.com is awesome!'});
+            gapi.client.load('jasify', 'v1', getOrganisations /* function called when api is loaded */, URL);
+        }
+
+        var organisations = [];
+        var repeat=100;
+
+        function getOrganisations() {
+            debug('Jasify API loaded');
+            gapi.client.jasify.organizations.queryPublic().execute(responseHandler);
+            function responseHandler(resp) {
+                var info = resp.result;
+                organisations = info.items;
+                for (var i = 0; i < info.items.length; ++i) {
+                    var organisation = info.items[i];
+                    var tbody = document.getElementById('organisation-table');
+                    var tr = tbody.appendChild(document.createElement('tr'));
+                    var td1 = tr.appendChild(document.createElement('td'));
+                    td1.appendChild(document.createTextNode(organisation.name));
+                    var td2 = tr.appendChild(document.createElement('td'));
+                    td2.appendChild(document.createTextNode(organisation.description));
+                    var td3 = tr.appendChild(document.createElement('td'));
+                    td3.appendChild(document.createTextNode(organisation.id));
+                }
+            }
+        }
+
+        /** This function is called when the button is clicked */
+        function getActivities(organizations, countdown) {
+            var ids = [];
+            for (var i in organizations) {
+                ids.push(organizations[i].id);
+            }
+            var req = {organizationIds: ids};
+
+            var start = new Date();
+            gapi.client.jasify.activities.listQuery(req).execute(responseHandler /* function below */);
+
+            function responseHandler(resp) {
+                var finish = new Date();
+                var duration = finish.getTime() - start.getTime();
+                if (resp.error) {
+                    var dbg = 'resp.error{';
+                    for (var prop in resp.error) {
+                        dbg += prop + '=' + resp.error[prop] + ', ';
+                    }
+                    dbg += '}';
+                    alert(dbg);
+                    return;
+                }
+                var info = resp.result;
+                var activities = info.items;
+
+                //Ok ok ok... I make a little more pretty..  but I use innerHTML coz I'm lazy...
+                var tfoot = document.getElementById('the-foot');
+                var tr = tfoot.appendChild(document.createElement('tr'));
+                var html = '<td colspan=3><ul>';
+                var a = activities[i];
+                html += '<li>';
+                html += '<b>' + duration + '<br/>';
+                html += '</li>';
+                html += '</ul></td>';
+                tr.innerHTML = html;
+                countdown--;
+                if (countdown > 0) {
+                    getActivities(organizations, countdown)
+                } else {
+                    debug('Activities: ' + activities.length);
+                }
+
+            }
+        }
+        /**
+         * Simple function to append a log to the html page
+         * @param str to append
+         */
+        function debug(str) {
+            var li = document.createElement('li');
+            li.appendChild(document.createTextNode('[' + new Date() + '] ' + str));
+            document.getElementById('log').appendChild(li)
+        }
+    </script>
+    <script src="https://apis.google.com/js/client.js?onload=clientLoaded"></script>
+</head>
+<body>
+<h1>Jasify API client example</h1>
+
+<p>
+    <a href="https://github.com/krico/jas/blob/master/schedule/schedule-appengine/src/main/html/examples/api.example.html">
+        View the code on GitHub!
+    </a>
+</p>
+<p>
+    Note the &lt;script src="https://apis.google.com/js/client.js?onload=<b>clientLoaded</b>"&gt;<br>
+    <b>clientLoaded</b> is the function called when the google client.js is loaded.
+</p>
+
+<p>
+    You can click on the button to query activities
+</p>
+
+<h3>Organisations</h3>
+
+<div id="organisatons">
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Duration</th>
+            <th>Description</th>
+            <th>Id</th>
+        </tr>
+        </thead>
+        <tbody id="organisation-table"></tbody>
+        </tfoot>
+    </table>
+</div>
+
+<h3>Activities</h3>
+
+<div id="activities">
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Duration</th>
+        </tr>
+        </thead>
+        <tbody id="activity-table"></tbody>
+        <tfoot id="the-foot">
+        <tr>
+            <td colspan="3">
+                <button style="background: #ddd; color: firebrick" onclick="getActivities(organisations, 100);">Query activities
+                </button>
+                &lt;&lt; this button calls the function <b>getActivities(organisations)</b>. Watch the debug output...
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+
+<h5>Debug output</h5>
+<ul id="log" style="font-size: 9pt"></ul>
+
+</body>
+</html>

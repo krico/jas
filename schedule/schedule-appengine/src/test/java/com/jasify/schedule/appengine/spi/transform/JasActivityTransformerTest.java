@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.spi.dm.JasActivity;
 import com.jasify.schedule.appengine.spi.dm.JasActivityType;
 import com.jasify.schedule.appengine.util.KeyUtil;
@@ -31,21 +32,16 @@ public class JasActivityTransformerTest {
 
     @Test
     public void testTransformTo() throws Exception {
-        Activity internal = new Activity();
-        Key id = Datastore.createKey(Activity.class, 1);
-        internal.setId(id);
-        internal.setDescription("Desc");
-        ActivityType at = new ActivityType();
-        at.setId(Datastore.createKey(ActivityType.class, 9));
-        internal.getActivityTypeRef().setModel(at);
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        Activity internal = TestHelper.createActivity(activityType, true);
 
         JasActivity external = transformer.transformTo(internal);
         assertNotNull(external);
-        assertEquals("Desc", external.getDescription());
-        assertEquals(id, KeyUtil.stringToKey(external.getId()));
+        assertEquals(internal.getDescription(), external.getDescription());
+        assertEquals(internal.getId(), KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getActivityType());
-        assertNotNull(external.getActivityType().getId());
-        assertEquals(at.getId(), KeyUtil.stringToKey(external.getActivityType().getId()));
+        assertEquals(activityType.getId(), KeyUtil.stringToKey(external.getActivityType().getId()));
     }
 
     @Test

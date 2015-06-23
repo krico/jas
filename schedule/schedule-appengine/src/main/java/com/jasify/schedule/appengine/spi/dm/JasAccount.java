@@ -1,9 +1,5 @@
 package com.jasify.schedule.appengine.spi.dm;
 
-import org.slim3.datastore.Attribute;
-import org.slim3.datastore.CreationDate;
-import org.slim3.datastore.ModificationDate;
-
 import java.util.Date;
 
 /**
