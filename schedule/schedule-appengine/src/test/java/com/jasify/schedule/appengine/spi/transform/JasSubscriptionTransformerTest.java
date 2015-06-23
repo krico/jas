@@ -16,6 +16,7 @@ import org.slim3.datastore.Datastore;
 import java.util.Date;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNull;
 
 public class JasSubscriptionTransformerTest {
     private JasSubscriptionTransformer transformer = new JasSubscriptionTransformer();
@@ -57,7 +58,7 @@ public class JasSubscriptionTransformerTest {
         Subscription internal = transformer.transformFrom(external);
 
         assertEquals(id, internal.getId());
-        assertEquals(external.getCreated(), internal.getCreated());
+        assertNull(internal.getCreated());
         assertEquals(external.getUser().getName(), internal.getUserRef().getModel().getName());
     }
 }

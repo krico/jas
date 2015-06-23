@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.spi.dm.JasActivity;
 import com.jasify.schedule.appengine.spi.dm.JasActivityType;
 import com.jasify.schedule.appengine.util.KeyUtil;
@@ -31,23 +32,23 @@ public class JasActivityTransformerTest {
 
     @Test
     public void testTransformTo() throws Exception {
-        ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
         Activity internal = TestHelper.createActivity(activityType, true);
 
         JasActivity external = transformer.transformTo(internal);
         assertNotNull(external);
-        assertEquals(internal.getDescription(), external.getDescription());
+        assertNotNull(external.getActivityType());
+        assertEquals(activityType.getId(), KeyUtil.stringToKey(external.getActivityType().getId()));
         assertEquals(internal.getCurrency(), external.getCurrency());
-        assertEquals(internal.getLocation(), external.getLocation());
+        assertEquals(internal.getDescription(), external.getDescription());
         assertEquals(internal.getFinish(), external.getFinish());
-        assertEquals(internal.getStart(), external.getStart());
+        assertEquals(internal.getId(), KeyUtil.stringToKey(external.getId()));
+        assertEquals(internal.getLocation(), external.getLocation());
         assertEquals(internal.getMaxSubscriptions(), external.getMaxSubscriptions());
         assertEquals(internal.getPrice(), external.getPrice());
+        assertEquals(internal.getStart(), external.getStart());
         assertEquals(internal.getSubscriptionCount(), external.getSubscriptionCount());
-        assertEquals(internal.getId(), KeyUtil.stringToKey(external.getId()));
-        assertNotNull(external.getActivityType());
-        assertNotNull(external.getActivityType().getId());
-        assertEquals(activityType.getId(), KeyUtil.stringToKey(external.getActivityType().getId()));
     }
 
     @Test
