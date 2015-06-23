@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
@@ -12,6 +14,7 @@ import com.jasify.schedule.appengine.spi.dm.JasItemDetails;
 import com.jasify.schedule.appengine.spi.dm.JasNewShoppingCartRequest;
 import com.jasify.schedule.appengine.util.FormatUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -249,5 +252,22 @@ public class ShoppingCartEndpointTest {
         assertEquals(2, cart.getItems().size());
         assertEquals(activity2.getPrice(), cart.getItems().get(0).getPrice());
         assertEquals(activityPackage.getPrice(), cart.getItems().get(1).getPrice());
+        ShoppingCart exists = endpoint.getCart(null, cart.getId());
+        assertNotNull(exists);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testAnonymousCartToUserCartNotFound() throws UnauthorizedException, BadRequestException, NotFoundException {
+        endpoint.anonymousCartToUserCart(newCaller(99), RandomStringUtils.randomAlphabetic(32));
+    }
+
+    @Test
+    public void testAnonymousCartToUserCart() throws Exception {
+        ShoppingCart cart = new ShoppingCart();
+        cart.setCurrency("BRL");
+        String id = shoppingCartDao.put(cart);
+        endpoint.anonymousCartToUserCart(newCaller(99), id);
+        ShoppingCart userCart = endpoint.getUserCart(newCaller(99));
+        assertEquals("BRL", userCart.getCurrency());
     }
 }

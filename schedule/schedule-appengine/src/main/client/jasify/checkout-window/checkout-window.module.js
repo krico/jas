@@ -28,9 +28,10 @@
             .setPrefix('Jasify');
     }
 
-    function jasifyCheckoutWindowRun($rootScope, $log) {
+    function jasifyCheckoutWindowRun($rootScope, $log, $location) {
         $rootScope.$on('$routeChangeError', function (event, next, current) {
             $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
+            $location.path('/route-error');
         });
     }
 

@@ -12,7 +12,7 @@ describe('BookingViaJasify', function () {
         ShoopingCart,
         AUTH_EVENTS,
         controller,
-        activityPackages = { items: []},
+        activityPackages = {items: []},
         activities = {
             "items": [{
                 "id": "A159-O53",
@@ -79,10 +79,14 @@ describe('BookingViaJasify', function () {
         BrowserData = _BrowserData_;
         Auth = _Auth_;
         AUTH_EVENTS = _AUTH_EVENTS_;
-        spyOn(ShoopingCart, 'clearUserCart').and.callFake(function () {
+        spyOn(ShoopingCart, 'createAnonymousCart').and.callFake(function () {
             return $q.when(true);
         });
-        controller = $controller('BookingViaJasify', {$scope: $rootScope.$new(), activities: activities, activityPackages: activityPackages});
+        controller = $controller('BookingViaJasify', {
+            $scope: $rootScope.$new(),
+            activities: activities,
+            activityPackages: activityPackages
+        });
     }));
 
     it('should expose activities', function () {
@@ -97,65 +101,12 @@ describe('BookingViaJasify', function () {
         expect(controller.isActivityFullyBooked(activities.items[1])).toBe(false);
     });
 
-    it('should clean shopping cart before booking', function () {
+    it('should create anonymous cart with selection when booking', function () {
+        controller.activitySelection = [{id: 'A123-O321'}];
+        var req = {activityIds: [controller.activitySelection[0].id], activityPackageSubscriptions: []}
 
         controller.bookIt();
-        expect(ShoopingCart.clearUserCart).toHaveBeenCalled();
-    });
-
-    it('should add selection to ShoppingCart', function () {
-        controller.activitySelection = controller.activities;
-        controller.bookIt();
-
-        var activitiesAddedToCart = [];
-
-        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function (activity) {
-            activitiesAddedToCart.push(activity);
-        });
-
-        $rootScope.$apply();
-
-        expect(activitiesAddedToCart).toEqual(controller.activitySelection.map(function (activity) {
-            return activity.id;
-        }));
-    });
-
-    it('should redirect to success page when all activities were booked', function () {
-        controller.selection = controller.activities;
-        controller.bookIt();
-        spyOn(BrowserData, 'setPaymentAcceptRedirect');
-        spyOn($location, 'path');
-
-        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function () {
-            var dfd = $q.defer();
-            dfd.resolve();
-            return dfd.promise;
-        });
-        $rootScope.$apply();
-
-        expect(BrowserData.setPaymentAcceptRedirect).toHaveBeenCalledWith('done');
-        expect($location.path).toHaveBeenCalledWith('/checkout');
-    });
-
-    it('should redirect to success page when all activities were booked', function () {
-        controller.selection = controller.activities;
-        controller.bookIt();
-        spyOn(BrowserData, 'setPaymentAcceptRedirect');
-        spyOn(ShoopingCart, 'addUserActivity').and.callFake(function () {
-            var dfd = $q.defer();
-            dfd.resolve();
-            return dfd.promise;
-        });
-        $rootScope.$apply();
-
-        expect(BrowserData.setPaymentAcceptRedirect).toHaveBeenCalled();
-    });
-
-    it('should restore session after user account was created', function () {
-        spyOn(Auth, 'restore');
-        $rootScope.$broadcast(AUTH_EVENTS.accountCreated);
-        $rootScope.$apply();
-        expect(Auth.restore).toHaveBeenCalledWith(true);
+        expect(ShoopingCart.createAnonymousCart).toHaveBeenCalledWith(req);
     });
 
 });

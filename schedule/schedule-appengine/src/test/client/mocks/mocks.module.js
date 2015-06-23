@@ -52,6 +52,7 @@
             carts: {
                 get: nop,
                 createAnonymousCart: nop,
+                anonymousCartToUserCart: nop,
                 removeItem: nop,
                 addUserActivity: nop,
                 getUserCart: nop,

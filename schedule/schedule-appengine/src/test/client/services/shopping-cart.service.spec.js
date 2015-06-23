@@ -168,7 +168,7 @@ describe('ShoppingCartService', function () {
         expect($gapiMock.client.jasify.carts.addUserActivity).toHaveBeenCalledWith({activityId: activity.id});
     });
 
-    it('should add user activity to cart by id', function () {
+    it('create an anonymous cart', function () {
         var expected = {};
         spyOn($gapiMock.client.jasify.carts, 'createAnonymousCart').and.returnValue($q.when({result: expected}));
         var request = {foo: 'bar'};
@@ -183,6 +183,39 @@ describe('ShoppingCartService', function () {
         $rootScope.$apply();
 
         expect($gapiMock.client.jasify.carts.createAnonymousCart).toHaveBeenCalledWith(request);
+    });
+
+    it('covert an anonymous cart', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'anonymousCartToUserCart').and.returnValue($q.when({result: expected}));
+        var request = {id: 'bar'};
+        ShoppingCart.anonymousCartToUserCart(request)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.anonymousCartToUserCart).toHaveBeenCalledWith({id: 'bar'});
+    });
+
+    it('covert an anonymous cart by id', function () {
+        var expected = {};
+        spyOn($gapiMock.client.jasify.carts, 'anonymousCartToUserCart').and.returnValue($q.when({result: expected}));
+        ShoppingCart.anonymousCartToUserCart('bar')
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.carts.anonymousCartToUserCart).toHaveBeenCalledWith({id: 'bar'});
     });
 
 });

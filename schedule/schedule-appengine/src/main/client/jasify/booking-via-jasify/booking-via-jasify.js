@@ -250,12 +250,12 @@
         function confirmPopup(r) {
             jasDialogs.ok('Open new window', 'To continue with your checkout we need to open a new window.', onOk);
             function onOk() {
-                PopupWindow.open('/checkout-window.html#/anonymous/' + r.id, {width: 820})
+                PopupWindow.open('/checkout-window.html#/anonymous-checkout/' + r.id, {width: 820})
                     .then(function () {
                         jasDialogs.success('Checkout complete!');
                     }, function (res) {
                         jasDialogs.error(res);
-                    })
+                    });
             }
         }
     }

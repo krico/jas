@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.memcache.Memcache;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
@@ -124,6 +125,11 @@ public class ShoppingCartEndpoint {
         return uniqueKeys;
     }
 
+    @ApiMethod(name = "carts.get", path = "carts/anonymous/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public ShoppingCart getCart(User caller, @Named("id") String cartId) throws NotFoundException, BadRequestException {
+        return shoppingCartDao.get(cartId).calculate();
+    }
+
     @ApiMethod(name = "carts.createAnonymousCart", path = "carts/anonymous", httpMethod = ApiMethod.HttpMethod.POST)
     public ShoppingCart createAnonymousCart(User caller, JasNewShoppingCartRequest request) throws NotFoundException, BadRequestException {
         ShoppingCart cart = new ShoppingCart();
@@ -149,6 +155,18 @@ public class ShoppingCartEndpoint {
         }
         shoppingCartDao.put(cart);
         return cart.calculate();
+    }
+
+    @ApiMethod(name = "carts.anonymousCartToUserCart", path = "carts/anonymous/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public void anonymousCartToUserCart(User caller, @Named("id") String anonymousCartId) throws NotFoundException, BadRequestException, UnauthorizedException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        ShoppingCart shoppingCart = shoppingCartDao.get(anonymousCartId);
+        if (shoppingCart == null) {
+            throw new NotFoundException("Cart not found! (id=" + anonymousCartId + ")");
+        }
+        shoppingCart.setId(KeyUtil.userIdToCartId(jasUser.getUserId()));
+        shoppingCartDao.put(shoppingCart);
+        Memcache.delete(anonymousCartId);
     }
 
     @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
