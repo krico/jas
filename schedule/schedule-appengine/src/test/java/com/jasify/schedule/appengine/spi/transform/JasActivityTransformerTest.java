@@ -31,21 +31,23 @@ public class JasActivityTransformerTest {
 
     @Test
     public void testTransformTo() throws Exception {
-        Activity internal = new Activity();
-        Key id = Datastore.createKey(Activity.class, 1);
-        internal.setId(id);
-        internal.setDescription("Desc");
-        ActivityType at = new ActivityType();
-        at.setId(Datastore.createKey(ActivityType.class, 9));
-        internal.getActivityTypeRef().setModel(at);
+        ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        Activity internal = TestHelper.createActivity(activityType, true);
 
         JasActivity external = transformer.transformTo(internal);
         assertNotNull(external);
-        assertEquals("Desc", external.getDescription());
-        assertEquals(id, KeyUtil.stringToKey(external.getId()));
+        assertEquals(internal.getDescription(), external.getDescription());
+        assertEquals(internal.getCurrency(), external.getCurrency());
+        assertEquals(internal.getLocation(), external.getLocation());
+        assertEquals(internal.getFinish(), external.getFinish());
+        assertEquals(internal.getStart(), external.getStart());
+        assertEquals(internal.getMaxSubscriptions(), external.getMaxSubscriptions());
+        assertEquals(internal.getPrice(), external.getPrice());
+        assertEquals(internal.getSubscriptionCount(), external.getSubscriptionCount());
+        assertEquals(internal.getId(), KeyUtil.stringToKey(external.getId()));
         assertNotNull(external.getActivityType());
         assertNotNull(external.getActivityType().getId());
-        assertEquals(at.getId(), KeyUtil.stringToKey(external.getActivityType().getId()));
+        assertEquals(activityType.getId(), KeyUtil.stringToKey(external.getActivityType().getId()));
     }
 
     @Test

@@ -36,7 +36,7 @@ public class JasSubscriptionTransformer implements Transformer<Subscription, Jas
             return userDao.get(subscription.getUserRef().getKey());
         } catch (EntityNotFoundException e) {
             log.error("Entity not found", e);
-            return subscription.getUserRef().getModel();
+            return null;
         }
     }
 
