@@ -236,7 +236,7 @@ public class ActivityEndpointTest {
     }
 
     @Test
-    public void testUpdateActivityType() throws Exception {
+    public void testUpdateActivityTypeName() throws Exception {
         Organization organization = TestHelper.createOrganization(true);
         ActivityType activityType = TestHelper.createActivityType(organization, true);
         ActivityType dbActivityType = endpoint.getActivityType(newAdminCaller(1), activityType.getId());
@@ -247,6 +247,20 @@ public class ActivityEndpointTest {
         ActivityType result = endpoint.getActivityType(newAdminCaller(1), activityType.getId());
         equals(dbActivityType, result);
         assertFalse(result.getName().equals(activityType.getName()));
+    }
+
+    @Test
+    public void testUpdateActivityType() throws Exception {
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        ActivityType dbActivityType = endpoint.getActivityType(newAdminCaller(1), activityType.getId());
+
+        dbActivityType.setMaxSubscriptions(dbActivityType.getMaxSubscriptions() + 1);
+        endpoint.updateActivityType(newAdminCaller(1), activityType.getId(), dbActivityType);
+
+        ActivityType result = endpoint.getActivityType(newAdminCaller(1), activityType.getId());
+        equals(dbActivityType, result);
+        assertEquals(activityType.getMaxSubscriptions() + 1, result.getMaxSubscriptions());
     }
 
     // AddActivityType

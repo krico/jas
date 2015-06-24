@@ -98,8 +98,10 @@ public class ActivityEndpoint {
         try {
             final ActivityType dbActivityType = activityTypeDao.get(activityType.getId());
             final Key organizationId = dbActivityType.getOrganizationRef().getKey();
-            if (activityTypeDao.exists(activityType.getName(), organizationId)) {
-                throw new BadRequestException("ActivityType.name=" + activityType.getName() + ", Organization.id=" + organizationId);
+            if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), activityType.getName())) {
+                if (activityTypeDao.exists(activityType.getName(), organizationId)) {
+                    throw new BadRequestException("ActivityType.name=" + activityType.getName() + ", Organization.id=" + organizationId);
+                }
             }
             return ActivityServiceFactory.getActivityService().updateActivityType(activityType);
         } catch (EntityNotFoundException e) {
