@@ -152,16 +152,13 @@ public class ActivityEndpoint {
         }
     }
 
-    private List<Activity> filterActivities(List<Activity> activities, final Date fromDate,
-                                            final Date toDate,
-                                            Integer offset,
-                                            Integer limit) {
-        if (activities.isEmpty()) {
-            return Collections.emptyList();
+    private List<Activity> filterByDate(List<Activity> activities, final Date fromDate, final Date toDate) {
+        if (fromDate == null && toDate == null) {
+            return activities;
         }
 
-        ArrayList<Activity> filtered = new ArrayList<>();
-        filtered.addAll(Collections2.filter(activities, new Predicate<Activity>() {
+        ArrayList<Activity> result = new ArrayList<>();
+        result.addAll(Collections2.filter(activities, new Predicate<Activity>() {
             @Override
             public boolean apply(@Nullable Activity input) {
                 if (fromDate != null && input.getStart() != null && fromDate.after(input.getStart())) {
@@ -173,6 +170,18 @@ public class ActivityEndpoint {
                 return true;
             }
         }));
+        return result;
+    }
+
+    private List<Activity> filterActivities(List<Activity> activities, Date fromDate,
+                                            Date toDate,
+                                            Integer offset,
+                                            Integer limit) {
+        if (activities.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Activity> filtered = filterByDate(activities, fromDate, toDate);
 
         if (offset == null) offset = 0;
         if (limit == null) limit = 0;
