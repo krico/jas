@@ -477,7 +477,7 @@ public class MailParserTest {
 
     @Test
     public void testNewVersionEmail() throws Exception {
-        MailParser mailParser = MailParser.createNewVersionEmail("Beta", "222", "ABC", "#2", "https://URL");
+        MailParser mailParser = MailParser.createNewVersionEmail("aev", "Beta", "222", "ABC", "#2", "https://URL");
         String text = mailParser.getText();
 
         assert (text.contains("Version    : Beta"));
