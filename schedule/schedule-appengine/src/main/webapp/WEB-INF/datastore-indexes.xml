@@ -14,4 +14,8 @@
         <property name="created" direction="desc"/>
     </datastore-index>
 
+    <datastore-index kind="ActivityPackage" ancestor="true" source="manual">
+        <property name="created" direction="desc"/>
+    </datastore-index>
+
 </datastore-indexes>
