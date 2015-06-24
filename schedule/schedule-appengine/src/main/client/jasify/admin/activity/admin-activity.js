@@ -117,7 +117,7 @@
             }
 
             function fail(r) {
-                vm.alert('danger', 'Failed: ' + r.statusText);
+                jasDialogs.resultError("Failed to update Activity. Please try again.", r);
             }
         }
 

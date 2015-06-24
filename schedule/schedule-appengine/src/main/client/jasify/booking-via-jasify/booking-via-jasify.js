@@ -1,6 +1,8 @@
 /*global window, _ */
 (function (angular, _) {
 
+    'use strict';
+
     angular
         .module('jasify.bookingViaJasify')
         .controller('BookingViaJasify', BookingViaJasify);
@@ -54,6 +56,7 @@
         this.hasCompletedActivityPackages = hasCompletedActivityPackages;
         this.packageSelectionIncomplete = packageSelectionIncomplete;
         this.packageSelectionComplete = packageSelectionComplete;
+        this.canSelectAllForActivityPackage = canSelectAllForActivityPackage;
         this.packageSelectionTooBig = packageSelectionTooBig;
         this.selectAllForActivityPackage = selectAllForActivityPackage;
         this.updateSelectAllFlag = updateSelectAllFlag;
@@ -199,6 +202,19 @@
 
             vm.activityPackageSelection = localStorageService.get(sessionStorageKeys.activityPackageSelection) || {};
             vm.activitySelection = localStorageService.get(sessionStorageKeys.activitySelection) || [];
+        }
+
+        function canSelectAllForActivityPackage(activityPackage) {
+
+            var numActivitiesToBook = 0;
+
+            angular.forEach(vm.activityPackageActivities[activityPackage.id], function(activity) {
+                if (isActivityFullyBooked(activity) === false) {
+                    numActivitiesToBook += 1;
+                }
+            });
+
+            return numActivitiesToBook === activityPackage.itemCount;
         }
 
         function bookIt() {

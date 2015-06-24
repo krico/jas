@@ -14,7 +14,7 @@
      *
      * @returns {{success: Function, warning: Function, error: Function}}
      */
-    function jasDialogs() {
+    function jasDialogs($log) {
 
         return {
             success: function(message) {
@@ -29,7 +29,26 @@
             },
             error: function(message) {
                 if (swal) {
-                    swal("Operation Failed", message,"warning");
+                    swal("Operation Failed", message, "warning");
+                }
+            },
+            resultError: function(message, result) {
+                var errorDetails = [];
+                if (swal) {
+                    if (result) {
+                        if (result.result && result.result.error && result.result.error.message) {
+                            errorDetails.push(result.result.error.message);
+                        } else {
+                            if (result.statusText) {
+                                errorDetails.push(result.statusText);
+                            }
+                            if (result.status) {
+                                errorDetails.push(result.status);
+                            }
+                        }
+                    }
+                    $log.debug(message, result);
+                    swal("Operation Failed", message + errorDetails.join(','), "warning");
                 }
             },
             ruSure: function(message, onConfirm) {

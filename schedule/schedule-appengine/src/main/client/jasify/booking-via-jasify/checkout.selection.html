@@ -1,9 +1,21 @@
 <div ng-if="!vm.auth.isAuthenticated()">
-    <div class="card">
-        <div class="card-body card-padding-sm card-with-icon">
-            <i class="md mdi mdi-info-outline"></i>
-            Booking is done via Jasify. <br/>Sign In or Create Account in order to finish booking
-            process.
+    <div class="card checkout-card">
+        <div class="card-body card-padding-sm">
+            <div class="card-with-icon">
+                <i class="md mdi mdi-info-outline"></i>
+                Booking is done via Jasify. <br/>Sign In or Create Account in order to finish booking
+                process.
+            </div>
+            <div class="clearfix">
+                <button wizard-trigger="#activity-packages"
+                        class="btn bgm-blue waves-effect pull-left">
+                    <i class="md mdi mdi-undo"></i> Back to Activity Packages
+                </button>
+                <button wizard-trigger="#activities"
+                        class="btn bgm-blue waves-effect pull-left">
+                    <i class="md mdi mdi-undo"></i> Back to Activities
+                </button>
+            </div>
         </div>
     </div>
     <div class="row">
