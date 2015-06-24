@@ -26,7 +26,7 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
         super(ActivityPackageActivityMeta.get());
     }
 
-    public List<ActivityPackageActivity> getByActivityId(final Key activityId) throws EntityNotFoundException {
+    public List<ActivityPackageActivity> getByActivityId(Key activityId) throws EntityNotFoundException {
         ActivityPackageActivityMeta meta = getMeta();
 
         Activity activity = activityDao.get(activityId);

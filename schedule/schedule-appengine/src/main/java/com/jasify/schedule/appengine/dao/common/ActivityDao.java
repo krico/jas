@@ -19,12 +19,12 @@ public class ActivityDao extends BaseCachingDao<Activity> {
         super(ActivityMeta.get());
     }
 
-    public List<Activity> getByActivityTypeId(final Key activityTypeId) {
+    public List<Activity> getByActivityTypeId(Key activityTypeId) {
         ActivityMeta meta = getMeta();
         return query(new ByActivityTypeQuery(meta, activityTypeId));
     }
 
-    public List<Activity> getByOrganizationId(final Key organizationId) {
+    public List<Activity> getByOrganizationId(Key organizationId) {
         ActivityMeta meta = getMeta();
         return query(new ByOrganizationQuery(meta, organizationId));
     }

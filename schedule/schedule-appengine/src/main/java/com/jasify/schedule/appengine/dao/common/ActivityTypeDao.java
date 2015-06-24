@@ -38,7 +38,7 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
         });
     }
 
-    public List<ActivityType> getByOrganization(final Key organizationId) {
+    public List<ActivityType> getByOrganization(Key organizationId) {
         ActivityTypeMeta meta = getMeta();
         return query(new ByOrganizationQuery(meta, organizationId));
     }

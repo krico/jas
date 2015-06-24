@@ -4,10 +4,7 @@ import com.google.appengine.api.datastore.*;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.tools.development.testing.*;
 import com.google.common.base.Throwables;
-import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
-import com.jasify.schedule.appengine.meta.activity.ActivityPackageExecutionMeta;
-import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
-import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
+import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -456,8 +453,9 @@ public final class TestHelper {
         populatorBuilder.registerRandomizer(ActivityPackage.class, int.class, "itemCount", new MaxCountRandomizer());
         Populator populator = populatorBuilder.build();
         ActivityPackage activityPackage = populator.populateBean(ActivityPackage.class, "id", "organizationRef", "activityPackageActivityListRef", "executionCount");
-        activityPackage.getOrganizationRef().setModel(organization);
         if (store) {
+            activityPackage.setId(Datastore.allocateId(organization.getId(), ActivityPackageMeta.get()));
+            activityPackage.getOrganizationRef().setModel(organization);
             Datastore.put(activityPackage);
         }
         return activityPackage;
@@ -467,10 +465,10 @@ public final class TestHelper {
         PopulatorBuilder populatorBuilder = new PopulatorBuilder();
         Populator populator = populatorBuilder.build();
         ActivityPackageExecution activityPackageExecution = populator.populateBean(ActivityPackageExecution.class, "id", "activityPackageRef", "subscriptionListRef", "transferRef", "userRef");
-        activityPackageExecution.setId(Datastore.allocateId(user.getId(), ActivityPackageExecutionMeta.get()));
-        activityPackageExecution.getActivityPackageRef().setModel(activityPackage);
-        activityPackageExecution.getUserRef().setModel(user);
         if (store) {
+            activityPackageExecution.setId(Datastore.allocateId(user.getId(), ActivityPackageExecutionMeta.get()));
+            activityPackageExecution.getActivityPackageRef().setModel(activityPackage);
+            activityPackageExecution.getUserRef().setModel(user);
             Datastore.put(activityPackageExecution);
         }
         return activityPackageExecution;
@@ -480,10 +478,10 @@ public final class TestHelper {
         PopulatorBuilder populatorBuilder = new PopulatorBuilder();
         Populator populator = populatorBuilder.build();
         Subscription subscription = populator.populateBean(Subscription.class, "id", "activityRef", "userRef", "transferRef");
-        subscription.setId(Datastore.allocateId(user.getId(), SubscriptionMeta.get()));
-        subscription.getActivityRef().setModel(activity);
-        subscription.getUserRef().setModel(user);
         if (store) {
+            subscription.setId(Datastore.allocateId(user.getId(), SubscriptionMeta.get()));
+            subscription.getActivityRef().setModel(activity);
+            subscription.getUserRef().setModel(user);
             Datastore.put(subscription);
         }
         return subscription;
