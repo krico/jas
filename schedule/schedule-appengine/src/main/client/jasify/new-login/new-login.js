@@ -31,9 +31,9 @@
             $mdDialog.show(
                 $mdDialog.alert()
                     .parent(angular.element(document.body))
-                    .title('Sing In Failed')
+                    .title('Sign In Failed')
                     .content('Email/Username and password did not match. Please try again.')
-                    .ariaLabel('Sing In Failed')
+                    .ariaLabel('Sign In Failed')
                     .ok('OK')
             );
         }
