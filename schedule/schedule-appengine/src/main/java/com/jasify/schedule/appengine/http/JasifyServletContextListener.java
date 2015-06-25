@@ -26,7 +26,7 @@ public class JasifyServletContextListener implements ServletContextListener {
         SchemaMigration.instance().executePendingMigrations();
         SchemaMigration.instance().notifyOfNewVersion();
 
-        log.info("Context initialized in [%s]", watch.stop());
+        log.info("Context initialized in [{}]", watch.stop());
     }
 
     /**
