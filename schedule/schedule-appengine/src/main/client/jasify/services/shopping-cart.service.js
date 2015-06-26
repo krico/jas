@@ -46,7 +46,7 @@
         }
 
         function anonymousCartToUserCart(idOrCart) {
-            var request = {id: fetchId(idOrCart)}
+            var request = {id: fetchId(idOrCart)};
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.anonymousCartToUserCart(request)
                     .then(Endpoint.resultHandler, Endpoint.rejectHandler);
