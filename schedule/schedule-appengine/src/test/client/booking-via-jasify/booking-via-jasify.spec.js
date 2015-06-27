@@ -103,7 +103,7 @@ describe('BookingViaJasify', function () {
 
     it('should create anonymous cart with selection when booking', function () {
         controller.activitySelection = [{id: 'A123-O321'}];
-        var req = {activityIds: [controller.activitySelection[0].id], activityPackageSubscriptions: []}
+        var req = {activityIds: [controller.activitySelection[0].id], activityPackageSubscriptions: []};
 
         controller.bookIt();
         expect(ShoopingCart.createAnonymousCart).toHaveBeenCalledWith(req);
