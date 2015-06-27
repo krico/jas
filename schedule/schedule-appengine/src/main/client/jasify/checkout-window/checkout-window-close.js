@@ -2,7 +2,7 @@
 
     angular.module('jasify.checkoutWindow').controller('CheckoutWindowCloseController', CheckoutWindowCloseController);
 
-    function CheckoutWindowCloseController($window, $timeout, $location, $cookies, BrowserData) {
+    function CheckoutWindowCloseController($window, $timeout, $location, $cookies, CHECKOUT_WINDOW) {
         var vm = this;
         vm.loaded = false;
         vm.operationFailed = false;
@@ -11,7 +11,7 @@
 
         $timeout(function () {
             vm.onLoad();
-        }, 1000);
+        }, 500);
 
 
         function onLoad() {
@@ -19,13 +19,13 @@
             var ps = $location.search().paymentStatus;
             vm.operationFailed = !(ps && ps == 'success');
             if (vm.operationFailed) {
-                $cookies.popupPaymentStatus = 'failed';
+                $cookies[CHECKOUT_WINDOW.statusCookie] = CHECKOUT_WINDOW.statusPaymentFailed;
             } else {
-                $cookies.popupPaymentStatus = 'success';
+                $cookies[CHECKOUT_WINDOW.statusCookie] = CHECKOUT_WINDOW.statusSuccess;
             }
             $timeout(function () {
                 vm.close();
-            }, 2000);
+            }, 2500);
         }
 
         function close() {

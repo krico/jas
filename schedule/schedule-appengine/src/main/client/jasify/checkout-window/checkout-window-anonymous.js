@@ -2,7 +2,9 @@
 
     angular.module('jasify.checkoutWindow').controller('CheckoutWindowAnonymousController', CheckoutWindowAnonymousController);
 
-    function CheckoutWindowAnonymousController($log, $location, ShoppingCart, Auth, $scope, AUTH_EVENTS, cart) {
+    function CheckoutWindowAnonymousController($log, $location, $scope, $cookies,
+                                               ShoppingCart, Auth, BrowserData, AUTH_EVENTS,
+                                               CHECKOUT_WINDOW, cart) {
         var vm = this;
         vm.auth = Auth;
 
@@ -14,10 +16,18 @@
 
         $log.debug('CheckoutWindowAnonymousController created');
 
-        Auth.restore().then(goToCheckout);
+        Auth.restore().then(goToCheckout,
+            function () {
+                $cookies[CHECKOUT_WINDOW.statusCookie] = CHECKOUT_WINDOW.statusAuthenticating;
+            });
 
         function goToCheckout() {
-            $log.debug('Going to checkout, CART: ' + cart.id);
+
+            $cookies[CHECKOUT_WINDOW.statusCookie] = CHECKOUT_WINDOW.statusCheckout;
+
+            BrowserData.setPaymentCancelRedirect('/close');
+            BrowserData.setPaymentAcceptRedirect('/close');
+
             return ShoppingCart.anonymousCartToUserCart(cart).then(function () {
                 $location.path('/checkout');
             });//TODO: continue from here

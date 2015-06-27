@@ -23,17 +23,17 @@
         "jasify.filters"
     ]);
 
-    
-    bookingViaJasify.run(function($rootScope, $modal, AUTH_EVENTS) {
+
+    bookingViaJasify.run(function ($rootScope, $modal, AUTH_EVENTS) {
 
         var modalInstance,
             scope = $rootScope.$new();
 
-        scope.ok = function() {
+        scope.ok = function () {
             modalInstance.close();
         };
 
-        $rootScope.$on(AUTH_EVENTS.loginFailed, function() {
+        $rootScope.$on(AUTH_EVENTS.loginFailed, function () {
             modalInstance = $modal.open({
                 templateUrl: 'booking-via-jasify/loginFailed.html',
                 size: 'sm',
@@ -41,7 +41,7 @@
             });
         });
     });
-    
+
     bookingViaJasify.config(bookingViaRoutes);
     bookingViaJasify.constant('sessionStorageKeys', {
         activityPackageSelection: 'activityPackageSelection',
@@ -100,7 +100,7 @@
         localStorageServiceProvider
             //.setStorageType('sessionStorage')
             .setPrefix('Jasify');
-        CheckoutProvider.popupMode(true);
+        // CheckoutProvider.popupMode(true);
     });
 
 }(window.angular, window._, window.moment));
