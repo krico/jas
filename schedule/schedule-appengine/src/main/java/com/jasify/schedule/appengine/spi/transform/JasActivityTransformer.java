@@ -33,7 +33,6 @@ public class JasActivityTransformer implements Transformer<Activity, JasActivity
         if (activityType != null) {
             external.setActivityType(typeTransformer.transformTo(activityType));
         }
-        external.setBookItUrl("https://jasify-schedule.appspot.com/book-it.html#/" + internal.getId());
         external.setCurrency(internal.getCurrency());
         external.setDescription(internal.getDescription());
         external.setFinish(internal.getFinish());
@@ -43,6 +42,7 @@ public class JasActivityTransformer implements Transformer<Activity, JasActivity
         external.setPrice(internal.getPrice());
         external.setStart(internal.getStart());
         external.setSubscriptionCount(internal.getSubscriptionCount());
+        external.setBookItUrl("https://jasify-schedule.appspot.com/book-it.html#/" + external.getId());
         return external;
     }
 

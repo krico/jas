@@ -49,6 +49,7 @@ public class JasActivityTransformerTest {
         assertEquals(internal.getPrice(), external.getPrice());
         assertEquals(internal.getStart(), external.getStart());
         assertEquals(internal.getSubscriptionCount(), external.getSubscriptionCount());
+        assertEquals("https://jasify-schedule.appspot.com/book-it.html#/" + KeyUtil.keyToString(internal.getId()), external.getBookItUrl());
     }
 
     @Test
