@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.memcache.Memcache;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.Activity;
@@ -20,6 +21,7 @@ import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageSubscription;
 import com.jasify.schedule.appengine.spi.dm.JasItemDetails;
+import com.jasify.schedule.appengine.spi.dm.JasNewShoppingCartRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.FormatUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
@@ -65,25 +67,7 @@ public class ShoppingCartEndpoint {
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
     private final ShoppingCartDao shoppingCartDao = new ShoppingCartDao();
 
-    @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
-    public ShoppingCart getUserCart(User caller) throws UnauthorizedException, ForbiddenException {
-        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
-        return shoppingCartDao.getUserCart(jasUser.getUserId()).calculate();
-    }
-
-    @ApiMethod(name = "carts.clearUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public ShoppingCart clearUserCart(User caller) throws UnauthorizedException, ForbiddenException {
-        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
-        String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
-        ShoppingCart cleanCart = new ShoppingCart(cartId);
-        shoppingCartDao.put(cleanCart);
-        return cleanCart;
-    }
-
-    @ApiMethod(name = "carts.addUserActivity", path = "carts/user/activity/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public ShoppingCart addUserActivity(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
-        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
-
+    private Activity validateAndGetActivity(Key activityId) throws NotFoundException, BadRequestException {
         Activity activity;
         try {
             activity = activityDao.get(activityId);
@@ -96,16 +80,13 @@ public class ShoppingCartEndpoint {
         if (activity.getPrice() == null) {
             throw new BadRequestException("Cannot add activity with no price to cart, id=" + activityId);
         }
-        String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
-        return shoppingCartDao.addItem(cartId, new ShoppingCart.ItemBuilder()
-                .activity(activity)
-                .build())
-                .calculate();
+        return activity;
     }
 
-    @ApiMethod(name = "carts.addUserActivityPackage", path = "carts/user/activity-package/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public ShoppingCart addUserActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, JasActivityPackageSubscription subscription) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
-        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+    private ActivityPackage validateAndGetActivityPackage(Key activityPackageId) throws NotFoundException, BadRequestException {
+        if (activityPackageId == null) {
+            throw new BadRequestException("activityPackageId is NULL");
+        }
         ActivityPackage activityPackage;
         try {
             activityPackage = activityPackageDao.get(activityPackageId);
@@ -118,7 +99,10 @@ public class ShoppingCartEndpoint {
         if (activityPackage.getPrice() == null) {
             throw new BadRequestException("Cannot add activityPackageId with no price to cart, activityPackageId=" + activityPackageId);
         }
+        return activityPackage;
+    }
 
+    private Set<Key> validateSubscriptionActivities(Key activityPackageId, JasActivityPackageSubscription subscription) throws BadRequestException, NotFoundException {
         List<Key> activityIds = Preconditions.checkNotNull(subscription.getActivityIds());
         if (activityIds.isEmpty()) {
             throw new BadRequestException("You must have at least 1 activity, activityPackageId=" + activityPackageId);
@@ -138,6 +122,86 @@ public class ShoppingCartEndpoint {
                 throw new NotFoundException("activityId=" + activityId);
             }
         }
+        return uniqueKeys;
+    }
+
+    @ApiMethod(name = "carts.get", path = "carts/anonymous/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public ShoppingCart getCart(User caller, @Named("id") String cartId) throws NotFoundException, BadRequestException {
+        return shoppingCartDao.get(cartId).calculate();
+    }
+
+    @ApiMethod(name = "carts.createAnonymousCart", path = "carts/anonymous", httpMethod = ApiMethod.HttpMethod.POST)
+    public ShoppingCart createAnonymousCart(User caller, JasNewShoppingCartRequest request) throws NotFoundException, BadRequestException {
+        ShoppingCart cart = new ShoppingCart();
+        List<Key> activityIds = request.getActivityIds();
+        if (activityIds != null) {
+            for (Key activityId : activityIds) {
+                Activity activity = validateAndGetActivity(activityId);
+                cart.getItems().add(new ShoppingCart.ItemBuilder()
+                        .activity(activity)
+                        .build());
+            }
+        }
+        List<JasNewShoppingCartRequest.ActivityPackageSubscription> activityPackageSubscriptions = request.getActivityPackageSubscriptions();
+        if (activityPackageSubscriptions != null) {
+            for (JasNewShoppingCartRequest.ActivityPackageSubscription subscription : activityPackageSubscriptions) {
+                ActivityPackage activityPackage = validateAndGetActivityPackage(subscription.getActivityPackageId());
+                Set<Key> uniqueKeys = validateSubscriptionActivities(activityPackage.getId(), subscription);
+                cart.getItems().add(new ShoppingCart.ItemBuilder()
+                        .activityPackage(activityPackage)
+                        .data(new ArrayList<>(uniqueKeys))
+                        .build());
+            }
+        }
+        shoppingCartDao.put(cart);
+        return cart.calculate();
+    }
+
+    @ApiMethod(name = "carts.anonymousCartToUserCart", path = "carts/anonymous/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public void anonymousCartToUserCart(User caller, @Named("id") String anonymousCartId) throws NotFoundException, BadRequestException, UnauthorizedException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        ShoppingCart shoppingCart = shoppingCartDao.get(anonymousCartId);
+        if (shoppingCart == null) {
+            throw new NotFoundException("Cart not found! (id=" + anonymousCartId + ")");
+        }
+        shoppingCart.setId(KeyUtil.userIdToCartId(jasUser.getUserId()));
+        shoppingCartDao.put(shoppingCart);
+        Memcache.delete(anonymousCartId);
+    }
+
+    @ApiMethod(name = "carts.getUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.GET)
+    public ShoppingCart getUserCart(User caller) throws UnauthorizedException, ForbiddenException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        return shoppingCartDao.getUserCart(jasUser.getUserId()).calculate();
+    }
+
+    @ApiMethod(name = "carts.clearUserCart", path = "carts/user", httpMethod = ApiMethod.HttpMethod.DELETE)
+    public ShoppingCart clearUserCart(User caller) throws UnauthorizedException, ForbiddenException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
+        ShoppingCart cleanCart = new ShoppingCart(cartId);
+        shoppingCartDao.put(cleanCart);
+        return cleanCart;
+    }
+
+    @ApiMethod(name = "carts.addUserActivity", path = "carts/user/activity/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public ShoppingCart addUserActivity(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+
+        Activity activity = validateAndGetActivity(activityId);
+        String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
+        return shoppingCartDao.addItem(cartId, new ShoppingCart.ItemBuilder()
+                .activity(activity)
+                .build())
+                .calculate();
+    }
+
+    @ApiMethod(name = "carts.addUserActivityPackage", path = "carts/user/activity-package/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.POST)
+    public ShoppingCart addUserActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, JasActivityPackageSubscription subscription) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+        JasifyEndpointUser jasUser = JasifyEndpoint.mustBeLoggedIn(caller);
+        ActivityPackage activityPackage = validateAndGetActivityPackage(activityPackageId);
+
+        Set<Key> uniqueKeys = validateSubscriptionActivities(activityPackageId, subscription);
 
         String cartId = KeyUtil.userIdToCartId(jasUser.getUserId());
         return shoppingCartDao.addItem(cartId, new ShoppingCart.ItemBuilder()

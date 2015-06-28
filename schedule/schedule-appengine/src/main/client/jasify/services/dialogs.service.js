@@ -17,22 +17,22 @@
     function jasDialogs($log) {
 
         return {
-            success: function(message) {
+            success: function (message) {
                 if (swal) {
                     swal("", message, "success");
                 }
             },
-            warning: function(message) {
+            warning: function (message) {
                 if (swal) {
                     swal("", message, "warning");
                 }
             },
-            error: function(message) {
+            error: function (message) {
                 if (swal) {
                     swal("Operation Failed", message, "warning");
                 }
             },
-            resultError: function(message, result) {
+            resultError: function (message, result) {
                 var errorDetails = [];
                 if (swal) {
                     if (result) {
@@ -51,7 +51,7 @@
                     swal("Operation Failed", message + errorDetails.join(','), "warning");
                 }
             },
-            ruSure: function(message, onConfirm) {
+            ruSure: function (message, onConfirm) {
                 if (swal) {
                     swal({
                         title: "Are you sure?",
@@ -62,6 +62,20 @@
                         closeOnConfirm: true
                     }, function () {
                         onConfirm();
+                    });
+                }
+            },
+            ok: function (title, message, onOk, closeOnConfirm, type) {
+                if (swal) {
+                    swal({
+                        title: title,
+                        text: message,
+                        type: type,
+                        showCancelButton: false,
+                        confirmButtonText: "Ok",
+                        closeOnConfirm: !!closeOnConfirm
+                    }, function () {
+                        onOk();
                     });
                 }
             }

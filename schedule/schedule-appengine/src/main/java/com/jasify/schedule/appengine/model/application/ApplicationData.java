@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.application;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.common.base.Stopwatch;
 import com.jasify.schedule.appengine.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,7 @@ public final class ApplicationData {
 
     Application loadApplication() {
         log.debug("Loading application");
+        Stopwatch watch = Stopwatch.createStarted();
         Transaction tx = Datastore.beginTransaction();
         Key name = Datastore.createKey(Application.class, Constants.APPLICATION_NAME);
         Application application;
@@ -91,14 +93,16 @@ public final class ApplicationData {
                 application = new Application();
                 application.setName(name);
                 Datastore.put(tx, application);
-                log.info("Created: {}", application);
+                log.info("Created(in {}): {}", watch.toString(), application);
             } else {
-                log.info("Loaded: {}" + application);
+                log.info("Loaded (in {}): {}", watch.toString(), application);
             }
             application.reloadProperties(tx);
+            log.info("Properties loaded (in {})", watch.stop());
+            tx.commit();
             return application;
         } finally {
-            tx.commit();
+            if (tx.isActive()) tx.rollback();
         }
     }
 

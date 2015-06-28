@@ -7,8 +7,9 @@
         .module('jasify.bookingViaJasify')
         .controller('BookingViaJasify', BookingViaJasify);
 
-    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $location, $q, $timeout, localStorageService, sessionStorageKeys,
-                              BrowserData, ShoppingCart, ActivityPackage, Auth, activities, activityPackages, jasDialogs, getContrast) {
+    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $window, $timeout, $location, localStorageService,
+                              sessionStorageKeys, PopupWindow, ShoppingCart, ActivityPackage, Auth, activities,
+                              activityPackages, jasDialogs, getContrast, CHECKOUT_WINDOW, $cookies) {
 
         var vm = this;
         vm.wizardOptions = {
@@ -76,7 +77,6 @@
         function onWizardClick(tab, navigation, index) {
             $timeout(function () {
                 var v = activeTab();
-                $log.debug('Active tab: ' + v);
                 localStorageService.set(sessionStorageKeys.selectedTabIndex, v);
             }, 500);
         }
@@ -208,7 +208,7 @@
 
             var numActivitiesToBook = 0;
 
-            angular.forEach(vm.activityPackageActivities[activityPackage.id], function(activity) {
+            angular.forEach(vm.activityPackageActivities[activityPackage.id], function (activity) {
                 if (isActivityFullyBooked(activity) === false) {
                     numActivitiesToBook += 1;
                 }
@@ -218,31 +218,93 @@
         }
 
         function bookIt() {
-            ShoppingCart.clearUserCart().then(function () {
-                var promises = [];
+            var request = {activityIds: [], activityPackageSubscriptions: []};
 
-                angular.forEach(vm.activitySelection, function (value) {
-                    $log.debug("Adding activity to shopping cart: " + value.id);
-                    promises.push(ShoppingCart.addUserActivity(value.id));
+            angular.forEach(vm.activitySelection, function (value) {
+                $log.debug("Adding activity to shopping cart: " + value.id);
+                this.activityIds.push(value.id);
+            }, request);
+
+            var completeActivityPackagesList = _.filter(vm.activityPackages, vm.packageSelectionComplete);
+
+            angular.forEach(completeActivityPackagesList, function (value) {
+                $log.debug("Adding activity package to shopping cart: " + value.id);
+
+                var activityIds = [];
+                angular.forEach(vm.activityPackageSelection[value.id], function (activity) {
+                    this.push(activity.id);
+                }, activityIds);
+
+                this.activityPackageSubscriptions.push({
+                    activityPackageId: value.id,
+                    activityIds: activityIds
                 });
+            }, request);
 
-                var completeActivityPackagesList = _.filter(vm.activityPackages, vm.packageSelectionComplete);
+            ShoppingCart.createAnonymousCart(request).then(confirmPopup, error);
 
-                angular.forEach(completeActivityPackagesList, function (value) {
-                    $log.debug("Adding activity package to shopping cart: " + value.id);
-                    promises.push(ShoppingCart.addUserActivityPackage(value, vm.activityPackageSelection[value.id]));
+            function error(r) {
+                jasDialogs.error(r.statusText + ' (' + r.status + ')');
+            }
+        }
+
+        function confirmPopup(r) {
+            jasDialogs.ok('Proceed in new window', 'Booking is done via Jasify. ' +
+                'A new window will be opened where you will be able to Sign In or Create an account and ' +
+                'proceed to your checkout.',
+                onOk);
+            function onOk() {
+                var w = $window.innerWidth || 820;
+                var h = $window.innerHeight || 620;
+                w = w - 20;
+                h = h - 20;
+                if (CHECKOUT_WINDOW.statusCookie in $cookies) {
+                    delete $cookies[CHECKOUT_WINDOW.statusCookie];
+                }
+                PopupWindow.open('/checkout-window.html#/anonymous-checkout/' + r.id, {
+                    width: w,
+                    height: h
+                }).then(onWindowClosed, function (res) {
+                    jasDialogs.error(res);
                 });
+            }
 
-                $q.all(promises).then(function () {
-                    $log.debug('Shopping cart is ready');
-                    BrowserData.setPaymentAcceptRedirect('done');
-                    BrowserData.setPaymentCancelRedirect($location.path());
-                    $location.path('/checkout');
-                }, function () {
-                    // TODO
-                });
+            function onWindowClosed() {
+                var status = $cookies[CHECKOUT_WINDOW.statusCookie];
+                if (status) {
+                    if (status == CHECKOUT_WINDOW.statusSuccess) {
 
-            });
+                        jasDialogs.ok('Checkout complete!', 'Thanks!', function () {
+                            $timeout(function () {
+                                $location.path('/done')
+                            }, 500);
+                        }, true, 'success');
+
+                    } else if (status == CHECKOUT_WINDOW.statusPaymentFailed) {
+
+                        jasDialogs.warning('It seems you did not complete your payment.  ' +
+                        'Feel free to change your selections an try again!');
+
+                    } else if (status == CHECKOUT_WINDOW.statusAuthenticating) {
+
+                        jasDialogs.warning('It seems you did not Sign In or Create Account.  ' +
+                        'Feel free to change your selections and try again!');
+
+                    } else if (status == CHECKOUT_WINDOW.statusCheckout) {
+
+                        jasDialogs.warning('It seems you did not finish your checkout.  ' +
+                        'Feel free to change your selections and try again!');
+
+                    } else {
+
+                        jasDialogs.warning('System was unable to determine the result of your checkout operation. (' + status + ")");
+
+                    }
+                } else {
+                    //TODO: check with server
+                    jasDialogs.warning('System was unable to determine the result of your checkout operation.');
+                }
+            }
         }
     }
 

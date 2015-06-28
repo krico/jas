@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model;
 
 import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.Version;
@@ -57,9 +58,10 @@ public final class SchemaMigration {
             return false;
         }
         log.info("New version installed: {}", currentVersion);
-        String subject = String.format("[Jasify] New Version In Prod [%s]", Version.toShortVersionString());
+        String instanceVersion = SystemProperty.applicationVersion.get() + "/" + Version.toShortVersionString();
+        String subject = String.format("[Jasify] New Version In Prod [%s]", instanceVersion);
         try {
-            MailParser mailParser = MailParser.createNewVersionEmail(Version.getVersion(), Version.getTimestampVersion(),
+            MailParser mailParser = MailParser.createNewVersionEmail(SystemProperty.applicationVersion.get(), Version.getVersion(), Version.getTimestampVersion(),
                     Version.getBranch(), Version.getNumber(), EnvironmentUtil.defaultVersionUrl());
             MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {

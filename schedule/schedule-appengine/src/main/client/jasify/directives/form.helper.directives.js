@@ -94,7 +94,7 @@
                 };
             }
         };
-    })
+    });
 
     jasifyDirectivesFormModule.directive('btnHref', function ($location) {
         return function (scope, element, attrs) {

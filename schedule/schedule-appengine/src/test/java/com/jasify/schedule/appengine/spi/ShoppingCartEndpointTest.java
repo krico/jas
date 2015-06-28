@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
@@ -9,8 +11,10 @@ import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageSubscription;
 import com.jasify.schedule.appengine.spi.dm.JasItemDetails;
+import com.jasify.schedule.appengine.spi.dm.JasNewShoppingCartRequest;
 import com.jasify.schedule.appengine.util.FormatUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -162,5 +166,108 @@ public class ShoppingCartEndpointTest {
 
         assertEquals(1, item.getSubItemIds().size());
         assertEquals(activity.getId(), item.getSubItemIds().get(0));
+    }
+
+    @Test
+    public void testCreateAnonymousCartEmpty() throws Exception {
+        JasNewShoppingCartRequest request = new JasNewShoppingCartRequest();
+        ShoppingCart cart = endpoint.createAnonymousCart(null, request);
+        assertNotNull(cart);
+        assertNotNull(cart.getId());
+        assertTrue(cart.getItems().isEmpty());
+    }
+
+    @Test
+    public void testCreateAnonymousWithActivities() throws Exception {
+        Activity activity = new Activity();
+        activity.setName("A");
+        activity.setPrice(30d);
+        Datastore.put(activity);
+
+        JasNewShoppingCartRequest request = new JasNewShoppingCartRequest();
+
+        request.getActivityIds().add(activity.getId());
+
+        ShoppingCart cart = endpoint.createAnonymousCart(null, request);
+
+        assertNotNull(cart);
+        assertNotNull(cart.getId());
+        assertEquals(1, cart.getItems().size());
+        assertEquals(activity.getPrice(), cart.getItems().get(0).getPrice());
+    }
+
+    @Test
+    public void testCreateAnonymousWithActivityPackages() throws Exception {
+        Activity activity = new Activity();
+        activity.setName("A");
+        activity.setPrice(30d);
+
+        ActivityPackage activityPackage = new ActivityPackage();
+        activityPackage.setName("AP");
+        activityPackage.setPrice(60d);
+        Datastore.put(activity, activityPackage);
+
+        JasNewShoppingCartRequest request = new JasNewShoppingCartRequest();
+
+        JasNewShoppingCartRequest.ActivityPackageSubscription subscription = new JasNewShoppingCartRequest.ActivityPackageSubscription();
+        subscription.setActivityPackageId(activityPackage.getId());
+        subscription.getActivityIds().add(activity.getId());
+        request.getActivityPackageSubscriptions().add(subscription);
+
+        ShoppingCart cart = endpoint.createAnonymousCart(null, request);
+
+        assertNotNull(cart);
+        assertNotNull(cart.getId());
+        assertEquals(1, cart.getItems().size());
+        assertEquals(activityPackage.getPrice(), cart.getItems().get(0).getPrice());
+    }
+
+    @Test
+    public void testCreateAnonymousWithActivityPackagesAndActivities() throws Exception {
+        Activity activity = new Activity();
+        activity.setName("A");
+        activity.setPrice(30d);
+        Activity activity2 = new Activity();
+        activity2.setName("B");
+        activity2.setPrice(40d);
+
+        ActivityPackage activityPackage = new ActivityPackage();
+        activityPackage.setName("AP");
+        activityPackage.setPrice(60d);
+        Datastore.put(activity, activity2, activityPackage);
+
+        JasNewShoppingCartRequest request = new JasNewShoppingCartRequest();
+
+        JasNewShoppingCartRequest.ActivityPackageSubscription subscription = new JasNewShoppingCartRequest.ActivityPackageSubscription();
+        subscription.setActivityPackageId(activityPackage.getId());
+        subscription.getActivityIds().add(activity.getId());
+        request.getActivityPackageSubscriptions().add(subscription);
+
+        request.getActivityIds().add(activity2.getId());
+
+        ShoppingCart cart = endpoint.createAnonymousCart(null, request);
+
+        assertNotNull(cart);
+        assertNotNull(cart.getId());
+        assertEquals(2, cart.getItems().size());
+        assertEquals(activity2.getPrice(), cart.getItems().get(0).getPrice());
+        assertEquals(activityPackage.getPrice(), cart.getItems().get(1).getPrice());
+        ShoppingCart exists = endpoint.getCart(null, cart.getId());
+        assertNotNull(exists);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testAnonymousCartToUserCartNotFound() throws UnauthorizedException, BadRequestException, NotFoundException {
+        endpoint.anonymousCartToUserCart(newCaller(99), RandomStringUtils.randomAlphabetic(32));
+    }
+
+    @Test
+    public void testAnonymousCartToUserCart() throws Exception {
+        ShoppingCart cart = new ShoppingCart();
+        cart.setCurrency("BRL");
+        String id = shoppingCartDao.put(cart);
+        endpoint.anonymousCartToUserCart(newCaller(99), id);
+        ShoppingCart userCart = endpoint.getUserCart(newCaller(99));
+        assertEquals("BRL", userCart.getCurrency());
     }
 }

@@ -4,6 +4,8 @@
     function shoppingCart(Endpoint, $q, $log) {
         var ShoppingCart = {
             get: get,
+            createAnonymousCart: createAnonymousCart,
+            anonymousCartToUserCart: anonymousCartToUserCart,
             getUserCart: getUserCart,
             clearUserCart: clearUserCart,
             addUserActivity: addUserActivity,
@@ -32,6 +34,21 @@
 
             return Endpoint.jasify(function (jasify) {
                 return jasify.carts.get(req)
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+            });
+        }
+
+        function createAnonymousCart(request) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.carts.createAnonymousCart(request)
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+            });
+        }
+
+        function anonymousCartToUserCart(idOrCart) {
+            var request = {id: fetchId(idOrCart)};
+            return Endpoint.jasify(function (jasify) {
+                return jasify.carts.anonymousCartToUserCart(request)
                     .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
