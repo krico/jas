@@ -109,7 +109,9 @@ public class PayPalPaymentProviderTest {
 
 
         PayPalPaymentProvider.PayPalInterface mock = testPayPalInterface.getPayPalMock();
-        EasyMock.expect(mock.getWebProfiles()).andReturn(Collections.singletonList(new WebProfile().setId(PROFILE_ID)));
+        // TODO: This line is only needed if an update is being made to the webprofile
+        WebProfile webProfile = new WebProfile().setId(PROFILE_ID).setPresentation(new Presentation().setBrandName("Jasify"));
+        EasyMock.expect(mock.getWebProfiles()).andReturn(Collections.singletonList(webProfile));
 
         final Capture<Payment> paymentCapture = EasyMock.newCapture();
         EasyMock.expect(mock.create(EasyMock.capture(paymentCapture))).andAnswer(new IAnswer<Payment>() {
