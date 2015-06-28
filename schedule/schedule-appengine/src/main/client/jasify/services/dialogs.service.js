@@ -32,7 +32,7 @@
                     swal("Operation Failed", message, "warning");
                 }
             },
-            resultError: function(message, result) {
+            resultError: function (message, result) {
                 var errorDetails = [];
                 if (swal) {
                     if (result) {
@@ -65,11 +65,12 @@
                     });
                 }
             },
-            ok: function (title, message, onOk, closeOnConfirm) {
+            ok: function (title, message, onOk, closeOnConfirm, type) {
                 if (swal) {
                     swal({
                         title: title,
                         text: message,
+                        type: type,
                         showCancelButton: false,
                         confirmButtonText: "Ok",
                         closeOnConfirm: !!closeOnConfirm

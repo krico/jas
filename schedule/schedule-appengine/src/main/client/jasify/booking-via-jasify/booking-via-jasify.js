@@ -7,7 +7,7 @@
         .module('jasify.bookingViaJasify')
         .controller('BookingViaJasify', BookingViaJasify);
 
-    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $window, $timeout, localStorageService,
+    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $window, $timeout, $location, localStorageService,
                               sessionStorageKeys, PopupWindow, ShoppingCart, ActivityPackage, Auth, activities,
                               activityPackages, jasDialogs, getContrast, CHECKOUT_WINDOW, $cookies) {
 
@@ -274,7 +274,11 @@
                 if (status) {
                     if (status == CHECKOUT_WINDOW.statusSuccess) {
 
-                        jasDialogs.success('Checkout complete!');
+                        jasDialogs.ok('Checkout complete!', 'Thanks!', function () {
+                            $timeout(function () {
+                                $location.path('/done')
+                            }, 500);
+                        }, true, 'success');
 
                     } else if (status == CHECKOUT_WINDOW.statusPaymentFailed) {
 

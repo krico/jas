@@ -46,17 +46,13 @@
             var beanName = angular.uppercase(propertyName.substring(0, 1)) + propertyName.substring(1);
 
             BrowserData['set' + beanName] = function (value) {
-                $log.debug('set' + beanName + ' = ' + value);
                 localStorageService.set(propertyName, value);
             };
 
             BrowserData['get' + beanName] = function () {
-                $log.debug('get' + beanName);
                 if (BrowserData['is' + beanName + 'Set']()) {
-                    $log.debug('get' + beanName + ' = ' + localStorageService.get(propertyName));
                     return localStorageService.get(propertyName);
                 }
-                $log.debug('(Default) get' + beanName + ' = ' + BrowserData.DEFAULTS[propertyName]);
                 return BrowserData.DEFAULTS[propertyName];
             };
 
@@ -65,7 +61,6 @@
             };
 
             BrowserData['clear' + beanName] = function () {
-                $log.debug('clear' + beanName);
                 localStorageService.remove(propertyName);
             };
 
