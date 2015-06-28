@@ -59,7 +59,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
             Activity activity = activityDao.get(activityId);
             Subscription subscribe = activityService.subscribe(user, activity);
             subscriptionId = subscribe.getId();
-        } catch (EntityNotFoundException | UniqueConstraintException | OperationException e) {
+        } catch (EntityNotFoundException | OperationException e) {
             throw new PaymentWorkflowException(e);
         }
     }

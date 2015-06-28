@@ -347,8 +347,6 @@ public class ActivityEndpoint {
             return ActivityServiceFactory.getActivityService().subscribe(user, activity);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
-        } catch (UniqueConstraintException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (OperationException e) {
             throw new BadRequestException(e.getMessage());
         }
