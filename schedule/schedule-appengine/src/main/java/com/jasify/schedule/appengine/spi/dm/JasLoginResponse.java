@@ -9,6 +9,17 @@ import com.jasify.schedule.appengine.util.KeyUtil;
  * @since 01/01/15.
  */
 public class JasLoginResponse implements JasEndpointEntity {
+
+    /**
+     * When this is true, the only other field available is {@link #failureReason}
+     */
+    private boolean failed;
+
+    /**
+     * This is only set if {@link #failed} is true
+     */
+    private String failureReason;
+
     private String sessionId; /* Session id */
     private String userId;
     private String name;
@@ -19,6 +30,11 @@ public class JasLoginResponse implements JasEndpointEntity {
     public JasLoginResponse() {
     }
 
+    public JasLoginResponse(boolean failed, String failureReason) {
+        this.failed = failed;
+        this.failureReason = failureReason;
+    }
+
     public JasLoginResponse(User user, UserSession userSession) {
         setUserId(KeyUtil.keyToString(user.getId()));
         setSessionId(userSession.getSessionId());
@@ -26,6 +42,22 @@ public class JasLoginResponse implements JasEndpointEntity {
         setAdmin(user.isAdmin());
         setUser(user);
         setOrgMember(userSession.isOrgMember());
+    }
+
+    public boolean isFailed() {
+        return failed;
+    }
+
+    public void setFailed(boolean failed) {
+        this.failed = failed;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
     }
 
     public User getUser() {

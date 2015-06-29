@@ -124,7 +124,8 @@ public class AuthEndpoint {
             return new JasLoginResponse(user, userSession);
         }
 
-        throw new UnauthorizedException("No session present");
+        log.info("Restore failed");
+        return new JasLoginResponse(true, "No session present");
     }
 
     @ApiMethod(name = "auth.logout", path = "auth/logout", httpMethod = ApiMethod.HttpMethod.POST)

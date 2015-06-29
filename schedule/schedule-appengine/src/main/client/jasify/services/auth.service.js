@@ -97,7 +97,17 @@
             } else {
                 $log.debug("Restoring session...");
                 p = Endpoint.jasify(function (jasify) {
-                    return jasify.auth.restore();
+                    return jasify.auth.restore().then(function (res) {
+
+                            if (res.result && res.result.failed) {
+                                var reason = res.result.failureReason || 'No message';
+                                return $q.reject({status: 401, statusText: reason});
+                            }
+                            return $q.when(res);
+                        },
+                        function (res) {
+                            return $q.reject(res);
+                        });
                 });
             }
 
