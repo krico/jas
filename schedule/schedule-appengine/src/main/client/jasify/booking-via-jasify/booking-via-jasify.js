@@ -276,7 +276,7 @@
 
                         jasDialogs.ok('Checkout complete!', 'Thanks!', function () {
                             $timeout(function () {
-                                $location.path('/done')
+                                $location.path('/done');
                             }, 500);
                         }, true, 'success');
 
