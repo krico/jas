@@ -39,13 +39,13 @@ public class AuthEndpointTest {
     private TestUserServiceFactory testUserServiceFactory = new TestUserServiceFactory();
     private TestOAuth2ServiceFactory testOAuth2ServiceFactory = new TestOAuth2ServiceFactory();
 
-    private AuthEndpoint endpoint = new AuthEndpoint();
+    private AuthEndpoint endpoint;
 
     @Before
     public void datastore() {
         TestHelper.initializeDatastore();
         testUserServiceFactory.setUp();
-
+        endpoint = new AuthEndpoint();
     }
 
     @After
@@ -275,10 +275,12 @@ public class AuthEndpointTest {
         endpoint.recoverPassword(request);
     }
 
-    @Test(expected = UnauthorizedException.class)
+    @Test
     public void testRestoreUnauthorized() throws Exception {
         testUserServiceFactory.replay();
-        endpoint.restore();
+        JasLoginResponse restore = endpoint.restore();
+        assertNotNull(restore);
+        assertTrue(restore.isFailed());
     }
 
     @Test
@@ -297,6 +299,7 @@ public class AuthEndpointTest {
 
         JasLoginResponse response = endpoint.restore();
         assertNotNull(response);
+        assertFalse(response.isFailed());
         assertEquals(user, response.getUser());
     }
 }
