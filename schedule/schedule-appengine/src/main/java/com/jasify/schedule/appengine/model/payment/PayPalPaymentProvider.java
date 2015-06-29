@@ -109,13 +109,15 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
             List<WebProfile> list = payPal.getWebProfiles();
             if (list == null || list.isEmpty()) {
                 log.info("Creating new WebProfile");
-                WebProfile profile = new WebProfile("Jasify BookIT");
-//                profile.setFlowConfig(new FlowConfig().setLandingPageType("Billing"));
-//                profile.setPresentation(new Presentation().setBrandName("MyWayFit"));
-                profile.setInputFields(new InputFields().setAllowNote(false).setNoShipping(1));
-                profileId = payPal.create(profile);
+                WebProfile webProfile = new WebProfile("Jasify BookIT");
+//                webProfile.setFlowConfig(new FlowConfig().setLandingPageType("Billing"));
+//                webProfile.setPresentation(new Presentation().setBrandName("Jasify"));
+                webProfile.setInputFields(new InputFields().setAllowNote(false).setNoShipping(1));
+                profileId = payPal.create(webProfile);
             } else {
                 profileId = list.get(0).getId();
+                // TODO: Remove this once its been run in prod
+                updateWebProfile(list.get(0), "Jasify");
                 log.info("Retrieved profile id={}", profileId);
             }
         } catch (Exception e) {
@@ -123,6 +125,28 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
         }
     }
 
+    private void updateWebProfile(WebProfile webProfile, String brandName) {
+        PayPalInterface payPal = getPayPalInterface();
+        try {
+            boolean updated = false;
+            String oldBrandName = webProfile.getPresentation() != null ? webProfile.getPresentation().getBrandName() : null;
+            if (!StringUtils.equals(brandName, oldBrandName)) {
+                if (brandName == null) {
+                    webProfile.setPresentation(null);
+                } else {
+                    webProfile.setPresentation(new Presentation().setBrandName(brandName));
+                }
+                updated = true;
+            }
+
+            if (updated) {
+                payPal.update(webProfile);
+                log.info("WebProfile updated id={}, brandName={}", webProfile.getId(), brandName);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to update WebProfile", e);
+        }
+    }
     @Override
     public void createPayment(PayPalPayment payment, GenericUrl baseUrl) throws PaymentException {
         payment.validate();
@@ -309,6 +333,8 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
 
         String create(WebProfile profile) throws PaymentException;
 
+        void update(WebProfile profile) throws PaymentException;
+
         com.paypal.api.payments.Payment create(com.paypal.api.payments.Payment payment) throws PaymentException;
 
         com.paypal.api.payments.Payment execute(com.paypal.api.payments.Payment payment, PaymentExecution execution) throws PaymentException;
@@ -360,6 +386,15 @@ public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
                 String profileId = response.getId();
                 log.info("Created profile id={}, data={}", profileId, response);
                 return profileId;
+            } catch (PayPalRESTException e) {
+                throw new PaymentException(e);
+            }
+        }
+
+        @Override
+        public void update(WebProfile webProfile) throws PaymentException {
+            try {
+                webProfile.update(getAccessToken());
             } catch (PayPalRESTException e) {
                 throw new PaymentException(e);
             }
