@@ -1,6 +1,5 @@
 package com.jasify.schedule.appengine.http;
 
-import com.google.common.base.Stopwatch;
 import com.jasify.schedule.appengine.model.SchemaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +20,10 @@ public class JasifyServletContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         log.debug("Context initialized...");
 
-        Stopwatch watch = Stopwatch.createStarted();
-
         SchemaMigration.instance().executePendingMigrations();
         SchemaMigration.instance().notifyOfNewVersion();
 
-        log.info("Context initialized in [{}]", watch.stop());
+        log.info("Context initialized");
     }
 
     /**
