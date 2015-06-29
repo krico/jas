@@ -109,11 +109,10 @@ public interface ActivityService {
      * @param user     to subscribe
      * @param activity to subscribe to
      * @return a newly created Subscription for this user to this activity
-     * @throws UniqueConstraintException user was already subscribed to this activity
      * @throws OperationException        if activity is fully subscribed
      */
     @Nonnull
-    Subscription subscribe(User user, Activity activity) throws UniqueConstraintException, OperationException;
+    Subscription subscribe(User user, Activity activity) throws OperationException;
 
     /**
      * @param user            who is subscribing
@@ -121,12 +120,11 @@ public interface ActivityService {
      * @param activities      activities to subscribe to
      * @return the execution of this subscription
      * @throws EntityNotFoundException   if any of the entities don't exist
-     * @throws UniqueConstraintException user was already subscribed to any of the activities
      * @throws OperationException        if activity is fully subscribed
      *                                   if there are more activities then allowed by the package
      * @throws IllegalArgumentException  if any of the activities is not part of the package
      */
-    ActivityPackageExecution subscribe(User user, ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException;
+    ActivityPackageExecution subscribe(User user, ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, OperationException, IllegalArgumentException;
 
     /**
      * @param userId            who is subscribing

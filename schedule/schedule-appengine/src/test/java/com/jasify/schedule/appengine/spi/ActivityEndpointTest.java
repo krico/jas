@@ -880,12 +880,12 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddSubscriptionDoubleSubscription() throws Exception {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("User already subscribed");
         User user = createUser();
         Activity activity = createActivity(true);
         endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
         endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
+        List<Subscription> subscriptions = endpoint.getSubscriptions(newAdminCaller(1), activity.getId());
+        assertEquals(2, subscriptions.size());
     }
 
     @Test

@@ -686,22 +686,6 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testSubscribeTwiceForSameUser() throws Exception {
-        thrown.expect(UniqueConstraintException.class);
-        thrown.expectMessage("User already subscribed");
-        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, null);
-        activityService.subscribe(testUser1, activity1Organization1);
-        activityService.subscribe(testUser1, activity1Organization1);
-    }
-
-    @Test(expected = UniqueConstraintException.class)
-    public void testSubscribeTwice() throws Exception {
-        activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
-        activityService.subscribe(testUser1, activity1Organization1);
-        activityService.subscribe(testUser1, activity1Organization1);
-    }
-
-    @Test
     public void testCancel() throws Exception {
         activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         Subscription subscription = activityService.subscribe(testUser1, activity1Organization1);

@@ -368,14 +368,7 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Subscription subscribe(final User user, final Activity activity) throws UniqueConstraintException, OperationException {
-        List<Subscription> existingSubscriptions = getSubscriptions(activity);
-        for (Subscription subscription : existingSubscriptions) {
-            if (user.getId().equals(subscription.getUserRef().getKey())) {
-                throw new UniqueConstraintException("User already subscribed");
-            }
-        }
-
+    public Subscription subscribe(final User user, final Activity activity) throws OperationException {
         if (activity.getMaxSubscriptions() > 0 && activity.getSubscriptionCount() >= activity.getMaxSubscriptions()) {
             throw new OperationException("Activity fully subscribed");
         }
@@ -407,12 +400,12 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public ActivityPackageExecution subscribe(User user, ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
+    public ActivityPackageExecution subscribe(User user, ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, OperationException, IllegalArgumentException {
         return subscribe(user.getId(), activityPackage.getId(), Lists.transform(activities, ACTIVITY_TO_KEY_FUNCTION));
     }
 
     @Override
-    public ActivityPackageExecution subscribe(final Key userId, final Key activityPackageId, final List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException {
+    public ActivityPackageExecution subscribe(final Key userId, final Key activityPackageId, final List<Key> activityIds) throws EntityNotFoundException, OperationException, IllegalArgumentException {
         // TODO: This method needs cleanup
         Preconditions.checkState(!activityIds.isEmpty(), "Need at least 1 activity to subscribe");
         if (userId == null) throw new EntityNotFoundException("User id=NULL");
@@ -460,9 +453,6 @@ class DefaultActivityService implements ActivityService {
                             throw new OperationException("Activity[" + activity.getId() + "] fully subscribed");
                         }
 
-                        if (isSubscribed(tx, user, activity)) {
-                            throw new UniqueConstraintException("User already subscribed to activity: " + activity.getId());
-                        }
                         activity.setSubscriptionCount(subscriptionCount + 1);
 
                         ActivityPackageSubscription subscription = new ActivityPackageSubscription();
@@ -479,7 +469,7 @@ class DefaultActivityService implements ActivityService {
                     return execution;
                 }
             });
-        } catch (EntityNotFoundException | UniqueConstraintException | OperationException e) {
+        } catch (EntityNotFoundException | OperationException e) {
             throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
@@ -517,12 +507,6 @@ class DefaultActivityService implements ActivityService {
         } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-    private boolean isSubscribed(Transaction tx, User user, Activity activity) {
-        return !Datastore.query(tx, subscriptionMeta, user.getId())
-                .filter(subscriptionMeta.activityRef.equal(activity.getId()))
-                .asKeyList().isEmpty();
     }
 
     public List<Activity> getActivities(Transaction tx, List<Key> activityIds) throws EntityNotFoundException {
