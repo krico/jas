@@ -25,6 +25,7 @@ import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelQuery;
 import org.slim3.datastore.ModelRef;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Objects;
 
@@ -335,7 +336,6 @@ public class DefaultBalanceService implements BalanceService {
         }
     }
 
-
     private void applyTransferTransaction(Transfer transfer, boolean debit) {
         ModelRef<Transaction> legRef = debit ? transfer.getPayerLegRef() : transfer.getBeneficiaryLegRef();
         String desc = "Leg (" + (debit ? "Payer" : "Beneficiary") + ")";
@@ -343,33 +343,42 @@ public class DefaultBalanceService implements BalanceService {
         Preconditions.checkNotNull(legRef.getKey(), desc);
         Preconditions.checkNotNull(legRef.getKey().getParent(), desc + ".parent");
 
-        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-        try {
-            Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
-            if (transaction == null) {
-                transaction = new Transaction(transfer, debit);
-                transaction.setId(legRef.getKey());
-                transaction.getAccountRef().setKey(legRef.getKey().getParent());
-                Key accountKey = transaction.getAccountRef().getKey();
-                Account account = Datastore.getOrNull(tx, accountMeta, accountKey);
-                if (account == null) {
-                    log.warn("Creating new account for key={}", accountKey);
-                    account = new Account(accountKey);
-                    account.setCurrency(transaction.getCurrency()); //TODO: multiple currencies?
+        int retries = 5;
+        while (true) {
+            com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
+            try {
+                Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
+                if (transaction == null) {
+                    transaction = new Transaction(transfer, debit);
+                    transaction.setId(legRef.getKey());
+                    transaction.getAccountRef().setKey(legRef.getKey().getParent());
+                    Key accountKey = transaction.getAccountRef().getKey();
+                    Account account = Datastore.getOrNull(tx, accountMeta, accountKey);
+                    if (account == null) {
+                        log.warn("Creating new account for key={}", accountKey);
+                        account = new Account(accountKey);
+                        account.setCurrency(transaction.getCurrency()); //TODO: multiple currencies?
+                    }
+
+                    account.setBalance(account.getBalance() + transaction.getBalanceAmount());
+                    account.setUnpaid(account.getUnpaid() + transaction.getUnpaid());
+
+                    Datastore.put(tx, account, transaction);
+                } else {
+                    log.warn("Transaction already existed, Transaction.Id={}, desc={}", legRef.getKey(), desc);
                 }
-
-                account.setBalance(account.getBalance() + transaction.getBalanceAmount());
-                account.setUnpaid(account.getUnpaid() + transaction.getUnpaid());
-
-                Datastore.put(tx, account, transaction);
-
-            } else {
-                log.warn("Transaction already existed, Transaction.Id={}, desc={}", legRef.getKey(), desc);
+                tx.commit();
+                break;
+            } catch (ConcurrentModificationException e) {
+                if (retries == 0) {
+                    throw e;
+                }
+                // Allow retry to occur
+                --retries;
+            } finally {
+                if (tx.isActive())
+                    tx.rollback();
             }
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
         }
     }
 
