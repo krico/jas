@@ -223,6 +223,10 @@ public class DefaultBalanceService implements BalanceService {
                 transfer.setAmount(amount);
                 transfer.setCurrency(executedPayment.getCurrency());
                 transfer.setDescription(executedPayment.describe());
+                // Datastore does not allow String properties to exceed 500 characters. Do some magic.
+                if (transfer.getDescription().length() > 500) {
+                    transfer.setDescription(transfer.getDescription().substring(0, 490) + " ...");
+                }
                 transfer.setReference(executedPayment.reference());
                 transfer.getPayerLegRef().setKey(Datastore.allocateId(custodialAccountKey, transactionMeta));
                 transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(userAccountKey, transactionMeta));

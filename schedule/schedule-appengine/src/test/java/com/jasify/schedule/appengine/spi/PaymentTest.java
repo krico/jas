@@ -30,7 +30,7 @@ import static junit.framework.TestCase.assertEquals;
  * @author wszarmach
  * @since 29/06/15.
  */
-public class PaymentIssueTest {
+public class PaymentTest {
     private final LocalTaskQueueTestConfig.TaskCountDownLatch latch = new LocalTaskQueueTestConfig.TaskCountDownLatch(1);
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(
             new LocalDatastoreServiceTestConfig()
@@ -90,7 +90,7 @@ public class PaymentIssueTest {
         JasifyEndpointUser jasifyEndpointUser = newAdminCaller(user.getId().getId());
 
         ShoppingCart shoppingCart = shoppingCartEndpoint.addUserActivity(jasifyEndpointUser, TestHelper.createActivity(true).getId());
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 20; i++) {
             assertEquals(shoppingCart.getId(), shoppingCartEndpoint.addUserActivity(jasifyEndpointUser, TestHelper.createActivity(true).getId()).getId());
         }
 
