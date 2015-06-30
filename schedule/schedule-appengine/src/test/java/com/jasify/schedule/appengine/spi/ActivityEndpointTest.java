@@ -228,6 +228,16 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    public void testUpdateActivityTypeWithBlankName() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityType.name");
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        activityType.setName("       ");
+        endpoint.updateActivityType(newAdminCaller(1), activityType.getId(), activityType);
+    }
+
+    @Test
     public void testUpdateActivityTypeWithUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
         Organization organization = TestHelper.createOrganization(true);
@@ -250,17 +260,51 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    public void testUpdateActivityTypeExistingNameForSameOrganization() throws Exception {
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType1 = TestHelper.createActivityType(organization, true);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityType.name=" + activityType1.getName() + ", Organization.id=" + organization.getId());
+        ActivityType activityType2 = TestHelper.createActivityType(organization, true);
+        activityType2.setName(activityType1.getName());
+
+        endpoint.updateActivityType(newAdminCaller(1), activityType2.getId(), activityType2);
+    }
+
+    @Test
+    public void testUpdateActivityTypeExistingNameForDifferentOrganization() throws Exception {
+        ActivityType activityType1 = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        ActivityType activityType2 = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        activityType2.setName(activityType1.getName());
+
+        endpoint.updateActivityType(newAdminCaller(1), activityType2.getId(), activityType2);
+    }
+
+    @Test
     public void testUpdateActivityType() throws Exception {
         Organization organization = TestHelper.createOrganization(true);
         ActivityType activityType = TestHelper.createActivityType(organization, true);
         ActivityType dbActivityType = endpoint.getActivityType(newAdminCaller(1), activityType.getId());
 
+        dbActivityType.setColourTag(dbActivityType.getColourTag() + "1");
+        dbActivityType.setCurrency(dbActivityType.getCurrency() + "1");
+        dbActivityType.setDescription(dbActivityType.getDescription() + "1");
+        dbActivityType.setLocation(dbActivityType.getLocation() + "1");
         dbActivityType.setMaxSubscriptions(dbActivityType.getMaxSubscriptions() + 1);
+        dbActivityType.setName(dbActivityType.getName() + "1");
+        dbActivityType.setPrice(dbActivityType.getPrice() + 1);
+
         endpoint.updateActivityType(newAdminCaller(1), activityType.getId(), dbActivityType);
 
         ActivityType result = endpoint.getActivityType(newAdminCaller(1), activityType.getId());
         equals(dbActivityType, result);
+        assertEquals(activityType.getColourTag() + "1", result.getColourTag());
+        assertEquals(activityType.getCurrency() + "1", result.getCurrency());
+        assertEquals(activityType.getDescription() + "1", result.getDescription());
+        assertEquals(activityType.getLocation() + "1", result.getLocation());
         assertEquals(activityType.getMaxSubscriptions() + 1, result.getMaxSubscriptions());
+        assertEquals(activityType.getName() + "1", result.getName());
+        assertEquals(activityType.getPrice() + 1, result.getPrice());
     }
 
     // AddActivityType
@@ -308,7 +352,19 @@ public class ActivityEndpointTest {
         thrown.expectMessage("ActivityType.name");
         JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
         jasAddActivityTypeRequest.setActivityType(new ActivityType());
-        jasAddActivityTypeRequest.setOrganizationId(Datastore.allocateId(Organization.class));
+        jasAddActivityTypeRequest.setOrganizationId(TestHelper.createOrganization(true).getId());
+        endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
+    }
+
+    @Test
+    public void testAddActivityTypeEmptyActivityTypeName() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityType.name");
+        JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
+        ActivityType activityType = new ActivityType();
+        activityType.setName("      ");
+        jasAddActivityTypeRequest.setActivityType(activityType);
+        jasAddActivityTypeRequest.setOrganizationId(TestHelper.createOrganization(true).getId());
         endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
     }
 
@@ -322,7 +378,7 @@ public class ActivityEndpointTest {
     }
 
     @Test
-    public void testAddActivityTypeDuplicate() throws Exception {
+    public void testAddActivityTypeExistingNameForSameOrganization() throws Exception {
         Organization organization = TestHelper.createOrganization(true);
         ActivityType activityType = TestHelper.createActivityType(organization, false);
         thrown.expect(BadRequestException.class);
@@ -332,6 +388,20 @@ public class ActivityEndpointTest {
         jasAddActivityTypeRequest.setOrganizationId(organization.getId());
         endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
         endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
+    }
+
+    @Test
+    public void testAddActivityTypeExistingNameForDifferentOrganization() throws Exception {
+        for (int i=0; i<2; i++) {
+            Organization organization = TestHelper.createOrganization(true);
+            ActivityType activityType = TestHelper.createActivityType(organization, false);
+            activityType.setName("SameName");
+            JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
+            jasAddActivityTypeRequest.setActivityType(activityType);
+            jasAddActivityTypeRequest.setOrganizationId(organization.getId());
+            ActivityType result = endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
+            assertNotNull(result);
+        }
     }
 
     @Test

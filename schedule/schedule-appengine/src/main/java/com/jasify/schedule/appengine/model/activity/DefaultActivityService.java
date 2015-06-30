@@ -108,33 +108,6 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Key addActivityType(final Organization organization, final ActivityType activityType) throws UniqueConstraintException {
-        Preconditions.checkArgument(StringUtils.isNotBlank(activityType.getName()));
-        try {
-            return TransactionOperator.execute(new ModelOperation<Key>() {
-                @Override
-                public Key execute(Transaction tx) throws ModelException {
-                    if (activityTypeDao.exists(activityType.getName(), organization.getId())) {
-          //          if (!isActivityTypeNameUnique(tx, organization.getId(), activityType.getName())) {
-                        throw new UniqueConstraintException("ActivityType.name=" + activityType.getName() + ", Organization.id=" + organization.getId());
-                    }
-                    activityType.setId(Datastore.allocateId(organization.getId(), activityTypeMeta));
-                    activityType.getOrganizationRef().setKey(organization.getId());
-
-                    Key ret = Datastore.put(tx, activityType);
-                    tx.commit();
-                    return ret;
-                }
-            });
-        } catch (UniqueConstraintException e) {
-            throw e;
-        } catch (ModelException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
-    @Nonnull
-    @Override
     public ActivityType updateActivityType(final ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException {
         final String name = StringUtils.trimToNull(activityType.getName());
         if (name == null) {

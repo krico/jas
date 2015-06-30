@@ -22,17 +22,6 @@ public interface ActivityService {
     int MaximumRepeatCounter = 25;
 
     /**
-     * Add an activityType to and organization
-     *
-     * @param organization to add it to
-     * @param activityType to add to it
-     * @return the key to the newly added activityType
-     * @throws UniqueConstraintException if <code>organization</code> already contains an activityType with the name of the activityType being added.
-     */
-    @Nonnull
-    public Key addActivityType(Organization organization, ActivityType activityType) throws UniqueConstraintException;
-
-    /**
      * @param activityType to be updated
      * @return the updated ActivityType
      * @throws EntityNotFoundException   if it didn't exist

@@ -142,78 +142,10 @@ public class ActivityServiceTest {
         TestHelper.cleanupDatastore();
     }
 
-    @Test
-    public void testAddActivityType() throws Exception {
-        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        assertNotNull(id);
-    }
-
-    @Test
-    public void testAddActivityTypeSameNameInDifferentOrganizations() throws Exception {
-        Key id1 = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        Key id2 = activityService.addActivityType(organization2, new ActivityType(TEST_ACTIVITY_TYPE));
-        assertNotNull(id1);
-        assertNotNull(id2);
-        assertNotSame(id1, id2);
-    }
-
-    @Test(expected = UniqueConstraintException.class)
-    public void testAddActivityTypeThrowsUniqueNameConstraint() throws Exception {
-        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-    }
-
-    @Test
-    public void testUpdateActivityType() throws Exception {
-        ActivityType activityType = new ActivityType(TEST_ACTIVITY_TYPE);
-        Key id = activityService.addActivityType(organization1, activityType);
-        activityType.setName("New Name");
-        activityType.setDescription("Description");
-        activityType.setPrice(55.0);
-        activityType.setCurrency("NZD");
-        activityType.setLocation("Location");
-        activityType.setColourTag("Blue");
-        activityType.setMaxSubscriptions(6);
-        ActivityType updatedActivityType = activityService.updateActivityType(activityType);
-        assertNotNull(updatedActivityType);
-        assertEquals(id, updatedActivityType.getId());
-        assertEquals("New Name", updatedActivityType.getName());
-        assertEquals("Description", updatedActivityType.getDescription());
-        assertEquals(55.0, updatedActivityType.getPrice());
-        assertEquals("NZD", updatedActivityType.getCurrency());
-        assertEquals("Location", updatedActivityType.getLocation());
-        assertEquals("Blue", updatedActivityType.getColourTag());
-        assertEquals(6, updatedActivityType.getMaxSubscriptions());
-        assertEquals("New Name", Datastore.get(ActivityTypeMeta.get(), id).getName());
-    }
-
-    @Test(expected = UniqueConstraintException.class)
-    public void testUpdateActivityTypeThrowsUniqueConstraintException() throws Exception {
-        ActivityType activityType1 = new ActivityType(TEST_ACTIVITY_TYPE);
-        activityService.addActivityType(organization1, activityType1);
-        activityType1.setName("New Name");
-        activityType1.setDescription("Description");
-        activityService.updateActivityType(activityType1);
-
-        ActivityType activityType2 = new ActivityType(TEST_ACTIVITY_TYPE);
-        activityService.addActivityType(organization1, activityType2);
-        activityType2.setName("New Name");
-        activityType2.setDescription("Description");
-        activityService.updateActivityType(activityType2);
-    }
-
     @Test(expected = FieldValueException.class)
     public void testUpdateActivityTypeThrowsFieldValueException() throws Exception {
         ActivityType activityType = new ActivityType();
         activityService.updateActivityType(activityType);
-    }
-
-    @Test
-    public void testRemoveActivityType() throws Exception {
-        Key id = activityService.addActivityType(organization1, new ActivityType(TEST_ACTIVITY_TYPE));
-        ActivityType activityType = Datastore.get(ActivityTypeMeta.get(), id);
-        activityService.removeActivityType(activityType);
-        assertNull(Datastore.getOrNull(id));
     }
 
     @Test

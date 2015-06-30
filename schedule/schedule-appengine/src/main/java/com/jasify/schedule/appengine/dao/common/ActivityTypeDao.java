@@ -1,13 +1,19 @@
 package com.jasify.schedule.appengine.dao.common;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -41,6 +47,23 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
     public List<ActivityType> getByOrganization(Key organizationId) {
         ActivityTypeMeta meta = getMeta();
         return query(new ByOrganizationQuery(meta, organizationId));
+    }
+
+    @Nonnull
+    public Key save(@Nonnull ActivityType entity, @Nonnull Key organizationId) throws ModelException {
+        String name = StringUtils.trimToNull(entity.getName());
+
+        if (StringUtils.isBlank(name)) {
+            throw new FieldValueException("ActivityType.name");
+        }
+
+        if (exists(name, organizationId)) {
+            throw new UniqueConstraintException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
+        }
+
+        entity.setId(Datastore.allocateId(organizationId, getMeta()));
+        entity.getOrganizationRef().setKey(organizationId);
+        return super.save(entity);
     }
 
     private static class ByOrganizationQuery extends BaseDaoQuery<ActivityType, ActivityTypeMeta> {

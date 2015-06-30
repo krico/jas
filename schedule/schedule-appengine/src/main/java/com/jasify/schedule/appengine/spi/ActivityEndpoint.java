@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.BadRequestException;
@@ -7,15 +8,13 @@ import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.dao.users.UserDao;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.OperationException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
@@ -25,6 +24,7 @@ import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import org.apache.commons.lang3.StringUtils;
+import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,25 +114,27 @@ public class ActivityEndpoint {
     @ApiMethod(name = "activityTypes.add", path = "activity-types", httpMethod = ApiMethod.HttpMethod.POST)
     public ActivityType addActivityType(User caller, JasAddActivityTypeRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(request.getOrganizationId()));
-        checkFound(request.getActivityType());
-        Key organizationId = checkFound(request.getOrganizationId());
-        Key id;
-        try {
-            final String name = StringUtils.trimToNull(request.getActivityType().getName());
-            if (name == null) {
-                throw new BadRequestException("ActivityType.name");
-            }
+        final ActivityType activityType = checkFound(request.getActivityType());
+        final Key organizationId = checkFound(request.getOrganizationId());
 
-            if (activityTypeDao.exists(name, organizationId)) {
-                throw new BadRequestException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
-            }
-            Organization organization = organizationDao.get(organizationId);
-            id = ActivityServiceFactory.getActivityService().addActivityType(organization, request.getActivityType());
-            return activityTypeDao.get(id);
-        } catch (UniqueConstraintException e) {
-            throw new BadRequestException(e.getMessage());
+        try {
+            // Check if the organization actually exists
+            organizationDao.get(organizationId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        }
+
+        try {
+            return TransactionOperator.execute(new ModelOperation<ActivityType>() {
+                @Override
+                public ActivityType execute(Transaction tx) throws ModelException {
+                    activityTypeDao.save(activityType, organizationId);
+                    tx.commit();
+                    return activityType;
+                }
+            });
+        } catch (ModelException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
