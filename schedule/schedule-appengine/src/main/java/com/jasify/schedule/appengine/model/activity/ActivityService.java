@@ -5,7 +5,6 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
-import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 
 import javax.annotation.Nonnull;
@@ -30,11 +29,6 @@ public interface ActivityService {
      */
     @Nonnull
     ActivityType updateActivityType(ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException;
-
-    /**
-     * @param activityType to be removed
-     */
-    void removeActivityType(ActivityType activityType);
 
     /**
      * @param activityType to link with

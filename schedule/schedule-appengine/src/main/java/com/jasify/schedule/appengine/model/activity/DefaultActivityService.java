@@ -12,7 +12,6 @@ import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
-import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
@@ -51,7 +50,6 @@ class DefaultActivityService implements ActivityService {
         }
     };
 
-    private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
     private final RepeatDetailsMeta repeatDetailsMeta;
     private final SubscriptionMeta subscriptionMeta;
@@ -66,7 +64,6 @@ class DefaultActivityService implements ActivityService {
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     private DefaultActivityService() {
-        activityTypeMeta = ActivityTypeMeta.get();
         activityMeta = ActivityMeta.get();
         repeatDetailsMeta = RepeatDetailsMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
@@ -144,11 +141,6 @@ class DefaultActivityService implements ActivityService {
         }
 
         return dbActivityType;
-    }
-
-    @Override
-    public void removeActivityType(ActivityType activityType) {
-        Datastore.delete(activityType.getId());
     }
 
     @Nonnull

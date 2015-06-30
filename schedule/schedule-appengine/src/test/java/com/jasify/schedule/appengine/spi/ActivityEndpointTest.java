@@ -446,9 +446,10 @@ public class ActivityEndpointTest {
 
     @Test
     public void testRemoveActivityTypeWithActivities() throws Exception {
+        ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("ActivityType has activities");
-        Activity activity = createActivity(true);
+        thrown.expectMessage("Cannot delete activity type with activities! id=" + activityType.getId() + " (1 activities).");
+        Activity activity = TestHelper.createActivity(activityType, true);
         endpoint.removeActivityType(newAdminCaller(1), activity.getActivityTypeRef().getKey());
     }
 

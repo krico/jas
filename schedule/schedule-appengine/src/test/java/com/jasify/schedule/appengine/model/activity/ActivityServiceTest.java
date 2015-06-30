@@ -3,7 +3,6 @@ package com.jasify.schedule.appengine.model.activity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.mail.MailServicePb;
 import com.google.appengine.api.mail.dev.LocalMailService;
-import com.google.appengine.labs.repackaged.com.google.common.base.Function;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
@@ -15,7 +14,6 @@ import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.OperationException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -27,7 +25,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 import static junit.framework.TestCase.*;
@@ -146,12 +143,6 @@ public class ActivityServiceTest {
     public void testUpdateActivityTypeThrowsFieldValueException() throws Exception {
         ActivityType activityType = new ActivityType();
         activityService.updateActivityType(activityType);
-    }
-
-    @Test
-    public void testRemoveActivityTypeThrowsNullPointerException() throws Exception {
-        thrown.expect(NullPointerException.class);
-        activityService.removeActivityType(null);
     }
 
     @Test

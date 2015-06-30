@@ -1,12 +1,8 @@
 package com.jasify.schedule.appengine.spi;
 
-import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
-import com.google.api.server.spi.response.BadRequestException;
-import com.google.api.server.spi.response.ForbiddenException;
-import com.google.api.server.spi.response.NotFoundException;
-import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Preconditions;
@@ -16,7 +12,8 @@ import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
-import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
+import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
@@ -24,7 +21,6 @@ import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import org.apache.commons.lang3.StringUtils;
-import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +69,7 @@ public class ActivityEndpoint {
     private final UserDao userDao = new UserDao();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<ActivityType> getActivityTypes(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
+    public List<ActivityType> getActivityTypes(@SuppressWarnings("unused")User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         checkFound(organizationId);
         return activityTypeDao.getByOrganization(organizationId);
 
@@ -139,18 +135,28 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityTypes.remove", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public void removeActivityType(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
         checkFound(id);
+
         try {
-            // TODO: Possible race condition? Need to protect
-            if (!activityDao.getByActivityTypeId(id).isEmpty()) {
-                throw new BadRequestException("ActivityType has activities");
-            }
-            ActivityType activityType = activityTypeDao.get(id);
-            ActivityServiceFactory.getActivityService().removeActivityType(activityType);
+            ConsistencyGuard.beforeDelete(ActivityType.class, id);
+
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    activityTypeDao.get(id); //Throws not found if this activityType doesn't exist
+                    activityTypeDao.delete(id);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (InconsistentModelStateException e) {
+            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 
@@ -201,7 +207,7 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activities.query", path = "activities", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<Activity> getActivities(User caller,
+    public List<Activity> getActivities(@SuppressWarnings("unused")User caller,
                                         @Nullable @Named("organizationId") Key organizationId,
                                         @Nullable @Named("activityTypeId") Key activityTypeId,
                                         @Nullable @Named("fromDate") final Date fromDate,
@@ -390,13 +396,13 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityPackages.query", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<ActivityPackage> getActivityPackages(User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
+    public List<ActivityPackage> getActivityPackages(@SuppressWarnings("unused")User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         checkFound(organizationId);
         return activityPackageDao.getByOrganization(organizationId);
     }
 
     @ApiMethod(name = "activityPackages.get", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.GET)
-    public ActivityPackage getActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public ActivityPackage getActivityPackage(@SuppressWarnings("unused")User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         checkFound(id);
         try {
             return activityPackageDao.get(id);
@@ -457,7 +463,7 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityPackages.getActivities", path = "activity-packages-activity/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<Activity> getActivityPackageActivities(User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public List<Activity> getActivityPackageActivities(@SuppressWarnings("unused")User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         checkFound(activityPackageId);
         try {
             ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
