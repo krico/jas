@@ -336,17 +336,16 @@ public class DefaultBalanceService implements BalanceService {
         }
     }
 
-    private void applyTransferTransaction(Transfer transfer, boolean debit) {
-        ModelRef<Transaction> legRef = debit ? transfer.getPayerLegRef() : transfer.getBeneficiaryLegRef();
-        String desc = "Leg (" + (debit ? "Payer" : "Beneficiary") + ")";
+    private void applyTransferTransaction(final Transfer transfer, final boolean debit) {
+        final ModelRef<Transaction> legRef = debit ? transfer.getPayerLegRef() : transfer.getBeneficiaryLegRef();
+        final String desc = "Leg (" + (debit ? "Payer" : "Beneficiary") + ")";
         Preconditions.checkNotNull(legRef, desc);
         Preconditions.checkNotNull(legRef.getKey(), desc);
         Preconditions.checkNotNull(legRef.getKey().getParent(), desc + ".parent");
 
-        int retries = 5;
-        while (true) {
-            com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-            try {
+        new RetryTransaction() {
+            @Override
+            void doWork(com.google.appengine.api.datastore.Transaction tx) {
                 Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
                 if (transaction == null) {
                     transaction = new Transaction(transfer, debit);
@@ -367,19 +366,8 @@ public class DefaultBalanceService implements BalanceService {
                 } else {
                     log.warn("Transaction already existed, Transaction.Id={}, desc={}", legRef.getKey(), desc);
                 }
-                tx.commit();
-                break;
-            } catch (ConcurrentModificationException e) {
-                if (retries == 0) {
-                    throw e;
-                }
-                // Allow retry to occur
-                --retries;
-            } finally {
-                if (tx.isActive())
-                    tx.rollback();
             }
-        }
+        }.run();
     }
 
     @Override
@@ -453,6 +441,31 @@ public class DefaultBalanceService implements BalanceService {
     @Override
     public int getTransactionCount(Key accountId) {
         return Datastore.query(transactionMeta, accountId).asKeyList().size();
+    }
+
+    // If this will be used for other transactions extract it to its own class
+    public abstract class RetryTransaction {
+        abstract void doWork(com.google.appengine.api.datastore.Transaction tx);
+        public void run() {
+            int retries = 5;
+            while (true) {
+                com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
+                try {
+                    doWork(tx);
+                    tx.commit();
+                    break;
+                } catch (ConcurrentModificationException e) {
+                    if (retries == 0) {
+                        throw e;
+                    }
+                    // Allow retry to occur
+                    --retries;
+                } finally {
+                    if (tx.isActive())
+                        tx.rollback();
+                }
+            }
+        }
     }
 
     private static class Singleton {
