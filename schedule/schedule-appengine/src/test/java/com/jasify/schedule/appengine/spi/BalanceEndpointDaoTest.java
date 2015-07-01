@@ -34,7 +34,7 @@ import static junit.framework.TestCase.assertTrue;
  * @author wszarmach
  * @since 29/06/15.
  */
-public class PaymentTest {
+public class BalanceEndpointDaoTest {
     private final LocalTaskQueueTestConfig.TaskCountDownLatch latch = new LocalTaskQueueTestConfig.TaskCountDownLatch(1);
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(
             new LocalDatastoreServiceTestConfig()
