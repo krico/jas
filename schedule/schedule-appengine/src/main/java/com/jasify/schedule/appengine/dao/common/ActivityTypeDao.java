@@ -4,10 +4,14 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
+import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -41,6 +45,38 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
     public List<ActivityType> getByOrganization(Key organizationId) {
         ActivityTypeMeta meta = getMeta();
         return query(new ByOrganizationQuery(meta, organizationId));
+    }
+
+    @Nonnull
+    public Key save(@Nonnull ActivityType entity, @Nonnull Key organizationId) throws ModelException {
+        String name = StringUtils.trimToNull(entity.getName());
+
+        if (StringUtils.isBlank(name)) {
+            throw new FieldValueException("ActivityType.name");
+        }
+        // If the trim changed anything
+        entity.setName(name);
+
+        if (entity.getId() == null) {
+            // New ActivityType
+            if (exists(name, organizationId)) {
+                throw new UniqueConstraintException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
+            }
+            entity.setId(Datastore.allocateId(organizationId, getMeta()));
+            entity.getOrganizationRef().setKey(organizationId);
+            return super.save(entity);
+        }
+
+        // Update ActivityType
+        ActivityType dbActivityType = get(entity.getId());
+
+        if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), entity.getName())) {
+            if (exists(entity.getName(), organizationId)) {
+                throw new UniqueConstraintException("ActivityType.name=" + entity.getName() + ", Organization.id=" + organizationId);
+            }
+        }
+
+        return super.save(entity);
     }
 
     private static class ByOrganizationQuery extends BaseDaoQuery<ActivityType, ActivityTypeMeta> {

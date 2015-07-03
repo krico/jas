@@ -12,6 +12,9 @@ import com.jasify.schedule.appengine.meta.activity.ActivityPackageExecutionMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.balance.*;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.ModelOperation;
+import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.balance.task.ApplyActivityPackageExecutionCharges;
 import com.jasify.schedule.appengine.model.balance.task.ApplySubscriptionCharges;
@@ -161,8 +164,19 @@ public class DefaultBalanceService implements BalanceService {
 
     @Override
     public void applyTransfer(Transfer transfer) {
-        applyTransferTransaction(transfer, true);
-        applyTransferTransaction(transfer, false);
+        try {
+            applyTransferTransaction(transfer, true);
+        } catch (ModelException e) {
+            // TODO: This should not happen but if it ever does schedule a task to retry
+            log.error("Failed to make debit", e);
+        }
+
+        try {
+            applyTransferTransaction(transfer, false);
+        } catch (ModelException e) {
+            // TODO: This should not happen but if it ever does schedule a task to retry
+            log.error("Failed to make credit", e);
+        }
     }
 
     /**
@@ -223,6 +237,10 @@ public class DefaultBalanceService implements BalanceService {
                 transfer.setAmount(amount);
                 transfer.setCurrency(executedPayment.getCurrency());
                 transfer.setDescription(executedPayment.describe());
+                // Datastore does not allow String properties to exceed 500 characters. Do some magic.
+                if (transfer.getDescription().length() > 500) {
+                    transfer.setDescription(transfer.getDescription().substring(0, 490) + " ...");
+                }
                 transfer.setReference(executedPayment.reference());
                 transfer.getPayerLegRef().setKey(Datastore.allocateId(custodialAccountKey, transactionMeta));
                 transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(userAccountKey, transactionMeta));
@@ -331,42 +349,40 @@ public class DefaultBalanceService implements BalanceService {
         }
     }
 
-
-    private void applyTransferTransaction(Transfer transfer, boolean debit) {
-        ModelRef<Transaction> legRef = debit ? transfer.getPayerLegRef() : transfer.getBeneficiaryLegRef();
-        String desc = "Leg (" + (debit ? "Payer" : "Beneficiary") + ")";
+    private void applyTransferTransaction(final Transfer transfer, final boolean debit) throws ModelException {
+        final ModelRef<Transaction> legRef = debit ? transfer.getPayerLegRef() : transfer.getBeneficiaryLegRef();
+        final String desc = "Leg (" + (debit ? "Payer" : "Beneficiary") + ")";
         Preconditions.checkNotNull(legRef, desc);
         Preconditions.checkNotNull(legRef.getKey(), desc);
         Preconditions.checkNotNull(legRef.getKey().getParent(), desc + ".parent");
 
-        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-        try {
-            Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
-            if (transaction == null) {
-                transaction = new Transaction(transfer, debit);
-                transaction.setId(legRef.getKey());
-                transaction.getAccountRef().setKey(legRef.getKey().getParent());
-                Key accountKey = transaction.getAccountRef().getKey();
-                Account account = Datastore.getOrNull(tx, accountMeta, accountKey);
-                if (account == null) {
-                    log.warn("Creating new account for key={}", accountKey);
-                    account = new Account(accountKey);
-                    account.setCurrency(transaction.getCurrency()); //TODO: multiple currencies?
+        TransactionOperator.execute(new ModelOperation<Void>() {
+            @Override
+            public Void execute(com.google.appengine.api.datastore.Transaction tx) throws ModelException {
+                Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
+                if (transaction == null) {
+                    transaction = new Transaction(transfer, debit);
+                    transaction.setId(legRef.getKey());
+                    transaction.getAccountRef().setKey(legRef.getKey().getParent());
+                    Key accountKey = transaction.getAccountRef().getKey();
+                    Account account = Datastore.getOrNull(tx, accountMeta, accountKey);
+                    if (account == null) {
+                        log.warn("Creating new account for key={}", accountKey);
+                        account = new Account(accountKey);
+                        account.setCurrency(transaction.getCurrency()); //TODO: multiple currencies?
+                    }
+
+                    account.setBalance(account.getBalance() + transaction.getBalanceAmount());
+                    account.setUnpaid(account.getUnpaid() + transaction.getUnpaid());
+
+                    Datastore.put(tx, account, transaction);
+                    tx.commit();
+                } else {
+                    log.warn("Transaction already existed, Transaction.Id={}, desc={}", legRef.getKey(), desc);
                 }
-
-                account.setBalance(account.getBalance() + transaction.getBalanceAmount());
-                account.setUnpaid(account.getUnpaid() + transaction.getUnpaid());
-
-                Datastore.put(tx, account, transaction);
-
-            } else {
-                log.warn("Transaction already existed, Transaction.Id={}, desc={}", legRef.getKey(), desc);
+                return null;
             }
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
-        }
+        });
     }
 
     @Override

@@ -5,17 +5,33 @@ import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.OrganizationAccount;
 import com.jasify.schedule.appengine.model.balance.UserAccount;
+import com.jasify.schedule.appengine.spi.ActivityEndpoint;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Objects;
 import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
 public class FormatUtilTest {
+
+
+    @Before
+    public void before() {
+        // Your wondering why... well initializeDatastore sets the default timezone to UTC.
+        // FormatUtil.toString is called indirectly by other tests and the SimpleDateFormat is initialized with default timezone
+        // By the time we get here its UTC but your pc default timezone is probably not UTC so the tests will fail
+        TestHelper.initializeDatastore();
+    }
+
+    @After
+    public void after() {
+        TestHelper.cleanupDatastore();
+    }
 
     @Test
     public void wellDefined() throws Exception {

@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -108,6 +109,7 @@ class SchemaMigrationInitialLoad {
         }
 
         ActivityService activityService = ActivityServiceFactory.getActivityService();
+        ActivityTypeDao activityTypeDao = new ActivityTypeDao();
         int count = 0;
         for (Organization organization : organizations) {
             ++count;
@@ -116,7 +118,7 @@ class SchemaMigrationInitialLoad {
                 activityType.setDescription("This is the activity " + count);
             }
 
-            activityService.addActivityType(organization, activityType);
+            activityTypeDao.save(activityType, organization.getId());
 
             Activity activity = new Activity(activityType);
             activity.setName(activityType.getName());

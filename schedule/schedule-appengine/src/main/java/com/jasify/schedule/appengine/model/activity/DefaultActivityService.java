@@ -12,11 +12,9 @@ import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
-import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.slf4j.Logger;
@@ -51,7 +49,6 @@ class DefaultActivityService implements ActivityService {
         }
     };
 
-    private final ActivityTypeMeta activityTypeMeta;
     private final ActivityMeta activityMeta;
     private final RepeatDetailsMeta repeatDetailsMeta;
     private final SubscriptionMeta subscriptionMeta;
@@ -59,14 +56,12 @@ class DefaultActivityService implements ActivityService {
     private final ActivityPackageActivityMeta activityPackageActivityMeta;
     private final ActivityPackageExecutionMeta activityPackageExecutionMeta;
 
-    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
     private final ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     private DefaultActivityService() {
-        activityTypeMeta = ActivityTypeMeta.get();
         activityMeta = ActivityMeta.get();
         repeatDetailsMeta = RepeatDetailsMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
@@ -108,79 +103,7 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Key addActivityType(final Organization organization, final ActivityType activityType) throws UniqueConstraintException {
-        Preconditions.checkArgument(StringUtils.isNotBlank(activityType.getName()));
-        try {
-            return TransactionOperator.execute(new ModelOperation<Key>() {
-                @Override
-                public Key execute(Transaction tx) throws ModelException {
-                    if (activityTypeDao.exists(activityType.getName(), organization.getId())) {
-          //          if (!isActivityTypeNameUnique(tx, organization.getId(), activityType.getName())) {
-                        throw new UniqueConstraintException("ActivityType.name=" + activityType.getName() + ", Organization.id=" + organization.getId());
-                    }
-                    activityType.setId(Datastore.allocateId(organization.getId(), activityTypeMeta));
-                    activityType.getOrganizationRef().setKey(organization.getId());
-
-                    Key ret = Datastore.put(tx, activityType);
-                    tx.commit();
-                    return ret;
-                }
-            });
-        } catch (UniqueConstraintException e) {
-            throw e;
-        } catch (ModelException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
-    @Nonnull
-    @Override
-    public ActivityType updateActivityType(final ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException {
-        final String name = StringUtils.trimToNull(activityType.getName());
-        if (name == null) {
-            throw new FieldValueException("ActivityType.name");
-        }
-        final ActivityType dbActivityType = activityTypeDao.get(activityType.getId());
-
-        try {
-            TransactionOperator.execute(new ModelOperation<Void>() {
-                @Override
-                public Void execute(Transaction tx) throws ModelException {
-                    if (!StringUtils.equalsIgnoreCase(dbActivityType.getName(), name)) {
-                        if (activityTypeDao.exists(name, dbActivityType.getOrganizationRef().getKey())) {
-                 //       if (!isActivityTypeNameUnique(tx, dbActivityType.getOrganizationRef().getKey(), name)) {
-                            throw new UniqueConstraintException("ActivityType.name=" + name);
-                        }
-                        dbActivityType.setName(name);
-                    }
-                    dbActivityType.setColourTag(activityType.getColourTag());
-                    dbActivityType.setDescription(activityType.getDescription());
-                    dbActivityType.setPrice(activityType.getPrice());
-                    dbActivityType.setCurrency(activityType.getCurrency());
-                    dbActivityType.setLocation(activityType.getLocation());
-                    dbActivityType.setMaxSubscriptions(activityType.getMaxSubscriptions());
-                    Datastore.put(tx, dbActivityType);
-                    tx.commit();
-                    return null;
-                }
-            });
-        } catch (EntityNotFoundException | FieldValueException | UniqueConstraintException e) {
-            throw e;
-        } catch (ModelException e) {
-            throw Throwables.propagate(e);
-        }
-
-        return dbActivityType;
-    }
-
-    @Override
-    public void removeActivityType(ActivityType activityType) {
-        Datastore.delete(activityType.getId());
-    }
-
-    @Nonnull
-    @Override
-    public List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws FieldValueException {
+    public List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws ModelException {
         validateActivity(activity);
         if (repeatDetails == null) {
             repeatDetails = new RepeatDetails();
@@ -194,7 +117,7 @@ class DefaultActivityService implements ActivityService {
             case Weekly:
                 return addActivityRepeatTypeWeekly(activityType, activity, repeatDetails);
             case No:
-                activity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
+                activityDao.save(activity, activityType.getId());
                 return Arrays.asList(Datastore.put(activity));
             default: // Safety check in case someone adds a new RepeatType but forgets to update this method
                 throw new FieldValueException("activity.repeatDetails.repeatType");
@@ -321,21 +244,6 @@ class DefaultActivityService implements ActivityService {
                 return null;
             }
         });
-    }
-
-    @Nonnull
-    @Override
-    public Activity updateActivity(Activity activity) throws EntityNotFoundException, FieldValueException {
-        validateActivity(activity);
-        Activity dbActivity = activityDao.get(activity.getId());
-        BeanUtil.copyPropertiesExcluding(dbActivity, activity, "created", "modified", "id", "activityTypeRef");
-        Datastore.put(dbActivity);
-        return dbActivity;
-    }
-
-    @Override
-    public void removeActivity(Activity activity) {
-        Datastore.delete(activity.getId());
     }
 
     @Override

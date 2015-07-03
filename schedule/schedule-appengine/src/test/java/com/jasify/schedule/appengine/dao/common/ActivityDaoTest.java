@@ -1,12 +1,15 @@
 package com.jasify.schedule.appengine.dao.common;
 
+import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -82,6 +85,24 @@ public class ActivityDaoTest {
         assertEquals(2, dao.getByOrganizationId(organization1.getId()).size());
         assertEquals(4, dao.getByOrganizationId(organization2.getId()).size());
         assertEquals(2, dao.getByOrganizationId(organization1.getId()).size());
+    }
+
+    @Test
+    public void testSaveNew() throws Exception {
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        Activity activity = TestHelper.createActivity(activityType, false);
+        Key result = dao.save(activity);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testSaveUpdate() throws Exception {
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        Activity activity = TestHelper.createActivity(activityType, true);
+        Key result = dao.save(activity);
+        assertNotNull(result);
     }
 
     @Test
