@@ -12,6 +12,9 @@ import com.jasify.schedule.appengine.meta.activity.ActivityPackageExecutionMeta;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
 import com.jasify.schedule.appengine.meta.balance.*;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.ModelOperation;
+import com.jasify.schedule.appengine.model.TransactionOperator;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.balance.task.ApplyActivityPackageExecutionCharges;
 import com.jasify.schedule.appengine.model.balance.task.ApplySubscriptionCharges;
@@ -25,7 +28,6 @@ import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelQuery;
 import org.slim3.datastore.ModelRef;
 
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Objects;
 
@@ -162,8 +164,19 @@ public class DefaultBalanceService implements BalanceService {
 
     @Override
     public void applyTransfer(Transfer transfer) {
-        applyTransferTransaction(transfer, true);
-        applyTransferTransaction(transfer, false);
+        try {
+            applyTransferTransaction(transfer, true);
+        } catch (ModelException e) {
+            // TODO: This should not happen but if it ever does schedule a task to retry
+            log.error("Failed to make debit", e);
+        }
+
+        try {
+            applyTransferTransaction(transfer, false);
+        } catch (ModelException e) {
+            // TODO: This should not happen but if it ever does schedule a task to retry
+            log.error("Failed to make credit", e);
+        }
     }
 
     /**
@@ -336,17 +349,17 @@ public class DefaultBalanceService implements BalanceService {
         }
     }
 
-    private void applyTransferTransaction(final Transfer transfer, final boolean debit) {
+    private void applyTransferTransaction(final Transfer transfer, final boolean debit) throws ModelException {
         final ModelRef<Transaction> legRef = debit ? transfer.getPayerLegRef() : transfer.getBeneficiaryLegRef();
         final String desc = "Leg (" + (debit ? "Payer" : "Beneficiary") + ")";
         Preconditions.checkNotNull(legRef, desc);
         Preconditions.checkNotNull(legRef.getKey(), desc);
         Preconditions.checkNotNull(legRef.getKey().getParent(), desc + ".parent");
 
-        new RetryTransaction() {
+        TransactionOperator.execute(new ModelOperation<Void>() {
             @Override
-            void doWork(com.google.appengine.api.datastore.Transaction tx) {
-                Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
+            public Void execute(com.google.appengine.api.datastore.Transaction tx) throws ModelException {
+M                Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
                 if (transaction == null) {
                     transaction = new Transaction(transfer, debit);
                     transaction.setId(legRef.getKey());
@@ -363,11 +376,13 @@ public class DefaultBalanceService implements BalanceService {
                     account.setUnpaid(account.getUnpaid() + transaction.getUnpaid());
 
                     Datastore.put(tx, account, transaction);
+                    tx.commit();
                 } else {
                     log.warn("Transaction already existed, Transaction.Id={}, desc={}", legRef.getKey(), desc);
                 }
+                return null;
             }
-        }.run();
+        });
     }
 
     @Override
@@ -441,31 +456,6 @@ public class DefaultBalanceService implements BalanceService {
     @Override
     public int getTransactionCount(Key accountId) {
         return Datastore.query(transactionMeta, accountId).asKeyList().size();
-    }
-
-    // If this will be used for other transactions extract it to its own class
-    public abstract class RetryTransaction {
-        abstract void doWork(com.google.appengine.api.datastore.Transaction tx);
-        public void run() {
-            int retries = 5;
-            while (true) {
-                com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-                try {
-                    doWork(tx);
-                    tx.commit();
-                    break;
-                } catch (ConcurrentModificationException e) {
-                    if (retries == 0) {
-                        throw e;
-                    }
-                    // Allow retry to occur
-                    --retries;
-                } finally {
-                    if (tx.isActive())
-                        tx.rollback();
-                }
-            }
-        }
     }
 
     private static class Singleton {

@@ -1,10 +1,7 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
-import com.jasify.schedule.appengine.model.OperationException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.users.User;
 
 import javax.annotation.Nonnull;
@@ -21,16 +18,6 @@ public interface ActivityService {
     int MaximumRepeatCounter = 25;
 
     /**
-     * @param activityType to be updated
-     * @return the updated ActivityType
-     * @throws EntityNotFoundException   if it didn't exist
-     * @throws FieldValueException       if any of the fields is invalid
-     * @throws UniqueConstraintException if you are changing the name to a name that already exists within the organization
-     */
-    @Nonnull
-    ActivityType updateActivityType(ActivityType activityType) throws EntityNotFoundException, FieldValueException, UniqueConstraintException;
-
-    /**
      * @param activityType to link with
      * @param activity      to add
      * @param repeatDetails information on adding repeat activities
@@ -38,21 +25,7 @@ public interface ActivityService {
      * @throws FieldValueException if any fields are invalid
      */
     @Nonnull
-    List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws FieldValueException;
-
-    /**
-     * @param activity to updated
-     * @return the updated activity
-     * @throws EntityNotFoundException if it doesn't exist
-     * @throws FieldValueException     if any of the fields are invalid
-     */
-    @Nonnull
-    Activity updateActivity(Activity activity) throws EntityNotFoundException, FieldValueException;
-
-    /**
-     * @param activity to be removed
-     */
-    void removeActivity(Activity activity);
+    List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws ModelException;
 
     /**
      * @param activityPackage to be created

@@ -30,20 +30,18 @@ import java.util.*;
 import static junit.framework.TestCase.*;
 
 public class ActivityServiceTest {
-    private static final String TEST_ACTIVITY_TYPE = "Test Activity Type";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     private ActivityService activityService;
     private User testUser1;
     private User testUser2;
     private Organization organization1;
-    private Organization organization2;
     private ActivityType activityType1OfOrganization1;
     private ActivityType activityType2OfOrganization1;
     private Activity activity1Organization1;
     private Activity activity2Organization1;
     private ActivityPackage activityPackage10Organization;
-    private ActivityPackageExecution activityPackageExecution10Organization;
     //  private ActivityPackage activityPackage;
     private ActivityPackageExecution activityPackageExecution;
 
@@ -118,7 +116,7 @@ public class ActivityServiceTest {
         TestHelper.initializeJasify();
         activityService = ActivityServiceFactory.getActivityService();
         organization1 = createOrganization("Org1");
-        organization2 = createOrganization("Org2");
+        Organization organization2 = createOrganization("Org2");
         testUser1 = createUser("testUser1");
         testUser2 = createUser("testUser2");
         Datastore.put(organization1, organization2, testUser1, testUser2);
@@ -137,12 +135,6 @@ public class ActivityServiceTest {
     @After
     public void cleanupDatastore() {
         TestHelper.cleanupDatastore();
-    }
-
-    @Test(expected = FieldValueException.class)
-    public void testUpdateActivityTypeThrowsFieldValueException() throws Exception {
-        ActivityType activityType = new ActivityType();
-        activityService.updateActivityType(activityType);
     }
 
     @Test
@@ -507,51 +499,6 @@ public class ActivityServiceTest {
     }
 
     @Test
-    public void testUpdateActivity() throws Exception {
-        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
-        Date expected = activity1Organization1.getCreated();
-        activity1Organization1.setName("New Name");
-        activity1Organization1.setDescription("Description");
-        activity1Organization1.setCurrency("CHF");
-        activity1Organization1.setMaxSubscriptions(20);
-        activity1Organization1.setSubscriptionCount(10);
-        activity1Organization1.setLocation("Location");
-
-        DateTime start = new DateTime(activity1Organization1.getStart());
-        DateTime finish = new DateTime(activity1Organization1.getFinish());
-
-        activity1Organization1.setCreated(new Date(99));
-        activity1Organization1.setModified(new Date(25));
-        long before = System.currentTimeMillis();
-
-        Activity updatedActivity = activityService.updateActivity(activity1Organization1);
-
-        assertNotNull(updatedActivity);
-        assertEquals(ids.get(0), updatedActivity.getId());
-        assertEquals("New Name", updatedActivity.getName());
-        assertEquals("Description", updatedActivity.getDescription());
-
-        Activity fetched = Datastore.get(ActivityMeta.get(), ids.get(0));
-        assertEquals("New Name", fetched.getName());
-        assertEquals("Description", fetched.getDescription());
-        assertEquals("CHF", fetched.getCurrency());
-        assertEquals(20, fetched.getMaxSubscriptions());
-        assertEquals(10, fetched.getSubscriptionCount());
-        assertEquals(start.toDate(), fetched.getStart());
-        assertEquals(finish.toDate(), fetched.getFinish());
-        assertEquals("Location", fetched.getLocation());
-        assertEquals(expected, fetched.getCreated());
-        assertTrue(before <= fetched.getModified().getTime());
-    }
-
-    @Test
-    public void testRemoveActivity() throws Exception {
-        List<Key> ids = activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
-        activityService.removeActivity(activity1Organization1);
-        assertNull(Datastore.getOrNull(ids.get(0)));
-    }
-
-    @Test
     public void testSubscribe() throws Exception {
         activityService.addActivity(activityType1OfOrganization1, activity1Organization1, new RepeatDetails());
         Subscription subscription = activityService.subscribe(testUser1, activity1Organization1);
@@ -896,7 +843,7 @@ public class ActivityServiceTest {
         thrown.expect(FieldValueException.class);
         thrown.expectMessage("ActivityPackage.activities");
         activityPackage10Organization.setItemCount(2);
-        activityService.addActivityPackage(activityPackage10Organization, Collections.EMPTY_LIST);
+        activityService.addActivityPackage(activityPackage10Organization, Collections.<Activity>emptyList());
     }
 
     @Test

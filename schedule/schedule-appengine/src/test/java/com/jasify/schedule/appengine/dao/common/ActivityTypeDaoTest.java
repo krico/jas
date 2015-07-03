@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.dao.common;
 
+import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -95,5 +96,19 @@ public class ActivityTypeDaoTest {
         ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
         boolean result = dao.exists(activityType.getLcName(), TestHelper.createOrganization(true).getId());
         assertFalse(result);
+    }
+
+    @Test
+    public void testSaveNew() throws Exception {
+        ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), false);
+        Key result = dao.save(activityType);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testSaveUpdate() throws Exception {
+        ActivityType activityType = TestHelper.createActivityType(TestHelper.createOrganization(true), true);
+        Key result = dao.save(activityType);
+        assertNotNull(result);
     }
 }
