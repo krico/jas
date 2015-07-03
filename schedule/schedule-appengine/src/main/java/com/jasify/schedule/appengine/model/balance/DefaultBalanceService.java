@@ -359,7 +359,7 @@ public class DefaultBalanceService implements BalanceService {
         TransactionOperator.execute(new ModelOperation<Void>() {
             @Override
             public Void execute(com.google.appengine.api.datastore.Transaction tx) throws ModelException {
-M                Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
+                Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
                 if (transaction == null) {
                     transaction = new Transaction(transfer, debit);
                     transaction.setId(legRef.getKey());
