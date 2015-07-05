@@ -7,16 +7,15 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.jasify.schedule.appengine.dao.common.*;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
+import com.jasify.schedule.appengine.dao.common.SubscriptionDao;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
-import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
-import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.CompositeCriterion;
@@ -25,7 +24,10 @@ import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author krico
@@ -50,7 +52,6 @@ class DefaultActivityService implements ActivityService {
     };
 
     private final ActivityMeta activityMeta;
-    private final RepeatDetailsMeta repeatDetailsMeta;
     private final SubscriptionMeta subscriptionMeta;
     private final ActivityPackageMeta activityPackageMeta;
     private final ActivityPackageActivityMeta activityPackageActivityMeta;
@@ -63,7 +64,6 @@ class DefaultActivityService implements ActivityService {
 
     private DefaultActivityService() {
         activityMeta = ActivityMeta.get();
-        repeatDetailsMeta = RepeatDetailsMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
         activityPackageMeta = ActivityPackageMeta.get();
         activityPackageActivityMeta = ActivityPackageActivityMeta.get();
@@ -72,206 +72,6 @@ class DefaultActivityService implements ActivityService {
 
     static ActivityService instance() {
         return Singleton.INSTANCE;
-    }
-
-    private void validateActivity(Activity activity) throws FieldValueException {
-        if (activity.getStart() == null) throw new FieldValueException("Activity.start");
-        if (activity.getStart().getTime() < System.currentTimeMillis()) throw new FieldValueException("Activity.start");
-        if (activity.getFinish() == null) throw new FieldValueException("Activity.finish");
-        if (activity.getFinish().getTime() < activity.getStart().getTime())
-            throw new FieldValueException("Activity.finish");
-        if (activity.getPrice() != null && activity.getPrice() < 0) throw new FieldValueException("Activity.price");
-        if (activity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
-    }
-
-    private void validateRepeatDetails(RepeatDetails repeatDetails) throws FieldValueException {
-        if (repeatDetails.getRepeatType() == null) throw new FieldValueException("RepeatDetails.repeatType");
-        if (repeatDetails.getRepeatType() != RepeatType.No) {
-            if (repeatDetails.getRepeatEvery() <= 0) throw new FieldValueException("RepeatDetails.repeatEvery");
-            if (repeatDetails.getRepeatUntilType() == null)
-                throw new FieldValueException("RepeatDetails.repeatUntilType");
-            if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && repeatDetails.getUntilCount() <= 0)
-                throw new FieldValueException("RepeatDetails.untilCount");
-            if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date) {
-                if (repeatDetails.getUntilDate() == null)
-                    throw new FieldValueException("RepeatDetails.untilDate");
-                if (repeatDetails.getUntilDate().getTime() < System.currentTimeMillis())
-                    throw new FieldValueException("RepeatDetails.untilDate");
-            }
-        }
-    }
-
-    @Nonnull
-    @Override
-    public List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws ModelException {
-        validateActivity(activity);
-        if (repeatDetails == null) {
-            repeatDetails = new RepeatDetails();
-        } else {
-            validateRepeatDetails(repeatDetails);
-        }
-
-        switch (repeatDetails.getRepeatType()) {
-            case Daily:
-                return addActivityRepeatTypeDaily(activityType, activity, repeatDetails);
-            case Weekly:
-                return addActivityRepeatTypeWeekly(activityType, activity, repeatDetails);
-            case No:
-                activityDao.save(activity, activityType.getId());
-                return Arrays.asList(Datastore.put(activity));
-            default: // Safety check in case someone adds a new RepeatType but forgets to update this method
-                throw new FieldValueException("activity.repeatDetails.repeatType");
-        }
-    }
-
-    private List<Key> addActivityRepeatTypeDaily(final ActivityType activityType, final Activity activity, final RepeatDetails repeatDetails) throws FieldValueException {
-
-        repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
-        activity.setRepeatDetails(repeatDetails);
-
-        return TransactionOperator.executeNoEx(new ModelOperation<List<Key>>() {
-            @Override
-            public List<Key> execute(Transaction tx) throws ModelException {
-                DateTime start = new DateTime(activity.getStart());
-                DateTime finish = new DateTime(activity.getFinish());
-                Datastore.put(tx, repeatDetails);
-                List<Activity> activities = new ArrayList<>();
-                while (activities.size() < MaximumRepeatCounter) {
-                    Activity newActivity = new Activity(activityType);
-                    BeanUtil.copyProperties(newActivity, activity);
-                    newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
-                    newActivity.setStart(start.toDate());
-                    newActivity.setFinish(finish.toDate());
-                    activities.add(newActivity);
-
-                    start = start.plusDays(repeatDetails.getRepeatEvery());
-                    finish = finish.plusDays(repeatDetails.getRepeatEvery());
-
-                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
-                        break;
-                    if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
-                        break;
-                }
-
-                if (!activities.isEmpty()) {
-                    List<Key> ret = Datastore.put(tx, activities);
-                    tx.commit();
-                    return ret;
-                }
-                return null;
-            }
-        });
-    }
-
-    private Set<Integer> getRepeatDays(RepeatDetails repeatDetails) {
-        Set<Integer> result = new HashSet<>();
-        if (repeatDetails.isMondayEnabled()) result.add(DateTimeConstants.MONDAY);
-        if (repeatDetails.isTuesdayEnabled()) result.add(DateTimeConstants.TUESDAY);
-        if (repeatDetails.isWednesdayEnabled()) result.add(DateTimeConstants.WEDNESDAY);
-        if (repeatDetails.isThursdayEnabled()) result.add(DateTimeConstants.THURSDAY);
-        if (repeatDetails.isFridayEnabled()) result.add(DateTimeConstants.FRIDAY);
-        if (repeatDetails.isSaturdayEnabled()) result.add(DateTimeConstants.SATURDAY);
-        if (repeatDetails.isSundayEnabled()) result.add(DateTimeConstants.SUNDAY);
-        return result;
-    }
-
-    // TODO: Computer says this is too complex so should get broken up
-    private List<Key> addActivityRepeatTypeWeekly(final ActivityType activityType, final Activity activity, final RepeatDetails repeatDetails) throws FieldValueException {
-        final Set<Integer> repeatDays = getRepeatDays(repeatDetails);
-        if (repeatDays.isEmpty()) throw new FieldValueException("RepeatDetails.repeatDays");
-
-        final int repeatEvery;
-        if (repeatDetails.getRepeatEvery() > 1) {
-            repeatEvery = (repeatDetails.getRepeatEvery() - 1) * 7;
-        } else {
-            repeatEvery = 0;
-        }
-
-        repeatDetails.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), repeatDetailsMeta));
-        activity.setRepeatDetails(repeatDetails);
-
-        return TransactionOperator.executeNoEx(new ModelOperation<List<Key>>() {
-            @Override
-            public List<Key> execute(Transaction tx) throws ModelException {
-                DateTime start = new DateTime(activity.getStart());
-                DateTime finish = new DateTime(activity.getFinish());
-
-                // Find the next chosen day
-                for (int day = 0; day < 7; day++) {
-                    if (repeatDays.contains(start.getDayOfWeek())) {
-                        break;
-                    }
-                    start = start.plusDays(1);
-                    finish = finish.plusDays(1);
-                }
-                Datastore.put(tx, repeatDetails);
-
-                List<Activity> activities = new ArrayList<>();
-                boolean repeatCompleted = false;
-                while (!repeatCompleted && activities.size() < MaximumRepeatCounter) {
-                    // Run through 7 days per week
-                    for (int day = 0; day < 7 && !repeatCompleted; day++) {
-                        // Its one of the chosen days
-                        if (repeatDays.contains(start.getDayOfWeek())) {
-                            Activity newActivity = new Activity(activityType);
-                            BeanUtil.copyProperties(newActivity, activity);
-                            newActivity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), activityMeta));
-                            newActivity.setStart(start.toDate());
-                            newActivity.setFinish(finish.toDate());
-                            activities.add(newActivity);
-                        }
-                        // Move to the next day
-                        start = start.plusDays(1);
-                        finish = finish.plusDays(1);
-
-                        if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
-                            repeatCompleted = true;
-                        if (repeatDetails.getRepeatUntilType() == RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
-                            repeatCompleted = true;
-                    }
-                    // Jump to next period
-                    if (repeatEvery > 0) {
-                        start = start.plusDays(repeatEvery);
-                        finish = finish.plusDays(repeatEvery);
-                    }
-                }
-
-                if (!activities.isEmpty()) {
-                    List<Key> tmp = Datastore.put(tx, activities);
-                    tx.commit();
-                    return tmp;
-                }
-                return null;
-            }
-        });
-    }
-
-    @Override
-    public void removeActivityPackage(final Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException {
-        try {
-            TransactionOperator.execute(new ModelOperation<Void>() {
-                @Override
-                public Void execute(Transaction tx) throws ModelException {
-                    ActivityPackage activityPackage = activityPackageDao.get(id);
-                    if (activityPackage.getExecutionCount() != 0) {
-                        throw new OperationException("ActivityPackage has executions");
-                    }
-                    List<Key> toDelete = new ArrayList<>();
-                    toDelete.add(activityPackage.getId());
-                    toDelete.addAll(Datastore
-                            .query(tx, activityPackageActivityMeta, activityPackage.getOrganizationRef().getKey())
-                            .filter(activityPackageActivityMeta.activityPackageRef.equal(id))
-                            .asKeyList());
-                    Datastore.delete(tx, toDelete);
-                    tx.commit();
-                    return null;
-                }
-            });
-        } catch (EntityNotFoundException | IllegalArgumentException | OperationException e) {
-            throw e;
-        } catch (ModelException e) {
-            throw Throwables.propagate(e);
-        }
     }
 
     @Nonnull
@@ -460,7 +260,7 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Nonnull
- // TODO   @Override
+    // TODO   @Override
     public List<Subscription> getSubscriptions(Activity activity) {
         // This assumes that you have the latest version of activity
         return activity.getSubscriptionListRef().getModelList();

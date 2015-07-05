@@ -4,9 +4,11 @@ import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.repackaged.org.joda.time.DateTime;
+import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
-import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
@@ -21,6 +23,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -136,6 +139,7 @@ public class ActivityEndpointTest {
     @Test
     public void testGetActivityTypesByNullId() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("organizationId == null");
         endpoint.getActivityTypes(newCaller(1), null);
     }
 
@@ -159,27 +163,29 @@ public class ActivityEndpointTest {
     public void testGetActivityTypeNoUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.getActivityType(null, null);
+        endpoint.getActivityType(null, Datastore.allocateId(ActivityType.class));
     }
 
     @Test
     public void testGetActivityTypeNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.getActivityType(newCaller(1), null);
+        endpoint.getActivityType(newCaller(1), Datastore.allocateId(ActivityType.class));
     }
 
     @Test
     public void testGetActivityTypeNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.getActivityType(newAdminCaller(1), null);
     }
 
     @Test
     public void testGetActivityTypeForUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.getActivityType(newAdminCaller(1), Datastore.allocateId(ActivityType.class));
+        Key id = Datastore.allocateId(ActivityType.class);
+        thrown.expectMessage("No entity was found matching the key: " + id);
+        endpoint.getActivityType(newAdminCaller(1), id);
     }
 
     @Test
@@ -195,27 +201,27 @@ public class ActivityEndpointTest {
     public void testUpdateActivityTypeNoUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.updateActivityType(null, null, null);
+        endpoint.updateActivityType(null, Datastore.allocateId(ActivityType.class), new ActivityType());
     }
 
     @Test
     public void testUpdateActivityTypeNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.updateActivityType(newCaller(1), null, null);
+        endpoint.updateActivityType(newCaller(1), Datastore.allocateId(ActivityType.class), new ActivityType());
     }
 
     @Test
     public void testUpdateActivityTypeNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.updateActivityType(newAdminCaller(1), null, null);
     }
 
     @Test
     public void testUpdateActivityTypeNullActivityType() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("activityType == null");
         endpoint.updateActivityType(newAdminCaller(1), Datastore.allocateId(ActivityType.class), null);
     }
 
@@ -242,9 +248,11 @@ public class ActivityEndpointTest {
     @Test
     public void testUpdateActivityTypeWithUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
+        Key id = Datastore.allocateId(ActivityType.class);
+        thrown.expectMessage("No entity was found matching the key: " + id);
         Organization organization = TestHelper.createOrganization(true);
         ActivityType activityType = TestHelper.createActivityType(organization, false);
-        endpoint.updateActivityType(newAdminCaller(1), Datastore.allocateId(organization.getId(), ActivityTypeMeta.get()), activityType);
+        endpoint.updateActivityType(newAdminCaller(1), id, activityType);
     }
 
     @Test
@@ -312,8 +320,8 @@ public class ActivityEndpointTest {
     // AddActivityType
     @Test
     public void testAddActivityTypeNullRequest() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("request == null");
         endpoint.addActivityType(null, null);
     }
 
@@ -334,7 +342,7 @@ public class ActivityEndpointTest {
     @Test
     public void testAddActivityTypeNullActivityType() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("request.activityType == null");
         JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
         endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
     }
@@ -342,7 +350,7 @@ public class ActivityEndpointTest {
     @Test
     public void testAddActivityTypeNullOrganizationId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("request.organizationId == null");
         JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
         jasAddActivityTypeRequest.setActivityType(new ActivityType());
         endpoint.addActivityType(newAdminCaller(1), jasAddActivityTypeRequest);
@@ -426,27 +434,29 @@ public class ActivityEndpointTest {
     public void testRemoveActivityTypeNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.removeActivityType(null, null);
+        endpoint.removeActivityType(null, Datastore.allocateId(ActivityType.class));
     }
 
     @Test
     public void testRemoveActivityTypeNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.removeActivityType(newCaller(1), null);
+        endpoint.removeActivityType(newCaller(1), Datastore.allocateId(ActivityType.class));
     }
 
     @Test
     public void testRemoveActivityTypeNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.removeActivityType(newAdminCaller(1), null);
     }
 
     @Test
     public void testRemoveActivityTypeUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.removeActivityType(newAdminCaller(1), Datastore.allocateId(ActivityType.class));
+        Key id = Datastore.allocateId(ActivityType.class);
+        thrown.expectMessage("No entity was found matching the key: " + id);
+        endpoint.removeActivityType(newAdminCaller(1), id);
     }
 
     @Test
@@ -557,8 +567,8 @@ public class ActivityEndpointTest {
     // GetActivitiesByIds
     @Test
     public void getActivitiesByIdsNullRequest() throws Exception {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Must choose one: activityTypeIds or organizationIds");
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("request == null");
         endpoint.getActivitiesByIds(newCaller(1), null);
     }
 
@@ -663,14 +673,16 @@ public class ActivityEndpointTest {
     @Test
     public void testGetActivityNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.getActivity(newAdminCaller(1), null);
     }
 
     @Test
     public void testGetActivityUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.getActivity(newAdminCaller(1), Datastore.allocateId(Activity.class));
+        Key id = Datastore.allocateId(Activity.class);
+        thrown.expectMessage("No entity was found matching the key: " + id);
+        endpoint.getActivity(newAdminCaller(1), id);
     }
 
     @Test
@@ -686,34 +698,34 @@ public class ActivityEndpointTest {
     public void testUpdateActivityNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.updateActivity(null, null, new Activity());
+        endpoint.updateActivity(null, Datastore.allocateId(Activity.class), new Activity());
     }
 
     @Test
     public void testUpdateActivityNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.updateActivity(newCaller(1), null, new Activity());
+        endpoint.updateActivity(newCaller(1), Datastore.allocateId(Activity.class), new Activity());
     }
 
     @Test
     public void testUpdateActivityNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.updateActivity(newAdminCaller(1), null, new Activity());
     }
 
     @Test
     public void testUpdateActivityNullActivity() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("activity == null");
         endpoint.updateActivity(newAdminCaller(1), Datastore.allocateId(Activity.class), null);
     }
 
     @Test
     public void testUpdateActivityNullActivityTypeKey() throws Exception {
-        // TODO: FIX THIS
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("Activity not found");
         Organization organization = TestHelper.createOrganization(true);
         endpoint.updateActivity(newAdminCaller(1), Datastore.allocateId(organization.getId(), ActivityMeta.get()), new Activity());
     }
@@ -762,22 +774,22 @@ public class ActivityEndpointTest {
     // AddActivity
     @Test
     public void testAddActivityNullRequest() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("request == null");
         endpoint.addActivity(null, null);
     }
 
     @Test
     public void testAddActivityNullActivity() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("request.activity == null");
         endpoint.addActivity(null, new JasAddActivityRequest());
     }
 
     @Test
     public void testAddActivityNullActivityTypeKey() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("request.activity.activityType == null");
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(new Activity());
         endpoint.addActivity(null, jasAddActivityRequest);
@@ -787,9 +799,11 @@ public class ActivityEndpointTest {
     public void testAddActivityNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+
         ActivityType activityType = new ActivityType();
         Datastore.put(activityType);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(new Activity(activityType));
         endpoint.addActivity(null, jasAddActivityRequest);
     }
@@ -804,22 +818,90 @@ public class ActivityEndpointTest {
     }
 
     @Test
-    public void testAddActivityInvalidValue() throws Exception {
+    public void testAddActivityWithNullStart() throws Exception {
         thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Activity.start");
+
+        Activity activity = createActivity(false);
+        activity.setStart(null);
+
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
-        RepeatDetails repeatDetails = new RepeatDetails();
-        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
-        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithStartInThePast() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Activity.start");
+
+        Activity activity = createActivity(false);
+        activity.setStart(new DateTime(2000, 1, 1, 10, 0, 0).toDate());
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithNullFinish() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Activity.finish");
+
+        Activity activity = createActivity(false);
+        activity.setFinish(null);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithFinishBeforeStart() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Activity.finish");
+
+        Activity activity = createActivity(false);
+        DateTime finish = new DateTime(activity.getStart());
+        finish = finish.minusDays(1);
+        activity.setFinish(finish.toDate());
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithNegativePrice() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Activity.price");
+
+        Activity activity = createActivity(false);
+        activity.setPrice(new Double("-1"));
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityNegativeMaxSubscriptions() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Activity.maxSubscriptions");
+
+        Activity activity = createActivity(false);
+        activity.setMaxSubscriptions(-1);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
 
     @Test
     public void testAddActivityWithNullNameAndNullActivityTypeKey() throws Exception {
         thrown.expect(NotFoundException.class);
-        ActivityType activityType = new ActivityType();
-        activityType.setId(Datastore.allocateId(ActivityType.class));
-        Activity activity = new Activity(activityType);
+        thrown.expectMessage("request.activity.activityType == null");
+        Activity activity = new Activity(new ActivityType());
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
@@ -827,8 +909,9 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivity() throws Exception {
-        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         Activity activity = createActivity(false);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
         List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
         assertEquals(1, result.size());
@@ -837,12 +920,440 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithNullName() throws Exception {
-        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         Activity activity = createActivity(false);
         activity.setName(null);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
         List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
         assertEquals(activity.getActivityTypeRef().getModel().getName(), result.get(0).getName());
+    }
+
+    @Test
+    public void testAddActivityWithNullRepeatType() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("RepeatDetails.repeatType");
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(null);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithInvalidRepeatEvery() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("RepeatDetails.repeatEvery");
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatEvery(0);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithNullRepeatUntilType() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("RepeatDetails.repeatUntilType");
+
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithNullRepeatUntilDate() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("RepeatDetails.untilDate");
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Date);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithRepeatUntilDateInThePast() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("RepeatDetails.untilDate");
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Date);
+        repeatDetails.setUntilDate(new Date(20));
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithInvalidRepeatDailyUntilCount() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("RepeatDetails.untilCount");
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(0);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithNoRepeatDays() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("RepeatDetails.repeatDays");
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Weekly);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(1);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+    }
+
+    @Test
+    public void testAddActivityWithRepeatDailyUntilCount() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(2);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        Activity activity1 = result.get(0);
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        date = date.plusDays(1);
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatDailyUntilDate() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Date);
+        DateTime date2 = date1.plusDays(1);
+        repeatDetails.setUntilDate(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate());
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        Activity activity1 = result.get(0);
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatDailyEveryWeek() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(2);
+        repeatDetails.setRepeatEvery(7); // Every 7 days
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        Activity activity1 = result.get(0);
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        DateTime date2 = date1.plusDays(7);
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatDailyEveryTwoWeeks() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(2);
+        repeatDetails.setRepeatEvery(14); // Every two weeks
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        Activity activity1 = result.get(0);
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        DateTime date2 = date1.plusDays(14);
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatDailyDoesNotExceedMaximum() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(50);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(ActivityCreator.MaximumRepeatCounter, result.size());
+    }
+
+    private void setRepeatDay(RepeatDetails repeatDetails, int jodaDayOfWeek) {
+        switch (jodaDayOfWeek) {
+            case DateTimeConstants.MONDAY:
+                repeatDetails.setMondayEnabled(true);
+                break;
+            case DateTimeConstants.TUESDAY:
+                repeatDetails.setTuesdayEnabled(true);
+                break;
+            case DateTimeConstants.WEDNESDAY:
+                repeatDetails.setWednesdayEnabled(true);
+                break;
+            case DateTimeConstants.THURSDAY:
+                repeatDetails.setThursdayEnabled(true);
+                break;
+            case DateTimeConstants.FRIDAY:
+                repeatDetails.setFridayEnabled(true);
+                break;
+            case DateTimeConstants.SATURDAY:
+                repeatDetails.setSaturdayEnabled(true);
+                break;
+            case DateTimeConstants.SUNDAY:
+                repeatDetails.setSundayEnabled(true);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Test
+    public void testAddActivityWithRepeatWeeklyCount() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Weekly);
+        setRepeatDay(repeatDetails, date1.getDayOfWeek());
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(2);
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        Activity activity1 = result.get(0);
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        DateTime date2 = date1.plusDays(7);
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatWeeklyDate() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Weekly);
+        setRepeatDay(repeatDetails, date1.getDayOfWeek());
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Date);
+        DateTime date2 = date1.plusDays(8);
+        repeatDetails.setUntilDate(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate());
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        Activity activity1 = result.get(0);
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        DateTime date3 = date1.plusDays(7);
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatWeeklyEveryTwoWeeks() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Weekly);
+        setRepeatDay(repeatDetails, date1.getDayOfWeek());
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(2);
+        repeatDetails.setRepeatEvery(2); // Every two weeks
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        Activity activity1 = result.get(0);
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        DateTime date3 = date1.plusDays(14);
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatWeeklyTwoDaysEveryTwoWeeks() throws Exception {
+        Activity activity = createActivity(false);
+        DateTime date1 = new DateTime().plusDays(1);
+
+        activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
+        activity.setFinish(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 11, 0, 0).toDate());
+
+        RepeatDetails repeatDetails = new RepeatDetails();
+        repeatDetails.setRepeatType(RepeatDetails.RepeatType.Weekly);
+        setRepeatDay(repeatDetails, date1.plusDays(1).getDayOfWeek());
+        setRepeatDay(repeatDetails, date1.plusDays(3).getDayOfWeek());
+        repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+        repeatDetails.setUntilCount(4);
+        repeatDetails.setRepeatEvery(2); // Every two weeks
+
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        jasAddActivityRequest.setActivity(activity);
+        jasAddActivityRequest.setRepeatDetails(repeatDetails);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+        assertNotNull(result);
+        assertEquals(4, result.size());
+
+        Activity activity1 = result.get(0);
+        DateTime date2 = date1.plusDays(1);
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 10, 0, 0).toDate(), activity1.getStart());
+        assertEquals(new DateTime(date2.getYear(), date2.getMonthOfYear(), date2.getDayOfMonth(), 11, 0, 0).toDate(), activity1.getFinish());
+
+        Activity activity2 = result.get(1);
+        DateTime date3 = date2.plusDays(2);
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 10, 0, 0).toDate(), activity2.getStart());
+        assertEquals(new DateTime(date3.getYear(), date3.getMonthOfYear(), date3.getDayOfMonth(), 11, 0, 0).toDate(), activity2.getFinish());
+
+        Activity activity3 = result.get(2);
+        DateTime date4 = date2.plusDays(14);
+        assertEquals(new DateTime(date4.getYear(), date4.getMonthOfYear(), date4.getDayOfMonth(), 10, 0, 0).toDate(), activity3.getStart());
+        assertEquals(new DateTime(date4.getYear(), date4.getMonthOfYear(), date4.getDayOfMonth(), 11, 0, 0).toDate(), activity3.getFinish());
+
+        Activity activity4 = result.get(3);
+        DateTime date5 = date4.plusDays(2);
+        assertEquals(new DateTime(date5.getYear(), date5.getMonthOfYear(), date5.getDayOfMonth(), 10, 0, 0).toDate(), activity4.getStart());
+        assertEquals(new DateTime(date5.getYear(), date5.getMonthOfYear(), date5.getDayOfMonth(), 11, 0, 0).toDate(), activity4.getFinish());
     }
 
     @Test
@@ -865,20 +1376,20 @@ public class ActivityEndpointTest {
     public void testRemoveActivityNoUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.removeActivity(null, null);
+        endpoint.removeActivity(null, Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testRemoveActivityNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.removeActivity(newCaller(1), null);
+        endpoint.removeActivity(newCaller(1), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testRemoveActivityNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.removeActivity(newAdminCaller(1), null);
     }
 
@@ -891,19 +1402,19 @@ public class ActivityEndpointTest {
 
     @Test
     public void testRemoveActivityWithSubscriptions() throws Exception {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Activity has subscriptions");
         Activity activity = createActivity(true);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot delete activity with subscriptions! id=" + activity.getId() + " (1 subscriptions).");
         endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity.getId());
         endpoint.removeActivity(newAdminCaller(1), activity.getId());
     }
 
     @Test
     public void testRemoveActivityInActivityPackage() throws Exception {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Activity is linked to Activity Package");
         Organization organization = TestHelper.createOrganization(true);
         Activity activity = createActivity(organization, true);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot delete activity linked to activity packages! id=" + activity.getId() + " (1 activity packages).");
         ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
         endpoint.addActivityToActivityPackage(newAdminCaller(1), activityPackage.getId(), activity.getId());
         endpoint.removeActivity(newAdminCaller(1), activity.getId());
@@ -921,6 +1432,7 @@ public class ActivityEndpointTest {
     @Test
     public void testAddSubscriptionNoUserThrowsNotFoundException() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("userId == null");
         endpoint.addSubscription(null, null, null);
     }
 
@@ -934,26 +1446,31 @@ public class ActivityEndpointTest {
     @Test
     public void testAddSubscriptionNullUserId() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("userId == null");
         endpoint.addSubscription(newAdminCaller(1), null, Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testAddSubscriptionWithNullActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("activityId == null");
         endpoint.addSubscription(newAdminCaller(1), Datastore.allocateId(User.class), null);
     }
 
     @Test
     public void testAddSubscriptionWithUnknownUserId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.addSubscription(newAdminCaller(1), Datastore.allocateId(User.class), Datastore.allocateId(Activity.class));
+        Key userId = Datastore.allocateId(User.class);
+        thrown.expectMessage("No entity was found matching the key: " + userId);
+        endpoint.addSubscription(newAdminCaller(1), userId, Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testAddSubscriptionWithUnknownActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.addSubscription(newAdminCaller(1), createUser().getId(), Datastore.allocateId(Activity.class));
+        Key activityId = Datastore.allocateId(Activity.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityId);
+        endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activityId);
     }
 
     @Test
@@ -991,12 +1508,6 @@ public class ActivityEndpointTest {
 
     // GetSubscription
     @Test
-    public void testGetSubscriptionNoUserThrowsNotFoundException() throws Exception {
-        thrown.expect(NotFoundException.class);
-        endpoint.getSubscription(null, null, null);
-    }
-
-    @Test
     public void testGetSubscriptionNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
@@ -1006,25 +1517,28 @@ public class ActivityEndpointTest {
     @Test
     public void testGetSubscriptionNullUserId() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("userId == null");
         endpoint.getSubscription(newAdminCaller(1), null, Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testGetSubscriptionWithNullActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("activityId == null");
         endpoint.getSubscription(newAdminCaller(1), Datastore.allocateId(User.class), null);
     }
 
     @Test
     public void testGetSubscriptionWithUnknownUserId() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("No such subscription");
         endpoint.getSubscription(newAdminCaller(1), Datastore.allocateId(User.class), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testGetSubscriptionWithUnknownActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("No such subscription");
         endpoint.getSubscription(newAdminCaller(1), createUser().getId(), Datastore.allocateId(Activity.class));
     }
 
@@ -1048,23 +1562,23 @@ public class ActivityEndpointTest {
 
     // GetSubscriptions
     @Test
-    public void testGetSubscriptionsNulUser() throws Exception {
+    public void testGetSubscriptionsNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.getSubscriptions(null, null);
+        endpoint.getSubscriptions(null, Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testGetSubscriptionsNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.getSubscriptions(newCaller(1), null);
+        endpoint.getSubscriptions(newCaller(1), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testGetSubscriptionsNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("activityId == null");
         endpoint.getSubscriptions(newAdminCaller(1), null);
     }
 
@@ -1090,27 +1604,29 @@ public class ActivityEndpointTest {
     public void testCancelSubscriptionNulUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.cancelSubscription(null, null);
+        endpoint.cancelSubscription(null, Datastore.allocateId(Subscription.class));
     }
 
     @Test
     public void testCancelSubscriptionNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.cancelSubscription(newCaller(1), null);
+        endpoint.cancelSubscription(newCaller(1), Datastore.allocateId(Subscription.class));
     }
 
     @Test
     public void testCancelSubscriptionNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("subscriptionId == null");
         endpoint.cancelSubscription(newAdminCaller(1), null);
     }
 
     @Test
     public void testCancelSubscriptionUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.cancelSubscription(newAdminCaller(1), Datastore.allocateId(ActivityType.class));
+        Key subscriptionId = Datastore.allocateId(Subscription.class);
+        thrown.expectMessage("No entity was found matching the key: " + subscriptionId);
+        endpoint.cancelSubscription(newAdminCaller(1), subscriptionId);
     }
 
     @Test
@@ -1126,7 +1642,7 @@ public class ActivityEndpointTest {
     @Test
     public void testGetActivityPackagesNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("organizationId == null");
         endpoint.getActivityPackages(null, null);
     }
 
@@ -1149,14 +1665,16 @@ public class ActivityEndpointTest {
     @Test
     public void testGetActivityPackageNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.getActivityPackage(null, null);
     }
 
     @Test
     public void testGetActivityPackageUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.getActivityPackage(null, Datastore.allocateId(ActivityPackage.class));
+        Key id = Datastore.allocateId(ActivityPackage.class);
+        thrown.expectMessage("No entity was found matching the key: " + id);
+        endpoint.getActivityPackage(null, id);
     }
 
     @Test
@@ -1171,41 +1689,41 @@ public class ActivityEndpointTest {
     public void testUpdateActivityPackageNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.updateActivityPackage(null, null, null);
+        endpoint.updateActivityPackage(null, Datastore.allocateId(ActivityPackage.class), new JasActivityPackageRequest());
     }
 
     @Test
     public void testUpdateActivityPackageNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.updateActivityPackage(newCaller(1), null, null);
+        endpoint.updateActivityPackage(newCaller(1), Datastore.allocateId(ActivityPackage.class), new JasActivityPackageRequest());
     }
 
     @Test
     public void testUpdateActivityPackageNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.updateActivityPackage(newAdminCaller(1), null, null);
     }
 
     @Test
     public void testUpdateActivityPackageNullRequest() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("request == null");
         endpoint.updateActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), null);
     }
 
     @Test
     public void testUpdateActivityPackageNullNullActivityPackage() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("request.activityPackage == null");
         endpoint.updateActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), new JasActivityPackageRequest());
     }
 
     @Test
-    public void testUpdateActivityPackageNullNullActivities() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+    public void testUpdateActivityPackageNullActivities() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("request.activities == null");
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
         jasActivityPackageRequest.setActivityPackage(new ActivityPackage());
         jasActivityPackageRequest.setActivities(null);
@@ -1215,9 +1733,11 @@ public class ActivityEndpointTest {
     @Test
     public void testUpdateActivityPackageUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
+        Key activityPackageId = Datastore.allocateId(ActivityPackage.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityPackageId);
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
         jasActivityPackageRequest.setActivityPackage(new ActivityPackage());
-        endpoint.updateActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), jasActivityPackageRequest);
+        endpoint.updateActivityPackage(newAdminCaller(1), activityPackageId, jasActivityPackageRequest);
     }
 
     @Test
@@ -1235,8 +1755,8 @@ public class ActivityEndpointTest {
     // AddActivityPackage
     @Test
     public void testAddActivityPackageNullNullRequest() throws Exception {
-        // TODO: FIX THIS
-        thrown.expect(NullPointerException.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("request == null");
         endpoint.addActivityPackage(newAdminCaller(1), null);
     }
 
@@ -1334,34 +1854,34 @@ public class ActivityEndpointTest {
     public void testRemoveActivityPackageNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.removeActivityPackage(null, null);
+        endpoint.removeActivityPackage(null, Datastore.allocateId(ActivityPackage.class));
     }
 
     @Test
     public void testRemoveActivityPackageNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.removeActivityPackage(newCaller(1), null);
+        endpoint.removeActivityPackage(newCaller(1), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testRemoveActivityPackageNullId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("id == null");
         endpoint.removeActivityPackage(newAdminCaller(1), null);
     }
 
     @Test
     public void testRemoveActivityPackageUnknownId() throws Exception {
-        thrown.expect(NotFoundException.class);
+        thrown.expect(BadRequestException.class);
         endpoint.removeActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class));
     }
 
     @Test
     public void testRemoveActivityPackageWithExecutions() throws Exception {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("ActivityPackage has executions");
         ActivityPackage activityPackage = createActivityPackage(true);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot delete activity package with executions! id=" + activityPackage.getId() + " (1 executions).");
         activityPackage.setExecutionCount(1);
         Datastore.put(activityPackage);
         endpoint.removeActivityPackage(newAdminCaller(1), activityPackage.getId());
@@ -1380,13 +1900,16 @@ public class ActivityEndpointTest {
     @Test
     public void testGetActivityPackageActivitiesNullId() throws Exception {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("activityPackageId == null");
         endpoint.getActivityPackageActivities(null, null);
     }
 
     @Test
     public void testGetActivityPackageActivitiesUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.getActivityPackageActivities(null, Datastore.allocateId(ActivityPackage.class));
+        Key activityPackageId = Datastore.allocateId(ActivityPackage.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityPackageId);
+        endpoint.getActivityPackageActivities(null, activityPackageId);
     }
 
     @Test
@@ -1411,40 +1934,44 @@ public class ActivityEndpointTest {
     public void testAddActivityToActivityPackagePackageNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.addActivityToActivityPackage(null, null, null);
+        endpoint.addActivityToActivityPackage(null, Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testAddActivityToActivityPackageNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.addActivityToActivityPackage(newCaller(1), null, null);
+        endpoint.addActivityToActivityPackage(newCaller(1), Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testAddActivityToActivityPackageNullActivityPackageId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("activityPackageId == null");
         endpoint.addActivityToActivityPackage(newAdminCaller(1), null, null);
     }
 
     @Test
     public void testAddActivityToActivityPackageNullActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("activityId == null");
         endpoint.addActivityToActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), null);
     }
 
     @Test
     public void testAddActivityToActivityPackageUnknownActivityPackageId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.addActivityToActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
+        Key activityPackageId = Datastore.allocateId(ActivityPackage.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityPackageId);
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), activityPackageId, Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testAddActivityToActivityPackageUnknownActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.addActivityToActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), Datastore.allocateId(Activity.class));
+        Key activityId = Datastore.allocateId(Activity.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityId);
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), activityId);
     }
 
     @Test
@@ -1463,40 +1990,44 @@ public class ActivityEndpointTest {
     public void testRemoveActivityFromActivityPackagePackageNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
-        endpoint.removeActivityFromActivityPackage(null, null, null);
+        endpoint.removeActivityFromActivityPackage(null, Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testRemoveActivityFromActivityPackageNotAdmin() throws Exception {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
-        endpoint.removeActivityFromActivityPackage(newCaller(1), null, null);
+        endpoint.removeActivityFromActivityPackage(newCaller(1), Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testRemoveActivityFromActivityPackageNullActivityPackageId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("activityPackageId == null");
         endpoint.removeActivityFromActivityPackage(newAdminCaller(1), null, null);
     }
 
     @Test
     public void testRemoveActivityFromActivityPackageNullActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found");
+        thrown.expectMessage("activityId == null");
         endpoint.removeActivityFromActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), null);
     }
 
     @Test
     public void testRemoveActivityFromActivityPackageUnknownActivityPackageId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
+        Key activityPackageId = Datastore.allocateId(ActivityPackage.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityPackageId);
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), activityPackageId, Datastore.allocateId(Activity.class));
     }
 
     @Test
     public void testRemoveActivityFromActivityPackageUnknownActivityId() throws Exception {
         thrown.expect(NotFoundException.class);
-        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), Datastore.allocateId(Activity.class));
+        Key activityId = Datastore.allocateId(Activity.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityId);
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), activityId);
     }
 
     @Test

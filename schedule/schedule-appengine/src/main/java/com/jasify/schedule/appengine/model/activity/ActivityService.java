@@ -15,17 +15,7 @@ public interface ActivityService {
     /**
      * Maximum number of activities that can be added in one addActivity call
      */
-    int MaximumRepeatCounter = 25;
 
-    /**
-     * @param activityType to link with
-     * @param activity      to add
-     * @param repeatDetails information on adding repeat activities
-     * @return list of ids of the added activities
-     * @throws FieldValueException if any fields are invalid
-     */
-    @Nonnull
-    List<Key> addActivity(ActivityType activityType, Activity activity, RepeatDetails repeatDetails) throws ModelException;
 
     /**
      * @param activityPackage to be created
@@ -52,8 +42,6 @@ public interface ActivityService {
      * @throws EntityNotFoundException
      */
     ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException;
-
-    void removeActivityPackage(Key id) throws EntityNotFoundException, IllegalArgumentException, OperationException;
 
     void addActivityToActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
 
