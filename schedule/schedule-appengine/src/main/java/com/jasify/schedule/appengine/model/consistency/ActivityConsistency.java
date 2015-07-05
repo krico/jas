@@ -24,12 +24,15 @@ public class ActivityConsistency implements EntityConsistency<Activity> {
     public void ensureActivityHasNoSubscriptions(Key id) throws InconsistentModelStateException {
         List<Subscription> subscriptions = new SubscriptionDao().getByActivity(id);
         if (!subscriptions.isEmpty()) {
-            throw new InconsistentModelStateException("Activity has subscriptions");
+            throw new InconsistentModelStateException("Cannot delete activity with subscriptions! " +
+                    "id=" + id + " (" + subscriptions.size() + " subscriptions).");
         }
+
         try {
             List<ActivityPackageActivity> activityPackageActivities = new ActivityPackageActivityDao().getByActivityId(id);
             if (!activityPackageActivities.isEmpty()) {
-                throw new InconsistentModelStateException("Activity is linked to Activity Package");
+                throw new InconsistentModelStateException("Cannot delete activity linked to activity packages! " +
+                        "id=" + id + " (" + activityPackageActivities.size() + " activity packages).");
             }
         } catch (EntityNotFoundException e) {
             log.error("Activity not found", e);
