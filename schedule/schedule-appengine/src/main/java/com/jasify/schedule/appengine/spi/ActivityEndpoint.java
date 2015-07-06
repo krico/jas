@@ -139,7 +139,7 @@ public class ActivityEndpoint {
 
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
-                public Void execute(Transaction tx) throws ModelException {
+                public Void execute(Transaction tx) throws EntityNotFoundException {
                     activityTypeDao.get(id); //Throws not found if this activityType doesn't exist
                     activityTypeDao.delete(id);
                     tx.commit();
@@ -270,26 +270,8 @@ public class ActivityEndpoint {
                     activityDao.save(activities, activityTypeId);
                     tx.commit();
                     return activities;
-//                    return Lists.transform(keys, new Function<Key, Activity>() {
-//                        @javax.annotation.Nullable
-//                        @Override
-//                        public Activity apply(Key input) {
-//                            return Datastore.get(Activity.class, input);
-//                        }
-//                    });
                 }
             });
-
-//
-//            ActivityService activityService = ActivityServiceFactory.getActivityService();
-//            ActivityType activityType = activityTypeDao.get(request.getActivity().getActivityTypeRef().getKey());
-//
-//            List<Key> keys = activityService.addActivity(activityType, request.getActivity(), request.getRepeatDetails());
-//            List<Activity> result = new ArrayList<>();
-//            for (Key key : keys) {
-//                result.add(activityDao.get(key));
-//            }
-//            return result;
         } catch (FieldValueException e) {
             throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
@@ -317,8 +299,6 @@ public class ActivityEndpoint {
             });
         } catch (InconsistentModelStateException e) {
             throw new BadRequestException(e.getMessage());
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
         } catch (ModelException me) {
             throw new InternalServerErrorException(me.getMessage());
         }
@@ -454,8 +434,6 @@ public class ActivityEndpoint {
             });
         } catch (InconsistentModelStateException e) {
             throw new BadRequestException(e.getMessage());
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
         } catch (ModelException me) {
             throw new InternalServerErrorException(me.getMessage());
         }
@@ -489,8 +467,6 @@ public class ActivityEndpoint {
                     return null;
                 }
             });
-        } catch (InconsistentModelStateException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (ModelException me) {
@@ -509,18 +485,15 @@ public class ActivityEndpoint {
 
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
-                public Void execute(Transaction tx) throws ModelException {
+                public Void execute(Transaction tx) throws EntityNotFoundException {
                     activityPackageDao.get(activityPackageId);
                     activityDao.get(activityId);
                     Key result = activityPackageActivityDao.getKeyByActivityPackageIdAndActivityId(activityPackageId, activityId);
-
                     activityPackageActivityDao.delete(result);
                     tx.commit();
                     return null;
                 }
             });
-        } catch (InconsistentModelStateException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (ModelException me) {

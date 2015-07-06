@@ -9,6 +9,7 @@ import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
@@ -901,9 +902,22 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    public void testAddActivityWithUnknownActivityTypeId() throws Exception {
+        Key activityTypeKey = Datastore.allocateId(ActivityType.class);
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityTypeKey);
+        JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+        Activity activity = new Activity();
+        activity.getActivityTypeRef().setKey(activityTypeKey);
+        jasAddActivityRequest.setActivity(activity);
+        List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+        assertEquals(1, result.size());
+        equals(activity, result.get(0));
+    }
+
+    @Test
     public void testAddActivity() throws Exception {
         Activity activity = createActivity(TestHelper.createOrganization(true), false);
-
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
         List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
@@ -1938,6 +1952,22 @@ public class ActivityEndpointTest {
         Organization organization = TestHelper.createOrganization(true);
         ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
         jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+    }
+
+    @Test
+    public void testAddActivityPackageWithUnknownOrganizationId() throws Exception {
+        thrown.expect(NotFoundException.class);
+        Key organizationId = Datastore.allocateId(Organization.class);
+        thrown.expectMessage("No entity was found matching the key: " + organizationId);
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        ActivityPackage activityPackage = new ActivityPackage();
+        activityPackage.getOrganizationRef().setKey(organizationId);
+        activityPackage.setItemCount(2);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        Organization organization = TestHelper.createOrganization(true);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
     }
