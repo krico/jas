@@ -9,9 +9,9 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageActivityDao;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
-import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
@@ -384,8 +384,9 @@ public class PaymentServiceTest {
         Activity activity1 = createActivity(activityType);
         Activity activity2 = createActivity(activityType);
 
-        ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackage, activity1);
-        ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackage, activity2);
+        ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
+        activityPackageActivityDao.create(activityPackage.getId(), activity1.getId());
+        activityPackageActivityDao.create(activityPackage.getId(), activity2.getId());
 
         PaymentWorkflow paymentWorkflow = PaymentWorkflowFactory.workflowFor(activityPackage.getId(), Arrays.asList(activity1.getId(), activity2.getId()));
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
@@ -426,8 +427,9 @@ public class PaymentServiceTest {
         Activity activity1 = createActivity(activityType);
         Activity activity2 = createActivity(activityType);
 
-        ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackage, activity1);
-        ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackage, activity2);
+        ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
+        activityPackageActivityDao.create(activityPackage.getId(), activity1.getId());
+        activityPackageActivityDao.create(activityPackage.getId(), activity2.getId());
 
         PaymentWorkflow paymentWorkflow = PaymentWorkflowFactory.workflowFor(activityPackage.getId(), Arrays.asList(activity1.getId(), activity2.getId()));
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));

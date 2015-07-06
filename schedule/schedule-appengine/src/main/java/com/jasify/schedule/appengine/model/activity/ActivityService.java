@@ -26,26 +26,16 @@ public interface ActivityService {
     Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException;
 
     /**
-     * @param activityPackage with the data to be updated
-     * @return the updated activityPackage
-     * @throws EntityNotFoundException if it doesn't exist
-     * @throws FieldValueException     if fields are invalid
-     */
-    ActivityPackage updateActivityPackage(ActivityPackage activityPackage) throws EntityNotFoundException, FieldValueException;
-
-    /**
      * This method updates the activityPackage and the activities at once
      *
      * @param activityPackage to be updated
      * @param activities      new list of activities for this package
      * @return the updated activity package
      * @throws EntityNotFoundException
+     * @throws FieldValueException     if fields are invalid
      */
-    ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException;
+    ActivityPackage updateActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException, EntityNotFoundException;
 
-    void addActivityToActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
-
-    void removeActivityFromActivityPackage(ActivityPackage activityPackage, Activity activity) throws EntityNotFoundException;
 
     /**
      * Subscribe a user for an activity
@@ -83,14 +73,6 @@ public interface ActivityService {
      *                                   if any of the keys is not the type they should be
      */
     ActivityPackageExecution subscribe(Key userId, Key activityPackageId, List<Key> activityIds) throws EntityNotFoundException, UniqueConstraintException, OperationException, IllegalArgumentException;
-
-    /**
-     * Cancel a subscription, effectively doing the reverse of {@link #subscribe}
-     *
-     * @param subscription to cancel
-     * @throws EntityNotFoundException if any of the involved entities don't exist
-     */
-    void cancel(Subscription subscription) throws EntityNotFoundException;
 
     /**
      * Cancel a subscription, effectively doing the reverse of {@link #subscribe}

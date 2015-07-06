@@ -5,11 +5,8 @@ import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.dao.users.UserDao;
-import com.jasify.schedule.appengine.meta.activity.ActivityPackageActivityMeta;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
@@ -21,10 +18,8 @@ import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -107,8 +102,6 @@ public class ActivityEndpoint {
             });
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
-        } catch (FieldValueException | UniqueConstraintException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -131,8 +124,6 @@ public class ActivityEndpoint {
                     return activityType;
                 }
             });
-        } catch (FieldValueException | UniqueConstraintException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -164,52 +155,6 @@ public class ActivityEndpoint {
         }
     }
 
-    private List<Activity> filterByDate(List<Activity> activities, final Date fromDate, final Date toDate) {
-        if (fromDate == null && toDate == null) {
-            return activities;
-        }
-
-        ArrayList<Activity> result = new ArrayList<>();
-        result.addAll(Collections2.filter(activities, new Predicate<Activity>() {
-            @Override
-            public boolean apply(@Nullable Activity input) {
-                if (fromDate != null && input.getStart() != null && fromDate.after(input.getStart())) {
-                    return false;
-                }
-                if (toDate != null && input.getFinish() != null && toDate.before(input.getFinish())) {
-                    return false;
-                }
-                return true;
-            }
-        }));
-        return result;
-    }
-
-    private List<Activity> filterActivities(List<Activity> activities, Date fromDate,
-                                            Date toDate,
-                                            Integer offset,
-                                            Integer limit) {
-        if (activities.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<Activity> filtered = filterByDate(activities, fromDate, toDate);
-
-        if (offset == null) offset = 0;
-        if (limit == null) limit = 0;
-
-        if (offset > 0 || limit > 0) {
-            if (offset < filtered.size()) {
-                if (limit <= 0) limit = filtered.size();
-                return new ArrayList<>(filtered.subList(offset, Math.min(offset + limit, filtered.size())));
-            } else {
-                return Collections.emptyList();
-            }
-        }
-
-        return filtered;
-    }
-
     @ApiMethod(name = "activities.query", path = "activities", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Activity> getActivities(@SuppressWarnings("unused") User caller,
                                         @Nullable @Named("organizationId") Key organizationId,
@@ -235,13 +180,12 @@ public class ActivityEndpoint {
             all.addAll(activityDao.getByOrganizationId(organizationId));
         }
 
-        //TODO: I'm pretty sure this should be done on the Service implementation, but I'm in the bus and lazy and sleepy
-        return filterActivities(all, fromDate, toDate, offset, limit);
+        return new ActivityFilter().filter(all, fromDate, toDate, offset, limit);
     }
 
     // The hardest part is to get the name right!
     @ApiMethod(name = "activities.listQuery", path = "activities-list", httpMethod = ApiMethod.HttpMethod.POST)
-    public List<Activity> getActivitiesByIds(User caller,
+    public List<Activity> getActivitiesByIds(@SuppressWarnings("unused") User caller,
                                              JasListQueryActivitiesRequest request) throws BadRequestException, NotFoundException {
         checkFound(request, "request == null");
         if (request.getActivityTypeIds().isEmpty() && request.getOrganizationIds().isEmpty()) {
@@ -264,7 +208,7 @@ public class ActivityEndpoint {
             }
         }
 
-        return filterActivities(all, request.getFromDate(), request.getToDate(), request.getOffset(), request.getLimit());
+        return new ActivityFilter().filter(all, request.getFromDate(), request.getToDate(), request.getOffset(), request.getLimit());
     }
 
     @ApiMethod(name = "activities.get", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.GET)
@@ -298,8 +242,6 @@ public class ActivityEndpoint {
             });
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Activity not found");
-        } catch (FieldValueException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -450,7 +392,7 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         checkFound(id, "id == null");
         checkFound(request, "request == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(id));
@@ -458,9 +400,12 @@ public class ActivityEndpoint {
         List<Activity> activities = checkFound(request.getActivities(), "request.activities == null");
         activityPackage.setId(id);
         try {
+            activityPackageDao.get(id);
             return ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage, activities);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (FieldValueException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -498,16 +443,11 @@ public class ActivityEndpoint {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
-                    ActivityPackage activityPackage = activityPackageDao.get(id);
+                    activityPackageDao.get(id);
                     // Delete all the attached activities
-                    List<Key> toDelete = new ArrayList<>();
-                    toDelete.add(id);
-                    ActivityPackageActivityMeta activityPackageActivityMeta = ActivityPackageActivityMeta.get();
-                    toDelete.addAll(Datastore
-                            .query(tx, activityPackageActivityMeta, activityPackage.getOrganizationRef().getKey())
-                            .filter(activityPackageActivityMeta.activityPackageRef.equal(id))
-                            .asKeyList());
-                    Datastore.delete(tx, toDelete);
+                    List<Key> toDelete = activityPackageActivityDao.getKeysByActivityPackageId(id);
+                    activityPackageActivityDao.delete(toDelete);
+                    activityPackageDao.delete(id);
                     tx.commit();
                     return null;
                 }
@@ -533,32 +473,58 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityPackages.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public void addActivityToActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public void addActivityToActivityPackage(User caller, @Named("activityPackageId") final Key activityPackageId, @Named("activityId") final Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
         checkFound(activityPackageId, "activityPackageId == null");
         checkFound(activityId, "activityId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(activityPackageId));
 
         try {
-            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-            Activity activity = activityDao.get(activityId);
-            ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackage, activity);
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    activityPackageDao.get(activityPackageId);
+                    activityDao.get(activityId);
+                    activityPackageActivityDao.create(activityPackageId, activityId);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (InconsistentModelStateException e) {
+            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 
     @ApiMethod(name = "activityPackages.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") final Key activityPackageId, @Named("activityId") final Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
         checkFound(activityPackageId, "activityPackageId == null");
         checkFound(activityId, "activityId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(activityPackageId));
 
         try {
-            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-            Activity activity = activityDao.get(activityId);
-            ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(activityPackage, activity);
+            // ConsistencyGuard.beforeDelete(Activity.class, id);
+
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    activityPackageDao.get(activityPackageId);
+                    activityDao.get(activityId);
+                    Key result = activityPackageActivityDao.getKeyByActivityPackageIdAndActivityId(activityPackageId, activityId);
+
+                    activityPackageActivityDao.delete(result);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (InconsistentModelStateException e) {
+            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 }

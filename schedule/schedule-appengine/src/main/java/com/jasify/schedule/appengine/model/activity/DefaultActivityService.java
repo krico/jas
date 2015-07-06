@@ -13,14 +13,12 @@ import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
 import com.jasify.schedule.appengine.dao.common.SubscriptionDao;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.CompositeCriterion;
 import org.slim3.datastore.Datastore;
-import org.slim3.datastore.EntityNotFoundRuntimeException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,7 +32,6 @@ import java.util.Set;
  * @since 09/01/15.
  */
 class DefaultActivityService implements ActivityService {
-    private static final Logger log = LoggerFactory.getLogger(DefaultActivityService.class);
     private static final Function<Activity, Key> ACTIVITY_TO_KEY_FUNCTION = new Function<Activity, Key>() {
         @Nullable
         @Override
@@ -51,7 +48,6 @@ class DefaultActivityService implements ActivityService {
         }
     };
 
-    private final ActivityMeta activityMeta;
     private final SubscriptionMeta subscriptionMeta;
     private final ActivityPackageMeta activityPackageMeta;
     private final ActivityPackageActivityMeta activityPackageActivityMeta;
@@ -63,7 +59,6 @@ class DefaultActivityService implements ActivityService {
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     private DefaultActivityService() {
-        activityMeta = ActivityMeta.get();
         subscriptionMeta = SubscriptionMeta.get();
         activityPackageMeta = ActivityPackageMeta.get();
         activityPackageActivityMeta = ActivityPackageActivityMeta.get();
@@ -154,7 +149,7 @@ class DefaultActivityService implements ActivityService {
                         Preconditions.checkArgument(packageActivityKeys.contains(activityId));
                     }
 
-                    List<Activity> activities = getActivities(tx, activityIds);
+                    List<Activity> activities = activityDao.get(activityIds);
                     for (Activity activity : activities) {
                         int subscriptionCount = activity.getSubscriptionCount();
                         if (activity.getMaxSubscriptions() > 0 && subscriptionCount >= activity.getMaxSubscriptions()) {
@@ -194,7 +189,7 @@ class DefaultActivityService implements ActivityService {
                     ActivityPackageExecution execution = activityPackageExecutionDao.get(activityPackageExecution.getId());
                     ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
                     activityPackage.setExecutionCount(activityPackage.getExecutionCount() - 1);
-                    Datastore.put(tx, activityPackage);
+                    activityPackageDao.save(activityPackage);
 
                     Key userId = execution.getUserRef().getKey();
                     List<Key> subscriptionIds = Datastore.query(tx, ActivityPackageSubscriptionMeta.get(), userId)
@@ -205,7 +200,8 @@ class DefaultActivityService implements ActivityService {
                         cancelSubscription(tx, subscriptionId);
                     }
 
-                    Datastore.delete(tx, execution.getId());
+                    ConsistencyGuard.beforeDelete(ActivityPackageExecution.class, execution.getId());
+                    activityPackageExecutionDao.delete(execution.getId());
                     tx.commit();
                     return null;
                 }
@@ -215,21 +211,6 @@ class DefaultActivityService implements ActivityService {
         } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-    public List<Activity> getActivities(Transaction tx, List<Key> activityIds) throws EntityNotFoundException {
-        List<Activity> activities;
-        try {
-            activities = Datastore.get(tx, activityMeta, activityIds);
-        } catch (EntityNotFoundRuntimeException e) {
-            throw new EntityNotFoundException("ActivityIds: " + activityIds, e);
-        }
-        return activities;
-    }
-
-    @Override
-    public void cancel(Subscription subscription) throws EntityNotFoundException {
-        cancelSubscription(subscription.getId());
     }
 
     @Override
@@ -250,21 +231,16 @@ class DefaultActivityService implements ActivityService {
         }
     }
 
-    private void cancelSubscription(Transaction tx, Key subscriptionId) throws EntityNotFoundException {
+    private void cancelSubscription(Transaction tx, Key subscriptionId) throws ModelException {
         if (subscriptionId == null) throw new EntityNotFoundException("Subscription id=NULL");
         Subscription dbSubscription = subscriptionDao.get(subscriptionId);
         Activity dbActivity = activityDao.get(dbSubscription.getActivityRef().getKey());
         dbActivity.setSubscriptionCount(dbActivity.getSubscriptionCount() - 1);
-        Datastore.put(tx, dbActivity);
-        Datastore.delete(tx, subscriptionId);
+        activityDao.save(dbActivity);
+        ConsistencyGuard.beforeDelete(Subscription.class, subscriptionId);
+        subscriptionDao.delete(subscriptionId);
     }
 
-    @Nonnull
-    // TODO   @Override
-    public List<Subscription> getSubscriptions(Activity activity) {
-        // This assumes that you have the latest version of activity
-        return activity.getSubscriptionListRef().getModelList();
-    }
 
     @Override
     public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException {
@@ -303,23 +279,11 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public ActivityPackage updateActivityPackage(ActivityPackage activityPackage) throws EntityNotFoundException, FieldValueException {
-        ActivityPackage dbActivityPackage = activityPackageDao.get(activityPackage.getId());
-
-        copyProperties(activityPackage, dbActivityPackage);
-
-        Datastore.put(dbActivityPackage);
-
-        return dbActivityPackage;
-    }
-
-    private void copyProperties(ActivityPackage source, ActivityPackage destination) {
-        BeanUtil.copyPropertiesExcluding(destination, source,
-                "id", "created", "modified", "executionCount", "organizationRef", "activityPackageActivityListRef");
-    }
-
-    @Override
-    public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws EntityNotFoundException {
+    public ActivityPackage updateActivityPackage(final ActivityPackage activityPackage, final List<Activity> activities) throws FieldValueException, EntityNotFoundException {
+        if (activityPackage.getItemCount() <= 0) throw new FieldValueException("ActivityPackage.itemCount");
+        if (activities.isEmpty() || activities.size() == 1 || activities.size() < activityPackage.getItemCount()) {
+            throw new FieldValueException("ActivityPackage.activities.size");
+        }
         try {
             return TransactionOperator.execute(new ModelOperation<ActivityPackage>() {
                 @Override
@@ -332,7 +296,8 @@ class DefaultActivityService implements ActivityService {
 
                     Key organizationId = dbActivityPackage.getOrganizationRef().getKey();
 
-                    copyProperties(activityPackage, dbActivityPackage);
+                    BeanUtil.copyPropertiesExcluding(dbActivityPackage, activityPackage,
+                            "id", "created", "modified", "executionCount", "organizationRef", "activityPackageActivityListRef");
 
                     List<Object> models = new ArrayList<>();
                     models.add(dbActivityPackage);
@@ -377,76 +342,6 @@ class DefaultActivityService implements ActivityService {
                     dbActivityPackage.getActivityPackageActivityListRef().clear();
 
                     return dbActivityPackage;
-                }
-            });
-        } catch (EntityNotFoundException e) {
-            throw e;
-        } catch (ModelException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
-    @Override
-    public void addActivityToActivityPackage(final ActivityPackage activityPackage, final Activity activity) throws EntityNotFoundException {
-        try {
-            TransactionOperator.execute(new ModelOperation<Void>() {
-                @Override
-                public Void execute(Transaction tx) throws ModelException {
-                    Key organizationId = activityPackageDao.get(activityPackage.getId()).getOrganizationRef().getKey();
-
-                    ActivityPackageActivity activityPackageActivity = Datastore
-                            .query(tx, activityPackageActivityMeta, organizationId)
-                            .filter(new CompositeCriterion(activityPackageActivityMeta,
-                                    Query.CompositeFilterOperator.AND,
-                                    activityPackageActivityMeta.activityPackageRef.equal(activityPackage.getId()),
-                                    activityPackageActivityMeta.activityRef.equal(activity.getId())))
-                            .asSingle();
-
-                    if (activityPackageActivity == null) {
-                        activityPackageActivity = new ActivityPackageActivity();
-                        activityPackageActivity.getActivityRef().setKey(activity.getId());
-                        activityPackageActivity.getActivityPackageRef().setKey(activityPackage.getId());
-                        activityPackageActivity.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
-                        Datastore.put(tx, activityPackageActivity);
-                    } else {
-                        log.warn("Tried to add already existent ap: {} / a: {}", activityPackage.getId(), activity.getId());
-                    }
-
-                    tx.commit();
-                    return null;
-                }
-            });
-        } catch (EntityNotFoundException e) {
-            throw e;
-        } catch (ModelException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
-    @Override
-    public void removeActivityFromActivityPackage(final ActivityPackage activityPackage, final Activity activity) throws EntityNotFoundException {
-        try {
-            TransactionOperator.execute(new ModelOperation<Void>() {
-                @Override
-                public Void execute(Transaction tx) throws ModelException {
-                    Key organizationId = activityPackageDao.get(activityPackage.getId()).getOrganizationRef().getKey();
-
-                    ActivityPackageActivity activityPackageActivity = Datastore
-                            .query(tx, activityPackageActivityMeta, organizationId)
-                            .filter(new CompositeCriterion(activityPackageActivityMeta,
-                                    Query.CompositeFilterOperator.AND,
-                                    activityPackageActivityMeta.activityPackageRef.equal(activityPackage.getId()),
-                                    activityPackageActivityMeta.activityRef.equal(activity.getId())))
-                            .asSingle();
-
-                    if (activityPackageActivity == null) {
-                        log.warn("Tried to remove non existent ap: {} / a: {}", activityPackage.getId(), activity.getId());
-                    } else {
-                        Datastore.delete(tx, activityPackageActivity.getId());
-                    }
-
-                    tx.commit();
-                    return null;
                 }
             });
         } catch (EntityNotFoundException e) {
