@@ -15,6 +15,7 @@ import java.util.List;
  * @since 09/06/15.
  */
 public class ActivityPackageDao extends BaseCachingDao<ActivityPackage> {
+
     public ActivityPackageDao() {
         super(ActivityPackageMeta.get());
     }

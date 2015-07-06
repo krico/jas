@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -56,14 +57,6 @@ public class ActivityEndpointTest {
     private Activity createActivity(Organization organization, boolean store) {
         ActivityType activityType = TestHelper.createActivityType(organization, true);
         return TestHelper.createActivity(activityType, store);
-    }
-
-    private Activity createActivity(boolean store) {
-        return createActivity(TestHelper.createOrganization(true), store);
-    }
-
-    private ActivityPackage createActivityPackage(boolean store) {
-        return TestHelper.createActivityPackage(TestHelper.createOrganization(true), store);
     }
 
     private void equals(ActivityType activityType1, ActivityType activityType2) {
@@ -687,7 +680,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testGetActivity() throws Exception {
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         Activity result = endpoint.getActivity(newAdminCaller(1), activity.getId());
         assertNotNull(result);
         equals(activity, result);
@@ -734,7 +727,7 @@ public class ActivityEndpointTest {
     public void testUpdateActivityUnknownId() throws Exception {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("Activity not found");
-        endpoint.updateActivity(newAdminCaller(1), Datastore.allocateId(Activity.class), createActivity(false));
+        endpoint.updateActivity(newAdminCaller(1), Datastore.allocateId(Activity.class), createActivity(TestHelper.createOrganization(true), false));
     }
 
     @Test
@@ -757,7 +750,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testUpdateActivityWithNullName() throws Exception {
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         activity.setName(null);
         Activity result = endpoint.updateActivity(newAdminCaller(1), activity.getId(), activity);
         assertEquals(activity.getActivityTypeRef().getModel().getName(), result.getName());
@@ -765,7 +758,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testUpdateActivity() throws Exception {
-        Activity activity1 = createActivity(true);
+        Activity activity1 = createActivity(TestHelper.createOrganization(true), true);
         Activity activity2 = TestHelper.createActivity(activity1.getActivityTypeRef().getModel(), false);
         Activity result = endpoint.updateActivity(newAdminCaller(1), activity1.getId(), activity2);
         equals(activity2, result);
@@ -813,7 +806,7 @@ public class ActivityEndpointTest {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("Must be admin");
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         endpoint.addActivity(newCaller(1), jasAddActivityRequest);
     }
 
@@ -822,7 +815,7 @@ public class ActivityEndpointTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Activity.start");
 
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         activity.setStart(null);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
@@ -835,7 +828,7 @@ public class ActivityEndpointTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Activity.start");
 
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         activity.setStart(new DateTime(2000, 1, 1, 10, 0, 0).toDate());
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
@@ -848,7 +841,7 @@ public class ActivityEndpointTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Activity.finish");
 
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         activity.setFinish(null);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
@@ -861,7 +854,7 @@ public class ActivityEndpointTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Activity.finish");
 
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime finish = new DateTime(activity.getStart());
         finish = finish.minusDays(1);
         activity.setFinish(finish.toDate());
@@ -876,7 +869,7 @@ public class ActivityEndpointTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Activity.price");
 
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         activity.setPrice(new Double("-1"));
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
@@ -889,7 +882,7 @@ public class ActivityEndpointTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Activity.maxSubscriptions");
 
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         activity.setMaxSubscriptions(-1);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
@@ -909,7 +902,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivity() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
         jasAddActivityRequest.setActivity(activity);
@@ -920,7 +913,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithNullName() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         activity.setName(null);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
@@ -938,7 +931,7 @@ public class ActivityEndpointTest {
         repeatDetails.setRepeatType(null);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
@@ -954,7 +947,7 @@ public class ActivityEndpointTest {
         repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
@@ -969,7 +962,7 @@ public class ActivityEndpointTest {
         repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
@@ -984,7 +977,7 @@ public class ActivityEndpointTest {
         repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Date);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
@@ -1000,7 +993,7 @@ public class ActivityEndpointTest {
         repeatDetails.setUntilDate(new Date(20));
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
@@ -1016,7 +1009,7 @@ public class ActivityEndpointTest {
         repeatDetails.setUntilCount(0);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
@@ -1032,14 +1025,14 @@ public class ActivityEndpointTest {
         repeatDetails.setUntilCount(1);
 
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        jasAddActivityRequest.setActivity(createActivity(false));
+        jasAddActivityRequest.setActivity(createActivity(TestHelper.createOrganization(true), false));
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
     }
 
     @Test
     public void testAddActivityWithRepeatDailyUntilCount() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1070,7 +1063,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatDailyUntilDate() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1101,7 +1094,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatDailyEveryWeek() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1133,7 +1126,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatDailyEveryTwoWeeks() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1165,7 +1158,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatDailyDoesNotExceedMaximum() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1215,7 +1208,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatWeeklyCount() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1247,7 +1240,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatWeeklyDate() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1280,7 +1273,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatWeeklyEveryTwoWeeks() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1313,7 +1306,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatWeeklyTwoDaysEveryTwoWeeks() throws Exception {
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
 
         activity.setStart(new DateTime(date1.getYear(), date1.getMonthOfYear(), date1.getDayOfMonth(), 10, 0, 0).toDate());
@@ -1359,7 +1352,7 @@ public class ActivityEndpointTest {
     @Test
     public void testAddActivityWithRepeatDetails() throws Exception {
         JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
-        Activity activity = createActivity(false);
+        Activity activity = createActivity(TestHelper.createOrganization(true), false);
         RepeatDetails repeatDetails = new RepeatDetails();
         repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
         repeatDetails.setRepeatEvery(1);
@@ -1402,7 +1395,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testRemoveActivityWithSubscriptions() throws Exception {
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot delete activity with subscriptions! id=" + activity.getId() + " (1 subscriptions).");
         endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity.getId());
@@ -1422,7 +1415,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testRemoveActivity() throws Exception {
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         endpoint.removeActivity(newAdminCaller(1), activity.getId());
         List<Activity> result = endpoint.getActivities(newAdminCaller(1), null, activity.getActivityTypeRef().getKey(), null, null, null, null);
         assertTrue(result.isEmpty());
@@ -1476,7 +1469,7 @@ public class ActivityEndpointTest {
     @Test
     public void testAddSubscriptionDoubleSubscription() throws Exception {
         User user = createUser();
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
         endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
         List<Subscription> subscriptions = endpoint.getSubscriptions(newAdminCaller(1), activity.getId());
@@ -1487,7 +1480,7 @@ public class ActivityEndpointTest {
     public void testAddSubscriptionOverSubscribe() throws Exception {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Activity fully subscribed");
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         activity.setMaxSubscriptions(1);
         Datastore.put(activity);
         endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity.getId());
@@ -1496,7 +1489,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddSubscription() throws Exception {
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         activity.setMaxSubscriptions(1);
         Datastore.put(activity);
         User user = createUser();
@@ -1546,7 +1539,7 @@ public class ActivityEndpointTest {
     public void testGetSubscriptionWithNotSubscribedUserId() throws Exception {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("No such subscription");
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity.getId());
         endpoint.getSubscription(newAdminCaller(1), createUser().getId(), activity.getId());
     }
@@ -1554,7 +1547,7 @@ public class ActivityEndpointTest {
     @Test
     public void testGetSubscription() throws Exception {
         User user = createUser();
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         Subscription subscription = endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
         Subscription result = endpoint.getSubscription(newAdminCaller(1), user.getId(), activity.getId());
         equals(subscription, result);
@@ -1590,7 +1583,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testGetSubscriptions() throws Exception {
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         activity.setMaxSubscriptions(5);
         Datastore.put(activity);
         endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity.getId());
@@ -1631,7 +1624,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testCancelSubscription() throws Exception {
-        Activity activity = createActivity(true);
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
         Subscription subscription = endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity.getId());
         assertEquals(1, endpoint.getSubscriptions(newAdminCaller(1), activity.getId()).size());
         endpoint.cancelSubscription(newAdminCaller(1), subscription.getId());
@@ -1679,7 +1672,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testGetActivityPackage() throws Exception {
-        ActivityPackage activityPackage = createActivityPackage(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
         ActivityPackage result = endpoint.getActivityPackage(null, activityPackage.getId());
         equals(activityPackage, result);
     }
@@ -1741,15 +1734,130 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    public void testUpdateActivityPackageInvalidItemCount() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.itemCount");
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
+        activityPackage.setItemCount(0);
+        Datastore.put(activityPackage);
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
+    }
+
+    @Test
+    public void testUpdateActivityPackageEmptyActivities() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.activities.size");
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
+    }
+
+    @Test
+    public void testUpdateActivityPackageOneActivity() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.activities.size");
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.setActivities(Arrays.asList(createActivity(organization, true)));
+        endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
+    }
+
+    @Test
+    public void testUpdateActivityPackageItemCountGreaterThanActivities() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.activities.size");
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        activityPackage.setItemCount(3);
+        Datastore.put(activityPackage);
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
+    }
+
+    @Test
     public void testUpdateActivityPackage() throws Exception {
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
-        ActivityPackage activityPackage = createActivityPackage(true);
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        activityPackage.setItemCount(2);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+
         ActivityPackage dbActivityPackage = endpoint.getActivityPackage(newAdminCaller(1), activityPackage.getId());
+
+        dbActivityPackage.setCurrency(dbActivityPackage.getCurrency() + "Changed");
+        dbActivityPackage.setDescription(dbActivityPackage.getDescription() + "Changed");
+        dbActivityPackage.setMaxExecutions(dbActivityPackage.getMaxExecutions() + 1);
         dbActivityPackage.setName(dbActivityPackage.getName() + "Changed");
+        dbActivityPackage.setItemCount(dbActivityPackage.getItemCount() + 1);
+        dbActivityPackage.setPrice(dbActivityPackage.getPrice() + 1);
+        dbActivityPackage.setValidFrom(new DateTime(dbActivityPackage.getValidFrom()).plusDays(1).toDate());
+        dbActivityPackage.setValidUntil(new DateTime(dbActivityPackage.getValidUntil()).plusDays(1).toDate());
+
         jasActivityPackageRequest.setActivityPackage(dbActivityPackage);
+        jasActivityPackageRequest.setActivities(dbActivityPackage.getActivities());
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+
         ActivityPackage result = endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
         equals(dbActivityPackage, result);
-        assertFalse(result.getName().equals(activityPackage.getName()));
+        assertEquals(3, result.getActivities().size());
+        long fetchedModified = result.getModified().getTime();
+        long modified = System.currentTimeMillis();
+        assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+    }
+
+    @Test
+    public void testUpdateActivityPackageAddActivity() throws Exception {
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        activityPackage.setItemCount(2);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+
+        ActivityPackage dbActivityPackage = endpoint.getActivityPackage(newAdminCaller(1), activityPackage.getId());
+
+        jasActivityPackageRequest.setActivityPackage(dbActivityPackage);
+        jasActivityPackageRequest.setActivities(dbActivityPackage.getActivities());
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+
+        ActivityPackage result = endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
+        equals(dbActivityPackage, result);
+        assertEquals(3, result.getActivities().size());
+    }
+
+    @Test
+    public void testUpdateActivityPackageRemoveActivity() throws Exception {
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        activityPackage.setItemCount(2);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+
+        ActivityPackage dbActivityPackage = endpoint.getActivityPackage(newAdminCaller(1), activityPackage.getId());
+
+        jasActivityPackageRequest.setActivityPackage(dbActivityPackage);
+        jasActivityPackageRequest.setActivities(dbActivityPackage.getActivities().subList(0,2));
+
+        ActivityPackage result = endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
+        equals(dbActivityPackage, result);
+        assertEquals(2, result.getActivities().size());
     }
 
     // AddActivityPackage
@@ -1879,7 +1987,7 @@ public class ActivityEndpointTest {
 
     @Test
     public void testRemoveActivityPackageWithExecutions() throws Exception {
-        ActivityPackage activityPackage = createActivityPackage(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(TestHelper.createOrganization(true), true);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot delete activity package with executions! id=" + activityPackage.getId() + " (1 executions).");
         activityPackage.setExecutionCount(1);
@@ -1971,7 +2079,7 @@ public class ActivityEndpointTest {
         thrown.expect(NotFoundException.class);
         Key activityId = Datastore.allocateId(Activity.class);
         thrown.expectMessage("No entity was found matching the key: " + activityId);
-        endpoint.addActivityToActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), activityId);
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), TestHelper.createActivityPackage(TestHelper.createOrganization(true), true).getId(), activityId);
     }
 
     @Test
@@ -2027,7 +2135,7 @@ public class ActivityEndpointTest {
         thrown.expect(NotFoundException.class);
         Key activityId = Datastore.allocateId(Activity.class);
         thrown.expectMessage("No entity was found matching the key: " + activityId);
-        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), createActivityPackage(true).getId(), activityId);
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), TestHelper.createActivityPackage(TestHelper.createOrganization(true), true).getId(), activityId);
     }
 
     @Test
