@@ -15,10 +15,12 @@ import org.slf4j.LoggerFactory;
 public class ActivityPackageConsistency implements EntityConsistency<ActivityPackage> {
     private static final Logger log = LoggerFactory.getLogger(ActivityPackageConsistency.class);
 
+    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+
     @BeforeDelete(entityClass = ActivityPackage.class)
     public void ensureActivityTypeHasNoActivities(Key id) throws InconsistentModelStateException {
         try {
-            ActivityPackage activityPackage = new ActivityPackageDao().get(id);
+            ActivityPackage activityPackage = activityPackageDao.get(id);
             if (activityPackage.getExecutionCount() != 0) {
                 throw new InconsistentModelStateException("Cannot delete activity package with executions! " +
                         "id=" + id + " (" + activityPackage.getExecutionCount() + " executions).");

@@ -20,6 +20,8 @@ import java.util.List;
 public class ActivityConsistency implements EntityConsistency<Activity> {
     private static final Logger log = LoggerFactory.getLogger(ActivityConsistency.class);
 
+    private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
+
     @BeforeDelete(entityClass = Activity.class)
     public void ensureActivityHasNoSubscriptions(Key id) throws InconsistentModelStateException {
         List<Subscription> subscriptions = new SubscriptionDao().getByActivity(id);
@@ -29,7 +31,7 @@ public class ActivityConsistency implements EntityConsistency<Activity> {
         }
 
         try {
-            List<ActivityPackageActivity> activityPackageActivities = new ActivityPackageActivityDao().getByActivityId(id);
+            List<ActivityPackageActivity> activityPackageActivities = activityPackageActivityDao.getByActivityId(id);
             if (!activityPackageActivities.isEmpty()) {
                 throw new InconsistentModelStateException("Cannot delete activity linked to activity packages! " +
                         "id=" + id + " (" + activityPackageActivities.size() + " activity packages).");

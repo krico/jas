@@ -481,19 +481,20 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(activityPackageId));
 
         try {
-            // ConsistencyGuard.beforeDelete(Activity.class, id);
-
+            activityPackageDao.get(activityPackageId);
+            activityDao.get(activityId);
+            final Key activityPackageActivityId = activityPackageActivityDao.getKeyByActivityPackageIdAndActivityId(activityPackageId, activityId);
+            ConsistencyGuard.beforeDelete(ActivityPackageActivity.class, activityPackageActivityId);
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
-                public Void execute(Transaction tx) throws EntityNotFoundException {
-                    activityPackageDao.get(activityPackageId);
-                    activityDao.get(activityId);
-                    Key result = activityPackageActivityDao.getKeyByActivityPackageIdAndActivityId(activityPackageId, activityId);
-                    activityPackageActivityDao.delete(result);
+                public Void execute(Transaction tx) throws EntityNotFoundException, InconsistentModelStateException {
+                    activityPackageActivityDao.delete(activityPackageActivityId);
                     tx.commit();
                     return null;
                 }
             });
+        } catch (InconsistentModelStateException e) {
+            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (ModelException me) {
