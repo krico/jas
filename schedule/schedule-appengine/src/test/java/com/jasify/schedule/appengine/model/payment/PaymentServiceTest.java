@@ -9,10 +9,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.dao.common.ActivityPackageActivityDao;
-import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityPackage;
-import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
@@ -88,15 +85,6 @@ public class PaymentServiceTest {
         activity.setPrice(19.95);
         Datastore.put(activity);
         return activity;
-    }
-
-    private ActivityPackage createActivityPackage(ActivityType activityType) {
-        ActivityPackage activityPackage = new ActivityPackage();
-        activityPackage.getOrganizationRef().setModel(activityType.getOrganizationRef().getModel());
-        activityPackage.setItemCount(2);
-        activityPackage.setPrice(29.95);
-        Datastore.put(activityPackage);
-        return activityPackage;
     }
 
     private User createUser() {
@@ -379,14 +367,14 @@ public class PaymentServiceTest {
         CashPayment payment = createCashPayment(paymentProvider);
 
         User user = createUser();
-        ActivityType activityType = createActivityType();
-        ActivityPackage activityPackage = createActivityPackage(activityType);
-        Activity activity1 = createActivity(activityType);
-        Activity activity2 = createActivity(activityType);
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
+        activityPackage.setItemCount(2);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        Activity activity1 = TestHelper.createActivity(activityType, true);
+        Activity activity2 = TestHelper.createActivity(activityType, true);
 
-        ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
-        activityPackageActivityDao.create(activityPackage.getId(), activity1.getId());
-        activityPackageActivityDao.create(activityPackage.getId(), activity2.getId());
+        ActivityServiceFactory.getActivityService().addActivityPackage(activityPackage, Arrays.asList(activity1, activity2));
 
         PaymentWorkflow paymentWorkflow = PaymentWorkflowFactory.workflowFor(activityPackage.getId(), Arrays.asList(activity1.getId(), activity2.getId()));
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
@@ -422,14 +410,14 @@ public class PaymentServiceTest {
         CashPayment payment = createCashPayment(paymentProvider);
 
         User user = createUser();
-        ActivityType activityType = createActivityType();
-        ActivityPackage activityPackage = createActivityPackage(activityType);
-        Activity activity1 = createActivity(activityType);
-        Activity activity2 = createActivity(activityType);
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
+        activityPackage.setItemCount(2);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        Activity activity1 = TestHelper.createActivity(activityType, true);
+        Activity activity2 = TestHelper.createActivity(activityType, true);
 
-        ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
-        activityPackageActivityDao.create(activityPackage.getId(), activity1.getId());
-        activityPackageActivityDao.create(activityPackage.getId(), activity2.getId());
+        ActivityServiceFactory.getActivityService().addActivityPackage(activityPackage, Arrays.asList(activity1, activity2));
 
         PaymentWorkflow paymentWorkflow = PaymentWorkflowFactory.workflowFor(activityPackage.getId(), Arrays.asList(activity1.getId(), activity2.getId()));
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));

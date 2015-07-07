@@ -4,9 +4,11 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
+import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import org.slim3.datastore.Datastore;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -18,6 +20,15 @@ public class ActivityPackageDao extends BaseCachingDao<ActivityPackage> {
 
     public ActivityPackageDao() {
         super(ActivityPackageMeta.get());
+    }
+
+    @Nonnull
+    public Key save(@Nonnull ActivityPackage entity, @Nonnull Key organizationId) throws ModelException {
+        if (entity.getId() == null) {
+            entity.setId(Datastore.allocateId(organizationId, getMeta()));
+            entity.getOrganizationRef().setKey(organizationId);
+        }
+        return super.save(entity);
     }
 
     public List<ActivityPackage> getByOrganization(Key organizationId) {

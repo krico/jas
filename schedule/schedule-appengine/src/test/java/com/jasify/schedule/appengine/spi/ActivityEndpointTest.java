@@ -1926,7 +1926,7 @@ public class ActivityEndpointTest {
         thrown.expectMessage("Only authenticated users can call this method");
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
         Organization organization = TestHelper.createOrganization(true);
-        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
         jasActivityPackageRequest.setActivityPackage(activityPackage);
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         endpoint.addActivityPackage(null, jasActivityPackageRequest);
@@ -1938,20 +1938,50 @@ public class ActivityEndpointTest {
         thrown.expectMessage("Must be admin");
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
         Organization organization = TestHelper.createOrganization(true);
-        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
         jasActivityPackageRequest.setActivityPackage(activityPackage);
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         endpoint.addActivityPackage(newCaller(1), jasActivityPackageRequest);
     }
 
     @Test
-    public void testAddActivityPackageInvalidValue() throws Exception {
+    public void testAddActivityPackageWithOneActivity() throws Exception {
         thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.activities.size");
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
         Organization organization = TestHelper.createOrganization(true);
-        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
         jasActivityPackageRequest.setActivityPackage(activityPackage);
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+    }
+
+    @Test
+    public void testAddActivityPackageWithLessActivitiesThanItemCount() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.activities.size");
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
+        activityPackage.setItemCount(3);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+    }
+
+    @Test
+    public void testAddActivityPackageWithDuplicateActivities() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.activities has duplicates");
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
+        activityPackage.setItemCount(2);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        Activity activity = createActivity(organization, true);
+        jasActivityPackageRequest.getActivities().add(activity);
+        jasActivityPackageRequest.getActivities().add(activity);
         endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
     }
 
@@ -1972,12 +2002,25 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    public void testAddActivityPackageInvalidItemCount() throws Exception {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("ActivityPackage.itemCount");
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
+        activityPackage.setItemCount(0);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+    }
+
+    @Test
     public void testAddActivityPackage() throws Exception {
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
         Organization organization = TestHelper.createOrganization(true);
-        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
         activityPackage.setItemCount(2);
-        Datastore.put(activityPackage);
         jasActivityPackageRequest.setActivityPackage(activityPackage);
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
@@ -2100,7 +2143,7 @@ public class ActivityEndpointTest {
         thrown.expect(NotFoundException.class);
         Key activityPackageId = Datastore.allocateId(ActivityPackage.class);
         thrown.expectMessage("No entity was found matching the key: " + activityPackageId);
-        endpoint.addActivityToActivityPackage(newAdminCaller(1), activityPackageId, Datastore.allocateId(Activity.class));
+        endpoint.addActivityToActivityPackage(newAdminCaller(1), activityPackageId, TestHelper.createActivity(true).getId());
     }
 
     @Test

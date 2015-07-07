@@ -8,7 +8,6 @@ import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageActivityMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.ModelException;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import com.jasify.schedule.appengine.model.activity.ActivityPackageActivity;
@@ -35,21 +34,11 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
     }
 
     @Nonnull
-    public Key create(@Nonnull Key activityPackageId, @Nonnull Key activityId) throws ModelException {
-        ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-        Key organizationId = activityPackage.getOrganizationRef().getKey();
-        ActivityPackageActivity activityPackageActivity = getByActivityPackageIdAndActivityId(activityPackageId, activityId);
-
-        if (activityPackageActivity != null) {
-            throw new UniqueConstraintException("ActivityPackage " + activityPackageId + " already contains Activity " + activityId);
+    public Key save(@Nonnull ActivityPackageActivity entity, @Nonnull Key organizationId) throws ModelException {
+        if (entity.getId() == null) {
+            entity.setId(Datastore.allocateId(organizationId, getMeta()));
         }
-
-        activityPackageActivity = new ActivityPackageActivity();
-        activityPackageActivity.getActivityRef().setKey(activityId);
-        activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
-        activityPackageActivity.setId(Datastore.allocateId(organizationId, getMeta()));
-
-        return super.save(activityPackageActivity);
+        return super.save(entity);
     }
 
     public List<ActivityPackageActivity> getByActivityId(Key activityId) throws EntityNotFoundException {
