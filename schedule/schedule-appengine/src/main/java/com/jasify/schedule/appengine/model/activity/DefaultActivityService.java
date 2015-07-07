@@ -7,10 +7,7 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
-import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
-import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
-import com.jasify.schedule.appengine.dao.common.SubscriptionDao;
+import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
@@ -48,21 +45,16 @@ class DefaultActivityService implements ActivityService {
         }
     };
 
-    private final SubscriptionMeta subscriptionMeta;
-    private final ActivityPackageMeta activityPackageMeta;
     private final ActivityPackageActivityMeta activityPackageActivityMeta;
-    private final ActivityPackageExecutionMeta activityPackageExecutionMeta;
 
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+    private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
     private final ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     private DefaultActivityService() {
-        subscriptionMeta = SubscriptionMeta.get();
-        activityPackageMeta = ActivityPackageMeta.get();
         activityPackageActivityMeta = ActivityPackageActivityMeta.get();
-        activityPackageExecutionMeta = ActivityPackageExecutionMeta.get();
     }
 
     static ActivityService instance() {
@@ -82,15 +74,13 @@ class DefaultActivityService implements ActivityService {
                 public Subscription execute(Transaction tx) throws ModelException {
                     Subscription subscription = new Subscription();
 
-                    subscription.setId(Datastore.allocateId(user.getId(), subscriptionMeta));
                     subscription.getActivityRef().setKey(activity.getId());
-                    subscription.getUserRef().setKey(user.getId());
+                    subscriptionDao.save(subscription, user.getId());
 
                     activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
                     activity.getSubscriptionListRef().getModelList().add(subscription);
 
-                    Datastore.put(tx, activity);
-                    Datastore.put(tx, subscription);
+                    activityDao.save(activity);
 
                     // TODO Add this user to the organizations client list
                     tx.commit();
@@ -132,11 +122,10 @@ class DefaultActivityService implements ActivityService {
                     }
                     activityPackage.setExecutionCount(executionCount + 1);
 
-                    execution.setId(Datastore.allocateId(userId, activityPackageExecutionMeta));
-                    execution.getUserRef().setKey(userId);
                     execution.getActivityPackageRef().setKey(activityPackageId);
+                    activityPackageExecutionDao.save(execution, userId);
 
-                    Datastore.put(tx, activityPackage, execution);
+                    Datastore.put(tx, activityPackage);
 
                     Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
 
@@ -159,12 +148,10 @@ class DefaultActivityService implements ActivityService {
                         activity.setSubscriptionCount(subscriptionCount + 1);
 
                         ActivityPackageSubscription subscription = new ActivityPackageSubscription();
-                        subscription.setId(Datastore.allocateId(userId, subscriptionMeta));
                         subscription.getActivityPackageExecutionRef().setKey(execution.getId());
                         subscription.getActivityRef().setKey(activity.getId());
-                        subscription.getUserRef().setKey(userId);
-
-                        Datastore.put(tx, activity, subscription);
+                        subscriptionDao.save(subscription, userId);
+                        activityDao.save(activity);
                     }
 
                     // TODO Add this user to the organizations client list
@@ -243,10 +230,12 @@ class DefaultActivityService implements ActivityService {
 
 
     @Override
-    public Key addActivityPackage(ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException {
-        Key organizationId = activityPackage.getOrganizationRef().getKey();
+    public Key addActivityPackage(final ActivityPackage activityPackage, List<Activity> activities) throws FieldValueException {
+        final Key organizationId = activityPackage.getOrganizationRef().getKey();
 
-        if (activityPackage.getItemCount() <= 0) throw new FieldValueException("ActivityPackage.itemCount");
+        if (activityPackage.getItemCount() <= 0) {
+            throw new FieldValueException("ActivityPackage.itemCount");
+        }
         if (activities.isEmpty() || activities.size() == 1 || activities.size() < activityPackage.getItemCount()) {
             throw new FieldValueException("ActivityPackage.activities.size");
         }
@@ -258,9 +247,7 @@ class DefaultActivityService implements ActivityService {
         }
 //        if (activityPackage.getValidUntil().getTime() < activityPackage.getValidFrom().getTime()) throw new FieldValueException("ActivityPackage.validUntil");
 
-        activityPackage.setId(Datastore.allocateId(organizationId, activityPackageMeta));
         final List<Object> models = new ArrayList<>();
-        models.add(activityPackage);
         for (Activity activity : activities) {
             ActivityPackageActivity junction = new ActivityPackageActivity(activityPackage, activity);
             junction.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
@@ -269,6 +256,7 @@ class DefaultActivityService implements ActivityService {
         TransactionOperator.executeNoEx(new ModelOperation<Void>() {
             @Override
             public Void execute(Transaction tx) throws ModelException {
+                activityPackageDao.save(activityPackage, organizationId);
                 Datastore.put(tx, models);
                 tx.commit();
                 return null;
@@ -312,8 +300,7 @@ class DefaultActivityService implements ActivityService {
                         ActivityPackageActivity activityPackageActivity = new ActivityPackageActivity();
                         activityPackageActivity.getActivityRef().setKey(activityId);
                         activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
-                        activityPackageActivity.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
-                        models.add(activityPackageActivity);
+                        activityPackageActivityDao.save(activityPackageActivity, organizationId);
                     }
                     Datastore.put(tx, models);
 

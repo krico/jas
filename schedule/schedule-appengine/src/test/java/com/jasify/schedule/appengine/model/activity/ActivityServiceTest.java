@@ -10,7 +10,6 @@ import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
@@ -33,7 +32,6 @@ public class ActivityServiceTest {
     private User testUser1;
     private User testUser2;
     private Activity activity1Organization1;
-    private Activity activity2Organization1;
     private ActivityPackage activityPackage10Organization;
     private ActivityPackageExecution activityPackageExecution;
 
@@ -93,7 +91,6 @@ public class ActivityServiceTest {
         activityType2OfOrganization1.getOrganizationRef().setKey(organization1.getId());
         Datastore.put(activityType1OfOrganization1, activityType2OfOrganization1);
         activity1Organization1 = createActivity(activityType1OfOrganization1);
-        activity2Organization1 = createActivity(activityType2OfOrganization1);
         activityPackage10Organization = createActivityPackage(organization1);
     }
 
@@ -247,45 +244,6 @@ public class ActivityServiceTest {
     @Test
     public void testActivityWithCreateDateInPastThrows() {
 
-    }
-
-    @Test
-    public void testActivityPackageWithNoActivitiesThrows() throws Exception {
-        thrown.expect(FieldValueException.class);
-        thrown.expectMessage("ActivityPackage.activities");
-        activityPackage10Organization.setItemCount(2);
-        activityService.addActivityPackage(activityPackage10Organization, Collections.<Activity>emptyList());
-    }
-
-    @Test
-    public void testActivityPackageWithZeroItemCountThrows() throws Exception {
-        thrown.expect(FieldValueException.class);
-        thrown.expectMessage("ActivityPackage.itemCount");
-        activityPackage10Organization.setItemCount(0);
-        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity2Organization1));
-    }
-
-    @Test
-    public void testActivityPackageWithDuplicateActivitiesThrows() throws Exception {
-        thrown.expect(FieldValueException.class);
-        thrown.expectMessage("ActivityPackage.activities");
-        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1, activity1Organization1));
-    }
-
-    @Test
-    public void testActivityPackageLessActivitiesThanItemCountThrows() throws Exception {
-        thrown.expect(FieldValueException.class);
-        thrown.expectMessage("ActivityPackage.activities");
-        activityPackage10Organization.setItemCount(2);
-        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1));
-    }
-
-    @Test
-    public void testActivityPackageWithOneActivityThrows() throws Exception {
-        thrown.expect(FieldValueException.class);
-        thrown.expectMessage("ActivityPackage.activities");
-        activityPackage10Organization.setItemCount(1);
-        activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1Organization1));
     }
 
 //    @Test

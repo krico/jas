@@ -453,9 +453,9 @@ public final class TestHelper {
         populatorBuilder.registerRandomizer(ActivityPackage.class, int.class, "itemCount", new MaxCountRandomizer());
         Populator populator = populatorBuilder.build();
         ActivityPackage activityPackage = populator.populateBean(ActivityPackage.class, "id", "organizationRef", "activityPackageActivityListRef", "executionCount");
+        activityPackage.getOrganizationRef().setKey(organization.getId());
         if (store) {
             activityPackage.setId(Datastore.allocateId(organization.getId(), ActivityPackageMeta.get()));
-            activityPackage.getOrganizationRef().setModel(organization);
             Datastore.put(activityPackage);
         }
         return activityPackage;
@@ -472,6 +472,18 @@ public final class TestHelper {
             Datastore.put(activityPackageExecution);
         }
         return activityPackageExecution;
+    }
+
+    public static ActivityPackageActivity createActivityPackageActivity(ActivityPackage activityPackage, Activity activity, boolean store) {
+        ActivityPackageActivity activityPackageActivity = new ActivityPackageActivity();
+        activityPackageActivity.getActivityRef().setKey(activity.getId());
+        activityPackageActivity.getActivityPackageRef().setKey(activityPackage.getId());
+        if (store) {
+            activityPackageActivity.setId(Datastore.allocateId(activityPackage.getId(), ActivityPackageExecutionMeta.get()));
+            activityPackageActivity.getActivityPackageRef().setModel(activityPackage);
+            Datastore.put(activityPackageActivity);
+        }
+        return activityPackageActivity;
     }
 
     public static Subscription createSubscription(User user, Activity activity, boolean store) {

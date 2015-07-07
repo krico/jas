@@ -341,7 +341,6 @@ public class ActivityEndpoint {
         checkFound(activityId, "activityId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activityId));
         return subscriptionDao.getByActivity(activityId);
-
     }
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)
@@ -460,9 +459,20 @@ public class ActivityEndpoint {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
-                    activityPackageDao.get(activityPackageId);
                     activityDao.get(activityId);
-                    activityPackageActivityDao.create(activityPackageId, activityId);
+                    ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
+                    ActivityPackageActivity activityPackageActivity = activityPackageActivityDao.getByActivityPackageIdAndActivityId(activityPackageId, activityId);
+
+                    if (activityPackageActivity != null) {
+                        throw new UniqueConstraintException("ActivityPackage " + activityPackageId + " already contains Activity " + activityId);
+                    }
+
+                    Key organizationId = activityPackage.getOrganizationRef().getKey();
+
+                    activityPackageActivity = new ActivityPackageActivity();
+                    activityPackageActivity.getActivityRef().setKey(activityId);
+                    activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
+                    activityPackageActivityDao.save(activityPackageActivity, organizationId);
                     tx.commit();
                     return null;
                 }
