@@ -44,13 +44,15 @@
         // TODO: extract is somwehere
         $translateProvider
             .translations('en-US', {
-                SIGN_OUT: 'Sign Out ',
+                SIGN_OUT: 'Sign Out',
+                SIGN_IN: 'Sign In',
                 LOCATION: 'Location',
                 START: 'Start',
                 FINISH: 'Finish',
                 SUBSCRIPTIONS: 'Subscriptions'
             }).translations('de', {
                 SIGN_OUT: 'Abmelden',
+                SIGN_IN: 'Anmelden',
                 LOCATION: 'Lage',
                 START: 'Start',
                 FINISH: 'Fertig',

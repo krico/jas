@@ -92,7 +92,7 @@
         <div class="md-display-1">Jasify!</div>
     </div>
 </div>
-<md-sidenav id="sidebar"
+<md-sidenav ng-if="!appVm.noMenu" id="sidebar"
             class="toggled md-sidenav-left md-whiteframe-z2"
             md-component-id="left"
             md-is-locked-open="$mdMedia('gt-md')">
@@ -165,8 +165,10 @@
                        class="toolbar-animate md-icon-button" aria-label="Settings">
                 <md-icon md-svg-icon="build/img/{{contextAction.type}}.svg"></md-icon>
             </md-button>
-            <md-button ng-show="(!showContext || !hasContext)" class="md-raised"
+            <md-button ng-if="!appVm.noMenu" ng-show="(!showContext || !hasContext)" class="md-raised"
                        translate="SIGN_OUT" ng-href="#/logout"></md-button>
+            <md-button ng-if="appVm.noMenu" ng-show="(!showContext || !hasContext)" class="md-raised"
+                       translate="SIGN_IN" ng-href="login.html"></md-button>
         </div>
     </md-toolbar>
     <md-content id="content" ng-controller="NavbarController as vm"

@@ -13,19 +13,27 @@
         appVm.setCurrentUser = $rootScope.setCurrentUser = setCurrentUser;
         appVm.currentUser = null;
         appVm.menuActive = menuActive;
+        appVm.noMenu = false;
 
         $scope.$on(AUTH_EVENTS.logoutSuccess, gotoLogin);
         $scope.$on(AUTH_EVENTS.notAuthenticated, gotoLogin);
 
-        if (!$location.path() || $location.path().indexOf('/oauth/') === -1) {
-            //don't restore if we are doing oauth
+        if (!$location.path() ||
+                //don't restore if we are doing oauth or recover-password
+            ($location.path().indexOf('/oauth/') === -1 && $location.path().indexOf('recover-password') === -1)) {
+
             restore();
+
+        } else if ($location.path().indexOf('recover-password') !== -1) {
+            //Recover password doesn't need menu
+            appVm.noMenu = true;
         }
 
         function gotoLogin() {
             if ($location.path() &&
                 $location.path() !== '/') {
                 if ($location.path().indexOf('oauth') === -1 &&
+                    $location.path().indexOf('recover-password') === -1 &&
                     $location.path().indexOf('logout') === -1) {
                     localStorageService.set('loginBackPath', $location.path());
                 }
@@ -58,7 +66,7 @@
 
         $timeout(function () {
             appVm.hideSplash = true;
-        }, 2000);
+        }, 1500);
     }
 
 })(window.angular);
