@@ -9,7 +9,6 @@ import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
@@ -2125,7 +2124,7 @@ public class ActivityEndpointTest {
 
     // RemoveActivityFromActivityPackage
     @Test
-    public void testRemoveActivityFromActivityPackagePackageNullUser() throws Exception {
+    public void testRemoveActivityFromActivityPackageNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
         endpoint.removeActivityFromActivityPackage(null, Datastore.allocateId(ActivityPackage.class), Datastore.allocateId(Activity.class));
@@ -2166,6 +2165,33 @@ public class ActivityEndpointTest {
         Key activityId = Datastore.allocateId(Activity.class);
         thrown.expectMessage("No entity was found matching the key: " + activityId);
         endpoint.removeActivityFromActivityPackage(newAdminCaller(1), TestHelper.createActivityPackage(TestHelper.createOrganization(true), true).getId(), activityId);
+    }
+
+    @Test
+    public void testRemoveActivityFromActivityPackageWithSubscriptions() throws Exception {
+        JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
+        activityPackage.setItemCount(2);
+        Datastore.put(activityPackage);
+        jasActivityPackageRequest.setActivityPackage(activityPackage);
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
+        ActivityPackage result = endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+        ActivityServiceFactory.getActivityService().subscribe(TestHelper.createUser(true), activityPackage, result.getActivities());
+
+        Activity activity = result.getActivities().get(0);
+        Key activityPackageActivityKey = null;
+        for (ActivityPackageActivity activityPackageActivity : activityPackage.getActivityPackageActivityListRef().getModelList()) {
+            if (activityPackageActivity.getActivityRef().getKey().equals(activity.getId())) {
+                activityPackageActivityKey = activityPackageActivity.getId();
+                break;
+            }
+        }
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot delete activity package activity with subscriptions! id=" + activityPackageActivityKey + " (1 subscriptions).");
+        endpoint.removeActivityFromActivityPackage(newAdminCaller(1), activityPackage.getId(), activity.getId());
     }
 
     @Test

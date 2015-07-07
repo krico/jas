@@ -12,5 +12,5 @@ public class ActivityPackageExecutionDao extends BaseCachingDao<ActivityPackageE
     public ActivityPackageExecutionDao() {
         super(ActivityPackageExecutionMeta.get());
     }
-    
+
 }
