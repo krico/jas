@@ -9,6 +9,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
@@ -24,6 +25,7 @@ import org.slim3.datastore.Datastore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -380,7 +382,9 @@ public class PaymentServiceTest {
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
         paymentService.createPayment(paymentProvider, payment, baseUrl);
-        for (Activity activity : activityPackage.getActivities()) {
+        ActivityDao activityDao = new ActivityDao();
+        List<Activity> activities = activityDao.getByActivityPackageId(activityPackage.getId());
+        for (Activity activity : activities) {
             assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
             assertEquals(1, activity.getSubscriptionCount());
         }
@@ -396,7 +400,8 @@ public class PaymentServiceTest {
 
         payment = Datastore.get(CashPayment.class, payment.getId());
         assertEquals(PaymentStateEnum.Completed, payment.getState());
-        for (Activity activity : activityPackage.getActivities()) {
+        activities = activityDao.getByActivityPackageId(activityPackage.getId());
+        for (Activity activity : activities) {
             assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
             assertEquals(1, activity.getSubscriptionCount());
         }
@@ -423,7 +428,9 @@ public class PaymentServiceTest {
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
         paymentService.createPayment(paymentProvider, payment, baseUrl);
-        for (Activity activity : activityPackage.getActivities()) {
+        ActivityDao activityDao = new ActivityDao();
+        List<Activity> activities = activityDao.getByActivityPackageId(activityPackage.getId());
+        for (Activity activity : activities) {
             assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
             assertEquals(1, activity.getSubscriptionCount());
         }
@@ -438,7 +445,9 @@ public class PaymentServiceTest {
 
         payment = Datastore.get(CashPayment.class, payment.getId());
         assertEquals(PaymentStateEnum.Canceled, payment.getState());
-        for (Activity activity : activityPackage.getActivities()) {
+        activityDao = new ActivityDao();
+        activities = activityDao.getByActivityPackageId(activityPackage.getId());
+        for (Activity activity : activities) {
             assertEquals(0, activity.getSubscriptionListRef().getModelList().size());
             assertEquals(0, activity.getSubscriptionCount());
         }

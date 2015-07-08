@@ -31,10 +31,6 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
     private static final String UNIQUE_ORGANIZATION_CONSTRAINT = "OrganizationDao.OrganizationName";
     private final UniqueIndex nameIndex;
 
-    private final OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
-    private final GroupDao groupDao = new GroupDao();
-    private final UserDao userDao = new UserDao();
-
     public OrganizationDao() {
         super(OrganizationMeta.get());
         nameIndex = UniqueIndexCache.get(UNIQUE_ORGANIZATION_CONSTRAINT, meta, OrganizationMeta.get().name, false);
@@ -107,7 +103,7 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
     }
 
     public List<Organization> byMemberUserId(Key userId) throws EntityNotFoundException {
-        List<OrganizationMember> organizationMembers = organizationMemberDao.byUserId(userId);
+        List<OrganizationMember> organizationMembers = new OrganizationMemberDao().byUserId(userId);
         if (organizationMembers.isEmpty()) return Collections.emptyList();
         List<Key> organizationIds = new ArrayList<>();
         for (OrganizationMember organizationMember : organizationMembers) {
@@ -119,11 +115,11 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
     }
 
     public boolean isUserMemberOfAnyOrganization(Key userId) {
-        return !organizationMemberDao.byUserIdKeys(userId).isEmpty();
+        return !new OrganizationMemberDao().byUserIdKeys(userId).isEmpty();
     }
 
     public List<User> getUsersOfOrganization(Key organizationId) throws EntityNotFoundException {
-        List<OrganizationMember> organizationMembers = organizationMemberDao.byOrganizationId(organizationId);
+        List<OrganizationMember> organizationMembers = new OrganizationMemberDao().byOrganizationId(organizationId);
         if (organizationMembers.isEmpty()) return Collections.emptyList();
         List<Key> userIds = new ArrayList<>();
         for (OrganizationMember organizationMember : organizationMembers) {
@@ -131,11 +127,11 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
             if (key != null) userIds.add(key);
         }
         if (userIds.isEmpty()) return Collections.emptyList();
-        return userDao.get(userIds);
+        return new UserDao().get(userIds);
     }
 
     public List<Group> getGroupsOfOrganization(Key organizationId) throws EntityNotFoundException {
-        List<OrganizationMember> organizationMembers = organizationMemberDao.byOrganizationId(organizationId);
+        List<OrganizationMember> organizationMembers = new OrganizationMemberDao().byOrganizationId(organizationId);
         if (organizationMembers.isEmpty()) return Collections.emptyList();
         List<Key> groupIds = new ArrayList<>();
         for (OrganizationMember organizationMember : organizationMembers) {
@@ -143,20 +139,21 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
             if (key != null) groupIds.add(key);
         }
         if (groupIds.isEmpty()) return Collections.emptyList();
-        return groupDao.get(groupIds);
+        return new GroupDao().get(groupIds);
     }
 
     public boolean addUserToOrganization(Key organizationId, Key userId) throws ModelException {
-        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndUserId(organizationId, userId);
+        OrganizationMember existing = new OrganizationMemberDao().byOrganizationIdAndUserId(organizationId, userId);
         if (existing != null) return false;
         existing = new OrganizationMember();
         existing.getOrganizationRef().setKey(organizationId);
         existing.getUserRef().setKey(userId);
-        organizationMemberDao.save(existing);
+        new OrganizationMemberDao().save(existing);
         return true;
     }
 
     public boolean removeUserFromOrganization(Key organizationId, Key userId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
         OrganizationMember existing = organizationMemberDao.byOrganizationIdAndUserId(organizationId, userId);
         if (existing == null) return false;
         organizationMemberDao.delete(existing.getId());
@@ -164,6 +161,7 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
     }
 
     public boolean addGroupToOrganization(Key organizationId, Key groupId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
         OrganizationMember existing = organizationMemberDao.byOrganizationIdAndGroupId(organizationId, groupId);
         if (existing != null) return false;
         existing = new OrganizationMember();
@@ -174,6 +172,7 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
     }
 
     public boolean removeGroupFromOrganization(Key organizationId, Key groupId) throws ModelException {
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
         OrganizationMember existing = organizationMemberDao.byOrganizationIdAndGroupId(organizationId, groupId);
         if (existing == null) return false;
         organizationMemberDao.delete(existing.getId());

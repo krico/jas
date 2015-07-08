@@ -8,12 +8,14 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackageActivity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,7 +24,6 @@ import java.util.List;
  * @since 07/06/15.
  */
 public class ActivityDao extends BaseCachingDao<Activity> {
-    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
 
     public ActivityDao() {
         super(ActivityMeta.get());
@@ -36,6 +37,24 @@ public class ActivityDao extends BaseCachingDao<Activity> {
     public List<Activity> getByOrganizationId(Key organizationId) {
         ActivityMeta meta = getMeta();
         return query(new ByOrganizationQuery(meta, organizationId));
+    }
+
+    public List<Activity> getByActivityPackageId(Key activityPackageId) throws EntityNotFoundException {
+        List<ActivityPackageActivity> activityPackageActivities = new ActivityPackageActivityDao().getByActivityPackageId(activityPackageId);
+        List<Activity> result = new ArrayList<>();
+        for (ActivityPackageActivity activityPackageActivity : activityPackageActivities) {
+            result.add(get(activityPackageActivity.getActivityRef().getKey()));
+        }
+        return result;
+    }
+
+    public List<Key> getKeysByActivityPackageId(Key activityPackageId) throws EntityNotFoundException {
+        List<ActivityPackageActivity> activityPackageActivities = new ActivityPackageActivityDao().getByActivityPackageId(activityPackageId);
+        List<Key> result = new ArrayList<>();
+        for (ActivityPackageActivity activityPackageActivity : activityPackageActivities) {
+            result.add(activityPackageActivity.getActivityRef().getKey());
+        }
+        return result;
     }
 
     @Nonnull
@@ -66,7 +85,7 @@ public class ActivityDao extends BaseCachingDao<Activity> {
         if (entity.getPrice() != null && entity.getPrice() < 0) throw new FieldValueException("Activity.price");
         if (entity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
 
-        ActivityType activityType = activityTypeDao.get(activityTypeId);
+        ActivityType activityType = entity.getActivityTypeRef().getModel();
 
         String name = StringUtils.trimToNull(entity.getName());
         if (StringUtils.isBlank(name)) {
@@ -75,7 +94,8 @@ public class ActivityDao extends BaseCachingDao<Activity> {
 
         if (entity.getId() == null) {
             // New Activity
-            entity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), getMeta()));
+            Key organizationId = activityTypeId.getParent();
+            entity.setId(Datastore.allocateId(organizationId, getMeta()));
         }
     }
 

@@ -19,9 +19,7 @@ import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
 
@@ -442,8 +440,23 @@ public class ActivityEndpoint {
     public List<Activity> getActivityPackageActivities(@SuppressWarnings("unused") User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         checkFound(activityPackageId, "activityPackageId == null");
         try {
-            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-            return activityPackage.getActivities();
+            List<Activity> activities = activityDao.getByActivityPackageId(activityPackageId);
+            Collections.sort(activities, new Comparator<Activity>() {
+                @Override
+                public int compare(Activity o1, Activity o2) {
+                    Date start1 = o1.getStart();
+                    if (start1 == null) {
+                        start1 = o1.getCreated() == null ? new Date(Long.MAX_VALUE) : o1.getCreated();
+                    }
+                    Date start2 = o2.getStart();
+                    if (start2 == null) {
+                        start2 = o2.getCreated() == null ? new Date(Long.MAX_VALUE) : o2.getCreated();
+                    }
+
+                    return start1.compareTo(start2);
+                }
+            });
+            return activities;
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

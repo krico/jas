@@ -25,9 +25,6 @@ import java.util.List;
  * @since 09/06/15.
  */
 public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageActivity> {
-    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
-    private final ActivityDao activityDao = new ActivityDao();
-    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
 
     public ActivityPackageActivityDao() {
         super(ActivityPackageActivityMeta.get());
@@ -44,13 +41,13 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
     public List<ActivityPackageActivity> getByActivityId(Key activityId) throws EntityNotFoundException {
         ActivityPackageActivityMeta meta = getMeta();
 
-        Activity activity = activityDao.get(activityId);
+        Activity activity = new ActivityDao().get(activityId);
         if (activity.getActivityTypeRef().getKey() == null) {
             return Collections.emptyList();
         }
 
         Key activityTypeId = activity.getActivityTypeRef().getKey();
-        ActivityType activityType = activityTypeDao.get(activityTypeId);
+        ActivityType activityType = new ActivityTypeDao().get(activityTypeId);
         if (activityType.getOrganizationRef().getKey() == null) {
             return Collections.emptyList();
         }
@@ -63,7 +60,7 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
     public Key getKeyByActivityPackageIdAndActivityId(Key activityPackageId, Key activityId) throws EntityNotFoundException {
         ActivityPackageActivityMeta meta = getMeta();
 
-        ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
+        ActivityPackage activityPackage = new ActivityPackageDao().get(activityPackageId);
         Key organizationId = activityPackage.getOrganizationRef().getKey();
 
         List<Key> result = queryKeys(new ByActivityPackageAndActivityQuery(meta, organizationId, activityPackageId, activityId));
@@ -81,8 +78,7 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
     public ActivityPackageActivity getByActivityPackageIdAndActivityId(Key activityPackageId, Key activityId) throws EntityNotFoundException {
         ActivityPackageActivityMeta meta = getMeta();
 
-        ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-        Key organizationId = activityPackage.getOrganizationRef().getKey();
+        Key organizationId = activityPackageId.getParent();
 
         List<ActivityPackageActivity> result = query(new ByActivityPackageAndActivityQuery(meta, organizationId, activityPackageId, activityId));
 
@@ -99,10 +95,18 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
     public List<Key> getKeysByActivityPackageId(Key activityPackageId) throws EntityNotFoundException {
         ActivityPackageActivityMeta meta = getMeta();
 
-        ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-        Key organizationId = activityPackage.getOrganizationRef().getKey();
+        Key organizationId = activityPackageId.getParent();
 
         return queryKeys(new ByOrganizationAndActivityPackageQuery(meta, organizationId, activityPackageId));
+    }
+
+    public List<ActivityPackageActivity> getByActivityPackageId(Key activityPackageId) throws EntityNotFoundException {
+        ActivityPackageActivityMeta meta = getMeta();
+
+        ActivityPackage activityPackage = new ActivityPackageDao().get(activityPackageId);
+        Key organizationId = activityPackage.getOrganizationRef().getKey();
+
+        return query(new ByOrganizationAndActivityPackageQuery(meta, organizationId, activityPackageId));
     }
 
     private static class ByOrganizationAndActivityQuery extends BaseDaoQuery<ActivityPackageActivity, ActivityPackageActivityMeta> {

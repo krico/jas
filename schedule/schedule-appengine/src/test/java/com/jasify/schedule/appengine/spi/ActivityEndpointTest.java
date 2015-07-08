@@ -1818,15 +1818,18 @@ public class ActivityEndpointTest {
         dbActivityPackage.setValidUntil(new DateTime(dbActivityPackage.getValidUntil()).plusDays(1).toDate());
 
         jasActivityPackageRequest.setActivityPackage(dbActivityPackage);
-        jasActivityPackageRequest.setActivities(dbActivityPackage.getActivities());
+        List<Activity> activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        jasActivityPackageRequest.setActivities(activities);
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
 
-        ActivityPackage result = endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
-        equals(dbActivityPackage, result);
-        assertEquals(3, result.getActivities().size());
-        long fetchedModified = result.getModified().getTime();
+        ActivityPackage activityPackageResult = endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
+        equals(dbActivityPackage, activityPackageResult);
+        long fetchedModified = activityPackageResult.getModified().getTime();
         long modified = System.currentTimeMillis();
         assertTrue(fetchedModified <= modified && fetchedModified > (modified - 1000));
+
+        List<Activity> activitiesResult = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        assertEquals(3, activitiesResult.size());
     }
 
     @Test
@@ -1842,13 +1845,15 @@ public class ActivityEndpointTest {
 
         ActivityPackage dbActivityPackage = endpoint.getActivityPackage(newAdminCaller(1), activityPackage.getId());
 
+        List<Activity> activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
         jasActivityPackageRequest.setActivityPackage(dbActivityPackage);
-        jasActivityPackageRequest.setActivities(dbActivityPackage.getActivities());
+        jasActivityPackageRequest.setActivities(activities);
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
 
         ActivityPackage result = endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
         equals(dbActivityPackage, result);
-        assertEquals(3, result.getActivities().size());
+        activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        assertEquals(3, activities.size());
     }
 
     @Test
@@ -1864,13 +1869,14 @@ public class ActivityEndpointTest {
         endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
 
         ActivityPackage dbActivityPackage = endpoint.getActivityPackage(newAdminCaller(1), activityPackage.getId());
-
+        List<Activity> activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
         jasActivityPackageRequest.setActivityPackage(dbActivityPackage);
-        jasActivityPackageRequest.setActivities(dbActivityPackage.getActivities().subList(0,2));
+        jasActivityPackageRequest.setActivities(activities.subList(0, 2));
 
         ActivityPackage result = endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
         equals(dbActivityPackage, result);
-        assertEquals(2, result.getActivities().size());
+        activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        assertEquals(2, activities.size());
     }
 
     // AddActivityPackage
@@ -2026,7 +2032,8 @@ public class ActivityEndpointTest {
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         ActivityPackage result = endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
         equals(activityPackage, result);
-        assertEquals(2, result.getActivities().size());
+        List<Activity> activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        assertEquals(2, activities.size());
     }
 
     // RemoveActivityPackage
@@ -2220,10 +2227,11 @@ public class ActivityEndpointTest {
         jasActivityPackageRequest.setActivityPackage(activityPackage);
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
-        ActivityPackage result = endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
-        ActivityServiceFactory.getActivityService().subscribe(TestHelper.createUser(true), activityPackage, result.getActivities());
+        endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
+        List<Activity> activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
+        ActivityServiceFactory.getActivityService().subscribe(TestHelper.createUser(true), activityPackage, activities);
 
-        Activity activity = result.getActivities().get(0);
+        Activity activity = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId()).get(0);
         Key activityPackageActivityKey = null;
         for (ActivityPackageActivity activityPackageActivity : activityPackage.getActivityPackageActivityListRef().getModelList()) {
             if (activityPackageActivity.getActivityRef().getKey().equals(activity.getId())) {
