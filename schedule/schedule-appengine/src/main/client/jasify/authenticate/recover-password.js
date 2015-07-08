@@ -2,7 +2,7 @@
 
     angular.module('jasify.authenticate').controller('RecoverPasswordController', RecoverPasswordController);
 
-    function RecoverPasswordController($log, $timeout, $routeParams, $rootScope, Auth, AUTH_EVENTS) {
+    function RecoverPasswordController($log, $window, $routeParams, $rootScope, Auth, AUTH_EVENTS) {
         var vm = this;
         vm.setPassword = setPassword;
         vm.signIn = signIn;
@@ -17,7 +17,7 @@
         vm.popoverText = '';
 
         function signIn() {
-            $rootScope.$broadcast(AUTH_EVENTS.signIn);
+            $window.location = '/login.html';
         }
 
         function again() {

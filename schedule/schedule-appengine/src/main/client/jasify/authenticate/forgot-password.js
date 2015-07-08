@@ -5,7 +5,7 @@
 
     angular.module('jasify.authenticate').controller('ForgotPasswordController', ForgotPasswordController);
 
-    function ForgotPasswordController($q, Auth) {
+    function ForgotPasswordController($q, $location, Auth, BrowserData) {
         var vm = this;
         vm.email = '';
         vm.recover = recover;
@@ -14,6 +14,8 @@
         vm.passwordSent = false;
         vm.failed = false;
         vm.forgotForm = {};
+        vm.hasBack = hasBack;
+        vm.back = back;
 
         function recover() {
 
@@ -39,6 +41,16 @@
 
         function again() {
             vm.failed = false;
+        }
+
+        function hasBack() {
+            return BrowserData.isForgotPasswordOriginSet();
+        }
+
+        function back() {
+            var path = BrowserData.getForgotPasswordOrigin();
+            BrowserData.clearForgotPasswordOrigin();
+            $location.path(path);
         }
     }
 })(window.angular);
