@@ -22,6 +22,7 @@
         addProperty('firstAccess', true);
         addProperty('rememberUser');
         addProperty('loggedIn', false);
+        addProperty('forgotPasswordOrigin');
 
         /**
          * Creates the accessor/functions for handling a property.

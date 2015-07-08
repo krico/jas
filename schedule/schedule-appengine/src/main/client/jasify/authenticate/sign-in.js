@@ -19,6 +19,7 @@
         }
 
         function forgot(fn) {
+            BrowserData.setForgotPasswordOrigin($location.path());
             $location.path('/forgot-password');
             if (angular.isFunction(fn)) {
                 fn();
