@@ -124,8 +124,7 @@ class DefaultActivityService implements ActivityService {
 
                     execution.getActivityPackageRef().setKey(activityPackageId);
                     activityPackageExecutionDao.save(execution, userId);
-
-                    Datastore.put(tx, activityPackage);
+                    activityPackageDao.save(activityPackage);
 
                     Key organizationId = Preconditions.checkNotNull(activityPackage.getOrganizationRef().getKey());
 
@@ -287,9 +286,6 @@ class DefaultActivityService implements ActivityService {
                     BeanUtil.copyPropertiesExcluding(dbActivityPackage, activityPackage,
                             "id", "created", "modified", "executionCount", "organizationRef", "activityPackageActivityListRef");
 
-                    List<Object> models = new ArrayList<>();
-                    models.add(dbActivityPackage);
-
                     Set<Key> toAdd = new HashSet<>();
                     for (Key newKey : newKeys) {
                         if (existingKeys.contains(newKey)) continue;
@@ -302,7 +298,7 @@ class DefaultActivityService implements ActivityService {
                         activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
                         activityPackageActivityDao.save(activityPackageActivity, organizationId);
                     }
-                    Datastore.put(tx, models);
+                    activityPackageDao.save(dbActivityPackage);
 
                     Set<Key> toRemove = new HashSet<>();
                     for (Key existingKey : existingKeys) {
