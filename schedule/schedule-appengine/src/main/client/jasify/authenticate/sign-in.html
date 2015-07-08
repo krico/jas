@@ -17,36 +17,45 @@
           name="vm.authenticateForm" ng-submit="vm.authenticateForm.$valid && vm.signIn($close)">
         <div jas-has-feedback class="form-group fg-float">
             <div class="fg-line">
-                <input id="email" autofocus name="email" ng-model="vm.user.email" required class="form-control fg-input" />
+                <input id="email" autofocus name="email" ng-model="vm.user.email" required class="form-control fg-input"
+                       ng-model-options="{debounce: {'default':0, 'blur':1000}}"/>
             </div>
             <label class="fg-label">Email or Username</label>
-            <jas-feedback-icon-invalid field="vm.authenticateForm.email" form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <jas-feedback-icon-invalid field="vm.authenticateForm.email"
+                                       form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <!-- #568 if we display this message, the forgot password link bellow moves and the click fails
             <jas-error-help-block field="vm.authenticateForm.email" form="vm.authenticateForm">
                 <span ng-message="required">Email or Username is required</span>
             </jas-error-help-block>
+            -->
         </div>
         <div jas-has-feedback class="form-group fg-float">
             <div class="fg-line">
-                <input id="password" name="password" ng-model="vm.user.password" required class="form-control fg-input" type="password" />
+                <input id="password" name="password" ng-model="vm.user.password" required class="form-control fg-input"
+                       type="password"/>
             </div>
             <label class="fg-label">Password</label>
-            <jas-feedback-icon-invalid field="vm.authenticateForm.password" form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <jas-feedback-icon-invalid field="vm.authenticateForm.password"
+                                       form="vm.authenticateForm"></jas-feedback-icon-invalid>
+            <!-- #568 if we display this message, the forgot password link bellow moves and the click fails
             <jas-error-help-block field="vm.authenticateForm.password" form="vm.authenticateForm">
                 <span ng-message="required">Password is required</span>
             </jas-error-help-block>
+            -->
             <small>
-                <a href="javascript:void(0)" ng-click="vm.forgot($close)">Forgot your password?</a>
+                <a ng-click="vm.forgot($close)">Forgot your password?</a>
             </small>
         </div>
         <div class="checkbox m-t-25 m-b-25">
             <label>
-                <input type="checkbox" ng-checked="vm.rememberMe" ng-model="vm.rememberMe"><i class="input-helper"></i>Remember me
+                <input type="checkbox" ng-checked="vm.rememberMe" ng-model="vm.rememberMe"><i class="input-helper"></i>Remember
+                me
             </label>
         </div>
         <button class="btn btn-primary waves-effect" type="submit"><i class="icon ion-email"></i> Sign In</button>
-        <hr />
+        <hr/>
         <small layout="row" layout-align="start center" class="sign-in">
-            Sign In with&nbsp;<a href="javascript:void(0)" ng-click="vm.email = false"> Google or Facebook</a>
+            Sign In with&nbsp;<a ng-click="vm.email = false"> Google or Facebook</a>
         </small>
     </form>
 </div>
