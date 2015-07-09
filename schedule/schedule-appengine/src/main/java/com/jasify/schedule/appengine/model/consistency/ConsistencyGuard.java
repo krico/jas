@@ -108,8 +108,6 @@ public final class ConsistencyGuard {
             throw new IllegalArgumentException("Target directory is not a directory: " + targetDir);
         }
 
-        System.err.println("!!!\n!!!\n!!!\n!!!\n!!!\n!!!\n!!! YEAH " + targetDir + "\n!!!\n!!!\n!!!\n!!!\n!!!\n!!!\n!!!\n");
-
         File jsonCache = new File(targetDir, CACHE_PATH);
         if (jsonCache.getParentFile().mkdirs()) {
             throw new IOException("Failed to create: " + jsonCache.getParentFile());
