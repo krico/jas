@@ -2,13 +2,14 @@ package com.jasify.schedule.appengine.model;
 
 import com.google.common.base.Throwables;
 import org.slim3.datastore.ModelMeta;
+import org.slim3.datastore.StringAttributeMeta;
 
 public class UniqueConstraintBuilder {
     private ModelMeta<?> meta;
     private String uniquePropertyName;
     private String uniqueClassifierPropertyName = null;
     private boolean ignoreNullValues = false;
-    private boolean createIfMissing = true;
+    private boolean createIfMissing = false;
 
     UniqueConstraintBuilder() {
     }
@@ -18,9 +19,17 @@ public class UniqueConstraintBuilder {
         return this;
     }
 
+    public UniqueConstraintBuilder withUniquePropertyName(StringAttributeMeta<?> uniqueProperty) {
+        return withUniquePropertyName(uniqueProperty.getName());
+    }
+
     public UniqueConstraintBuilder withUniquePropertyName(String uniquePropertyName) {
         this.uniquePropertyName = uniquePropertyName;
         return this;
+    }
+
+    public UniqueConstraintBuilder withUniqueClassifierPropertyName(StringAttributeMeta<?> uniqueClassifierProperty) {
+        return withUniqueClassifierPropertyName(uniqueClassifierProperty.getName());
     }
 
     public UniqueConstraintBuilder withUniqueClassifierPropertyName(String uniqueClassifierPropertyName) {

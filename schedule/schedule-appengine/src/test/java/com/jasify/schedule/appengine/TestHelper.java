@@ -8,6 +8,7 @@ import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.UniqueConstraints;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
@@ -141,6 +142,7 @@ public final class TestHelper {
 
     public static void initializeServletRunner() {
         TestHelper.initializeJasify();
+        UniqueConstraints.ensureAllConstraintsExist();
         try {
             servletRunner = new ServletRunner(relPath("src/main/webapp/WEB-INF/web.xml"));
         } catch (Exception e) {
@@ -168,6 +170,7 @@ public final class TestHelper {
     public static void initializeDatastore(LocalServiceTestHelper datastoreHelper) {
         datastoreHelper.setUp();
         UserContext.clearContext();
+        UniqueConstraints.ensureAllConstraintsExist();
     }
 
     public static void cleanupDatastore() {
@@ -219,6 +222,7 @@ public final class TestHelper {
         int i = 0;
         try {
 
+            UniqueConstraints.ensureAllConstraintsExist();
             UniqueConstraint constraint = UniqueConstraint.create(UserMeta.get(), UserMeta.get().name);
 
             List<User> created = new ArrayList<>();

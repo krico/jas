@@ -72,8 +72,7 @@ public class UniqueConstraint {
         UniqueConstraintBuilder builder = new UniqueConstraintBuilder()
                 .forMeta(meta)
                 .withUniquePropertyName(uniqueProperty.getName())
-                .ignoreNullValues(allowNullValues)
-                .createIfMissing(true);
+                .ignoreNullValues(allowNullValues);
 
         if (uniqueClassifierProperty != null)
             builder.withUniqueClassifierPropertyName(uniqueClassifierProperty.getName());
@@ -103,7 +102,12 @@ public class UniqueConstraint {
         }
 
         if (!createIfMissing) {
-            throw new UniqueConstraintException("MISSING UniqueConstraint: " + name);
+            StringBuilder builder = new StringBuilder("MISSING UniqueConstraint: ").append(name);
+            builder
+                    .append("\n\t").append("You probably need to add on com.jasify.schedule.appengine.model.UniqueConstraints:")
+                    .append("\n\t").append("new UniqueConstraintBuilder(). ... .createNoEx();")
+                    .append(".");
+            throw new UniqueConstraintException(builder.toString());
         }
 
         Preconditions.checkState(Datastore.getCurrentTransaction() == null,
