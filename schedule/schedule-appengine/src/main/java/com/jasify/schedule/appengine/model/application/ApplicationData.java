@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.application;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,8 @@ public final class ApplicationData {
     private final Application application;
 
     private ApplicationData() {
+        Preconditions.checkState(Datastore.getCurrentTransaction() == null,
+                "ApplicationData should never be initialized inside a Transaction");
         application = loadApplication();
     }
 
@@ -82,7 +85,6 @@ public final class ApplicationData {
 
     Application loadApplication() {
         log.debug("Loading application");
-
         Transaction tx = Datastore.beginTransaction();
         Key name = Datastore.createKey(Application.class, Constants.APPLICATION_NAME);
         Application application;
