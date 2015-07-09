@@ -46,15 +46,25 @@ public class UniqueConstraint {
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty) throws RuntimeException {
-        return create(meta, uniqueProperty, null, false);
+        return new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .createNoEx();
     }
 
-    public static <T> UniqueConstraint createAllowingNullValues(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty) throws RuntimeException {
-        return create(meta, uniqueProperty, null, true);
+    public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, boolean allowNullValues) throws RuntimeException {
+        return new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .ignoreNullValues(allowNullValues)
+                .createNoEx();
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty) throws RuntimeException {
-        return create(meta, uniqueProperty, uniqueClassifierProperty, false);
+        return new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .withUniqueClassifierPropertyName(uniqueClassifierProperty.getName()).createNoEx();
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty, boolean allowNullValues) throws RuntimeException {
@@ -62,13 +72,14 @@ public class UniqueConstraint {
         UniqueConstraintBuilder builder = new UniqueConstraintBuilder()
                 .forMeta(meta)
                 .withUniquePropertyName(uniqueProperty.getName())
-                .ignoreNullValues(allowNullValues);
+                .ignoreNullValues(allowNullValues)
+                .createIfMissing(true);
 
         if (uniqueClassifierProperty != null)
             builder.withUniqueClassifierPropertyName(uniqueClassifierProperty.getName());
 
         try {
-            return builder.createUniqueConstraint();
+            return builder.create();
         } catch (UniqueConstraintException e) {
             throw Throwables.propagate(e);
         }
@@ -92,7 +103,7 @@ public class UniqueConstraint {
         }
 
         if (!createIfMissing) {
-            throw new UniqueConstraintException("Unique doesn't exist constraint: " + name);
+            throw new UniqueConstraintException("MISSING UniqueConstraint: " + name);
         }
 
         Preconditions.checkState(Datastore.getCurrentTransaction() == null,

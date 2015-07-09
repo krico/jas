@@ -28,10 +28,10 @@ public class UniqueConstraintTest {
 
     @Test
     public void testConstructorHasRightPrefixAndIsPersistent() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         assertNotNull(uc.getUniqueKind());
         assertTrue(uc.getUniqueKind().startsWith(Constants.UNIQUE_CONSTRAINT_PREFIX));
-        UniqueConstraint uc2 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc2 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         //They should be the same
         assertNotNull(uc2.getUniqueKind());
 
@@ -40,18 +40,18 @@ public class UniqueConstraintTest {
 
     @Test
     public void testConstructorWithClassifierHasRightPrefixAndIsPersistentAndDoesNotClashWithNoClassifiedConstraint() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName("name").withUniqueClassifierPropertyName("realName").createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName("name").withUniqueClassifierPropertyName("realName").create();
         assertNotNull(uc.getUniqueKind());
         assertTrue(uc.getUniqueKind().startsWith(Constants.UNIQUE_CONSTRAINT_PREFIX));
-        UniqueConstraint uc2 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName("name").withUniqueClassifierPropertyName("realName").createUniqueConstraint();
+        UniqueConstraint uc2 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName("name").withUniqueClassifierPropertyName("realName").create();
         //They should be the same
         assertNotNull(uc2.getUniqueKind());
 
         assertEquals("UC should be persistent", uc.getUniqueKind(), uc2.getUniqueKind());
 
-        UniqueConstraint uc3 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc3 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         assertNotSame("UC classified cannot have same kind as unclassified", uc.getUniqueKind(), uc3.getUniqueKind());
-        UniqueConstraint uc4 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName("name").withUniqueClassifierPropertyName("email").createUniqueConstraint();
+        UniqueConstraint uc4 = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName("name").withUniqueClassifierPropertyName("email").create();
         assertNotSame("Different classifier prop cannot have same kind", uc.getUniqueKind(), uc4.getUniqueKind());
         assertNotSame("UC classified cannot have same kind as unclassified", uc3.getUniqueKind(), uc4.getUniqueKind());
     }
@@ -64,7 +64,7 @@ public class UniqueConstraintTest {
         u2.setName("user");
         Datastore.put(u);
         Datastore.put(u2);
-        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
     }
 
     @Test(expected = UniqueConstraintException.class)
@@ -74,7 +74,7 @@ public class UniqueConstraintTest {
         User u2 = new User();
         u2.setEmail(null);
         Datastore.put(u, u2);
-        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().email.getName()).createUniqueConstraint();
+        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().email.getName()).create();
     }
 
     @Test
@@ -84,7 +84,7 @@ public class UniqueConstraintTest {
         User u2 = new User();
         u2.setEmail(null);
         Datastore.put(u, u2);
-        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().email.getName()).ignoreNullValues(true).createUniqueConstraint();
+        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().email.getName()).ignoreNullValues(true).create();
     }
 
     @Test
@@ -97,7 +97,7 @@ public class UniqueConstraintTest {
         Datastore.put(u2);
         boolean threw;
         try {
-            new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+            new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
             threw = false;
         } catch (UniqueConstraintException e) {
             threw = true;
@@ -119,7 +119,7 @@ public class UniqueConstraintTest {
         u2.setRealName("User Name");
         Datastore.put(u);
         Datastore.put(u2);
-        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
     }
 
     @Test
@@ -136,7 +136,7 @@ public class UniqueConstraintTest {
         Datastore.put(u, u2, u3);
         boolean threw;
         try {
-            new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+            new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
             threw = false;
         } catch (UniqueConstraintException e) {
             threw = true;
@@ -174,7 +174,7 @@ public class UniqueConstraintTest {
 
     @Test
     public void testReserveReleaseReserve() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         uc.reserve("krico");
         uc.release("krico");
         uc.reserve("krico");
@@ -182,7 +182,7 @@ public class UniqueConstraintTest {
 
     @Test
     public void testReserveWithClassifierReleaseReserve() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.reserve("krico", "Christian1");
         uc.reserve("krico", "Christian2");
         uc.release("krico", "Christian2");
@@ -191,21 +191,21 @@ public class UniqueConstraintTest {
 
     @Test(expected = UniqueConstraintException.class)
     public void testReserveThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         uc.reserve("krico");
         uc.reserve("krico");
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testReserveWithClassifierThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.reserve("krico", "Christian");
         uc.reserve("krico", "Christian");
     }
 
     @Test
     public void testReserveWithDifferentClassifierThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.reserve("krico", "Christian1");
         uc.reserve("krico", "Christian2");
         try {
@@ -218,31 +218,31 @@ public class UniqueConstraintTest {
 
     @Test(expected = UniqueConstraintException.class)
     public void testReserveNullThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         uc.reserve(null);
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testReserveClassifiedNullKeyThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.reserve(null, "something");
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testReserveClassifiedNullClassifierThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.reserve("user", null);
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testReserveClassifiedNullThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.reserve(null, null);
     }
 
     @Test
     public void testReserveNullNoBreak() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         try {
             uc.reserve(null);
         } catch (UniqueConstraintException e) {
@@ -253,31 +253,31 @@ public class UniqueConstraintTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testReserveClassifiedWithNoClassifierThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.reserve("krico"); //Should call with classifier
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReserveNonClassifiedWithClassifierThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         uc.reserve("krico", "Christian"); //Should call without classifier
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReleaseClassifiedWithNoClassifierThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).withUniqueClassifierPropertyName(UserMeta.get().realName.getName()).create();
         uc.release("krico"); //Should call with classifier
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReleaseNonClassifiedWithClassifierThrows() throws Exception {
-        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createUniqueConstraint();
+        UniqueConstraint uc = new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).create();
         uc.release("krico", "Christian"); //Should call without classifier
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testConstructorWillFailUnlessCreateIfMissing() throws Exception {
-        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createIfMissing(false).createUniqueConstraint();
+        new UniqueConstraintBuilder().forMeta(UserMeta.get()).withUniquePropertyName(UserMeta.get().name.getName()).createIfMissing(false).create();
     }
 
 }

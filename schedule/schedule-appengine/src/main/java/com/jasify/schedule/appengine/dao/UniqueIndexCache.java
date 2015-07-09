@@ -53,7 +53,7 @@ public final class UniqueIndexCache {
         private final UniqueConstraint constraint;
 
         public <T> UniqueIndexImpl(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, boolean allowNullValues) {
-            constraint = UniqueConstraint.create(meta, uniqueProperty, null, allowNullValues);
+            constraint = UniqueConstraint.create(meta, uniqueProperty, allowNullValues);
         }
 
         @Override

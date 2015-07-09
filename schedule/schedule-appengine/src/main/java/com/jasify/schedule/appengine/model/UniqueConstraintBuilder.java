@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model;
 
+import com.google.common.base.Throwables;
 import org.slim3.datastore.ModelMeta;
 
 public class UniqueConstraintBuilder {
@@ -8,6 +9,9 @@ public class UniqueConstraintBuilder {
     private String uniqueClassifierPropertyName = null;
     private boolean ignoreNullValues = false;
     private boolean createIfMissing = true;
+
+    UniqueConstraintBuilder() {
+    }
 
     public UniqueConstraintBuilder forMeta(ModelMeta<?> meta) {
         this.meta = meta;
@@ -34,7 +38,15 @@ public class UniqueConstraintBuilder {
         return this;
     }
 
-    public UniqueConstraint createUniqueConstraint() throws UniqueConstraintException {
+    public UniqueConstraint create() throws UniqueConstraintException {
         return new UniqueConstraint(meta, uniquePropertyName, uniqueClassifierPropertyName, ignoreNullValues, createIfMissing);
+    }
+
+    public UniqueConstraint createNoEx() {
+        try {
+            return create();
+        } catch (UniqueConstraintException e) {
+            throw Throwables.propagate(e);
+        }
     }
 }
