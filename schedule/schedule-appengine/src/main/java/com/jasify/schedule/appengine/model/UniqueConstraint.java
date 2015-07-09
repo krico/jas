@@ -58,8 +58,17 @@ public class UniqueConstraint {
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty, boolean allowNullValues) throws RuntimeException {
+
+        UniqueConstraintBuilder builder = new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .ignoreNullValues(allowNullValues);
+
+        if (uniqueClassifierProperty != null)
+            builder.withUniqueClassifierPropertyName(uniqueClassifierProperty.getName());
+
         try {
-            return new UniqueConstraint(meta, uniqueProperty.getName(), uniqueClassifierProperty == null ? null : uniqueClassifierProperty.getName(), allowNullValues, true);
+            return builder.createUniqueConstraint();
         } catch (UniqueConstraintException e) {
             throw Throwables.propagate(e);
         }
@@ -83,7 +92,7 @@ public class UniqueConstraint {
         }
 
         if (!createIfMissing) {
-            throw new UniqueConstraintException("Unique doesn't exist constraint: " +name);
+            throw new UniqueConstraintException("Unique doesn't exist constraint: " + name);
         }
 
         Preconditions.checkState(Datastore.getCurrentTransaction() == null,
