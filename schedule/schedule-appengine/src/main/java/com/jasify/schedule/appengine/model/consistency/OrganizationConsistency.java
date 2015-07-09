@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.consistency;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationMemberDao;
 import com.jasify.schedule.appengine.model.common.Organization;
 
@@ -18,6 +19,15 @@ public class OrganizationConsistency implements EntityConsistency<Organization> 
         if (!memberKeys.isEmpty()) {
             throw new InconsistentModelStateException("Cannot delete organization with members! " +
                     "id=" + id + " (" + memberKeys.size() + " members).");
+        }
+    }
+
+    @BeforeDelete(entityClass = Organization.class)
+    public void ensureOrganizationHasNoActivityTypes(Key id) throws InconsistentModelStateException {
+        List<Key> activityTypeKeys = new ActivityTypeDao().getKeysByOrganization(id);
+        if (!activityTypeKeys.isEmpty()) {
+            throw new InconsistentModelStateException("Cannot delete organization with activity types! " +
+                    "id=" + id + " (" + activityTypeKeys.size() + " activity types).");
         }
     }
 }

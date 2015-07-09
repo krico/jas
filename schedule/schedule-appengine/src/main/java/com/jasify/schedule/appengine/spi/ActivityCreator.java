@@ -5,7 +5,6 @@ import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails;
-import com.jasify.schedule.appengine.util.BeanUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 
@@ -45,21 +44,27 @@ public class ActivityCreator {
         }
     }
 
-    private Activity createActivity(Activity from, ActivityType activityType, Date start, Date finish) {
+    private Activity createActivity(Activity from, ActivityType activityType, RepeatDetails repeatDetails, Date start, Date finish) {
         Activity newActivity = new Activity(activityType);
-        BeanUtil.copyProperties(newActivity, from);
-        newActivity.setStart(start);
+        newActivity.setCurrency(from.getCurrency());
+        newActivity.setDescription(from.getDescription());
         newActivity.setFinish(finish);
+        newActivity.setLocation(from.getLocation());
+        newActivity.setMaxSubscriptions(from.getMaxSubscriptions());
+        newActivity.setName(from.getName());
+        newActivity.setPrice(from.getPrice());
+        newActivity.getRepeatDetailsRef().setKey(repeatDetails.getId());
+        newActivity.setStart(start);
+        newActivity.setSubscriptionCount(from.getSubscriptionCount());
         return newActivity;
     }
 
     private List<Activity> addActivityRepeatTypeDaily() throws ModelException {
-        activity.setRepeatDetails(repeatDetails);
         DateTime start = new DateTime(activity.getStart());
         DateTime finish = new DateTime(activity.getFinish());
         List<Activity> activities = new ArrayList<>();
         while (activities.size() < MaximumRepeatCounter) {
-            activities.add(createActivity(activity, activityType, start.toDate(), finish.toDate()));
+            activities.add(createActivity(activity, activityType, repeatDetails, start.toDate(), finish.toDate()));
             start = start.plusDays(repeatDetails.getRepeatEvery());
             finish = finish.plusDays(repeatDetails.getRepeatEvery());
             if (repeatDetails.getRepeatUntilType() == RepeatDetails.RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
@@ -93,9 +98,6 @@ public class ActivityCreator {
             repeatEvery = 0;
         }
 
-        activity.setRepeatDetails(repeatDetails);
-
-
         DateTime start = new DateTime(activity.getStart());
         DateTime finish = new DateTime(activity.getFinish());
 
@@ -115,7 +117,7 @@ public class ActivityCreator {
             for (int day = 0; day < 7 && !repeatCompleted; day++) {
                 // Its one of the chosen days
                 if (repeatDays.contains(start.getDayOfWeek())) {
-                    activities.add(createActivity(activity, activityType, start.toDate(), finish.toDate()));
+                    activities.add(createActivity(activity, activityType, repeatDetails, start.toDate(), finish.toDate()));
 
                 }
                 // Move to the next day

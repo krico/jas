@@ -2093,8 +2093,10 @@ public class ActivityEndpointTest {
 
     @Test
     public void testGetActivityPackageActivitiesUnknownId() throws Exception {
+        thrown.expect(NotFoundException.class);
         Key organizationId = Datastore.allocateId(Organization.class);
         Key activityPackageId = Datastore.allocateId(organizationId, ActivityPackage.class);
+        thrown.expectMessage("No entity was found matching the key: " + activityPackageId);
         List<Activity> result = endpoint.getActivityPackageActivities(null, activityPackageId);
         assertTrue(result.isEmpty());
     }

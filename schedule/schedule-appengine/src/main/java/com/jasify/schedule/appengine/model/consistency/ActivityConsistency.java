@@ -21,10 +21,11 @@ public class ActivityConsistency implements EntityConsistency<Activity> {
     private static final Logger log = LoggerFactory.getLogger(ActivityConsistency.class);
 
     private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
+    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
     @BeforeDelete(entityClass = Activity.class)
     public void ensureActivityHasNoSubscriptions(Key id) throws InconsistentModelStateException {
-        List<Subscription> subscriptions = new SubscriptionDao().getByActivity(id);
+        List<Subscription> subscriptions = subscriptionDao.getByActivity(id);
         if (!subscriptions.isEmpty()) {
             throw new InconsistentModelStateException("Cannot delete activity with subscriptions! " +
                     "id=" + id + " (" + subscriptions.size() + " subscriptions).");

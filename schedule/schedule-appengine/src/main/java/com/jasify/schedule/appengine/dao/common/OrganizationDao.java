@@ -143,12 +143,13 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
     }
 
     public boolean addUserToOrganization(Key organizationId, Key userId) throws ModelException {
-        OrganizationMember existing = new OrganizationMemberDao().byOrganizationIdAndUserId(organizationId, userId);
+        OrganizationMemberDao organizationMemberDao = new OrganizationMemberDao();
+        OrganizationMember existing = organizationMemberDao.byOrganizationIdAndUserId(organizationId, userId);
         if (existing != null) return false;
         existing = new OrganizationMember();
         existing.getOrganizationRef().setKey(organizationId);
         existing.getUserRef().setKey(userId);
-        new OrganizationMemberDao().save(existing);
+        organizationMemberDao.save(existing);
         return true;
     }
 

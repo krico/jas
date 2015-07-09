@@ -75,6 +75,7 @@ class DefaultActivityService implements ActivityService {
                     Subscription subscription = new Subscription();
 
                     subscription.getActivityRef().setKey(activity.getId());
+                    subscription.getUserRef().setKey(user.getId());
 
                     activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
                     activity.getSubscriptionListRef().getModelList().add(subscription);
@@ -300,7 +301,7 @@ class DefaultActivityService implements ActivityService {
                         ActivityPackageActivity activityPackageActivity = new ActivityPackageActivity();
                         activityPackageActivity.getActivityRef().setKey(activityId);
                         activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
-                        activityPackageActivityDao.save(activityPackageActivity, organizationId);
+                        activityPackageActivityDao.save(activityPackageActivity, dbActivityPackage.getId());
                     }
                     activityPackageDao.save(dbActivityPackage);
 

@@ -260,7 +260,8 @@ public class ActivityEndpoint {
 
                     ActivityType activityType = activityTypeDao.get(activityTypeId);
                     if (repeatDetails != null) {
-                        repeatDetailsDao.save(repeatDetails, activityTypeId);
+                        Key organizationId = activityType.getOrganizationRef().getKey();
+                        repeatDetailsDao.save(repeatDetails, organizationId);
                     }
 
                     ActivityCreator activityCreator = new ActivityCreator(request.getActivity(), repeatDetails, activityType);
@@ -479,19 +480,16 @@ public class ActivityEndpoint {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
                     activityDao.get(activityId);
-                    ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
+                    activityPackageDao.get(activityPackageId);
                     ActivityPackageActivity activityPackageActivity = activityPackageActivityDao.getByActivityPackageIdAndActivityId(activityPackageId, activityId);
 
                     if (activityPackageActivity != null) {
                         throw new UniqueConstraintException("ActivityPackage " + activityPackageId + " already contains Activity " + activityId);
                     }
 
-                    Key organizationId = activityPackage.getOrganizationRef().getKey();
-
                     activityPackageActivity = new ActivityPackageActivity();
                     activityPackageActivity.getActivityRef().setKey(activityId);
-                    activityPackageActivity.getActivityPackageRef().setKey(activityPackageId);
-                    activityPackageActivityDao.save(activityPackageActivity, organizationId);
+                    activityPackageActivityDao.save(activityPackageActivity, activityPackageId);
                     tx.commit();
                     return null;
                 }

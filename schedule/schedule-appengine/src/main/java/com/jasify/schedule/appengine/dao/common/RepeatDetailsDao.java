@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.meta.activity.RepeatDetailsMeta;
 import com.jasify.schedule.appengine.model.FieldValueException;
@@ -9,6 +10,8 @@ import com.jasify.schedule.appengine.model.activity.RepeatDetails;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author wszarmach
@@ -49,6 +52,23 @@ public class RepeatDetailsDao extends BaseCachingDao<RepeatDetails> {
             entity.setId(Datastore.allocateId(organizationId, getMeta()));
         }
 
+        return save(entity);
+    }
+
+    @Nonnull
+    @Override
+    public Key save(@Nonnull RepeatDetails entity) throws ModelException {
+        Preconditions.checkNotNull(entity.getId(), "RepeatDetails must have id");
         return super.save(entity);
+    }
+
+    @Nonnull
+    @Override
+    public List<Key> save(@Nonnull List<RepeatDetails> entities) throws ModelException {
+        List<Key> result = new ArrayList<>();
+        for (RepeatDetails entity : entities) {
+            result.add(save(entity));
+        }
+        return result;
     }
 }

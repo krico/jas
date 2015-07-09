@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
@@ -14,6 +15,7 @@ import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
  * @since 07/06/15.
  */
 public class ActivityDao extends BaseCachingDao<Activity> {
+    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
 
     public ActivityDao() {
         super(ActivityMeta.get());
@@ -40,7 +43,7 @@ public class ActivityDao extends BaseCachingDao<Activity> {
     @Nonnull
     public Key save(@Nonnull Activity entity, @Nonnull Key activityTypeId) throws ModelException {
         preSave(entity, activityTypeId);
-        return super.save(entity);
+        return save(entity);
     }
 
     @Nonnull
@@ -53,7 +56,29 @@ public class ActivityDao extends BaseCachingDao<Activity> {
             preSave(entity, activityTypeId);
         }
 
-        return super.save(entities);
+        return save(entities);
+    }
+
+    @Nonnull
+    @Override
+    public Key save(@Nonnull Activity entity) throws ModelException {
+        Preconditions.checkNotNull(entity.getActivityTypeRef().getKey(), "Activity must have activityTypeRef");
+        if (entity.getId() == null) {
+            ActivityType activityType = activityTypeDao.get(entity.getActivityTypeRef().getKey());
+            Key organizationId = activityType.getOrganizationRef().getKey();
+            entity.setId(Datastore.allocateId(organizationId, getMeta()));
+        }
+        return super.save(entity);
+    }
+
+    @Nonnull
+    @Override
+    public List<Key> save(@Nonnull List<Activity> entities) throws ModelException {
+        List<Key> result = new ArrayList<>();
+        for (Activity entity : entities) {
+            result.add(save(entity));
+        }
+        return result;
     }
 
     private void preSave(Activity entity, Key activityTypeId) throws EntityNotFoundException, FieldValueException {
@@ -65,17 +90,11 @@ public class ActivityDao extends BaseCachingDao<Activity> {
         if (entity.getPrice() != null && entity.getPrice() < 0) throw new FieldValueException("Activity.price");
         if (entity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
 
-        ActivityType activityType = entity.getActivityTypeRef().getModel();
+        ActivityType activityType = activityTypeDao.get(activityTypeId);
 
         String name = StringUtils.trimToNull(entity.getName());
         if (StringUtils.isBlank(name)) {
             entity.setName(activityType.getName());
-        }
-
-        if (entity.getId() == null) {
-            // New Activity
-            Key organizationId = activityTypeId.getParent();
-            entity.setId(Datastore.allocateId(organizationId, getMeta()));
         }
     }
 
