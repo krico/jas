@@ -8,14 +8,12 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.Activity;
-import com.jasify.schedule.appengine.model.activity.ActivityPackageActivity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,24 +35,6 @@ public class ActivityDao extends BaseCachingDao<Activity> {
     public List<Activity> getByOrganizationId(Key organizationId) {
         ActivityMeta meta = getMeta();
         return query(new ByOrganizationQuery(meta, organizationId));
-    }
-
-    public List<Activity> getByActivityPackageId(Key activityPackageId) throws EntityNotFoundException {
-        List<ActivityPackageActivity> activityPackageActivities = new ActivityPackageActivityDao().getByActivityPackageId(activityPackageId);
-        List<Activity> result = new ArrayList<>();
-        for (ActivityPackageActivity activityPackageActivity : activityPackageActivities) {
-            result.add(get(activityPackageActivity.getActivityRef().getKey()));
-        }
-        return result;
-    }
-
-    public List<Key> getKeysByActivityPackageId(Key activityPackageId) throws EntityNotFoundException {
-        List<ActivityPackageActivity> activityPackageActivities = new ActivityPackageActivityDao().getByActivityPackageId(activityPackageId);
-        List<Key> result = new ArrayList<>();
-        for (ActivityPackageActivity activityPackageActivity : activityPackageActivities) {
-            result.add(activityPackageActivity.getActivityRef().getKey());
-        }
-        return result;
     }
 
     @Nonnull

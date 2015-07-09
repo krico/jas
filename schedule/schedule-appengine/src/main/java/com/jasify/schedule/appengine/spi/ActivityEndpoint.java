@@ -440,7 +440,13 @@ public class ActivityEndpoint {
     public List<Activity> getActivityPackageActivities(@SuppressWarnings("unused") User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
         checkFound(activityPackageId, "activityPackageId == null");
         try {
-            List<Activity> activities = activityDao.getByActivityPackageId(activityPackageId);
+            List<ActivityPackageActivity> activityPackageActivities = activityPackageActivityDao.getByActivityPackageId(activityPackageId);
+            List<Activity> activities = new ArrayList<>();
+            for (ActivityPackageActivity activityPackageActivity : activityPackageActivities) {
+                Activity activity = activityDao.get(activityPackageActivity.getActivityRef().getKey());
+                activities.add(activity);
+            }
+
             Collections.sort(activities, new Comparator<Activity>() {
                 @Override
                 public int compare(Activity o1, Activity o2) {

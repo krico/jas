@@ -103,8 +103,7 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
     public List<ActivityPackageActivity> getByActivityPackageId(Key activityPackageId) throws EntityNotFoundException {
         ActivityPackageActivityMeta meta = getMeta();
 
-        ActivityPackage activityPackage = new ActivityPackageDao().get(activityPackageId);
-        Key organizationId = activityPackage.getOrganizationRef().getKey();
+        Key organizationId = activityPackageId.getParent();
 
         return query(new ByOrganizationAndActivityPackageQuery(meta, organizationId, activityPackageId));
     }

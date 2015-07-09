@@ -75,12 +75,12 @@ class DefaultActivityService implements ActivityService {
                     Subscription subscription = new Subscription();
 
                     subscription.getActivityRef().setKey(activity.getId());
-                    subscriptionDao.save(subscription, user.getId());
 
                     activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
                     activity.getSubscriptionListRef().getModelList().add(subscription);
 
                     activityDao.save(activity);
+                    subscriptionDao.save(subscription, user.getId());
 
                     // TODO Add this user to the organizations client list
                     tx.commit();
@@ -272,14 +272,18 @@ class DefaultActivityService implements ActivityService {
             throw new FieldValueException("ActivityPackage.activities.size");
         }
         try {
-            final Key activityPackageId = activityPackage.getId();
-            final Set<Key> existingKeys = new HashSet<>(activityDao.getKeysByActivityPackageId(activityPackageId));
-
             return TransactionOperator.execute(new ModelOperation<ActivityPackage>() {
                 @Override
                 public ActivityPackage execute(Transaction tx) throws ModelException {
+                    Key activityPackageId = activityPackage.getId();
                     ActivityPackage dbActivityPackage = activityPackageDao.get(activityPackageId);
                     List<Key> newKeys = Lists.transform(activities, ACTIVITY_TO_KEY_FUNCTION);
+
+                    List<ActivityPackageActivity> activityPackageActivities = activityPackageActivityDao.getByActivityPackageId(activityPackageId);
+                    Set<Key> existingKeys = new HashSet<>();
+                    for (ActivityPackageActivity activityPackageActivity : activityPackageActivities) {
+                        existingKeys.add(activityPackageActivity.getActivityRef().getKey());
+                    }
 
                     Key organizationId = dbActivityPackage.getOrganizationRef().getKey();
 

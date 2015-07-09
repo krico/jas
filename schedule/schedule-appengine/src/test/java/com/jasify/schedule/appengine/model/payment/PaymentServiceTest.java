@@ -9,7 +9,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
@@ -25,7 +24,6 @@ import org.slim3.datastore.Datastore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -283,7 +281,7 @@ public class PaymentServiceTest {
         PayPalPayment payPalPayment = createPayPalPayment(paymentProvider);
 
         User user = createUser();
-        Activity activity = createActivity(createActivityType());
+        Activity activity = TestHelper.createActivity(true);
 
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
@@ -364,52 +362,6 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void testActivityPackageCancelTaskCancelsPayment() throws Exception {
-        PaymentProvider<CashPayment> paymentProvider = CashPaymentProvider.instance();
-        CashPayment payment = createCashPayment(paymentProvider);
-
-        User user = createUser();
-        Organization organization = TestHelper.createOrganization(true);
-        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
-        activityPackage.setItemCount(2);
-        ActivityType activityType = TestHelper.createActivityType(organization, true);
-        Activity activity1 = TestHelper.createActivity(activityType, true);
-        Activity activity2 = TestHelper.createActivity(activityType, true);
-
-        ActivityServiceFactory.getActivityService().addActivityPackage(activityPackage, Arrays.asList(activity1, activity2));
-
-        PaymentWorkflow paymentWorkflow = PaymentWorkflowFactory.workflowFor(activityPackage.getId(), Arrays.asList(activity1.getId(), activity2.getId()));
-        paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
-        GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
-        paymentService.createPayment(paymentProvider, payment, baseUrl);
-        ActivityDao activityDao = new ActivityDao();
-        List<Activity> activities = activityDao.getByActivityPackageId(activityPackage.getId());
-        for (Activity activity : activities) {
-            assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
-            assertEquals(1, activity.getSubscriptionCount());
-        }
-        activityPackage = Datastore.get(ActivityPackage.class, activityPackage.getId());
-        assertEquals(1, activityPackage.getExecutionCount());
-        paymentService.executePayment(paymentProvider, payment);
-
-        Queue paymentQueue = QueueFactory.getQueue("payment-queue");
-        LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
-        localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
-
-        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
-
-        payment = Datastore.get(CashPayment.class, payment.getId());
-        assertEquals(PaymentStateEnum.Completed, payment.getState());
-        activities = activityDao.getByActivityPackageId(activityPackage.getId());
-        for (Activity activity : activities) {
-            assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
-            assertEquals(1, activity.getSubscriptionCount());
-        }
-        activityPackage = Datastore.get(ActivityPackage.class, activityPackage.getId());
-        assertEquals(1, activityPackage.getExecutionCount());
-    }
-
-    @Test
     public void testActivityPackageCancelTaskIgnoresCompletedPayments() throws Exception {
         PaymentProvider<CashPayment> paymentProvider = CashPaymentProvider.instance();
         CashPayment payment = createCashPayment(paymentProvider);
@@ -428,12 +380,64 @@ public class PaymentServiceTest {
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
         GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
         paymentService.createPayment(paymentProvider, payment, baseUrl);
-        ActivityDao activityDao = new ActivityDao();
-        List<Activity> activities = activityDao.getByActivityPackageId(activityPackage.getId());
-        for (Activity activity : activities) {
-            assertEquals(1, activity.getSubscriptionListRef().getModelList().size());
-            assertEquals(1, activity.getSubscriptionCount());
-        }
+        activity1 = Datastore.get(Activity.class, activity1.getId());
+        assertEquals(1, activity1.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity1.getSubscriptionCount());
+        activity2 = Datastore.get(Activity.class, activity2.getId());
+        assertEquals(1, activity2.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity2.getSubscriptionCount());
+
+        activityPackage = Datastore.get(ActivityPackage.class, activityPackage.getId());
+        assertEquals(1, activityPackage.getExecutionCount());
+        paymentService.executePayment(paymentProvider, payment);
+
+        Queue paymentQueue = QueueFactory.getQueue("payment-queue");
+        LocalTaskQueue localTaskQueue = LocalTaskQueueTestConfig.getLocalTaskQueue();
+        localTaskQueue.runTask("payment-queue", localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().get(0).getTaskName());
+
+        assert (localTaskQueue.getQueueStateInfo().get(paymentQueue.getQueueName()).getTaskInfo().isEmpty());
+
+        payment = Datastore.get(CashPayment.class, payment.getId());
+        assertEquals(PaymentStateEnum.Completed, payment.getState());
+
+        activity1 = Datastore.get(Activity.class, activity1.getId());
+        assertEquals(1, activity1.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity1.getSubscriptionCount());
+        activity2 = Datastore.get(Activity.class, activity2.getId());
+        assertEquals(1, activity2.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity2.getSubscriptionCount());
+
+        activityPackage = Datastore.get(ActivityPackage.class, activityPackage.getId());
+        assertEquals(1, activityPackage.getExecutionCount());
+    }
+
+    @Test
+    public void testActivityPackageCancelTaskCancelsPayment() throws Exception {
+        PaymentProvider<CashPayment> paymentProvider = CashPaymentProvider.instance();
+        CashPayment payment = createCashPayment(paymentProvider);
+
+        User user = createUser();
+        Organization organization = TestHelper.createOrganization(true);
+        ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, false);
+        activityPackage.setItemCount(2);
+        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        Activity activity1 = TestHelper.createActivity(activityType, true);
+        Activity activity2 = TestHelper.createActivity(activityType, true);
+
+        ActivityServiceFactory.getActivityService().addActivityPackage(activityPackage, Arrays.asList(activity1, activity2));
+
+        PaymentWorkflow paymentWorkflow = PaymentWorkflowFactory.workflowFor(activityPackage.getId(), Arrays.asList(activity1.getId(), activity2.getId()));
+        paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
+        GenericUrl baseUrl = new GenericUrl("http://localhost:8080");
+        paymentService.createPayment(paymentProvider, payment, baseUrl);
+
+        activity1 = Datastore.get(Activity.class, activity1.getId());
+        assertEquals(1, activity1.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity1.getSubscriptionCount());
+        activity2 = Datastore.get(Activity.class, activity2.getId());
+        assertEquals(1, activity2.getSubscriptionListRef().getModelList().size());
+        assertEquals(1, activity2.getSubscriptionCount());
+
         activityPackage = Datastore.get(ActivityPackage.class, activityPackage.getId());
         assertEquals(1, activityPackage.getExecutionCount());
 
@@ -445,12 +449,14 @@ public class PaymentServiceTest {
 
         payment = Datastore.get(CashPayment.class, payment.getId());
         assertEquals(PaymentStateEnum.Canceled, payment.getState());
-        activityDao = new ActivityDao();
-        activities = activityDao.getByActivityPackageId(activityPackage.getId());
-        for (Activity activity : activities) {
-            assertEquals(0, activity.getSubscriptionListRef().getModelList().size());
-            assertEquals(0, activity.getSubscriptionCount());
-        }
+
+        activity1 = Datastore.get(Activity.class, activity1.getId());
+        assertEquals(0, activity1.getSubscriptionListRef().getModelList().size());
+        assertEquals(0, activity1.getSubscriptionCount());
+        activity2 = Datastore.get(Activity.class, activity2.getId());
+        assertEquals(0, activity2.getSubscriptionListRef().getModelList().size());
+        assertEquals(0, activity2.getSubscriptionCount());
+
         activityPackage = Datastore.get(ActivityPackage.class, activityPackage.getId());
         assertEquals(0, activityPackage.getExecutionCount());
     }
