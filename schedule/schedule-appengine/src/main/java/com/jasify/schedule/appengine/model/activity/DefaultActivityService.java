@@ -256,7 +256,7 @@ class DefaultActivityService implements ActivityService {
         TransactionOperator.executeNoEx(new ModelOperation<Void>() {
             @Override
             public Void execute(Transaction tx) throws ModelException {
-                activityPackageDao.save(activityPackage, organizationId);
+                activityPackageDao.save(activityPackage);
                 activityPackageActivityDao.save(models);
                 tx.commit();
                 return null;

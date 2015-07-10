@@ -65,12 +65,6 @@ public class BaseDaoTest {
         assertEquals(expected1, BeanUtil.beanMap(entity, exclude));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testConstructorInsideTransaction() throws Exception {
-        beginTx();
-        new ExampleDao();
-    }
-
     @Test
     public void testGet() throws Exception {
         Example expected = createExample();
