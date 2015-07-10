@@ -1,23 +1,21 @@
 package com.jasify.schedule.appengine.model;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
+import com.jasify.schedule.appengine.dao.common.RepeatDetailsDao;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserService;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import com.jasify.schedule.appengine.spi.ActivityCreator;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.datastore.Datastore;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -110,6 +108,7 @@ class SchemaMigrationInitialLoad {
 
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         ActivityTypeDao activityTypeDao = new ActivityTypeDao();
+        ActivityDao activityDao = new ActivityDao();
         int count = 0;
         for (Organization organization : organizations) {
             ++count;
@@ -151,15 +150,17 @@ class SchemaMigrationInitialLoad {
             repeatDetails.setThursdayEnabled(true);
             repeatDetails.setFridayEnabled(true);
 
-
-            List<Key> activityKeys = activityService.addActivity(activityType, activity, repeatDetails);
-            List<Activity> activities = Lists.transform(activityKeys, new Function<Key, Activity>() {
-                @Nullable
-                @Override
-                public Activity apply(Key input) {
-                    return Datastore.get(Activity.class, input);
-                }
-            });
+            new RepeatDetailsDao().save(repeatDetails, organization.getId());
+            ActivityCreator activityCreator = new ActivityCreator(activity, repeatDetails, activityType);
+            List<Activity> activities = activityCreator.create();
+            activityDao.save(activities);
+//            List<Activity> activities = Lists.transform(activityKeys, new Function<Key, Activity>() {
+//                @Nullable
+//                @Override
+//                public Activity apply(Key input) {
+//                    return Datastore.get(Activity.class, input);
+//                }
+//            });
 
             ActivityPackage activityPackageFull = new ActivityPackage();
             activityPackageFull.getOrganizationRef().setModel(organization);

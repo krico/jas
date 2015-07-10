@@ -8,9 +8,7 @@ import com.jasify.schedule.appengine.model.common.Organization;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 
 /**
  * @author szarmawa
@@ -98,11 +96,29 @@ public class ActivityDaoTest {
 
     @Test
     public void testSaveUpdate() throws Exception {
-        Organization organization = TestHelper.createOrganization(true);
-        ActivityType activityType = TestHelper.createActivityType(organization, true);
-        Activity activity = TestHelper.createActivity(activityType, true);
+        Activity activity = TestHelper.createActivity(true);
         Key result = dao.save(activity);
         assertNotNull(result);
+    }
+
+    @Test
+    public void testActivityNameTrailingSpaceRemoved() throws Exception {
+        Activity activity = TestHelper.createActivity(true);
+        activity.setName("NAME   ");
+        assertEquals("NAME   ", activity.getName());
+        Key key = dao.save(activity);
+        Activity result = dao.get(key);
+        assertEquals("NAME", result.getName());
+    }
+
+    @Test
+    public void testActivityNullNameChangedToActivityTypeName() throws Exception {
+        Activity activity = TestHelper.createActivity(false);
+        activity.setName(null);
+        assertNull(activity.getName());
+        Key key = dao.save(activity);
+        Activity result = dao.get(key);
+        assertEquals(result.getActivityTypeRef().getModel().getName(), result.getName());
     }
 
     @Test

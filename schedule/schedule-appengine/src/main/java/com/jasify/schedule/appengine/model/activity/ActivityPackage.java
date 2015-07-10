@@ -1,12 +1,8 @@
 package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageActivityMeta;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.common.Organization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.*;
 
 import java.util.*;
@@ -17,7 +13,6 @@ import java.util.*;
  */
 @Model
 public class ActivityPackage {
-    private static final Logger log = LoggerFactory.getLogger(ActivityPackage.class);
 
     @Attribute(primaryKey = true)
     private Key id;
@@ -171,51 +166,4 @@ public class ActivityPackage {
     public InverseModelListRef<ActivityPackageActivity, ActivityPackage> getActivityPackageActivityListRef() {
         return activityPackageActivityListRef;
     }
-
-    public List<Activity> getActivities() {
-        List<Activity> ret = new ArrayList<>();
-        List<ActivityPackageActivity> activityLinks = activityPackageActivityListRef.getModelList();
-        if (activityLinks == null) return ret;
-
-        for (ActivityPackageActivity link : activityLinks) {
-            try {
-                ActivityDao activityDao = new ActivityDao();
-                Activity activity = activityDao.get(link.getActivityRef().getKey());
-                ret.add(activity);
-            } catch (EntityNotFoundException e) {
-                log.error("Failed to find activity with key", e);
-            }
-        }
-        Collections.sort(ret, new Comparator<Activity>() {
-            @Override
-            public int compare(Activity o1, Activity o2) {
-                Date start1 = o1.getStart();
-                if (start1 == null) {
-                    start1 = o1.getCreated() == null ? new Date(Long.MAX_VALUE) : o1.getCreated();
-                }
-                Date start2 = o2.getStart();
-                if (start2 == null) {
-                    start2 = o2.getCreated() == null ? new Date(Long.MAX_VALUE) : o2.getCreated();
-                }
-
-                return start1.compareTo(start2);
-            }
-        });
-
-        return ret;
-    }
-
-    public Set<Key> getActivityKeys() {
-        Set<Key> ret = new HashSet<>();
-        List<ActivityPackageActivity> activityLinks = activityPackageActivityListRef.getModelList();
-        if (activityLinks == null) return ret;
-
-        for (ActivityPackageActivity link : activityLinks) {
-            Key key = link.getActivityRef().getKey();
-            if (key != null) ret.add(key);
-        }
-
-        return ret;
-    }
-
 }

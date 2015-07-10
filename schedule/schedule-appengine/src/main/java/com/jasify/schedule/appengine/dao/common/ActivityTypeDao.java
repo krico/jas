@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
@@ -13,6 +14,7 @@ import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,6 +49,11 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
         return query(new ByOrganizationQuery(meta, organizationId));
     }
 
+    public List<Key> getKeysByOrganization(Key organizationId) {
+        ActivityTypeMeta meta = getMeta();
+        return queryKeys(new ByOrganizationQuery(meta, organizationId));
+    }
+
     @Nonnull
     public Key save(@Nonnull ActivityType entity, @Nonnull Key organizationId) throws ModelException {
         String name = StringUtils.trimToNull(entity.getName());
@@ -62,9 +69,8 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
             if (exists(name, organizationId)) {
                 throw new UniqueConstraintException("ActivityType.name=" + name + ", Organization.id=" + organizationId);
             }
-            entity.setId(Datastore.allocateId(organizationId, getMeta()));
             entity.getOrganizationRef().setKey(organizationId);
-            return super.save(entity);
+            return save(entity);
         }
 
         // Update ActivityType
@@ -76,7 +82,28 @@ public class ActivityTypeDao extends BaseCachingDao<ActivityType> {
             }
         }
 
+        return save(entity);
+    }
+
+    @Nonnull
+    @Override
+    public Key save(@Nonnull ActivityType entity) throws ModelException {
+        Preconditions.checkNotNull(entity.getOrganizationRef().getKey(), "ActivityType must have organizationRef");
+        if(entity.getId() == null) {
+            Key organizationId = entity.getOrganizationRef().getKey();
+            entity.setId(Datastore.allocateId(organizationId, getMeta()));
+        }
         return super.save(entity);
+    }
+
+    @Nonnull
+    @Override
+    public List<Key> save(@Nonnull List<ActivityType> entities) throws ModelException {
+        List<Key> result = new ArrayList<>();
+        for (ActivityType entity : entities) {
+            result.add(save(entity));
+        }
+        return result;
     }
 
     private static class ByOrganizationQuery extends BaseDaoQuery<ActivityType, ActivityTypeMeta> {

@@ -205,15 +205,15 @@ public final class TestHelper {
         mailHelper.tearDown();
     }
 
-    public static void assertEqualsNoMillis(Date d1, Date d2) {
-        if (d1 == null || d2 == null) {
-            assertEquals("both must be null", d1, d2);
-        } else {
-            long l1 = d1.getTime() / 1000L;
-            long l2 = d2.getTime() / 1000L;
-            assertEquals(new Date(l1 * 1000L), new Date(l2 * 1000L));
-        }
-    }
+//    public static void assertEqualsNoMillis(Date d1, Date d2) {
+//        if (d1 == null || d2 == null) {
+//            assertEquals("both must be null", d1, d2);
+//        } else {
+//            long l1 = d1.getTime() / 1000L;
+//            long l2 = d2.getTime() / 1000L;
+//            assertEquals(new Date(l1 * 1000L), new Date(l2 * 1000L));
+//        }
+//    }
 
     public static List<User> createUsers(int total) throws UsernameExistsException {
         int i = 0;
@@ -390,7 +390,7 @@ public final class TestHelper {
     public static class PriceRandomizer implements Randomizer<Double> {
         @Override
         public Double getRandomValue() {
-            return new Double((new RandomDataGenerator()).nextLong(0, (long) Double.MAX_VALUE));
+            return (double) (new RandomDataGenerator()).nextLong(0, (long) Double.MAX_VALUE);
         }
     }
 
@@ -417,9 +417,9 @@ public final class TestHelper {
 
         ActivityType activityType = populator.populateBean(ActivityType.class, "id", "organizationRef", "lcName");
         activityType.setLcName(StringUtils.lowerCase(activityType.getName()));
+        activityType.getOrganizationRef().setKey(organization.getId());
         if (store) {
             // TODO: ActivityType requires the model not to be set but Activity requires the model to be set??
-            activityType.getOrganizationRef().setModel(organization);
             activityType.setId(Datastore.allocateId(organization.getId(), ActivityTypeMeta.get()));
             Datastore.put(activityType);
         }
@@ -437,7 +437,7 @@ public final class TestHelper {
         Populator populator = populatorBuilder.build();
         Activity activity = populator.populateBean(Activity.class, "id", "activityTypeRef", "repeatDetailsRef", "subscriptionListRef", "finish", "subscriptionCount");
         activity.setFinish(new DateTime(activity.getStart().getTime()).plusHours(1).toDate());
-        activity.getActivityTypeRef().setModel(activityType);
+        activity.getActivityTypeRef().setKey(activityType.getId());
         if (store) {
             activity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), ActivityMeta.get()));
             Datastore.put(activity);
@@ -453,9 +453,9 @@ public final class TestHelper {
         populatorBuilder.registerRandomizer(ActivityPackage.class, int.class, "itemCount", new MaxCountRandomizer());
         Populator populator = populatorBuilder.build();
         ActivityPackage activityPackage = populator.populateBean(ActivityPackage.class, "id", "organizationRef", "activityPackageActivityListRef", "executionCount");
+        activityPackage.getOrganizationRef().setKey(organization.getId());
         if (store) {
             activityPackage.setId(Datastore.allocateId(organization.getId(), ActivityPackageMeta.get()));
-            activityPackage.getOrganizationRef().setModel(organization);
             Datastore.put(activityPackage);
         }
         return activityPackage;
@@ -465,37 +465,49 @@ public final class TestHelper {
         PopulatorBuilder populatorBuilder = new PopulatorBuilder();
         Populator populator = populatorBuilder.build();
         ActivityPackageExecution activityPackageExecution = populator.populateBean(ActivityPackageExecution.class, "id", "activityPackageRef", "subscriptionListRef", "transferRef", "userRef");
+        activityPackageExecution.getActivityPackageRef().setKey(activityPackage.getId());
+        activityPackageExecution.getUserRef().setKey(user.getId());
         if (store) {
             activityPackageExecution.setId(Datastore.allocateId(user.getId(), ActivityPackageExecutionMeta.get()));
-            activityPackageExecution.getActivityPackageRef().setModel(activityPackage);
-            activityPackageExecution.getUserRef().setModel(user);
             Datastore.put(activityPackageExecution);
         }
         return activityPackageExecution;
     }
 
+//    public static ActivityPackageActivity createActivityPackageActivity(ActivityPackage activityPackage, Activity activity, boolean store) {
+//        ActivityPackageActivity activityPackageActivity = new ActivityPackageActivity();
+//        activityPackageActivity.getActivityRef().setKey(activity.getId());
+//        activityPackageActivity.getActivityPackageRef().setKey(activityPackage.getId());
+//        if (store) {
+//            activityPackageActivity.setId(Datastore.allocateId(activityPackage.getId(), ActivityPackageExecutionMeta.get()));
+//            Datastore.put(activityPackageActivity);
+//        }
+//        return activityPackageActivity;
+//    }
+
     public static Subscription createSubscription(User user, Activity activity, boolean store) {
         PopulatorBuilder populatorBuilder = new PopulatorBuilder();
         Populator populator = populatorBuilder.build();
         Subscription subscription = populator.populateBean(Subscription.class, "id", "activityRef", "userRef", "transferRef");
+        subscription.getActivityRef().setKey(activity.getId());
+        subscription.getUserRef().setKey(user.getId());
         if (store) {
             subscription.setId(Datastore.allocateId(user.getId(), SubscriptionMeta.get()));
-            subscription.getActivityRef().setModel(activity);
-            subscription.getUserRef().setModel(user);
             Datastore.put(subscription);
         }
         return subscription;
     }
 
     public static Activity createActivity(boolean storeAll) {
-        Organization organization = createOrganization(storeAll);
-        ActivityType activityType = createActivityType(organization, storeAll);
+        Organization organization = createOrganization(true);
+        ActivityType activityType = createActivityType(organization, true);
         return createActivity(activityType, storeAll);
     }
 
     public static User createUser(boolean store) {
         User user = new User("fred", "Em@il.com", "Real Name");
         if (store) {
+            user.setId(Datastore.allocateId(User.class));
             Datastore.put(user);
         }
         return user;

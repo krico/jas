@@ -13,9 +13,11 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class ActivityTypeConsistency implements EntityConsistency<ActivityType> {
+    private final ActivityDao activityDao = new ActivityDao();
+
     @BeforeDelete(entityClass = ActivityType.class)
     public void ensureActivityTypeHasNoActivities(Key id) throws InconsistentModelStateException {
-        List<Activity> activities = new ActivityDao().getByActivityTypeId(id);
+        List<Activity> activities = activityDao.getByActivityTypeId(id);
         if (!activities.isEmpty()) {
             throw new InconsistentModelStateException("Cannot delete activity type with activities! " +
                     "id=" + id + " (" + activities.size() + " activities).");

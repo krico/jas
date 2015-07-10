@@ -20,16 +20,22 @@ import java.util.List;
 public class ActivityConsistency implements EntityConsistency<Activity> {
     private static final Logger log = LoggerFactory.getLogger(ActivityConsistency.class);
 
+    private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
+    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
+
     @BeforeDelete(entityClass = Activity.class)
     public void ensureActivityHasNoSubscriptions(Key id) throws InconsistentModelStateException {
-        List<Subscription> subscriptions = new SubscriptionDao().getByActivity(id);
+        List<Subscription> subscriptions = subscriptionDao.getByActivity(id);
         if (!subscriptions.isEmpty()) {
-            throw new InconsistentModelStateException("Activity has subscriptions");
+            throw new InconsistentModelStateException("Cannot delete activity with subscriptions! " +
+                    "id=" + id + " (" + subscriptions.size() + " subscriptions).");
         }
+
         try {
-            List<ActivityPackageActivity> activityPackageActivities = new ActivityPackageActivityDao().getByActivityId(id);
+            List<ActivityPackageActivity> activityPackageActivities = activityPackageActivityDao.getByActivityId(id);
             if (!activityPackageActivities.isEmpty()) {
-                throw new InconsistentModelStateException("Activity is linked to Activity Package");
+                throw new InconsistentModelStateException("Cannot delete activity linked to activity packages! " +
+                        "id=" + id + " (" + activityPackageActivities.size() + " activity packages).");
             }
         } catch (EntityNotFoundException e) {
             log.error("Activity not found", e);

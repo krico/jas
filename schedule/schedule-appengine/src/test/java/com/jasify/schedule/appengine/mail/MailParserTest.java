@@ -54,16 +54,13 @@ public class MailParserTest {
         return subscription;
     }
 
-    private ActivityPackage createActivityPackage(ActivityType activityType, List<Activity> activities) {
+    private ActivityPackage createActivityPackage(ActivityType activityType) {
         ActivityPackage activityPackage = new ActivityPackage();
         activityPackage.getOrganizationRef().setModel(activityType.getOrganizationRef().getModel());
         activityPackage.setPrice(random(20.0, 25.0));
         activityPackage.setItemCount(2);
         activityPackage.setName("Squash Bundle");
         activityPackage.setCurrency("CHF");
-        for (Activity activity : activities) {
-            activityPackage.getActivities().add(activity);
-        }
         Datastore.put(activityPackage);
         return activityPackage;
     }
@@ -77,15 +74,16 @@ public class MailParserTest {
     }
 
     private ActivityPackageExecution createActivityPackageExecution(User user, ActivityType activityType) {
-        List<Activity> activities = new ArrayList<>();
-        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 15, 13, 0), new DateTime(2015, 4, 15, 14, 0)));
-        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 16, 13, 0), new DateTime(2015, 4, 16, 14, 0)));
-        ActivityPackage activityPackage = createActivityPackage(activityType, activities);
+        ActivityPackage activityPackage = createActivityPackage(activityType);
 
         ActivityPackageExecution activityPackageExecution = new ActivityPackageExecution();
         activityPackageExecution.getActivityPackageRef().setModel(activityPackage);
         activityPackageExecution.getUserRef().setModel(user);
         activityPackageExecution.setId(Datastore.allocateId(ActivityPackageExecution.class));
+
+        List<Activity> activities = new ArrayList<>();
+        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 15, 13, 0), new DateTime(2015, 4, 15, 14, 0)));
+        activities.add(createActivity(activityType, random(10.0, 20.0), new DateTime(2015, 4, 16, 13, 0), new DateTime(2015, 4, 16, 14, 0)));
 
         for (Activity activity : activities) {
             ActivityPackageSubscription activityPackageSubscription = createActivityPackageSubscription(user, activity);

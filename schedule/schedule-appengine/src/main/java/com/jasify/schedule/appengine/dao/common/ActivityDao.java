@@ -1,17 +1,22 @@
 package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
+import org.apache.commons.lang3.StringUtils;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,26 +41,60 @@ public class ActivityDao extends BaseCachingDao<Activity> {
     }
 
     @Nonnull
-    public Key save(@Nonnull Activity entity, @Nonnull Key activityTypeId) throws ModelException {
-        if (entity.getStart() == null) throw new FieldValueException("Activity.start");
-        if (entity.getStart().getTime() < System.currentTimeMillis()) throw new FieldValueException("Activity.start");
-        if (entity.getFinish() == null) throw new FieldValueException("Activity.finish");
-        if (entity.getFinish().getTime() < entity.getStart().getTime())
-            throw new FieldValueException("Activity.finish");
-        if (entity.getPrice() != null && entity.getPrice() < 0) throw new FieldValueException("Activity.price");
-        if (entity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
+    public List<Key> save(@Nonnull List<Activity> entities, @Nonnull Key activityTypeId) throws ModelException {
+        if (entities.isEmpty()) {
+            return Collections.emptyList();
+        }
 
+        for (Activity entity : entities) {
+            if (entity.getActivityTypeRef().getKey() == null) {
+                entity.getActivityTypeRef().setKey(activityTypeId);
+            }
+        }
+
+        return save(entities);
+    }
+
+    @Nonnull
+    @Override
+    public Key save(@Nonnull Activity entity) throws ModelException {
+        Preconditions.checkNotNull(entity.getActivityTypeRef().getKey(), "Activity must have activityTypeRef");
+        validate(entity);
+
+        Key activityTypeId = entity.getActivityTypeRef().getKey();
         ActivityType activityType = activityTypeDao.get(activityTypeId);
-        if (entity.getName() == null) {
+
+        String name = StringUtils.trimToNull(entity.getName());
+        if (StringUtils.isBlank(name)) {
             entity.setName(activityType.getName());
+        } else {
+            entity.setName(name);
         }
 
         if (entity.getId() == null) {
-            // New Activity
-            entity.setId(Datastore.allocateId(activityType.getOrganizationRef().getKey(), getMeta()));
+            Key organizationId = activityType.getOrganizationRef().getKey();
+            entity.setId(Datastore.allocateId(organizationId, getMeta()));
         }
-
         return super.save(entity);
+    }
+
+    @Nonnull
+    @Override
+    public List<Key> save(@Nonnull List<Activity> entities) throws ModelException {
+        List<Key> result = new ArrayList<>();
+        for (Activity entity : entities) {
+            result.add(save(entity));
+        }
+        return result;
+    }
+
+    private void validate(Activity entity) throws FieldValueException, EntityNotFoundException {
+        if (entity.getStart() == null) throw new FieldValueException("Activity.start");
+        if (entity.getStart().getTime() < System.currentTimeMillis()) throw new FieldValueException("Activity.start");
+        if (entity.getFinish() == null) throw new FieldValueException("Activity.finish");
+        if (entity.getFinish().getTime() < entity.getStart().getTime()) throw new FieldValueException("Activity.finish");
+        if (entity.getPrice() != null && entity.getPrice() < 0) throw new FieldValueException("Activity.price");
+        if (entity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
     }
 
     private static class ByActivityTypeQuery extends BaseDaoQuery<Activity, ActivityMeta> {

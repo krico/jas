@@ -39,7 +39,7 @@ public class SubscriptionDaoTest {
 
     @Test
     public void testGetSubscription() throws Exception {
-        Subscription subscription = TestHelper.createSubscription(TestHelper.createUser(true), null, true);
+        Subscription subscription = TestHelper.createSubscription(TestHelper.createUser(true), TestHelper.createActivity(true), true);
         Subscription result = dao.get(subscription.getId());
         assertNotNull(result);
         assertEquals(subscription.getCreated(), result.getCreated());

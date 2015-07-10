@@ -5,9 +5,6 @@ import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.jasify.schedule.appengine.dao.common.*;
 import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.*;
@@ -22,10 +19,7 @@ import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
 
@@ -65,19 +59,20 @@ public class ActivityEndpoint {
     private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final OrganizationDao organizationDao = new OrganizationDao();
+    private final RepeatDetailsDao repeatDetailsDao = new RepeatDetailsDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
     private final UserDao userDao = new UserDao();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(@SuppressWarnings("unused") User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
-        checkFound(organizationId);
+        checkFound(organizationId, "organizationId == null");
         return activityTypeDao.getByOrganization(organizationId);
     }
 
     @ApiMethod(name = "activityTypes.get", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public ActivityType getActivityType(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        checkFound(id, "id == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
-        checkFound(id);
         try {
             return activityTypeDao.get(id);
         } catch (EntityNotFoundException e) {
@@ -87,8 +82,9 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.update", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public ActivityType updateActivityType(User caller, @Named("id") final Key id, final ActivityType activityType) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        checkFound(id, "id == null");
+        checkFound(activityType, "activityType == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
-        checkFound(id);
         activityType.setId(id);
 
         try {
@@ -104,8 +100,6 @@ public class ActivityEndpoint {
             });
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
-        } catch (FieldValueException | UniqueConstraintException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -113,9 +107,10 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.add", path = "activity-types", httpMethod = ApiMethod.HttpMethod.POST)
     public ActivityType addActivityType(User caller, JasAddActivityTypeRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        checkFound(request, "request == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(request.getOrganizationId()));
-        final ActivityType activityType = checkFound(request.getActivityType());
-        final Key organizationId = checkFound(request.getOrganizationId());
+        final ActivityType activityType = checkFound(request.getActivityType(), "request.activityType == null");
+        final Key organizationId = checkFound(request.getOrganizationId(), "request.organizationId == null");
 
         try {
             return TransactionOperator.execute(new ModelOperation<ActivityType>() {
@@ -127,8 +122,6 @@ public class ActivityEndpoint {
                     return activityType;
                 }
             });
-        } catch (FieldValueException | UniqueConstraintException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -136,15 +129,15 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityTypes.remove", path = "activity-types/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivityType(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
+        checkFound(id, "id == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
-        checkFound(id);
 
         try {
             ConsistencyGuard.beforeDelete(ActivityType.class, id);
 
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
-                public Void execute(Transaction tx) throws ModelException {
+                public Void execute(Transaction tx) throws EntityNotFoundException {
                     activityTypeDao.get(id); //Throws not found if this activityType doesn't exist
                     activityTypeDao.delete(id);
                     tx.commit();
@@ -158,52 +151,6 @@ public class ActivityEndpoint {
         } catch (ModelException me) {
             throw new InternalServerErrorException(me.getMessage());
         }
-    }
-
-    private List<Activity> filterByDate(List<Activity> activities, final Date fromDate, final Date toDate) {
-        if (fromDate == null && toDate == null) {
-            return activities;
-        }
-
-        ArrayList<Activity> result = new ArrayList<>();
-        result.addAll(Collections2.filter(activities, new Predicate<Activity>() {
-            @Override
-            public boolean apply(@Nullable Activity input) {
-                if (fromDate != null && input.getStart() != null && fromDate.after(input.getStart())) {
-                    return false;
-                }
-                if (toDate != null && input.getFinish() != null && toDate.before(input.getFinish())) {
-                    return false;
-                }
-                return true;
-            }
-        }));
-        return result;
-    }
-
-    private List<Activity> filterActivities(List<Activity> activities, Date fromDate,
-                                            Date toDate,
-                                            Integer offset,
-                                            Integer limit) {
-        if (activities.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<Activity> filtered = filterByDate(activities, fromDate, toDate);
-
-        if (offset == null) offset = 0;
-        if (limit == null) limit = 0;
-
-        if (offset > 0 || limit > 0) {
-            if (offset < filtered.size()) {
-                if (limit <= 0) limit = filtered.size();
-                return new ArrayList<>(filtered.subList(offset, Math.min(offset + limit, filtered.size())));
-            } else {
-                return Collections.emptyList();
-            }
-        }
-
-        return filtered;
     }
 
     @ApiMethod(name = "activities.query", path = "activities", httpMethod = ApiMethod.HttpMethod.GET)
@@ -231,18 +178,15 @@ public class ActivityEndpoint {
             all.addAll(activityDao.getByOrganizationId(organizationId));
         }
 
-        //TODO: I'm pretty sure this should be done on the Service implementation, but I'm in the bus and lazy and sleepy
-        return filterActivities(all, fromDate, toDate, offset, limit);
+        return new ActivityFilter().filter(all, fromDate, toDate, offset, limit);
     }
 
     // The hardest part is to get the name right!
     @ApiMethod(name = "activities.listQuery", path = "activities-list", httpMethod = ApiMethod.HttpMethod.POST)
-    public List<Activity> getActivitiesByIds(User caller,
+    public List<Activity> getActivitiesByIds(@SuppressWarnings("unused") User caller,
                                              JasListQueryActivitiesRequest request) throws BadRequestException, NotFoundException {
-
-        if (request == null) {
-            throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
-        } else if (request.getActivityTypeIds().isEmpty() && request.getOrganizationIds().isEmpty()) {
+        checkFound(request, "request == null");
+        if (request.getActivityTypeIds().isEmpty() && request.getOrganizationIds().isEmpty()) {
             throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
         } else if (!request.getActivityTypeIds().isEmpty() && !request.getOrganizationIds().isEmpty()) {
             throw new BadRequestException("Must choose one: activityTypeIds or organizationIds");
@@ -262,13 +206,13 @@ public class ActivityEndpoint {
             }
         }
 
-        return filterActivities(all, request.getFromDate(), request.getToDate(), request.getOffset(), request.getLimit());
+        return new ActivityFilter().filter(all, request.getFromDate(), request.getToDate(), request.getOffset(), request.getLimit());
     }
 
     @ApiMethod(name = "activities.get", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public Activity getActivity(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         mustBeLoggedIn(caller);
-        checkFound(id);
+        checkFound(id, "id == null");
         try {
             return activityDao.get(id);
         } catch (EntityNotFoundException e) {
@@ -278,8 +222,9 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.update", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
     public Activity updateActivity(User caller, @Named("id") final Key id, final Activity activity) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activity.getId()));
-        checkFound(id);
+        checkFound(activity, "activity == null");
+        checkFound(id, "id == null");
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(id));
         activity.setId(id);
 
         try {
@@ -288,39 +233,44 @@ public class ActivityEndpoint {
                 public Activity execute(Transaction tx) throws ModelException {
                     Activity dbActivity = activityDao.get(id);
                     BeanUtil.copyPropertiesExcluding(dbActivity, activity, "created", "modified", "id", "activityTypeRef");
-                    activityDao.save(dbActivity, dbActivity.getActivityTypeRef().getKey());
+                    activityDao.save(dbActivity);
                     tx.commit();
                     return dbActivity;
                 }
             });
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Activity not found");
-        } catch (FieldValueException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "activities.add", path = "activities", httpMethod = ApiMethod.HttpMethod.POST)
-    public List<Activity> addActivity(User caller, JasAddActivityRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
-        checkFound(request.getActivity());
-        checkFound(request.getActivity().getActivityTypeRef().getKey());
-        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(request.getActivity().getActivityTypeRef().getKey()));
+    public List<Activity> addActivity(User caller, final JasAddActivityRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        checkFound(request, "request == null");
+        checkFound(request.getActivity(), "request.activity == null");
+        final Key activityTypeId = checkFound(request.getActivity().getActivityTypeRef().getKey(), "request.activity.activityType == null");
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(activityTypeId));
 
         try {
-            ActivityService activityService = ActivityServiceFactory.getActivityService();
-            ActivityType activityType = activityTypeDao.get(request.getActivity().getActivityTypeRef().getKey());
-            // In case client does not set the Name field we force the set here
-            if (request.getActivity().getName() == null) {
-                request.getActivity().setName(activityType.getName());
-            }
-            List<Key> keys = activityService.addActivity(activityType, request.getActivity(), request.getRepeatDetails());
-            List<Activity> result = new ArrayList<>();
-            for (Key key : keys) {
-                result.add(activityDao.get(key));
-            }
-            return result;
+            return TransactionOperator.execute(new ModelOperation<List<Activity>>() {
+                @Override
+                public List<Activity> execute(Transaction tx) throws ModelException {
+                    RepeatDetails repeatDetails = request.getRepeatDetails();
+
+                    ActivityType activityType = activityTypeDao.get(activityTypeId);
+                    if (repeatDetails != null) {
+                        Key organizationId = activityType.getOrganizationRef().getKey();
+                        repeatDetailsDao.save(repeatDetails, organizationId);
+                    }
+
+                    ActivityCreator activityCreator = new ActivityCreator(request.getActivity(), repeatDetails, activityType);
+                    List<Activity> activities = activityCreator.create();
+                    activityDao.save(activities, activityTypeId);
+                    tx.commit();
+                    return activities;
+                }
+            });
         } catch (FieldValueException e) {
             throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
@@ -332,8 +282,8 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activities.remove", path = "activities/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void removeActivity(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
+        checkFound(id, "id == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(id));
-        checkFound(id);
         try {
             ConsistencyGuard.beforeDelete(Activity.class, id);
 
@@ -348,8 +298,6 @@ public class ActivityEndpoint {
             });
         } catch (InconsistentModelStateException e) {
             throw new BadRequestException(e.getMessage());
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
         } catch (ModelException me) {
             throw new InternalServerErrorException(me.getMessage());
         }
@@ -357,9 +305,9 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.add", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.POST)
     public Subscription addSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException {
+        checkFound(userId, "userId == null");
+        checkFound(activityId, "activityId == null");
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
-        checkFound(userId);
-        checkFound(activityId);
         try {
             com.jasify.schedule.appengine.model.users.User user = userDao.get(userId);
             Activity activity = activityDao.get(activityId);
@@ -373,9 +321,9 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.query", path = "activity-subscriptions", httpMethod = ApiMethod.HttpMethod.GET)
     public Subscription getSubscription(User caller, @Named("userId") Key userId, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        checkFound(userId, "userId == null");
+        checkFound(activityId, "activityId == null");
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
-        checkFound(userId);
-        checkFound(activityId);
 
         List<Subscription> subscriptions = subscriptionDao.getByActivity(activityId);
         for (Subscription subscription : subscriptions) {
@@ -389,16 +337,15 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activitySubscriptions.subscribers", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Subscription> getSubscriptions(User caller, @Named("activityId") Key activityId) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        checkFound(activityId, "activityId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activityId));
-        checkFound(activityId);
         return subscriptionDao.getByActivity(activityId);
-
     }
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)
     public void cancelSubscription(User caller, @Named("subscriptionId") Key subscriptionId) throws UnauthorizedException, ForbiddenException, NotFoundException {
+        checkFound(subscriptionId, "subscriptionId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromSubscriptionId(subscriptionId));
-        checkFound(subscriptionId);
         try {
             ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
         } catch (EntityNotFoundException e) {
@@ -408,13 +355,13 @@ public class ActivityEndpoint {
 
     @ApiMethod(name = "activityPackages.query", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityPackage> getActivityPackages(@SuppressWarnings("unused") User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
-        checkFound(organizationId);
+        checkFound(organizationId, "organizationId == null");
         return activityPackageDao.getByOrganization(organizationId);
     }
 
     @ApiMethod(name = "activityPackages.get", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public ActivityPackage getActivityPackage(@SuppressWarnings("unused") User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        checkFound(id);
+        checkFound(id, "id == null");
         try {
             return activityPackageDao.get(id);
         } catch (EntityNotFoundException e) {
@@ -423,21 +370,26 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activityPackages.update", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public ActivityPackage updateActivityPackage(User caller, @Named("id") Key id, JasActivityPackageRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        checkFound(id, "id == null");
+        checkFound(request, "request == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(id));
-        checkFound(id);
-        ActivityPackage activityPackage = Preconditions.checkNotNull(request.getActivityPackage(), "request.ActivityPackage is NULL");
-        List<Activity> activities = Preconditions.checkNotNull(request.getActivities(), "request.Activities is NULL");
+        ActivityPackage activityPackage = checkFound(request.getActivityPackage(), "request.activityPackage == null");
+        List<Activity> activities = checkFound(request.getActivities(), "request.activities == null");
         activityPackage.setId(id);
         try {
+            activityPackageDao.get(id);
             return ActivityServiceFactory.getActivityService().updateActivityPackage(activityPackage, activities);
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("Not found");
+            throw new NotFoundException(e.getMessage());
+        } catch (FieldValueException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "activityPackages.add", path = "activity-packages", httpMethod = ApiMethod.HttpMethod.POST)
     public ActivityPackage addActivityPackage(User caller, JasActivityPackageRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        checkFound(request, "request == null");
         ActivityPackage activityPackage = checkFound(request.getActivityPackage(), "request.activityPackage == NULL");
         Key organizationId = checkFound(activityPackage.getOrganizationRef().getKey(), "request.activityPackage.organization == NULL");
         List<Activity> activities = checkFound(request.getActivities(), "request.activities == NULL");
@@ -457,58 +409,123 @@ public class ActivityEndpoint {
         } catch (FieldValueException e) {
             throw new BadRequestException(e.getMessage());
         }
-
     }
 
     @ApiMethod(name = "activityPackages.remove", path = "activity-packages/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeActivityPackage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public void removeActivityPackage(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
+        checkFound(id, "id == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityTypeId(id));
-        checkFound(id);
         try {
-            ActivityServiceFactory.getActivityService().removeActivityPackage(id);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        } catch (OperationException e) {
+            ConsistencyGuard.beforeDelete(ActivityPackage.class, id);
+
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    activityPackageDao.get(id);
+                    // Delete all the attached activities
+                    List<Key> toDelete = activityPackageActivityDao.getKeysByActivityPackageId(id);
+                    activityPackageActivityDao.delete(toDelete);
+                    activityPackageDao.delete(id);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (InconsistentModelStateException e) {
             throw new BadRequestException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 
     @ApiMethod(name = "activityPackages.getActivities", path = "activity-packages-activity/{activityPackageId}", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Activity> getActivityPackageActivities(@SuppressWarnings("unused") User caller, @Named("activityPackageId") Key activityPackageId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        checkFound(activityPackageId);
+        checkFound(activityPackageId, "activityPackageId == null");
         try {
-            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-            return activityPackage.getActivities();
+            List<ActivityPackageActivity> activityPackageActivities = activityPackageActivityDao.getByActivityPackageId(activityPackageId);
+            List<Activity> activities = new ArrayList<>();
+            for (ActivityPackageActivity activityPackageActivity : activityPackageActivities) {
+                Activity activity = activityDao.get(activityPackageActivity.getActivityRef().getKey());
+                activities.add(activity);
+            }
+
+            Collections.sort(activities, new Comparator<Activity>() {
+                @Override
+                public int compare(Activity o1, Activity o2) {
+                    Date start1 = o1.getStart();
+                    if (start1 == null) {
+                        start1 = o1.getCreated() == null ? new Date(Long.MAX_VALUE) : o1.getCreated();
+                    }
+                    Date start2 = o2.getStart();
+                    if (start2 == null) {
+                        start2 = o2.getCreated() == null ? new Date(Long.MAX_VALUE) : o2.getCreated();
+                    }
+
+                    return start1.compareTo(start2);
+                }
+            });
+            return activities;
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "activityPackages.addActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.POST)
-    public void addActivityToActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public void addActivityToActivityPackage(User caller, @Named("activityPackageId") final Key activityPackageId, @Named("activityId") final Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
+        checkFound(activityPackageId, "activityPackageId == null");
+        checkFound(activityId, "activityId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(activityPackageId));
-        checkFound(activityPackageId);
-        checkFound(activityId);
+
         try {
-            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-            Activity activity = activityDao.get(activityId);
-            ActivityServiceFactory.getActivityService().addActivityToActivityPackage(activityPackage, activity);
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws ModelException {
+                    activityDao.get(activityId);
+                    activityPackageDao.get(activityPackageId);
+                    ActivityPackageActivity activityPackageActivity = activityPackageActivityDao.getByActivityPackageIdAndActivityId(activityPackageId, activityId);
+
+                    if (activityPackageActivity != null) {
+                        throw new UniqueConstraintException("ActivityPackage " + activityPackageId + " already contains Activity " + activityId);
+                    }
+
+                    activityPackageActivity = new ActivityPackageActivity();
+                    activityPackageActivity.getActivityRef().setKey(activityId);
+                    activityPackageActivityDao.save(activityPackageActivity, activityPackageId);
+                    tx.commit();
+                    return null;
+                }
+            });
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 
     @ApiMethod(name = "activityPackages.removeActivity", path = "activity-packages-activity/{activityPackageId}/{activityId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") Key activityPackageId, @Named("activityId") Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+    public void removeActivityFromActivityPackage(User caller, @Named("activityPackageId") final Key activityPackageId, @Named("activityId") final Key activityId) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException, InternalServerErrorException {
+        checkFound(activityPackageId, "activityPackageId == null");
+        checkFound(activityId, "activityId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityPackageId(activityPackageId));
-        checkFound(activityPackageId);
-        checkFound(activityId);
+
         try {
-            ActivityPackage activityPackage = activityPackageDao.get(activityPackageId);
-            Activity activity = activityDao.get(activityId);
-            ActivityServiceFactory.getActivityService().removeActivityFromActivityPackage(activityPackage, activity);
+            activityPackageDao.get(activityPackageId);
+            activityDao.get(activityId);
+            final Key activityPackageActivityId = activityPackageActivityDao.getKeyByActivityPackageIdAndActivityId(activityPackageId, activityId);
+            ConsistencyGuard.beforeDelete(ActivityPackageActivity.class, activityPackageActivityId);
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws EntityNotFoundException, InconsistentModelStateException {
+                    activityPackageActivityDao.delete(activityPackageActivityId);
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (InconsistentModelStateException e) {
+            throw new BadRequestException(e.getMessage());
         } catch (EntityNotFoundException e) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException(e.getMessage());
+        } catch (ModelException me) {
+            throw new InternalServerErrorException(me.getMessage());
         }
     }
 }
