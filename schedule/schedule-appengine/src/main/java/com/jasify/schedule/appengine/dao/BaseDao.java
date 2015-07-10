@@ -28,7 +28,7 @@ public abstract class BaseDao<T> {
     protected BaseDao(@Nonnull ModelMeta<T> meta) {
         this.meta = meta;
         Preconditions.checkState(Datastore.getCurrentTransaction() == null,
-                "{} cannot be instantiated within a transaction", this);
+                "%s cannot be instantiated within a transaction", this);
     }
 
     //Syntax sugar
