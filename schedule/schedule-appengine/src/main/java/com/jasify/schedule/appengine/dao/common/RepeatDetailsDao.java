@@ -23,8 +23,7 @@ public class RepeatDetailsDao extends BaseCachingDao<RepeatDetails> {
         super(RepeatDetailsMeta.get());
     }
 
-    @Nonnull
-    public Key save(@Nonnull RepeatDetails entity, @Nonnull Key organizationId) throws ModelException {
+    private void validate(RepeatDetails entity) throws FieldValueException {
         if (entity.getRepeatType() == null) throw new FieldValueException("RepeatDetails.repeatType");
         if (entity.getRepeatType() != RepeatDetails.RepeatType.No) {
             if (entity.getRepeatEvery() <= 0) throw new FieldValueException("RepeatDetails.repeatEvery");
@@ -46,7 +45,10 @@ public class RepeatDetailsDao extends BaseCachingDao<RepeatDetails> {
                     || entity.isSundayEnabled();
             if (!dayEnabled) throw new FieldValueException("RepeatDetails.repeatDays");
         }
+    }
 
+    @Nonnull
+    public Key save(@Nonnull RepeatDetails entity, @Nonnull Key organizationId) throws ModelException {
         if (entity.getId() == null) {
             // New RepeatDetails
             entity.setId(Datastore.allocateId(organizationId, getMeta()));
@@ -59,6 +61,7 @@ public class RepeatDetailsDao extends BaseCachingDao<RepeatDetails> {
     @Override
     public Key save(@Nonnull RepeatDetails entity) throws ModelException {
         Preconditions.checkNotNull(entity.getId(), "RepeatDetails must have id");
+        validate(entity);
         return super.save(entity);
     }
 

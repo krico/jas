@@ -499,8 +499,8 @@ public final class TestHelper {
     }
 
     public static Activity createActivity(boolean storeAll) {
-        Organization organization = createOrganization(storeAll);
-        ActivityType activityType = createActivityType(organization, storeAll);
+        Organization organization = createOrganization(true);
+        ActivityType activityType = createActivityType(organization, true);
         return createActivity(activityType, storeAll);
     }
 
