@@ -41,19 +41,15 @@ public class ActivityDao extends BaseCachingDao<Activity> {
     }
 
     @Nonnull
-    public Key save(@Nonnull Activity entity, @Nonnull Key activityTypeId) throws ModelException {
-        preSave(entity, activityTypeId);
-        return save(entity);
-    }
-
-    @Nonnull
     public List<Key> save(@Nonnull List<Activity> entities, @Nonnull Key activityTypeId) throws ModelException {
         if (entities.isEmpty()) {
             return Collections.emptyList();
         }
 
         for (Activity entity : entities) {
-            preSave(entity, activityTypeId);
+            if (entity.getActivityTypeRef().getKey() == null) {
+                entity.getActivityTypeRef().setKey(activityTypeId);
+            }
         }
 
         return save(entities);
@@ -63,8 +59,19 @@ public class ActivityDao extends BaseCachingDao<Activity> {
     @Override
     public Key save(@Nonnull Activity entity) throws ModelException {
         Preconditions.checkNotNull(entity.getActivityTypeRef().getKey(), "Activity must have activityTypeRef");
+        validate(entity);
+
+        Key activityTypeId = entity.getActivityTypeRef().getKey();
+        ActivityType activityType = activityTypeDao.get(activityTypeId);
+
+        String name = StringUtils.trimToNull(entity.getName());
+        if (StringUtils.isBlank(name)) {
+            entity.setName(activityType.getName());
+        } else {
+            entity.setName(name);
+        }
+
         if (entity.getId() == null) {
-            ActivityType activityType = activityTypeDao.get(entity.getActivityTypeRef().getKey());
             Key organizationId = activityType.getOrganizationRef().getKey();
             entity.setId(Datastore.allocateId(organizationId, getMeta()));
         }
@@ -81,21 +88,13 @@ public class ActivityDao extends BaseCachingDao<Activity> {
         return result;
     }
 
-    private void preSave(Activity entity, Key activityTypeId) throws EntityNotFoundException, FieldValueException {
+    private void validate(Activity entity) throws FieldValueException, EntityNotFoundException {
         if (entity.getStart() == null) throw new FieldValueException("Activity.start");
         if (entity.getStart().getTime() < System.currentTimeMillis()) throw new FieldValueException("Activity.start");
         if (entity.getFinish() == null) throw new FieldValueException("Activity.finish");
-        if (entity.getFinish().getTime() < entity.getStart().getTime())
-            throw new FieldValueException("Activity.finish");
+        if (entity.getFinish().getTime() < entity.getStart().getTime()) throw new FieldValueException("Activity.finish");
         if (entity.getPrice() != null && entity.getPrice() < 0) throw new FieldValueException("Activity.price");
         if (entity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
-
-        ActivityType activityType = activityTypeDao.get(activityTypeId);
-
-        String name = StringUtils.trimToNull(entity.getName());
-        if (StringUtils.isBlank(name)) {
-            entity.setName(activityType.getName());
-        }
     }
 
     private static class ByActivityTypeQuery extends BaseDaoQuery<Activity, ActivityMeta> {

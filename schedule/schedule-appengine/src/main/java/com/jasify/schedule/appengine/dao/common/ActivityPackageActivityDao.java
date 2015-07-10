@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine.dao.common;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
@@ -13,7 +12,6 @@ import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import com.jasify.schedule.appengine.model.activity.ActivityPackageActivity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
-import org.slim3.datastore.CompositeCriterion;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nonnull;
@@ -166,10 +164,8 @@ public class ActivityPackageActivityDao extends BaseCachingDao<ActivityPackageAc
             Key activityId = parameters.get(2);
             return Datastore
                     .query(Datastore.getCurrentTransaction(), meta, organizationId)
-                    .filter(new CompositeCriterion(meta,
-                            Query.CompositeFilterOperator.AND,
-                            meta.activityPackageRef.equal(activityPackageId),
-                            meta.activityRef.equal(activityId)))
+                    .filter(meta.activityPackageRef.equal(activityPackageId),
+                            meta.activityRef.equal(activityId))
                     .asKeyList();
         }
     }

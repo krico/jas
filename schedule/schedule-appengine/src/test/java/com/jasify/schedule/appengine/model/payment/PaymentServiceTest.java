@@ -71,22 +71,6 @@ public class PaymentServiceTest {
         return payment;
     }
 
-    private ActivityType createActivityType() {
-        Organization organization = new Organization();
-        Datastore.put(organization);
-        ActivityType activityType = new ActivityType();
-        activityType.getOrganizationRef().setModel(organization);
-        Datastore.put(activityType);
-        return activityType;
-    }
-
-    private Activity createActivity(ActivityType activityType) {
-        Activity activity = new Activity(activityType);
-        activity.setPrice(19.95);
-        Datastore.put(activity);
-        return activity;
-    }
-
     private User createUser() {
         User user = new User("testuser");
         Datastore.put(user);
@@ -175,7 +159,7 @@ public class PaymentServiceTest {
         CashPayment payment = createCashPayment(paymentProvider);
 
         User user = createUser();
-        Activity activity = createActivity(createActivityType());
+        Activity activity = TestHelper.createActivity(true);
 
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));
@@ -205,7 +189,7 @@ public class PaymentServiceTest {
         PayPalPayment payPalPayment = createPayPalPayment(paymentProvider);
 
         User user = createUser();
-        Activity activity = createActivity(createActivityType());
+        Activity activity = TestHelper.createActivity(true);
 
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
@@ -243,7 +227,7 @@ public class PaymentServiceTest {
         PayPalPayment payPalPayment = createPayPalPayment(paymentProvider);
 
         User user = createUser();
-        Activity activity = createActivity(createActivityType());
+        Activity activity = TestHelper.createActivity(true);
 
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payPalPayment, Arrays.asList(paymentWorkflow));
@@ -338,7 +322,7 @@ public class PaymentServiceTest {
         CashPayment payment = createCashPayment(paymentProvider);
 
         User user = createUser();
-        Activity activity = createActivity(createActivityType());
+        Activity activity = TestHelper.createActivity(true);
 
         PaymentWorkflow paymentWorkflow = new ActivityPaymentWorkflow(activity.getId());
         paymentService.newPayment(user.getId().getId(), payment, Arrays.asList(paymentWorkflow));

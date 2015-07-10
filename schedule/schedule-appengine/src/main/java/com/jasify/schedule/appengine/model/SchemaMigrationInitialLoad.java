@@ -1,8 +1,5 @@
 package com.jasify.schedule.appengine.model;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
@@ -18,9 +15,7 @@ import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slim3.datastore.Datastore;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -158,7 +153,7 @@ class SchemaMigrationInitialLoad {
             new RepeatDetailsDao().save(repeatDetails, organization.getId());
             ActivityCreator activityCreator = new ActivityCreator(activity, repeatDetails, activityType);
             List<Activity> activities = activityCreator.create();
-            activityDao.save(activities, activityType.getId());
+            activityDao.save(activities);
 //            List<Activity> activities = Lists.transform(activityKeys, new Function<Key, Activity>() {
 //                @Nullable
 //                @Override

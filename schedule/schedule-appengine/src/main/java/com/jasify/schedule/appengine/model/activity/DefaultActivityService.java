@@ -247,7 +247,7 @@ class DefaultActivityService implements ActivityService {
         }
 //        if (activityPackage.getValidUntil().getTime() < activityPackage.getValidFrom().getTime()) throw new FieldValueException("ActivityPackage.validUntil");
 
-        final List<Object> models = new ArrayList<>();
+        final List<ActivityPackageActivity> models = new ArrayList<>();
         for (Activity activity : activities) {
             ActivityPackageActivity junction = new ActivityPackageActivity(activityPackage, activity);
             junction.setId(Datastore.allocateId(organizationId, activityPackageActivityMeta));
@@ -257,7 +257,7 @@ class DefaultActivityService implements ActivityService {
             @Override
             public Void execute(Transaction tx) throws ModelException {
                 activityPackageDao.save(activityPackage, organizationId);
-                Datastore.put(tx, models);
+                activityPackageActivityDao.save(models);
                 tx.commit();
                 return null;
             }

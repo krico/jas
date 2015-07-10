@@ -233,7 +233,7 @@ public class ActivityEndpoint {
                 public Activity execute(Transaction tx) throws ModelException {
                     Activity dbActivity = activityDao.get(id);
                     BeanUtil.copyPropertiesExcluding(dbActivity, activity, "created", "modified", "id", "activityTypeRef");
-                    activityDao.save(dbActivity, dbActivity.getActivityTypeRef().getKey());
+                    activityDao.save(dbActivity);
                     tx.commit();
                     return dbActivity;
                 }
