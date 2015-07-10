@@ -102,12 +102,10 @@ public class UniqueConstraint {
         }
 
         if (!createIfMissing) {
-            StringBuilder builder = new StringBuilder("MISSING UniqueConstraint: ").append(name);
-            builder
-                    .append("\n\t").append("You probably need to add on com.jasify.schedule.appengine.model.UniqueConstraints:")
-                    .append("\n\t").append("new UniqueConstraintBuilder(). ... .createNoEx();")
-                    .append(".");
-            throw new UniqueConstraintException(builder.toString());
+            throw new UniqueConstraintException("MISSING UniqueConstraint: " + name +
+                    "\n\t" + "You probably need to add on com.jasify.schedule.appengine.model.UniqueConstraints:" +
+                    "\n\t" + "new UniqueConstraintBuilder(). ... .createNoEx();" +
+                    "\n\t" + "there are several examples there..." + ".");
         }
 
         Preconditions.checkState(Datastore.getCurrentTransaction() == null,

@@ -29,6 +29,7 @@ public class SchemaMigrationTest {
     public void initializeDatastore() {
         TestHelper.initializeDatastore();
         ApplicationData.instance().reload();
+        UniqueConstraints.ensureAllConstraintsExist();
     }
 
     @After

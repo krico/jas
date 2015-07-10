@@ -11,6 +11,9 @@ import com.jasify.schedule.appengine.meta.activity.ActivityPackageMeta;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.OperationException;
+import com.jasify.schedule.appengine.model.UniqueConstraints;
+import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
+import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
@@ -77,6 +80,7 @@ public class ActivityServiceTest {
     @Before
     public void initializeDatastore() {
         TestHelper.initializeJasify();
+        UniqueConstraints.ensureAllConstraintsExist();
         activityService = ActivityServiceFactory.getActivityService();
         Organization organization1 = createOrganization("Org1");
         Organization organization2 = createOrganization("Org2");

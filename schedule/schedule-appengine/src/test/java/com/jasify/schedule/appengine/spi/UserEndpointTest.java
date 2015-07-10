@@ -37,11 +37,12 @@ import static org.easymock.EasyMock.*;
 public class UserEndpointTest {
     private TestUserServiceFactory testUserServiceFactory = new TestUserServiceFactory();
 
-    private UserEndpoint endpoint = new UserEndpoint();
+    private UserEndpoint endpoint;
 
     @Before
     public void datastore() {
         TestHelper.initializeDatastore();
+        endpoint = new UserEndpoint();
         testUserServiceFactory.setUp();
     }
 
