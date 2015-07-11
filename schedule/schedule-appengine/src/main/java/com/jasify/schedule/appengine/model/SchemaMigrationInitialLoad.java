@@ -163,7 +163,7 @@ class SchemaMigrationInitialLoad {
 //            });
 
             ActivityPackage activityPackageFull = new ActivityPackage();
-            activityPackageFull.getOrganizationRef().setModel(organization);
+            activityPackageFull.getOrganizationRef().setKey(organization.getId());
             activityPackageFull.setName("Activity Package " + KeyUtil.keyToString(organization.getId()) + " (FULL)");
             activityPackageFull.setDescription(activityPackageFull.getName() + " description");
             activityPackageFull.setCurrency("CHF");

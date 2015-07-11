@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.dao;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.UniqueConstraintsTest;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import org.junit.After;
 import org.junit.Before;
@@ -30,6 +31,7 @@ public class UniqueIndexCacheTest {
         UniqueIndexCache.clear();
         TestHelper.initializeDatastore();
         ApplicationData.instance().reload();
+        UniqueConstraintsTest.createExampleConstraints();
     }
 
     @Test
@@ -67,18 +69,6 @@ public class UniqueIndexCacheTest {
         uniqueIndex.reserve("a");
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testUniqueIndexNotAllowNull() throws UniqueConstraintException {
-        Datastore.put(new Example(), new Example());
-        UniqueIndexCache.get(INDEX_NAME, ExampleMeta.get(), ExampleMeta.get().data, false);
-    }
-
-    @Test
-    public void testUniqueIndexAllowNull() throws UniqueConstraintException {
-        Datastore.put(new Example(), new Example());
-        UniqueIndexCache.get(INDEX_NAME, ExampleMeta.get(), ExampleMeta.get().data, true);
-    }
-
     @Test
     public void testUniquePairIndexCachesValues() {
         UniquePairIndex uniqueIndex = UniqueIndexCache.get(INDEX_NAME, ExampleMeta.get(), ExampleMeta.get().data, ExampleMeta.get().dataType, false);
@@ -107,17 +97,4 @@ public class UniqueIndexCacheTest {
         uniqueIndex.release("a", "b");
         uniqueIndex.reserve("a", "b");
     }
-
-    @Test(expected = RuntimeException.class)
-    public void testUniquePairIndexNotAllowNull() throws UniqueConstraintException {
-        Datastore.put(new Example(), new Example());
-        UniqueIndexCache.get(INDEX_NAME, ExampleMeta.get(), ExampleMeta.get().data, ExampleMeta.get().dataType, false);
-    }
-
-    @Test
-    public void testUniquePairIndexAllowNull() throws UniqueConstraintException {
-        Datastore.put(new Example(), new Example());
-        UniqueIndexCache.get(INDEX_NAME, ExampleMeta.get(), ExampleMeta.get().data, ExampleMeta.get().dataType, true);
-    }
-
 }

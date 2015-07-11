@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.Constants;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.application.ApplicationProperty;
@@ -36,39 +37,50 @@ public class UniqueConstraint {
     private final String uniqueKind;
     private final boolean ignoreNullValues;
 
-    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName) throws UniqueConstraintException {
-        this(meta, uniquePropertyName, false);
-    }
-
-    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, boolean ignoreNullValues) throws UniqueConstraintException {
-        this(meta, uniquePropertyName, null, ignoreNullValues);
-    }
-
-    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, String uniqueClassifierPropertyName, boolean ignoreNullValues) throws UniqueConstraintException {
+    UniqueConstraint(ModelMeta<?> meta, String uniquePropertyName, String uniqueClassifierPropertyName, boolean ignoreNullValues, boolean createIfMissing) throws UniqueConstraintException {
         this.meta = meta;
         this.uniquePropertyName = uniquePropertyName;
         this.uniqueClassifierPropertyName = uniqueClassifierPropertyName;
         this.ignoreNullValues = ignoreNullValues;
-        this.uniqueKind = determineKind();
+        this.uniqueKind = determineKind(createIfMissing);
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty) throws RuntimeException {
-        return create(meta, uniqueProperty, null, false);
+        return new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .createNoEx();
     }
 
-    public static <T> UniqueConstraint createAllowingNullValues(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty) throws RuntimeException {
-        return create(meta, uniqueProperty, null, true);
+    public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, boolean allowNullValues) throws RuntimeException {
+        return new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .ignoreNullValues(allowNullValues)
+                .createNoEx();
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty) throws RuntimeException {
-        return create(meta, uniqueProperty, uniqueClassifierProperty, false);
+        return new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .withUniqueClassifierPropertyName(uniqueClassifierProperty.getName()).createNoEx();
     }
 
     public static <T> UniqueConstraint create(ModelMeta<T> meta, StringAttributeMeta<T> uniqueProperty, StringAttributeMeta<T> uniqueClassifierProperty, boolean allowNullValues) throws RuntimeException {
+
+        UniqueConstraintBuilder builder = new UniqueConstraintBuilder()
+                .forMeta(meta)
+                .withUniquePropertyName(uniqueProperty.getName())
+                .ignoreNullValues(allowNullValues);
+
+        if (uniqueClassifierProperty != null)
+            builder.withUniqueClassifierPropertyName(uniqueClassifierProperty.getName());
+
         try {
-            return new UniqueConstraint(meta, uniqueProperty.getName(), uniqueClassifierProperty == null ? null : uniqueClassifierProperty.getName(), allowNullValues);
+            return builder.create();
         } catch (UniqueConstraintException e) {
-            throw new RuntimeException(e);
+            throw Throwables.propagate(e);
         }
     }
 
@@ -80,14 +92,25 @@ public class UniqueConstraint {
         return "jasify.UniqueConstraint." + meta.getKind() + "#" + uniquePropertyName + (uniqueClassifierPropertyName == null ? "" : "+" + uniqueClassifierPropertyName);
     }
 
-    private String determineKind() throws UniqueConstraintException {
+    private String determineKind(boolean createIfMissing) throws UniqueConstraintException {
         String name = getEntityKindPropertyName();
         ApplicationData applicationData = ApplicationData.instance();
         String kind = applicationData.getProperty(name);
         if (kind != null) {
-            log.info("Existing constraint: {}, uniqueKind = [{}]", getEntityKindPropertyName(), kind);
+            log.debug("Existing constraint: {}, uniqueKind = [{}]", name, kind);
             return kind;
         }
+
+        if (!createIfMissing) {
+            throw new UniqueConstraintException("MISSING UniqueConstraint: " + name +
+                    "\n\t" + "You probably need to add on com.jasify.schedule.appengine.model.UniqueConstraints:" +
+                    "\n\t" + "new UniqueConstraintBuilder(). ... .createNoEx();" +
+                    "\n\t" + "there are several examples there..." + ".");
+        }
+
+        Preconditions.checkState(Datastore.getCurrentTransaction() == null,
+                "UniqueConstraint should never be initialized inside a Transaction");
+
         ApplicationProperty indexProperty;
         Transaction txn = Datastore.beginTransaction();
         Key indexKey = applicationData.createPropertyKey(getEntityKindPropertyName());

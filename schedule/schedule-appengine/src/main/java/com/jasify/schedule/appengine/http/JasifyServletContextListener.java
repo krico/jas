@@ -1,6 +1,9 @@
 package com.jasify.schedule.appengine.http;
 
+import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.model.SchemaMigration;
+import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
+import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +24,11 @@ public class JasifyServletContextListener implements ServletContextListener {
         log.debug("Context initialized...");
 
         SchemaMigration.instance().executePendingMigrations();
+        try {
+            ConsistencyGuard.initialize();
+        } catch (InconsistentModelStateException e) {
+            throw Throwables.propagate(e);
+        }
         SchemaMigration.instance().notifyOfNewVersion();
 
         log.info("Context initialized");

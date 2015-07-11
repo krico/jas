@@ -49,7 +49,7 @@ final class DefaultUserService implements UserService {
         userLoginMeta = UserLoginMeta.get();
         passwordRecoveryMeta = PasswordRecoveryMeta.get();
         uniqueName = UniqueConstraint.create(userMeta, userMeta.name);
-        uniqueEmail = UniqueConstraint.createAllowingNullValues(userMeta, userMeta.email);
+        uniqueEmail = UniqueConstraint.create(userMeta, userMeta.email, true);
         uniqueLogin = UniqueConstraint.create(userLoginMeta, userLoginMeta.userId, userLoginMeta.provider);
     }
 

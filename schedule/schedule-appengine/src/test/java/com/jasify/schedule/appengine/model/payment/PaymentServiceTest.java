@@ -9,6 +9,11 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.UniqueConstraints;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
+import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
@@ -49,6 +54,7 @@ public class PaymentServiceTest {
     @Before
     public void initializeDatastore() {
         TestHelper.initializeJasify(helper);
+        UniqueConstraints.ensureAllConstraintsExist();
         paymentService = PaymentServiceFactory.getPaymentService();
     }
 

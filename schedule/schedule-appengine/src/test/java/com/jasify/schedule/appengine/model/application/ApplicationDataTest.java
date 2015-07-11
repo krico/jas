@@ -49,18 +49,18 @@ public class ApplicationDataTest {
     public void testGetDefaultPropertiesForInteger() {
         ApplicationData instance = ApplicationData.instance().reload();
         assertNull(instance.getProperty("Test1"));
-        assertEquals(15, (int)instance.getPropertyWithDefaultValue("Test1", 15));
+        assertEquals(15, (int) instance.getPropertyWithDefaultValue("Test1", 15));
         assertEquals(15, instance.getProperty("Test1"));
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testGetDefaultPropertiesForDouble() {
         ApplicationData instance = ApplicationData.instance().reload();
         assertNull(instance.getProperty("Test1"));
         instance.getPropertyWithDefaultValue("Test1", 15.8);
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testGetDefaultPropertiesForFloat() {
         ApplicationData instance = ApplicationData.instance().reload();
         assertNull(instance.getProperty("Test1"));
@@ -70,7 +70,7 @@ public class ApplicationDataTest {
     @Test
     public void testGetDefaultPropertiesForLong() {
         ApplicationData instance = ApplicationData.instance().reload();
-        assertEquals(15l, (long)instance.getPropertyWithDefaultValue("Test1", 15l));
+        assertEquals(15l, (long) instance.getPropertyWithDefaultValue("Test1", 15l));
         assertEquals(15l, instance.getProperty("Test1"));
     }
 
@@ -150,11 +150,15 @@ public class ApplicationDataTest {
         assertNotNull(application);
 
         Transaction tx = Datastore.beginTransaction();
-        for (ApplicationProperty property : application.listProperties(tx)) {
-            log.info("P: "/* '+' is to get toString coverage */ + property);
-            assertNotNull(property.toString(), property.getValue());
+        try {
+            for (ApplicationProperty property : application.listProperties(tx)) {
+                log.info("P: "/* '+' is to get toString coverage */ + property);
+                assertNotNull(property.toString(), property.getValue());
+            }
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
         }
-        tx.commit();
 
         assertEquals("A String", instance.getProperty("String"));
         assertEquals(Boolean.TRUE, instance.getProperty("Boolean"));
@@ -173,11 +177,27 @@ public class ApplicationDataTest {
         instance.setProperty("List", null);
 
         tx = Datastore.beginTransaction();
-        for (ApplicationProperty property : application.listProperties(tx)) {
-            log.info("P: "/* '+' is to get toString coverage */ + property);
-            assertNull(property.getValue());
+        try {
+            for (ApplicationProperty property : application.listProperties(tx)) {
+                switch (property.getKey().getName()) {
+                    case "String":
+                    case "Boolean":
+                    case "Integer":
+                    case "Long":
+                    case "Text":
+                    case "Blob":
+                    case "List":
+                        break;
+                    default:
+                        continue;
+                }
+                log.info("P: "/* '+' is to get toString coverage */ + property);
+                assertNull(property.getValue());
+            }
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
         }
-        tx.commit();
 
         assertNull(instance.getProperty("String"));
         assertNull(instance.getProperty("Boolean"));
