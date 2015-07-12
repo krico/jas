@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.jasify.schedule.appengine.TestHelper;
@@ -400,7 +401,7 @@ public class UserServiceTest {
         service.login(user1.getName(), "newPassword");
     }
 
-    @Test(expected=EntityNotFoundException.class)
+    @Test(expected = EntityNotFoundException.class)
     public void recoverPasswordTwiceFails() throws Exception {
         User user1 = service.newUser();
         user1.setName("test");
@@ -461,6 +462,39 @@ public class UserServiceTest {
         service.create(user, "password");
         user.setName("TesT1");
         service.save(user);
+    }
+
+    @Test(expected = FieldValueException.class)
+    public void testSaveChecksEmailIsUnique() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test1");
+        user1.setEmail("a@b");
+        service.create(user1, "password");
+        User user2 = service.newUser();
+        user2.setName("test2");
+        user2.setEmail("b@b");
+        User ret = service.create(user2, "password");
+        user2 = service.get(ret.getId());
+        user2.setEmail("a@b");
+        service.save(user2); //This needs to throw
+    }
+
+    @Test
+    public void testSaveUpdatesEmailUniqueIndex() throws Exception {
+        User user1 = service.newUser();
+        user1.setName("test1");
+        user1.setEmail("a@b");
+        service.create(user1, "password");
+        User user2 = service.newUser();
+        user2.setName("test2");
+        user2.setEmail("b@b");
+        Key user2Id = service.create(user2, "password").getId();
+        user2 = service.get(user2Id);
+        user2.setEmail("a@b");
+
+        user1.setEmail("c@b");
+        service.save(user1);
+        service.save(user2);
     }
 
     @Test
