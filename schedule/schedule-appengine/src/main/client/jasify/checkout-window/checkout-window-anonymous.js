@@ -27,6 +27,7 @@
 
             BrowserData.setPaymentCancelRedirect('/close');
             BrowserData.setPaymentAcceptRedirect('/close');
+            BrowserData.setPaymentCancelRedirectAuto(true);
 
             return ShoppingCart.anonymousCartToUserCart(cart).then(function () {
                 $location.path('/checkout');
