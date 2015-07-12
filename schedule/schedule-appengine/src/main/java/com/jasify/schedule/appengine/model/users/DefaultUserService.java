@@ -160,32 +160,45 @@ final class DefaultUserService implements UserService {
         //TODO: permissions?
 
         Transaction tx = Datastore.beginTransaction();
-        User db = Datastore.getOrNull(tx, userMeta, user.getId());
-        if (db == null) {
-            tx.rollback();
-            throw new EntityNotFoundException();
+        try {
+            User db = Datastore.getOrNull(tx, userMeta, user.getId());
+            if (db == null) {
+                throw new EntityNotFoundException();
+            }
+
+            //TODO: why did I decide to manually copy these!?  Horrible!
+
+
+            if (!StringUtils.equals(db.getName(), user.getName())) {
+                throw new FieldValueException("Cannot change 'name' with save();");
+            }
+
+            String email = StringUtils.trimToNull(StringUtils.lowerCase(user.getEmail()));
+            if (!StringUtils.equals(db.getEmail(), email)) {
+                if (db.getEmail() != null) uniqueEmail.releaseInCurrentTransaction(db.getEmail());
+                try {
+                    if (email != null) uniqueEmail.reserveInCurrentTransaction(email);
+                } catch (UniqueConstraintException e) {
+                    throw new FieldValueException("Duplicate e-mail: " + email);
+                }
+            }
+
+            db.setAbout(user.getAbout());
+            db.setEmail(email);
+            db.setLocale(user.getLocale());
+            db.setAdmin(user.isAdmin());
+            db.setRealName(user.getRealName());
+
+            UserDetail model = db.getDetailRef().getModel();
+            if (model == null) {
+                Datastore.put(tx, db);
+            } else {
+                Datastore.put(tx, db, model);
+            }
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
         }
-
-        //TODO: why did I decide to manually copy these!?  Horrible!
-
-
-        if (!StringUtils.equals(db.getName(), user.getName())) {
-            tx.rollback();
-            throw new FieldValueException("Cannot change 'name' with save();");
-        }
-        db.setAbout(user.getAbout());
-        db.setEmail(StringUtils.lowerCase(user.getEmail()));
-        db.setLocale(user.getLocale());
-        db.setAdmin(user.isAdmin());
-        db.setRealName(user.getRealName());
-
-        UserDetail model = db.getDetailRef().getModel();
-        if (model == null) {
-            Datastore.put(tx, db);
-        } else {
-            Datastore.put(tx, db, model);
-        }
-        tx.commit();
         return user;
     }
 
