@@ -1,15 +1,15 @@
 <div ng-if="vm.organizations.length > 0" class="card">
     <div class="card-header">
-        <h2>Activity Types
+        <h2>{{ 'ACTIVITY_TYPES' | translate }}
             <small>
-                Add/edit/delete activity types.
+                {{ 'ADD_EDIT_DELETE_ACTIVITY_TYPES' | translate }}
             </small>
         </h2>
     </div>
     <div class="card-body card-padding-sm">
         <div class="form-horizontal" role="form">
             <div class="form-group">
-                <label for="organization" class="col-sm-2 control-label">Organization:</label>
+                <label for="organization" class="col-sm-2 control-label">{{ 'ORGANIZATION' | translate }}</label>
 
                 <div class="col-sm-4">
                     <div class="fg-line">
@@ -30,13 +30,13 @@
         <thead>
         <tr>
             <th>
-                <row-add action="vm.addActivityType()" description="Add Activity Type"/>
+                <row-add action="vm.addActivityType()" description="{{ 'ADD_ACTIVITY_TYPE' | translate }}"></row-add>
             </th>
-            <th>Name</th>
-            <th>Tag</th>
-            <th>Location</th>
-            <th>Price</th>
-            <th>Description</th>
+            <th>{{ 'NAME' | translate }}</th>
+            <th>{{ 'COLOUR' | translate }}</th>
+            <th>{{ 'LOCATION' | translate }}</th>
+            <th>{{ 'PRICE' | translate }}</th>
+            <th>{{ 'DESCRIPTION' | translate }}</th>
         </tr>
         </thead>
         <tbody>
@@ -61,14 +61,18 @@
 </div>
 <div class="card" ng-if="vm.organizations.length > 0 && vm.activityTypes.length === 0">
     <div class="card-padding card-body text-center">
-        <p>No Activities Types are defined for {{::vm.organization.name}}.</p>
-        <button ng-click="vm.addActivityType()" class="btn btn-primary waves-effect">Create Activity Type</button>
+        <p>{{ 'NO_ACTIVITY_TYPES_DEFINED_FOR' | translate}} {{::vm.organization.name}}.</p>
+        <button ng-click="vm.addActivityType()" class="btn btn-primary waves-effect">{{ 'CREATE_ACTIVITY_TYPE' |
+            translate }}
+        </button>
     </div>
 </div>
 <div class="card" ng-if="vm.organizations.length === 0">
     <div class="card-padding card-body text-center">
-        <p>Before you can create an Activities Type, you need to create an Organization.</p>
-        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
+        <p>{{ 'CREATE_ORGANIZATION_TYPE_BEFORE_ACTIVITY_TYPE' | translate }}</p>
+        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">{{ 'CREATE_ORGANIZATION' | translate
+            }}
+        </button>
     </div>
 </div>
 
