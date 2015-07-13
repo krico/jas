@@ -73,9 +73,18 @@
      */
     jasifyWeb.run(jasifyWebRun);
 
-    function jasifyWebRun($rootScope, $log) {
-        $rootScope.$on('$routeChangeError', function (event, next, current) {
-            $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' next=' + angular.toJson(next));
+    function jasifyWebRun($rootScope, $log, $window, $location, jasDialogs) {
+
+        $rootScope.$on('$routeChangeError', function (event, current, previous, rejection) {
+            // Broadcasted if any of the resolve promises are rejected
+            $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' current=' + angular.toJson(current));
+            jasDialogs.error('There was a problem communicating with the server.  Press OK and you will be directed back.', function () {
+                if (previous) {
+                    $window.history.back();
+                } else {
+                    $location.path("/").replace();
+                }
+            });
         });
     }
 

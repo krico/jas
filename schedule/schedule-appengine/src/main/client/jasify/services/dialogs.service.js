@@ -27,9 +27,20 @@
                     swal("", message, "warning");
                 }
             },
-            error: function (message) {
+            error: function (message, onOk) {
                 if (swal) {
-                    swal("Operation Failed", message, "warning");
+                    if (angular.isFunction(onOk)) {
+                        swal({
+                            title: "Operation Failed",
+                            text: message,
+                            type: "warning",
+                            showCancelButton: false
+                        }, function () {
+                            onOk();
+                        });
+                    } else {
+                        swal("Operation Failed", message, "warning");
+                    }
                 }
             },
             resultError: function (message, result) {
