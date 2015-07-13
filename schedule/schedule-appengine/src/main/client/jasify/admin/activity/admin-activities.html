@@ -1,15 +1,13 @@
 <div ng-if="vm.organizations.length > 0" class="card">
     <div class="card-header">
-        <h2>Activities
-            <small>
-                Add/edit/delete activities. Check activity subscriptions or add/remove subscribers from an activity.
-            </small>
+        <h2>{{ 'ACTIVITIES' | translate }}
+            <small>{{ 'ADD_EDIT_DELETE_ACTIVITIES' | translate }}</small>
         </h2>
     </div>
     <div class="card-body card-padding-sm">
         <div class="form-horizontal" role="form">
             <div class="form-group">
-                <label for="organization" class="col-sm-2 control-label">Organization:</label>
+                <label for="organization" class="col-sm-2 control-label">{{ 'ORGANIZATION' | translate }}</label>
 
                 <div class="col-sm-4">
                     <div class="fg-line">
@@ -30,14 +28,14 @@
         <thead>
         <tr>
             <th>
-                <row-add action="vm.addActivity()"  description="Add Activity"/>
+                <row-add action="vm.addActivity()" description="Add Activity"></row-add>
             </th>
-            <th>Activity Type</th>
-            <th class="visible-lg" translate="LOCATION"></th>
-            <th translate="START"></th>
-            <th translate="FINISH"></th>
-            <th translate="SUBSCRIPTIONS"></th>
-            <th>Price</th>
+            <th>{{ 'ACTIVITY_TYPE' | translate }}</th>
+            <th class="visible-lg">{{ 'LOCATION' | translate }}</th>
+            <th>{{ 'START' | translate }}</th>
+            <th>{{ 'FINISH' | translate }}</th>
+            <th>{{ 'SUBSCRIPTIONS' | translate }}</th>
+            <th>{{ 'PRICE' | translate }}</th>
             <th class="jas-visible-xs" colspan="2"></th>
         </tr>
         </thead>
@@ -50,9 +48,11 @@
                 <row-edit action="vm.viewActivity(activity)"></row-edit>
                 <row-delete action="vm.removeActivity(activity)"></row-delete>
                 <div class="dropdown">
-                    <button type="button" tooltip="Subscriptions" class="btn btn-icon btn-primary command-edit" data-toggle="dropdown" aria-expanded="true"><i class="md mdi mdi-group"></i></button>
-                    <ul class="dropdown-menu fadeIn animated fadeOut" ng-include="'subscribtion-actions'">
-                    </ul>
+                    <button type="button" tooltip="{{ 'SUBSCRIPTIONS' | translate }}"
+                            class="btn btn-icon btn-primary command-edit" data-toggle="dropdown" aria-expanded="true">
+                        <i class="md mdi mdi-group"></i>
+                    </button>
+                    <ul class="dropdown-menu fadeIn animated fadeOut" ng-include="'subscribtion-actions'"></ul>
                 </div>
             </td>
             <td class="activity-type">{{activity.activityType.name}}</td>
@@ -76,17 +76,21 @@
 </div>
 <div class="card" ng-if="vm.organizations.length > 0 && vm.activities.length === 0">
     <div class="card-padding card-body text-center">
-        <p>No Activities are defined for {{::vm.organization.name}}.</p>
-        <button ng-click="vm.addActivity()" class="btn btn-primary waves-effect">Create Activity</button>
+        <p>{{ 'NO_ACTIVITIES_DEFINED_FOR' | translate }} {{::vm.organization.name}}.</p>
+        <button ng-click="vm.addActivity()" class="btn btn-primary waves-effect">{{ 'CREATE_ACTIVITY' | translate }}
+        </button>
     </div>
 </div>
 <div class="card" ng-if="vm.organizations.length === 0">
     <div class="card-padding card-body text-center">
-        <p>Before you can start planning Activities, you need to create Organization.</p>
-        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
+        <p>{{ 'CREATE_ORGANIZATION_TYPE_BEFORE_ACTIVITY' | translate }}</p>
+        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">{{ 'CREATE_ORGANIZATION' | translate
+            }}
+        </button>
     </div>
 </div>
 <script id="subscribtion-actions" type="text/ng-template">
-    <li ng-if="activity.subscriptionCount > 0"><a href ng-click="vm.viewSubscribers(activity.id)">View Subscribers</a></li>
-    <li><a href ng-click="vm.addSubscriber(activity.id)">Add Subscriber</a></li>
+    <li ng-if="activity.subscriptionCount > 0"><a href ng-click="vm.viewSubscribers(activity.id)">{{ 'VIEW_SUBSCRIBERS'
+        | translate }}</a></li>
+    <li><a href ng-click="vm.addSubscriber(activity.id)">{{ 'ADD_SUBSCRIBER' | translate }}</a></li>
 </script>
