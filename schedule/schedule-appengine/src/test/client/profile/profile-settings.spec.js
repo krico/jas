@@ -1,7 +1,7 @@
 describe('ProfileSettingsController', function () {
     var $scope, $applicationScope, vm, $routeParams, User, Session, $controller, $rootScope, $q;
 
-    beforeEach(module('jasifyWeb'));
+    beforeEach(module('jasifyWebTest'));
 
     beforeEach(inject(function (_$routeParams_, _User_, _Session_, _$controller_, _$rootScope_, _$q_) {
         $routeParams = _$routeParams_;

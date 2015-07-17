@@ -14,6 +14,8 @@ module.exports = function (config, min) {
     }
 
     files.push('src/test/client/**/*.js');
+    files.push('karma.module.js');
+
     config.set({
         basePath: '../../..',
         frameworks: ['jasmine'],

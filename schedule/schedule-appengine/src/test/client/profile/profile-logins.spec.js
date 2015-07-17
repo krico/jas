@@ -1,7 +1,7 @@
 describe('ProfileLoginsController', function () {
     var $scope, vm;
 
-    beforeEach(module('jasifyWeb'));
+    beforeEach(module('jasifyWebTest'));
 
 
     beforeEach(inject(function ($rootScope, $controller) {
