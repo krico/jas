@@ -48,6 +48,8 @@
             suffix: '.json'
         });
 
+        $translateProvider.useSanitizeValueStrategy('sanitize');
+
         $translateProvider
             .registerAvailableLanguageKeys(['en-US', 'de'], {
                 'de_DE': 'de',
