@@ -1,5 +1,7 @@
 (function (angular) {
 
+    'use strict';
+
     var jasifyWeb = angular.module('jasifyWeb', [
         'ngRoute',
         'ngResource',
@@ -41,29 +43,18 @@
         EndpointProvider.verbose(true);
         localStorageServiceProvider.setPrefix('Jasify');
 
-        // TODO: extract is somwehere
+        $translateProvider.useStaticFilesLoader({
+            prefix: '/build/i18n/locale-',
+            suffix: '.json'
+        });
+
         $translateProvider
-            .translations('en-US', {
-                SIGN_OUT: 'Sign Out',
-                SIGN_IN: 'Sign In',
-                LOCATION: 'Location',
-                START: 'Start',
-                FINISH: 'Finish',
-                SUBSCRIPTIONS: 'Subscriptions'
-            }).translations('de', {
-                SIGN_OUT: 'Abmelden',
-                SIGN_IN: 'Anmelden',
-                LOCATION: 'Lage',
-                START: 'Start',
-                FINISH: 'Fertig',
-                SUBSCRIPTIONS: 'Abonnements'
-            }).registerAvailableLanguageKeys(['en', 'de'], {
-                'en_US': 'en',
-                'en_UK': 'en',
+            .registerAvailableLanguageKeys(['en-US', 'de'], {
                 'de_DE': 'de',
                 'de_CH': 'de'
-            }).fallbackLanguage('en');
-
+            })
+            .determinePreferredLanguage()
+            .fallbackLanguage('en-US');
     }).run(function (jasLocale) {
         jasLocale.initialize();
     });
@@ -99,4 +90,4 @@
             "</ul>");
     }]);
 
-})(angular);
+})(window.angular);
