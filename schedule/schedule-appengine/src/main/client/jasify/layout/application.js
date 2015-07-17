@@ -6,7 +6,7 @@
     angular.module('jasifyWeb').controller('ApplicationController', ApplicationController);
 
     function ApplicationController($timeout, $scope, $rootScope, $window, $location,
-                                   localStorageService, Auth, BrowserData, AUTH_EVENTS) {
+                                   localStorageService, Auth, BrowserData, AUTH_EVENTS, jasDialogs) {
 
         var appVm = this;
 
@@ -17,6 +17,7 @@
 
         $scope.$on(AUTH_EVENTS.logoutSuccess, gotoLogin);
         $scope.$on(AUTH_EVENTS.notAuthenticated, gotoLogin);
+        $scope.$on(AUTH_EVENTS.notAuthorized, notAuthorized);
 
         if (!$location.path() ||
                 //don't restore if we are doing oauth or recover-password
@@ -53,6 +54,10 @@
 
         function setCurrentUser(user) {
             appVm.currentUser = $rootScope.currentUser = user;
+        }
+
+        function notAuthorized(event){
+            jasDialogs.error('You are not authorized to access this resource.');
         }
 
         function restore() {
