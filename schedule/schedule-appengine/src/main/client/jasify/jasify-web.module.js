@@ -50,8 +50,7 @@
 
         $translateProvider.useSanitizeValueStrategy('sanitize');
 
-        $translateProvider
-            .registerAvailableLanguageKeys(['en', 'de'], {
+        $translateProvider.registerAvailableLanguageKeys(['en', 'de'], {
                 'de_CH': 'de',
                 'de_DE': 'de',
                 'en_GB': 'en',
