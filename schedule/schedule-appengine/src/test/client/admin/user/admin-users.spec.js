@@ -1,7 +1,7 @@
 describe('AdminUsersController', function () {
     var $controller, $location, User, vm, $q, $rootScope;
 
-    beforeEach(module('jasifyWeb'));
+    beforeEach(module('jasifyWebTest'));
 
 
     beforeEach(inject(function (_$controller_, _$location_, _User_, _$q_, _$rootScope_) {

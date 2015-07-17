@@ -2,7 +2,7 @@ describe('AdminUserController', function () {
     var $scope, $q, $controller, $rootScope, $gapiMock, User, Auth, Endpoint, vm;
     var testUser = {id: 555, name: 'test'};
 
-    beforeEach(module('jasifyWeb'));
+    beforeEach(module('jasifyWebTest'));
 
     beforeEach(module('jasify.mocks'));
 

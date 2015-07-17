@@ -1,7 +1,7 @@
 describe('AdminOrganizationController', function () {
     var $controller, $location, Organization, vm, $q, $rootScope;
 
-    beforeEach(module('jasifyWeb'));
+    beforeEach(module('jasifyWebTest'));
 
 
     beforeEach(inject(function (_$controller_, _$location_, _Organization_, _$q_, _$rootScope_) {

@@ -1,7 +1,7 @@
 describe('LogoutController', function () {
     var $scope, vm, Session, $q, $applicationScope, Auth, $rootScope, AUTH_EVENTS, $window = {};
 
-    beforeEach(module('jasifyWeb'));
+    beforeEach(module('jasifyWebTest'));
 
     beforeEach(inject(function (_Session_, _$q_, _$rootScope_, $controller, _Auth_, _AUTH_EVENTS_) {
         Session = _Session_;

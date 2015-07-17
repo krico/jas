@@ -163,7 +163,7 @@
                 description: '@',
                 action: '&'
             },
-            template: '<button tooltip="Delete" ng-click="confirm()" tooltip="{{description}}" type="button" class="btn btn-icon btn-danger command-delete">' +
+            template: '<button ng-click="confirm()" tooltip="{{description || \'DELETE\' | translate}}" type="button" class="btn btn-icon btn-danger command-delete">' +
             '<span class="md mdi mdi-delete"></span></button>',
             link: function (scope, element, attrs) {
                 if (!attrs.action) {

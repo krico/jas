@@ -1,4 +1,7 @@
 {
+  "i18n": [
+    "src/main/i18n/locale-*.json"
+  ],
   "js": [
     "src/main/client/**/*.module.js",
     "src/main/client/**/*.js",
@@ -75,6 +78,7 @@
         "autosize/dist/autosize.js",
         "eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js",
         "angular-translate/angular-translate.js",
+        "angular-translate-loader-static-files/angular-translate-loader-static-files.js",
         "../../src/main/vendor/farbtastic/farbtastic.js"
       ],
       "iframecontentwindow": [
