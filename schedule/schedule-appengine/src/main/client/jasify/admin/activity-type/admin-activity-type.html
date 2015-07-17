@@ -117,10 +117,12 @@
                             <jas-feedback-icon-invalid field="vm.activityTypeForm.price"
                                                        form="vm.activityTypeForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityTypeForm.price" form="vm.activityTypeForm">
-                                <span ng-message="required">Price is required.</span>
-                                <span ng-message="number">Invalid number.</span>
-                                <span ng-message="min">Value must be greater than or equal to 0.</span>
-                                <span ng-message="max">Value must be smaller than 10000.</span>
+                                <div ng-message="required"><span>{{ 'PRICE_IS_REQUIRED' | translate }}</span></div>
+                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN_OR_EQUAL_TO' | translate:'{ value: 0 }' }}</span>
+                                </div>
+                                <div ng-message="max">
+                                    <span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span></div>
                             </jas-error-help-block>
                         </div>
                         <div jas-has-feedback class="col-sm-4 col-xs-5">
