@@ -64,18 +64,55 @@
      */
     jasifyWeb.run(jasifyWebRun);
 
-    function jasifyWebRun($rootScope, $log, $window, $location, jasDialogs) {
+    function jasifyWebRun($rootScope, $log, $window, $location, jasDialogs, AUTH_EVENTS) {
 
         $rootScope.$on('$routeChangeError', function (event, current, previous, rejection) {
             // Broadcasted if any of the resolve promises are rejected
-            $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' current=' + angular.toJson(current));
-            jasDialogs.error('There was a problem communicating with the server.  Press OK and you will be directed back.', function () {
+            $log.debug('$routeChangeError, event=' + angular.toJson(event) + ' current=' + angular.toJson(current) + ', rejection=' + angular.toJson(rejection));
+
+            if (isBroadcast(rejection)) {
+                //no need to handle this one as an event broadcast happened
+                $log.debug('Event should be handled [' + rejection + ']');
+            } else if (is401(rejection)) {
+                jasDialogs.error('It seems your session has expired... Press OK to Sign In again.', function () {
+                    $window.location = 'login.html';
+                });
+            } else if (is403(rejection)) {
+                jasDialogs.error('You are not authorized to access the operation you have attempted to execute.  Press OK and you will be directed back.', function () {
+                    emulateRouteChangeRollback();
+                });
+            } else {
+                jasDialogs.error('There was a problem communicating with the server.  Press OK and you will be directed back.', function () {
+                    emulateRouteChangeRollback();
+                });
+            }
+
+            function isBroadcast(rejection) {
+                return AUTH_EVENTS.notGuest == rejection ||
+                    AUTH_EVENTS.notAuthenticated == rejection ||
+                    AUTH_EVENTS.notAuthorized == rejection;
+            }
+
+            function /* Unauthorized => not logged in */ is401(rejection) {
+                return isRejectionCode(rejection, 401);
+            }
+
+            function /* Forbidden => insufficient privileges */ is403(rejection) {
+                return isRejectionCode(rejection, 403);
+            }
+
+            function isRejectionCode(rejection, code) {
+                return rejection && rejection.result && rejection.result.error && rejection.result.error.code == code;
+            }
+
+            function emulateRouteChangeRollback() {
                 if (previous) {
                     $window.history.back();
                 } else {
                     $location.path("/").replace();
                 }
-            });
+
+            }
         });
     }
 

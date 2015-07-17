@@ -34,7 +34,7 @@
             return Allow.restoreThen(function () {
                 if (Auth.isAuthenticated()) {
                     $rootScope.$broadcast(AUTH_EVENTS.notGuest);
-                    return $q.reject('guests only');
+                    return $q.reject(AUTH_EVENTS.notGuest);
                 } else {
                     return true;
                 }
@@ -45,7 +45,7 @@
             return Allow.restoreThen(function () {
                 if (!Auth.isAuthenticated()) {
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-                    return $q.reject('users only');
+                    return $q.reject(AUTH_EVENTS.notAuthenticated);
                 } else {
                     return true;
                 }
@@ -56,10 +56,10 @@
             return Allow.restoreThen(function () {
                 if (!Auth.isAuthenticated()) {
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-                    return $q.reject('admins only');
+                    return $q.reject(AUTH_EVENTS.notAuthenticated);
                 } else if (!Auth.isAdmin()) {
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-                    return $q.reject('admins only');
+                    return $q.reject(AUTH_EVENTS.notAuthorized);
                 } else {
                     return true;
                 }
@@ -70,10 +70,10 @@
             return Allow.restoreThen(function () {
                 if (!Auth.isAuthenticated()) {
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-                    return $q.reject('admins only');
+                    return $q.reject(AUTH_EVENTS.notAuthenticated);
                 } else if (!(Auth.isAdmin() || Auth.isOrgMember())) {
                     $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-                    return $q.reject('admins only');
+                    return $q.reject(AUTH_EVENTS.notAuthorized);
                 } else {
                     return true;
                 }

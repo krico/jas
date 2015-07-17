@@ -33,13 +33,13 @@
                         swal({
                             title: "Operation Failed",
                             text: message,
-                            type: "warning",
+                            type: "error",
                             showCancelButton: false
                         }, function () {
                             onOk();
                         });
                     } else {
-                        swal("Operation Failed", message, "warning");
+                        swal("Operation Failed", message, "error");
                     }
                 }
             },
