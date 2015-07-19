@@ -2,7 +2,7 @@
 
     angular.module('jasify.admin').controller('AdminSubscribersController', AdminSubscribersController);
 
-    function AdminSubscribersController($location, subscriptions, Activity) {
+    function AdminSubscribersController($location, $filter, subscriptions, Activity) {
         var vm = this;
 
         vm.subscriptions = subscriptions.items;
@@ -11,6 +11,8 @@
         vm.cancel = cancel;
         vm.back = back;
 
+        var $translate = $filter('translate');
+
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
         }
@@ -18,7 +20,8 @@
         function cancel(id) {
             Activity.cancelSubscription(id).then(ok, fail);
             function ok(r) {
-                vm.alert('warning', 'Subscription removed!');
+                var translation = $translate('SUBSCRIPTION_REMOVED');
+                vm.alert('warning', translation);
                 var newS = [];
                 angular.forEach(vm.subscriptions, function (value, key) {
                     if (id != value.id) {
@@ -30,7 +33,8 @@
         }
 
         function fail(r) {
-            vm.alert('danger', 'Failed: ' + r.statusText);
+            var translation = $translate('FAILED');
+            vm.alert('danger', translation + ': ' + r.statusText);
         }
 
         function back() {

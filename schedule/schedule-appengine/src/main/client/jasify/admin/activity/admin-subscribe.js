@@ -2,7 +2,7 @@
 
     angular.module('jasify.admin').controller('AdminSubscribeController', AdminSubscribeController);
 
-    function AdminSubscribeController(jasPagerSettings, $location, User, Activity, activity, subscriptions) {
+    function AdminSubscribeController(jasPagerSettings, $location, $filter, User, Activity, activity, subscriptions) {
         var vm = this;
 
         vm.sort = 'DESC';
@@ -31,6 +31,8 @@
         vm.perPage = perPage;
 
         vm.init = init;
+
+        var $translate = $filter('translate');
 
         vm.init();
 
@@ -114,7 +116,8 @@
             }
 
             function fail(r) {
-                vm.alert('danger', 'Failed to find user');
+                var translation = $translate('FAILED_TO_FIND_USER');
+                vm.alert('danger', translation);
             }
         }
 

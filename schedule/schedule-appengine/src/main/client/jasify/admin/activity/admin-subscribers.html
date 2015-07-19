@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-sm-1">
-        <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> back</a>
+        <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> {{ 'BACK' | translate }}</a>
     </div>
 </div>
 <div class="row">
@@ -8,8 +8,8 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th>Created</th>
-                <th>Name</th>
+                <th>{{ 'CREATED' | translate }}</th>
+                <th>{{ 'NAME' | translate }}</th>
             </tr>
             </thead>
             <tbody>
@@ -17,14 +17,12 @@
                 <td>{{subscription.user.created | date:'yyyy-MM-dd HH:mm'}}</td>
                 <td>{{subscription.user.name}}</td>
                 <td>
-                    <a ng-href="mailto:{{subscription.user.email}}" target="_top"><span class="glyphicon glyphicon-envelope"></span></a>
+                    <a ng-href="mailto:{{subscription.user.email}}" target="_top"><span
+                            class="glyphicon glyphicon-envelope"></span></a>
                 </td>
                 <td>
                     <row-delete action="vm.cancel(subscription.id)"></row-delete>
                 </td>
-            </tr>
-            <tr ng-if="vm.activities.length == 0">
-                <td colspan="8">No activities...</td>
             </tr>
             </tbody>
         </table>
