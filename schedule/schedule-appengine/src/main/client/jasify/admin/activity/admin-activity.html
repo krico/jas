@@ -3,18 +3,19 @@
     <div class="card">
         <div class="card-header">
             <card-back href="#/admin/activities/{{vm.organization.id}}"></card-back>
-            <h2 ng-if="!vm.activity.id">New Activity
-                <small>Select Organization & Activity Type and create Activities.</small>
+            <h2 ng-if="!vm.activity.id">{{ 'NEW_ACTIVITY' | translate }}
+                <small>{{ 'NEW_ACTIVITY_DESCRIPTION' | translate }}</small>
             </h2>
-            <h2 ng-if="vm.activity.id">Edit Activity
-                <small>Edit details of existing activity.</small>
+            <h2 ng-if="vm.activity.id">{{ 'EDIT_ACTIVITY' | translate }}
+                <small>{{ 'EDIT_ACTIVITY_DESCRIPTION' | translate }}</small>
             </h2>
         </div>
         <div class="card-body card-padding-sm">
             <div class="row">
                 <div class="col-sm-12">
                     <div jas-has-feedback class="form-group">
-                        <label class="control-label col-sm-4" for="organization">Organization:</label>
+                        <label class="control-label col-sm-4" for="organization">{{ 'ORGANIZATION' | translate
+                            }}</label>
 
                         <div class="col-sm-8" ng-show="!vm.activity.id">
                             <div class="fg-line">
@@ -30,7 +31,8 @@
                             <jas-feedback-icon-invalid field="vm.activityForm.organization"
                                                        form="vm.activityForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityForm.organization" form="vm.activityForm">
-                                <span ng-message="required">Organization is required.</span>
+                                <div ng-message="required"><span>{{ 'ORGANIZATION_IS_REQUIRED' | translate }}</span>
+                                </div>
                             </jas-error-help-block>
                         </div>
                         <div class="col-sm-8" ng-show="vm.activity.id">
@@ -38,7 +40,8 @@
                         </div>
                     </div>
                     <div jas-has-feedback class="form-group">
-                        <label for="activityType" class="col-sm-4 control-label">Activity Type:</label>
+                        <label for="activityType" class="col-sm-4 control-label">{{ 'ACTIVITY_TYPE' | translate
+                            }}</label>
 
                         <div class="col-sm-8" ng-show="!vm.activity.id">
                             <div class="fg-line">
@@ -53,15 +56,16 @@
                             <jas-feedback-icon-invalid field="vm.activityForm.activityType"
                                                        form="vm.activityForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityForm.activityType" form="vm.activityForm">
-                                <span ng-message="required">Activity Type is required.</span>
+                                <div ng-message="required"><span>{{ 'ACTIVITY_TYPE_IS_REQUIRED' | translate }}</span>
+                                </div>
                             </jas-error-help-block>
                         </div>
                         <div class="col-sm-8" ng-show="vm.activity.id">
                             <p class="form-control-static">{{vm.activity.activityType.name}}</p>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="control-label col-sm-4">Start/End Date:</label>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">{{ 'START_END_DATE' | translate }}</label>
 
                         <div class="col-sm-4 time-date-pair">
                             <div class="col-sm-6" jas-has-feedback>
@@ -72,7 +76,8 @@
                                            required ng-model="vm.activity.start">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.fromDate" form="vm.activityForm">
-                                    <span ng-message="required">Starting date is required.</span>
+                                    <div ng-message="required"><span>{{ 'START_DATE_IS_REQUIRED' | translate }}</span>
+                                    </div>
                                 </jas-error-help-block>
                             </div>
                             <div class="col-sm-5" jas-has-feedback>
@@ -81,10 +86,11 @@
                                            ng-model="vm.fromTime">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.fromTime" form="vm.activityForm">
-                                    <span ng-message="required">Starting hour is required.</span>
+                                    <div ng-message="required"><span>{{ 'START_TIME_IS_REQUIRED' | translate }}</span>
+                                    </div>
                                 </jas-error-help-block>
                             </div>
-                            <label class="control-label"> to </label>
+                            <label class="control-label"> {{ 'TO' | translate }} </label>
                         </div>
                         <div class="col-sm-4 time-date-pair">
                             <div class="col-sm-6" jas-has-feedback>
@@ -94,7 +100,8 @@
                                            required ng-model="vm.activity.finish">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.toDate" form="vm.activityForm">
-                                    <span ng-message="required">Ending date is required.</span>
+                                    <div ng-message="required"><span>{{ 'END_DATE_IS_REQUIRED' | translate }}</span>
+                                    </div>
                                 </jas-error-help-block>
                             </div>
                             <div class="col-sm-6" jas-has-feedback>
@@ -103,17 +110,19 @@
                                            ng-model="vm.toTime">
                                 </div>
                                 <jas-error-help-block field="vm.activityForm.toTime" form="vm.activityForm">
-                                    <span ng-message="required">Ending hour is required.</span>
+                                    <div ng-message="required"><span>{{ 'END_TIME_IS_REQUIRED' | translate }}</span>
+                                    </div>
                                 </jas-error-help-block>
                             </div>
                         </div>
                     </div>
                     <div jas-has-feedback class="form-group">
-                        <label for="location" class="col-sm-4 control-label">Location:</label>
+                        <label for="location" class="col-sm-4 control-label">{{ 'LOCATION' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="fg-line">
-                                <input id="location" name="location" required placeholder="Enter location"
+                                <input id="location" name="location" required
+                                       placeholder="{{ 'ENTER_LOCATION' | translate }}"
                                        class="form-control"
                                        ng-model="vm.activity.location"/>
                             </div>
@@ -121,16 +130,17 @@
                             <jas-feedback-icon-invalid field="vm.activityForm.location"
                                                        form="vm.activityForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityForm.location" form="vm.activityForm">
-                                <span ng-message="required">Location is required.</span>
+                                <div ng-message="required"><span>{{ 'LOCATION_IS_REQUIRED' | translate }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="price" class="col-sm-4 col-xs-12 control-label">Price:</label>
+                    <div jas-has-feedback class="form-group">
+                        <label for="price" class="col-sm-4 col-xs-12 control-label">{{ 'PRICE' | translate }}</label>
 
                         <div jas-has-feedback class="col-sm-4 col-xs-7">
                             <div class="fg-line">
-                                <input id="price" name="price" placeholder="Enter price" type="number"
+                                <input id="price" name="price" placeholder="{{ 'ENTER_PRICE' | translate }}"
+                                       type="number"
                                        class="form-control"
                                        min="0" max="10000" required
                                        ng-model="vm.activity.price"
@@ -140,10 +150,12 @@
                             <jas-feedback-icon-invalid field="vm.activityForm.price"
                                                        form="vm.activityForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityForm.price" form="vm.activityForm">
-                                <span ng-message="required">Price is required.</span>
-                                <span ng-message="number">Invalid number.</span>
-                                <span ng-message="min">Value must be greater than or equal to 0.</span>
-                                <span ng-message="max">Value must be smaller than 10000.</span>
+                                <div ng-message="required"><span>{{ 'PRICE_IS_REQUIRED' | translate }}</span></div>
+                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN_OR_EQUAL_TO' | translate:'{ value: 0 }' }}</span>
+                                </div>
+                                <div ng-message="max"><span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span>
+                                </div>
                             </jas-error-help-block>
                         </div>
                         <div jas-has-feedback class="col-sm-4 col-xs-5">
@@ -159,16 +171,17 @@
                             <jas-feedback-icon-invalid field="vm.activityForm.currency"
                                                        form="vm.activityForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityForm.currency" form="vm.activityForm">
-                                <span ng-message="required">Currency is required.</span>
+                                <div ng-message="required"><span>{{ 'CURRENCY_IS_REQUIRED' | translate }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
                     <div jas-has-feedback class="form-group">
-                        <label for="capacity" class="col-sm-4 control-label">Capacity:</label>
+                        <label for="capacity" class="col-sm-4 control-label">{{ 'CAPACITY' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="fg-line">
-                                <input id="capacity" name="capacity" type="number" placeholder="Enter capacity"
+                                <input id="capacity" name="capacity" type="number"
+                                       placeholder="{{ 'ENTER_CAPACITY' | translate }}"
                                        class="form-control" min="1" max="1000" required
                                        ng-model="vm.activity.maxSubscriptions"/>
                             </div>
@@ -176,20 +189,22 @@
                             <jas-feedback-icon-invalid field="vm.activityForm.capacity"
                                                        form="vm.activityForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityForm.capacity" form="vm.activityForm">
-                                <span ng-message="required">Capacity is required.</span>
-                                <span ng-message="number">Invalid number.</span>
-                                <span ng-message="min">Value must be greater than 0.</span>
-                                <span ng-message="max">Value must be smaller than 1000.</span>
+                                <div ng-message="required"><span>{{ 'CAPACITY_IS_REQUIRED' | translate }}</span></div>
+                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN' | translate:'{ value: 0 }' }}</span>
+                                </div>
+                                <div ng-message="max"><span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span>
+                                </div>
                             </jas-error-help-block>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="description" class="col-sm-4 control-label">Description:</label>
+                        <label for="description" class="col-sm-4 control-label">{{ 'DESCRIPTION' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="fg-line">
                                 <textarea class="form-control auto-size" id="description" name="description" rows="2"
-                                          placeholder="Enter description"
+                                          placeholder="{{ 'ENTER_DESCRIPTION' | translate }}"
                                           ng-model="vm.activity.description"></textarea>
                             </div>
                         </div>
@@ -197,7 +212,7 @@
                 </div>
                 <div ng-if="!vm.activity.id" class="col-sm-12">
                     <div class="form-group">
-                        <label class="col-sm-4 control-label">Repeat settings:</label>
+                        <label class="col-sm-4 control-label">{{ 'REPEAT_SETTINGS' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="radio radio-inline">
@@ -205,7 +220,7 @@
                                     <input type="radio" name="repeatType" value="No" ng-checked="true"
                                            ng-model="vm.repeatDetails.repeatType">
                                     <i class="input-helper"></i>
-                                    Do not repeat
+                                    {{ 'REPEAT_TURNED_OFF' | translate }}
                                 </label>
                             </div>
                             <div class="radio radio-inline">
@@ -213,7 +228,7 @@
                                     <input type="radio" name="repeatType" value="Daily"
                                            ng-model="vm.repeatDetails.repeatType">
                                     <i class="input-helper"></i>
-                                    Repeat daily
+                                    {{ 'REPEAT_DAILY' | translate }}
                                 </label>
                             </div>
                             <div class="radio radio-inline">
@@ -221,45 +236,52 @@
                                     <input type="radio" name="repeatType" value="Weekly"
                                            ng-model="vm.repeatDetails.repeatType">
                                     <i class="input-helper"></i>
-                                    Repeat on days
+                                    {{ 'REPEAT_ON_DAYS' | translate }}
                                 </label>
                             </div>
                             <div class="m-t-25" ng-show="vm.repeatDetails.repeatType === 'Weekly'">
                                 <div class="btn-group">
                                     <label class="btn btn-default">
                                         <input type="checkbox" name="daysOfWeek"
-                                               ng-model="vm.repeatDetails.mondayEnabled"> Mon
+                                               ng-model="vm.repeatDetails.mondayEnabled"> {{ 'MONDAY_ABBREVIATED' |
+                                        translate }}
                                     </label>
                                     <label class="btn btn-default">
                                         <input type="checkbox" name="daysOfWeek"
-                                               ng-model="vm.repeatDetails.tuesdayEnabled"> Tue
+                                               ng-model="vm.repeatDetails.tuesdayEnabled"> {{ 'TUESDAY_ABBREVIATED' |
+                                        translate }}
                                     </label>
                                     <label class="btn btn-default">
                                         <input type="checkbox" name="daysOfWeek"
-                                               ng-model="vm.repeatDetails.wednesdayEnabled"> Wed
+                                               ng-model="vm.repeatDetails.wednesdayEnabled"> {{ 'WEDNESDAY_ABBREVIATED'
+                                        | translate }}
                                     </label>
                                     <label class="btn btn-default">
                                         <input type="checkbox" name="daysOfWeek"
-                                               ng-model="vm.repeatDetails.thursdayEnabled"> Thu
+                                               ng-model="vm.repeatDetails.thursdayEnabled"> {{ 'THURSDAY_ABBREVIATED' |
+                                        translate }}
                                     </label>
                                     <label class="btn btn-default">
                                         <input type="checkbox" name="daysOfWeek"
-                                               ng-model="vm.repeatDetails.fridayEnabled"> Fri
+                                               ng-model="vm.repeatDetails.fridayEnabled"> {{ 'FRIDAY_ABBREVIATED' |
+                                        translate }}
                                     </label>
                                     <label class="btn btn-default">
                                         <input type="checkbox" name="daysOfWeek"
-                                               ng-model="vm.repeatDetails.saturdayEnabled"> Sat
+                                               ng-model="vm.repeatDetails.saturdayEnabled"> {{ 'SATURDAY_ABBREVIATED' |
+                                        translate }}
                                     </label>
                                     <label class="btn btn-default">
                                         <input type="checkbox" name="daysOfWeek"
-                                               ng-model="vm.repeatDetails.sundayEnabled"> Sun
+                                               ng-model="vm.repeatDetails.sundayEnabled"> {{ 'SUNDAY_ABBREVIATED' |
+                                        translate }}
                                     </label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div ng-show="vm.repeatDetails.repeatType !== 'No'" class="form-group" jas-has-feedback>
-                        <label for="repeatEvery" class="col-sm-4 control-label">Repeat every:</label>
+                        <label for="repeatEvery" class="col-sm-4 control-label">{{ 'REPEAT_EVERY' | translate }}</label>
 
                         <div class="col-sm-4">
                             <div class="fg-line">
@@ -271,9 +293,13 @@
                             <jas-feedback-icon-invalid field="vm.activityForm.repeatEvery"
                                                        form="vm.activityForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityForm.repeatEvery" form="vm.activityForm">
-                                <span ng-message="required">Repeat value is required.</span>
-                                <span ng-message="min">Repeat min value is 1.</span>
-                                <span ng-message="max">Repeat max value is 30.</span>
+                                <div ng-message="required"><span>{{ 'REPEAT_VALUE_IS_REQUIRED' | translate }}</span>
+                                </div>
+                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                <div ng-message="min">
+                                    <span>{{ 'REPEAT_VALUE_MINIMUM_IS' | translate:'{ value: 1 }' }}</span></div>
+                                <div ng-message="max">
+                                    <span>{{ 'REPEAT_VALUE_MAXIMUM_IS' | translate:'{ value: 25 }' }}</span></div>
                             </jas-error-help-block>
                         </div>
                         <div class="col-sm-4 control-label text-left">
@@ -281,7 +307,7 @@
                         </div>
                     </div>
                     <div ng-show="vm.repeatDetails.repeatType !== 'No'" class="form-group">
-                        <label class="col-sm-4 control-label">Ends:</label>
+                        <label class="col-sm-4 control-label">{{ 'ENDS' | translate }}</label>
 
                         <div class="col-sm-4" layout="row">
                             <div class="radio radio-addon">
@@ -290,7 +316,7 @@
                                            ng-checked="true"
                                            ng-model="vm.repeatDetails.repeatUntilType">
                                     <i class="input-helper"></i>
-                                    On:
+                                    {{ 'ON' | translate }}
                                 </label>
                             </div>
                             <div flex jas-has-feedback>
@@ -301,7 +327,7 @@
                                            ng-focus="vm.repeatDetails.repeatUntilType = 'Date'"
                                            ng-required="vm.repeatDetails.repeatType !== 'No' && vm.repeatDetails.repeatUntilType === 'Date'"
                                            ng-model="vm.repeatDetails.untilDate" data-toggle="dropdown"
-                                           placeholder="Enter activity end date">
+                                           placeholder="{{ 'ENTER_ACTIVITY_END_DATE' | translate }}">
                                 </div>
                                 <jas-feedback-icon-valid
                                         field="vm.activityForm.endsOnDateValue"></jas-feedback-icon-valid>
@@ -312,7 +338,7 @@
                         <div class="col-sm-offset-4 col-sm-4"
                              ng-class="{ 'has-error': vm.activityForm.endsOnDateValue.$invalid }">
                             <jas-error-help-block field="vm.activityForm.endsOnDateValue" form="vm.activityForm">
-                                <span ng-message="required">End date is required.</span>
+                                <div ng-message="required"><span>{{ 'END_DATE_IS_REQUIRED' | translate }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
@@ -348,16 +374,21 @@
                              ng-class="{ 'has-error': vm.activityForm.endsAfterOccurences.$invalid }">
                             <jas-error-help-block field="vm.activityForm.endsAfterOccurences"
                                                   form="vm.activityForm">
-                                <span ng-message="required">Times number is required.</span>
-                                <span ng-message="min">Times min value is 2.</span>
-                                <span ng-message="max">Times max value is 100.</span>
+                                <div ng-message="required"><span>{{ 'TIMES_VALUE_IS_REQUIRED' | translate }}</span>
+                                </div>
+                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                <div ng-message="min">
+                                    <span>{{ 'TIMES_VALUE_MINIMUM_IS' | translate:'{ value: 2 }' }}</span></div>
+                                <div ng-message="max">
+                                    <span>{{ 'TIMES_VALUE_MAXIMUM_IS' | translate:'{ value: 25 }' }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-offset-4 col-sm-8">
                     <a-button type="submit" controller="vm.saveBtn"></a-button>
-                    <button type="button" btn-href="/admin/activities/{{vm.organization.id}}" class="m-l-10 btn btn-default waves-effect">Cancel
+                    <button type="button" btn-href="/admin/activities/{{vm.organization.id}}"
+                            class="m-l-10 btn btn-default waves-effect">{{ 'CANCEL' | translate }}
                     </button>
                 </div>
             </div>

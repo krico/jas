@@ -13,6 +13,7 @@
         'angularSpinner',
         'LocalStorageModule',
         'ui.bootstrap.datetimepicker',
+        'pascalprecht.translate',
         'jasifyComponents',
         'jasify.authenticate',
         'jasify.payment',
@@ -94,6 +95,23 @@
                 }
             });
     }
+
+    bookingViaJasify.config(function ($translateProvider) {
+        $translateProvider.useStaticFilesLoader({
+            prefix: '/build/i18n/locale-',
+            suffix: '.json'
+        });
+
+        //  $translateProvider.useSanitizeValueStrategy('sanitize');
+
+        $translateProvider.registerAvailableLanguageKeys(['en', 'de'], {
+            'de_CH': 'de',
+            'de_DE': 'de',
+            'en_GB': 'en',
+            'en_US': 'en'
+        }).determinePreferredLanguage().fallbackLanguage('en');
+    });
+
 
     bookingViaJasify.config(function (localStorageServiceProvider, CheckoutProvider) {
         //TODO: We use storage to communicate with checkout, so needs to be local and prefix jasify

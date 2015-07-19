@@ -1,9 +1,11 @@
 {
-  "SIGN_OUT": "Abmelden",
-  "SIGN_IN": "Anmelden",
-  "LOCATION": "Lage",
-  "START": "Start",
-  "FINISH": "Fertig",
+  "CHECKOUT": "Zur Kasse",
   "DELETE": "Löschen",
+  "FINISH": "Fertig",
+  "LOCATION": "Lage",
+  "PRICE": "Preis",
+  "SIGN_IN": "Anmelden",
+  "SIGN_OUT": "Abmelden",
+  "START": "Start",
   "SUBSCRIPTIONS": "Abonnements"
 }

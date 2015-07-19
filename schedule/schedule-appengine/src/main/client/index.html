@@ -166,9 +166,11 @@
                 <md-icon md-svg-icon="build/img/{{contextAction.type}}.svg"></md-icon>
             </md-button>
             <md-button ng-if="!appVm.noMenu" ng-show="(!showContext || !hasContext)" class="md-raised"
-                       translate="SIGN_OUT" ng-href="#/logout"></md-button>
+                       ng-href="#/logout">{{ 'SIGN_OUT' | translate }}
+            </md-button>
             <md-button ng-if="appVm.noMenu" ng-show="(!showContext || !hasContext)" class="md-raised"
-                       translate="SIGN_IN" ng-href="login.html"></md-button>
+                       ng-href="login.html">{{ 'SIGN_IN' | translate }}
+            </md-button>
         </div>
     </md-toolbar>
     <md-content id="content" ng-controller="NavbarController as vm"

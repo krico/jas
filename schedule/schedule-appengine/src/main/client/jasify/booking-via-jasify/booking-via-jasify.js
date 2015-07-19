@@ -7,7 +7,7 @@
         .module('jasify.bookingViaJasify')
         .controller('BookingViaJasify', BookingViaJasify);
 
-    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $window, $timeout, $location, localStorageService,
+    function BookingViaJasify(AUTH_EVENTS, $scope, $log, $rootScope, $window, $timeout, $location, $filter, localStorageService,
                               sessionStorageKeys, PopupWindow, ShoppingCart, ActivityPackage, Auth, activities,
                               activityPackages, jasDialogs, getContrast, CHECKOUT_WINDOW, $cookies) {
 
@@ -23,6 +23,8 @@
         vm.activityPackageActivities = {};
         vm.activityPackageSelection = {};
         vm.activityPackageSelectAllFlags = [];
+
+        var $translate = $filter('translate');
 
         vm.getStyle = function (activity) {
             return {
@@ -106,7 +108,8 @@
         }
 
         function confirmRemoveActivity(activity) {
-            jasDialogs.ruSure("Do you want to remove this Activity?", function () {
+            var translation = $translate('REMOVE_ACTIVITY');
+            jasDialogs.ruSure(translation, function () {
                 $rootScope.$apply(function () {
                     vm.activitySelection.splice(vm.activitySelection.indexOf(activity), 1);
                 });
@@ -114,7 +117,8 @@
         }
 
         function confirmRemoveActivityPackage(activityPackage) {
-            jasDialogs.ruSure("Do you want to remove this Activity Package?", function () {
+            var translation = $translate('REMOVE_ACTIVITY_PACKAGE');
+            jasDialogs.ruSure(translation, function () {
                 $rootScope.$apply(function () {
                     delete vm.activityPackageSelection[activityPackage.id];
                 });
@@ -249,10 +253,10 @@
         }
 
         function confirmPopup(r) {
-            jasDialogs.ok('Proceed in new window', 'Booking is done via Jasify. ' +
-                'A new window will be opened where you will be able to Sign In or Create an account and ' +
-                'proceed to your checkout.',
-                onOk);
+            var translationTitle = $translate('PROCEED_IN_NEW_WINDOW');
+            var translationBody = $translate('PROCEED_TO_BOOKING_VIA_JASIFY');
+
+            jasDialogs.ok(translationTitle, translationBody, onOk);
             function onOk() {
                 var w = $window.innerWidth || 820;
                 var h = $window.innerHeight || 620;
@@ -273,39 +277,32 @@
                 var status = $cookies[CHECKOUT_WINDOW.statusCookie];
                 if (status) {
                     if (status == CHECKOUT_WINDOW.statusSuccess) {
-
-                        jasDialogs.ok('Checkout complete!', 'Thanks!', function () {
+                        var proceedToPaymentTitle = $translate('CHECKOUT_COMPLETE');
+                        var proceedToPaymentBody = $translate('PROCEED_IN_NEW_WINDOW');
+                        jasDialogs.ok(proceedToPaymentTitle, proceedToPaymentBody, function () {
                             $timeout(function () {
                                 $location.path('/done');
                             }, 500);
                         }, true, 'success');
-
                     } else if (status == CHECKOUT_WINDOW.statusPaymentFailed) {
-
-                        jasDialogs.warning('It seems you did not complete your payment.  ' +
-                        'Feel free to change your selections an try again!');
-
+                        var paymentNotCompleteTranslation = $translate('CHECKOUT_PAYMENT_NOT_COMPLETE_RETRY_SELECTION');
+                        jasDialogs.warning(paymentNotCompleteTranslation);
                     } else if (status == CHECKOUT_WINDOW.statusAuthenticating) {
-
-                        jasDialogs.warning('It seems you did not Sign In or Create Account.  ' +
-                        'Feel free to change your selections and try again!');
-
+                        var authenticationtNotCompleteTranslation = $translate('CHECKOUT_AUTHENTICATION_NOT_COMPLETE_RETRY_SELETION');
+                        jasDialogs.warning(authenticationtNotCompleteTranslation);
                     } else if (status == CHECKOUT_WINDOW.statusCheckout) {
-
-                        jasDialogs.warning('It seems you did not finish your checkout.  ' +
-                        'Feel free to change your selections and try again!');
-
+                        var checkoutNotCompleteTranslation = $translate('CHECKOUT_NOT_COMPLETE_RETRY_SELECTION');
+                        jasDialogs.warning(checkoutNotCompleteTranslation);
                     } else {
-
-                        jasDialogs.warning('System was unable to determine the result of your checkout operation. (' + status + ")");
-
+                        var checkoutErrorWithStatusTranslation = $translate('CHECKOUT_ERROR');
+                        jasDialogs.warning(checkoutErrorWithStatusTranslation + "(" + status + ")");
                     }
                 } else {
                     //TODO: check with server
-                    jasDialogs.warning('System was unable to determine the result of your checkout operation.');
+                    var checkoutErrorWithoutStatusTranslation = $translate('CHECKOUT_ERROR');
+                    jasDialogs.warning(checkoutErrorWithoutStatusTranslation);
                 }
             }
         }
     }
-
 }(window.angular, _));

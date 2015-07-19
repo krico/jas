@@ -48,13 +48,16 @@
             suffix: '.json'
         });
 
-        $translateProvider
-            .registerAvailableLanguageKeys(['en-US', 'de'], {
+        //   $translateProvider.useSanitizeValueStrategy('sanitize');
+
+        $translateProvider.registerAvailableLanguageKeys(['en', 'de'], {
+                'de_CH': 'de',
                 'de_DE': 'de',
-                'de_CH': 'de'
+                'en_GB': 'en',
+                'en_US': 'en'
             })
             .determinePreferredLanguage()
-            .fallbackLanguage('en-US');
+            .fallbackLanguage('en');
     }).run(function (jasLocale) {
         jasLocale.initialize();
     });

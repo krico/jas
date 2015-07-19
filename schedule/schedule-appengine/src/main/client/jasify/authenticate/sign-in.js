@@ -4,7 +4,7 @@
 
     angular.module('jasify.authenticate').controller('SignInController', SignInController);
 
-    function SignInController($rootScope, $window, $location, AUTH_EVENTS, Auth, BrowserData) {
+    function SignInController($rootScope, $window, $location, jasDialogs, AUTH_EVENTS, Auth, BrowserData) {
         var vm = this;
 
         vm.user = {};
@@ -16,6 +16,12 @@
 
         if (vm.rememberMe) {
             vm.user.email = BrowserData.getRememberUser();
+        }
+
+        $rootScope.$on(AUTH_EVENTS.loginFailed, loginFailed);
+
+        function loginFailed() {
+            jasDialogs.resultError("There was an error with your E-Mail/Password combination. Please try again.");
         }
 
         function forgot(fn) {

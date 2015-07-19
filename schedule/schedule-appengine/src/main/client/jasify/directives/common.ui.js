@@ -74,7 +74,7 @@
             scope: {
                 description: '@'
             },
-            template: '<a class="back-button"><button tooltip="Back" class="btn btn-default btn-icon"><i class="md mdi-undo"></i></button></a>',
+            template: '<a class="back-button"><button tooltip="{{description || \'BACK\' | translate}}" class="btn btn-default btn-icon"><i class="md mdi-undo"></i></button></a>',
             link: function (scope, element, attrs) {
                 if (!attrs.ngHref && !attrs.href) {
                     throw new Error("ngHref is not defined on element");
@@ -139,11 +139,9 @@
                 description: '@',
                 action: '&'
             },
-            template: '<button tooltip="{{tooltip}}" type="button" ng-click="action()" class="btn btn-icon btn-primary command-edit"><span class="md mdi mdi-edit"></span></button>',
+            template: '<button ng-click="action()" tooltip="{{description || \'EDIT\' | translate}}" type="button" class="btn btn-icon btn-primary command-edit">' +
+            '<span class="md mdi mdi-edit"></span></button>',
             link: function (scope, element, attrs) {
-
-                scope.tooltip = 'Edit';
-
                 if (!attrs.action) {
                     throw new Error("action is not defined on element");
                 }

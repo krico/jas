@@ -2,40 +2,39 @@
     <div class="card">
         <div ng-show="!!vm.activitySelection.length || vm.hasCompletedActivityPackages()"
              class="clearfix bgm-bluegray card-header card-header-with-icon">
-            <h2>Your Selection summary
-                <small>Review selected activities & activity packages. If everything is OK, submit it.
-                </small>
+            <h2>{{ 'SELECTION_SUMMARY' | translate }}
+                <small>{{ 'SELECTION_SUMMARY_DESCRIPTION' | translate }}</small>
             </h2>
             <button ng-click="vm.bookIt()" class="btn bgm-blue pull-right waves-effect btn-float-text">
                 Submit <i class="md mdi mdi-shopping-cart"></i></button>
             <button wizard-trigger="#activity-packages"
                     class="btn bgm-blue waves-effect pull-left">
-                <i class="md mdi mdi-undo"></i> Back to Activity Packages
+                <i class="md mdi mdi-undo"></i> {{ 'ACTIVITY_PACKAGES' | translate }}
             </button>
             <button wizard-trigger="#activities"
                     class="btn bgm-blue waves-effect pull-left">
-                <i class="md mdi mdi-undo"></i> Back to Activities
+                <i class="md mdi mdi-undo"></i> {{ 'ACTIVITIES' | translate }}
             </button>
         </div>
         <div ng-show="!vm.activitySelection.length && !vm.hasCompletedActivityPackages()"
              class="clearfix bgm-amber card-header card-header-with-icon">
-            <h2>No Items selected
-                <small>You did not select any activities nor activity packages.</small>
+            <h2>{{ 'NO_ITEMS_SELECTED' | translate }}
+                <small>{{ 'NO_ACTIVITIES_OR_ACTIVITY_PACKAGES_SELECTED' | translate }}.</small>
             </h2>
             <button wizard-trigger="#activity-packages"
                     class="btn bgm-blue waves-effect pull-left">
-                <i class="md mdi mdi-undo"></i> Back to Activity Packages
+                <i class="md mdi mdi-undo"></i> {{ 'ACTIVITY_PACKAGES' | translate }}
             </button>
             <button wizard-trigger="#activities"
                     class="btn bgm-blue waves-effect pull-left">
-                <i class="md mdi mdi-undo"></i> Back to Activities
+                <i class="md mdi mdi-undo"></i> {{ 'ACTIVITIES' | translate }}
             </button>
         </div>
         <div class="card-body card-padding-sm">
             <div ng-show="vm.hasCompletedActivityPackages()"
                  class="activity-listview listview lv-bordered lv-lg">
                 <div class="lv-header-alt">
-                    <h2 class="lvh-label">Selected Activity Packages</h2>
+                    <h2 class="lvh-label">{{ 'SELECTED_ACTIVITY_PACKAGES' | translate }}</h2>
                 </div>
                 <div class="lv-body">
                     <div class="lv-item media"
@@ -45,11 +44,13 @@
                                 {{$index + 1}}. {{activityPackage.name}}
                             </div>
                             <ul class="lv-attrs">
-                                <li>Activities in Package: {{activityPackage.itemCount}}</li>
-                                <li>Price: {{activityPackage.price}} {{activityPackage.currency}}</li>
+                                <li>{{ 'ACTIVITIES_IN_ACTIVITY_PACKAGE' | translate }}: {{activityPackage.itemCount}}
+                                </li>
+                                <li>{{ 'PRICE' | translate }}: {{activityPackage.price}} {{activityPackage.currency}}
+                                </li>
                             </ul>
                             <div class="lv-actions actions">
-                                <button tooltip="Remove"
+                                <button tooltip="{{ 'REMOVE' | translate }}"
                                         ng-click="vm.confirmRemoveActivityPackage(activityPackage)"
                                         class="btn btn-warning btn-icon"><i
                                         class="md mdi mdi-close"></i>
@@ -62,7 +63,7 @@
             <div ng-show="vm.activitySelection.length"
                  class="activity-listview listview lv-bordered lv-lg">
                 <div class="lv-header-alt">
-                    <h2 class="lvh-label">Selected Activities</h2>
+                    <h2 class="lvh-label">{{ 'SELECTED_ACTIVITIES' | translate }}</h2>
                 </div>
                 <div class="lv-body">
                     <div class="lv-item media" ng-repeat="activity in vm.activitySelection">
@@ -73,14 +74,15 @@
                             <ul class="lv-attrs">
                                 <li>{{[activity.start, activity.finish] | tableShortDateTime}}</li>
                                 <li ng-if="activity.maxSubscriptions < activity.subscriptionCount">
-                                    Places left: {{activity.maxSubscriptions -
+                                    {{ 'PLACES_LEFT' | translate }}: {{activity.maxSubscriptions -
                                     activity.subscriptionCount}}
                                 </li>
-                                <li>Price: {{activity.price}} {{activity.currency}}</li>
-                                <li ng-if="activity.location">Location: {{activity.location}}</li>
+                                <li>{{ 'PRICE' | translate }}: {{activity.price}} {{activity.currency}}</li>
+                                <li ng-if="activity.location">{{ 'LOCATION' | translate }}: {{activity.location}}</li>
                             </ul>
                             <div class="lv-actions actions">
-                                <button tooltip="Remove" ng-click="vm.confirmRemoveActivity(activity)"
+                                <button tooltip="{{ 'REMOVE' | translate }}"
+                                        ng-click="vm.confirmRemoveActivity(activity)"
                                         class="btn btn-warning btn-icon"><i
                                         class="md mdi mdi-close"></i>
                                 </button>
