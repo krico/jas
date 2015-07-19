@@ -48,7 +48,7 @@
             suffix: '.json'
         });
 
-        $translateProvider.useSanitizeValueStrategy('sanitize');
+        //   $translateProvider.useSanitizeValueStrategy('sanitize');
 
         $translateProvider.registerAvailableLanguageKeys(['en', 'de'], {
                 'de_CH': 'de',
