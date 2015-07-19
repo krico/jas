@@ -1,15 +1,15 @@
 <div class="card">
     <div class="card-header bgm-bluegray">
-        <h2 class="pull-left">Activities
-            <small>Select activities you would like to join.</small>
+        <h2 class="pull-left">{{ 'ACTIVITIES' | translate }}
+            <small>{{ 'SELECT_ACTIVITIES_YOU_WOULD_LIKE_TO_JOIN' | translate }}</small>
         </h2>
         <button wizard-trigger="#activity-packages"
                 class="pull-right btn bgm-blue waves-effect">
-            Continue to Activity Packages <i
+            {{ 'ACTIVITY_PACKAGES' | translate }} <i
                 class="md mdi mdi-send"></i></button>
         <button wizard-trigger="#checkout"
                 class="pull-right btn bgm-blue waves-effect">
-            Continue to Checkout <i
+            {{ 'CONTINUE_TO_CHECKOUT' | translate }} <i
                 class="md mdi mdi-send"></i></button>
     </div>
     <div class="card-body card-padding-sm">
@@ -33,12 +33,12 @@
                     <small class="c-gray">{{activity.location}}</small>
                 </div>
                 <ul class="tvb-stats pull-right">
-                    <li ng-show="vm.isActivityFullyBooked(activity)" class="tvbs-views">Fully Booked
+                    <li ng-show="vm.isActivityFullyBooked(activity)" class="tvbs-views">{{ 'FULLY_BOOKED' | translate }}
                     </li>
-                    <li ng-show="!vm.isActivityFullyBooked(activity)">Price: {{activity.price}}
+                    <li ng-show="!vm.isActivityFullyBooked(activity)">{{ 'PRICE' | translate }}: {{activity.price}}
                         {{activity.currency}}
                     </li>
-                    <li ng-show="!vm.isActivityFullyBooked(activity)">Places left:
+                    <li ng-show="!vm.isActivityFullyBooked(activity)">{{ 'PLACES_LEFT' | translate }}:
                         {{activity.maxSubscriptions - activity.subscriptionCount}}
                     </li>
                 </ul>
