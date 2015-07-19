@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityController', AdminActivityController);
 
-    function AdminActivityController($scope, $location, $moment,
+    function AdminActivityController($scope, $location, $moment, $filter,
                                      jasDialogs, Activity, aButtonController, ActivityType,
                                      activity, organizations) {
         var vm = this;
@@ -25,6 +25,8 @@
             repeatType: "No",
             repeatUntilType: "Date"
         };
+
+        var $translate = $filter('translate');
 
         function loadActivityTypes(organization) {
 
@@ -62,12 +64,14 @@
                 .format();
 
             if (activityToSave.start > activityToSave.finish) {
-                jasDialogs.warning("Activity's finish date precedes start date. Please correct.");
+                var activityFinishBeforeStarttranslation = $translate('ACTIVITY_FINISH_DATE_MUST_BE_GREATER_OR_EQUAL_TO_START_DATE');
+                jasDialogs.warning(activityFinishBeforeStarttranslation);
                 return;
             }
 
             if ($moment(activityToSave.start) < $moment()) {
-                jasDialogs.warning("Activity's start date precedes current date. Please correct.");
+                var activityStartBeforeNowtranslation = $translate('ACTIVITY_START_DATE_MUST_BE_GREATER_OR_EQUAL_TO_NOW');
+                jasDialogs.warning(activityStartBeforeNowtranslation);
                 return;
             }
 
@@ -104,20 +108,24 @@
                     $location.search({});
 
                     if (result.items.length === 1) {
-                        jasDialogs.success('Activity was created.');
+                        var activityCreatedtranslation = $translate('ACTIVITY_CREATED');
+                        jasDialogs.success(activityCreatedtranslation);
                         $location.path('/admin/activity/' + result.items[0].id);
                     } else if (result.items.length > 1) {
-                        jasDialogs.success(result.items.length + ' activities were created.');
+                        var activitiesCreatedtranslation = $translate('ACTIVITIES_CREATED', {value: result.items.length});
+                        jasDialogs.success(activitiesCreatedtranslation);
                         $location.path("/admin/activities/" + result.items[0].activityType.organizationId);
                     } else {
-                        jasDialogs.warning('No activities were created.');
+                        var noActivityCreatedtranslation = $translate('NO_ACTIVITY_CREATED');
+                        jasDialogs.warning(noActivityCreatedtranslation);
                         $location.path("/admin/activities");
                     }
                 }
             }
 
             function fail(r) {
-                jasDialogs.resultError("Failed to update Activity. Please try again.", r);
+                var failedToUpdateActivityTranslation = $translate('FAILED_TO_UPDATE_ACTIVITY');
+                jasDialogs.resultError(failedToUpdateActivityTranslation, r);
             }
         }
 
