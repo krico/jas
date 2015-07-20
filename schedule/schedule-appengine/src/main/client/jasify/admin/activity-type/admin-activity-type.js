@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityTypeController', AdminActivityTypeController);
 
-    function AdminActivityTypeController($location, getContrast,
+    function AdminActivityTypeController($location, $filter, getContrast,
                                          jasDialogs, aButtonController, ActivityType,
                                          activityType, organizations) {
         var vm = this;
@@ -19,6 +19,8 @@
         initOrganization();
 
         vm.saveOrUpdate = saveOrUpdate;
+
+        var $translate = $filter('translate');
 
         function saveOrUpdate() {
 
@@ -37,22 +39,26 @@
             function ok(result) {
                 if (activityTypeToSave.id) {
                     vm.activityType = result;
-                    jasDialogs.success('Activity Type updated.');
+                    var activityTypeUpdatedTranslation = $translate('ACTIVITY_TYPE_UPDATED');
+                    jasDialogs.success(activityTypeUpdatedTranslation);
                 } else {
                     $location.search({});
 
                     if (result !== null) {
-                        jasDialogs.success('Activity Type was created.');
+                        var activityTypeCreatedTranslation = $translate('ACTIVITY_TYPE_CREATED');
+                        jasDialogs.success(activityTypeCreatedTranslation);
                         $location.path('/admin/activity-type/' + result.id);
                     } else {
-                        jasDialogs.warning('Activity Type was not created.');
+                        var activityTypeNotCreatedTranslation = $translate('ACTIVITY_TYPE_NOT_CREATED');
+                        jasDialogs.warning(activityTypeNotCreatedTranslation);
                         $location.path("/admin/activity-types");
                     }
                 }
             }
 
             function fail(r) {
-                vm.alert('danger', 'Failed: ' + r.statusText);
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
             }
         }
 

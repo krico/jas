@@ -4,22 +4,24 @@
         <div class="card-header">
             <div class="actions-group">
                 <a-button type="submit" controller="vm.saveBtn"></a-button>
-                <button type="button" btn-href="/admin/activity-types" class="btn btn-default waves-effect">Cancel
+                <button type="button" btn-href="/admin/activity-types" class="btn btn-default waves-effect">{{ 'CANCEL'
+                    | translate }}
                 </button>
             </div>
             <card-back href="#/admin/activity-types"></card-back>
-            <h2 ng-if="!vm.activityType.id">New Activity Type
-                <small>Create a new activity type.</small>
+            <h2 ng-if="!vm.activityType.id">{{ 'NEW_ACTIVITY_TYPE' | translate }}
+                <small>{{ 'NEW_ACTIVITY_TYPE_DESCRIPTION' | translate }}</small>
             </h2>
-            <h2 ng-if="vm.activityType.id">Edit Activity Type
-                <small>Edit details of existing activity type. Note that existing activities will not be updated.</small>
+            <h2 ng-if="vm.activityType.id">{{ 'EDIT_ACTIVITY_TYPE' | translate }}
+                <small>{{ 'EDIT_ACTIVITY_TYPE_DESCRIPTION' | translate }}</small>
             </h2>
         </div>
         <div class="card-body card-padding-sm">
             <div class="row">
                 <div class="col-sm-12">
                     <div jas-has-feedback class="form-group">
-                        <label class="control-label col-sm-4" for="organization">Organization:</label>
+                        <label class="control-label col-sm-4" for="organization">{{ 'ORGANIZATION' | translate
+                            }}</label>
 
                         <div class="col-sm-8" ng-show="!vm.activityType.id">
                             <div class="fg-line">
@@ -34,7 +36,8 @@
                             <jas-feedback-icon-invalid field="vm.activityTypeForm.organization"
                                                        form="vm.activityTypeForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityTypeForm.organization" form="vm.activityTypeForm">
-                                <span ng-message="required">Organization is required.</span>
+                                <div ng-message="required"><span>{{ 'ORGANIZATION_IS_REQUIRED' | translate }}</span>
+                                </div>
                             </jas-error-help-block>
                         </div>
                         <div class="col-sm-8" ng-show="vm.activityType.id">
@@ -42,11 +45,11 @@
                         </div>
                     </div>
                     <div jas-has-feedback class="form-group">
-                        <label for="name" class="col-sm-4 control-label">Name:</label>
+                        <label for="name" class="col-sm-4 control-label">{{ 'NAME' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="fg-line">
-                                <input id="name" name="name" required placeholder="Enter Name"
+                                <input id="name" name="name" required placeholder="{{ 'ENTER_NAME' | translate }}"
                                        class="form-control"
                                        ng-model="vm.activityType.name"/>
                             </div>
@@ -54,16 +57,17 @@
                             <jas-feedback-icon-invalid field="vm.activityTypeForm.name"
                                                        form="vm.activityTypeForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityTypeForm.name" form="vm.activityTypeForm">
-                                <span ng-message="required">Name is required.</span>
+                                <div ng-message="required"><span>{{ 'NAME_IS_REQUIRED' | translate }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
                     <div jas-has-feedback class="form-group">
-                        <label for="location" class="col-sm-4 control-label">Location:</label>
+                        <label for="location" class="col-sm-4 control-label">{{ 'LOCATION' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="fg-line">
-                                <input id="location" name="location" required placeholder="Enter location"
+                                <input id="location" name="location" required
+                                       placeholder="{{ 'ENTER_LOCATION' | translate }}"
                                        class="form-control"
                                        ng-model="vm.activityType.location"/>
                             </div>
@@ -71,12 +75,12 @@
                             <jas-feedback-icon-invalid field="vm.activityTypeForm.location"
                                                        form="vm.activityTypeForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityTypeForm.location" form="vm.activityTypeForm">
-                                <span ng-message="required">Location is required.</span>
+                                <div ng-message="required"><span>{{ 'LOCATION_IS_REQUIRED' | translate }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="colourTag" class="col-sm-4 control-label">Colour:</label>
+                        <label for="colourTag" class="col-sm-4 control-label">{{ 'COLOUR' | translate }}</label>
 
                         <div class="col-sm-4">
                             <div class="cp-container">
@@ -102,12 +106,13 @@
                             <span class="badge" ng-style="vm.tagStyle">{{vm.activityType.name}}</span>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="price" class="col-sm-4 col-xs-12 control-label">Price:</label>
+                    <div jas-has-feedback class="form-group">
+                        <label for="price" class="col-sm-4 col-xs-12 control-label">{{ 'PRICE' | translate }}</label>
 
                         <div jas-has-feedback class="col-sm-4 col-xs-7">
                             <div class="fg-line">
-                                <input id="price" name="price" placeholder="Enter price" type="number"
+                                <input id="price" name="price" placeholder="{{ 'ENTER_PRICE' | translate }}"
+                                       type="number"
                                        class="form-control"
                                        min="0" max="10000" required
                                        ng-model="vm.activityType.price"
@@ -138,16 +143,17 @@
                             <jas-feedback-icon-invalid field="vm.activityTypeForm.currency"
                                                        form="vm.activityTypeForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityTypeForm.currency" form="vm.activityTypeForm">
-                                <span ng-message="required">Currency is required.</span>
+                                <div ng-message="required"><span>{{ 'CURRENCY_IS_REQUIRED' | translate }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
                     <div jas-has-feedback class="form-group">
-                        <label for="capacity" class="col-sm-4 control-label">Capacity:</label>
+                        <label for="capacity" class="col-sm-4 control-label">{{ 'CAPACITY' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="fg-line">
-                                <input id="capacity" name="capacity" type="number" placeholder="Enter capacity"
+                                <input id="capacity" name="capacity" type="number"
+                                       placeholder="{{ 'ENTER_CAPACITY' | translate }}"
                                        class="form-control" min="1" max="1000" required
                                        ng-model="vm.activityType.maxSubscriptions"/>
                             </div>
@@ -155,20 +161,22 @@
                             <jas-feedback-icon-invalid field="vm.activityTypeForm.capacity"
                                                        form="vm.activityTypeForm"></jas-feedback-icon-invalid>
                             <jas-error-help-block field="vm.activityTypeForm.capacity" form="vm.activityTypeForm">
-                                <span ng-message="required">Capacity is required.</span>
-                                <span ng-message="number">Invalid number.</span>
-                                <span ng-message="min">Value must be greater than 0.</span>
-                                <span ng-message="max">Value must be smaller than 1000.</span>
+                                <div ng-message="required"><span>{{ 'CAPACITY_IS_REQUIRED' | translate }}</span></div>
+                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN_OR_EQUAL_TO' | translate:'{ value: 0 }' }}</span>
+                                </div>
+                                <div ng-message="max">
+                                    <span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span></div>
                             </jas-error-help-block>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="description" class="col-sm-4 control-label">Description:</label>
+                        <label for="description" class="col-sm-4 control-label">{{ 'DESCRIPTION' | translate }}</label>
 
                         <div class="col-sm-8">
                             <div class="fg-line">
                                 <textarea class="form-control auto-size" id="description" name="description" rows="2"
-                                          placeholder="Enter description"
+                                          placeholder="{{ 'ENTER_DESCRIPTION' | translate }}"
                                           ng-model="vm.activityType.description"></textarea>
                             </div>
                         </div>

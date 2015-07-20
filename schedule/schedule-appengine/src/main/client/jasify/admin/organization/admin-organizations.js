@@ -19,8 +19,8 @@
         var $translate = $filter('translate');
 
         function errorHandler(resp) {
-            var translation = $translate('NO_ORGANIZATION_CREATED');
-            jasDialogs.resultError(translation);
+            var translation = $translate('ORGANIZATION_NOT_CREATED');
+            jasDialogs.warning(translation);
         }
 
         function add(organization) {

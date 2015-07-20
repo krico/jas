@@ -33,8 +33,8 @@
         }
 
         function fail(r) {
-            var translation = $translate('FAILED');
-            vm.alert('danger', translation + ': ' + r.statusText);
+            var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+            jasDialogs.resultError(failedPleaseRetryTranslation, r);
         }
 
         function back() {

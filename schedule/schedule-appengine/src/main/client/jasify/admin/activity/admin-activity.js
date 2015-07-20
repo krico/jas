@@ -102,30 +102,31 @@
                         hour: $moment(vm.activity.finish).get('hour'),
                         minute: $moment(vm.activity.finish).get('minute')
                     };
-
+                    var activityUpdatedTranslation = $translate('ACTIVITY_UPDATED');
+                    jasDialogs.success(activityUpdatedTranslation);
                 } else {
 
                     $location.search({});
 
                     if (result.items.length === 1) {
-                        var activityCreatedtranslation = $translate('ACTIVITY_CREATED');
-                        jasDialogs.success(activityCreatedtranslation);
+                        var activityCreatedTranslation = $translate('ACTIVITY_CREATED');
+                        jasDialogs.success(activityCreatedTranslation);
                         $location.path('/admin/activity/' + result.items[0].id);
                     } else if (result.items.length > 1) {
-                        var activitiesCreatedtranslation = $translate('ACTIVITIES_CREATED', {value: result.items.length});
-                        jasDialogs.success(activitiesCreatedtranslation);
+                        var activitiesCreatedTranslation = $translate('ACTIVITIES_CREATED', {value: result.items.length});
+                        jasDialogs.success(activitiesCreatedTranslation);
                         $location.path("/admin/activities/" + result.items[0].activityType.organizationId);
                     } else {
-                        var noActivityCreatedtranslation = $translate('NO_ACTIVITY_CREATED');
-                        jasDialogs.warning(noActivityCreatedtranslation);
+                        var noActivityCreatedTranslation = $translate('ACTIVITY_NOT_CREATED');
+                        jasDialogs.warning(noActivityCreatedTranslation);
                         $location.path("/admin/activities");
                     }
                 }
             }
 
             function fail(r) {
-                var failedToUpdateActivityTranslation = $translate('FAILED_TO_UPDATE_ACTIVITY');
-                jasDialogs.resultError(failedToUpdateActivityTranslation, r);
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
             }
         }
 
