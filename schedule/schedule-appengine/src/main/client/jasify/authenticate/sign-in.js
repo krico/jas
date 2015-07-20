@@ -4,7 +4,7 @@
 
     angular.module('jasify.authenticate').controller('SignInController', SignInController);
 
-    function SignInController($rootScope, $window, $location, jasDialogs, AUTH_EVENTS, Auth, BrowserData) {
+    function SignInController($rootScope, $window, $location, $filter, jasDialogs, AUTH_EVENTS, Auth, BrowserData) {
         var vm = this;
 
         vm.user = {};
@@ -21,7 +21,9 @@
         $rootScope.$on(AUTH_EVENTS.loginFailed, loginFailed);
 
         function loginFailed() {
-            jasDialogs.resultError("There was an error with your E-Mail/Password combination. Please try again.");
+            var $translate = $filter('translate');
+            var translation = $translate('EMAIL_AND_PASSWORD_DO_NOT_MATCH_PLEASE_TRY_AGAIN');
+            jasDialogs.resultError(translation);
         }
 
         function forgot(fn) {
