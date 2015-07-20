@@ -107,6 +107,8 @@ public final class SchemaMigration {
             executed = true;
         }
 
+        UniqueConstraints.ensureAllConstraintsExist();
+
         if (EnvironmentUtil.isDevelopment()) {
             String devInitialize = SchemaMigration.class.getName() + ".DevInitialize";
             Boolean devInitialized = applicationData.getProperty(devInitialize);
