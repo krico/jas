@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.model;
 
 import com.google.appengine.api.datastore.*;
-import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.Version;
@@ -50,18 +49,19 @@ public final class SchemaMigration {
     }
 
     public boolean notifyOfNewVersion() {
+        String deployVersionName = EnvironmentUtil.deployVersionName();
         String currentVersion = Version.toVersionString();
         ApplicationData applicationData = ApplicationData.instance();
-        String propertyName = Version.class.getName();
+        String propertyName = Version.class.getName() + "." + deployVersionName;
         String version = applicationData.getProperty(propertyName);
         if (StringUtils.equals(currentVersion, version)) {
             return false;
         }
         log.info("New version installed: {}", currentVersion);
-        String instanceVersion = SystemProperty.applicationVersion.get() + "/" + Version.toShortVersionString();
+        String instanceVersion = deployVersionName + "/" + Version.toShortVersionString();
         String subject = String.format("[Jasify] New Version In Prod [%s]", instanceVersion);
         try {
-            MailParser mailParser = MailParser.createNewVersionEmail(SystemProperty.applicationVersion.get(), Version.getVersion(), Version.getTimestampVersion(),
+            MailParser mailParser = MailParser.createNewVersionEmail(deployVersionName, Version.getVersion(), Version.getTimestampVersion(),
                     Version.getBranch(), Version.getNumber(), EnvironmentUtil.defaultVersionUrl());
             MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
         } catch (Exception e) {
@@ -106,6 +106,8 @@ public final class SchemaMigration {
             applicationData.setProperty(userLoginUniqueConstraintKey, true);
             executed = true;
         }
+
+        UniqueConstraints.ensureAllConstraintsExist();
 
         if (EnvironmentUtil.isDevelopment()) {
             String devInitialize = SchemaMigration.class.getName() + ".DevInitialize";
