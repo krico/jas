@@ -102,8 +102,8 @@
                 </pagination>
             </div>
             <div class="col-sm-6 infoBar">
-                <div class="infos">Showing {{vm.perPage() * (vm.page - 1) + 1}} to {{[vm.users.length * vm.page ,
-                    vm.total] | min}} of {{vm.total}} entries
+                <div class="infos" translate="SHOWING_X_TO_Y_OF_Z_ENTRIES"
+                     translate-values="{fromEntry: '{{vm.perPage() * (vm.page - 1) + 1}}', toEntry: '{{[vm.perPage() * vm.page, vm.total] | min}}', totalEntries: '{{vm.total}}'}">
                 </div>
             </div>
         </div>
