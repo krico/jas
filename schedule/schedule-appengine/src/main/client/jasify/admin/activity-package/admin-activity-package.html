@@ -8,11 +8,11 @@
                         <a-button type="submit" controller="vm.saveBtn"></a-button>
                         <button type="button"
                                 btn-href="/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}"
-                                class="btn btn-default waves-effect">Cancel
+                                class="btn btn-default waves-effect">{{ 'CANCEL' | translate }}
                         </button>
                     </div>
                     <card-back ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}"></card-back>
-                    <h2>New Activity Package
+                    <h2>{{ 'NEW_ACTIVITY_PACKAGE' | translate }}
                         <small>Group Activities into Package</small>
                     </h2>
                 </div>
@@ -25,7 +25,7 @@
                         </button>
                     </div>
                     <card-back ng-href="#/admin/activity-packages/{{vm.activityPackage.organizationId || vm.organization.id}}"></card-back>
-                    <h2>Edit Activity Package
+                    <h2>{{ 'EDIT_ACTIVITY_PACKAGE' | translate }}
                         <small>Group Activities into Package</small>
                     </h2>
                 </div>
@@ -33,56 +33,60 @@
         </div>
         <div class="card-body card-padding-sm">
             <div jas-has-feedback class="form-group">
-                <label for="name" class="col-sm-3 control-label">Name:</label>
+                <label for="name" class="col-sm-3 control-label">{{ 'NAME' | translate }}</label>
 
                 <div class="col-sm-5">
                     <div class="fg-line">
-                        <input placeholder="Enter name" ng-model="vm.activityPackage.name" type="text"
+                        <input placeholder="{{ 'ENTER_NAME' | translate }}" ng-model="vm.activityPackage.name"
+                               type="text"
                                class="form-control" id="name" name="name" required/>
                     </div>
                     <jas-feedback-icon-valid field="vm.activityPackageForm.name"></jas-feedback-icon-valid>
                     <jas-feedback-icon-invalid field="vm.activityPackageForm.name"
                                                form="vm.activityPackageForm"></jas-feedback-icon-invalid>
                     <jas-error-help-block field="vm.activityPackageForm.name" form="vm.activityPackageForm">
-                        <span ng-message="required">Name is required.</span>
+                        <div ng-message="required"><span>{{ 'NAME_IS_REQUIRED' | translate }}</span></div>
                     </jas-error-help-block>
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
-                <label for="description" class="col-sm-3 control-label">Description:</label>
+                <label for="description" class="col-sm-3 control-label">{{ 'DESCRIPTION' | translate }}</label>
 
                 <div class="col-sm-5">
                     <div class="fg-line">
                         <textarea ng-model="vm.activityPackage.description"
                                   id="description" name="description"
                                   required
-                                  class="form-control" rows="3" placeholder="Enter description">
+                                  class="form-control" rows="3" placeholder="{{ 'ENTER_DESCRIPTION' | translate }}">
                         </textarea>
                     </div>
                     <jas-feedback-icon-valid field="vm.activityPackageForm.description"></jas-feedback-icon-valid>
                     <jas-feedback-icon-invalid field="vm.activityPackageForm.description"
                                                form="vm.activityPackageForm"></jas-feedback-icon-invalid>
                     <jas-error-help-block field="vm.activityPackageForm.description" form="vm.activityPackageForm">
-                        <span ng-message="required">Description is required.</span>
+                        <div ng-message="required"><span>{{ 'DESCRIPTION_IS_REQUIRED' | translate }}</span></div>
                     </jas-error-help-block>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="price" class="col-sm-3  col-xs-12 control-label">Price:</label>
+            <div jas-has-feedback class="form-group">
+                <label for="price" class="col-sm-3  col-xs-12 control-label">{{ 'PRICE' | translate }}</label>
                 <div jas-has-feedback class="col-sm-3 col-xs-6">
                     <div class="fg-line">
                         <input id="price" name="price" type="number" min="0" max="10000" class="form-control"
-                               ng-model="vm.activityPackage.price" required placeholder="Enter price"
+                               ng-model="vm.activityPackage.price" required
+                               placeholder="{{ 'ENTER_PRICE' | translate }}"
                                ng-change="vm.activityPackage.currency='CHF'"/>
                     </div>
                     <jas-feedback-icon-valid field="vm.activityPackageForm.price"></jas-feedback-icon-valid>
                     <jas-feedback-icon-invalid field="vm.activityPackageForm.price"
                                                form="vm.activityPackageForm"></jas-feedback-icon-invalid>
                     <jas-error-help-block field="vm.activityPackageForm.price" form="vm.activityPackageForm">
-                        <span ng-message="required">Price is required.</span>
-                        <span ng-message="number">Invalid number.</span>
-                        <span ng-message="min">Value must be greater than or equal to 0.</span>
-                        <span ng-message="max">Value must be smaller than 10000.</span>
+                        <div ng-message="required"><span>{{ 'PRICE_IS_REQUIRED' | translate }}</span></div>
+                        <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                        <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN_OR_EQUAL_TO' | translate:'{ value: 0 }' }}</span>
+                        </div>
+                        <div ng-message="max">
+                            <span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span></div>
                     </jas-error-help-block>
                 </div>
                 <div jas-has-feedback class="col-sm-2 col-xs-6">
@@ -98,33 +102,38 @@
                     <jas-feedback-icon-invalid field="vm.activityForm.currency"
                                                form="vm.activityForm"></jas-feedback-icon-invalid>
                     <jas-error-help-block field="vm.activityForm.currency" form="vm.activityForm">
-                        <span ng-message="required">Currency is required.</span>
+                        <div ng-message="required"><span>{{ 'CURRENCY_IS_REQUIRED' | translate }}</span></div>
                     </jas-error-help-block>
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
                 <label for="itemCount" class="col-sm-3 control-label">
-                    <help-label help="Number of activities a client can subscribe to">Item Count:</help-label></label>
+                    <help-label help="{{ 'ITEM_COUNT_DESCRIPTION' | translate }}">{{ 'ITEM_COUNT' | translate }}
+                    </help-label>
+                </label>
                 <div class="col-sm-5">
                     <div class="fg-line">
                         <input id="itemCount" name="itemCount" type="number"
-                               min="2" max="100" class="form-control" placeholder="Enter Item Count"
+                               min="2" max="100" class="form-control" placeholder="{{ 'ENTER_ITEM_COUNT' | translate }}"
                                ng-model="vm.activityPackage.itemCount" required/>
                     </div>
                     <jas-feedback-icon-valid field="vm.activityPackageForm.itemCount"></jas-feedback-icon-valid>
                     <jas-feedback-icon-invalid field="vm.activityPackageForm.itemCount"
                                                form="vm.activityPackageForm"></jas-feedback-icon-invalid>
                     <jas-error-help-block field="vm.activityPackageForm.itemCount" form="vm.activityPackageForm">
-                        <span ng-message="required">Item Count is required.</span>
-                        <span ng-message="number">Invalid number.</span>
-                        <span ng-message="min">Value must be greater than 1.</span>
-                        <span ng-message="max">Value must be smaller than 100.</span>
+                        <div ng-message="required"><span>{{ 'ITEM_COUNT_IS_REQUIRED' | translate }}</span></div>
+                        <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                        <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN_OR_EQUAL_TO' | translate:'{ value: 0 }' }}</span>
+                        </div>
+                        <div ng-message="max">
+                            <span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 100 }' }}</span></div>
                     </jas-error-help-block>
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
                 <label class="control-label col-sm-3" for="validUntil">
-                    <help-label help="This is the last day when this Package will be available.">Valid until:</help-label>
+                    <help-label help="{{ 'VALID_UNTIL_DESCRIPTION' | translate }}">{{ 'VALID_UNTIL' | translate }}
+                    </help-label>
                 </label>
                 <div class="col-sm-5">
                     <div class="fg-line">
@@ -136,7 +145,7 @@
                 </div>
             </div>
             <div jas-has-feedback class="form-group">
-                <label class="control-label col-sm-3" for="organization">Organization:</label>
+                <label class="control-label col-sm-3" for="organization">{{ 'ORGANIZATION' | translate }}</label>
 
                 <div class="col-sm-5">
                     <div class="fg-line">
@@ -153,18 +162,19 @@
                     <jas-feedback-icon-invalid field="vm.activityPackageForm.organization"
                                                form="vm.activityPackageForm"></jas-feedback-icon-invalid>
                     <jas-error-help-block field="vm.activityPackageForm.organization" form="vm.activityPackageForm">
-                        <span ng-message="required">Organization is required.</span>
+                        <span ng-message="required">{{ 'ORGANIZATION_IS_REQUIRED' | translate }}</span>
                     </jas-error-help-block>
                 </div>
             </div>
-
-            <md-subheader class="md-no-sticky bgm-bluegray c-white">Activities ({{vm.selectedActivities.length || 0}}
-                selected)
+            <md-subheader class="md-no-sticky bgm-bluegray c-white">
+                <p translate="ACTIVITIES_X_SELECTED"
+                   translate-values="{value: '{{vm.selectedActivities.length || 0}}'}"></p>
             </md-subheader>
             <div id="activity-selection-lists" class="row">
                 <div class="col-xs-6">
                     <md-list>
-                        <md-subheader class="md-no-sticky">Available <br class="visible-xs-block"/> (click to select)
+                        <md-subheader class="md-no-sticky">{{ 'AVAILABLE' | translate }} <br class="visible-xs-block"/>
+                            ({{ 'CLICK_TO_SELECT' | translate }})
                         </md-subheader>
                         <md-list-item ng-click="vm.selectActivity(activity)" div layout="row"
                                       layout-align="start center" class="md-2-line"
@@ -182,7 +192,8 @@
                 </div>
                 <div class="col-xs-6">
                     <md-list>
-                        <md-subheader class="md-no-sticky">Selected <br class="visible-xs-block"/> (click to deselect)
+                        <md-subheader class="md-no-sticky">{{ 'SELECTED' | translate }} <br class="visible-xs-block"/>
+                            ({{ 'CLICK_TO_DESELECT' | translate }})
                         </md-subheader>
                         <md-list-item ng-click="vm.deselectActivity(activity.id)" div layout="row"
                                       layout-align="start center" class="md-2-line"
@@ -193,7 +204,7 @@
 
                                 <p> {{[activity.start, activity.finish] | tableShortDateTime}} </p>
 
-                                <p> Price: {{activity.price}} {{activity.currency}}</p>
+                                <p> {{ 'PRICE' | translate }}: {{activity.price}} {{activity.currency}}</p>
                             </div>
                         </md-list-item>
                     </md-list>

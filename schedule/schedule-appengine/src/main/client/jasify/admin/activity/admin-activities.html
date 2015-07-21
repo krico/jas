@@ -76,7 +76,7 @@
 </div>
 <div class="card" ng-if="vm.organizations.length > 0 && vm.activities.length === 0">
     <div class="card-padding card-body text-center">
-        <p>{{ 'NO_ACTIVITIES_DEFINED_FOR' | translate }} {{::vm.organization.name}}.</p>
+        <p translate="NO_ACTIVITIES_DEFINED_FOR_X" translate-values="{organization: '{{::vm.organization.name}}'}"></p>
         <button ng-click="vm.addActivity()" class="btn btn-primary waves-effect">{{ 'CREATE_ACTIVITY' | translate }}
         </button>
     </div>

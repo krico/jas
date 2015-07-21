@@ -44,7 +44,8 @@
             }
 
             function fail(r) {
-                //vm.alert('danger', 'Failed to load activity types');
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
             }
         }
 

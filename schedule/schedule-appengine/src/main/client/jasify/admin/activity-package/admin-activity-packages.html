@@ -1,15 +1,15 @@
 <div ng-if="vm.organizations.length > 0" class="card">
     <div class="card-header">
-        <h2>Activity Packages
+        <h2>{{ 'ACTIVITY_PACKAGES' | translate }}
             <small>
-                Group multiple activities into one activity package. You can add new activity packages or edit/delete existing packages as long as there are no subscribers
+                {{ 'ADD_EDIT_DELETE_ACTIVITY_PACKAGED' | translate }}
             </small>
         </h2>
     </div>
     <div class="card-body card-padding-sm">
         <div class="form-horizontal" role="form">
             <div class="form-group">
-                <label for="organization" class="col-sm-2 control-label">Organization:</label>
+                <label for="organization" class="col-sm-2 control-label">{{ 'ORGANIZATION' | translate }}</label>
                 <div class="col-sm-4">
                     <div class="fg-line">
                         <div class="select">
@@ -30,12 +30,12 @@
             <th class="row-commands">
                 <row-add action="vm.addActivityPackage()" description="Add Activity Package" />
             </th>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th><span tooltip="How many subscriptions are allowed">No. items</span></th>
-            <th><span tooltip="How many activities are inclded">No. activities</span></th>
-            <th><span tooltip="How many times was this bought">Executions</span></th>
+            <th>{{ 'ID' | translate }}</th>
+            <th>{{ 'NAME' | translate }}</th>
+            <th>{{ 'PRICE' | translate }}</th>
+            <th><span tooltip="How many subscriptions are allowed">{{ 'NUMBER_OF_ITEMS' | translate }}</span></th>
+            <th><span tooltip="How many activities are inclded">{{ 'NUMBER_OF_ACTIVITIES' | translate }}</span></th>
+            <th><span tooltip="How many times was this bought">{{ 'SUBSCRIPTIONS' | translate }}</span></th>
             <th></th>
         </tr>
         </thead>
@@ -65,13 +65,18 @@
 </div>
 <div class="card" ng-if="vm.organizations.length > 0 && vm.activityPackages.length === 0">
     <div class="card-padding card-body text-center">
-        <p>No Activity Packages are defined for {{vm.organization.name}}.</p>
-        <button ng-click="vm.addActivityPackage()" class="btn btn-primary waves-effect">Create Activity Package</button>
+        <p translate="NO_ACTIVITY_PACKAGES_DEFINED_FOR_X"
+           translate-values="{organization: '{{vm.organization.name}}'}"></p>
+        <button ng-click="vm.addActivityPackage()" class="btn btn-primary waves-effect">{{ 'CREATE_ACTIVITY_PACKAGE' |
+            translate }}
+        </button>
     </div>
 </div>
 <div class="card" ng-if="vm.organizations.length === 0">
     <div class="card-padding card-body text-center">
-        <p>Before creating Activity Package you need to create Organization.</p>
-        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">Create Organization</button>
+        <p>{{ 'CREATE_ORGANIZATION_TYPE_BEFORE_ACTIVITY_PACKAGE' | translate }}</p>
+        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">{{ 'CREATE_ORGANIZATION' | translate
+            }}
+        </button>
     </div>
 </div>

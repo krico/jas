@@ -59,7 +59,8 @@
 </div>
 <div class="card" ng-if="vm.organizations.length > 0 && vm.activityTypes.length === 0">
     <div class="card-padding card-body text-center">
-        <p>{{ 'NO_ACTIVITY_TYPES_DEFINED_FOR' | translate}} {{::vm.organization.name}}.</p>
+        <p translate="NO_ACTIVITY_TYPES_DEFINED_FOR_X"
+           translate-values="{organization: '{{::vm.organization.name}}'}"></p>
         <button ng-click="vm.addActivityType()" class="btn btn-primary waves-effect">{{ 'CREATE_ACTIVITY_TYPE' |
             translate }}
         </button>
