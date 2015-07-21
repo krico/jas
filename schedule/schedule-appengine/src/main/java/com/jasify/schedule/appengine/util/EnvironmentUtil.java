@@ -5,6 +5,8 @@ import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Preconditions;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author krico
@@ -12,6 +14,8 @@ import java.util.Objects;
  */
 public final class EnvironmentUtil {
     public static final String CI_ENV_KEY = "ENV_IS_CI";
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^([^\\.]+)\\.(.*)$");
+
 
     private EnvironmentUtil() {
     }
@@ -25,6 +29,19 @@ public final class EnvironmentUtil {
      */
     public static String appId() {
         return currentEnvironment().getAppId();
+    }
+
+    public static String versionId() {
+        return currentEnvironment().getVersionId();
+    }
+
+    public static String deployVersionName() {
+        String versionId = currentEnvironment().getVersionId();
+        Matcher matcher = VERSION_PATTERN.matcher(versionId);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        return versionId;
     }
 
     /**
