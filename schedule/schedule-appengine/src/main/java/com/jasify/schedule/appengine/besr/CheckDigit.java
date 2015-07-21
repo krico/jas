@@ -1,7 +1,7 @@
 package com.jasify.schedule.appengine.besr;
 
 /**
- * @author krico
+ * @author krico github@cwa.to
  * @since 22/07/15.
  */
 public final class CheckDigit {
