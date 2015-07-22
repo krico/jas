@@ -28,10 +28,14 @@ public final class CheckDigit {
      * @return true if is valid and the check digit is corrects
      */
     public static boolean isValid(String number) {
-        String digits = number.replaceAll("[^0-9]", "");
+        String digits = onlyDigits(number);
         if (digits.length() < 2) return false;
         String toComplete = digits.substring(0, digits.length() - 1);
         return complete(toComplete).equals(digits);
+    }
+
+    public static String onlyDigits(String number) {
+        return number.replaceAll("[^0-9]", "");
     }
 
     /**

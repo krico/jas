@@ -20,6 +20,7 @@ public class CheckDigitTest {
         assertTrue(CheckDigit.isValid("120000000000234478943216899"));
         assertTrue(CheckDigit.isValid("12 00000 00000 23447 89432 16899"));
         assertTrue(CheckDigit.isValid("030001625"));
+        assertTrue(CheckDigit.isValid("0100003949753"));
     }
 
     @Test
@@ -28,5 +29,13 @@ public class CheckDigitTest {
         assertEquals("120000000000234478943216899", CheckDigit.complete("12000000000023447894321689"));
         assertEquals("12 00000 00000 23447 89432 16899", CheckDigit.complete("12 00000 00000 23447 89432 1689"));
         assertEquals("030001625", CheckDigit.complete("03000162"));
+    }
+
+    @Test
+    public void testOnlyDigits() throws Exception {
+        assertEquals("", CheckDigit.onlyDigits("abcDEF,+-tk@#$%IV"));
+        assertEquals("00", CheckDigit.onlyDigits("abc0DEF,+-tk@#$%I0V"));
+        assertEquals("123", CheckDigit.onlyDigits("1 2,3 "));
+        assertEquals("12033", CheckDigit.onlyDigits("CHF 120.33"));
     }
 }
