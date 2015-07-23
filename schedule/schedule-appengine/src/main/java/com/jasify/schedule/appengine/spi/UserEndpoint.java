@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.spi;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
 import com.google.api.server.spi.response.ForbiddenException;
+import com.google.api.server.spi.response.InternalServerErrorException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
@@ -13,6 +14,7 @@ import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -105,13 +107,15 @@ public class UserEndpoint {
     }
 
     @ApiMethod(name = "users.update", path = "users/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public com.jasify.schedule.appengine.model.users.User updateUser(User caller, @Named("id") Key id, com.jasify.schedule.appengine.model.users.User user) throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
+    public com.jasify.schedule.appengine.model.users.User updateUser(User caller, @Named("id") Key id, com.jasify.schedule.appengine.model.users.User user) throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException, InternalServerErrorException {
         mustBeSameUserOrAdmin(caller, id);
         user.setId(id);
         try {
             return UserServiceFactory.getUserService().save(user);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("User not found");
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 
@@ -124,7 +128,7 @@ public class UserEndpoint {
     */
 
     @ApiMethod(name = "users.add", path = "users", httpMethod = ApiMethod.HttpMethod.POST)
-    public com.jasify.schedule.appengine.model.users.User addUser(User caller, JasAddUserRequest request, HttpServletRequest servletRequest) throws UserLoginExistsException, UsernameExistsException, EmailExistsException {
+    public com.jasify.schedule.appengine.model.users.User addUser(User caller, JasAddUserRequest request, HttpServletRequest servletRequest) throws UserLoginExistsException, UsernameExistsException, EmailExistsException, InternalServerErrorException {
 
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(request.getUser());
@@ -136,13 +140,17 @@ public class UserEndpoint {
         com.jasify.schedule.appengine.model.users.User user;
 
         HttpSession session = servletRequest.getSession();
-        if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
-            UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
-            session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
-            user = UserServiceFactory.getUserService().create(request.getUser(), login);
-        } else {
-            String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
-            user = UserServiceFactory.getUserService().create(request.getUser(), pw);
+        try {
+            if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
+                UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+                session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+                user = UserServiceFactory.getUserService().create(request.getUser(), login);
+            } else {
+                String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
+                user = UserServiceFactory.getUserService().create(request.getUser(), pw);
+            }
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
 
         if (caller == null) {

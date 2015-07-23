@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.response.ForbiddenException;
+import com.google.api.server.spi.response.InternalServerErrorException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
@@ -11,6 +12,7 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.dm.JasAddUserRequest;
@@ -233,19 +235,19 @@ public class UserEndpointTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testUpdateUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
+    public void testUpdateUserNullId() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException, InternalServerErrorException {
         testUserServiceFactory.replay();
         endpoint.updateUser(newCaller(1), null, new User());
     }
 
     @Test(expected = ForbiddenException.class)
-    public void testUpdateUserNotSameUser() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException {
+    public void testUpdateUserNotSameUser() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException, InternalServerErrorException {
         testUserServiceFactory.replay();
         endpoint.updateUser(newCaller(1), KeyFactory.createKey("u", 2), new User());
     }
 
     @Test
-    public void testUpdateUser() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException, EntityNotFoundException {
+    public void testUpdateUser() throws NotFoundException, UnauthorizedException, ForbiddenException, ModelException, InternalServerErrorException {
         User expected = new User();
         expect(UserServiceFactory.getUserService().save(expected)).andReturn(expected);
         testUserServiceFactory.replay();
@@ -254,7 +256,7 @@ public class UserEndpointTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testUpdateUserNotFoundException() throws NotFoundException, UnauthorizedException, ForbiddenException, FieldValueException, EntityNotFoundException {
+    public void testUpdateUserNotFoundException() throws NotFoundException, UnauthorizedException, ForbiddenException, ModelException, InternalServerErrorException {
         User user = new User();
         UserServiceFactory.getUserService().save(user);
         expectLastCall().andThrow(new EntityNotFoundException());

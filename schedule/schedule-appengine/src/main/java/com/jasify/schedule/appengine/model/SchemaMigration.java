@@ -191,7 +191,11 @@ public final class SchemaMigration {
             UserServiceFactory.getUserService().create(admin, "admin");
         } catch (UsernameExistsException | EmailExistsException e) {
             // Don't really care
+            log.warn(e.getMessage());
+        } catch (ModelException e) {
+            log.error("Failed to create user", e);
         }
+
         if (EnvironmentUtil.isContinuousIntegrationEnvironment()) {
             log.warn("CONTINUOUS INTEGRATION: Creating test values for OAuth2ProviderConfig");
             for (OAuth2ProviderEnum provider : OAuth2ProviderEnum.values()) {
