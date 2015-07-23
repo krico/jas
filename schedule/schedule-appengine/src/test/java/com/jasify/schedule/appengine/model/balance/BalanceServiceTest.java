@@ -4,7 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.ModelMetadataUtil;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -127,7 +127,7 @@ public class BalanceServiceTest {
     public void testSubscriptionWithSubscriptionId() throws Exception {
         assertSubscription(new DoSubscription() {
             @Override
-            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
+            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws ModelException {
                 balanceService.subscription(subscription.getId());
             }
         }, false);
@@ -137,7 +137,7 @@ public class BalanceServiceTest {
     public void testSubscriptionWithSubscription() throws Exception {
         assertSubscription(new DoSubscription() {
             @Override
-            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
+            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws ModelException {
                 balanceService.subscription(subscription);
             }
         }, false);
@@ -147,7 +147,7 @@ public class BalanceServiceTest {
     public void testUnpaidSubscriptionWithSubscriptionId() throws Exception {
         assertSubscription(new DoSubscription() {
             @Override
-            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException {
+            public void subscription(Subscription subscription, Account payer, Account beneficiary) throws ModelException {
                 balanceService.unpaidSubscription(subscription.getId());
             }
         }, true);
@@ -157,7 +157,7 @@ public class BalanceServiceTest {
     public void testActivityPackageExecutionWithId() throws Exception {
         assertActivityPackageExecution(new DoActivityPackageExecution() {
             @Override
-            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws EntityNotFoundException {
+            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws ModelException {
                 balanceService.activityPackageExecution(execution.getId());
             }
         }, false);
@@ -167,7 +167,7 @@ public class BalanceServiceTest {
     public void testActivityPackageExecutionWithModel() throws Exception {
         assertActivityPackageExecution(new DoActivityPackageExecution() {
             @Override
-            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws EntityNotFoundException {
+            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws ModelException {
                 balanceService.activityPackageExecution(execution);
             }
         }, false);
@@ -177,7 +177,7 @@ public class BalanceServiceTest {
     public void testUnpaidActivityPackageExecutionWithId() throws Exception {
         assertActivityPackageExecution(new DoActivityPackageExecution() {
             @Override
-            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws EntityNotFoundException {
+            public void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary) throws ModelException {
                 balanceService.unpaidActivityPackageExecution(execution.getId());
             }
         }, true);
@@ -447,11 +447,11 @@ public class BalanceServiceTest {
         assertEquals(otherTransactions.get(3).getId(), timed.get(2).getId());
     }
 
-    private static interface DoSubscription {
-        void subscription(Subscription subscription, Account payer, Account beneficiary) throws EntityNotFoundException;
+    private interface DoSubscription {
+        void subscription(Subscription subscription, Account payer, Account beneficiary) throws ModelException;
     }
 
-    private static interface DoActivityPackageExecution {
-        void activityPackageExecution(ActivityPackageExecution activityPackageExecution, Account payer, Account beneficiary) throws EntityNotFoundException;
+    private interface DoActivityPackageExecution {
+        void activityPackageExecution(ActivityPackageExecution activityPackageExecution, Account payer, Account beneficiary) throws ModelException;
     }
 }

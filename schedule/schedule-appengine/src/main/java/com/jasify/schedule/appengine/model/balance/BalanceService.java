@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.balance;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -36,21 +37,21 @@ public interface BalanceService {
      *
      * @param payment - a payment that has been executed and needs to be reflected on the balance
      */
-    void payment(Payment payment);
+    void payment(Payment payment) throws ModelException;
 
-    void unpaidSubscription(Key subscriptionId) throws EntityNotFoundException;
+    void unpaidSubscription(Key subscriptionId) throws ModelException;
 
-    void subscription(Key subscriptionId) throws EntityNotFoundException;
+    void subscription(Key subscriptionId) throws ModelException;
 
-    void subscription(Subscription subscription) throws EntityNotFoundException;
+    void subscription(Subscription subscription) throws ModelException;
 
-    void unpaidActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException;
+    void unpaidActivityPackageExecution(Key activityPackageExecutionId) throws ModelException;
 
-    void activityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException;
+    void activityPackageExecution(Key activityPackageExecutionId) throws ModelException;
 
-    void activityPackageExecution(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException;
+    void activityPackageExecution(ActivityPackageExecution activityPackageExecution) throws ModelException;
 
-    Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount);
+    Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount) throws ModelException;
 
     void applyTransfer(Transfer transfer);
 

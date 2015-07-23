@@ -68,7 +68,7 @@ public class DefaultBalanceService implements BalanceService {
 
 
     @Override
-    public void unpaidSubscription(Key subscriptionId) throws EntityNotFoundException {
+    public void unpaidSubscription(Key subscriptionId) throws ModelException {
         Subscription subscription = Datastore.get(subscriptionMeta, subscriptionId);
         Activity activity = activityDao.get(subscription.getActivityRef().getKey());
         ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
@@ -78,12 +78,12 @@ public class DefaultBalanceService implements BalanceService {
         subscription(subscription, payer, beneficiary, true);
     }
 
-    public void subscription(Key subscriptionId) throws EntityNotFoundException {
+    public void subscription(Key subscriptionId) throws ModelException {
         subscription(Datastore.get(subscriptionMeta, subscriptionId));
     }
 
     @Override
-    public void subscription(Subscription subscription) throws EntityNotFoundException {
+    public void subscription(Subscription subscription) throws ModelException {
         Activity activity = activityDao.get(subscription.getActivityRef().getKey());
         ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
         Key organizationId = activityType.getOrganizationRef().getKey();
@@ -92,8 +92,7 @@ public class DefaultBalanceService implements BalanceService {
         subscription(subscription, payer, beneficiary, false);
     }
 
-    private void subscription(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
-
+    private void subscription(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) throws ModelException {
         //TODO: Validate balance is there before we start.
 
         linkToTransfer(subscription);
@@ -107,7 +106,7 @@ public class DefaultBalanceService implements BalanceService {
     }
 
     @Override
-    public void unpaidActivityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException {
+    public void unpaidActivityPackageExecution(Key activityPackageExecutionId) throws ModelException {
         ActivityPackageExecution activityPackageExecution = Datastore.get(activityPackageExecutionMeta, activityPackageExecutionId);
         ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
         Key organizationId = activityPackage.getOrganizationRef().getKey();
@@ -118,12 +117,12 @@ public class DefaultBalanceService implements BalanceService {
     }
 
     @Override
-    public void activityPackageExecution(ActivityPackageExecution activityPackageExecution) throws EntityNotFoundException {
+    public void activityPackageExecution(ActivityPackageExecution activityPackageExecution) throws ModelException {
         activityPackageExecution(activityPackageExecution.getId());
     }
 
     @Override
-    public void activityPackageExecution(Key activityPackageExecutionId) throws EntityNotFoundException {
+    public void activityPackageExecution(Key activityPackageExecutionId) throws ModelException {
         ActivityPackageExecution activityPackageExecution = Datastore.get(activityPackageExecutionMeta, activityPackageExecutionId);
         ActivityPackage activityPackage = activityPackageDao.get(activityPackageExecution.getActivityPackageRef().getKey());
         Key organizationId = activityPackage.getOrganizationRef().getKey();
@@ -132,8 +131,7 @@ public class DefaultBalanceService implements BalanceService {
         activityPackageExecution(activityPackageExecution, payer, beneficiary, false);
     }
 
-    private void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
-
+    private void activityPackageExecution(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) throws ModelException {
         //TODO: Validate balance is there before we start.
 
         linkToTransfer(execution);
@@ -152,7 +150,7 @@ public class DefaultBalanceService implements BalanceService {
      * @param payment a payment that was executed and is to be persisted so that it is credited to the user
      */
     @Override
-    public void payment(Payment payment) {
+    public void payment(Payment payment) throws ModelException {
         Preconditions.checkNotNull(payment.getUserRef().getKey(), "payment.UserRef");
 
         linkToTransfer(payment);
@@ -186,20 +184,20 @@ public class DefaultBalanceService implements BalanceService {
      * @param hasTransfer that is to be credited to the user
      * @return the newly allocated or restored transferId
      */
-    private Key linkToTransfer(HasTransfer hasTransfer) {
+    private Key linkToTransfer(final HasTransfer hasTransfer) throws ModelException {
         Key transferId = hasTransfer.getTransferRef().getKey();
         if (transferId == null) {
             transferId = Datastore.allocateId(transferMeta);
             hasTransfer.getTransferRef().setKey(transferId);
 
-            com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-            try {
-                Datastore.put(tx, hasTransfer);
-                tx.commit();
-            } finally {
-                if (tx.isActive())
-                    tx.rollback();
-            }
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(com.google.appengine.api.datastore.Transaction tx) {
+                    Datastore.put(tx, hasTransfer);
+                    tx.commit();
+                    return null;
+                }
+            });
         } else {
             log.warn("{} was already linked to transfer, HasTransfer.Id={}, Transfer.Id={}", hasTransfer.getClass().getName(), hasTransfer.getId(), transferId);
         }
@@ -212,141 +210,131 @@ public class DefaultBalanceService implements BalanceService {
      * @param executedPayment the needs to be transfered
      * @return the created or restored transfer
      */
-    private Transfer createPaymentTransfer(Payment executedPayment) {
+    private Transfer createPaymentTransfer(final Payment executedPayment) throws ModelException {
         Preconditions.checkNotNull(executedPayment.getTransferRef().getKey());
         Key userKey = Preconditions.checkNotNull(executedPayment.getUserRef().getKey());
 
-        Transfer transfer;
+        final Key userAccountKey = AccountUtil.memberAccountIdMustExist(userKey);
 
-        Key userAccountKey = AccountUtil.memberAccountIdMustExist(userKey);
+        return TransactionOperator.execute(new ModelOperation<Transfer>() {
+            @Override
+            public Transfer execute(com.google.appengine.api.datastore.Transaction tx) {
+                Transfer transfer = Datastore.getOrNull(tx, transferMeta, executedPayment.getTransferRef().getKey());
+                if (transfer == null) {
+                    Double amount = executedPayment.getAmount();
+                    Double fee = executedPayment.getFee();
+                    if (fee == null) {
+                        fee = 0d;
+                    }
 
-        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-        try {
-            transfer = Datastore.getOrNull(tx, transferMeta, executedPayment.getTransferRef().getKey());
-            if (transfer == null) {
-                Double amount = executedPayment.getAmount();
-                Double fee = executedPayment.getFee();
-                if (fee == null) {
-                    fee = 0d;
+                    amount -= fee;
+
+                    transfer = new Transfer();
+                    transfer.setId(executedPayment.getTransferRef().getKey());
+                    transfer.setAmount(amount);
+                    transfer.setCurrency(executedPayment.getCurrency());
+                    transfer.setDescription(executedPayment.describe());
+                    // Datastore does not allow String properties to exceed 500 characters. Do some magic.
+                    if (transfer.getDescription().length() > 500) {
+                        transfer.setDescription(transfer.getDescription().substring(0, 490) + " ...");
+                    }
+                    transfer.setReference(executedPayment.reference());
+                    transfer.getPayerLegRef().setKey(Datastore.allocateId(custodialAccountKey, transactionMeta));
+                    transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(userAccountKey, transactionMeta));
+
+                    executedPayment.onCreateTransfer(transfer);
+
+                    Datastore.put(tx, transfer);
+
+                } else {
+                    log.warn("Transfer already existed, Transfer.Id={}", executedPayment.getTransferRef().getKey());
                 }
-
-                amount -= fee;
-
-                transfer = new Transfer();
-                transfer.setId(executedPayment.getTransferRef().getKey());
-                transfer.setAmount(amount);
-                transfer.setCurrency(executedPayment.getCurrency());
-                transfer.setDescription(executedPayment.describe());
-                // Datastore does not allow String properties to exceed 500 characters. Do some magic.
-                if (transfer.getDescription().length() > 500) {
-                    transfer.setDescription(transfer.getDescription().substring(0, 490) + " ...");
-                }
-                transfer.setReference(executedPayment.reference());
-                transfer.getPayerLegRef().setKey(Datastore.allocateId(custodialAccountKey, transactionMeta));
-                transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(userAccountKey, transactionMeta));
-
-                executedPayment.onCreateTransfer(transfer);
-
-                Datastore.put(tx, transfer);
-
-            } else {
-                log.warn("Transfer already existed, Transfer.Id={}", executedPayment.getTransferRef().getKey());
+                tx.commit();
+                return transfer;
             }
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
-        }
-        return transfer;
+        });
     }
 
-    private Transfer createActivityPackageExecutionTransfer(ActivityPackageExecution execution, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
-        Transfer transfer;
-        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-        try {
-            transfer = Datastore.getOrNull(tx, transferMeta, execution.getTransferRef().getKey());
-            if (transfer == null) {
-                ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
-                Double amount = activityPackage.getPrice();
-                transfer = new Transfer();
-                transfer.setId(execution.getTransferRef().getKey());
-                transfer.setAmount(amount);
-                if (unpaid) { //cash payments are marked as unpaid
-                    transfer.setUnpaid(amount);
+    private Transfer createActivityPackageExecutionTransfer(final ActivityPackageExecution execution, final Account payer, final Account beneficiary, final boolean unpaid) throws ModelException {
+        return TransactionOperator.execute(new ModelOperation<Transfer>() {
+            @Override
+            public Transfer execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException {
+                Transfer transfer = Datastore.getOrNull(tx, transferMeta, execution.getTransferRef().getKey());
+                if (transfer == null) {
+                    ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
+                    Double amount = activityPackage.getPrice();
+                    transfer = new Transfer();
+                    transfer.setId(execution.getTransferRef().getKey());
+                    transfer.setAmount(amount);
+                    if (unpaid) { //cash payments are marked as unpaid
+                        transfer.setUnpaid(amount);
+                    }
+                    transfer.setCurrency(activityPackage.getCurrency());
+                    transfer.setDescription(FormatUtil.toString(activityPackage));
+                    transfer.setReference(Objects.toString(execution.getId()));
+                    transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
+                    transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));
+
+                    Datastore.put(tx, transfer);
+
+                } else {
+                    log.warn("Transfer already existed, Transfer.Id={}", execution.getTransferRef().getKey());
                 }
-                transfer.setCurrency(activityPackage.getCurrency());
-                transfer.setDescription(FormatUtil.toString(activityPackage));
-                transfer.setReference(Objects.toString(execution.getId()));
-                transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
-                transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));
-
-                Datastore.put(tx, transfer);
-
-            } else {
-                log.warn("Transfer already existed, Transfer.Id={}", execution.getTransferRef().getKey());
+                tx.commit();
+                return transfer;
             }
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
-        }
-        return transfer;
+        });
     }
 
-    private Transfer createSubscriptionTransfer(Subscription subscription, Account payer, Account beneficiary, boolean unpaid) throws EntityNotFoundException {
-        Transfer transfer;
-        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-        try {
-            transfer = Datastore.getOrNull(tx, transferMeta, subscription.getTransferRef().getKey());
-            if (transfer == null) {
-                Activity activity = activityDao.get(subscription.getActivityRef().getKey());
-                Double amount = activity.getPrice();
-                transfer = new Transfer();
-                transfer.setId(subscription.getTransferRef().getKey());
-                transfer.setAmount(amount);
-                if (unpaid) { //cash payments are marked as unpaid
-                    transfer.setUnpaid(amount);
+    private Transfer createSubscriptionTransfer(final Subscription subscription, final Account payer, final Account beneficiary, final boolean unpaid) throws ModelException {
+        return TransactionOperator.execute(new ModelOperation<Transfer>() {
+            @Override
+            public Transfer execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException {
+                Transfer transfer = Datastore.getOrNull(tx, transferMeta, subscription.getTransferRef().getKey());
+                if (transfer == null) {
+                    Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+                    Double amount = activity.getPrice();
+                    transfer = new Transfer();
+                    transfer.setId(subscription.getTransferRef().getKey());
+                    transfer.setAmount(amount);
+                    if (unpaid) { //cash payments are marked as unpaid
+                        transfer.setUnpaid(amount);
+                    }
+                    transfer.setCurrency(activity.getCurrency());
+                    transfer.setDescription(FormatUtil.toString(activity));
+                    transfer.setReference(Objects.toString(subscription.getId()));
+                    transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
+                    transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));
+
+                    Datastore.put(tx, transfer);
+                } else {
+                    log.warn("Transfer already existed, Transfer.Id={}", subscription.getTransferRef().getKey());
                 }
-                transfer.setCurrency(activity.getCurrency());
-                transfer.setDescription(FormatUtil.toString(activity));
-                transfer.setReference(Objects.toString(subscription.getId()));
-                transfer.getPayerLegRef().setKey(Datastore.allocateId(payer.getId(), transactionMeta));
-                transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiary.getId(), transactionMeta));
-
-                Datastore.put(tx, transfer);
-
-            } else {
-                log.warn("Transfer already existed, Transfer.Id={}", subscription.getTransferRef().getKey());
+                tx.commit();
+                return transfer;
             }
-            tx.commit();
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
-        }
-        return transfer;
+        });
     }
 
     @Override
-    public Transfer createTransfer(Double amount, String currency, String description, String reference, Account payerAccount, Account beneficiaryAccount) {
-        com.google.appengine.api.datastore.Transaction tx = Datastore.beginTransaction();
-        try {
-            Transfer transfer = new Transfer();
-            transfer.setId(Datastore.allocateId(transferMeta));
-            transfer.setAmount(amount);
-            transfer.setCurrency(currency);
-            transfer.setDescription(description);
-            transfer.setReference(reference);
-            transfer.getPayerLegRef().setKey(Datastore.allocateId(payerAccount.getId(), transactionMeta));
-            transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiaryAccount.getId(), transactionMeta));
+    public Transfer createTransfer(final Double amount, final String currency, final String description, final String reference, final Account payerAccount, final Account beneficiaryAccount) throws ModelException {
+        return TransactionOperator.execute(new ModelOperation<Transfer>() {
+            @Override
+            public Transfer execute(com.google.appengine.api.datastore.Transaction tx) {
+                Transfer transfer = new Transfer();
+                transfer.setId(Datastore.allocateId(transferMeta));
+                transfer.setAmount(amount);
+                transfer.setCurrency(currency);
+                transfer.setDescription(description);
+                transfer.setReference(reference);
+                transfer.getPayerLegRef().setKey(Datastore.allocateId(payerAccount.getId(), transactionMeta));
+                transfer.getBeneficiaryLegRef().setKey(Datastore.allocateId(beneficiaryAccount.getId(), transactionMeta));
 
-            Datastore.put(tx, transfer);
-            tx.commit();
-
-            return transfer;
-        } finally {
-            if (tx.isActive())
-                tx.rollback();
-        }
+                Datastore.put(tx, transfer);
+                tx.commit();
+                return transfer;
+            }
+        });
     }
 
     private void applyTransferTransaction(final Transfer transfer, final boolean debit) throws ModelException {
@@ -358,7 +346,7 @@ public class DefaultBalanceService implements BalanceService {
 
         TransactionOperator.execute(new ModelOperation<Void>() {
             @Override
-            public Void execute(com.google.appengine.api.datastore.Transaction tx) throws ModelException {
+            public Void execute(com.google.appengine.api.datastore.Transaction tx) {
                 Transaction transaction = Datastore.getOrNull(tx, transactionMeta, legRef.getKey());
                 if (transaction == null) {
                     transaction = new Transaction(transfer, debit);

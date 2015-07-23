@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.balance.task;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.taskqueue.DeferredTask;
 import com.jasify.schedule.appengine.meta.activity.ActivityPackageExecutionMeta;
+import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
 import com.jasify.schedule.appengine.model.balance.*;
 import com.jasify.schedule.appengine.util.FormatUtil;
@@ -36,19 +37,23 @@ public class ApplyActivityPackageExecutionCharges implements DeferredTask {
 
         But, right now, we only have the "BETA" plan...  So as a proof of concept, we charge 0 CHF on every activityPackageExecution
          */
-        log.info("Applying activityPackageExecution fess for activityPackageExecutionId={}", activityPackageExecutionId);
-        ActivityPackageExecution activityPackageExecution = Datastore.get(ActivityPackageExecutionMeta.get(), activityPackageExecutionId);
-        Transfer transfer = activityPackageExecution.getTransferRef().getModel();
-        Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();
-        Account payerAccount = beneficiaryTransaction.getAccountRef().getModel();
-        Account beneficiaryAccount = AccountUtil.profitAndLossAccount();
-        BalanceService balanceService = BalanceServiceFactory.getBalanceService();
+        try {
+            log.info("Applying activityPackageExecution fess for activityPackageExecutionId={}", activityPackageExecutionId);
+            ActivityPackageExecution activityPackageExecution = Datastore.get(ActivityPackageExecutionMeta.get(), activityPackageExecutionId);
+            Transfer transfer = activityPackageExecution.getTransferRef().getModel();
+            Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();
+            Account payerAccount = beneficiaryTransaction.getAccountRef().getModel();
+            Account beneficiaryAccount = AccountUtil.profitAndLossAccount();
+            BalanceService balanceService = BalanceServiceFactory.getBalanceService();
 
-        String description = FormatUtil.toTransactionFeeString(activityPackageExecution);
+            String description = FormatUtil.toTransactionFeeString(activityPackageExecution);
 
-        Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), description,
-                Objects.toString(activityPackageExecution.getId()), payerAccount, beneficiaryAccount);
+            Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), description,
+                    Objects.toString(activityPackageExecution.getId()), payerAccount, beneficiaryAccount);
 
-        balanceService.applyTransfer(chargeTransfer);
+            balanceService.applyTransfer(chargeTransfer);
+        } catch (ModelException e) {
+            log.error("Failed to apply activityPackageExecution fess for activityPackageExecutionId={}", activityPackageExecutionId, e);
+        }
     }
 }
