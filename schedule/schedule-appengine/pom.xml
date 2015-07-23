@@ -196,6 +196,13 @@
             <version>0.9.10</version>
         </dependency>
 
+        <!-- iText (PDF generation) -->
+        <dependency>
+            <groupId>fr.opensagres.xdocreport.itext-gae</groupId>
+            <artifactId>itext-gae</artifactId>
+            <version>4.2.0-1</version>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>

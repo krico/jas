@@ -84,6 +84,17 @@
         <url-pattern>/oauth2/callback/*</url-pattern>
     </servlet-mapping>
 
+    <!-- BEGIN: PDF generation servlet -->
+    <servlet>
+        <servlet-name>pdf</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.pdf.PdfServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>pdf</servlet-name>
+        <url-pattern>/pdf</url-pattern>
+    </servlet-mapping>
+    <!-- END: PDF generation servlet -->
+
     <!-- BEGIN: Incoming mail handling -->
     <servlet>
         <servlet-name>mail</servlet-name>
