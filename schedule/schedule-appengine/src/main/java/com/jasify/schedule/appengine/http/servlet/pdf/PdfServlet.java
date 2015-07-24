@@ -1,10 +1,8 @@
 package com.jasify.schedule.appengine.http.servlet.pdf;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.Paragraph;
+import com.lowagie.text.*;
 import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +20,8 @@ import java.io.IOException;
  */
 public class PdfServlet extends HttpServlet {
     public static final String OCR_B_TRUE_TYPE = "BESR/fonts/OCR-B1.ttf";
+    //A5 (210 x 148mm)
+    public static final String BESR_A5 = "BESR/images/BESR-A5-RED.jpg";
     private static final Logger log = LoggerFactory.getLogger(PdfServlet.class);
 
     @Override
@@ -34,7 +34,7 @@ public class PdfServlet extends HttpServlet {
         try {
             return BaseFont.createFont(fontName, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         } catch (IOException | DocumentException e) {
-            throw new ServletException("Failed to preload font", e);
+            throw new ServletException("Failed to load font", e);
         }
     }
 
@@ -42,11 +42,27 @@ public class PdfServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            BaseFont baseFont = loadFont(OCR_B_TRUE_TYPE);
-            Document document = new Document();
-            PdfWriter.getInstance(document, bos);
+            Rectangle A5 = PageSize.A5.rotate();
+            Document document = new Document(A5, 0, 0, 0, 0);
+            PdfWriter writer = PdfWriter.getInstance(document, bos);
             document.open();
-            document.add(new Paragraph("2100000440001>961116900000006600000009284+ 030001625>", new Font(baseFont)));
+            document.resetHeader();
+
+
+            BaseFont baseFont = loadFont(OCR_B_TRUE_TYPE);
+            Image img = Image.getInstance(getClass().getResource("/" + BESR_A5));
+            img.scaleToFit(A5.getWidth(), A5.getWidth());
+            img.setBorder(0);
+            img.setAbsolutePosition((A5.getWidth() - img.getScaledWidth()) / 2, (A5.getHeight() - img.getScaledHeight()) / 2);
+            document.add(img);
+            PdfContentByte over = writer.getDirectContent();
+            over.beginText();
+            over.setFontAndSize(baseFont, 8.5f);
+            over.setTextMatrix(245,60);
+            over.showText("2100000440001>961116900000006600000009284+ 030001625>");
+            over.endText();
+//            Paragraph statusLine = new Paragraph("2100000440001>961116900000006600000009284+ 030001625>", new Font(baseFont, 8));
+//            document.add(statusLine);
             document.close();
         } catch (DocumentException e) {
             throw new ServletException("Failed to generate PDF", e);
