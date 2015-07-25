@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminOrganizationsController', AdminOrganizationsController);
 
-    function AdminOrganizationsController($location, Organization, Auth, organizations, toolbarContext) {
+    function AdminOrganizationsController($location, $filter, jasDialogs, Organization, Auth, organizations, toolbarContext) {
         var vm = this;
         vm.organizations = organizations.items;
         vm.organization = {};
@@ -13,29 +13,23 @@
         vm.update = update;
         vm.add = add;
         vm.viewOrganization = viewOrganization;
-        vm.alert = alert;
         vm.isAdmin = isAdmin;
         vm.selectOrganization = selectOrganization;
 
-        function alert(t, m) {
-            vm.alerts.push({type: t, msg: m});
-        }
-
-
-        function reloadHandler(r) {
-            vm.reload();
-        }
+        var $translate = $filter('translate');
 
         function errorHandler(resp) {
-            alert('danger', 'Operation failed: (' + resp.status + ") '" + resp.statusText + "'");
+            var translation = $translate('ORGANIZATION_NOT_CREATED');
+            jasDialogs.warning(translation);
         }
 
         function add(organization) {
             Organization.add(organization).then(ok, errorHandler);
             function ok(r) {
                 vm.organization = {};
-                vm.alert('success', 'Organization [' + r.name + '] added!');
                 vm.reload();
+                var translation = $translate('ORGANIZATION_CREATED');
+                jasDialogs.success(translation);
             }
         }
 
@@ -69,7 +63,6 @@
 
         function remove(id) {
             Organization.remove(id).then(vm.reload);
-            selectRow(null);
         }
 
         function viewOrganization(id) {

@@ -30,9 +30,8 @@
 
                 <h2 class="lvh-label">
                     <small>
-                        Select <strong>{{activityPackage.itemCount}}</strong> of the
-                        <strong>{{vm.activityPackageActivities[activityPackage.id].length}}</strong> activities
-                        below.
+                        <p translate="SELECT_X_OF_Y_ACTIVITIES"
+                           translate-values="{count: '{{activityPackage.itemCount}}', total: '{{vm.activityPackageActivities[activityPackage.id].length}}'}"></p>
                     </small>
                 </h2>
                 <h2 class="lvh-label">
@@ -42,13 +41,15 @@
                 <h2 class="lvh-label m-r-10">
                                 <span ng-show="vm.packageSelectionIncomplete(activityPackage)"
                                       class="label label-warning">
-                                    {{vm.activityPackageSelection[activityPackage.id].length || 0}}/{{activityPackage.itemCount}} {{ 'ACTIVITEIS_SELECTED' | translate }}</span>
+                                    {{vm.activityPackageSelection[activityPackage.id].length || 0}}/{{activityPackage.itemCount}} {{ 'ACTIVITIES_SELECTED' | translate }}</span>
                                 <span ng-show="vm.packageSelectionComplete(activityPackage)"
                                       class="label label-info">
                                     {{ 'SELECTION_COMPLETED' | translate }}</span>
                                 <span ng-show="vm.packageSelectionTooBig(activityPackage)"
-                                      class="label label-info">
-                                    You selected to many activities. Exactly {{activityPackage.itemCount}} activities must be selected.</span>
+                                      class="label label-info"
+                                      translate="SELECTED_TOO_MANY_ACTIVITIES_IN_ACTIVITY_PACKAGE"
+                                      translate-values="{count: '{{activityPackage.itemCount}}'}">
+                                    </span>
                 </h2>
             </div>
             <div class="lv-body">

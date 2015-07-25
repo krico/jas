@@ -116,8 +116,8 @@
             }
 
             function fail(r) {
-                var translation = $translate('FAILED_TO_FIND_USER');
-                vm.alert('danger', translation);
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
             }
         }
 

@@ -1,8 +1,11 @@
 {
   "CHECKOUT": "Zur Kasse",
   "DELETE": "Löschen",
+  "DESCRIPTION": "Beschreibung",
+  "EDIT": "Bearbeiten",
   "FINISH": "Fertig",
   "LOCATION": "Lage",
+  "ORGANIZATIONS": "Organisationen",
   "PRICE": "Preis",
   "SIGN_IN": "Anmelden",
   "SIGN_OUT": "Abmelden",

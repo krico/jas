@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityPackageController', AdminActivityPackageController);
 
-    function AdminActivityPackageController(moment, $location, jasDialogs, aButtonController, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
+    function AdminActivityPackageController(moment, $location, $filter, jasDialogs, aButtonController, ActivityPackage, Activity, organizations, activityPackage, activityPackageActivities) {
 
         var vm = this;
         vm.organization = null;
@@ -40,6 +40,8 @@
         vm.create = create;
         vm.reset = reset;
 
+        var $translate = $filter('translate');
+
         vm.reset(true);
 
         vm.selectOrganization(vm.organizations, vm.activityPackage, $location.search().organizationId);
@@ -49,14 +51,14 @@
             var numSelectedActivities = (vm.selectedActivities || []).length;
 
             if (numSelectedActivities === 0) {
-                jasDialogs.warning('You must select at least one activity.');
+                var noActivitiesSelectedTranslation = $translate('SELECT_AT_LEAST_ONE_ACTIVITY');
+                jasDialogs.warning(noActivitiesSelectedTranslation);
                 return false;
             }
 
             if (numSelectedActivities < vm.activityPackage.itemCount) {
-                jasDialogs.warning(
-                    "Items Count specifies minimum number of activities in the package. " +
-                    "You must select at least " + vm.activityPackage.itemCount + " activities or decrease Items Count.");
+                var tooManyActivitesSelectedTranslation = $translate('ITEM_COUNT_LESS_THEN_SELECTED_ACTIVITIES', {value: vm.activityPackage.itemCount});
+                jasDialogs.warning(tooManyActivitesSelectedTranslation);
                 return false;
             }
 
@@ -77,12 +79,12 @@
             function ok() {
                 activityPackage = angular.copy(vm.activityPackage);
                 activityPackageActivities = angular.copy(vm.selectedActivities);
-
                 makePristine();
             }
 
-            function fail() {
-                jasDialogs.error('Failed to update Activity Package. Please try again.');
+            function fail(r) {
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
             }
         }
 
@@ -96,14 +98,19 @@
 
             setValidUntilDate(vm.activityPackage, vm.selectedActivities);
 
-            ActivityPackage.add(vm.activityPackage, vm.selectedActivities).then(function (resp) {
+            ActivityPackage.add(vm.activityPackage, vm.selectedActivities).then(ok, fail);
+
+            function ok(resp) {
                 jasDialogs.success('Activity Package was created.');
 
                 $location.search({});
                 $location.path('/admin/activity-package/' + resp.id);
-            }, function () {
-                jasDialogs.error('Failed to create Activity Package. Please try again.');
-            });
+            }
+
+            function fail(r) {
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
+            }
         }
 
         function reset(initialReset) {
@@ -154,7 +161,6 @@
                 var a = activity1.start || new Date();
                 var b = activity2.start || new Date();
                 return a > b ? 1 : a < b ? -1 : 0;
-
             }
         }
 
@@ -217,7 +223,7 @@
                 vm.selectedActivities = [];
             }
             if (organization.id) {
-                Activity.query({organizationId: organization.id, fromDate: new Date().toISOString()}).then(ok, failed);
+                Activity.query({organizationId: organization.id, fromDate: new Date().toISOString()}).then(ok, fail);
             }
 
             function ok(resp) {
@@ -225,8 +231,9 @@
                 vm.sortActivityArray(vm.activities);
             }
 
-            function failed() {
-                jasDialogs.error("Failed to get organization activities");
+            function fail(r) {
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
             }
         }
     }

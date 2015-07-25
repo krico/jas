@@ -1,31 +1,33 @@
 <form name="organizationForm" role="form" class="form-inline" ng-if="vm.isAdmin()" novalidate ng-submit="vm.add(vm.organization)">
     <div class="form-group">
-        <label class="sr-only" for="name">Organization Name</label>
+        <label class="sr-only" for="name">{{ 'ORGANIZATION_NAME' | translate }}</label>
         <input type="text" class="form-control input-sm" id="name" ng-model="vm.organization.name"
-               placeholder="Organization Name">
+               placeholder="{{ 'NAME' | translate }}">
     </div>
     <div class="form-group">
-        <label class="sr-only" for="description">Organization Description</label>
+        <label class="sr-only" for="description">{{ 'ORGANIZATION_DESCRIPTION' | translate }}</label>
         <input type="text" class="form-control input-sm" id="description" ng-model="vm.organization.description"
-               placeholder="Description">
+               placeholder="{{ 'DESCRIPTION' | translate }}">
     </div>
-    <button type="submit" ng-disabled="!vm.organization.name" class="btn btn-primary input-sm">create organization</button>
+    <button type="submit" ng-disabled="!vm.organization.name" class="btn btn-primary input-sm">{{ 'CREATE_ORGANIZATION'
+        | translate }}
+    </button>
 </form>
 
 <div ng-if="vm.organizations.length > 0" class="card">
     <div class="card-header">
-        <h2>Organizations
-            <small>This is an admin only screen. Here you can add/view/delete organisations</small>
+        <h2>{{ 'ORGANIZATIONS' | translate }}
+            <small>{{ 'ADD_EDIT_DELETE_ORGANIZATIONS' | translate }}</small>
         </h2>
     </div>
     <table id="admin-organizations" class="table responsive table-hover table-condensed table-vmiddle">
         <thead>
         <tr>
             <th></th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Created</th>
-            <th>Updated</th>
+            <th>{{ 'NAME' | translate }}</th>
+            <th>{{ 'DESCRIPTION' | translate }}</th>
+            <th>{{ 'CREATED' | translate }}</th>
+            <th>{{ 'UPDATED' | translate }}</th>
         </tr>
         </thead>
         <tbody>
