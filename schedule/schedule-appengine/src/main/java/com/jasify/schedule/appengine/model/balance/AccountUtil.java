@@ -53,8 +53,8 @@ public final class AccountUtil {
                     account.setCurrency(DEFAULT_CURRENCY);
                     log.info("Created P&L account:{}", account);
                     Datastore.put(tx, account);
+                    tx.commit();
                 }
-                tx.commit();
                 return account;
             }
         });
@@ -131,8 +131,8 @@ public final class AccountUtil {
                     account = AccountUtil.newMemberAccount(memberId);
                     log.info("Created member account:{} for member:{}", memberAccountId, memberId);
                     Datastore.put(tx, account);
+                    tx.commit();
                 }
-                tx.commit();
                 return account;
             }
         });
