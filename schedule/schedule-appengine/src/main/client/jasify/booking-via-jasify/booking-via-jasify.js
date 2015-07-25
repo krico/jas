@@ -45,6 +45,7 @@
         angular.forEach(this.activityPackages, function (activityPackage) {
             ActivityPackage.getActivities(activityPackage.id).then(function (result) {
                 vm.activityPackageActivities[activityPackage.id] = result;
+                activityPackageExistsCheck(activityPackage.id);
                 updateSelectAllFlags();
             });
         });
@@ -225,6 +226,31 @@
 
             vm.activityPackageSelection = localStorageService.get(sessionStorageKeys.activityPackageSelection) || {};
             vm.activitySelection = localStorageService.get(sessionStorageKeys.activitySelection) || [];
+
+            activityExistsCheck(vm.activities);
+        }
+
+        function activityPackageExistsCheck(activityPackageId) {
+
+            var activityPackageSelection = vm.activityPackageSelection[activityPackageId] || [];
+
+            _.remove(activityPackageSelection, function(activityPackageSelectedActivity) {
+                return !_.find(vm.activityPackageActivities[activityPackageId], { 'id': activityPackageSelectedActivity.id });
+            });
+
+            if (activityPackageSelection.length === 0) {
+                delete vm.activityPackageSelection[activityPackageId];
+            }
+        }
+
+        function activityExistsCheck(activities) {
+            _.remove(vm.activitySelection, function(selectedActivity) {
+                return !_.find(activities, { 'id': selectedActivity.id });
+            });
+        }
+
+        function activityPackageCheck() {
+
         }
 
         function canSelectAllForActivityPackage(activityPackage) {
