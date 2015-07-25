@@ -120,7 +120,7 @@
         }
 
         function confirmClearPackageSelection() {
-            var translation = $translate('CLEAR_PACKAGE_SELECTION_PROMPT');
+            var translation = $translate('CLEAR_ACTIVITY_PACKAGE_SELECTION_PROMPT');
             jasDialogs.ruSure(translation, function () {
                 $rootScope.$apply(function () {
                     vm.activityPackageSelection = {};
