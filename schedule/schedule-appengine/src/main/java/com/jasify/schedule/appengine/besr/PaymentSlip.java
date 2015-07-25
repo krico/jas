@@ -34,6 +34,7 @@ public class PaymentSlip {
     private float ury;
     private float ulx;
     private float uly;
+    private float giroUlx;
 
     private float width;
     private float height;
@@ -57,6 +58,7 @@ public class PaymentSlip {
         urx = lrx;
         ulx = llx;
         uly = ury;
+        giroUlx = urx - Points.GiroWidth;
     }
 
     private void fillOrangeBackground() {
@@ -89,7 +91,42 @@ public class PaymentSlip {
         under.setLineWidth(Points.DottedLineWidth);
         under.moveTo(llx + Points.Millimeter, lly);
         under.lineTo(ulx + Points.Millimeter, uly);
-        under.setLineDash(0.8f, 2);
+        under.setLineDash(Points.DottedLineUnitsOn, Points.DottedLinePhase);
+        under.stroke();
+        under.restoreState();
+    }
+
+    private void dottedSeparatorVerticalLine() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(Color.BLACK);
+        under.setLineWidth(Points.DottedLineWidth);
+        under.moveTo(giroUlx, lly);
+        under.lineTo(giroUlx, uly - Points.Line);
+        under.setLineDash(Points.DottedLineUnitsOn, Points.DottedLinePhase);
+        under.stroke();
+        under.restoreState();
+    }
+
+    private void solidSeparatorVerticalLine() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(Color.BLACK);
+        under.setLineWidth(Points.SolidLineWidth);
+        under.moveTo(giroUlx, uly - Points.Line);
+        under.lineTo(giroUlx, uly);
+        under.stroke();
+        under.restoreState();
+    }
+
+    private void solidInFavorOfSeparatorVerticalLine() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(Color.BLACK);
+        under.setLineWidth(Points.SolidLineWidth);
+        float off = giroUlx + 24 * Points.Column;
+        under.moveTo(off, lly);
+        under.lineTo(off, uly - Points.Line);
         under.stroke();
         under.restoreState();
     }
@@ -131,52 +168,9 @@ public class PaymentSlip {
             dottedLeftVerticalLine();
             solidLeftVerticalLine();
             solidTopHorizontalLine();
-
-            if (false) {
-                // Add a rectangle under the image
-                PdfContentByte under = writer.getDirectContentUnder();
-                under.saveState();
-                under.setColorFill(Colors.Background);
-                float width = document.getPageSize().getWidth();
-                float height = document.getPageSize().getHeight();
-                under.rectangle(0, 0, width, height);
-                under.fill();
-                under.setColorFill(Color.white);
-                under.rectangle(width - Points.StatusLineBoxWidth, 0, Points.StatusLineBoxWidth, Points.StatusLineBoxHeight);
-                under.fill();
-
-                under.restoreState();
-                under.saveState();
-                under.setColorStroke(Color.black);
-                under.setLineWidth(0.8f);
-                under.moveTo(0, 0);
-                under.lineTo(width, 0);
-                under.lineTo(width, height);
-                under.lineTo(0, height);
-                under.closePath();
-                under.stroke();
-
-                under.moveTo(0, height - Points.Line);
-                under.lineTo(width, height - Points.Line);
-                under.stroke();
-
-                under.moveTo(Points.Column * 4, 0);
-                under.lineTo(Points.Column * 4, height);
-                under.stroke();
-                under.restoreState();
-
-
-                BaseFont baseFont = loadFont(OCR_B_TRUE_TYPE);
-                PdfContentByte over = writer.getDirectContent();
-                over.saveState();
-                over.rectangle(100, 100, 100, 100);
-                over.restoreState();
-                over.beginText();
-                over.setFontAndSize(baseFont, 8.5f);
-                over.setTextMatrix(245, 60);
-                over.showText("2100000440001>961116900000006600000009284+ 030001625>");
-                over.endText();
-            }
+            dottedSeparatorVerticalLine();
+            solidSeparatorVerticalLine();
+            solidInFavorOfSeparatorVerticalLine();
 
             document.close();
         } finally {
@@ -193,7 +187,7 @@ public class PaymentSlip {
 
     interface Dimensions {
         float HeightMillimeters = 106;
-        float WidthMillimeters = 220;
+        float WidthMillimeters = 220 + 1;
 
         float ReceiptWidthColumns = 27;
         float GiroWidthColumns = 59;
@@ -220,7 +214,12 @@ public class PaymentSlip {
         float Width = Utilities.millimetersToPoints(Dimensions.WidthMillimeters);
         float Height = Utilities.millimetersToPoints(Dimensions.HeightMillimeters);
         Rectangle PageSize = new RectangleReadOnly(Width + Margin, Height + Margin);
+        float GiroWidth = Dimensions.GiroWidthColumns * Column;
+        float ReceiptWidth = Dimensions.ReceiptWidthColumns * Column;
+
         float StatusLineBoxWidth = Dimensions.ReceiptWidthColumns * Column;
         float StatusLineBoxHeight = Utilities.inchesToPoints(Dimensions.StatusLineBoxHeightInches);
+        float DottedLineUnitsOn = 0.8f;
+        float DottedLinePhase = 2;
     }
 }
