@@ -45,6 +45,7 @@
         angular.forEach(this.activityPackages, function (activityPackage) {
             ActivityPackage.getActivities(activityPackage.id).then(function (result) {
                 vm.activityPackageActivities[activityPackage.id] = result;
+                activityPackageExistsCheck(activityPackage.id);
                 updateSelectAllFlags();
             });
         });
@@ -56,6 +57,8 @@
         this.disableActivityPackageActivitySelection = disableActivityPackageActivitySelection;
         this.confirmRemoveActivity = confirmRemoveActivity;
         this.confirmRemoveActivityPackage = confirmRemoveActivityPackage;
+        this.confirmClearActivitySelection = confirmClearActivitySelection;
+        this.confirmClearPackageSelection = confirmClearPackageSelection;
         this.hasCompletedActivityPackages = hasCompletedActivityPackages;
         this.packageSelectionIncomplete = packageSelectionIncomplete;
         this.packageSelectionComplete = packageSelectionComplete;
@@ -112,6 +115,23 @@
             jasDialogs.ruSure(translation, function () {
                 $rootScope.$apply(function () {
                     vm.activitySelection.splice(vm.activitySelection.indexOf(activity), 1);
+                });
+            });
+        }
+
+        function confirmClearPackageSelection() {
+            var translation = $translate('CLEAR_PACKAGE_SELECTION_PROMPT');
+            jasDialogs.ruSure(translation, function () {
+                $rootScope.$apply(function () {
+                    vm.activityPackageSelection = {};
+                });
+            });
+        }
+        function confirmClearActivitySelection() {
+            var translation = $translate('CLEAR_ACTIVITY_SELECTION_PROMPT');
+            jasDialogs.ruSure(translation, function () {
+                $rootScope.$apply(function () {
+                    vm.activitySelection = [];
                 });
             });
         }
@@ -206,6 +226,27 @@
 
             vm.activityPackageSelection = localStorageService.get(sessionStorageKeys.activityPackageSelection) || {};
             vm.activitySelection = localStorageService.get(sessionStorageKeys.activitySelection) || [];
+
+            activityExistsCheck(vm.activities);
+        }
+
+        function activityPackageExistsCheck(activityPackageId) {
+
+            var activityPackageSelection = vm.activityPackageSelection[activityPackageId] || [];
+
+            _.remove(activityPackageSelection, function(activityPackageSelectedActivity) {
+                return !_.find(vm.activityPackageActivities[activityPackageId], { 'id': activityPackageSelectedActivity.id });
+            });
+
+            if (activityPackageSelection.length === 0) {
+                delete vm.activityPackageSelection[activityPackageId];
+            }
+        }
+
+        function activityExistsCheck(activities) {
+            _.remove(vm.activitySelection, function(selectedActivity) {
+                return !_.find(activities, { 'id': selectedActivity.id });
+            });
         }
 
         function canSelectAllForActivityPackage(activityPackage) {
