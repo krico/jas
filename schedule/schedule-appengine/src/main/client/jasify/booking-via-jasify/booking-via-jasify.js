@@ -249,10 +249,6 @@
             });
         }
 
-        function activityPackageCheck() {
-
-        }
-
         function canSelectAllForActivityPackage(activityPackage) {
 
             var numActivitiesToBook = 0;
