@@ -35,6 +35,8 @@ public class PaymentSlip {
     private float ulx;
     private float uly;
     private float giroUlx;
+    private float inFavorOfUlx;
+    private float rightUpperSquareY;
 
     private float width;
     private float height;
@@ -59,6 +61,8 @@ public class PaymentSlip {
         ulx = llx;
         uly = ury;
         giroUlx = urx - Points.GiroWidth;
+        inFavorOfUlx = giroUlx + 24 * Points.Column;
+        rightUpperSquareY = ury - (7 * Points.Line);
     }
 
     private void fillOrangeBackground() {
@@ -87,7 +91,7 @@ public class PaymentSlip {
     private void dottedLeftVerticalLine() {
         PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
-        under.setColorStroke(Color.BLACK);
+        under.setColorStroke(LineColors.DottedLeftVerticalLine);
         under.setLineWidth(Points.DottedLineWidth);
         under.moveTo(llx + Points.Millimeter, lly);
         under.lineTo(ulx + Points.Millimeter, uly);
@@ -99,7 +103,7 @@ public class PaymentSlip {
     private void dottedSeparatorVerticalLine() {
         PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
-        under.setColorStroke(Color.BLACK);
+        under.setColorStroke(LineColors.DottedSeparatorVerticalLine);
         under.setLineWidth(Points.DottedLineWidth);
         under.moveTo(giroUlx, lly);
         under.lineTo(giroUlx, uly - Points.Line);
@@ -111,7 +115,7 @@ public class PaymentSlip {
     private void solidSeparatorVerticalLine() {
         PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
-        under.setColorStroke(Color.BLACK);
+        under.setColorStroke(LineColors.SeparatorVerticalLine);
         under.setLineWidth(Points.SolidLineWidth);
         under.moveTo(giroUlx, uly - Points.Line);
         under.lineTo(giroUlx, uly);
@@ -122,22 +126,10 @@ public class PaymentSlip {
     private void solidInFavorOfSeparatorVerticalLine() {
         PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
-        under.setColorStroke(Color.BLACK);
+        under.setColorStroke(LineColors.InFavorOfSeparatorVerticalLine);
         under.setLineWidth(Points.SolidLineWidth);
-        float off = giroUlx + 24 * Points.Column;
-        under.moveTo(off, lly);
-        under.lineTo(off, uly - Points.Line);
-        under.stroke();
-        under.restoreState();
-    }
-
-    private void solidLeftVerticalLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
-        under.saveState();
-        under.setColorStroke(Color.BLACK);
-        under.setLineWidth(Points.SolidLineWidth);
-        under.moveTo(ulx + Points.Millimeter, uly - Points.Line);
-        under.lineTo(urx, ury - Points.Line);
+        under.moveTo(inFavorOfUlx, lly);
+        under.lineTo(inFavorOfUlx, uly - Points.Line);
         under.stroke();
         under.restoreState();
     }
@@ -145,10 +137,56 @@ public class PaymentSlip {
     private void solidTopHorizontalLine() {
         PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
-        under.setColorStroke(Color.BLACK);
+        under.setColorStroke(LineColors.TopHorizontalLine);
+        under.setLineWidth(Points.SolidLineWidth);
+        under.moveTo(ulx + Points.Millimeter, uly - Points.Line);
+        under.lineTo(urx, ury - Points.Line);
+        under.stroke();
+        under.restoreState();
+    }
+
+    private void solidHorizontalRightLine() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(LineColors.HorizontalRightLine);
+        under.setLineWidth(Points.SolidLineWidth);
+        under.moveTo(inFavorOfUlx, rightUpperSquareY);
+        under.lineTo(urx, rightUpperSquareY);
+        under.stroke();
+        under.restoreState();
+    }
+
+    private void solidHorizontalReferenceLine() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(LineColors.HorizontalReferenceLine);
+        under.setLineWidth(Points.SolidLineWidth);
+        float offY = ury - 13 * Points.Line;
+        under.moveTo(inFavorOfUlx, offY);
+        under.lineTo(urx, offY);
+        under.stroke();
+        under.restoreState();
+    }
+
+    private void solidLeftVerticalLine() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(LineColors.LeftVerticalLine);
         under.setLineWidth(Points.SolidLineWidth);
         under.moveTo(ulx + 4 * Points.Column, uly);
         under.lineTo(llx + 4 * Points.Column, lly);
+        under.stroke();
+        under.restoreState();
+    }
+
+    private void solidVerticalCircleSquareLine() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(LineColors.VerticalCircleSquareLine);
+        under.setLineWidth(Points.SolidLineWidth);
+        float offX = urx - 13 * Points.Column;
+        under.moveTo(offX, ury - Points.Line);
+        under.lineTo(offX, rightUpperSquareY);
         under.stroke();
         under.restoreState();
     }
@@ -171,7 +209,9 @@ public class PaymentSlip {
             dottedSeparatorVerticalLine();
             solidSeparatorVerticalLine();
             solidInFavorOfSeparatorVerticalLine();
-
+            solidHorizontalRightLine();
+            solidHorizontalReferenceLine();
+            solidVerticalCircleSquareLine();
             document.close();
         } finally {
             log.info("Generated: {}", file);
@@ -183,6 +223,21 @@ public class PaymentSlip {
         } finally {
             log.info("Wrote: {}", file);
         }
+    }
+
+    /**
+     * I used these to find the lines by changing the colors
+     */
+    interface LineColors {
+        Color LeftVerticalLine = Color.BLACK;
+        Color DottedLeftVerticalLine = Color.BLACK;
+        Color HorizontalRightLine = Color.BLACK;
+        Color TopHorizontalLine = Color.BLACK;
+        Color InFavorOfSeparatorVerticalLine = Color.BLACK;
+        Color SeparatorVerticalLine = Color.BLACK;
+        Color DottedSeparatorVerticalLine = Color.BLACK;
+        Color VerticalCircleSquareLine = Color.BLACK;
+        Color HorizontalReferenceLine = Color.BLACK;
     }
 
     interface Dimensions {
