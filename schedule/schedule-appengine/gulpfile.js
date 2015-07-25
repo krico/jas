@@ -336,7 +336,6 @@ function staticHtml() {
 }
 
 function i18n() {
-    console.log(paths.i18n);
     return gulp.src(paths.i18n)
         .pipe(gulp.dest(paths.build + '/i18n'));
 }
