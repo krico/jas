@@ -3,7 +3,6 @@ package com.jasify.schedule.appengine.model.balance.task;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.taskqueue.DeferredTask;
 import com.jasify.schedule.appengine.meta.activity.SubscriptionMeta;
-import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.*;
 import com.jasify.schedule.appengine.util.FormatUtil;
@@ -37,23 +36,20 @@ public class ApplySubscriptionCharges implements DeferredTask {
 
         But, right now, we only have the "BETA" plan...  So as a proof of concept, we charge 0 CHF on every subscription
          */
-        try {
-            log.info("Applying subscription fees for subscription={}", subscriptionId);
-            Subscription subscription = Datastore.get(SubscriptionMeta.get(), subscriptionId);
-            Transfer transfer = subscription.getTransferRef().getModel();
-            Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();
-            Account payerAccount = beneficiaryTransaction.getAccountRef().getModel();
-            Account beneficiaryAccount = AccountUtil.profitAndLossAccount();
-            BalanceService balanceService = BalanceServiceFactory.getBalanceService();
 
-            String description = FormatUtil.toTransactionFeeString(subscription);
+        log.info("Applying subscription fees for subscription={}", subscriptionId);
+        Subscription subscription = Datastore.get(SubscriptionMeta.get(), subscriptionId);
+        Transfer transfer = subscription.getTransferRef().getModel();
+        Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();
+        Account payerAccount = beneficiaryTransaction.getAccountRef().getModel();
+        Account beneficiaryAccount = AccountUtil.profitAndLossAccount();
+        BalanceService balanceService = BalanceServiceFactory.getBalanceService();
 
-            Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), description,
-                    Objects.toString(subscription.getId()), payerAccount, beneficiaryAccount);
+        String description = FormatUtil.toTransactionFeeString(subscription);
 
-            balanceService.applyTransfer(chargeTransfer);
-        } catch (ModelException e) {
-            log.error("Failed to apply subscription fees for subscription={}", subscriptionId, e);
-        }
+        Transfer chargeTransfer = balanceService.createTransfer(0d, transfer.getCurrency(), description,
+                Objects.toString(subscription.getId()), payerAccount, beneficiaryAccount);
+
+        balanceService.applyTransfer(chargeTransfer);
     }
 }

@@ -9,7 +9,6 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
 import com.jasify.schedule.appengine.model.users.*;
@@ -74,7 +73,7 @@ public class AuthEndpoint {
 
     @ApiMethod(name = "auth.changePassword", path = "auth/change-password", httpMethod = ApiMethod.HttpMethod.POST)
     public void changePassword(User caller, JasChangePasswordRequest request)
-            throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, EntityNotFoundException, InternalServerErrorException {
+            throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, EntityNotFoundException {
         Preconditions.checkNotNull(request);
         JasifyEndpointUser jasCaller = mustBeSameUserOrAdmin(caller, request.getUserId());
 
@@ -92,11 +91,8 @@ public class AuthEndpoint {
         }
 
         log.info("User {} changing password of {}", caller, request.getUserId());
-        try {
-            UserServiceFactory.getUserService().setPassword(user, newPassword);
-        } catch (ModelException e) {
-            throw new InternalServerErrorException(e.getMessage());
-        }
+        UserServiceFactory.getUserService().setPassword(user, newPassword);
+
     }
 
     @ApiMethod(name = "auth.login", path = "auth/login", httpMethod = ApiMethod.HttpMethod.POST)
@@ -161,7 +157,7 @@ public class AuthEndpoint {
     }
 
     @ApiMethod(name = "auth.providerAuthenticate", path = "auth/provider-authenticate", httpMethod = ApiMethod.HttpMethod.POST)
-    public JasProviderAuthenticateResponse providerAuthenticate(User authenticatedUser, HttpServletRequest httpServletRequest, JasProviderAuthenticateRequest request) throws BadRequestException, NotFoundException, ConflictException, InternalServerErrorException {
+    public JasProviderAuthenticateResponse providerAuthenticate(User authenticatedUser, HttpServletRequest httpServletRequest, JasProviderAuthenticateRequest request) throws BadRequestException, NotFoundException, ConflictException {
         OAuth2Info oAuth2Info;
 
         try {
@@ -195,8 +191,6 @@ public class AuthEndpoint {
                 }
                 if (!found)
                     throw new ConflictException("UserLogin exists");
-            } catch (ModelException me) {
-                throw new InternalServerErrorException(me.getMessage());
             }
 
             return new JasProviderAuthenticateResponse(Objects.toString(oAuth2Info.getState()));
@@ -214,8 +208,6 @@ public class AuthEndpoint {
                     throw new ConflictException("Username exists");
                 } catch (UserLoginExistsException e) {
                     throw new ConflictException("UserLogin exists");
-                } catch (ModelException e) {
-                    throw new InternalServerErrorException(e.getMessage());
                 }
             }
 
@@ -228,7 +220,7 @@ public class AuthEndpoint {
 
 
     @ApiMethod(name = "auth.forgotPassword", path = "auth/forgot-password", httpMethod = ApiMethod.HttpMethod.POST)
-    public void forgotPassword(JasForgotPasswordRequest request) throws BadRequestException, NotFoundException, InternalServerErrorException {
+    public void forgotPassword(JasForgotPasswordRequest request) throws BadRequestException, NotFoundException {
         Preconditions.checkNotNull(request.getEmail(), "email");
         Preconditions.checkNotNull(request.getUrl(), "url");
         PasswordRecovery recovery;
@@ -236,8 +228,6 @@ public class AuthEndpoint {
             recovery = UserServiceFactory.getUserService().registerPasswordRecovery(request.getEmail());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
-        } catch (ModelException me) {
-            throw new InternalServerErrorException(me.getMessage());
         }
         notify(recovery, request.getUrl());
     }

@@ -2,11 +2,13 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
-import com.google.api.server.spi.response.*;
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.ForbiddenException;
+import com.google.api.server.spi.response.NotFoundException;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
@@ -59,7 +61,7 @@ public class UserLoginEndpoint {
     }
 
     @ApiMethod(name = "userLogins.remove", path = "user-logins/{loginId}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException, EntityNotFoundException, InternalServerErrorException {
+    public void removeLogin(User caller, @Named("loginId") String loginId) throws UnauthorizedException, BadRequestException, ForbiddenException, EntityNotFoundException {
         caller = mustBeLoggedIn(caller);
 
         Key loginKey = KeyUtil.stringToKey(Preconditions.checkNotNull(loginId));
@@ -71,11 +73,8 @@ public class UserLoginEndpoint {
         Key userKey = Preconditions.checkNotNull(login.getUserRef().getKey());
         caller = mustBeSameUserOrAdmin(caller, userKey.getId());
 
-        try {
-            UserServiceFactory.getUserService().removeLogin(loginKey);
-            log.info("Removed user: {}, login: {}", caller, login);
-        } catch (ModelException e) {
-            throw new InternalServerErrorException(e.getMessage());
-        }
+        UserServiceFactory.getUserService().removeLogin(loginKey);
+        log.info("Removed user: {}, login: {}", caller, login);
+
     }
 }

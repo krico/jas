@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.payment;
 
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.taskqueue.Queue;
@@ -108,93 +109,110 @@ class DefaultPaymentService implements PaymentService {
     }
 
     @Override
-    public <T extends Payment> void createPayment(final PaymentProvider<T> provider, final T payment, final GenericUrl baseUrl) throws ModelException {
+    public <T extends Payment> void createPayment(final PaymentProvider<T> provider, final T payment, final GenericUrl baseUrl) throws EntityNotFoundException, PaymentException {
         Preconditions.checkNotNull(payment.getId(), "PaymentService.newPayment first");
         Preconditions.checkNotNull(provider);
 
-        TransactionOperator.execute(new ModelOperation<Void>() {
-            @Override
-            public Void execute(Transaction tx) throws EntityNotFoundException, PaymentException {
-                Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
-                if (dbPayment == null) {
-                    throw new EntityNotFoundException("Payment id=" + payment.getId());
-                }
-                if (dbPayment.getState() != PaymentStateEnum.New) {
-                    throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected New)");
-                }
-                provider.createPayment(payment, baseUrl);
-                Datastore.put(tx, payment);
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws EntityNotFoundException, PaymentException {
+                    Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
+                    if (dbPayment == null) {
+                        throw new EntityNotFoundException("Payment id=" + payment.getId());
+                    }
+                    if (dbPayment.getState() != PaymentStateEnum.New) {
+                        throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected New)");
+                    }
+                    provider.createPayment(payment, baseUrl);
+                    Datastore.put(tx, payment);
 
-                queueCancelTask(tx, dbPayment.getId());
-                tx.commit();
-                return null;
-            }
-        });
+                    queueCancelTask(tx, dbPayment.getId());
+                    tx.commit();
+                    return null;
+                }
+            });
+        } catch (EntityNotFoundException | PaymentException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
         transitionWorkflowList(payment);
     }
 
     @Override
-    public <T extends Payment> void executePayment(final PaymentProvider<T> provider, final T payment) throws ModelException {
+    public <T extends Payment> void executePayment(final PaymentProvider<T> provider, final T payment) throws EntityNotFoundException, PaymentException {
         Preconditions.checkNotNull(provider);
         Preconditions.checkNotNull(payment.getId());
 
-        TransactionOperator.execute(new ModelOperation<Void>() {
-            @Override
-            public Void execute(Transaction tx) throws ModelException {
-                Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws EntityNotFoundException, PaymentException {
+                    Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
 
-                if (dbPayment == null) {
-                    throw new EntityNotFoundException("Payment id=" + payment.getId());
+                    if (dbPayment == null) {
+                        throw new EntityNotFoundException("Payment id=" + payment.getId());
+                    }
+
+                    if (dbPayment.getState() != PaymentStateEnum.Created) {
+                        throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected Created)");
+                    }
+
+                    provider.executePayment(payment);
+                    Datastore.put(tx, payment);
+                    tx.commit();
+                    return null;
                 }
-
-                if (dbPayment.getState() != PaymentStateEnum.Created) {
-                    throw new PaymentException("Payment.State: " + dbPayment.getState() + " (expected Created)");
-                }
-
-                provider.executePayment(payment);
-                Datastore.put(tx, payment);
-                tx.commit();
-                return null;
-            }
-        });
+            });
+        } catch (EntityNotFoundException | PaymentException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
 
         transitionWorkflowList(payment);
     }
 
     @Override
-    public <T extends Payment> void cancelPayment(final T payment) throws ModelException {
+    public <T extends Payment> void cancelPayment(final T payment) throws EntityNotFoundException, PaymentException {
         Preconditions.checkNotNull(payment.getId());
 
-        TransactionOperator.execute(new ModelOperation<Void>() {
-            @Override
-            public Void execute(Transaction tx) throws ModelException {
-                Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(Transaction tx) throws EntityNotFoundException {
+                    Payment dbPayment = Datastore.getOrNull(tx, paymentMeta, payment.getId());
 
-                if (dbPayment == null) {
-                    throw new EntityNotFoundException("Payment id=" + payment.getId());
-                }
+                    if (dbPayment == null) {
+                        throw new EntityNotFoundException("Payment id=" + payment.getId());
+                    }
 
-                if (dbPayment.getState() == PaymentStateEnum.Canceled) {
-                    log.warn("Cancelling a canceled payment", new Throwable()); // How did this happen
-                    return null;
-                }
+                    if (dbPayment.getState() == PaymentStateEnum.Canceled) {
+                        log.warn("Cancelling a canceled payment", new Throwable()); // How did this happen
+                        return null;
+                    }
 
-                if (dbPayment.getState() != null && dbPayment.getState().isFinal()) {
-                    throw new IllegalStateException("Payment[" + dbPayment.getId() + "] is already in a final state: " + dbPayment.getState());
-                }
-                dbPayment.setState(PaymentStateEnum.Canceled);
-                Datastore.put(tx, dbPayment);
-                tx.commit();
+                    if (dbPayment.getState() != null && dbPayment.getState().isFinal()) {
+                        throw new IllegalStateException("Payment[" + dbPayment.getId() + "] is already in a final state: " + dbPayment.getState());
+                    }
+                    dbPayment.setState(PaymentStateEnum.Canceled);
+                    Datastore.put(tx, dbPayment);
+                    tx.commit();
             /*
              Must also update the payment object. It is forwarded to transitionWorkflowList call and
              our current model always reflects the current state in the passed in object
              */
-                payment.setState(PaymentStateEnum.Canceled);
-                log.info("Payment canceled id={}", dbPayment.getId());
-                return null;
-            }
-        });
-
+                    payment.setState(PaymentStateEnum.Canceled);
+                    log.info("Payment canceled id={}", dbPayment.getId());
+                    return null;
+                }
+            });
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
         transitionWorkflowList(payment);
     }
 

@@ -3,12 +3,14 @@ package com.jasify.schedule.appengine.spi;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
-import com.google.api.server.spi.response.*;
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.ForbiddenException;
+import com.google.api.server.spi.response.NotFoundException;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.AccountUtil;
 import com.jasify.schedule.appengine.model.balance.BalanceService;
@@ -68,7 +70,7 @@ public class BalanceEndpoint {
     private final ShoppingCartDao shoppingCartDao = new ShoppingCartDao();
 
     @ApiMethod(name = "balance.createPayment", path = "balance/create-payment", httpMethod = ApiMethod.HttpMethod.POST)
-    public JasPaymentResponse createPayment(User caller, JasPaymentRequest paymentRequest) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException, InternalServerErrorException {
+    public JasPaymentResponse createPayment(User caller, JasPaymentRequest paymentRequest) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(paymentRequest.getBaseUrl()));
         if (paymentRequest.getType() != PaymentTypeEnum.PayPal) {
@@ -83,14 +85,12 @@ public class BalanceEndpoint {
             paymentService.createPayment(PayPalPaymentProvider.instance(), payment, baseUrl);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Payment");
-        } catch (ModelException me) {
-            throw new InternalServerErrorException(me.getMessage());
         }
         return new JasPaymentResponse(TypeUtil.toString(payment.getApproveUrl()));
     }
 
     @ApiMethod(name = "balance.createCheckoutPayment", path = "balance/create-checkout-payment", httpMethod = ApiMethod.HttpMethod.POST)
-    public JasPaymentResponse createCheckoutPayment(User caller, JasCheckoutPaymentRequest paymentRequest) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException, InternalServerErrorException {
+    public JasPaymentResponse createCheckoutPayment(User caller, JasCheckoutPaymentRequest paymentRequest) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException {
         //TODO: I had a real hard time (and gave up) writing a test for this method.  Indicates it's too complex?
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         Preconditions.checkNotNull(paymentRequest.getType());
@@ -112,7 +112,7 @@ public class BalanceEndpoint {
     }
 
     private <T extends Payment> T createPaymentInternal(JasifyEndpointUser jasCaller, PaymentProvider<T> provider,
-                                                        JasCheckoutPaymentRequest request) throws NotFoundException, PaymentException, InternalServerErrorException {
+                                                        JasCheckoutPaymentRequest request) throws NotFoundException, PaymentException {
         GenericUrl baseUrl = new GenericUrl(Preconditions.checkNotNull(request.getBaseUrl()));
         String cartId = Preconditions.checkNotNull(StringUtils.trimToNull(request.getCartId()));
 
@@ -144,14 +144,12 @@ public class BalanceEndpoint {
             paymentService.createPayment(provider, payment, baseUrl);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Payment");
-        } catch (ModelException me) {
-            throw new InternalServerErrorException(me.getMessage());
         }
         return payment;
     }
 
     @ApiMethod(name = "balance.cancelPayment", path = "balance/cancel-payment/{id}", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void cancelPayment(User caller, @Named("id") Key paymentId) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException, ForbiddenException, InternalServerErrorException {
+    public void cancelPayment(User caller, @Named("id") Key paymentId) throws UnauthorizedException, PaymentException, BadRequestException, NotFoundException, ForbiddenException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
@@ -159,13 +157,11 @@ public class BalanceEndpoint {
             paymentService.cancelPayment(payment); //TODO: implement
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Payment (deleted after get?)");
-        } catch (ModelException me) {
-            throw new InternalServerErrorException(me.getMessage());
         }
     }
 
     @ApiMethod(name = "balance.executePayment", path = "balance/execute-payment/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public void executePayment(User caller, @Named("id") Key paymentId, @Nullable @Named("payerId") String payerId) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException, ForbiddenException, InternalServerErrorException {
+    public void executePayment(User caller, @Named("id") Key paymentId, @Nullable @Named("payerId") String payerId) throws UnauthorizedException, NotFoundException, PaymentException, BadRequestException, ForbiddenException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
@@ -191,8 +187,6 @@ public class BalanceEndpoint {
             }
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Payment");
-        } catch (ModelException me) {
-            throw new InternalServerErrorException(me.getMessage());
         }
     }
 

@@ -1,13 +1,14 @@
 package com.jasify.schedule.appengine.model.balance;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.balance.AccountMeta;
 import com.jasify.schedule.appengine.meta.balance.OrganizationAccountMeta;
 import com.jasify.schedule.appengine.meta.balance.UserAccountMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
-import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.ModelOperation;
+import com.jasify.schedule.appengine.model.TransactionOperator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,8 @@ public final class AccountUtil {
     public static final String PROFIT_AND_LOSS_ACCOUNT = "P&L";
     public static final String USER_ACCOUNT_PREFIX = "u";
     public static final String ORGANIZATION_ACCOUNT_PREFIX = "o";
-    private static final Logger log = LoggerFactory.getLogger(AccountUtil.class);
     public static final String DEFAULT_CURRENCY = "CHF";
+    private static final Logger log = LoggerFactory.getLogger(AccountUtil.class);
 
     private AccountUtil() {
     }
@@ -41,8 +42,8 @@ public final class AccountUtil {
         return Datastore.createKey(AccountMeta.get(), PROFIT_AND_LOSS_ACCOUNT);
     }
 
-    public static Account profitAndLossAccount() throws ModelException {
-        return TransactionOperator.execute(new ModelOperation<Account>() {
+    public static Account profitAndLossAccount() {
+        return TransactionOperator.executeNoEx(new ModelOperation<Account>() {
             @Override
             public Account execute(com.google.appengine.api.datastore.Transaction tx) {
                 Key id = profitAndLossAccountKey();
@@ -115,14 +116,14 @@ public final class AccountUtil {
         throw new IllegalArgumentException("This should never happen!");
     }
 
-    public static Key memberAccountIdMustExist(Key memberId) throws ModelException {
+    public static Key memberAccountIdMustExist(Key memberId) {
         return memberAccountMustExist(memberId).getId();
     }
 
-    public static Account memberAccountMustExist(final Key memberId) throws ModelException {
+    public static Account memberAccountMustExist(final Key memberId) {
         final Key memberAccountId = AccountUtil.memberIdToAccountId(memberId);
 
-        return TransactionOperator.execute(new ModelOperation<Account>() {
+        return TransactionOperator.executeNoEx(new ModelOperation<Account>() {
             @Override
             public Account execute(com.google.appengine.api.datastore.Transaction tx) {
                 Account account = Datastore.getOrNull(AccountMeta.get(), memberAccountId);

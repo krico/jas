@@ -192,8 +192,6 @@ public final class SchemaMigration {
         } catch (UsernameExistsException | EmailExistsException e) {
             // Don't really care
             log.warn(e.getMessage());
-        } catch (ModelException e) {
-            log.error("Failed to create user", e);
         }
 
         if (EnvironmentUtil.isContinuousIntegrationEnvironment()) {

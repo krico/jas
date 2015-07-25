@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.users;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
@@ -61,7 +62,7 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public User create(final User user, String password) throws ModelException {
+    public User create(final User user, String password) throws EmailExistsException, UsernameExistsException {
         user.setName(StringUtils.lowerCase(Preconditions.checkNotNull(StringUtils.trimToNull(user.getName()), "User.Name cannot be null")));
         user.setEmail(StringUtils.lowerCase(StringUtils.trimToNull(user.getEmail())));
         user.setPassword(new ShortBlob(DigestUtil.encrypt(password)));
@@ -85,7 +86,7 @@ final class DefaultUserService implements UserService {
             user.setAdmin(true);//Admin for me...
         }
 
-        TransactionOperator.execute(new ModelOperation<Void>() {
+        TransactionOperator.executeNoEx(new ModelOperation<Object>() {
             @Override
             public Void execute(com.google.appengine.api.datastore.Transaction tx) {
                 user.setId(Datastore.allocateId(userMeta));
@@ -101,7 +102,7 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public User create(final User user, final UserLogin login) throws ModelException {
+    public User create(final User user, final UserLogin login) throws EmailExistsException, UsernameExistsException, UserLoginExistsException {
         Preconditions.checkNotNull(login, "login cannot be NULL");
         Preconditions.checkNotNull(login.getProvider(), "login.Provider cannot be NULL");
         Preconditions.checkNotNull(login.getUserId(), "login.UserId cannot be NULL");
@@ -132,7 +133,7 @@ final class DefaultUserService implements UserService {
             }
         }
 
-        TransactionOperator.execute(new ModelOperation<Void>() {
+        TransactionOperator.executeNoEx(new ModelOperation<Object>() {
             @Override
             public Void execute(com.google.appengine.api.datastore.Transaction tx) {
                 user.setId(Datastore.allocateId(userMeta));
@@ -160,113 +161,133 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public User save(final User user) throws ModelException {
+    public User save(final User user) throws EntityNotFoundException, FieldValueException {
         //TODO: permissions?
-        TransactionOperator.execute(new ModelOperation<Void>() {
-            @Override
-            public Void execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException, FieldValueException {
-                User db = Datastore.getOrNull(tx, userMeta, user.getId());
-                if (db == null) {
-                    throw new EntityNotFoundException();
-                }
-
-                //TODO: why did I decide to manually copy these!?  Horrible!
-
-                if (!StringUtils.equals(db.getName(), user.getName())) {
-                    throw new FieldValueException("Cannot change 'name' with save();");
-                }
-
-                String email = StringUtils.trimToNull(StringUtils.lowerCase(user.getEmail()));
-                if (!StringUtils.equals(db.getEmail(), email)) {
-                    if (db.getEmail() != null) uniqueEmail.releaseInCurrentTransaction(db.getEmail());
-                    try {
-                        if (email != null) uniqueEmail.reserveInCurrentTransaction(email);
-                    } catch (UniqueConstraintException e) {
-                        throw new FieldValueException("Duplicate e-mail: " + email);
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException, FieldValueException {
+                    User db = Datastore.getOrNull(tx, userMeta, user.getId());
+                    if (db == null) {
+                        throw new EntityNotFoundException();
                     }
+
+                    //TODO: why did I decide to manually copy these!?  Horrible!
+
+                    if (!StringUtils.equals(db.getName(), user.getName())) {
+                        throw new FieldValueException("Cannot change 'name' with save();");
+                    }
+
+                    String email = StringUtils.trimToNull(StringUtils.lowerCase(user.getEmail()));
+                    if (!StringUtils.equals(db.getEmail(), email)) {
+                        if (db.getEmail() != null) uniqueEmail.releaseInCurrentTransaction(db.getEmail());
+                        try {
+                            if (email != null) uniqueEmail.reserveInCurrentTransaction(email);
+                        } catch (UniqueConstraintException e) {
+                            throw new FieldValueException("Duplicate e-mail: " + email);
+                        }
+                    }
+
+                    db.setAbout(user.getAbout());
+                    db.setEmail(email);
+                    db.setLocale(user.getLocale());
+                    db.setAdmin(user.isAdmin());
+                    db.setRealName(user.getRealName());
+
+                    UserDetail model = db.getDetailRef().getModel();
+                    if (model == null) {
+                        Datastore.put(tx, db);
+                    } else {
+                        Datastore.put(tx, db, model);
+                    }
+                    tx.commit();
+                    return null;
                 }
-
-                db.setAbout(user.getAbout());
-                db.setEmail(email);
-                db.setLocale(user.getLocale());
-                db.setAdmin(user.isAdmin());
-                db.setRealName(user.getRealName());
-
-                UserDetail model = db.getDetailRef().getModel();
-                if (model == null) {
-                    Datastore.put(tx, db);
-                } else {
-                    Datastore.put(tx, db, model);
-                }
-                tx.commit();
-                return null;
-            }
-        });
-
+            });
+        } catch (EntityNotFoundException | FieldValueException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
         return user;
     }
 
     @Override
-    public User setPassword(final User user, final String newPassword) throws ModelException {
-        return TransactionOperator.execute(new ModelOperation<User>() {
-            @Override
-            public User execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException {
-                User db = Datastore.getOrNull(tx, userMeta, user.getId());
-                if (db == null) {
-                    tx.rollback();
-                    throw new EntityNotFoundException();
-                }
-                db.setPassword(new ShortBlob(DigestUtil.encrypt(newPassword)));
-                Datastore.put(tx, db);
-                tx.commit();
-                return db;
-            }
-        });
-    }
-
-    @Override
-    public UserLogin addLogin(final User user, final UserLogin login) throws ModelException {
+    public User setPassword(final User user, final String newPassword) throws EntityNotFoundException {
         try {
-            uniqueLogin.reserve(login.getUserId(), login.getProvider());
-        } catch (UniqueConstraintException e) {
-            throw new UserLoginExistsException(e.getMessage());
-        }
-
-        return TransactionOperator.execute(new ModelOperation<UserLogin>() {
-            @Override
-            public UserLogin execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException {
-                User db = Datastore.getOrNull(tx, userMeta, user.getId());
-                if (db == null) {
-                    tx.rollback();
-                    uniqueLogin.release(login.getUserId(), login.getProvider());
-                    throw new EntityNotFoundException();
+            return TransactionOperator.execute(new ModelOperation<User>() {
+                @Override
+                public User execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException {
+                    User db = Datastore.getOrNull(tx, userMeta, user.getId());
+                    if (db == null) {
+                        throw new EntityNotFoundException();
+                    }
+                    db.setPassword(new ShortBlob(DigestUtil.encrypt(newPassword)));
+                    Datastore.put(tx, db);
+                    tx.commit();
+                    return db;
                 }
-                login.setId(Datastore.allocateId(db.getId(), UserLogin.class));
-                login.getUserRef().setModel(db);
-
-                Datastore.put(tx, db, login);
-                tx.commit();
-                return login;
-            }
-        });
+            });
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
     }
 
     @Override
-    public void removeLogin(final Key id) throws ModelException {
-        TransactionOperator.execute(new ModelOperation<Void>() {
-            @Override
-            public Void execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException {
-                UserLogin dbLogin = Datastore.getOrNull(tx, userLoginMeta, id);
-                if (dbLogin == null) {
-                    tx.rollback();
-                    throw new EntityNotFoundException("UserLogin");
+    public UserLogin addLogin(final User user, final UserLogin login) throws UserLoginExistsException, EntityNotFoundException {
+        try {
+            return TransactionOperator.execute(new ModelOperation<UserLogin>() {
+                @Override
+                public UserLogin execute(com.google.appengine.api.datastore.Transaction tx) throws UserLoginExistsException, EntityNotFoundException {
+                    try {
+                        uniqueLogin.reserveInCurrentTransaction(login.getUserId(), login.getProvider());
+                    } catch (UniqueConstraintException e) {
+                        throw new UserLoginExistsException(e.getMessage());
+                    }
+
+                    User db = Datastore.getOrNull(tx, userMeta, user.getId());
+                    if (db == null) {
+                        uniqueLogin.releaseInCurrentTransaction(login.getUserId(), login.getProvider());
+                        throw new EntityNotFoundException();
+                    }
+                    login.setId(Datastore.allocateId(db.getId(), UserLogin.class));
+                    login.getUserRef().setModel(db);
+
+                    Datastore.put(tx, db, login);
+                    tx.commit();
+                    return login;
                 }
-                Datastore.delete(tx, dbLogin.getId());
-                tx.commit();
-                uniqueLogin.release(dbLogin.getUserId(), dbLogin.getProvider());
-                return null;
-            }
-        });
+            });
+        } catch (UserLoginExistsException | EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    @Override
+    public void removeLogin(final Key id) throws EntityNotFoundException {
+        try {
+            TransactionOperator.execute(new ModelOperation<Void>() {
+                @Override
+                public Void execute(com.google.appengine.api.datastore.Transaction tx) throws EntityNotFoundException {
+                    UserLogin dbLogin = Datastore.getOrNull(tx, userLoginMeta, id);
+                    if (dbLogin == null) {
+                        throw new EntityNotFoundException("UserLogin");
+                    }
+                    Datastore.delete(tx, dbLogin.getId());
+                    tx.commit();
+                    uniqueLogin.releaseInCurrentTransaction(dbLogin.getUserId(), dbLogin.getProvider());
+                    return null;
+                }
+            });
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (ModelException e) {
+            throw Throwables.propagate(e);
+        }
     }
 
     @Override
@@ -339,13 +360,13 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public PasswordRecovery registerPasswordRecovery(final String email) throws ModelException {
+    public PasswordRecovery registerPasswordRecovery(final String email) throws EntityNotFoundException {
         final User user = findByEmail(email);
         if (user == null) {
             throw new EntityNotFoundException(email);
         }
 
-        return TransactionOperator.execute(new ModelOperation<PasswordRecovery>() {
+        return TransactionOperator.executeNoEx(new ModelOperation<PasswordRecovery>() {
             @Override
             public PasswordRecovery execute(com.google.appengine.api.datastore.Transaction tx) {
                 Key key;
