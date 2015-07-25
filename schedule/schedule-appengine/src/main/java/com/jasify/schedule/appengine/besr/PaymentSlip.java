@@ -38,9 +38,6 @@ public class PaymentSlip {
     private float inFavorOfUlx;
     private float rightUpperSquareY;
 
-    private float width;
-    private float height;
-
     public static void main(String[] args) throws Exception {
         new PaymentSlip().render(new File("/tmp/test.pdf"));
     }
@@ -50,8 +47,8 @@ public class PaymentSlip {
     }
 
     private void calculate() {
-        width = document.getPageSize().getWidth();
-        height = document.getPageSize().getHeight();
+        float width = document.getPageSize().getWidth();
+        float height = document.getPageSize().getHeight();
         llx = (width - Points.Width) / 2;
         lly = (height - Points.Height) / 2;
         lrx = llx + Points.Width;
@@ -72,6 +69,22 @@ public class PaymentSlip {
         under.rectangle(llx, lly, Points.Width, Points.Height);
         under.fill();
         under.restoreState();
+
+        //TODO: REMOVE A5 width
+        under.saveState();
+        under.setColorFill(Color.GREEN);
+        under.rectangle(llx, lly - 20, 595, 10);
+        under.fill();
+        under.restoreState();
+    }
+
+    private void whiteSquare() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorFill(Color.WHITE);
+        under.rectangle(giroUlx, lly, Points.GiroWidth, Points.Inch);
+        under.fill();
+        under.restoreState();
     }
 
     private void borderLines() {
@@ -84,18 +97,6 @@ public class PaymentSlip {
         under.lineTo(urx, ury);
         under.lineTo(ulx, uly);
         under.closePath();
-        under.stroke();
-        under.restoreState();
-    }
-
-    private void dottedLeftVerticalLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
-        under.saveState();
-        under.setColorStroke(LineColors.DottedLeftVerticalLine);
-        under.setLineWidth(Points.DottedLineWidth);
-        under.moveTo(llx + Points.Millimeter, lly);
-        under.lineTo(ulx + Points.Millimeter, uly);
-        under.setLineDash(Points.DottedLineUnitsOn, Points.DottedLinePhase);
         under.stroke();
         under.restoreState();
     }
@@ -128,7 +129,7 @@ public class PaymentSlip {
         under.saveState();
         under.setColorStroke(LineColors.InFavorOfSeparatorVerticalLine);
         under.setLineWidth(Points.SolidLineWidth);
-        under.moveTo(inFavorOfUlx, lly);
+        under.moveTo(inFavorOfUlx, lly + Points.Inch);
         under.lineTo(inFavorOfUlx, uly - Points.Line);
         under.stroke();
         under.restoreState();
@@ -139,7 +140,7 @@ public class PaymentSlip {
         under.saveState();
         under.setColorStroke(LineColors.TopHorizontalLine);
         under.setLineWidth(Points.SolidLineWidth);
-        under.moveTo(ulx + Points.Millimeter, uly - Points.Line);
+        under.moveTo(ulx, uly - Points.Line);
         under.lineTo(urx, ury - Points.Line);
         under.stroke();
         under.restoreState();
@@ -152,29 +153,6 @@ public class PaymentSlip {
         under.setLineWidth(Points.SolidLineWidth);
         under.moveTo(inFavorOfUlx, rightUpperSquareY);
         under.lineTo(urx, rightUpperSquareY);
-        under.stroke();
-        under.restoreState();
-    }
-
-    private void solidHorizontalReferenceLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
-        under.saveState();
-        under.setColorStroke(LineColors.HorizontalReferenceLine);
-        under.setLineWidth(Points.SolidLineWidth);
-        float offY = ury - 13 * Points.Line;
-        under.moveTo(inFavorOfUlx, offY);
-        under.lineTo(urx, offY);
-        under.stroke();
-        under.restoreState();
-    }
-
-    private void solidLeftVerticalLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
-        under.saveState();
-        under.setColorStroke(LineColors.LeftVerticalLine);
-        under.setLineWidth(Points.SolidLineWidth);
-        under.moveTo(ulx + 4 * Points.Column, uly);
-        under.lineTo(llx + 4 * Points.Column, lly);
         under.stroke();
         under.restoreState();
     }
@@ -202,15 +180,13 @@ public class PaymentSlip {
             calculate();
 
             fillOrangeBackground();
+            whiteSquare();
             borderLines();
-            dottedLeftVerticalLine();
-            solidLeftVerticalLine();
             solidTopHorizontalLine();
             dottedSeparatorVerticalLine();
             solidSeparatorVerticalLine();
             solidInFavorOfSeparatorVerticalLine();
             solidHorizontalRightLine();
-            solidHorizontalReferenceLine();
             solidVerticalCircleSquareLine();
             document.close();
         } finally {
@@ -229,20 +205,17 @@ public class PaymentSlip {
      * I used these to find the lines by changing the colors
      */
     interface LineColors {
-        Color LeftVerticalLine = Color.BLACK;
-        Color DottedLeftVerticalLine = Color.BLACK;
         Color HorizontalRightLine = Color.BLACK;
         Color TopHorizontalLine = Color.BLACK;
         Color InFavorOfSeparatorVerticalLine = Color.BLACK;
         Color SeparatorVerticalLine = Color.BLACK;
         Color DottedSeparatorVerticalLine = Color.BLACK;
         Color VerticalCircleSquareLine = Color.BLACK;
-        Color HorizontalReferenceLine = Color.BLACK;
     }
 
     interface Dimensions {
         float HeightMillimeters = 106;
-        float WidthMillimeters = 220 + 1;
+        float WidthMillimeters = 210;
 
         float ReceiptWidthColumns = 27;
         float GiroWidthColumns = 59;
@@ -269,11 +242,8 @@ public class PaymentSlip {
         float Width = Utilities.millimetersToPoints(Dimensions.WidthMillimeters);
         float Height = Utilities.millimetersToPoints(Dimensions.HeightMillimeters);
         Rectangle PageSize = new RectangleReadOnly(Width + Margin, Height + Margin);
-        float GiroWidth = Dimensions.GiroWidthColumns * Column;
-        float ReceiptWidth = Dimensions.ReceiptWidthColumns * Column;
+        float GiroWidth = Dimensions.GiroWidthColumns * Column - Millimeter;
 
-        float StatusLineBoxWidth = Dimensions.ReceiptWidthColumns * Column;
-        float StatusLineBoxHeight = Utilities.inchesToPoints(Dimensions.StatusLineBoxHeightInches);
         float DottedLineUnitsOn = 0.8f;
         float DottedLinePhase = 2;
     }
