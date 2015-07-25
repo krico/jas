@@ -23,6 +23,8 @@ public class PdfServlet extends HttpServlet {
     //A5 (210 x 148mm)
     public static final String BESR_A5 = "BESR/images/BESR-A5-RED.jpg";
     private static final Logger log = LoggerFactory.getLogger(PdfServlet.class);
+    private static final float LINE_HEIGHT = 10;
+    private static final float ONE_INCH = 10;
 
     @Override
     public void init() throws ServletException {
@@ -38,27 +40,27 @@ public class PdfServlet extends HttpServlet {
         }
     }
 
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             Rectangle A5 = PageSize.A5.rotate();
+            A5.setBorder(0);
+            A5.setBorderWidth(0);
             Document document = new Document(A5, 0, 0, 0, 0);
             PdfWriter writer = PdfWriter.getInstance(document, bos);
             document.open();
-            document.resetHeader();
-
 
             BaseFont baseFont = loadFont(OCR_B_TRUE_TYPE);
             Image img = Image.getInstance(getClass().getResource("/" + BESR_A5));
-            img.scaleToFit(A5.getWidth(), A5.getWidth());
             img.setBorder(0);
+            img.setBorderWidth(0);
+            img.scaleToFit(A5.getWidth() + 10, A5.getWidth() + 10);
             img.setAbsolutePosition((A5.getWidth() - img.getScaledWidth()) / 2, (A5.getHeight() - img.getScaledHeight()) / 2);
             document.add(img);
             PdfContentByte over = writer.getDirectContent();
             over.beginText();
             over.setFontAndSize(baseFont, 8.5f);
-            over.setTextMatrix(245,60);
+            over.setTextMatrix(245, 60);
             over.showText("2100000440001>961116900000006600000009284+ 030001625>");
             over.endText();
 //            Paragraph statusLine = new Paragraph("2100000440001>961116900000006600000009284+ 030001625>", new Font(baseFont, 8));
