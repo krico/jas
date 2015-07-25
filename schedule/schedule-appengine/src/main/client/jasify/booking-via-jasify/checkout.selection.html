@@ -35,6 +35,10 @@
                  class="activity-listview listview lv-bordered lv-lg">
                 <div class="lv-header-alt">
                     <h2 class="lvh-label">{{ 'SELECTED_ACTIVITY_PACKAGES' | translate }}</h2>
+                    <button ng-click="vm.confirmClearPackageSelection ()"
+                            class="btn btn-warning pull-right">
+                        {{ 'CLEAR_PACKAGE_SELECTION' | translate }}
+                    </button>
                 </div>
                 <div class="lv-body">
                     <div class="lv-item media"
@@ -64,6 +68,10 @@
                  class="activity-listview listview lv-bordered lv-lg">
                 <div class="lv-header-alt">
                     <h2 class="lvh-label">{{ 'SELECTED_ACTIVITIES' | translate }}</h2>
+                    <button ng-click="vm.confirmClearActivitySelection ()"
+                            class="btn btn-warning pull-right">
+                        {{ 'CLEAR_ACTIVITY_SELECTION' | translate }}
+                    </button>
                 </div>
                 <div class="lv-body">
                     <div class="lv-item media" ng-repeat="activity in vm.activitySelection">

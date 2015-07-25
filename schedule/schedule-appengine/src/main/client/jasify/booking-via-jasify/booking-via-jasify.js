@@ -56,6 +56,8 @@
         this.disableActivityPackageActivitySelection = disableActivityPackageActivitySelection;
         this.confirmRemoveActivity = confirmRemoveActivity;
         this.confirmRemoveActivityPackage = confirmRemoveActivityPackage;
+        this.confirmClearActivitySelection = confirmClearActivitySelection;
+        this.confirmClearPackageSelection = confirmClearPackageSelection;
         this.hasCompletedActivityPackages = hasCompletedActivityPackages;
         this.packageSelectionIncomplete = packageSelectionIncomplete;
         this.packageSelectionComplete = packageSelectionComplete;
@@ -112,6 +114,23 @@
             jasDialogs.ruSure(translation, function () {
                 $rootScope.$apply(function () {
                     vm.activitySelection.splice(vm.activitySelection.indexOf(activity), 1);
+                });
+            });
+        }
+
+        function confirmClearPackageSelection() {
+            var translation = $translate('CLEAR_PACKAGE_SELECTION_PROMPT');
+            jasDialogs.ruSure(translation, function () {
+                $rootScope.$apply(function () {
+                    vm.activityPackageSelection = {};
+                });
+            });
+        }
+        function confirmClearActivitySelection() {
+            var translation = $translate('CLEAR_ACTIVITY_SELECTION_PROMPT');
+            jasDialogs.ruSure(translation, function () {
+                $rootScope.$apply(function () {
+                    vm.activitySelection = [];
                 });
             });
         }
