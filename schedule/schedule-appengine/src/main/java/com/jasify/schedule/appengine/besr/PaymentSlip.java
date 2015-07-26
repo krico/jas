@@ -37,6 +37,8 @@ public class PaymentSlip {
     private float giroUlx;
     private float inFavorOfUlx;
     private float rightUpperSquareY;
+    private BaseFont codeLineFont;
+    private BaseFont formFont;
 
     public static void main(String[] args) throws Exception {
         new PaymentSlip().render(new File("/tmp/test.pdf"));
@@ -46,7 +48,7 @@ public class PaymentSlip {
         return BaseFont.createFont(fontName, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
     }
 
-    private void calculate() {
+    private void calculate() throws IOException, DocumentException {
         float width = document.getPageSize().getWidth();
         float height = document.getPageSize().getHeight();
         llx = (width - Points.Width) / 2;
@@ -60,6 +62,8 @@ public class PaymentSlip {
         giroUlx = urx - Points.GiroWidth;
         inFavorOfUlx = giroUlx + 24 * Points.Column;
         rightUpperSquareY = ury - (7 * Points.Line);
+        codeLineFont = loadFont(OCR_B_TRUE_TYPE);
+        formFont = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.WINANSI, BaseFont.EMBEDDED);
     }
 
     private void fillOrangeBackground() {
@@ -69,8 +73,10 @@ public class PaymentSlip {
         under.rectangle(llx, lly, Points.Width, Points.Height);
         under.fill();
         under.restoreState();
+    }
 
-        //TODO: REMOVE A5 width
+    private void fillA5Model() {
+        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorFill(Color.GREEN);
         under.rectangle(llx, lly - 20, 595, 10);
@@ -169,6 +175,38 @@ public class PaymentSlip {
         under.restoreState();
     }
 
+    private void receiptTitle() {
+        String text = "Empfangsschein / Récépissé / Ricevuta";
+        float fontSize = 8;
+        float ascentPoint = formFont.getAscentPoint(text, fontSize);
+        float textWidth = formFont.getWidthPoint(text, fontSize);
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFont, fontSize);
+        over.setTextMatrix(ulx + (Points.ReceiptWidth - textWidth) / 2, uly - Points.Line + (ascentPoint / 2));
+        over.showText(text);
+        over.endText();
+        over.restoreState();
+
+    }
+
+    private void codeLine() {
+
+        String text = "2100000440001>961116900000006600000009284+ 030001625>";
+        float fontSize = 10;
+        float textWidth = codeLineFont.getWidthPoint(text, fontSize);
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(codeLineFont, fontSize);
+        over.setTextMatrix(lrx - textWidth - 3 * Points.Column, lry + 4 * Points.Line);
+        over.moveTo(10, 100);
+        over.showText(text);
+        over.endText();
+        over.restoreState();
+    }
+
     public void render(File file) throws Exception {
         log.info("Generating: {}", file);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -180,6 +218,9 @@ public class PaymentSlip {
             calculate();
 
             fillOrangeBackground();
+
+            fillA5Model(); //TODO: remove
+
             whiteSquare();
             borderLines();
             solidTopHorizontalLine();
@@ -188,6 +229,10 @@ public class PaymentSlip {
             solidInFavorOfSeparatorVerticalLine();
             solidHorizontalRightLine();
             solidVerticalCircleSquareLine();
+            receiptTitle();
+
+            codeLine();
+
             document.close();
         } finally {
             log.info("Generated: {}", file);
@@ -243,6 +288,7 @@ public class PaymentSlip {
         float Height = Utilities.millimetersToPoints(Dimensions.HeightMillimeters);
         Rectangle PageSize = new RectangleReadOnly(Width + Margin, Height + Margin);
         float GiroWidth = Dimensions.GiroWidthColumns * Column - Millimeter;
+        float ReceiptWidth = Width - GiroWidth;
 
         float DottedLineUnitsOn = 0.8f;
         float DottedLinePhase = 2;
