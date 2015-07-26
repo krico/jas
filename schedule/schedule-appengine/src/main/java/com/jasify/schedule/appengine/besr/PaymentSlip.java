@@ -12,6 +12,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author krico
@@ -182,6 +184,17 @@ public class PaymentSlip {
         under.restoreState();
     }
 
+    private void topRightCircle() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(Colors.BackgroundPlain);
+        under.setLineWidth(0.4f);
+        under.circle(lrx - 6.5f * Points.Column, ury - (2 * Points.Line + 3.5f * Points.Column), 3.5f * Points.Column);
+        under.setLineDash(1, 2);
+        under.stroke();
+        under.restoreState();
+    }
+
     private void receiptTitle() {
         String text = "Empfangsschein / Récépissé / Ricevuta";
         float fontSize = 8f;
@@ -282,6 +295,24 @@ public class PaymentSlip {
 
     }
 
+    private void printDate() {
+
+        String text = new SimpleDateFormat("MM.YYYY").format(new Date());
+
+        float fontSize = 5f;
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+
+        over.setTextMatrix(0, 1, -1, 0, urx - Points.Column - (ascentPoint / 2), ury - 5 * Points.Line);
+        over.showText(text);
+        over.endText();
+        over.restoreState();
+
+    }
+
     public void render(File file) throws Exception {
         log.info("Generating: {}", file);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -304,11 +335,13 @@ public class PaymentSlip {
             solidInFavorOfSeparatorVerticalLine();
             solidHorizontalRightLine();
             solidVerticalCircleSquareLine();
+            topRightCircle();
 
             receiptTitle();
             giroTitle();
             layoutCode();
             acceptingOffice();
+            printDate();
 
             codeLine();
 
