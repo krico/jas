@@ -6,7 +6,6 @@ import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.Payment;
-import com.jasify.schedule.appengine.model.payment.PaymentException;
 import com.jasify.schedule.appengine.model.users.User;
 
 import java.util.List;
@@ -37,7 +36,7 @@ public interface BalanceService {
      *
      * @param payment - a payment that has been executed and needs to be reflected on the balance
      */
-    void payment(Payment payment) throws EntityNotFoundException;
+    void payment(Payment payment);
 
     void unpaidSubscription(Key subscriptionId) throws EntityNotFoundException;
 

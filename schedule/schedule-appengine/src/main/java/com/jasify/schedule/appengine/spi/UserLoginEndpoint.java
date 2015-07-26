@@ -75,6 +75,5 @@ public class UserLoginEndpoint {
 
         UserServiceFactory.getUserService().removeLogin(loginKey);
         log.info("Removed user: {}, login: {}", caller, login);
-
     }
 }

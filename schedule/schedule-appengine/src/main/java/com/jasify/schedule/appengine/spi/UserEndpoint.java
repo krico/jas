@@ -152,6 +152,5 @@ public class UserEndpoint {
         }
 
         return user;
-
     }
 }

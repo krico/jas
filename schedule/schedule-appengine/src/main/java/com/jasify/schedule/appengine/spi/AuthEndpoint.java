@@ -92,7 +92,6 @@ public class AuthEndpoint {
 
         log.info("User {} changing password of {}", caller, request.getUserId());
         UserServiceFactory.getUserService().setPassword(user, newPassword);
-
     }
 
     @ApiMethod(name = "auth.login", path = "auth/login", httpMethod = ApiMethod.HttpMethod.POST)
@@ -312,6 +311,4 @@ public class AuthEndpoint {
             log.warn("Failed to notify", e);
         }
     }
-
-
 }

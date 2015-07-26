@@ -2,7 +2,7 @@ package com.jasify.schedule.appengine.model.payment.task;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.taskqueue.DeferredTask;
-import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.*;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class CancelPaymentTask implements DeferredTask {
                     log.info("Cancelled Payment: " + paymentId);
                 }
             }
-        } catch (ModelException e) {
+        } catch (EntityNotFoundException | PaymentException e) {
             // All we can do is log
             log.error("Failed to cancel shopping cart", e);
         }
@@ -55,7 +55,7 @@ public class CancelPaymentTask implements DeferredTask {
                     return true;
                 }
             }
-        } catch (ModelException e) {
+        } catch (EntityNotFoundException | PaymentException e) {
             log.error("Failed to complete payment", e);
         }
         return false;
