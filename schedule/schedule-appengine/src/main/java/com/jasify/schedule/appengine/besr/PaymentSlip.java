@@ -195,6 +195,17 @@ public class PaymentSlip {
         under.restoreState();
     }
 
+    private void bottomLeftCircle() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(Colors.BackgroundPlain);
+        under.setLineWidth(0.4f);
+        under.circle(giroUlx - (13 * Points.Column + 3.5f * Points.Column), lly + (0.35f * Points.Line + 3.5f * Points.Column), 3.5f * Points.Column);
+        under.setLineDash(1, 2);
+        under.stroke();
+        under.restoreState();
+    }
+
     private void receiptTitle() {
         String text = "Empfangsschein / Récépissé / Ricevuta";
         float fontSize = 8f;
@@ -275,7 +286,7 @@ public class PaymentSlip {
         over.setFontAndSize(formFontRegular, fontSize);
 
         float ascentPoint = formFontRegular.getAscentPoint(text1, fontSize);
-        float offsetY = uly - 21 * Points.Line;
+        float offsetY = uly - (21 * Points.Line + ascentPoint / 2);
 
         over.setTextMatrix(giroUlx - 11 * Points.Column, offsetY);
         over.showText(text1);
@@ -336,6 +347,7 @@ public class PaymentSlip {
             solidHorizontalRightLine();
             solidVerticalCircleSquareLine();
             topRightCircle();
+            bottomLeftCircle();
 
             receiptTitle();
             giroTitle();
