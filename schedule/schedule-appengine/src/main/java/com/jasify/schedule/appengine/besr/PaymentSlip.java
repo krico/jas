@@ -19,6 +19,8 @@ import java.io.IOException;
  */
 public class PaymentSlip {
     public static final String OCR_B_TRUE_TYPE = "BESR/fonts/OCR-B1.ttf";
+    public static final String GROTESK_BOLD_TRUE_TYPE = "BESR/fonts/AlteHaasGroteskBold.ttf";
+    public static final String GROTESK_REGULAR_TRUE_TYPE = "BESR/fonts/AlteHaasGroteskRegular.ttf";
     //A5 (210 x 148mm)
     public static final String BESR_A5 = "BESR/images/BESR-A5-RED.jpg";
     private static final Rectangle SIZE = new RectangleReadOnly(Utilities.inchesToPoints(11), Utilities.inchesToPoints(11));
@@ -60,8 +62,8 @@ public class PaymentSlip {
         inFavorOfUlx = urx - 35 * Points.Column;
         rightUpperSquareY = ury - (7 * Points.Line);
         codeLineFont = BaseFont.createFont(OCR_B_TRUE_TYPE, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-        formFontBold = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.WINANSI, BaseFont.EMBEDDED);
-        formFontRegular = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        formFontBold = BaseFont.createFont(GROTESK_BOLD_TRUE_TYPE, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        formFontRegular = BaseFont.createFont(GROTESK_REGULAR_TRUE_TYPE, BaseFont.WINANSI, BaseFont.EMBEDDED);
     }
 
     private void fillOrangeBackground() {
@@ -182,7 +184,7 @@ public class PaymentSlip {
 
     private void receiptTitle() {
         String text = "Empfangsschein / Récépissé / Ricevuta";
-        float fontSize = 8;
+        float fontSize = 8f;
         float ascentPoint = formFontBold.getAscentPoint(text, fontSize);
         float textWidth = formFontBold.getWidthPoint(text, fontSize);
         PdfContentByte over = writer.getDirectContent();
