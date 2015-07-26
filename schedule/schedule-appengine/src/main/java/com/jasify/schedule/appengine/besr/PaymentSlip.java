@@ -38,14 +38,11 @@ public class PaymentSlip {
     private float inFavorOfUlx;
     private float rightUpperSquareY;
     private BaseFont codeLineFont;
-    private BaseFont formFont;
+    private BaseFont formFontBold;
+    private BaseFont formFontRegular;
 
     public static void main(String[] args) throws Exception {
         new PaymentSlip().render(new File("/tmp/test.pdf"));
-    }
-
-    private BaseFont loadFont(String fontName) throws IOException, DocumentException {
-        return BaseFont.createFont(fontName, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
     }
 
     private void calculate() throws IOException, DocumentException {
@@ -60,10 +57,11 @@ public class PaymentSlip {
         ulx = llx;
         uly = ury;
         giroUlx = urx - Points.GiroWidth;
-        inFavorOfUlx = giroUlx + 24 * Points.Column;
+        inFavorOfUlx = urx - 35 * Points.Column;
         rightUpperSquareY = ury - (7 * Points.Line);
-        codeLineFont = loadFont(OCR_B_TRUE_TYPE);
-        formFont = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        codeLineFont = BaseFont.createFont(OCR_B_TRUE_TYPE, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        formFontBold = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        formFontRegular = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);
     }
 
     private void fillOrangeBackground() {
@@ -81,6 +79,13 @@ public class PaymentSlip {
         under.setColorFill(Color.GREEN);
         under.rectangle(llx, lly - 20, 595, 10);
         under.fill();
+        under.setLineWidth(1);
+        under.setColorStroke(Color.black);
+        under.moveTo(llx, lly - 22);
+        under.lineTo(llx, lly - 8);
+        under.moveTo(llx + 595, lly - 22);
+        under.lineTo(llx + 595, lly - 8);
+        under.stroke();
         under.restoreState();
     }
 
@@ -178,17 +183,53 @@ public class PaymentSlip {
     private void receiptTitle() {
         String text = "Empfangsschein / Récépissé / Ricevuta";
         float fontSize = 8;
-        float ascentPoint = formFont.getAscentPoint(text, fontSize);
-        float textWidth = formFont.getWidthPoint(text, fontSize);
+        float ascentPoint = formFontBold.getAscentPoint(text, fontSize);
+        float textWidth = formFontBold.getWidthPoint(text, fontSize);
         PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
-        over.setFontAndSize(formFont, fontSize);
+        over.setFontAndSize(formFontBold, fontSize);
         over.setTextMatrix(ulx + (Points.ReceiptWidth - textWidth) / 2, uly - Points.Line + (ascentPoint / 2));
         over.showText(text);
         over.endText();
         over.restoreState();
 
+    }
+
+    private void giroTitle() {
+        String text1 = "Einzahlung Giro";
+        String text2 = "Versement Virement";
+        String text3 = "Versamento Girata";
+
+        String spc = "                                 ";
+
+        String text = text1 + spc + text2 + spc + "  " + text3;
+
+        float fontSize = 8;
+        float ascentPoint = formFontBold.getAscentPoint(text, fontSize);
+        float textWidth = formFontBold.getWidthPoint(text, fontSize);
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontBold, fontSize);
+        over.setTextMatrix((urx - Points.GiroWidth) + Points.Column * 1.5f, uly - Points.Line + (ascentPoint / 2));
+        over.showText(text);
+        over.endText();
+        over.restoreState();
+
+    }
+
+    private void layoutCode() {
+        String text = "609";
+        float fontSize = 10;
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(codeLineFont, fontSize);
+        over.setTextMatrix(lrx - Points.GiroWidth + 4 * Points.Column, lly + 7 * Points.Line);
+        over.showText(text);
+        over.endText();
+        over.restoreState();
     }
 
     private void codeLine() {
@@ -201,7 +242,6 @@ public class PaymentSlip {
         over.beginText();
         over.setFontAndSize(codeLineFont, fontSize);
         over.setTextMatrix(lrx - textWidth - 3 * Points.Column, lry + 4 * Points.Line);
-        over.moveTo(10, 100);
         over.showText(text);
         over.endText();
         over.restoreState();
@@ -229,8 +269,10 @@ public class PaymentSlip {
             solidInFavorOfSeparatorVerticalLine();
             solidHorizontalRightLine();
             solidVerticalCircleSquareLine();
-            receiptTitle();
 
+            receiptTitle();
+            giroTitle();
+            layoutCode();
             codeLine();
 
             document.close();
