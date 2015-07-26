@@ -249,7 +249,6 @@ final class DefaultUserService implements UserService {
 
                     User db = Datastore.getOrNull(tx, userMeta, user.getId());
                     if (db == null) {
-                        uniqueLogin.releaseInCurrentTransaction(login.getUserId(), login.getProvider());
                         throw new EntityNotFoundException();
                     }
                     login.setId(Datastore.allocateId(db.getId(), UserLogin.class));
@@ -278,8 +277,8 @@ final class DefaultUserService implements UserService {
                         throw new EntityNotFoundException("UserLogin");
                     }
                     Datastore.delete(tx, dbLogin.getId());
-                    tx.commit();
                     uniqueLogin.releaseInCurrentTransaction(dbLogin.getUserId(), dbLogin.getProvider());
+                    tx.commit();
                     return null;
                 }
             });
