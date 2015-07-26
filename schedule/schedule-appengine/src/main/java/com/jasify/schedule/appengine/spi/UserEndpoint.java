@@ -145,12 +145,12 @@ public class UserEndpoint {
             user = UserServiceFactory.getUserService().create(request.getUser(), pw);
         }
 
+
         if (caller == null) {
             boolean isOrgMember = organizationDao.isUserMemberOfAnyOrganization(user.getId());
             new HttpUserSession(user, isOrgMember).put(servletRequest); //login
         }
 
         return user;
-
     }
 }

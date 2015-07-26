@@ -36,7 +36,8 @@ public class ApplySubscriptionCharges implements DeferredTask {
 
         But, right now, we only have the "BETA" plan...  So as a proof of concept, we charge 0 CHF on every subscription
          */
-        log.info("Applying subscription fess for subscription={}", subscriptionId);
+
+        log.info("Applying subscription fees for subscription={}", subscriptionId);
         Subscription subscription = Datastore.get(SubscriptionMeta.get(), subscriptionId);
         Transfer transfer = subscription.getTransferRef().getModel();
         Transaction beneficiaryTransaction = transfer.getBeneficiaryLegRef().getModel();

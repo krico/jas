@@ -50,7 +50,7 @@ public class AccountUtilTest {
     }
 
     @Test
-    public void testProfitAndLossAccount() {
+    public void testProfitAndLossAccount() throws Exception {
         Account account = AccountUtil.profitAndLossAccount();
         assertNotNull(account);
         assertEquals(AccountUtil.profitAndLossAccountKey(), account.getId());
@@ -119,7 +119,7 @@ public class AccountUtilTest {
     }
 
     @Test
-    public void testMemberAccountMustExistUser() {
+    public void testMemberAccountMustExistUser() throws Exception {
         Key userId = Datastore.allocateId(UserMeta.get());
         assertNull(Datastore.getOrNull(UserAccountMeta.get(), AccountUtil.memberIdToAccountId(userId)));
         Key accountId = AccountUtil.memberAccountIdMustExist(userId);
@@ -130,7 +130,7 @@ public class AccountUtilTest {
     }
 
     @Test
-    public void testMemberAccountMustExistOrganization() {
+    public void testMemberAccountMustExistOrganization() throws Exception {
         Key organizationId = Datastore.allocateId(OrganizationMeta.get());
         assertNull(Datastore.getOrNull(UserAccountMeta.get(), AccountUtil.memberIdToAccountId(organizationId)));
         Key accountId = AccountUtil.memberAccountIdMustExist(organizationId);

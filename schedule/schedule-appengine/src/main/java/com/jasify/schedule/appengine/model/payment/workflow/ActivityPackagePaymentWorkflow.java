@@ -3,6 +3,7 @@ package com.jasify.schedule.appengine.model.payment.workflow;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
 import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
@@ -91,7 +92,7 @@ public class ActivityPackagePaymentWorkflow extends PaymentWorkflow {
                 } else {
                     BalanceServiceFactory.getBalanceService().activityPackageExecution(activityPackageExecutionId);
                 }
-            } catch (EntityNotFoundException e) {
+            } catch (ModelException e) {
                 throw new PaymentWorkflowException(e);
             }
         }

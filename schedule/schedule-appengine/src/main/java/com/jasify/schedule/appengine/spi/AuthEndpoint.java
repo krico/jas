@@ -311,6 +311,4 @@ public class AuthEndpoint {
             log.warn("Failed to notify", e);
         }
     }
-
-
 }

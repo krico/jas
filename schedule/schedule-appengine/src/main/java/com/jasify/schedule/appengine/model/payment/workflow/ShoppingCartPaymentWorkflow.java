@@ -158,7 +158,13 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         }
 
         for (Organization organization : organizations.values()) {
-            String subject = String.format("[Jasify] Subscribe [%s]", user.getDisplayName());
+            String userName = "Anonymous"; // Fallback in case user is null - which should never happen
+
+            if (user != null) {
+                userName = user.getDisplayName();
+            }
+
+            String subject = String.format("[Jasify] Subscribe [%s]", userName);
             try {
                 Collection<Subscription> orgSubscriptions = subscriptionMap.containsKey(organization.getId()) ? subscriptionMap.get(organization.getId()) : Collections.<Subscription>emptyList();
                 Collection<ActivityPackageExecution> orgExecutions = executionMap.containsKey(organization.getId()) ? executionMap.get(organization.getId()) : Collections.<ActivityPackageExecution>emptyList();

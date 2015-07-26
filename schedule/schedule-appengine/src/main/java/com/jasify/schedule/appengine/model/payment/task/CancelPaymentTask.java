@@ -55,7 +55,7 @@ public class CancelPaymentTask implements DeferredTask {
                     return true;
                 }
             }
-        } catch (PaymentException | EntityNotFoundException e) {
+        } catch (EntityNotFoundException | PaymentException e) {
             log.error("Failed to complete payment", e);
         }
         return false;

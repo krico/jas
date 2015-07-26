@@ -109,7 +109,6 @@ public class BalanceEndpoint {
             default:
                 throw new BadRequestException("Unsupported payment type: " + paymentRequest.getType());
         }
-
     }
 
     private <T extends Payment> T createPaymentInternal(JasifyEndpointUser jasCaller, PaymentProvider<T> provider,
