@@ -247,6 +247,39 @@ public class PaymentSlip {
         over.restoreState();
     }
 
+    private void acceptingOffice() {
+        String text1 = "Die Annahmestelle";
+        String text2 = "L’office de dépôt";
+        String text3 = "L’ufficio d’accettazione";
+
+
+        float fontSize = 6;
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+
+        float ascentPoint = formFontRegular.getAscentPoint(text1, fontSize);
+        float offsetY = uly - 21 * Points.Line;
+
+        over.setTextMatrix(giroUlx - 11 * Points.Column, offsetY);
+        over.showText(text1);
+
+        ascentPoint = formFontRegular.getAscentPoint(text2, fontSize);
+        offsetY -= (ascentPoint + 1);
+        over.setTextMatrix(giroUlx - 11 * Points.Column, offsetY);
+        over.showText(text2);
+
+        ascentPoint = formFontRegular.getAscentPoint(text3, fontSize);
+        offsetY -= (ascentPoint + 2);
+        over.setTextMatrix(giroUlx - 11 * Points.Column, offsetY);
+        over.showText(text3);
+
+        over.endText();
+        over.restoreState();
+
+    }
+
     public void render(File file) throws Exception {
         log.info("Generating: {}", file);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -273,6 +306,8 @@ public class PaymentSlip {
             receiptTitle();
             giroTitle();
             layoutCode();
+            acceptingOffice();
+
             codeLine();
 
             document.close();
