@@ -172,6 +172,23 @@ public class PaymentSlip {
         under.restoreState();
     }
 
+    private void positioningEdges() {
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(Color.BLACK);
+        under.setLineWidth(1f);
+        float edgeBase = lly + Points.Inch + 1;
+        under.moveTo(giroUlx + Points.Column + Points.Millimeter, edgeBase + 0.6f * Points.Line);
+        under.lineTo(giroUlx + Points.Column + Points.Millimeter, edgeBase);
+        under.lineTo(giroUlx + 3 * Points.Column + Points.Millimeter, edgeBase);
+
+        under.moveTo(lrx - (2 * Points.Column + Points.Millimeter), edgeBase + 0.6f * Points.Line);
+        under.lineTo(lrx - (2 * Points.Column + Points.Millimeter), edgeBase);
+        under.lineTo(lrx - (4 * Points.Column + Points.Millimeter), edgeBase);
+        under.stroke();
+        under.restoreState();
+    }
+
     private void solidVerticalCircleSquareLine() {
         PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
@@ -348,6 +365,7 @@ public class PaymentSlip {
             solidVerticalCircleSquareLine();
             topRightCircle();
             bottomLeftCircle();
+            positioningEdges();
 
             receiptTitle();
             giroTitle();
