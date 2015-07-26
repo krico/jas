@@ -1,14 +1,18 @@
 {
   "CHECKOUT": "Zur Kasse",
+  "CREATED": "Erstellt",
   "DELETE": "Löschen",
   "DESCRIPTION": "Beschreibung",
   "EDIT": "Bearbeiten",
   "FINISH": "Fertig",
   "LOCATION": "Lage",
   "ORGANIZATIONS": "Organisationen",
+  "PASSWORD": "Kennwort",
   "PRICE": "Preis",
+  "SEARCH": "Suche",
   "SIGN_IN": "Anmelden",
   "SIGN_OUT": "Abmelden",
   "START": "Start",
-  "SUBSCRIPTIONS": "Abonnements"
+  "SUBSCRIPTIONS": "Abonnements",
+  "USERS": "Benutzers"
 }
