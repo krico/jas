@@ -250,7 +250,6 @@ public class PaymentSlip {
 
         float fontSize = 8;
         float ascentPoint = formFontBold.getAscentPoint(text, fontSize);
-        float textWidth = formFontBold.getWidthPoint(text, fontSize);
         PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
@@ -323,6 +322,64 @@ public class PaymentSlip {
 
     }
 
+    private void onBehalfOf() {
+        String text = "Einzahlung für / Versement pour / Versamento per";
+
+
+        float fontSize = 6f;
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+        float offsetY = uly - (2 * Points.Line - ascentPoint / 2);
+
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+        over.setColorFill(Colors.BackgroundPlain);
+
+        over.setTextMatrix(ulx + 1 * Points.Column, offsetY);
+        over.showText(text);
+
+        over.setTextMatrix(giroUlx + 1 * Points.Column, offsetY);
+        over.showText(text);
+
+        over.endText();
+        over.restoreState();
+
+    }
+
+    private void noCommunications() {
+        String text1 = "Keine Mitteilungen anbringen";
+        String text2 = "Pas de communications";
+        String text3 = "Non aggiungete comunicazioni";
+
+
+        float fontSize = 6f;
+        float ascentPoint = formFontRegular.getAscentPoint(text1, fontSize);
+        float offsetY = uly - (3.5f * Points.Line - ascentPoint / 2);
+
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+        over.setColorFill(Colors.BackgroundPlain);
+
+        float offX = inFavorOfUlx + 1.5f * Points.Column;
+        over.setTextMatrix(offX, offsetY);
+        over.showText(text1);
+
+        offsetY -= Points.Line;
+        over.setTextMatrix(offX, offsetY);
+        over.showText(text2);
+
+        offsetY -= Points.Line;
+        over.setTextMatrix(offX, offsetY);
+        over.showText(text3);
+
+        over.endText();
+        over.restoreState();
+
+    }
+
     private void printDate() {
 
         String text = new SimpleDateFormat("MM.YYYY").format(new Date());
@@ -372,6 +429,8 @@ public class PaymentSlip {
             layoutCode();
             acceptingOffice();
             printDate();
+            onBehalfOf();
+            noCommunications();
 
             codeLine();
 
