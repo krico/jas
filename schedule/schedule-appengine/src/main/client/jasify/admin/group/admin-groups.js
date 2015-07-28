@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminGroupsController', AdminGroupsController);
 
-    function AdminGroupsController($location, Group, groups) {
+    function AdminGroupsController($location, $filter, jasDialogs, Group, groups) {
         var vm = this;
         vm.groups = groups.items;
         vm.group = {};
@@ -13,26 +13,20 @@
         vm.update = update;
         vm.add = add;
         vm.viewGroup = viewGroup;
-        vm.alert = alert;
 
-        function alert(t, m) {
-            vm.alerts.push({type: t, msg: m});
-        }
-
-
-        function reloadHandler(r) {
-            vm.reload();
-        }
+        var $translate = $filter('translate');
 
         function errorHandler(resp) {
-            alert('danger', 'Operation failed: (' + resp.status + ") '" + resp.statusText + "'");
+            var translation = $translate('FAILED_PLEASE_RETRY');
+            jasDialogs.resultError(translation, resp);
         }
 
         function add(group) {
             Group.add(group).then(ok, errorHandler);
-            function ok(r) {
+            function ok() {
                 vm.group = {};
-                vm.alert('success', 'Group [' + r.name + '] added!');
+                var translation = $translate('GROUP_CREATED');
+                jasDialogs.success(translation);
                 vm.reload();
             }
         }
@@ -45,7 +39,8 @@
         function remove(id) {
             Group.remove(id).then(ok, errorHandler);
             function ok(){
-                vm.alert('warning', 'Group removed!');
+                var translation = $translate('GROUP_REMOVED');
+                jasDialogs.success(translation);
                 vm.reload();
             }
         }
