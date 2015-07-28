@@ -329,7 +329,7 @@
                         var paymentNotCompleteTranslation = $translate('CHECKOUT_PAYMENT_NOT_COMPLETE_RETRY_SELECTION');
                         jasDialogs.warning(paymentNotCompleteTranslation);
                     } else if (status == CHECKOUT_WINDOW.statusAuthenticating) {
-                        var authenticationtNotCompleteTranslation = $translate('CHECKOUT_AUTHENTICATION_NOT_COMPLETE_RETRY_SELETION');
+                        var authenticationtNotCompleteTranslation = $translate('CHECKOUT_AUTHENTICATION_NOT_COMPLETE_RETRY_SELECTION');
                         jasDialogs.warning(authenticationtNotCompleteTranslation);
                     } else if (status == CHECKOUT_WINDOW.statusCheckout) {
                         var checkoutNotCompleteTranslation = $translate('CHECKOUT_NOT_COMPLETE_RETRY_SELECTION');
