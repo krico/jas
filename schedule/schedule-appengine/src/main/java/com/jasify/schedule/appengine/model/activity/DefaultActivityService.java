@@ -14,6 +14,8 @@ import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.CompositeCriterion;
 import org.slim3.datastore.Datastore;
 
@@ -29,6 +31,7 @@ import java.util.Set;
  * @since 09/01/15.
  */
 class DefaultActivityService implements ActivityService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultActivityService.class);
     private static final Function<Activity, Key> ACTIVITY_TO_KEY_FUNCTION = new Function<Activity, Key>() {
         @Nullable
         @Override
@@ -89,6 +92,7 @@ class DefaultActivityService implements ActivityService {
                 }
             });
         } catch (ModelException e) {
+            log.error("Failed to subscribe User={} to Activity={}", user.getId(), activity.getId()); // TODO: Replace with event recorder
             throw Throwables.propagate(e);
         }
     }
@@ -103,7 +107,7 @@ class DefaultActivityService implements ActivityService {
         // TODO: This method needs cleanup
         Preconditions.checkState(!activityIds.isEmpty(), "Need at least 1 activity to subscribe");
         if (userId == null) throw new EntityNotFoundException("User id=NULL");
-        final User user = UserServiceFactory.getUserService().getUser(userId);
+        UserServiceFactory.getUserService().getUser(userId);
 
         try {
             //I will implement this method with transactions, so we can use it as a reference for the other subscribe
@@ -160,8 +164,10 @@ class DefaultActivityService implements ActivityService {
                 }
             });
         } catch (EntityNotFoundException | OperationException e) {
+            log.error("Failed to subscribe User={} to ActivityPackage={}", userId, activityPackageId); // TODO: Replace with event recorder
             throw e;
         } catch (ModelException e) {
+            log.error("Failed to subscribe User={} to ActivityPackage={}", userId, activityPackageId); // TODO: Replace with event recorder
             throw Throwables.propagate(e);
         }
     }
