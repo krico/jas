@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityTypesController', AdminActivityTypesController);
 
-    function AdminActivityTypesController($location, $routeParams, ActivityType, organizations, activityTypes, toolbarContext) {
+    function AdminActivityTypesController($location, $routeParams, $filter, jasDialogs, ActivityType, organizations, activityTypes, toolbarContext) {
 
         var vm = this;
 
@@ -26,6 +26,8 @@
         vm.removeActivityType = removeActivityType;
         vm.getPreviewStyle = getPreviewStyle;
 
+        var $translate = $filter('translate');
+
         function setSelectedOrganization(organizationId) {
             vm.organization = _.find(vm.organizations, {id: organizationId});
         }
@@ -40,6 +42,8 @@
 
         function removeActivityType(activityType) {
             ActivityType.remove(activityType.id).then(function () {
+                var translation = $translate('ACTIVITY_TYPE_REMOVED');
+                jasDialogs.success(translation);
                 vm.activityTypes.splice(vm.activityTypes.indexOf(activityType), 1);
                 vm.selectActivityType(null);
             });
