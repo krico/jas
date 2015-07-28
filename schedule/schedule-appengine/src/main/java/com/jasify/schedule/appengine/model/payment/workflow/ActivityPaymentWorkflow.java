@@ -14,6 +14,8 @@ import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Model;
 
 /**
@@ -22,7 +24,7 @@ import org.slim3.datastore.Model;
  */
 @Model
 public class ActivityPaymentWorkflow extends PaymentWorkflow {
-
+    private static final Logger log = LoggerFactory.getLogger(ActivityPaymentWorkflow.class);
     private final ActivityDao activityDao = new ActivityDao();
     private Key activityId;
     private Key subscriptionId;
@@ -53,13 +55,15 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
     @Override
     public void onCreated() throws PaymentWorkflowException {
         Payment payment = getPaymentRef().getModel();
+        Key userId = payment.getUserRef().getKey();
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
-            User user = UserServiceFactory.getUserService().getUser(payment.getUserRef().getKey());
+            User user = UserServiceFactory.getUserService().getUser(userId);
             Activity activity = activityDao.get(activityId);
             Subscription subscribe = activityService.subscribe(user, activity);
             subscriptionId = subscribe.getId();
         } catch (EntityNotFoundException | OperationException e) {
+            log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
             throw new PaymentWorkflowException(e);
         }
     }

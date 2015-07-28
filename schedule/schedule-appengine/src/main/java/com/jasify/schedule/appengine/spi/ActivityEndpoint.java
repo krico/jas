@@ -18,6 +18,8 @@ import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
 import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -53,6 +55,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class ActivityEndpoint {
+    private static final Logger log = LoggerFactory.getLogger(ActivityEndpoint.class);
 
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
@@ -99,6 +102,7 @@ public class ActivityEndpoint {
                 }
             });
         } catch (EntityNotFoundException e) {
+
             throw new NotFoundException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
@@ -313,8 +317,10 @@ public class ActivityEndpoint {
             Activity activity = activityDao.get(activityId);
             return ActivityServiceFactory.getActivityService().subscribe(user, activity);
         } catch (EntityNotFoundException e) {
+            log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
             throw new NotFoundException(e.getMessage());
         } catch (OperationException e) {
+            log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
             throw new BadRequestException(e.getMessage());
         }
     }
