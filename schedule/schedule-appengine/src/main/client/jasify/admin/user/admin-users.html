@@ -1,8 +1,8 @@
 <div class="card">
     <div class="card-header">
-        <h2>Users List
+        <h2>{{ 'USERS' | translate }}
             <small>
-                Use search settings to find users, change user settings or add new user.
+                {{ 'ADD_EDIT_DELETE_USERS' | translate }}
             </small>
         </h2>
     </div>
@@ -17,7 +17,7 @@
                                    ng-model-options="{ debounce: 500 }"
                                    ng-model="vm.query"
                                    type="text" name="query" id="query" class="search-field form-control"
-                                   placeholder="Search">
+                                   placeholder="{{ 'SEARCH' | translate }}">
                         </div>
                     </div>
                 </div>
@@ -27,28 +27,28 @@
                             <label>
                                 <input type="checkbox" value="">
                                 <i class="input-helper"></i>
-                                Regex
+                                {{ 'REGEX' | translate }}
                             </label>
                         </div>
                         <div class="dropdown btn-group">
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                <span class="dropdown-text">Search by: {{vm.searchBy()}}</span> <span
+                                <span class="dropdown-text">{{ 'SEARCH_BY' | translate }}: {{vm.searchBy()}}</span> <span
                                     class="caret"></span>
                             </button>
                             <ul class="dropdown-menu pull-right" role="menu">
                                 <li ng-class="{ 'active': vm.searchBy() === 'name' }">
                                     <a href prevent="click" ng-click="vm.searchBy('name')"
-                                       class="dropdown-item dropdown-item-button">Name</a>
+                                       class="dropdown-item dropdown-item-button">{{ 'NAME' | translate }}</a>
                                 </li>
                                 <li ng-class="{ 'active': vm.searchBy() === 'email' }">
                                     <a href prevent="click" ng-click="vm.searchBy('email')"
-                                       class="dropdown-item dropdown-item-button">Email</a>
+                                       class="dropdown-item dropdown-item-button">{{ 'EMAIL' | translate }}</a>
                                 </li>
                             </ul>
                         </div>
                         <div class="dropdown btn-group">
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                <span class="dropdown-text">Page Size: {{vm.perPage()}}</span> <span
+                                <span class="dropdown-text">{{ 'PAGE_SIZE' | translate }}: {{vm.perPage()}}</span> <span
                                     class="caret"></span>
                             </button>
                             <ul class="dropdown-menu pull-right" role="menu">
@@ -68,18 +68,18 @@
         <thead>
         <tr>
             <th>
-                <row-add btn-href="/admin/user" description="Add User"/>
+                <row-add btn-href="/admin/user" description="{{ 'ADD_USER' | translate }}"/>
             </th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Admin</th>
-            <th>Created</th>
+            <th>{{ 'NAME' | translate }}</th>
+            <th>{{ 'EMAIL' | translate }}</th>
+            <th>{{ 'ADMIN' | translate }}</th>
+            <th>{{ 'CREATED' | translate }}</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="user in vm.users track by user.id">
             <td class="row-commands">
-                <row-edit description="Edit {{user.name}}" action="vm.viewUser(user.id)"
+                <row-edit description="{{ 'EDIT' | translate }}" action="vm.viewUser(user.id)"
                           data-row-id="{{user.id}}"></row-edit>
             </td>
             <td>{{user.name}}</td>

@@ -103,7 +103,7 @@ class DefaultActivityService implements ActivityService {
         // TODO: This method needs cleanup
         Preconditions.checkState(!activityIds.isEmpty(), "Need at least 1 activity to subscribe");
         if (userId == null) throw new EntityNotFoundException("User id=NULL");
-        final User user = UserServiceFactory.getUserService().getUser(userId);
+        UserServiceFactory.getUserService().getUser(userId);
 
         try {
             //I will implement this method with transactions, so we can use it as a reference for the other subscribe

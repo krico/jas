@@ -6,12 +6,13 @@ describe('AdminUserController', function () {
 
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_$q_, _$location_, _$controller_, _$rootScope_, _$routeParams_, _$gapiMock_, _User_, _Auth_, _Endpoint_) {
+    beforeEach(inject(function (_$q_, _$location_, _$controller_, _$rootScope_, _$routeParams_, _$gapiMock_, _jasDialogs_, _User_, _Auth_, _Endpoint_) {
         $q = _$q_;
         $controller = _$controller_;
         $rootScope = _$rootScope_;
         $location = _$location_;
         $gapiMock = _$gapiMock_;
+        jasDialogs = _jasDialogs_;
         User = _User_;
         Auth = _Auth_;
         Endpoint = _Endpoint_;
@@ -56,6 +57,7 @@ describe('AdminUserController', function () {
 
         vm = $controller('AdminUserController', {
             $scope: $scope,
+            jasDialogs: jasDialogs,
             User: User,
             Auth: Auth,
             user: {}
@@ -66,6 +68,7 @@ describe('AdminUserController', function () {
 
         spyOn(User, 'add');
         spyOn($location, 'path');
+        spyOn(jasDialogs, 'success');
 
         User.add.and.returnValue($q.when({id: 555, name: 'test'}));
 
@@ -74,6 +77,7 @@ describe('AdminUserController', function () {
         $rootScope.$apply();
 
         expect($location.path).toHaveBeenCalled();
+        expect(jasDialogs.success).toHaveBeenCalled();
     });
 
     it('can handle if create user fails', function () {

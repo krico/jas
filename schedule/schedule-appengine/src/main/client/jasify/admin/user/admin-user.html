@@ -3,32 +3,29 @@
         <a class="back-button" href="#/admin/users">
             <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
         </a>
-        <h2>{{vm.user.name}}'s Profile
-            <small>Edit user setting or change password</small>
+
+        <h2 translate="USERS_PROFILE" translate-values="{value: '{{::vm.user.name}}'}">
+            <small>{{ 'EDIT_USER_DESCRIPTION' | translate }}</small>
         </h2>
     </div>
     <div class="card-header" ng-if="!vm.user.id">
         <a class="back-button" href="#/admin/users">
             <button title="Back" class="btn btn-info btn-icon"><i class="md mdi-undo"></i></button>
         </a>
-        <h2>Create new user
+
+        <h2>{{ 'NEW_USER' | translate }}
         </h2>
     </div>
     <div class="card-body card-padding">
-        <div ng-if="vm.created" class="alert alert-success alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-            User <strong>{{vm.user.name}}</strong> succesfully created.
-        </div>
-
         <ul class="tab-nav" role="tablist">
             <li class="active">
                 <a prevent="click" href="#profile-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
-                    <i class="mdi mdi-settings"></i> User Settings
+                    <i class="mdi mdi-settings"></i>{{ 'USER_SETTINGS' | translate }}
                 </a>
             </li>
             <li ng-if="vm.user.id">
                 <a prevent="click" href="#password-tab" aria-controls="profile-tab" role="tab" data-toggle="tab">
-                    <i class="ion-ios-color-wand"></i> Password Management
+                    <i class="ion-ios-color-wand"></i>{{ 'PASSWORD_MANAGEMENT' | translate }}
                 </a>
             </li>
         </ul>
@@ -45,11 +42,11 @@
                                            required
                                            ng-disabled="vm.user.id" ng-model="vm.user.name">
                                 </div>
-                                <label class="fg-label">Name</label>
+                                <label class="fg-label">{{ 'NAME' | translate }}</label>
                                 <jas-feedback-icon-valid field="vm.forms.userForm.name"></jas-feedback-icon-valid>
                                 <jas-feedback-icon-invalid field="vm.forms.userForm.name" form="vm.forms.userForm"></jas-feedback-icon-invalid>
                                 <jas-error-help-block field="vm.forms.userForm.name" form="vm.forms.userForm">
-                                    <span ng-message="required">Name is required.</span>
+                                    <div ng-message="required"><span>{{ 'NAME_IS_REQUIRED' | translate }}</span></div>
                                 </jas-error-help-block>
                             </div>
                         </div>
@@ -59,7 +56,7 @@
                                     <input type="checkbox" ng-checked="vm.user.admin" name="type"
                                            ng-model="vm.user.admin">
                                     <i class="input-helper"></i>
-                                    Is Admin
+                                    {{ 'ADMIN' | translate }}
                                 </label>
                             </div>
                         </div>
@@ -70,30 +67,30 @@
                                    required
                                    ng-model="vm.user.password">
                         </div>
-                        <label class="fg-label">Password</label>
+                        <label class="fg-label">{{ 'PASSWORD' | translate }}</label>
                         <jas-feedback-icon-valid field="vm.forms.userForm.password"></jas-feedback-icon-valid>
                         <jas-feedback-icon-invalid field="vm.forms.userForm.password" form="vm.forms.userForm"></jas-feedback-icon-invalid>
                         <jas-error-help-block field="vm.forms.userForm.password" form="vm.forms.userForm">
-                            <span ng-message="required">Password is required.</span>
+                            <div ng-message="required"><span>{{ 'PASSWORD_IS_REQUIRED' | translate }}</span></div>
                         </jas-error-help-block>
                     </div>
                     <div jas-has-feedback class="form-group fg-float">
                         <div class="fg-line">
                             <input type="email" class="form-control fg-input" id="email" name="email" ng-model="vm.user.email">
                         </div>
-                        <label class="fg-label">Email</label>
+                        <label class="fg-label">{{ 'EMAIL' | translate }}</label>
                         <jas-feedback-icon-valid field="vm.forms.userForm.email"></jas-feedback-icon-valid>
                         <jas-feedback-icon-invalid field="vm.forms.userForm.email" form="vm.forms.userForm"></jas-feedback-icon-invalid>
                         <jas-error-help-block field="vm.forms.userForm.email" form="vm.forms.userForm">
-                            <span ng-message="email">This email address is not valid.</span>
+                            <div ng-message="email"><span>{{ 'EMAIL_ADDRESS_IS_INVALID' | translate }}</span></div>
                         </jas-error-help-block>
                     </div>
                     <div class="form-group fg-float">
                         <div class="fg-line">
                             <textarea class="form-control" rows="3"
-                                      placeholder="This is something about me...."></textarea>
+                                      placeholder="{{ 'ENTER_ABOUT_ME' | translate }}"></textarea>
                         </div>
-                        <label class="fg-label">About me</label>
+                        <label class="fg-label">{{ 'ABOUT_ME' | translate }}</label>
                     </div>
                     <div class="actions-group">
                         <a-button controller="vm.submitBtn" type="submit" ></a-button>
@@ -107,26 +104,29 @@
                         <div class="fg-line">
                             <input type="password" class="form-control" id="ch.oldPassword" name="oldPassword"
                                    ng-model="vm.pw.oldPassword"
+                                   placeholder="{{ 'ENTER_CURRENT_PASSWORD' | translate }}"
                                    required>
                         </div>
-                        <label class="fg-label">Current Password</label>
+                        <label class="fg-label">{{ 'CURRENT_PASSWORD' | translate }}</label>
                         <jas-feedback-icon-valid field="vm.forms.passwordForm.oldPassword"></jas-feedback-icon-valid>
                         <jas-feedback-icon-invalid field="vm.forms.passwordForm.oldPassword" form="vm.passwordForm.userForm"></jas-feedback-icon-invalid>
                         <jas-error-help-block field="vm.forms.passwordForm.oldPassword" form="vm.forms.passwordForm">
-                            <span ng-message="required">Current password is required.</span>
+                            <div ng-message="required"><span>{{ 'CURRENT_PASSWORD_IS_REQUIRED' | translate }}</span>
+                            </div>
                         </jas-error-help-block>
                     </div>
                     <div jas-has-feedback class="form-group fg-float">
                         <div class="fg-line">
                             <input type="password" class="form-control" id="ch.password" name="password"
                                    ng-model="vm.pw.newPassword"
+                                   placeholder="{{ 'ENTER_PASSWORD' | translate }}"
                                    required>
                         </div>
-                        <label class="fg-label">New Password</label>
+                        <label class="fg-label">{{ 'NEW_PASSWORD' | translate }}</label>
                         <jas-feedback-icon-valid field="vm.forms.passwordForm.password"></jas-feedback-icon-valid>
                         <jas-feedback-icon-invalid field="vm.forms.passwordForm.password" form="vm.passwordForm.userForm"></jas-feedback-icon-invalid>
                         <jas-error-help-block field="vm.forms.passwordForm.password" form="vm.forms.passwordForm">
-                            <span ng-message="required">Password is required.</span>
+                            <div ng-message="required"><span>{{ 'PASSWORD_IS_REQUIRED' | translate }}</span></div>
                         </jas-error-help-block>
                     </div>
                     <div jas-has-feedback class="form-group fg-float">
@@ -136,14 +136,16 @@
                                    class="form-control" id="ch.confirm" name="confirm"
                                    ng-model="vm.pw.confirmPassword" required
                                    jas-confirm-field="vm.forms.passwordForm.password"
-                                   placeholder="confirm">
+                                   placeholder="{{ 'ENTER_PASSWORD_CONFIRMATION' | translate }}">
                         </div>
-                        <label class="fg-label">Confirm New Password</label>
+                        <label class="fg-label">{{ 'CONFIRM_NEW_PASSWORD' | translate }}</label>
                         <jas-feedback-icon-valid field="vm.forms.passwordForm.confirm"></jas-feedback-icon-valid>
                         <jas-feedback-icon-invalid field="vm.forms.passwordForm.confirm" form="vm.passwordForm.confirm"></jas-feedback-icon-invalid>
                         <jas-error-help-block field="vm.forms.passwordForm.confirm" form="vm.forms.passwordForm">
-                            <span ng-message="required">Password confirmation is required.</span>
-                            <span ng-message="jasConfirmField">Passwords do not match.</span>
+                            <div ng-message="required">
+                                <span>{{ 'PASSWORD_CONFIRMATION_IS_REQUIRED' | translate }}</span></div>
+                            <div ng-message="jasConfirmField"><span>{{ 'PASSWORDS_DO_NOT_MATCH' | translate }}</span>
+                            </div>
                         </jas-error-help-block>
                     </div>
                     <div class="actions-group">

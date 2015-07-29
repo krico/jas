@@ -2,7 +2,7 @@
 
     angular.module('jasify.admin').controller('AdminUserController', AdminUserController);
 
-    function AdminUserController($routeParams, $location, user, User, Auth, aButtonController) {
+    function AdminUserController($routeParams, $location, $filter, jasDialogs, user, User, Auth, aButtonController) {
         var vm = this;
 
         vm.pw = {};
@@ -17,12 +17,16 @@
         vm.submitBtn = aButtonController.createProfileSave();
         vm.resetBtn = aButtonController.createProfileReset();
 
+        var $translate = $filter('translate');
+
         function save() {
             var promise = User.update(vm.user);
             vm.submitBtn.start(promise);
             promise.then(function ok(u) {
                 vm.submitResult = 'success';
                 vm.user = u;
+                var userUpdatedTranslation = $translate('USER_UPDATED');
+                jasDialogs.success(userUpdatedTranslation);
                 vm.forms.userForm.$setPristine();
                 vm.forms.userForm.$setUntouched();
             });
@@ -50,10 +54,11 @@
             var promise = User.add(vm.user, vm.user.password);
             vm.submitBtn.start(promise);
             promise.then(function(r) {
+                var userCreatedTranslation = $translate('USER_CREATED');
+                jasDialogs.success(userCreatedTranslation);
                 $location.path('/admin/user/' + r.id + '/created');
             });
         }
-
 
         function changePassword() {
             var promise = Auth.changePassword(vm.user, vm.pw.oldPassword, vm.pw.newPassword);
@@ -67,7 +72,5 @@
                 vm.forms.passwordForm.$setUntouched();
             });
         }
-
     }
-
 })(angular);

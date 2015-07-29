@@ -336,7 +336,9 @@
                 });
 
                 angular.element(inputColorOutput).scope().$watch(inputColorOutput.attr('ng-model'), function (newValue) {
-                    $.farbtastic($element).setColor(newValue);
+                    if (typeof newValue !== 'undefined') {
+                        $.farbtastic($element).setColor(newValue);
+                    }
                 });
             }
         };

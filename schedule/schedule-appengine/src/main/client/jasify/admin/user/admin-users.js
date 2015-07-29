@@ -81,7 +81,6 @@
                 }
             }
             return vm._perPage;
-
         }
 
         function searchBy(newValue) {
@@ -90,13 +89,11 @@
                 vm.searchByChanged();
             }
             return vm._searchBy;
-
         }
 
         function viewUser(id) {
             $location.path('/admin/user/' + id);
         }
-
     }
 
 })(angular);
