@@ -14,6 +14,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author krico
@@ -24,9 +26,16 @@ public class PaymentSlip {
     public static final String GROTESK_BOLD_TRUE_TYPE = "BESR/fonts/AlteHaasGroteskBold.ttf";
     public static final String GROTESK_REGULAR_TRUE_TYPE = "BESR/fonts/micross.ttf";
     //A5 (210 x 148mm)
-    public static final String BESR_A5 = "BESR/images/BESR-A5-RED.jpg";
-    private static final Rectangle SIZE = new RectangleReadOnly(Utilities.inchesToPoints(11), Utilities.inchesToPoints(11));
     private static final Logger log = LoggerFactory.getLogger(PaymentSlip.class);
+
+    private static final Pattern AMOUNT_PATTERN = Pattern.compile("^([0-9]{1,9})([0-9][0-9])$");
+
+    private String account = "01-39139-1";
+    private String codeLine = "2100000440001>961116900000006600000009284+ 030001625>";
+    private String referenceCode = "96 11169 00000 00660 00000 09284";
+    private String currency = "CHF";
+    private String recipient = "Robert Schneider SA\nGrands magasins\nCase postale\n2501 Biel/Bienne";
+    private String amount = "440001";
 
     private Document document;
     private PdfWriter writer;
@@ -41,6 +50,7 @@ public class PaymentSlip {
     private float giroUlx;
     private float inFavorOfUlx;
     private float rightUpperSquareY;
+    private float referenceCodeBoxLLX;
     private BaseFont codeLineFont;
     private BaseFont formFontBold;
     private BaseFont formFontRegular;
@@ -233,7 +243,7 @@ public class PaymentSlip {
         over.beginText();
         over.setFontAndSize(formFontBold, fontSize);
         over.setTextMatrix(ulx + (Points.ReceiptWidth - textWidth) / 2, uly - Points.Line + (ascentPoint / 2));
-        over.showText(text);
+        over.showTextKerned(text);
         over.endText();
         over.restoreState();
 
@@ -255,7 +265,7 @@ public class PaymentSlip {
         over.beginText();
         over.setFontAndSize(formFontBold, fontSize);
         over.setTextMatrix((urx - Points.GiroWidth) + Points.Column * 1.5f, uly - Points.Line + (ascentPoint / 2));
-        over.showText(text);
+        over.showTextKerned(text);
         over.endText();
         over.restoreState();
 
@@ -276,7 +286,7 @@ public class PaymentSlip {
 
     private void codeLine() {
 
-        String text = "2100000440001>961116900000006600000009284+ 030001625>";
+        String text = codeLine;
         float fontSize = 10;
         float textWidth = codeLineFont.getWidthPoint(text, fontSize);
         PdfContentByte over = writer.getDirectContent();
@@ -305,17 +315,17 @@ public class PaymentSlip {
         float offsetY = uly - (21 * Points.Line + ascentPoint / 2);
 
         over.setTextMatrix(giroUlx - 11 * Points.Column, offsetY);
-        over.showText(text1);
+        over.showTextKerned(text1);
 
         ascentPoint = formFontRegular.getAscentPoint(text2, fontSize);
         offsetY -= (ascentPoint + 1);
         over.setTextMatrix(giroUlx - 11 * Points.Column, offsetY);
-        over.showText(text2);
+        over.showTextKerned(text2);
 
         ascentPoint = formFontRegular.getAscentPoint(text3, fontSize);
         offsetY -= (ascentPoint + 2);
         over.setTextMatrix(giroUlx - 11 * Points.Column, offsetY);
-        over.showText(text3);
+        over.showTextKerned(text3);
 
         over.endText();
         over.restoreState();
@@ -337,10 +347,10 @@ public class PaymentSlip {
         over.setColorFill(Colors.BackgroundPlain);
 
         over.setTextMatrix(ulx + 1 * Points.Column, offsetY);
-        over.showText(text);
+        over.showTextKerned(text);
 
         over.setTextMatrix(giroUlx + 1 * Points.Column, offsetY);
-        over.showText(text);
+        over.showTextKerned(text);
 
         over.endText();
         over.restoreState();
@@ -365,15 +375,15 @@ public class PaymentSlip {
 
         float offX = inFavorOfUlx + 1.5f * Points.Column;
         over.setTextMatrix(offX, offsetY);
-        over.showText(text1);
+        over.showTextKerned(text1);
 
         offsetY -= Points.Line;
         over.setTextMatrix(offX, offsetY);
-        over.showText(text2);
+        over.showTextKerned(text2);
 
         offsetY -= Points.Line;
         over.setTextMatrix(offX, offsetY);
-        over.showText(text3);
+        over.showTextKerned(text3);
 
         over.endText();
         over.restoreState();
@@ -401,32 +411,196 @@ public class PaymentSlip {
 
     private void orangeReferenceCodeBox() {
         String text = "Referenz-Nr./Nº de référence/Nº di riferimento";
-        float fontSize = 5f;
+        float fontSize = 5.5f;
 
         PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
-        under.setColorStroke(Colors.BackgroundPlain);
-        under.setLineWidth(0.4f);
+
         float boxWidth = 33 * Points.Column;
         float boxHeight = 3 * Points.Column;
         float boxLLY = rightUpperSquareY - (0.5f * Points.Line + boxHeight);
-        float boxLLX = inFavorOfUlx + ((urx - inFavorOfUlx) - boxWidth) / 2;
-        under.rectangle(boxLLX, boxLLY, boxWidth, boxHeight);
-        under.stroke();
+        referenceCodeBoxLLX = inFavorOfUlx + ((urx - inFavorOfUlx) - boxWidth) / 2;
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+        float textWidth = formFontRegular.getWidthPoint(text, fontSize);
+        float textX = referenceCodeBoxLLX + (boxWidth - textWidth) / 2;
+        float textY = boxLLY + boxHeight - ascentPoint / 2;
 
         under.beginText();
         under.setFontAndSize(formFontRegular, fontSize);
         under.setColorFill(Colors.BackgroundPlain);
-        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
-        float textWidth = formFontRegular.getWidthPoint(text, fontSize);
-        float textX = boxLLX + (boxWidth - textWidth) / 2;
-        float textY = boxLLY + boxHeight - ascentPoint / 2;
         under.setTextMatrix(textX, textY);
-        under.showText(text);
+        under.showTextKerned(text);
+
         under.endText();
+
+        under.setColorStroke(Colors.BackgroundPlain);
+        under.setLineWidth(0.4f);
+        under.moveTo(textX - Points.Column, boxLLY + boxHeight);
+        under.lineTo(referenceCodeBoxLLX, boxLLY + boxHeight);
+        under.lineTo(referenceCodeBoxLLX, boxLLY);
+        under.lineTo(referenceCodeBoxLLX + boxWidth, boxLLY);
+        under.lineTo(referenceCodeBoxLLX + boxWidth, boxLLY + boxHeight);
+        under.lineTo(textX + textWidth + Points.Column, boxLLY + boxHeight);
+        under.stroke();
+
 
         under.restoreState();
 
+    }
+
+    private void giroPaidBy() {
+        String text = "Einbezahlt von / Versé par / Versato da";
+        float fontSize = 6f;
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+
+        float offsetY = uly - (11 * Points.Line - ascentPoint / 2);
+        float offsetX = referenceCodeBoxLLX;
+
+
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+        over.setColorFill(Colors.BackgroundPlain);
+
+        over.setTextMatrix(offsetX, offsetY);
+        over.showTextKerned(text);
+
+        over.endText();
+        over.restoreState();
+    }
+
+    private void receiptAccount() {
+        String text = "Konto / Compte / Conto";
+        float fontSize = 6f;
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+        float textWidth = formFontRegular.getWidthPoint(text, fontSize);
+
+        float offsetY = uly - (11 * Points.Line - ascentPoint / 2);
+        float offsetX = llx + 1 * Points.Column;
+
+
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+        over.setColorFill(Colors.BackgroundPlain);
+
+        over.setTextMatrix(offsetX, offsetY);
+        over.showTextKerned(text);
+
+
+        over.setColorFill(Color.BLACK);
+        over.setFontAndSize(formFontBold, 8f);
+
+        over.setTextMatrix(offsetX, offsetY - (Points.Line - ascentPoint));
+        over.showTextKerned(currency);
+
+        over.setTextMatrix(offsetX + textWidth + 2 * Points.Column, offsetY);
+        over.showTextKerned(account);
+
+        over.endText();
+        over.restoreState();
+    }
+
+    private void receiptAmountBox() {
+        Matcher matcher = AMOUNT_PATTERN.matcher(amount);
+        if (!matcher.matches()) {
+            throw new IllegalCodeLineException("Bad amount [" + amount + "]");
+        }
+        String amountWhole = matcher.group(1);
+        String amountCents = matcher.group(2);
+
+        float fontSize = 8f;
+        float ascentPoint = formFontBold.getAscentPoint(amountWhole, fontSize);
+        float amountWholeWidth = formFontBold.getWidthPoint(amountWhole, fontSize);
+
+        float offsetY = uly - (13 * Points.Line - ascentPoint / 2);
+        float offsetX = llx + 1 * Points.Column;
+
+
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+
+        over.setColorStroke(Colors.BackgroundPlain);
+        over.setLineWidth(1.7f);
+        float boxWidth = 16f * Points.Column;
+        float boxLLY = uly - 13.25f * Points.Line;
+        over.rectangle(offsetX, boxLLY, boxWidth, 1.5f * Points.Line);
+        float centBoxLLX = offsetX + 18f * Points.Column;
+        over.rectangle(centBoxLLX, boxLLY, 4f * Points.Column, 1.5f * Points.Line);
+        over.stroke();
+
+        over.beginText();
+        over.setFontAndSize(formFontBold, fontSize);
+        over.setColorFill(Color.BLACK);
+
+        over.setTextMatrix(offsetX + boxWidth - Points.Millimeter - amountWholeWidth, offsetY);
+        over.showTextKerned(amountWhole);
+
+        over.setTextMatrix(centBoxLLX + Points.Millimeter, offsetY);
+        over.showTextKerned(amountCents);
+
+        over.setFontAndSize(formFontBold, 10f);
+        over.setTextMatrix(offsetX + boxWidth + 1 * Points.Column - formFontBold.getWidthPoint(".", 10f) / 2, boxLLY);
+        over.showText(".");
+
+        over.endText();
+        over.restoreState();
+    }
+
+    private void receiptPaidBy() {
+        String text = "Einbezahlt von / Versé par / Versato da";
+        float fontSize = 6f;
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+
+        float offsetY = uly - (14 * Points.Line );
+        float offsetX = llx + 1 * Points.Column;
+
+
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+        over.setColorFill(Colors.BackgroundPlain);
+
+        over.setTextMatrix(offsetX, offsetY);
+        over.showTextKerned(text);
+
+        over.endText();
+        over.restoreState();
+    }
+
+    private void giroAccount() {
+        String text = "Konto / Compte / Conto";
+        float fontSize = 6f;
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+        float textWidth = formFontRegular.getWidthPoint(text, fontSize);
+
+        float offsetY = uly - (11 * Points.Line - ascentPoint / 2);
+        float offsetX = giroUlx + 1 * Points.Column;
+
+
+        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+        over.beginText();
+        over.setFontAndSize(formFontRegular, fontSize);
+        over.setColorFill(Colors.BackgroundPlain);
+
+        over.setTextMatrix(offsetX, offsetY);
+        over.showTextKerned(text);
+
+        over.setColorFill(Color.BLACK);
+        over.setFontAndSize(formFontBold, 8f);
+
+        over.setTextMatrix(offsetX, offsetY - (Points.Line - ascentPoint));
+        over.showTextKerned(currency);
+
+        over.setTextMatrix(offsetX + textWidth + 2 * Points.Column, offsetY);
+        over.showTextKerned(account);
+
+        over.endText();
+        over.restoreState();
     }
 
     public void render(File file) throws Exception {
@@ -462,8 +636,12 @@ public class PaymentSlip {
             printDate();
             onBehalfOf();
             noCommunications();
-
             orangeReferenceCodeBox();
+            giroPaidBy();
+            receiptPaidBy();
+            receiptAccount();
+            receiptAmountBox();
+            giroAccount();
 
             codeLine();
 
