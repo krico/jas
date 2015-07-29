@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivitiesController', AdminActivitiesController);
 
-    function AdminActivitiesController($location, $routeParams, Activity, organizations, activities, toolbarContext) {
+    function AdminActivitiesController($location, $routeParams, $filter, jasDialogs, Activity, organizations, activities, toolbarContext) {
 
         var vm = this;
 
@@ -17,7 +17,6 @@
             organizationSelected(vm.organizations[0]);
         }
 
-
         vm.activities = activities.items;
         vm.organizationSelected = organizationSelected;
 
@@ -28,6 +27,8 @@
 
         vm.viewSubscribers = viewSubscribers;
         vm.addSubscriber = addSubscriber;
+
+        var $translate = $filter('translate');
 
         function setSelectedOrganization(organizationId) {
             vm.organization = _.find(vm.organizations, {id: organizationId});
@@ -43,7 +44,10 @@
 
         function removeActivity(activity) {
             Activity.remove(activity.id).then(function () {
+                var translation = $translate('ACTIVITY_REMOVED');
+                jasDialogs.success(translation)
                 vm.activities.splice(vm.activities.indexOf(activity), 1);
+                ;
                 vm.selectActivity(null);
             });
         }
