@@ -30,15 +30,17 @@ public class PaymentSlip {
 
     private static final Pattern AMOUNT_PATTERN = Pattern.compile("^([0-9]{1,9})([0-9][0-9])$");
 
-    private String account = "01-39139-1";
-    private String codeLine = "2100000440001>961116900000006600000009284+ 030001625>";
-    private String referenceCode = "96 11169 00000 00660 00000 09284";
-    private String currency = "CHF";
-    private String recipient = "Robert Schneider SA\nGrands magasins\nCase postale\n2501 Biel/Bienne";
-    private String amount = "440001";
+    private final String account;
+    private final String codeLine;
+    private final String referenceCode;
+    private final String currency;
+    private final String recipient;
+    private final String amount;
 
     private Document document;
     private PdfWriter writer;
+    private PdfContentByte over;
+    private PdfContentByte under;
     private float llx;
     private float lly;
     private float lrx;
@@ -55,8 +57,25 @@ public class PaymentSlip {
     private BaseFont formFontBold;
     private BaseFont formFontRegular;
 
+    PaymentSlip(PaymentSlipBuilder builder) {
+        account = builder.account;
+        codeLine = builder.codeLine;
+        referenceCode = builder.referenceCode;
+        currency = builder.currency;
+        recipient = builder.recipient;
+        amount = builder.amount;
+
+    }
+
     public static void main(String[] args) throws Exception {
-        new PaymentSlip().render(new File("/tmp/test.pdf"));
+        PaymentSlip slip = new PaymentSlipBuilder()
+                .account("01-39139-1")
+                .referenceCode("96 11169 00000 00660 00000 09284")
+                .codeLine("2100000440001>961116900000006600000009284+ 030001625>")
+                .recipient("Robert Schneider SA\nGrands magasins\nCase postale\n2501 Biel/Bienne")
+                .amount("100000038")
+                .build();
+        slip.render(new File("/tmp/test.pdf"));
     }
 
     private void calculate() throws IOException, DocumentException {
@@ -76,10 +95,11 @@ public class PaymentSlip {
         codeLineFont = BaseFont.createFont(OCR_B_TRUE_TYPE, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         formFontBold = BaseFont.createFont(GROTESK_BOLD_TRUE_TYPE, BaseFont.WINANSI, BaseFont.EMBEDDED);
         formFontRegular = BaseFont.createFont(GROTESK_REGULAR_TRUE_TYPE, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        under = writer.getDirectContentUnder();
+        over = writer.getDirectContent();
     }
 
     private void fillOrangeBackground() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorFill(Colors.Background);
         under.rectangle(llx, lly, Points.Width, Points.Height);
@@ -87,24 +107,22 @@ public class PaymentSlip {
         under.restoreState();
     }
 
-    private void fillA5Model() {
-        PdfContentByte under = writer.getDirectContentUnder();
-        under.saveState();
-        under.setColorFill(Color.GREEN);
-        under.rectangle(llx, lly - 20, 595, 10);
-        under.fill();
-        under.setLineWidth(1);
-        under.setColorStroke(Color.black);
-        under.moveTo(llx, lly - 22);
-        under.lineTo(llx, lly - 8);
-        under.moveTo(llx + 595, lly - 22);
-        under.lineTo(llx + 595, lly - 8);
-        under.stroke();
-        under.restoreState();
-    }
+//    private void fillA5Model() {
+//        under.saveState();
+//        under.setColorFill(Color.GREEN);
+//        under.rectangle(llx, lly - 20, 595, 10);
+//        under.fill();
+//        under.setLineWidth(1);
+//        under.setColorStroke(Color.black);
+//        under.moveTo(llx, lly - 22);
+//        under.lineTo(llx, lly - 8);
+//        under.moveTo(llx + 595, lly - 22);
+//        under.lineTo(llx + 595, lly - 8);
+//        under.stroke();
+//        under.restoreState();
+//    }
 
     private void whiteSquare() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorFill(Color.WHITE);
         under.rectangle(giroUlx, lly, Points.GiroWidth, Points.Inch);
@@ -113,7 +131,6 @@ public class PaymentSlip {
     }
 
     private void borderLines() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(Color.BLACK);
         under.setLineWidth(Points.SolidLineWidth);
@@ -127,7 +144,6 @@ public class PaymentSlip {
     }
 
     private void dottedSeparatorVerticalLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(LineColors.DottedSeparatorVerticalLine);
         under.setLineWidth(Points.DottedLineWidth);
@@ -139,7 +155,6 @@ public class PaymentSlip {
     }
 
     private void solidSeparatorVerticalLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(LineColors.SeparatorVerticalLine);
         under.setLineWidth(Points.SolidLineWidth);
@@ -150,7 +165,6 @@ public class PaymentSlip {
     }
 
     private void solidInFavorOfSeparatorVerticalLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(LineColors.InFavorOfSeparatorVerticalLine);
         under.setLineWidth(Points.SolidLineWidth);
@@ -161,7 +175,6 @@ public class PaymentSlip {
     }
 
     private void solidTopHorizontalLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(LineColors.TopHorizontalLine);
         under.setLineWidth(Points.SolidLineWidth);
@@ -172,7 +185,6 @@ public class PaymentSlip {
     }
 
     private void solidHorizontalRightLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(LineColors.HorizontalRightLine);
         under.setLineWidth(Points.SolidLineWidth);
@@ -183,7 +195,6 @@ public class PaymentSlip {
     }
 
     private void positioningEdges() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(Color.BLACK);
         under.setLineWidth(1f);
@@ -200,7 +211,6 @@ public class PaymentSlip {
     }
 
     private void solidVerticalCircleSquareLine() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(LineColors.VerticalCircleSquareLine);
         under.setLineWidth(Points.SolidLineWidth);
@@ -212,7 +222,6 @@ public class PaymentSlip {
     }
 
     private void topRightCircle() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(Colors.BackgroundPlain);
         under.setLineWidth(0.4f);
@@ -223,7 +232,6 @@ public class PaymentSlip {
     }
 
     private void bottomLeftCircle() {
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
         under.setColorStroke(Colors.BackgroundPlain);
         under.setLineWidth(0.4f);
@@ -238,7 +246,6 @@ public class PaymentSlip {
         float fontSize = 8f;
         float ascentPoint = formFontBold.getAscentPoint(text, fontSize);
         float textWidth = formFontBold.getWidthPoint(text, fontSize);
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontBold, fontSize);
@@ -260,7 +267,6 @@ public class PaymentSlip {
 
         float fontSize = 8;
         float ascentPoint = formFontBold.getAscentPoint(text, fontSize);
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontBold, fontSize);
@@ -274,7 +280,6 @@ public class PaymentSlip {
     private void layoutCode() {
         String text = "609";
         float fontSize = 10;
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(codeLineFont, fontSize);
@@ -289,7 +294,6 @@ public class PaymentSlip {
         String text = codeLine;
         float fontSize = 10;
         float textWidth = codeLineFont.getWidthPoint(text, fontSize);
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(codeLineFont, fontSize);
@@ -306,7 +310,6 @@ public class PaymentSlip {
 
 
         float fontSize = 6;
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -340,7 +343,6 @@ public class PaymentSlip {
         float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
         float offsetY = uly - (2 * Points.Line - ascentPoint / 2);
 
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -351,6 +353,20 @@ public class PaymentSlip {
 
         over.setTextMatrix(giroUlx + 1 * Points.Column, offsetY);
         over.showTextKerned(text);
+
+        over.setColorFill(Color.BLACK);
+        over.setFontAndSize(formFontBold, 8f);
+        offsetY -= Points.Line - formFontBold.getAscentPoint("T", 8f) / 2;
+
+        for (String line : recipient.split("\n")) {
+            offsetY -= Points.Line - formFontBold.getAscentPoint(line, 8f) / 2;
+            over.setTextMatrix(ulx + 1 * Points.Column, offsetY);
+            over.showText(line);
+
+            over.setTextMatrix(giroUlx + 1 * Points.Column, offsetY);
+            over.showText(line);
+        }
+
 
         over.endText();
         over.restoreState();
@@ -367,7 +383,6 @@ public class PaymentSlip {
         float ascentPoint = formFontRegular.getAscentPoint(text1, fontSize);
         float offsetY = uly - (3.5f * Points.Line - ascentPoint / 2);
 
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -395,7 +410,6 @@ public class PaymentSlip {
         String text = new SimpleDateFormat("MM.YYYY").format(new Date());
 
         float fontSize = 5f;
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -408,12 +422,10 @@ public class PaymentSlip {
 
     }
 
-
     private void orangeReferenceCodeBox() {
         String text = "Referenz-Nr./Nº de référence/Nº di riferimento";
         float fontSize = 5.5f;
 
-        PdfContentByte under = writer.getDirectContentUnder();
         under.saveState();
 
         float boxWidth = 33 * Points.Column;
@@ -446,6 +458,17 @@ public class PaymentSlip {
 
         under.restoreState();
 
+        over.saveState();
+        over.beginText();
+        over.setColorFill(Color.BLACK);
+        over.setFontAndSize(codeLineFont, 10f);
+        float referenceTextWidth = codeLineFont.getWidthPoint(referenceCode, 10f);
+        float referenceTextHeight = codeLineFont.getAscentPoint(referenceCode, 10f);
+        over.setTextMatrix(referenceCodeBoxLLX + (boxWidth - referenceTextWidth) / 2, boxLLY + (boxHeight - referenceTextHeight) / 2);
+        over.showText(referenceCode);
+        over.endText();
+        over.restoreState();
+
     }
 
     private void giroPaidBy() {
@@ -457,7 +480,6 @@ public class PaymentSlip {
         float offsetX = referenceCodeBoxLLX;
 
 
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -480,7 +502,6 @@ public class PaymentSlip {
         float offsetX = llx + 1 * Points.Column;
 
 
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -519,7 +540,51 @@ public class PaymentSlip {
         float offsetX = llx + 1 * Points.Column;
 
 
-        PdfContentByte over = writer.getDirectContent();
+        over.saveState();
+
+        over.setColorStroke(Colors.BackgroundPlain);
+        over.setLineWidth(1.7f);
+        float boxWidth = 16f * Points.Column;
+        float boxLLY = uly - 13.25f * Points.Line;
+        over.rectangle(offsetX, boxLLY, boxWidth, 1.5f * Points.Line);
+        float centBoxLLX = offsetX + 18f * Points.Column;
+        over.rectangle(centBoxLLX, boxLLY, 4f * Points.Column, 1.5f * Points.Line);
+        over.stroke();
+
+        over.beginText();
+        over.setFontAndSize(formFontBold, fontSize);
+        over.setColorFill(Color.BLACK);
+
+        over.setTextMatrix(offsetX + boxWidth - Points.Millimeter - amountWholeWidth, offsetY);
+        over.showTextKerned(amountWhole);
+
+        over.setTextMatrix(centBoxLLX + Points.Millimeter, offsetY);
+        over.showTextKerned(amountCents);
+
+        over.setFontAndSize(formFontBold, 10f);
+        over.setTextMatrix(offsetX + boxWidth + 1 * Points.Column - formFontBold.getWidthPoint(".", 10f) / 2, boxLLY);
+        over.showText(".");
+
+        over.endText();
+        over.restoreState();
+    }
+
+    private void giroAmountBox() {
+        Matcher matcher = AMOUNT_PATTERN.matcher(amount);
+        if (!matcher.matches()) {
+            throw new IllegalCodeLineException("Bad amount [" + amount + "]");
+        }
+        String amountWhole = matcher.group(1);
+        String amountCents = matcher.group(2);
+
+        float fontSize = 8f;
+        float ascentPoint = formFontBold.getAscentPoint(amountWhole, fontSize);
+        float amountWholeWidth = formFontBold.getWidthPoint(amountWhole, fontSize);
+
+        float offsetY = uly - (13 * Points.Line - ascentPoint / 2);
+        float offsetX = giroUlx + 1 * Points.Column;
+
+
         over.saveState();
 
         over.setColorStroke(Colors.BackgroundPlain);
@@ -552,13 +617,11 @@ public class PaymentSlip {
     private void receiptPaidBy() {
         String text = "Einbezahlt von / Versé par / Versato da";
         float fontSize = 6f;
-        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
 
-        float offsetY = uly - (14 * Points.Line );
+        float offsetY = uly - (14 * Points.Line);
         float offsetX = llx + 1 * Points.Column;
 
 
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -566,6 +629,11 @@ public class PaymentSlip {
 
         over.setTextMatrix(offsetX, offsetY);
         over.showTextKerned(text);
+
+        over.setColorFill(Color.BLACK);
+        over.setTextMatrix(offsetX, offsetY - Points.Line);
+        over.setFontAndSize(formFontRegular, fontSize);
+        over.showText(referenceCode);
 
         over.endText();
         over.restoreState();
@@ -581,7 +649,6 @@ public class PaymentSlip {
         float offsetX = giroUlx + 1 * Points.Column;
 
 
-        PdfContentByte over = writer.getDirectContent();
         over.saveState();
         over.beginText();
         over.setFontAndSize(formFontRegular, fontSize);
@@ -615,7 +682,7 @@ public class PaymentSlip {
 
             fillOrangeBackground();
 
-            fillA5Model(); //TODO: remove
+//            fillA5Model();
 
             whiteSquare();
             borderLines();
@@ -642,6 +709,7 @@ public class PaymentSlip {
             receiptAccount();
             receiptAmountBox();
             giroAccount();
+            giroAmountBox();
 
             codeLine();
 
@@ -673,11 +741,7 @@ public class PaymentSlip {
     interface Dimensions {
         float HeightMillimeters = 106;
         float WidthMillimeters = 210;
-
-        float ReceiptWidthColumns = 27;
         float GiroWidthColumns = 59;
-
-        float StatusLineBoxHeightInches = 1f;
     }
 
     interface Colors {
