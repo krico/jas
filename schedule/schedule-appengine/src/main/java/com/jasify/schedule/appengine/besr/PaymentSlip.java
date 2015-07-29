@@ -72,7 +72,7 @@ public class PaymentSlip {
                 .account("01-39139-1")
                 .referenceCode("96 11169 00000 00660 00000 09284")
                 .codeLine("2100000440001>961116900000006600000009284+ 030001625>")
-                .recipient("Robert Schneider SA\nGrands magasins\nCase postale\n2501 Biel/Bienne")
+                .recipient("J.A.S. GmbH\nEuropastrasse 2\n1234 Opfikon")
                 .amount("100000038")
                 .build();
         slip.render(new File("/tmp/test.pdf"));
@@ -139,6 +139,12 @@ public class PaymentSlip {
         under.lineTo(urx, ury);
         under.lineTo(ulx, uly);
         under.closePath();
+        under.stroke();
+
+        under.setLineWidth(1f);
+        under.moveTo(lrx - 4.5f * Points.Column, lry);
+        under.lineTo(lrx, lry);
+        under.lineTo(lrx, lry + 4.5f * Points.Column);
         under.stroke();
         under.restoreState();
     }
@@ -757,7 +763,7 @@ public class PaymentSlip {
         float DottedLineWidth = 0.25f;
         float Inch = Utilities.inchesToPoints(1.0f);
         float Line = Inch / 6;
-        float Margin = Inch;
+        float Margin = 0;
         float Column = Inch / 10;
         float Millimeter = Utilities.millimetersToPoints(1);
         float Width = Utilities.millimetersToPoints(Dimensions.WidthMillimeters);
