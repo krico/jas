@@ -398,6 +398,37 @@ public class PaymentSlip {
 
     }
 
+
+    private void orangeReferenceCodeBox() {
+        String text = "Referenz-Nr./Nº de référence/Nº di riferimento";
+        float fontSize = 5f;
+
+        PdfContentByte under = writer.getDirectContentUnder();
+        under.saveState();
+        under.setColorStroke(Colors.BackgroundPlain);
+        under.setLineWidth(0.4f);
+        float boxWidth = 33 * Points.Column;
+        float boxHeight = 3 * Points.Column;
+        float boxLLY = rightUpperSquareY - (0.5f * Points.Line + boxHeight);
+        float boxLLX = inFavorOfUlx + ((urx - inFavorOfUlx) - boxWidth) / 2;
+        under.rectangle(boxLLX, boxLLY, boxWidth, boxHeight);
+        under.stroke();
+
+        under.beginText();
+        under.setFontAndSize(formFontRegular, fontSize);
+        under.setColorFill(Colors.BackgroundPlain);
+        float ascentPoint = formFontRegular.getAscentPoint(text, fontSize);
+        float textWidth = formFontRegular.getWidthPoint(text, fontSize);
+        float textX = boxLLX + (boxWidth - textWidth) / 2;
+        float textY = boxLLY + boxHeight - ascentPoint / 2;
+        under.setTextMatrix(textX, textY);
+        under.showText(text);
+        under.endText();
+
+        under.restoreState();
+
+    }
+
     public void render(File file) throws Exception {
         log.info("Generating: {}", file);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -431,6 +462,8 @@ public class PaymentSlip {
             printDate();
             onBehalfOf();
             noCommunications();
+
+            orangeReferenceCodeBox();
 
             codeLine();
 
