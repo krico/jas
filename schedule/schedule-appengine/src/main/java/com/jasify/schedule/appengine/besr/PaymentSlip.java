@@ -22,7 +22,7 @@ import java.util.Date;
 public class PaymentSlip {
     public static final String OCR_B_TRUE_TYPE = "BESR/fonts/OCR-B1.ttf";
     public static final String GROTESK_BOLD_TRUE_TYPE = "BESR/fonts/AlteHaasGroteskBold.ttf";
-    public static final String GROTESK_REGULAR_TRUE_TYPE = "BESR/fonts/AlteHaasGroteskRegular.ttf";
+    public static final String GROTESK_REGULAR_TRUE_TYPE = "BESR/fonts/micross.ttf";
     //A5 (210 x 148mm)
     public static final String BESR_A5 = "BESR/images/BESR-A5-RED.jpg";
     private static final Rectangle SIZE = new RectangleReadOnly(Utilities.inchesToPoints(11), Utilities.inchesToPoints(11));
