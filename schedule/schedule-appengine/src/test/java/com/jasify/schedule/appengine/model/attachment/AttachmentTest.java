@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.attachment;
 
+import com.google.common.net.MediaType;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
 import org.junit.After;
@@ -20,6 +21,12 @@ public class AttachmentTest {
         TestHelper.cleanupDatastore();
     }
 
+
+    @Test
+    public void testCreateWithMediaType() throws Exception {
+        Attachment attachment = Attachment.create("foo.pdf", MediaType.PDF, new byte[]{0});
+        assertEquals(attachment.getMimeType(), "application/pdf");
+    }
 
     @Test
     public void testCreateAndSave() throws Exception {

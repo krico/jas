@@ -7,9 +7,7 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.servletunit.ServletUnitClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.slim3.datastore.Datastore;
 
 import javax.mail.Message;
@@ -25,13 +23,13 @@ import static junit.framework.TestCase.assertNotNull;
 
 public class MailServletTest {
 
-    @Before
-    public void startServletRunner() {
+    @BeforeClass
+    public static void startServletRunner() {
         TestHelper.initializeServletRunner();
     }
 
-    @After
-    public void stopServletRunner() {
+    @AfterClass
+    public static void stopServletRunner() {
         TestHelper.cleanupServletRunner();
     }
 

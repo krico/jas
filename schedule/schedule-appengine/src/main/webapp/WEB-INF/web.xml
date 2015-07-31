@@ -84,16 +84,20 @@
         <url-pattern>/oauth2/callback/*</url-pattern>
     </servlet-mapping>
 
-    <!-- BEGIN: PDF generation servlet -->
+    <!-- BEGIN: Attachment download servlet -->
     <servlet>
-        <servlet-name>pdf</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.http.servlet.pdf.PdfServlet</servlet-class>
+        <servlet-name>attachment</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.AttachmentServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>pdf</servlet-name>
-        <url-pattern>/pdf</url-pattern>
+        <servlet-name>attachment</servlet-name>
+        <url-pattern>/view/*</url-pattern>
     </servlet-mapping>
-    <!-- END: PDF generation servlet -->
+    <servlet-mapping>
+        <servlet-name>attachment</servlet-name>
+        <url-pattern>/download/*</url-pattern>
+    </servlet-mapping>
+    <!-- END: Attachment download servlet -->
 
     <!-- BEGIN: Incoming mail handling -->
     <servlet>

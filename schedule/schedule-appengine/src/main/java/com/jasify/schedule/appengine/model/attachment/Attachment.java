@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.model.attachment;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.net.MediaType;
 import com.jasify.schedule.appengine.model.HasId;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.slim3.datastore.Attribute;
@@ -42,6 +43,10 @@ public class Attachment implements HasId {
     private Blob data;
 
     public Attachment() {
+    }
+
+    public static Attachment create(String name, MediaType mediaType, byte[] data) {
+        return create(name, mediaType.type() + "/" + mediaType.subtype(), data);
     }
 
     public static Attachment create(String name, String mimeType, byte[] data) {
