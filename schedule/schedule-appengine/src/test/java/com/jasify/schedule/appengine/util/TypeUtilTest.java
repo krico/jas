@@ -1,10 +1,7 @@
 package com.jasify.schedule.appengine.util;
 
 import com.google.api.client.http.GenericUrl;
-import com.google.appengine.api.datastore.Email;
-import com.google.appengine.api.datastore.Link;
-import com.google.appengine.api.datastore.ShortBlob;
-import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.*;
 import com.jasify.schedule.appengine.TestHelper;
 import org.junit.Test;
 
@@ -51,6 +48,15 @@ public class TypeUtilTest {
         assertNull(TypeUtil.toShortBlob(null));
         assertTrue(Objects.deepEquals(small, TypeUtil.toBytes(new ShortBlob(small))));
         assertEquals(new ShortBlob(small), TypeUtil.toShortBlob(small));
+    }
+
+    @Test
+    public void testBlob() {
+        byte[] bytes = {1, 2, 3, 4, 5};
+        assertNull(TypeUtil.toBytes((Blob) null));
+        assertNull(TypeUtil.toBlob(null));
+        assertTrue(Objects.deepEquals(bytes, TypeUtil.toBytes(new Blob(bytes))));
+        assertEquals(new Blob(bytes), TypeUtil.toBlob(bytes));
     }
 
 

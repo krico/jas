@@ -1,10 +1,7 @@
 package com.jasify.schedule.appengine.util;
 
 import com.google.api.client.http.GenericUrl;
-import com.google.appengine.api.datastore.Email;
-import com.google.appengine.api.datastore.Link;
-import com.google.appengine.api.datastore.ShortBlob;
-import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.*;
 
 /**
  * @author krico
@@ -49,5 +46,13 @@ public final class TypeUtil {
 
     public static ShortBlob toShortBlob(byte[] bytes) {
         return bytes == null ? null : new ShortBlob(bytes);
+    }
+
+    public static byte[] toBytes(Blob blob) {
+        return blob == null ? null : blob.getBytes();
+    }
+
+    public static Blob toBlob(byte[] bytes) {
+        return bytes == null ? null : new Blob(bytes);
     }
 }
