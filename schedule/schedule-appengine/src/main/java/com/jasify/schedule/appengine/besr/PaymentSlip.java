@@ -8,10 +8,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -65,17 +62,6 @@ public class PaymentSlip {
         recipient = builder.recipient;
         amount = builder.amount;
 
-    }
-
-    public static void main(String[] args) throws Exception {
-        PaymentSlip slip = new PaymentSlipBuilder()
-                .account("01-39139-1")
-                .referenceCode("96 11169 00000 00660 00000 09284")
-                .codeLine("2100000440001>961116900000006600000009284+ 030001625>")
-                .recipient("J.A.S. GmbH\nEuropastrasse 2\n1234 Opfikon")
-                .amount("100000038")
-                .build();
-        slip.render(new File("/tmp/test.pdf"));
     }
 
     private void calculate() throws IOException, DocumentException {
@@ -676,60 +662,61 @@ public class PaymentSlip {
         over.restoreState();
     }
 
-    public void render(File file) throws Exception {
-        log.info("Generating: {}", file);
+    public void render(File file) throws IOException, DocumentException {
+        log.info("Rendering to file: {}", file);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            render(fos);
+        }
+        log.info("Rendered to file: {}", file);
+    }
+
+    public byte[] renderToBytes() throws IOException, DocumentException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            document = new Document(Points.PageSize);
-            writer = PdfWriter.getInstance(document, bos);
-            document.open();
+        render(bos);
+        return bos.toByteArray();
+    }
 
-            calculate();
+    private void render(OutputStream bos) throws DocumentException, IOException {
+        document = new Document(Points.PageSize);
+        writer = PdfWriter.getInstance(document, bos);
+        document.open();
 
-            fillOrangeBackground();
+        calculate();
+
+        fillOrangeBackground();
 
 //            fillA5Model();
 
-            whiteSquare();
-            borderLines();
-            solidTopHorizontalLine();
-            dottedSeparatorVerticalLine();
-            solidSeparatorVerticalLine();
-            solidInFavorOfSeparatorVerticalLine();
-            solidHorizontalRightLine();
-            solidVerticalCircleSquareLine();
-            topRightCircle();
-            bottomLeftCircle();
-            positioningEdges();
+        whiteSquare();
+        borderLines();
+        solidTopHorizontalLine();
+        dottedSeparatorVerticalLine();
+        solidSeparatorVerticalLine();
+        solidInFavorOfSeparatorVerticalLine();
+        solidHorizontalRightLine();
+        solidVerticalCircleSquareLine();
+        topRightCircle();
+        bottomLeftCircle();
+        positioningEdges();
 
-            receiptTitle();
-            giroTitle();
-            layoutCode();
-            acceptingOffice();
-            printDate();
-            onBehalfOf();
-            noCommunications();
-            orangeReferenceCodeBox();
-            giroPaidBy();
-            receiptPaidBy();
-            receiptAccount();
-            receiptAmountBox();
-            giroAccount();
-            giroAmountBox();
+        receiptTitle();
+        giroTitle();
+        layoutCode();
+        acceptingOffice();
+        printDate();
+        onBehalfOf();
+        noCommunications();
+        orangeReferenceCodeBox();
+        giroPaidBy();
+        receiptPaidBy();
+        receiptAccount();
+        receiptAmountBox();
+        giroAccount();
+        giroAmountBox();
 
-            codeLine();
+        codeLine();
 
-            document.close();
-        } finally {
-            log.info("Generated: {}", file);
-        }
-
-        log.info("Writing: {}", file);
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(bos.toByteArray());
-        } finally {
-            log.info("Wrote: {}", file);
-        }
+        document.close();
     }
 
     /**
