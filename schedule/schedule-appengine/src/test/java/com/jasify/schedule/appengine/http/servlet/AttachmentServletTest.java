@@ -4,7 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.net.MediaType;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
-import com.jasify.schedule.appengine.model.attachment.Attachment;
+import com.jasify.schedule.appengine.model.attachment.AttachmentHelper;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
@@ -37,7 +37,7 @@ public class AttachmentServletTest {
         String text = "This is\nMy First\nAttachment...\n";
         byte[] bytes = text.getBytes("UTF-8");
         String filename = "first.txt";
-        Key id = dao.save(Attachment.create(filename, MediaType.PLAIN_TEXT_UTF_8, bytes));
+        Key id = dao.save(AttachmentHelper.create(filename, MediaType.PLAIN_TEXT_UTF_8, bytes));
         String idStr = KeyUtil.toHumanReadableString(id);
 
         ServletUnitClient client = TestHelper.servletRunner().newClient();

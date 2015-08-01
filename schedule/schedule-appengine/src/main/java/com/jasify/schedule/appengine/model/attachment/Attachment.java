@@ -45,18 +45,6 @@ public class Attachment implements HasId {
     public Attachment() {
     }
 
-    public static Attachment create(String name, MediaType mediaType, byte[] data) {
-        return create(name, mediaType.type() + "/" + mediaType.subtype(), data);
-    }
-
-    public static Attachment create(String name, String mimeType, byte[] data) {
-        Attachment attachment = new Attachment();
-        attachment.setName(name);
-        attachment.setMimeType(mimeType);
-        attachment.setData(TypeUtil.toBlob(data));
-        return attachment;
-    }
-
     @Override
     public Key getId() {
         return id;
