@@ -3,7 +3,16 @@ package com.jasify.schedule.appengine.util;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.jasify.schedule.appengine.model.SchemaMigration;
+import com.jasify.schedule.appengine.model.application.ApplicationData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +79,10 @@ public final class EnvironmentUtil {
 
     public static boolean isContinuousIntegrationEnvironment() {
         return Boolean.valueOf(System.getenv(CI_ENV_KEY));
+    }
+
+    public static File jasifyLocalConfig() {
+        return new File(System.getProperty("user.home"), "jasify.json");
     }
 
 }

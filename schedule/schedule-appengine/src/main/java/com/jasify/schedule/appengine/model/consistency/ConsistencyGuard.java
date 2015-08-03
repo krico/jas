@@ -5,6 +5,9 @@ import com.google.appengine.labs.repackaged.com.google.common.collect.ImmutableL
 import com.google.appengine.labs.repackaged.com.google.common.collect.ListMultimap;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.model.HasId;
+import com.jasify.schedule.appengine.util.EnvironmentUtil;
+import com.jasify.schedule.appengine.util.JSON;
+import com.jasify.schedule.appengine.util.Threads;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -16,21 +19,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * @author krico
  * @since 17/06/15.
  */
 public final class ConsistencyGuard {
+    public static final String PACKAGE_NAME = "com.jasify.schedule.appengine";
     private static final String CACHE_PATH = "META-INF/ConsistencyGuard.json";
     private static final Logger log = LoggerFactory.getLogger(ConsistencyGuard.class);
     private static boolean initialized = false;
     private static ListMultimap<Class<?>, Call> BEFORE_DELETE;
-    public static final String PACKAGE_NAME = "com.jasify.schedule.appengine";
 
     private ConsistencyGuard() {
     }
@@ -60,10 +65,41 @@ public final class ConsistencyGuard {
 
     private static boolean useCache(URL resource) {
         if (resource == null) return false;
+
+        if (EnvironmentUtil.isContinuousIntegrationEnvironment()) return true; // no dynamic in CI
+
         if (resource.getProtocol().equals("file")) {
             String file = resource.getFile();
-            //So that we don't use cache in dev
-            return !file.matches(".*target/schedule-appengine.*");
+            if (file.matches(".*target/schedule-appengine.*")) {
+
+                /* It looks like we are in dev, in appengine when we scan reflections we get a bunch of exceptions
+                 * I wanted to change
+                 */
+                File jasifyLocalConfig = EnvironmentUtil.jasifyLocalConfig();
+                if (jasifyLocalConfig.exists()) {
+                    try (FileReader reader = new FileReader(jasifyLocalConfig)) {
+                        Map map = JSON.fromJson(reader, Map.class);
+                        Map applicationConfig = (Map) map.get("DevConfig");
+                        if (applicationConfig != null) {
+                            Object useCacheObj = applicationConfig.get("ConsistencyGuard.UseCache");
+                            if (useCacheObj instanceof String) {
+                                return Boolean.valueOf((String) useCacheObj);
+                            }
+                        }
+                    } catch (IOException e) {
+                        throw Throwables.propagate(e);
+                    }
+                }
+                log.warn("\n!!!\n!!! A T T E N T I O N !\n!!!\nYou should set the property [ConsistencyGuard.UseCache] in [{}]\n" +
+                        "Then you will no longer get this warning...\n" +
+                        "It is described in DEVELOPER.md\n" +
+                        "If you are not changing java code, set it to true...\n" +
+                        "Get ready, you will see a bunch of exceptions in the logs now, they can be ignored but are really annoying...\n" +
+                        "Sleeping for 10 seconds to make sure you see this message at some point...", jasifyLocalConfig);
+                Threads.sleep(10000);
+                return false;
+            }
+            return true;
         }
         return true;
     }

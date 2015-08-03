@@ -5,6 +5,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
+
 import static junit.framework.TestCase.*;
 
 public class EnvironmentUtilTest {
@@ -59,5 +61,11 @@ public class EnvironmentUtilTest {
     public void testIsContinuousIntegrationEnvironment() {
         boolean expected = Boolean.valueOf(System.getenv(EnvironmentUtil.CI_ENV_KEY));
         assertEquals(expected, EnvironmentUtil.isContinuousIntegrationEnvironment());
+    }
+
+    @Test
+    public void testJasifyLocalConfig() {
+        File expected = new File(System.getProperty("user.home"), "jasify.json");
+        assertEquals(expected, EnvironmentUtil.jasifyLocalConfig());
     }
 }

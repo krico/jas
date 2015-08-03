@@ -83,6 +83,22 @@ that with `com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType`.
   }
 }
 ```
+
+*You need to decide if you want ConsistencyGuard.UseCache or not*.  This value *MUST* be specified to either `true` or `false`.
+
+ - `true`: use cached data from `target/schedule-appengine-1.0.3-SNAPSHOT/WEB-INF/classes/META-INF/ConsistencyGuard.json`.
+ If you set it to true, you need to *remember to build on the command line* every time you change consistency guard things...
+ - `false`: dynamically discover classes used by ConsistencyGuard, this causes appengine in dev to log several exceptions,
+ but has the advantage that changes are picked up as you make them.
+
+```javascript
+{
+  "ApplicationConfig" : {...},
+  "DevConfig": {
+    "ConsistencyGuard.UseCache": "true"
+  }
+}
+```
 ## Style
 
  * You [MUST read this](https://github.com/johnpapa/angularjs-styleguide)

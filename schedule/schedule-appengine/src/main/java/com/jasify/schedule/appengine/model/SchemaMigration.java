@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model;
 
+import com.google.api.server.spi.EnvUtil;
 import com.google.appengine.api.datastore.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -202,7 +203,7 @@ public final class SchemaMigration {
             }
             ApplicationData.instance().setProperty(SchemaMigration.class.getName() + ".InitialLoadType", "e2e");
         } else {
-            File jasifyLocalConfig = new File(System.getProperty("user.home"), "jasify.json");
+            File jasifyLocalConfig = EnvironmentUtil.jasifyLocalConfig();
             if (!jasifyLocalConfig.exists()) {
                 log.error("You MUST create jasify.json (check DEVELOPER.md)!");
                 throw new IllegalStateException("You MUST create jasify.json (check DEVELOPER.md)!");
