@@ -14,11 +14,12 @@
         vm.cancel = BrowserData.getPaymentCancelRedirect();
         vm.inProgress = false;
         vm.redirecting = false;
-        vm.paymentType = 'PayPal';
         vm.paymentTypes = [
-            {label: 'PayPal', id: 'PayPal'}//,
-            //    {label: 'Pay at the door (cash)', id: 'Cash'}
+            {label: 'PayPal', id: 'PayPal', button: 'Continue to PayPal'},
+            {label: 'Electronic Invoice', id: 'Invoice', button: 'Generate Electronic Invoice'}
+            //{label: 'Pay at the door (cash)', id: 'Cash', button: 'Continue and pay later'}
         ];
+        vm.paymentType = vm.paymentTypes[0];
 
         function alert(t, m) {
             vm.alerts.push({type: t, msg: m});
@@ -54,7 +55,7 @@
         function createPayment() {
             Balance.createCheckoutPayment({
                 cartId: cart.id,
-                type: vm.paymentType
+                type: vm.paymentType.id
             }).then(ok, fail);
 
             function ok(resp) {

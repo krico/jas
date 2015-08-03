@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.besr;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -12,11 +13,11 @@ public class PaymentSlipTest {
     private PaymentSlip build() {
         //WARNING: these are not proper values
         PaymentSlipBuilder builder = new PaymentSlipBuilder();
-        builder.account = "01-39139-1";
-        builder.referenceCode = "96 11169 00000 00660 00000 09284";
-        builder.codeLine = "2100000440001>961116900000006600000009284+ 030001625>";
+        builder.account = "00-00000-0";
+        builder.referenceCode = "00 00000 00000 00000 00000 00000";
+        builder.codeLine = "2100000000000>000000000000000000000000000+ 000000000>";
         builder.recipient = "J.A.S. GmbH\nEuropastrasse 2\n1234 Opfikon";
-        builder.amount = "100000038";
+        builder.amount = "000000000";
         return builder.build();
     }
 
