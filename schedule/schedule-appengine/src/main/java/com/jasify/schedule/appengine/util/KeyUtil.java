@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
+import com.jasify.schedule.appengine.meta.SequenceMeta;
 import com.jasify.schedule.appengine.meta.history.HistoryMeta;
 import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
 import com.jasify.schedule.appengine.meta.activity.*;
@@ -60,6 +61,7 @@ public final class KeyUtil {
             .put(PaymentMeta.get().getKind(), "P") //Payment
             .put(PaymentWorkflowMeta.get().getKind(), "pw") //PaymentWorkflow
             .put(RepeatDetailsMeta.get().getKind(), "R") //RepeatDetails
+            .put(SequenceMeta.get().getKind(), "s") //Subscription
             .put(SubscriptionMeta.get().getKind(), "S") //Subscription
             .put(TransactionMeta.get().getKind(), "T") //Transaction
             .put(TransferMeta.get().getKind(), "TR") //Transfer
