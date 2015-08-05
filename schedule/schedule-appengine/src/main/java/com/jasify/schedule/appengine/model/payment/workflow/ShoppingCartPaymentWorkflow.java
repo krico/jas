@@ -28,14 +28,6 @@ import java.util.*;
 public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
     private static final Logger log = LoggerFactory.getLogger(ShoppingCartPaymentWorkflow.class);
 
-    private final ActivityDao activityDao = new ActivityDao();
-    private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
-    private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
-    private final ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
-    private final OrganizationDao organizationDao = new OrganizationDao();
-    private final SubscriptionDao subscriptionDao = new SubscriptionDao();
-    private final UserDao userDao = new UserDao();
-
     private String cartId;
 
     public ShoppingCartPaymentWorkflow() {
@@ -81,8 +73,9 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
             // Is this possible?
             log.error("Empty subscription and executions list");
         } else {
-            notifyPublisher(subscriptions, executions);
-            notifySubscriber(subscriptions, executions);
+            UserDao userDao = new UserDao();
+            notifyPublisher(subscriptions, executions, userDao);
+            notifySubscriber(subscriptions, executions, userDao);
         }
     }
 
@@ -90,6 +83,7 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         List<Subscription> subscriptions = new ArrayList<>();
         // This is probably not the best way to get the subscriptions
         Payment payment = getPaymentRef().getModel();
+        SubscriptionDao subscriptionDao = new SubscriptionDao();
         for (PaymentWorkflow paymentWorkflow : payment.getWorkflowListRef().getModelList()) {
             if (paymentWorkflow instanceof ActivityPaymentWorkflow) {
                 Key key = ((ActivityPaymentWorkflow) paymentWorkflow).getSubscriptionId();
@@ -107,6 +101,7 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         List<ActivityPackageExecution> subscriptions = new ArrayList<>();
         // This is probably not the best way to get the subscriptions
         Payment payment = getPaymentRef().getModel();
+        ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
         for (PaymentWorkflow paymentWorkflow : payment.getWorkflowListRef().getModelList()) {
             if (paymentWorkflow instanceof ActivityPackagePaymentWorkflow) {
                 Key key = ((ActivityPackagePaymentWorkflow) paymentWorkflow).getActivityPackageExecutionId();
@@ -120,10 +115,14 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         return subscriptions;
     }
 
-    private void notifyPublisher(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) {
+    private void notifyPublisher(List<Subscription> subscriptions, List<ActivityPackageExecution> executions, UserDao userDao) {
         Map<Key, Organization> organizations = new HashMap<>();
         Map<Key, Collection<Subscription>> subscriptionMap = new HashMap<>();
         Map<Key, Collection<ActivityPackageExecution>> executionMap = new HashMap<>();
+        OrganizationDao organizationDao = new OrganizationDao();
+        ActivityDao activityDao = new ActivityDao();
+        ActivityPackageDao activityPackageDao = new ActivityPackageDao();
+        ActivityTypeDao activityTypeDao = new ActivityTypeDao();
 
         User user = null;
         try {
@@ -178,7 +177,7 @@ public class ShoppingCartPaymentWorkflow extends PaymentWorkflow {
         }
     }
 
-    private void notifySubscriber(List<Subscription> subscriptions, List<ActivityPackageExecution> executions) {
+    private void notifySubscriber(List<Subscription> subscriptions, List<ActivityPackageExecution> executions, UserDao userDao) {
         Preconditions.checkArgument(!(subscriptions.isEmpty() && executions.isEmpty()));
 
         try {
