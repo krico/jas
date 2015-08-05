@@ -28,8 +28,6 @@ public class ActivityPackagePaymentWorkflow extends PaymentWorkflow {
     private List<Key> activityIds;
     private Key activityPackageExecutionId;
 
-    private final ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
-
     public ActivityPackagePaymentWorkflow() {
     }
 
@@ -79,7 +77,7 @@ public class ActivityPackagePaymentWorkflow extends PaymentWorkflow {
     public void onCanceled() throws PaymentWorkflowException {
         if (activityPackageExecutionId != null) {
             try {
-                ActivityPackageExecution activityPackageExecution = activityPackageExecutionDao.get(activityPackageExecutionId);
+                ActivityPackageExecution activityPackageExecution = new ActivityPackageExecutionDao().get(activityPackageExecutionId);
                 ActivityServiceFactory.getActivityService().cancelActivityPackageExecution(activityPackageExecution);
             } catch (EntityNotFoundException e) {
                 throw new PaymentWorkflowException(e);

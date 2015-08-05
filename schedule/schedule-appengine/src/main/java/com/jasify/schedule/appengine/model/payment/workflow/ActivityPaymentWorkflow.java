@@ -25,7 +25,6 @@ import org.slim3.datastore.Model;
 @Model
 public class ActivityPaymentWorkflow extends PaymentWorkflow {
     private static final Logger log = LoggerFactory.getLogger(ActivityPaymentWorkflow.class);
-    private final ActivityDao activityDao = new ActivityDao();
     private Key activityId;
     private Key subscriptionId;
 
@@ -59,7 +58,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
             User user = UserServiceFactory.getUserService().getUser(userId);
-            Activity activity = activityDao.get(activityId);
+            Activity activity = new ActivityDao().get(activityId);
             Subscription subscribe = activityService.subscribe(user, activity);
             subscriptionId = subscribe.getId();
         } catch (EntityNotFoundException | OperationException e) {
