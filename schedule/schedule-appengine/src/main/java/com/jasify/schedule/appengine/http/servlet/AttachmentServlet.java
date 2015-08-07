@@ -56,7 +56,8 @@ public class AttachmentServlet extends HttpServlet {
         }
 
         String id = matcher.group(1);
-        String pathFilename = matcher.group(0);
+        String pathFilename = StringUtils.substring(matcher.group(2), 1);
+
         boolean download = req.getServletPath().startsWith("/download");
 
         Key attachmentId = KeyUtil.stringToKey(id);
