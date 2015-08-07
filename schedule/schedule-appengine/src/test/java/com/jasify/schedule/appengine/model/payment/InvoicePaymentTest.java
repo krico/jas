@@ -49,6 +49,7 @@ public class InvoicePaymentTest {
         testValidateValid();
         validPayment.setAccount(null);
         thrown.expectMessage("InvoicePayment.account");
+        thrown.expect(NullPointerException.class);
         validPayment.validate();
     }
 
@@ -57,6 +58,7 @@ public class InvoicePaymentTest {
         testValidateValid();
         validPayment.setReferenceCode(null);
         thrown.expectMessage("InvoicePayment.referenceCode");
+        thrown.expect(NullPointerException.class);
         validPayment.validate();
     }
 
@@ -65,6 +67,7 @@ public class InvoicePaymentTest {
         testValidateValid();
         validPayment.setRecipient(null);
         thrown.expectMessage("InvoicePayment.recipient");
+        thrown.expect(NullPointerException.class);
         validPayment.validate();
     }
 

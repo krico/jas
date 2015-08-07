@@ -64,6 +64,14 @@ public class PaymentSlip {
 
     }
 
+    String getCodeLine() {
+        return codeLine;
+    }
+
+    String getReferenceCode() {
+        return referenceCode;
+    }
+
     private void calculate() throws IOException, DocumentException {
         float width = document.getPageSize().getWidth();
         float height = document.getPageSize().getHeight();

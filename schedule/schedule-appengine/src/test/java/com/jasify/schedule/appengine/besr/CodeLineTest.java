@@ -68,7 +68,22 @@ public class CodeLineTest {
         thrown.expectMessage(startsWith("Reference length exceeds"));
 
         //RRRRRRRRRRRRRRRRRRRRRRRRRRR
-        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "123456789012345678901234567", "12345678").toCodeLine();
+        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "1234567890123456789012345671", "12345678").toCodeLine();
+    }
+
+    @Test
+    public void testReferenceCheckDigitThrows() {
+        thrown.expect(IllegalCodeLineException.class);
+        thrown.expectMessage(startsWith("Reference check digit is invalid"));
+
+        //RRRRRRRRRRRRRRRRRRRRRRRRRRR
+        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "123456789012345678901234569", "12345678").toCodeLine();
+    }
+
+    @Test
+    public void testReferenceCheckDigitPasses() {
+        //RRRRRRRRRRRRRRRRRRRRRRRRRRR
+        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", CheckDigit.complete("12345678901234567890123456"), "12345678").toCodeLine();
     }
 
     @Test
@@ -77,7 +92,22 @@ public class CodeLineTest {
         thrown.expectMessage(startsWith("Subscriber length exceeds"));
 
         //SSSSSSSSS
+        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "12345678901234567890123456", "1234567890").toCodeLine();
+    }
+
+    @Test
+    public void testSubscriberCheckDigitThrows() {
+        thrown.expect(IllegalCodeLineException.class);
+        thrown.expectMessage(startsWith("Subscriber check digit is invalid"));
+
+        //SSSSSSSSS
         new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "12345678901234567890123456", "123456789").toCodeLine();
+    }
+
+    @Test
+    public void testSubscriberCheckDigitPasses() {
+        //SSSSSSSSS
+        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "12345678901234567890123456", CheckDigit.complete("12345678")).toCodeLine();
     }
 
     @Test
@@ -113,7 +143,23 @@ public class CodeLineTest {
         thrown.expectMessage(startsWith("Reference length exceeds"));
 
         //RRRRRRRRRRRRRRRRRRRRRRRRRRR
-        new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "123456789012345678901234567", "12345678").toCodeLine();
+        new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "1234567890123456789012345678", "12345678").toCodeLine();
+    }
+
+    @Test
+    public void testNoAmountReferenceCheckDigitThrows() {
+        thrown.expect(IllegalCodeLineException.class);
+        thrown.expectMessage(startsWith("Reference check digit is invalid"));
+
+        //RRRRRRRRRRRRRRRRRRRRRRRRRRR
+        new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "123456789012345678901234569", "12345678").toCodeLine();
+    }
+
+    @Test
+    public void testNoAmountReferenceCheckDigitPasses() {
+
+        //RRRRRRRRRRRRRRRRRRRRRRRRRRR
+        new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, CheckDigit.complete("12345678901234567890123456"), "12345678").toCodeLine();
     }
 
     @Test
@@ -122,7 +168,30 @@ public class CodeLineTest {
         thrown.expectMessage(startsWith("Subscriber length exceeds"));
 
         //SSSSSSSSS
+        new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "12345678901234567890123456", "1234567890").toCodeLine();
+    }
+
+    @Test
+    public void testNoAmountSubscriberCheckDigitThrows() {
+        thrown.expect(IllegalCodeLineException.class);
+        thrown.expectMessage(startsWith("Subscriber check digit is invalid"));
+
+        //SSSSSSSSS
         new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "12345678901234567890123456", "123456789").toCodeLine();
+    }
+
+    @Test
+    public void testNoAmountSubscriberCheckDigitPasses() {
+        //SSSSSSSSS
+        new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "12345678901234567890123456", CheckDigit.complete("12345678")).toCodeLine();
+    }
+
+    @Test
+    public void testISR_CHFExample() {
+        CodeLine line = new CodeLine(SlipTypeEnum.ISR_CHF, "2012", "12000000000023447894321689", "01000162");
+        String codeLine = line.toCodeLine();
+        assertNotNull(codeLine);
+        assertEquals("0100000020124>120000000000234478943216899+ 010001628>", codeLine);
     }
 
     @Test

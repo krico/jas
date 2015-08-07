@@ -4,6 +4,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.meta.SequenceMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 
 import java.util.Collections;
@@ -17,6 +19,8 @@ import java.util.NoSuchElementException;
  * @since 05/08/15.
  */
 public class SequenceGenerator {
+    private static final Logger log = LoggerFactory.getLogger(SequenceGenerator.class);
+
     private final SequenceMeta meta = SequenceMeta.get();
     private final Key name;
     private final int increment;
@@ -36,8 +40,10 @@ public class SequenceGenerator {
         range = TransactionOperator.execute(new TransactionOperation<Iterator<Long>, RuntimeException>() {
             @Override
             public Iterator<Long> execute(Transaction tx) throws RuntimeException {
+                boolean created = false;
                 Sequence sequence = Datastore.getOrNull(SequenceMeta.get(), name);
                 if (sequence == null) {
+                    created = true;
                     sequence = new Sequence();
                     sequence.setName(name);
                     sequence.setNext(1L);
@@ -46,6 +52,7 @@ public class SequenceGenerator {
                 sequence.setNext(next + increment);
                 Datastore.put(tx, sequence);
                 tx.commit();
+                if (created) log.info("Created new Sequence [{}]", name);
                 return new LongRangeIterator(next, next + increment);
             }
         });
@@ -57,6 +64,10 @@ public class SequenceGenerator {
             loadRange();
         }
         return range.next();
+    }
+
+    public String nextAsString() {
+        return Long.toString(next());
     }
 
     static class LongRangeIterator implements Iterator<Long> {

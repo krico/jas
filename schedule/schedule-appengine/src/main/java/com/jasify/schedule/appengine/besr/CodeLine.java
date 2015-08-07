@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.besr;
 
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,12 +55,13 @@ public class CodeLine {
     private final String subscriber;
 
     /**
-     * All fields should be supplied <b>WITHOUT check digit</b> and will be left padded by zeros if required
+     * All fields will be left padded by zeros if required, if they are complete they will be verified, else a check digit
+     * will be generated
      *
      * @param slipType   the type
      * @param amount     the amount
      * @param reference  the reference number
-     * @param subscriber the subscirber number
+     * @param subscriber the subscriber number
      */
     CodeLine(SlipTypeEnum slipType, String amount, String reference, String subscriber) {
         this.slipType = slipType;
@@ -107,19 +109,35 @@ public class CodeLine {
             A = "";
         }
 
+        Preconditions.checkNotNull(reference, "reference");
         String R = leftPad(onlyDigits(reference), REFERENCE_LENGTH - 1);
-        if (R.length() >= REFERENCE_LENGTH) {
+        if (R.length() > REFERENCE_LENGTH) {
             throw new IllegalCodeLineException("Reference length exceeds " + (REFERENCE_LENGTH - 1) + " [" + R + "]");
         }
+        if (R.length() == REFERENCE_LENGTH) {
+            if (!CheckDigit.isValid(R)) {
+                throw new IllegalCodeLineException("Reference check digit is invalid [" + R + "]");
+            }
+        } else {
+            R = CheckDigit.complete(R);
+        }
+
         String S = leftPad(onlyDigits(subscriber), SUBSCRIBER_LENGTH - 1);
-        if (S.length() >= SUBSCRIBER_LENGTH) {
+        if (S.length() > SUBSCRIBER_LENGTH) {
             throw new IllegalCodeLineException("Subscriber length exceeds " + (SUBSCRIBER_LENGTH - 1) + " [" + S + "]");
+        }
+        if (S.length() == SUBSCRIBER_LENGTH) {
+            if (!CheckDigit.isValid(S)) {
+                throw new IllegalCodeLineException("Subscriber check digit is invalid [" + S + "]");
+            }
+        } else {
+            S = CheckDigit.complete(S);
         }
 
 
         return CheckDigit.complete(C + A) + '>'
-                + CheckDigit.complete(R) + "+ "
-                + CheckDigit.complete(S) + '>';
+                + R + "+ "
+                + S + '>';
     }
 
     @Override
