@@ -23,6 +23,16 @@
                     }
                 }
             })
+            .when('/payment/confirm/:paymentId', {
+                templateUrl: 'payment/payment-confirm.html',
+                controller: 'PaymentConfirmController',
+                controllerAs: 'vm',
+                resolve: {
+                    allow: /*@ngInject*/ function ($q, Allow) {
+                        return Allow.user();
+                    }
+                }
+            })
             .when('/payment/cancel/:paymentId', {
                 templateUrl: 'payment/payment-cancel.html',
                 controller: 'PaymentCancelController',

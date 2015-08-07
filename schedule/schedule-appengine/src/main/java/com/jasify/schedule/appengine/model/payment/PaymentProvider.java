@@ -9,6 +9,7 @@ import com.google.api.client.http.GenericUrl;
 public interface PaymentProvider<T extends Payment> {
     String CANCEL_PATH = "/payment/cancel/";
     String ACCEPT_PATH = "/payment/accept/";
+    String CONFIRM_PATH = "/payment/confirm/";
 
     T newPayment();
 

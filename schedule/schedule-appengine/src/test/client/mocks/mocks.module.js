@@ -140,6 +140,7 @@
                 getAccounts: nop,
                 getTransactions: nop,
                 createCheckoutPayment: nop,
+                getPaymentInvoice: nop,
                 executePayment: nop
             },
             histories: {

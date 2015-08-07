@@ -1,0 +1,17 @@
+<div class="row">
+    <div class="col-sm-12">&nbsp;</div>
+    <div class="col-sm-12">
+        <div class="col-sm-1 col-sm-offset-2 h4">
+            <span ng-show="vm.progress" us-spinner=""></span>&nbsp;
+        </div>
+        <div class="col-sm-6 h4" ng-hide="vm.progress">
+            Your invoice is ready to
+            <a target="_blank" ng-href="{{vm.invoice.viewUrl}}">view</a>
+            or
+            <a ng-href="{{vm.invoice.downloadUrl}}">download</a>.
+
+            And e-mail was sent to your e-mail address with this invoice attached.  Please pay it.
+        </div>
+        <div id="pdfPreview"></div>
+    </div>
+</div>

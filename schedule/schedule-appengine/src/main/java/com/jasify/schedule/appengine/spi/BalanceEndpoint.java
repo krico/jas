@@ -9,9 +9,15 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
+import com.jasify.schedule.appengine.model.balance.Account;
+import com.jasify.schedule.appengine.model.balance.AccountUtil;
+import com.jasify.schedule.appengine.model.balance.BalanceService;
+import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.balance.*;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.common.Organization;
@@ -20,10 +26,7 @@ import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
-import com.jasify.schedule.appengine.spi.dm.JasCheckoutPaymentRequest;
-import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
-import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
-import com.jasify.schedule.appengine.spi.dm.JasTransactionList;
+import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -104,6 +107,12 @@ public class BalanceEndpoint {
                 CashPayment payment = createPaymentInternal(jasCaller, CashPaymentProvider.instance(), paymentRequest);
                 GenericUrl url = new GenericUrl(paymentRequest.getBaseUrl());
                 url.setFragment(CashPaymentProvider.ACCEPT_PATH + KeyUtil.keyToString(payment.getId()));
+                return new JasPaymentResponse(url.build());
+            }
+            case Invoice: {
+                InvoicePayment payment = createPaymentInternal(jasCaller, InvoicePaymentProvider.instance(), paymentRequest);
+                GenericUrl url = new GenericUrl(paymentRequest.getBaseUrl());
+                url.setFragment(InvoicePaymentProvider.CONFIRM_PATH + KeyUtil.keyToString(payment.getId()));
                 return new JasPaymentResponse(url.build());
             }
             default:
@@ -187,6 +196,28 @@ public class BalanceEndpoint {
             }
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Payment");
+        }
+    }
+
+    @ApiMethod(name = "balance.getPaymentInvoice", path = "balance/payment-invoice/{paymentId}", httpMethod = ApiMethod.HttpMethod.GET)
+    public JasInvoice getPaymentInvoice(User caller, @Named("paymentId") Key paymentId) throws UnauthorizedException, NotFoundException, ForbiddenException, BadRequestException {
+        JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
+        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
+        Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
+        Preconditions.checkNotNull(payment.getType(), "No PaymentType");
+        try {
+            switch (payment.getType()) {
+                case Invoice: {
+                    InvoicePayment invoicePayment = (InvoicePayment) payment;
+                    AttachmentDao attachmentDao = new AttachmentDao();
+                    Attachment attachment = attachmentDao.get(invoicePayment.getAttachmentRef().getKey());
+                    return new JasInvoice(attachment);
+                }
+                default:
+                    throw new BadRequestException("Unsupported payment type: " + payment.getType());
+            }
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Invoice");
         }
     }
 
