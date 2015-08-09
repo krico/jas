@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<datastore-indexes autoGenerate="true">
+<!--
+  ALWAYS leave autoGenerate="false"
+  if you encounter errors of missing indices, you might want to set this TEMPORARILY to true
+  just so you know what indices to add, but don't forget to set it back to false.
+-->
+<datastore-indexes autoGenerate="false">
 
     <datastore-index kind="Account" ancestor="false" source="manual">
         <property name="__key__" direction="desc"/>
