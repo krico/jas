@@ -1,0 +1,30 @@
+<div class="card">
+    <div class="card-header">
+        <h2>{{ 'HISTORIES' | translate }}
+            <small>
+                {{ 'HISTORIES_DESCRIPTION' | translate }}
+            </small>
+        </h2>
+    </div>
+    <table id="history-list" class="table table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>{{ 'HISTORY_TYPE' | translate }}</th>
+            <th>{{ 'CREATED' | translate }}</th>
+            <th>{{ 'DESCRIPTION' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="history in vm.histories track by history.id">
+            <td class="row-commands">
+                <row-edit description="{{ 'EDIT' | translate }}" action="vm.viewHistory(history.id)"
+                          data-row-id="{{history.id}}"></row-edit>
+            </td>
+            <td>{{history.type}}</td>
+            <td class="created">{{history.created | amDateFormat:'L LT' }}</td>
+            <td>{{history.message}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

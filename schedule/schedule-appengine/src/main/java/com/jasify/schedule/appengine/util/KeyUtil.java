@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
+import com.jasify.schedule.appengine.meta.history.HistoryMeta;
 import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.application.ApplicationMeta;
@@ -47,6 +48,7 @@ public final class KeyUtil {
             .put(ApplicationPropertyMeta.get().getKind(), "ap") //AppProp
             .put(GroupMeta.get().getKind(), "G") //Group
             .put(GroupUserMeta.get().getKind(), "gu") //GroupUser
+            .put(HistoryMeta.get().getKind(), "H")
             .put(MailMessageMeta.get().getKind(), "M") //Msg
             .put(OrganizationMeta.get().getKind(), "O") //Organization
             .put(OrganizationMemberMeta.get().getKind(), "om") //OrganizationMember

@@ -29,6 +29,7 @@ import java.util.List;
                 JasActivityTransformer.class,
                 JasActivityTypeTransformer.class,
                 JasGroupTransformer.class,
+                JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
                 JasRepeatDetailsTransformer.class,
