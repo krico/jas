@@ -115,6 +115,7 @@ function rebuild() {
     gulp.watch(paths.staticHtml, ['static-html']);
     gulp.watch(paths.images, ['images']);
     gulp.watch(paths.customJs, ['custom-js']);
+    gulp.watch(paths.i18n, ['i18n']);
 }
 
 function clean(cb) {
