@@ -24,11 +24,17 @@ public class History {
     private HistoryTypeEnum type;
 
     private String message;
-
     /**
      * The user logged in at creation time
      */
     private ModelRef<User> currentUserRef = new ModelRef<>(User.class);
+
+    public History() {
+    }
+
+    public History(HistoryTypeEnum type) {
+        this.type = type;
+    }
 
     public Key getId() {
         return id;

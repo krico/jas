@@ -11,6 +11,7 @@ import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.UserSession;
+import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.oauth2.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
@@ -109,6 +110,8 @@ public class AuthEndpoint {
             boolean isOrgMember = organizationDao.isUserMemberOfAnyOrganization(user.getId());
             HttpUserSession userSession = new HttpUserSession(user, isOrgMember).put(httpServletRequest);
             log.info("[{}] user={} logged in!", httpServletRequest.getRemoteAddr(), user.getName());
+
+            HistoryHelper.addLogin(user, httpServletRequest);
 
             return new JasLoginResponse(user, userSession);
         } catch (LoginFailedException e) {

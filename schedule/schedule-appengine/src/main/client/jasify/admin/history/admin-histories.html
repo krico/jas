@@ -10,7 +10,6 @@
         <thead>
         <tr>
             <th>&nbsp;</th>
-            <th>{{ 'HISTORY_TYPE' | translate }}</th>
             <th>{{ 'CREATED' | translate }}</th>
             <th>{{ 'DESCRIPTION' | translate }}</th>
         </tr>
@@ -18,10 +17,8 @@
         <tbody>
         <tr ng-repeat="history in vm.histories track by history.id">
             <td class="row-commands">
-                <row-edit description="{{ 'EDIT' | translate }}" action="vm.viewHistory(history.id)"
-                          data-row-id="{{history.id}}"></row-edit>
+                <history-icon history="history" data-row-id="{{history.id}}"></history-icon>
             </td>
-            <td>{{history.type}}</td>
             <td class="created">{{history.created | amDateFormat:'L LT' }}</td>
             <td>{{history.message}}</td>
         </tr>

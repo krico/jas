@@ -4,6 +4,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.history.HistoryDao;
 import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.users.User;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author krico
@@ -16,10 +19,17 @@ public final class HistoryHelper {
     }
 
     public static void addMessage(String message) {
-        History history = new History();
-        history.setType(HistoryTypeEnum.Message);
+        History history = new History(HistoryTypeEnum.Message);
         history.setMessage(message);
 
+        addHistory(history);
+    }
+
+    public static void addLogin(User user, HttpServletRequest httpServletRequest) {
+        //TODO: Create LoginHistory @Model
+        History history = new History(HistoryTypeEnum.Login);
+        history.getCurrentUserRef().setKey(user.getId());
+        history.setMessage("User: " + user.getName() + " from: " + httpServletRequest.getRemoteAddr());
         addHistory(history);
     }
 
@@ -34,8 +44,8 @@ public final class HistoryHelper {
     }
 
     private static void addHistory(final History history) {
-
-        addCurrentUser(history);
+        if (history.getCurrentUserRef().getKey() == null)
+            addCurrentUser(history);
 
         //This could be done async
         TransactionOperator.executeNoEx(new ModelOperation<History>() {
