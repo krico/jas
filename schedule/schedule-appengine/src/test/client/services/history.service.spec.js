@@ -16,7 +16,9 @@ describe('HistoryService', function () {
     it('should query all histories', function () {
         var expected = [];
         spyOn($gapiMock.client.jasify.histories, 'query').and.returnValue($q.when({result: {items: expected}}));
-        History.query()
+        var from = 1;
+        var to = 2;
+        History.query(from, to)
             .then(function (res) {
                 expect(res.items).toBe(expected);
             },
@@ -26,7 +28,7 @@ describe('HistoryService', function () {
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.histories.query).toHaveBeenCalled();
+        expect($gapiMock.client.jasify.histories.query).toHaveBeenCalledWith({fromDate: from, toDate: to});
     });
 
 });

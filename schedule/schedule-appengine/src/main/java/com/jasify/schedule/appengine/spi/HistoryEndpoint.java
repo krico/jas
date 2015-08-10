@@ -46,13 +46,23 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class HistoryEndpoint {
+    public static final long DEFAULT_TIME_WINDOW_MILLIS = TimeUnit.DAYS.toMillis(7);
     private final HistoryDao historyDao = new HistoryDao();
 
     @ApiMethod(name = "histories.query", path = "histories", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<History> getHistories(User caller, @Nullable @Named("since") Date since) throws UnauthorizedException, ForbiddenException {
+    public List<History> getHistories(User caller, @Nullable @Named("fromDate") Date fromDate, @Nullable @Named("toDate") Date toDate) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
-        if (since == null) since = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7));
-        return historyDao.listSince(since);
+        if (fromDate == null && toDate == null) {
+            // No date specified, we default to latest in time window
+            fromDate = new Date(System.currentTimeMillis() - DEFAULT_TIME_WINDOW_MILLIS);
+            return historyDao.listSince(fromDate);
+        } else if (toDate == null) {
+            // Only fromDate
+            return historyDao.listSince(fromDate);
+        } else if (fromDate == null) {
+            // No start specified, default window until toDate
+            fromDate = new Date(toDate.getTime() - DEFAULT_TIME_WINDOW_MILLIS);
+        }
+        return historyDao.listBetween(fromDate, toDate);
     }
-
 }

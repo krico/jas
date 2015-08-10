@@ -53,6 +53,10 @@ public class HistoryDao extends BaseCachingDao<History> {
         return query(new SinceQuery(this.<HistoryMeta>getMeta(), when));
     }
 
+    public List<History> listBetween(final Date start, final Date end) {
+        return query(new BetweenQuery(this.<HistoryMeta>getMeta(), start, end));
+    }
+
     private static class SinceQuery extends BaseDaoQuery<History, HistoryMeta> {
         public SinceQuery(HistoryMeta meta, Date since) {
             super(meta, QueryParameters.of(since));
@@ -64,6 +68,24 @@ public class HistoryDao extends BaseCachingDao<History> {
             return Datastore
                     .query(meta)
                     .filter(meta.created.greaterThanOrEqual(since))
+                    .sort(meta.created.asc)
+                    .asKeyList();
+        }
+    }
+
+    private static class BetweenQuery extends BaseDaoQuery<History, HistoryMeta> {
+        public BetweenQuery(HistoryMeta meta, Date since, Date until) {
+            super(meta, QueryParameters.of(since, until));
+        }
+
+        @Override
+        public List<Key> execute() {
+            Date since = parameters.get(0);
+            Date until = parameters.get(1);
+            return Datastore
+                    .query(meta)
+                    .filter(meta.created.greaterThanOrEqual(since),
+                            meta.created.lessThanOrEqual(until))
                     .sort(meta.created.asc)
                     .asKeyList();
         }

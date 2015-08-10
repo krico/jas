@@ -6,9 +6,9 @@
             query: query
         };
 
-        function query() {
+        function query(fromDate, toDate) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.histories.query()
+                return jasify.histories.query({fromDate: fromDate, toDate: toDate})
                     .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }

@@ -119,4 +119,38 @@ public class HistoryDaoTest {
         assertEquals(id3, histories1.get(1).getId());
         assertEquals(id2, histories1.get(2).getId());
     }
+
+    @Test
+    public void testListBetween() throws Exception {
+        Date created1 = new Date(19760715);
+        Date created2 = new Date(created1.getTime() + 2);
+        History history1 = new History();
+        history1.setCreated(created1);
+        Key id1 = historyDao.save(history1);
+
+        History history2 = new History();
+        history2.setCreated(created2);
+        Key id2 = historyDao.save(history2);
+
+        List<History> histories1 = historyDao.listBetween(created1, created2);
+        assertNotNull(histories1);
+        assertEquals(2, histories1.size());
+        assertEquals(id1, histories1.get(0).getId());
+        assertEquals(id2, histories1.get(1).getId());
+
+        List<History> histories2 = historyDao.listBetween(created1, created1);
+        assertNotNull(histories2);
+        assertEquals(1, histories2.size());
+        assertEquals(id1, histories2.get(0).getId());
+
+        List<History> histories3 = historyDao.listBetween(created2, created2);
+        assertNotNull(histories3);
+        assertEquals(1, histories3.size());
+        assertEquals(id2, histories3.get(0).getId());
+
+        List<History> histories4 = historyDao.listBetween(created1, new Date(created1.getTime() + 1));
+        assertNotNull(histories4);
+        assertEquals(1, histories4.size());
+        assertEquals(id1, histories4.get(0).getId());
+    }
 }
