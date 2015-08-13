@@ -33,7 +33,7 @@ public class JasHistoryTransformerTest {
     private void assertEqualsHistory(History expected, JasHistory actual) {
         assertEquals(transformedKeyOrNull(expected.getId()), actual.getId());
         assertEquals(expected.getCreated(), actual.getCreated());
-        assertEquals(expected.getMessage(), actual.getMessage());
+        assertEquals(expected.getDescription(), actual.getDescription());
         assertEquals(expected.getType(), actual.getType());
         assertEquals(transformedKeyOrNull(expected.getCurrentUserRef().getKey()), actual.getCurrentUserId());
     }
@@ -56,7 +56,7 @@ public class JasHistoryTransformerTest {
         History internal = new History();
         internal.setId(Datastore.allocateId(History.class));
         internal.setCreated(new Date());
-        internal.setMessage("Message");
+        internal.setDescription("Message");
         internal.setType(HistoryTypeEnum.Message);
         internal.getCurrentUserRef().setKey(Datastore.allocateId(User.class));
         JasHistory external = transformer.transformTo(internal);

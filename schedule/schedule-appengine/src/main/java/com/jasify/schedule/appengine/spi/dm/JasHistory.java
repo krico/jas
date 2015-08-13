@@ -15,7 +15,7 @@ public class JasHistory {
 
     private HistoryTypeEnum type;
 
-    private String message;
+    private String description;
 
     private String currentUserId;
 
@@ -43,12 +43,12 @@ public class JasHistory {
         this.type = type;
     }
 
-    public String getMessage() {
-        return message;
+    public String getDescription() {
+        return description;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getCurrentUserId() {

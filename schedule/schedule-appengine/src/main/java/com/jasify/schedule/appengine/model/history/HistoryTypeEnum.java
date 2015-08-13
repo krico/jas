@@ -6,5 +6,10 @@ package com.jasify.schedule.appengine.model.history;
  */
 public enum HistoryTypeEnum {
     Login,
+    Logout,
+    LoginFailed,
+    PasswordChanged,
+    AccountCreated,
+    AccountCreationFailed,
     Message;
 }

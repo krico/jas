@@ -17,7 +17,7 @@ public class JasHistoryTransformer implements Transformer<History, JasHistory> {
         external.setId(keyTransformer.transformTo(internal.getId()));
         external.setCreated(internal.getCreated());
         external.setType(internal.getType());
-        external.setMessage(internal.getMessage());
+        external.setDescription(internal.getDescription());
         external.setCurrentUserId(keyTransformer.transformTo(internal.getCurrentUserRef().getKey()));
         return external;
     }

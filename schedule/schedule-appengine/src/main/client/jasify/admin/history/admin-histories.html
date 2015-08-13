@@ -15,12 +15,12 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="history in vm.histories track by history.id">
+        <tr ng-repeat="history in vm.histories |reverse track by history.id">
             <td class="row-commands">
                 <history-icon history="history" data-row-id="{{history.id}}"></history-icon>
             </td>
-            <td class="created">{{history.created | amDateFormat:'L LT' }}</td>
-            <td>{{history.message}}</td>
+            <td class="created"><nobr>{{history.created | amDateFormat:'L LT' }}</nobr></td>
+            <td>{{history.description}}</td>
         </tr>
         </tbody>
     </table>

@@ -14,7 +14,7 @@ public final class HistoryMeta extends org.slim3.datastore.ModelMeta<com.jasify.
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.history.History, com.jasify.schedule.appengine.model.history.HistoryTypeEnum> type = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.history.History, com.jasify.schedule.appengine.model.history.HistoryTypeEnum>(this, "type", "type", com.jasify.schedule.appengine.model.history.HistoryTypeEnum.class);
 
     /** */
-    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.history.History> message = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.history.History>(this, "message", "message");
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.history.History> description = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.history.History>(this, "description", "description");
 
     /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.history.History, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User> currentUserRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.history.History, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.users.User>, com.jasify.schedule.appengine.model.users.User>(this, "currentUserRef", "currentUserRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.users.User.class);
@@ -41,7 +41,7 @@ public final class HistoryMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setType(stringToEnum(com.jasify.schedule.appengine.model.history.HistoryTypeEnum.class, (java.lang.String) entity.getProperty("type")));
-        model.setMessage((java.lang.String) entity.getProperty("message"));
+        model.setDescription((java.lang.String) entity.getProperty("description"));
         if (model.getCurrentUserRef() == null) {
             throw new NullPointerException("The property(currentUserRef) is null.");
         }
@@ -60,7 +60,7 @@ public final class HistoryMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         }
         entity.setProperty("created", m.getCreated());
         entity.setProperty("type", enumToString(m.getType()));
-        entity.setProperty("message", m.getMessage());
+        entity.setProperty("description", m.getDescription());
         if (m.getCurrentUserRef() == null) {
             throw new NullPointerException("The property(currentUserRef) must not be null.");
         }
@@ -141,9 +141,9 @@ public final class HistoryMeta extends org.slim3.datastore.ModelMeta<com.jasify.
             writer.setNextPropertyName("type");
             encoder0.encode(writer, m.getType());
         }
-        if(m.getMessage() != null){
-            writer.setNextPropertyName("message");
-            encoder0.encode(writer, m.getMessage());
+        if(m.getDescription() != null){
+            writer.setNextPropertyName("description");
+            encoder0.encode(writer, m.getDescription());
         }
         if(m.getCurrentUserRef() != null && m.getCurrentUserRef().getKey() != null){
             writer.setNextPropertyName("currentUserRef");
@@ -163,8 +163,8 @@ public final class HistoryMeta extends org.slim3.datastore.ModelMeta<com.jasify.
         m.setCreated(decoder0.decode(reader, m.getCreated()));
         reader = rootReader.newObjectReader("type");
         m.setType(decoder0.decode(reader, m.getType(), com.jasify.schedule.appengine.model.history.HistoryTypeEnum.class));
-        reader = rootReader.newObjectReader("message");
-        m.setMessage(decoder0.decode(reader, m.getMessage()));
+        reader = rootReader.newObjectReader("description");
+        m.setDescription(decoder0.decode(reader, m.getDescription()));
         reader = rootReader.newObjectReader("currentUserRef");
         decoder0.decode(reader, m.getCurrentUserRef(), maxDepth, currentDepth);
         return m;

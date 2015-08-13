@@ -6,10 +6,17 @@
     angular.module('jasify.filters', [])
         .filter('tableShortDateTime', tableShortDateTime)
         .filter('calendarLong', calendarLong)
-        .filter('tsToDate', tsToDate);
+        .filter('tsToDate', tsToDate)
+        .filter('reverse', reverseFilter);
+
+    function reverseFilter() {
+        return function (items) {
+            return items.slice().reverse();
+        };
+    }
 
     function tsToDate(moment) {
-        return function(input, format) {
+        return function (input, format) {
             if (input) {
                 return moment(new Date(Number(input))).format(format);
             }

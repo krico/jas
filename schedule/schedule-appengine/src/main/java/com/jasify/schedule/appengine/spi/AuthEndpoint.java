@@ -74,7 +74,7 @@ public class AuthEndpoint {
     private final OrganizationDao organizationDao = new OrganizationDao();
 
     @ApiMethod(name = "auth.changePassword", path = "auth/change-password", httpMethod = ApiMethod.HttpMethod.POST)
-    public void changePassword(User caller, JasChangePasswordRequest request)
+    public void changePassword(User caller, HttpServletRequest httpServletRequest, JasChangePasswordRequest request)
             throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, EntityNotFoundException {
         Preconditions.checkNotNull(request);
         JasifyEndpointUser jasCaller = mustBeSameUserOrAdmin(caller, request.getUserId());
@@ -94,6 +94,8 @@ public class AuthEndpoint {
 
         log.info("User {} changing password of {}", caller, request.getUserId());
         UserServiceFactory.getUserService().setPassword(user, newPassword);
+
+        HistoryHelper.addPasswordChanged(user, httpServletRequest);
     }
 
     @ApiMethod(name = "auth.login", path = "auth/login", httpMethod = ApiMethod.HttpMethod.POST)
@@ -116,6 +118,7 @@ public class AuthEndpoint {
             return new JasLoginResponse(user, userSession);
         } catch (LoginFailedException e) {
             log.info("[{}] user={} login failed!", httpServletRequest.getRemoteAddr(), request.getUsername(), e);
+            HistoryHelper.addLoginFailed(request.getUsername(), httpServletRequest);
             throw new UnauthorizedException("Login failed");
         }
     }
@@ -125,6 +128,7 @@ public class AuthEndpoint {
         UserSession userSession = UserContext.getCurrentUser();
         if (userSession instanceof HttpUserSession) {
             com.jasify.schedule.appengine.model.users.User user = UserServiceFactory.getUserService().get(userSession.getUserId());
+            //TODO: Do we want to HistoryHelper.addRestore here?
             return new JasLoginResponse(user, userSession);
         }
 
@@ -133,9 +137,10 @@ public class AuthEndpoint {
     }
 
     @ApiMethod(name = "auth.logout", path = "auth/logout", httpMethod = ApiMethod.HttpMethod.POST)
-    public void logout(User caller) {
+    public void logout(User caller, HttpServletRequest httpServletRequest) {
         UserSession userSession = UserContext.getCurrentUser();
         if (userSession != null) {
+            HistoryHelper.addLogout(httpServletRequest);
             userSession.invalidate();
         }
         log.info("Logged out {}", caller);
@@ -180,6 +185,10 @@ public class AuthEndpoint {
             try {
                 userService.addLogin(userService.get(jasifyUser.getUserId()), userLogin);
             } catch (EntityNotFoundException e) {
+                log.error("Failed to login with oauth: " + jasifyUser.getUserId(), e);
+
+                HistoryHelper.addLoginFailed(userLogin, httpServletRequest, Objects.toString(e));
+
                 throw new NotFoundException(e);
             } catch (UserLoginExistsException e) {
                 /* Maybe it's this user?
@@ -192,31 +201,47 @@ public class AuthEndpoint {
                             StringUtils.equals(login.getUserId(), userLogin.getUserId());
                     if (found) break;
                 }
-                if (!found)
+                if (!found) {
+                    log.error("Failed to login with oauth: " + jasifyUser.getUserId() + " UserLogin exists");
+                    HistoryHelper.addLoginFailed(userLogin, httpServletRequest, "UserLogin exists");
                     throw new ConflictException("UserLogin exists");
+                }
             }
 
+            HistoryHelper.addLogin(userLogin, httpServletRequest, "Previously authenticated");
+            //TODO: I'm not sure this works
             return new JasProviderAuthenticateResponse(Objects.toString(oAuth2Info.getState()));
         } else {
             com.jasify.schedule.appengine.model.users.User existingUser = userService.findByLogin(oAuth2Info.getProvider().name(), oAuth2Info.getUserId());
+            UserLogin userLogin = new UserLogin(oAuth2Info);
+            String comment;
             if (existingUser == null) {
-                UserLogin userLogin = new UserLogin(oAuth2Info);
                 log.info("Creating new user={} authenticated via oauth", userLogin.getEmail());
-
+                comment = "Post user creation";
                 try {
                     existingUser = userService.create(new com.jasify.schedule.appengine.model.users.User(userLogin), userLogin);
+                    HistoryHelper.addAccountCreated(existingUser, userLogin, httpServletRequest);
                 } catch (EmailExistsException e) {
-                    throw new ConflictException("Email exists");
+                    String reason = "Email exists";
+                    HistoryHelper.addAccountCreationFailed(userLogin, httpServletRequest, reason);
+                    throw new ConflictException(reason);
                 } catch (UsernameExistsException e) {
-                    throw new ConflictException("Username exists");
+                    String reason = "Username exists";
+                    HistoryHelper.addAccountCreationFailed(userLogin, httpServletRequest, reason);
+                    throw new ConflictException(reason);
                 } catch (UserLoginExistsException e) {
-                    throw new ConflictException("UserLogin exists");
+                    String reason = "UserLogin exists";
+                    HistoryHelper.addAccountCreationFailed(userLogin, httpServletRequest, reason);
+                    throw new ConflictException(reason);
                 }
+            } else {
+                comment = "OAuth login";
             }
 
             boolean isOrgMember = organizationDao.isUserMemberOfAnyOrganization(existingUser.getId());
             //LOGIN!
             HttpUserSession userSession = new HttpUserSession(existingUser, isOrgMember).put(httpServletRequest);//todo: simulate log in
+            HistoryHelper.addLogin(userLogin, httpServletRequest, comment);
             return new JasProviderAuthenticateResponse(existingUser, userSession, Objects.toString(oAuth2Info.getState()));
         }
     }

@@ -23,7 +23,8 @@ public class History {
 
     private HistoryTypeEnum type;
 
-    private String message;
+    private String description;
+    
     /**
      * The user logged in at creation time
      */
@@ -60,12 +61,12 @@ public class History {
         this.type = type;
     }
 
-    public String getMessage() {
-        return message;
+    public String getDescription() {
+        return description;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public ModelRef<User> getCurrentUserRef() {

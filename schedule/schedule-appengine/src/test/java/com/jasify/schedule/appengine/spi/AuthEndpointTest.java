@@ -21,9 +21,13 @@ import com.jasify.schedule.appengine.util.KeyUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.easymock.EasyMock;
+import org.easymock.EasyMockRunner;
+import org.easymock.Mock;
+import org.easymock.MockType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slim3.datastore.Datastore;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,17 +39,23 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
 import static junit.framework.TestCase.*;
 import static org.easymock.EasyMock.*;
 
+@RunWith(EasyMockRunner.class)
 public class AuthEndpointTest {
     private TestUserServiceFactory testUserServiceFactory = new TestUserServiceFactory();
     private TestOAuth2ServiceFactory testOAuth2ServiceFactory = new TestOAuth2ServiceFactory();
 
     private AuthEndpoint endpoint;
 
+    @Mock(type = MockType.NICE)
+    private HttpServletRequest httpServletRequest;
+
     @Before
     public void datastore() {
         TestHelper.initializeDatastore();
         testUserServiceFactory.setUp();
         endpoint = new AuthEndpoint();
+        EasyMock.expect(httpServletRequest.getRemoteAddr()).andReturn("123.456.789.10").anyTimes();
+        EasyMock.replay(httpServletRequest);
     }
 
     @After
@@ -59,7 +69,7 @@ public class AuthEndpointTest {
     @Test(expected = ForbiddenException.class)
     public void testChangePasswordCheckAuthentication() throws Exception {
         testUserServiceFactory.replay();
-        endpoint.changePassword(newCaller(1), new JasChangePasswordRequest(Datastore.createKey(User.class, 2), "abc", "def"));
+        endpoint.changePassword(newCaller(1), httpServletRequest, new JasChangePasswordRequest(Datastore.createKey(User.class, 2), "abc", "def"));
     }
 
     @Test
@@ -72,9 +82,9 @@ public class AuthEndpointTest {
         expect(UserServiceFactory.getUserService().setPassword(user, "def")).andReturn(user).times(2);
         testUserServiceFactory.replay();
 
-        endpoint.changePassword(newCaller(1), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw, "def"));
+        endpoint.changePassword(newCaller(1), httpServletRequest, new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw, "def"));
         //admin
-        endpoint.changePassword(newAdminCaller(2), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), "", "def"));
+        endpoint.changePassword(newAdminCaller(2), httpServletRequest, new JasChangePasswordRequest(Datastore.createKey(User.class, 1), "", "def"));
     }
 
     @Test(expected = ForbiddenException.class)
@@ -86,7 +96,7 @@ public class AuthEndpointTest {
         expect(UserServiceFactory.getUserService().get(user.getId())).andReturn(user);
         testUserServiceFactory.replay();
 
-        endpoint.changePassword(newCaller(1), new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw + "x", "def"));
+        endpoint.changePassword(newCaller(1), httpServletRequest, new JasChangePasswordRequest(Datastore.createKey(User.class, 1), oldPw + "x", "def"));
     }
 
     @Test
@@ -166,11 +176,12 @@ public class AuthEndpointTest {
     public void testLogout() throws Exception {
         testUserServiceFactory.replay();
         UserSession session = EasyMock.createMock(UserSession.class);
+        EasyMock.expect(session.getUserIdKey()).andReturn(Datastore.allocateId(User.class));
         session.invalidate();
         expectLastCall();
         replay(session);
         UserContext.setContext(session, null, null);
-        endpoint.logout(newCaller(1));
+        endpoint.logout(newCaller(1), httpServletRequest);
         verify(session);
     }
 
@@ -213,6 +224,7 @@ public class AuthEndpointTest {
         HttpServletRequest httpServletRequest = EasyMock.createMock(HttpServletRequest.class);
         HttpSession session = EasyMock.createMock(HttpSession.class);
         EasyMock.expect(httpServletRequest.getSession(true)).andReturn(session);
+        EasyMock.expect(httpServletRequest.getRemoteAddr()).andReturn("123.456.789.10");
         session.setAttribute(EasyMock.anyString(), EasyMock.anyObject());
         EasyMock.expectLastCall();
 

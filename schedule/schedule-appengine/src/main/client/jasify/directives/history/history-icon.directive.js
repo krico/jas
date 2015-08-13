@@ -5,6 +5,21 @@
     var module = angular.module('jasifyComponents').directive('historyIcon', historyIconDirective);
 
     function historyIconDirective() {
+        var defaultIconClass = ['md', 'mdi', 'mdi-comment'];
+        var iconClassMap = {
+            Login: ['glyphicon', 'glyphicon-log-in'],
+            LoginFailed: ['glyphicon', 'glyphicon-remove-circle'],
+            PasswordChanged: ['ion-ios-color-wand'],
+            AccountCreated: ['mdi', 'mdi-person'],
+            AccountCreationFailed: ['glyphicon', 'glyphicon-remove-circle'],
+            Logout: ['ion-android-exit']
+        };
+        var defaultTextClass = [];
+        var textClassMap = {
+            AccountCreated: ['text-success'],
+            AccountCreationFailed: ['text-danger'],
+            LoginFailed: ['text-danger']
+        };
         return {
             restrict: 'E',
             replace: true,
@@ -15,17 +30,10 @@
             link: function (scope, element, attrs) {
                 scope.$watch('history', function (newValue) {
                     scope.history = newValue;
-                    var ic = ['md', 'mdi', 'mdi-comment'];
+                    var type = newValue && newValue.type || '';
 
-                    if (newValue && newValue.type) {
-                        if (newValue.type == 'Login') {
-                            ic = ['glyphicon', 'glyphicon-log-in'];
-                        }
-
-                    }
-
-                    scope.iconClass = ic;
-
+                    scope.iconClass = iconClassMap[type] || defaultIconClass;
+                    scope.textClass = textClassMap[type] || defaultTextClass;
                 });
             }
         };
