@@ -5,6 +5,7 @@ import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.history.HistoryDao;
 import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.util.KeyUtil;
@@ -181,8 +182,65 @@ public final class HistoryHelper {
         history.setReferrer(httpServletRequest.getHeader("referer")); // Yes, with the legendary misspelling.
         history.setRemoteAddress(httpServletRequest.getRemoteAddr());
         addUserLogin(userLogin, history);
-        history.setDescription("Failed to create account with OAuth credentials: " + history.toOAuthCredentialsString() +
-                " from: " + history.getRemoteAddress());
+        String description = "Failed to create account with OAuth credentials: " + history.toOAuthCredentialsString() +
+                " from: " + history.getRemoteAddress();
+
+        if (StringUtils.isNotBlank(reason)) description += " reason: " + reason;
+        history.setDescription(description);
+
+        addHistory(history);
+    }
+
+    public static void addForgottenPassword(PasswordRecovery recovery, HttpServletRequest httpServletRequest) {
+        AuthHistory history = new AuthHistory(HistoryTypeEnum.PasswordForgotten);
+
+        Key userId = recovery.getUserRef().getKey();
+        if (userId != null) {
+            try {
+                UserDao userDao = new UserDao();
+                User user = userDao.get(userId);
+                history.setName(user.getName());
+            } catch (EntityNotFoundException e) {
+                log.warn("Failed to get User from PasswordRecovery", e);
+            }
+            history.getCurrentUserRef().setKey(userId);
+        }
+
+        history.setRemoteAddress(httpServletRequest.getRemoteAddr());
+
+        history.setDescription("User: " + history.getName() + " forgot password from: " + history.getRemoteAddress());
+
+        addHistory(history);
+
+    }
+
+    public static void addForgottenPasswordFailed(String email, HttpServletRequest httpServletRequest) {
+        AuthHistory history = new AuthHistory(HistoryTypeEnum.PasswordForgottenFailed);
+
+        history.setRemoteAddress(httpServletRequest.getRemoteAddr());
+        history.setDescription("Email: " + email + " failed forgotten password from: " + history.getRemoteAddress());
+
+        addHistory(history);
+    }
+
+    public static void addRecoveredPassword(PasswordRecovery recovery, HttpServletRequest httpServletRequest) {
+        AuthHistory history = new AuthHistory(HistoryTypeEnum.PasswordRecovered);
+
+        Key userId = recovery.getUserRef().getKey();
+        if (userId != null) {
+            try {
+                UserDao userDao = new UserDao();
+                User user = userDao.get(userId);
+                history.setName(user.getName());
+            } catch (EntityNotFoundException e) {
+                log.warn("Failed to get User from PasswordRecovery", e);
+            }
+            history.getCurrentUserRef().setKey(userId);
+        }
+
+        history.setRemoteAddress(httpServletRequest.getRemoteAddr());
+
+        history.setDescription("User: " + history.getName() + " recovered password from: " + history.getRemoteAddress());
 
         addHistory(history);
     }

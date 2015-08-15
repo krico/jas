@@ -266,7 +266,7 @@ public class AuthEndpointTest {
         EasyMock.expect(UserServiceFactory.getUserService().registerPasswordRecovery(request.getEmail()))
                 .andReturn(recovery);
         testUserServiceFactory.replay();
-        endpoint.forgotPassword(request);
+        endpoint.forgotPassword(httpServletRequest, request);
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertEquals(1, sentMessages.size());
@@ -281,10 +281,11 @@ public class AuthEndpointTest {
         JasRecoverPasswordRequest request = new JasRecoverPasswordRequest();
         request.setCode("YAZ1");
         request.setNewPassword("secret");
-        UserServiceFactory.getUserService().recoverPassword(request.getCode(), request.getNewPassword());
-        EasyMock.expectLastCall();
+        PasswordRecovery recovery = new PasswordRecovery();
+        EasyMock.expect(UserServiceFactory.getUserService().recoverPassword(request.getCode(), request.getNewPassword()))
+                .andReturn(recovery);
         testUserServiceFactory.replay();
-        endpoint.recoverPassword(request);
+        endpoint.recoverPassword(httpServletRequest, request);
     }
 
     @Test

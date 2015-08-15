@@ -49,7 +49,7 @@ public interface UserService {
 
     PasswordRecovery registerPasswordRecovery(String email) throws EntityNotFoundException;
 
-    void recoverPassword(String recoveryCode, String newPassword) throws EntityNotFoundException;
+    PasswordRecovery recoverPassword(String passwordRecoveryCode, String newPassword) throws EntityNotFoundException;
 
     boolean usernameExists(String username);
 

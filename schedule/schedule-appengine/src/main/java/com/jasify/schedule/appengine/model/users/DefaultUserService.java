@@ -389,7 +389,7 @@ final class DefaultUserService implements UserService {
     }
 
     @Override
-    public void recoverPassword(String passwordRecoveryCode, String newPassword) throws EntityNotFoundException {
+    public PasswordRecovery recoverPassword(String passwordRecoveryCode, String newPassword) throws EntityNotFoundException {
         Preconditions.checkNotNull(passwordRecoveryCode);
         Preconditions.checkNotNull(newPassword);
         Key recoveryKey = Datastore.createKey(passwordRecoveryMeta, passwordRecoveryCode);
@@ -402,6 +402,7 @@ final class DefaultUserService implements UserService {
         Datastore.put(user);
         Datastore.delete(recoveryKey);
         log.info("Password recovered for user [{}] email [{}]", user.getName(), user.getEmail());
+        return recovery;
     }
 
     @Override

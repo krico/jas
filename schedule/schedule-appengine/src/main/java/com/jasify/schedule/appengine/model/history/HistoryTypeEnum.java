@@ -9,6 +9,9 @@ public enum HistoryTypeEnum {
     Logout,
     LoginFailed,
     PasswordChanged,
+    PasswordForgotten,
+    PasswordForgottenFailed,
+    PasswordRecovered,
     AccountCreated,
     AccountCreationFailed,
     Message;

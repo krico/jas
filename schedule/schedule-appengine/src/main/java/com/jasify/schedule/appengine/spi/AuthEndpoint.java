@@ -248,24 +248,27 @@ public class AuthEndpoint {
 
 
     @ApiMethod(name = "auth.forgotPassword", path = "auth/forgot-password", httpMethod = ApiMethod.HttpMethod.POST)
-    public void forgotPassword(JasForgotPasswordRequest request) throws BadRequestException, NotFoundException {
+    public void forgotPassword(HttpServletRequest httpServletRequest, JasForgotPasswordRequest request) throws BadRequestException, NotFoundException {
         Preconditions.checkNotNull(request.getEmail(), "email");
         Preconditions.checkNotNull(request.getUrl(), "url");
         PasswordRecovery recovery;
         try {
             recovery = UserServiceFactory.getUserService().registerPasswordRecovery(request.getEmail());
+            HistoryHelper.addForgottenPassword(recovery, httpServletRequest);
         } catch (EntityNotFoundException e) {
+            HistoryHelper.addForgottenPasswordFailed(request.getEmail(), httpServletRequest);
             throw new NotFoundException(e);
         }
         notify(recovery, request.getUrl());
     }
 
     @ApiMethod(name = "auth.recoverPassword", path = "auth/recover-password", httpMethod = ApiMethod.HttpMethod.POST)
-    public void recoverPassword(JasRecoverPasswordRequest request) throws BadRequestException, NotFoundException {
+    public void recoverPassword(HttpServletRequest httpServletRequest, JasRecoverPasswordRequest request) throws BadRequestException, NotFoundException {
         String code = Preconditions.checkNotNull(request.getCode(), "code");
         String newPassword = Preconditions.checkNotNull(request.getNewPassword(), "newPassword");
         try {
-            UserServiceFactory.getUserService().recoverPassword(code, newPassword);
+            PasswordRecovery recovery = UserServiceFactory.getUserService().recoverPassword(code, newPassword);
+            HistoryHelper.addRecoveredPassword(recovery, httpServletRequest);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
         }

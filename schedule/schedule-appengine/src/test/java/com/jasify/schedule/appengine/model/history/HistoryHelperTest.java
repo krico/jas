@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.dao.history.HistoryDao;
 import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.UserContext;
+import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
 import com.jasify.schedule.appengine.util.KeyUtil;
@@ -301,7 +302,6 @@ public class HistoryHelperTest {
 
     @Test
     public void testAddAccountCreationFailedOAuth() throws Exception {
-        EasyMock.verify(httpServletRequest);
 
         UserLogin userLogin = new UserLogin("Google", "123456789");
         userLogin.setEmail("who@you.com");
@@ -324,5 +324,85 @@ public class HistoryHelperTest {
         assertTrue(ah.getDescription().contains(userLogin.getProvider()));
         assertTrue(ah.getDescription().contains(userLogin.getUserId()));
         assertTrue(ah.getDescription().contains(userLogin.getEmail()));
+        assertTrue(ah.getDescription().contains(reason));
+    }
+
+    @Test
+    public void testAddForgottenPassword() throws Exception {
+        new UserDao().save(user);
+
+        PasswordRecovery recovery = new PasswordRecovery();
+        recovery.setCode(Datastore.createKey(PasswordRecovery.class, "ABC"));
+        recovery.getUserRef().setModel(user);
+        HistoryHelper.addForgottenPassword(recovery, httpServletRequest);
+        EasyMock.verify(httpServletRequest);
+        History history = getLastHistory();
+        assertTrue(history instanceof AuthHistory);
+        AuthHistory ah = (AuthHistory) history;
+        assertEquals(HistoryTypeEnum.PasswordForgotten, ah.getType());
+        assertEquals(TEST_REMOTE_ADDR, ah.getRemoteAddress());
+        assertEquals(user.getId(), ah.getCurrentUserRef().getKey());
+        assertEquals(user.getName(), ah.getName());
+        assertNotNull(ah.getDescription());
+        assertFalse("Code in description would be security leak", ah.getDescription().contains(recovery.getCode().getName()));
+        assertTrue(ah.getDescription().contains(TEST_REMOTE_ADDR));
+        assertTrue(ah.getDescription().contains(user.getName()));
+    }
+
+    @Test
+    public void testAddPasswordRecovered() throws Exception {
+        new UserDao().save(user);
+
+        PasswordRecovery recovery = new PasswordRecovery();
+        recovery.setCode(Datastore.createKey(PasswordRecovery.class, "ABC"));
+        recovery.getUserRef().setKey(user.getId());
+        HistoryHelper.addRecoveredPassword(recovery, httpServletRequest);
+        EasyMock.verify(httpServletRequest);
+        History history = getLastHistory();
+        assertTrue(history instanceof AuthHistory);
+        AuthHistory ah = (AuthHistory) history;
+        assertEquals(HistoryTypeEnum.PasswordRecovered, ah.getType());
+        assertEquals(TEST_REMOTE_ADDR, ah.getRemoteAddress());
+        assertEquals(user.getId(), ah.getCurrentUserRef().getKey());
+        assertEquals(user.getName(), ah.getName());
+        assertNotNull(ah.getDescription());
+        assertTrue(ah.getDescription().contains(TEST_REMOTE_ADDR));
+        assertTrue(ah.getDescription().contains(user.getName()));
+    }
+
+    @Test
+    public void testAddForgottenPasswordNoUser() throws Exception {
+        PasswordRecovery recovery = new PasswordRecovery();
+        recovery.setCode(Datastore.createKey(PasswordRecovery.class, "ABC"));
+        recovery.getUserRef().setModel(user);
+        HistoryHelper.addForgottenPassword(recovery, httpServletRequest);
+        EasyMock.verify(httpServletRequest);
+        History history = getLastHistory();
+        assertTrue(history instanceof AuthHistory);
+        AuthHistory ah = (AuthHistory) history;
+        assertEquals(HistoryTypeEnum.PasswordForgotten, ah.getType());
+        assertEquals(TEST_REMOTE_ADDR, ah.getRemoteAddress());
+        assertEquals(user.getId(), ah.getCurrentUserRef().getKey());
+        assertNull(ah.getName());
+        assertNotNull(ah.getDescription());
+        assertFalse("Code in description would be security leak", ah.getDescription().contains(recovery.getCode().getName()));
+        assertTrue(ah.getDescription().contains(TEST_REMOTE_ADDR));
+    }
+
+    @Test
+    public void testAddForgottenPasswordFailed() throws Exception {
+        String email = "foo@bar.com";
+        HistoryHelper.addForgottenPasswordFailed(email, httpServletRequest);
+        EasyMock.verify(httpServletRequest);
+        History history = getLastHistory();
+        assertTrue(history instanceof AuthHistory);
+        AuthHistory ah = (AuthHistory) history;
+        assertEquals(HistoryTypeEnum.PasswordForgottenFailed, ah.getType());
+        assertEquals(TEST_REMOTE_ADDR, ah.getRemoteAddress());
+        assertNull(ah.getCurrentUserRef().getKey());
+        assertNull(ah.getName());
+        assertNotNull(ah.getDescription());
+        assertTrue(ah.getDescription().contains(TEST_REMOTE_ADDR));
+        assertTrue(ah.getDescription().contains(email));
     }
 }

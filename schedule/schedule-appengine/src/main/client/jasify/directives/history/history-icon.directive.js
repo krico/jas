@@ -9,7 +9,10 @@
         var iconClassMap = {
             Login: ['glyphicon', 'glyphicon-log-in'],
             LoginFailed: ['glyphicon', 'glyphicon-remove-circle'],
-            PasswordChanged: ['ion-ios-color-wand'],
+            PasswordChanged: ['ion-android-lock'],
+            PasswordForgotten: ['ion-ios-locked'],
+            PasswordForgottenFailed: ['ion-ios-locked'],
+            PasswordRecovered: ['ion-ios-unlocked'],
             AccountCreated: ['mdi', 'mdi-person'],
             AccountCreationFailed: ['glyphicon', 'glyphicon-remove-circle'],
             Logout: ['ion-android-exit']
@@ -18,6 +21,8 @@
         var textClassMap = {
             AccountCreated: ['text-success'],
             AccountCreationFailed: ['text-danger'],
+            PasswordForgottenFailed: ['text-danger'],
+            PasswordRecovered: ['text-success'],
             LoginFailed: ['text-danger']
         };
         return {
