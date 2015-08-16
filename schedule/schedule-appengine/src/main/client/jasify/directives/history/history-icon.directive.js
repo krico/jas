@@ -4,7 +4,7 @@
 
     var module = angular.module('jasifyComponents').directive('historyIcon', historyIconDirective);
 
-    function historyIconDirective() {
+    function historyIconDirective($log) {
         var defaultIconClass = ['md', 'mdi', 'mdi-comment'];
         var iconClassMap = {
             Login: ['glyphicon', 'glyphicon-log-in'],
@@ -29,16 +29,24 @@
             restrict: 'E',
             replace: true,
             scope: {
-                history: '=history'
+                history: '=',
+                historyType: '@'
             },
             templateUrl: 'directives/history/history-icon.directive.html',
             link: function (scope, element, attrs) {
-                scope.$watch('history', function (newValue) {
-                    scope.history = newValue;
-                    var type = newValue && newValue.type || '';
-
+                scope.$watch('historyType', function (newValue) {
+                    var type = newValue;
+                    if (type) {
+                        scope.historyType = newValue;
+                    }
                     scope.iconClass = iconClassMap[type] || defaultIconClass;
                     scope.textClass = textClassMap[type] || defaultTextClass;
+                });
+                scope.$watch('history', function (newValue) {
+                    scope.history = newValue;
+                    if (newValue) {
+                        scope.historyType = newValue && newValue.type || '';
+                    }
                 });
             }
         };

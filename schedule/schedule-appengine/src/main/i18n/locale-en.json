@@ -215,5 +215,17 @@
   "VALUE_MUST_BE_LESS_THAN": "Value must be less than {{value}}",
   "VIEW_SUBSCRIBERS": "View Subscribers",
   "WEDNESDAY_ABBREVIATED": "Wed",
-  "WIDGETS": "Widgets"
+  "WIDGETS": "Widgets",
+  "HISTORY_TYPE": "History event type",
+  "HT_ALL": "Show all events",
+  "HT_Login": "Sign In",
+  "HT_Logout": "Sign Out",
+  "HT_LoginFailed": "Sign In Failed",
+  "HT_PasswordChanged": "Password Changed",
+  "HT_PasswordForgotten": "Recover Password",
+  "HT_PasswordForgottenFailed": "Recover Password Failed",
+  "HT_PasswordRecovered": "Password Recovered",
+  "HT_AccountCreated": "Account Created",
+  "HT_AccountCreationFailed": "Account Creation Failed",
+  "HT_Message": "Generic Event"
 }
