@@ -54,6 +54,25 @@ Now add a new run configuration
 * Select Karma
 * Name: karma (jasify), Configuration file: <JAS_ROOT>/schedule/schedule-appengine/src/test/javascript/karma.conf.js, Karma package: /Users/krico/Projects/jas/schedule/schedule-appengine/node_modules/karma
 
+### Enabling e-mail debug output
+
+In your development environment it is possible to configure jasify to write a file (e.g.: `2015-08-16_22-03-52.eml`)
+for every e-mail message that is sent.  Of course this feature only works on development environment...
+
+To enable this feature, just set the system property `jasify.emailDebug=true`.
+The best way of doing this is to add a VM parameter to the startup configuration of your AppEngine devserver.  Like
+
+```
+ -Djasify.emailDebug=true
+```
+
+Then, you will see a line every time an e-mail is sent that looks like:
+
+```
+INFO: E-mail available at: http://localhost:8080/download/ATT477/2015-08-17_01-12-12.eml
+```
+
+Now you can open that URL and view the e-mail on your preferred e-mail reader.
 
 ## Create a local config
 

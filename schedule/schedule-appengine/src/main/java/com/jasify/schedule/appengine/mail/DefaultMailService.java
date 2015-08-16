@@ -8,7 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,6 +25,7 @@ public final class DefaultMailService implements MailService {
     public static final String DEFAULT_SENDER = "DoNotReply@jasify-schedule.appspotmail.com";
     public static final String DEFAULT_OWNER = "github@cwa.to";
     private static final Logger log = LoggerFactory.getLogger(DefaultMailService.class);
+
     private final AtomicReference<StateEnum> initializationState = new AtomicReference<>(StateEnum.NEW);
     private Session session;
     private InternetAddress senderAddress;
@@ -102,6 +106,9 @@ public final class DefaultMailService implements MailService {
             log.debug("Sending e-mail [{}] as [{}] to {}", subject, fromAddress, Arrays.toString(toAddress));
             Message message = createMessage(fromAddress, toAddress, bccAddress, subject, htmlBody, textBody);
             Transport.send(message);
+
+            MailDebug.writeDebug(message);
+
             return true;
         } catch (Exception e) {
             log.warn("Failed to send e-mail", e);
@@ -111,7 +118,7 @@ public final class DefaultMailService implements MailService {
 
     private Message createMessage(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody) throws MessagingException {
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
 
         message.setFrom(fromAddress);
 
