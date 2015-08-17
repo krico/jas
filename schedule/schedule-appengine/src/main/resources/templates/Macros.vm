@@ -1,0 +1,6 @@
+#*
+ * Macros in this file are available in any template
+ *#
+
+# This macro make html bold, is used for testing
+#macro(bold $sometext)<b>$sometext</b>#end

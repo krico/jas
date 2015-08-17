@@ -129,7 +129,12 @@ that with `com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType`.
  run `mvn apt:process`
 
 ## Google Endpoints
+
  * [Javascript API help](https://developers.google.com/api-client-library/javascript/dev/dev_jscript)
+
+## Velocity
+
+ * [Velocity Engine 1.7](http://velocity.apache.org/engine/releases/velocity-1.7/)
 
 ## Jasmine (testing javscript)
 

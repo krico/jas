@@ -202,6 +202,13 @@
             <version>4.2.0-1</version>
         </dependency>
 
+        <!-- Velocity template engine -->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
