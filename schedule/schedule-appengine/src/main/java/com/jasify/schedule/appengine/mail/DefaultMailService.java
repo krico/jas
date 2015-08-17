@@ -7,7 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.*;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -132,18 +135,23 @@ public final class DefaultMailService implements MailService {
 
         message.setSubject(subject);
 
-        Multipart mp = new MimeMultipart();
-
-        if (htmlBody != null) {
-            MimeBodyPart htmlPart = new MimeBodyPart();
-            htmlPart.setContent(htmlBody, "text/html");
-            mp.addBodyPart(htmlPart);
-        }
+        /*
+         * The section 5.1.4 of RFC 2046 defines multipart/alternative
+         * http://tools.ietf.org/html/rfc2046#section-5.1.4
+         * ... in general the LAST part is the best choice ...
+         */
+        MimeMultipart mp = new MimeMultipart("alternative");
 
         if (textBody != null) {
             MimeBodyPart textPart = new MimeBodyPart();
             textPart.setContent(textBody, "text/plain");
             mp.addBodyPart(textPart);
+        }
+
+        if (htmlBody != null) {
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlBody, "text/html");
+            mp.addBodyPart(htmlPart);
         }
 
         message.setContent(mp);
