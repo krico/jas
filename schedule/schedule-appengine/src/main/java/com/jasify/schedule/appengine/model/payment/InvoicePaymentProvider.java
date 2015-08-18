@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.model.payment;
 
 import com.google.api.client.http.GenericUrl;
+import com.google.api.server.spi.config.Singleton;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import com.jasify.schedule.appengine.besr.PaymentSlip;
@@ -36,12 +37,14 @@ public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
     public InvoicePayment newPayment() {
         String invoiceRecipient = "Waldemar Arkadiusz Szarmach\nZuerichstrasse 77D\n8134 Adliswil";
         String invoiceAccount = "01-145-6";
+        String invoiceSubscriber = "010001456";
         String invoiceIdentificationNumber = "30292600493040";
         String invoiceNumber = invoiceNumberGenerator.nextAsString();
         InvoicePayment payment = new InvoicePayment();
         //TODO: Fetch these values from ApplicationData
         payment.setRecipient(invoiceRecipient);
         payment.setAccount(invoiceAccount);
+        payment.setSubscriber(invoiceSubscriber);
         payment.setReferenceCode(new ReferenceCode(invoiceIdentificationNumber, invoiceNumber).toReferenceCode());
         return payment;
     }
@@ -53,6 +56,7 @@ public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
         payment.validate();
         PaymentSlip slip = PaymentSlipBuilder.isrChf()
                 .account(payment.getAccount())
+                .subscriber(payment.getSubscriber())
                 .amount(payment.getAmount())
                 .currency(payment.getCurrency())
                 .recipient(payment.getRecipient())

@@ -12,6 +12,7 @@ public class PaymentSlipBuilder {
 
     SlipTypeEnum slipType;
     String account;
+    String subscriber;
     String codeLine;
     String referenceCode;
     String currency = "CHF";
@@ -26,6 +27,10 @@ public class PaymentSlipBuilder {
 
     public static PaymentSlipBuilder isrChf() {
         return new PaymentSlipBuilder().slipType(SlipTypeEnum.ISR_CHF);
+    }
+
+    public static PaymentSlipBuilder isrPlusChf() {
+        return new PaymentSlipBuilder().slipType(SlipTypeEnum.ISR_Plus_CHF);
     }
 
     public PaymentSlipBuilder slipType(SlipTypeEnum slipType) {
@@ -73,8 +78,13 @@ public class PaymentSlipBuilder {
         return this;
     }
 
+    public PaymentSlipBuilder subscriber(String subscriber) {
+        this.subscriber = subscriber;
+        return this;
+    }
+
     public PaymentSlipBuilder amount(double amount) {
-        this.amount = String.format(Locale.ROOT, "%.2f", amount).replace(".","");
+        this.amount = String.format(Locale.ROOT, "%.2f", amount).replace(".", "");
         return this;
     }
 
@@ -82,8 +92,11 @@ public class PaymentSlipBuilder {
         if (StringUtils.isBlank(referenceCode)) {
             referenceCode = new ReferenceCode(identificationNumber, invoiceNumber).toReferenceCode();
         }
+        if (StringUtils.isBlank(subscriber)) {
+            subscriber = account;
+        }
         if (StringUtils.isBlank(codeLine)) {
-            codeLine = new CodeLine(slipType, amount, referenceCode, account).toCodeLine();
+            codeLine = new CodeLine(slipType, amount, referenceCode, subscriber).toCodeLine();
         }
         return new PaymentSlip(this);
     }
@@ -99,33 +112,47 @@ public class PaymentSlipBuilder {
         if (amount != null ? !amount.equals(that.amount) : that.amount != null) return false;
         if (codeLine != null ? !codeLine.equals(that.codeLine) : that.codeLine != null) return false;
         if (currency != null ? !currency.equals(that.currency) : that.currency != null) return false;
+        if (identificationNumber != null ? !identificationNumber.equals(that.identificationNumber) : that.identificationNumber != null)
+            return false;
+        if (invoiceNumber != null ? !invoiceNumber.equals(that.invoiceNumber) : that.invoiceNumber != null)
+            return false;
         if (recipient != null ? !recipient.equals(that.recipient) : that.recipient != null) return false;
         if (referenceCode != null ? !referenceCode.equals(that.referenceCode) : that.referenceCode != null)
             return false;
+        if (slipType != that.slipType) return false;
+        if (subscriber != null ? !subscriber.equals(that.subscriber) : that.subscriber != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = account != null ? account.hashCode() : 0;
+        int result = slipType != null ? slipType.hashCode() : 0;
+        result = 31 * result + (account != null ? account.hashCode() : 0);
+        result = 31 * result + (subscriber != null ? subscriber.hashCode() : 0);
         result = 31 * result + (codeLine != null ? codeLine.hashCode() : 0);
         result = 31 * result + (referenceCode != null ? referenceCode.hashCode() : 0);
         result = 31 * result + (currency != null ? currency.hashCode() : 0);
         result = 31 * result + (recipient != null ? recipient.hashCode() : 0);
         result = 31 * result + (amount != null ? amount.hashCode() : 0);
+        result = 31 * result + (identificationNumber != null ? identificationNumber.hashCode() : 0);
+        result = 31 * result + (invoiceNumber != null ? invoiceNumber.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "PaymentSlipBuilder{" +
-                "account='" + account + '\'' +
+                "slipType=" + slipType +
+                ", account='" + account + '\'' +
+                ", subscriber='" + subscriber + '\'' +
                 ", codeLine='" + codeLine + '\'' +
                 ", referenceCode='" + referenceCode + '\'' +
                 ", currency='" + currency + '\'' +
                 ", recipient='" + recipient + '\'' +
                 ", amount='" + amount + '\'' +
+                ", identificationNumber='" + identificationNumber + '\'' +
+                ", invoiceNumber='" + invoiceNumber + '\'' +
                 '}';
     }
 }

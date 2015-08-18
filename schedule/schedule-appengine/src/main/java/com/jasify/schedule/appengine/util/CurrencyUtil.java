@@ -14,7 +14,7 @@ public final class CurrencyUtil {
     }
 
     public static String formatCurrencyNumber(String currency, Double amount) {
-        currency = Preconditions.checkNotNull(StringUtils.trimToNull(currency));
+        Preconditions.checkNotNull(StringUtils.trimToNull(currency));
         Preconditions.checkNotNull(amount);
         return String.format(Locale.ROOT, "%.2f", amount);
     }

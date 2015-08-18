@@ -14,6 +14,8 @@ import org.slim3.datastore.ModelRef;
 public class InvoicePayment extends Payment {
     private String account;
 
+    private String subscriber;
+
     private String referenceCode;
 
     private String recipient;
@@ -38,6 +40,14 @@ public class InvoicePayment extends Payment {
 
     public void setAccount(String account) {
         this.account = account;
+    }
+
+    public String getSubscriber() {
+        return subscriber;
+    }
+
+    public void setSubscriber(String subscriber) {
+        this.subscriber = subscriber;
     }
 
     public String getRecipient() {
@@ -70,6 +80,7 @@ public class InvoicePayment extends Payment {
                 super.toString() +
                 ", referenceCode='" + referenceCode + '\'' +
                 ", account='" + account + '\'' +
+                ", subscriber='" + subscriber + '\'' +
                 ", recipient='" + StringUtils.replace(recipient, "\n", "|") + '\'' +
                 '}';
     }

@@ -122,10 +122,18 @@ public class CodeLine {
             R = CheckDigit.complete(R);
         }
 
-        String S = leftPad(onlyDigits(subscriber), SUBSCRIBER_LENGTH);
+        String S = leftPad(onlyDigits(subscriber), SUBSCRIBER_LENGTH - 1);
         if (S.length() > SUBSCRIBER_LENGTH) {
             throw new IllegalCodeLineException("Subscriber length exceeds " + (SUBSCRIBER_LENGTH - 1) + " [" + S + "]");
         }
+        if (S.length() == SUBSCRIBER_LENGTH) {
+            if (!CheckDigit.isValid(S)) {
+                throw new IllegalCodeLineException("Subscriber check digit is invalid [" + S + "]");
+            }
+        } else {
+            S = CheckDigit.complete(S);
+        }
+
 
         return CheckDigit.complete(C + A) + '>'
                 + R + "+ "

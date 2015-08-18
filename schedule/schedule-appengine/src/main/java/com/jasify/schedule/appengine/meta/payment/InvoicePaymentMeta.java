@@ -8,6 +8,9 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment> account = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment>(this, "account", "account");
 
     /** */
+    public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment> subscriber = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment>(this, "subscriber", "subscriber");
+
+    /** */
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment> referenceCode = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment>(this, "referenceCode", "referenceCode");
 
     /** */
@@ -80,6 +83,7 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
     public com.jasify.schedule.appengine.model.payment.InvoicePayment entityToModel(com.google.appengine.api.datastore.Entity entity) {
         com.jasify.schedule.appengine.model.payment.InvoicePayment model = new com.jasify.schedule.appengine.model.payment.InvoicePayment();
         model.setAccount((java.lang.String) entity.getProperty("account"));
+        model.setSubscriber((java.lang.String) entity.getProperty("subscriber"));
         model.setReferenceCode((java.lang.String) entity.getProperty("referenceCode"));
         model.setRecipient((java.lang.String) entity.getProperty("recipient"));
         if (model.getAttachmentRef() == null) {
@@ -119,6 +123,7 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
             entity = new com.google.appengine.api.datastore.Entity(kind);
         }
         entity.setProperty("account", m.getAccount());
+        entity.setProperty("subscriber", m.getSubscriber());
         entity.setProperty("referenceCode", m.getReferenceCode());
         entity.setProperty("recipient", m.getRecipient());
         if (m.getAttachmentRef() == null) {
@@ -222,6 +227,10 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
             writer.setNextPropertyName("account");
             encoder0.encode(writer, m.getAccount());
         }
+        if(m.getSubscriber() != null){
+            writer.setNextPropertyName("subscriber");
+            encoder0.encode(writer, m.getSubscriber());
+        }
         if(m.getReferenceCode() != null){
             writer.setNextPropertyName("referenceCode");
             encoder0.encode(writer, m.getReferenceCode());
@@ -312,6 +321,8 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
         org.slim3.datastore.json.Default decoder0 = new org.slim3.datastore.json.Default();
         reader = rootReader.newObjectReader("account");
         m.setAccount(decoder0.decode(reader, m.getAccount()));
+        reader = rootReader.newObjectReader("subscriber");
+        m.setSubscriber(decoder0.decode(reader, m.getSubscriber()));
         reader = rootReader.newObjectReader("referenceCode");
         m.setReferenceCode(decoder0.decode(reader, m.getReferenceCode()));
         reader = rootReader.newObjectReader("recipient");

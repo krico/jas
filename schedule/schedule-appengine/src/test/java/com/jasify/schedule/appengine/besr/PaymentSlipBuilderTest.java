@@ -53,7 +53,41 @@ public class PaymentSlipBuilderTest {
                 .amount(20.12d)
                 .build();
 
-        assertEquals("0100000020124>120000000000234478943216899+ 001000162>", slip.getCodeLine());
+        assertEquals("0100000020124>120000000000234478943216899+ 010001628>", slip.getCodeLine());
+    }
+
+    @Test
+    public void testCodeLineIsGeneratedWithSubscriberNumberWhenNotSpecified() throws Exception {
+        PaymentSlip slip = PaymentSlipBuilder.isrChf()
+                .account("00016-2")
+                .subscriber("010001628")
+                .referenceCode("12000000000023447894321689")
+                .amount(20.12d)
+                .build();
+
+        assertEquals("0100000020124>120000000000234478943216899+ 010001628>", slip.getCodeLine());
+    }
+
+    @Test
+    public void testCodeLineWithSzarmachData() throws Exception {
+        PaymentSlip slip = PaymentSlipBuilder.isrPlusChf()
+                .account("01-145-6")
+                .subscriber("010001456")
+                .referenceCode("302926004930400052107000021")
+                .build();
+
+        assertEquals("042>302926004930400052107000021+ 010001456>", slip.getCodeLine());
+    }
+
+    @Test
+    public void testCodeLineWithSzarmachDataComplete() throws Exception {
+        PaymentSlip slip = PaymentSlipBuilder.isrPlusChf()
+                .account("01-145-6")
+                .subscriber("01000145")
+                .referenceCode("302926004930400052107000021")
+                .build();
+
+        assertEquals("042>302926004930400052107000021+ 010001456>", slip.getCodeLine());
     }
 
     @Test
