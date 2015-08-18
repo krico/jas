@@ -49,6 +49,7 @@ import java.util.Set;
                 JasActivityTransformer.class,
                 JasActivityTypeTransformer.class,
                 JasGroupTransformer.class,
+                JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
                 JasRepeatDetailsTransformer.class,

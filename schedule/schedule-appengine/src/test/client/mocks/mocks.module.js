@@ -140,6 +140,9 @@
                 getTransactions: nop,
                 createCheckoutPayment: nop,
                 executePayment: nop
+            },
+            histories: {
+                query: nop
             }
         };
 

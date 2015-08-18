@@ -83,12 +83,19 @@ public class HttpUserSession implements UserSession, HttpSessionBindingListener,
     }
 
     @Override
+    public Key getUserIdKey() {
+        return userId;
+    }
+
+    @Override
     public boolean isAdmin() {
         return admin;
     }
 
     @Override
-    public boolean isOrgMember() { return orgMember; }
+    public boolean isOrgMember() {
+        return orgMember;
+    }
 
     @Override
     public String getSessionId() {

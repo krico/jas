@@ -440,6 +440,22 @@
                     }
                 }
             })
-        ;
+            .when('/admin/histories', {
+                templateUrl: 'admin/history/admin-histories.html',
+                controller: 'AdminHistoriesController',
+                controllerAs: 'vm',
+                resolve: {
+                    histories: /*@ngInject*/ function ($q, Allow, History) {
+                        return Allow.admin().then(
+                            function () {
+                                return History.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            });
     }
 })(angular);

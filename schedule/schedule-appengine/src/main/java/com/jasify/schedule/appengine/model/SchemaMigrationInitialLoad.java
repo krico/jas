@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.dao.common.RepeatDetailsDao;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserService;
@@ -38,6 +39,8 @@ class SchemaMigrationInitialLoad {
     }
 
     void createInitialLoad(String loadType) throws Exception {
+        HistoryHelper.addMessage("Development initial load type is [" + loadType + "]");
+
         switch (loadType) {
             case E2E:
                 createInitialLoadE2E();
@@ -94,6 +97,7 @@ class SchemaMigrationInitialLoad {
             User user = userService.create(new User(name, name + "@jasify.com", name + " User"), String.format("secret%d", i));
             users.add(user);
         }
+        HistoryHelper.addMessage("Created " + users.size() + " users");
 
         OrganizationDao organizationDao = new OrganizationDao();
         for (int i = 0; i < 5; ++i) {
@@ -105,6 +109,8 @@ class SchemaMigrationInitialLoad {
             organizationDao.addUserToOrganization(organization.getId(), user.getId());
             organizations.add(organization);
         }
+        HistoryHelper.addMessage("Created " + organizations.size() + " organizations");
+
 
         ActivityService activityService = ActivityServiceFactory.getActivityService();
         ActivityTypeDao activityTypeDao = new ActivityTypeDao();
@@ -203,6 +209,8 @@ class SchemaMigrationInitialLoad {
 
             activityService.addActivityPackage(activityPackageOdd, odd);
         }
+        HistoryHelper.addMessage("Created several activities and other things");
+
     }
 
 }

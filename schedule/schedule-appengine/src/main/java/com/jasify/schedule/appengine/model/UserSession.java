@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.model;
 
+import com.google.appengine.api.datastore.Key;
+
 /**
  * @author krico
  * @since 11/11/14.
@@ -11,6 +13,8 @@ public interface UserSession {
     void invalidate();
 
     long getUserId();
+
+    Key getUserIdKey();
 
     String getSessionId();
 

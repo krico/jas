@@ -14,7 +14,7 @@ public class QueryParameters implements Serializable {
         this.parameters = parameters;
     }
 
-    public static QueryParameters of(Serializable[] parameters) {
+    public static QueryParameters of(Serializable... parameters) {
         return new QueryParameters(parameters);
     }
 

@@ -1,0 +1,80 @@
+<div class="card">
+    <div class="card-header">
+        <h2>{{ 'HISTORIES' | translate }}
+            <small>
+                {{ 'HISTORIES_DESCRIPTION' | translate }}
+            </small>
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="bootgrid-header container-fluid">
+            <div class="actionBar">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="search form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon glyphicon-search"></span>
+                            <input ng-model-options="{ debounce: 500 }"
+                                   ng-model="vm.query"
+                                   type="text" name="query" id="query" class="search-field form-control"
+                                   placeholder="{{ 'SEARCH' | translate }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="actions btn-group btn-block">
+                        <div class="dropdown btn-group btn-block">
+                            <button type="button" class="btn btn-default btn-block dropdown-toggle"
+                                    data-toggle="dropdown">
+                                <span ng-if="!vm.historyType" class="dropdown-text">
+                                    {{ 'HISTORY_TYPE' | translate }}
+                                </span>
+                                <span ng-if="vm.historyType" class="dropdown-text">
+                                    <history-icon history-type="{{vm.historyType}}"></history-icon>
+                                    {{'HT_'+vm.historyType | translate}}
+                                </span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right" role="menu">
+                                <li ng-class="{ 'active': !vm.historyType }">
+                                    <a href prevent="click" ng-click="vm.selectHistoryType(false)"
+                                       class="dropdown-item dropdown-item-button">
+                                        <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{'HT_ALL' | translate}}</a>
+                                </li>
+                                <li ng-repeat="type in vm.historyTypes"
+                                    ng-class="{ 'active': vm.historyType == type }">
+                                    <a href prevent="click" ng-click="vm.selectHistoryType(type)"
+                                       class="dropdown-item dropdown-item-button">
+                                        <history-icon history-type="{{type}}"></history-icon>
+                                        &nbsp;{{'HT_'+type | translate}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <table id="history-list" class="table table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>{{ 'CREATED' | translate }}</th>
+            <th>{{ 'DESCRIPTION' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="history in vm.histories |reverse |filter:vm.query as results track by history.id">
+            <td class="row-commands">
+                <history-icon history="history" data-row-id="{{history.id}}"></history-icon>
+            </td>
+            <td class="created">
+                <nobr>{{history.created | amDateFormat:'L LT' }}</nobr>
+            </td>
+            <td>{{history.description}}</td>
+        </tr>
+        <tr ng-if="results.length == 0">
+            <td colspan="3">No results found...</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
