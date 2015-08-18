@@ -53,7 +53,7 @@ public class PaymentSlipBuilderTest {
                 .amount(20.12d)
                 .build();
 
-        assertEquals("0100000020124>120000000000234478943216899+ 010001628>", slip.getCodeLine());
+        assertEquals("0100000020124>120000000000234478943216899+ 001000162>", slip.getCodeLine());
     }
 
     @Test
@@ -99,5 +99,17 @@ public class PaymentSlipBuilderTest {
         assertEquals(expected, builder.amount(0.10d));
         expected.amount = "987654";
         assertEquals(expected, builder.amount(9876.54d));
+        expected.amount = "123";
+        assertEquals(expected, builder.amount(1.23d));
+        expected.amount = "034";
+        assertEquals(expected, builder.amount(0.34d));
+        expected.amount = "12345678910";
+        assertEquals(expected, builder.amount(123456789.10d));
+    }
+
+    @Test
+    public void testAmountAsDoubleWeirdCase() throws Exception {
+        expected.amount = "1234";
+        assertEquals(expected, builder.amount(12.34d));
     }
 }

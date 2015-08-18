@@ -96,21 +96,6 @@ public class CodeLineTest {
     }
 
     @Test
-    public void testSubscriberCheckDigitThrows() {
-        thrown.expect(IllegalCodeLineException.class);
-        thrown.expectMessage(startsWith("Subscriber check digit is invalid"));
-
-        //SSSSSSSSS
-        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "12345678901234567890123456", "123456789").toCodeLine();
-    }
-
-    @Test
-    public void testSubscriberCheckDigitPasses() {
-        //SSSSSSSSS
-        new CodeLine(SlipTypeEnum.ISR_CHF, "1234567890", "12345678901234567890123456", CheckDigit.complete("12345678")).toCodeLine();
-    }
-
-    @Test
     public void testAmountRequiredForWithAmountTypesEmpty() {
         thrown.expect(IllegalCodeLineException.class);
         thrown.expectMessage(startsWith("Amount is required"));
@@ -172,15 +157,6 @@ public class CodeLineTest {
     }
 
     @Test
-    public void testNoAmountSubscriberCheckDigitThrows() {
-        thrown.expect(IllegalCodeLineException.class);
-        thrown.expectMessage(startsWith("Subscriber check digit is invalid"));
-
-        //SSSSSSSSS
-        new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "12345678901234567890123456", "123456789").toCodeLine();
-    }
-
-    @Test
     public void testNoAmountSubscriberCheckDigitPasses() {
         //SSSSSSSSS
         new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "12345678901234567890123456", CheckDigit.complete("12345678")).toCodeLine();
@@ -188,7 +164,7 @@ public class CodeLineTest {
 
     @Test
     public void testISR_CHFExample() {
-        CodeLine line = new CodeLine(SlipTypeEnum.ISR_CHF, "2012", "12000000000023447894321689", "01000162");
+        CodeLine line = new CodeLine(SlipTypeEnum.ISR_CHF, "2012", "12000000000023447894321689", "010001628");
         String codeLine = line.toCodeLine();
         assertNotNull(codeLine);
         assertEquals("0100000020124>120000000000234478943216899+ 010001628>", codeLine);
@@ -196,7 +172,7 @@ public class CodeLineTest {
 
     @Test
     public void testISR_Plus_CHFExample() {
-        CodeLine line = new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "12000000000023447894321689", "01000162");
+        CodeLine line = new CodeLine(SlipTypeEnum.ISR_Plus_CHF, null, "12000000000023447894321689", "010001628");
         String codeLine = line.toCodeLine();
         assertNotNull(codeLine);
         assertEquals("042>120000000000234478943216899+ 010001628>", codeLine);
@@ -204,7 +180,7 @@ public class CodeLineTest {
 
     @Test
     public void testISR_EURExample() {
-        CodeLine line = new CodeLine(SlipTypeEnum.ISR_EUR, "0000044000", "96111690000000660000000928", "03000162");
+        CodeLine line = new CodeLine(SlipTypeEnum.ISR_EUR, "0000044000", "96111690000000660000000928", "030001625");
         String codeLine = line.toCodeLine();
         assertNotNull(codeLine);
         assertEquals("2100000440001>961116900000006600000009284+ 030001625>", codeLine);
@@ -212,7 +188,7 @@ public class CodeLineTest {
 
     @Test
     public void testISR_Plus_EURExample() {
-        CodeLine line = new CodeLine(SlipTypeEnum.ISR_Plus_EUR, null, "96111690000000660000000928", "03000162");
+        CodeLine line = new CodeLine(SlipTypeEnum.ISR_Plus_EUR, null, "96111690000000660000000928", "030001625");
         String codeLine = line.toCodeLine();
         assertNotNull(codeLine);
         assertEquals("319>961116900000006600000009284+ 030001625>", codeLine);

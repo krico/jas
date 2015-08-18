@@ -1,9 +1,6 @@
 package com.jasify.schedule.appengine.besr;
 
-import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
 
@@ -77,9 +74,7 @@ public class PaymentSlipBuilder {
     }
 
     public PaymentSlipBuilder amount(double amount) {
-        int natural = (int) amount;
-        int rem = (int) ((amount - natural) * 100);
-        this.amount = String.valueOf(natural) + String.format(Locale.ROOT, "%02d", rem);
+        this.amount = String.format(Locale.ROOT, "%.2f", amount).replace(".","");
         return this;
     }
 

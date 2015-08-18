@@ -34,9 +34,9 @@ public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
 
     @Override
     public InvoicePayment newPayment() {
-        String invoiceRecipient = "Jasify GmbH\nIrgendeinestrasse 20\nIrgendeinstadt";
-        String invoiceAccount = "1-2345-6";
-        String invoiceIdentificationNumber = "123456";
+        String invoiceRecipient = "Waldemar Arkadiusz Szarmach\nZuerichstrasse 77D\n8134 Adliswil";
+        String invoiceAccount = "01-145-6";
+        String invoiceIdentificationNumber = "30292600493040";
         String invoiceNumber = invoiceNumberGenerator.nextAsString();
         InvoicePayment payment = new InvoicePayment();
         //TODO: Fetch these values from ApplicationData
