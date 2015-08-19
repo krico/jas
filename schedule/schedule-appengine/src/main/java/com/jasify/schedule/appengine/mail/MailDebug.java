@@ -35,7 +35,7 @@ public final class MailDebug {
             message.writeTo(os);
             Attachment attachment = AttachmentHelper.create(filename, "message/rfc822", os.toByteArray());
             new AttachmentDao().save(attachment);
-            log.info("E-mail available at: {}", AttachmentHelper.makeDownloadUrl(attachment));
+            log.info("Recorded e-mail\n\tSubject: {}\n\tURL: {}", message.getSubject(), AttachmentHelper.makeDownloadUrl(attachment));
         } catch (Exception e) {
             log.warn("Failed to write debug email", e);
         }

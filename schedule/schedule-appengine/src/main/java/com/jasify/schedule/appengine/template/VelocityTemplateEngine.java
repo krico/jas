@@ -5,6 +5,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -56,25 +57,36 @@ public class VelocityTemplateEngine implements TemplateEngine {
     }
 
     @Override
-    public String render(String templateName, Map<String, ?> context) throws TemplateEngineException {
+    public void render(String templateName, Context context, Writer writer) throws TemplateEngineException {
+        try {
+            String templatePath = templatePath(templateName);
+            Template template = getEngine().getTemplate(templatePath);
+            template.merge(context, writer);
+        } catch (ResourceNotFoundException e) {
+            throw new TemplateEngineException(e.getMessage() + " when parsing template[" + templateName + "]: ", e);
+        } catch (ParseErrorException e) {
+            throw new TemplateEngineException("Failed to parse template: " + templateName, e);
+        } catch (MethodInvocationException e) {
+            throw new TemplateEngineException("Failed to invoke a method on an object of template: " + templateName, e);
+        }
+
+    }
+
+    @Override
+    public String render(String templateName, Context context) throws TemplateEngineException {
         StringWriter writer = new StringWriter();
         render(templateName, context, writer);
         return writer.toString();
     }
 
     @Override
+    public String render(String templateName, Map<String, ?> context) throws TemplateEngineException {
+        return render(templateName, new VelocityContext(context));
+    }
+
+    @Override
     public void render(String templateName, Map<String, ?> context, Writer writer) throws TemplateEngineException {
-        try {
-            String templatePath = templatePath(templateName);
-            Template template = getEngine().getTemplate(templatePath);
-            template.merge(new VelocityContext(context), writer);
-        } catch (ResourceNotFoundException e) {
-            throw new TemplateEngineException("Template not found: " + templateName, e);
-        } catch (ParseErrorException e) {
-            throw new TemplateEngineException("Failed to parse template: " + templateName, e);
-        } catch (MethodInvocationException e) {
-            throw new TemplateEngineException("Failed to invoke a method on an object of template: " + templateName, e);
-        }
+        render(templateName, new VelocityContext(context), writer);
     }
 
     private String templatePath(String templateName) {

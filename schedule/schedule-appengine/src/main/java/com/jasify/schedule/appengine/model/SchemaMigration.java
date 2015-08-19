@@ -1,12 +1,10 @@
 package com.jasify.schedule.appengine.model;
 
-import com.google.api.server.spi.EnvUtil;
 import com.google.appengine.api.datastore.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.Version;
-import com.jasify.schedule.appengine.mail.MailParser;
-import com.jasify.schedule.appengine.mail.MailServiceFactory;
+import com.jasify.schedule.appengine.communication.Communicator;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
@@ -59,12 +57,8 @@ public final class SchemaMigration {
             return false;
         }
         log.info("New version installed: {}", currentVersion);
-        String instanceVersion = deployVersionName + "/" + Version.toShortVersionString();
-        String subject = String.format("[Jasify] New Version In Prod [%s]", instanceVersion);
         try {
-            MailParser mailParser = MailParser.createNewVersionEmail(deployVersionName, Version.getVersion(), Version.getTimestampVersion(),
-                    Version.getBranch(), Version.getNumber(), EnvironmentUtil.defaultVersionUrl());
-            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
+            Communicator.notifyOfNewVersion();
         } catch (Exception e) {
             log.warn("Failed to notify jasify", e);
         }

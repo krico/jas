@@ -4,3 +4,11 @@
 
 # This macro make html bold, is used for testing
 #macro(bold $sometext)<b>$sometext</b>#end
+
+#*
+ * This renders a default HTML page for e-mail. You can use it like so:
+ *     #@htmlMail()
+ *     <b>Hello!</b>
+ *     #end
+ *#
+#macro(htmlMail $title)#parse("/templates/HtmlMail.vm")#end

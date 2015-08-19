@@ -3,16 +3,8 @@ package com.jasify.schedule.appengine.util;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import com.jasify.schedule.appengine.model.SchemaMigration;
-import com.jasify.schedule.appengine.model.application.ApplicationData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,12 +32,16 @@ public final class EnvironmentUtil {
         return currentEnvironment().getAppId();
     }
 
+    /**
+     * @return Result is of the form <major>.<minor> where <major> is the version name supplied at deploy time and <minor> is a timestamp value maintained by App Engine.
+     * @see <a href="https://cloud.google.com/appengine/docs/java/javadoc/com/google/apphosting/api/ApiProxy.Environment#getVersionId()">https://cloud.google.com/appengine/docs/java/javadoc/com/google/apphosting/api/ApiProxy.Environment#getVersionId()</a>
+     */
     public static String versionId() {
         return currentEnvironment().getVersionId();
     }
 
     public static String deployVersionName() {
-        String versionId = currentEnvironment().getVersionId();
+        String versionId = versionId();
         Matcher matcher = VERSION_PATTERN.matcher(versionId);
         if (matcher.matches()) {
             return matcher.group(1);
