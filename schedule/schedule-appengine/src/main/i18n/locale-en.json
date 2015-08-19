@@ -64,8 +64,6 @@
   "CREATE_ORGANIZATION_TYPE_BEFORE_ACTIVITY_TYPE": "Before you can create an Activity Type, you need to create an Organization",
   "CREATED": "Created",
   "CURRENCY_IS_REQUIRED": "Currency is required",
-  "CURRENT_PASSWORD": "Current Password",
-  "CURRENT_PASSWORD_IS_REQUIRED": "Current Password is required",
   "DELETE": "Delete",
   "DESCRIPTION": "Description",
   "DESCRIPTION_IS_REQUIRED": "Description is required",
