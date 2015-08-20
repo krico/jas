@@ -51,13 +51,6 @@ public class MailParser {
         textBuilder = createStringBuilder(resource + ".txt");
     }
 
-    public static MailParser createJasifyUserSignUpEmail(User user) throws Exception {
-        MailParser mailParser = new MailParser("/jasify/UserSignUp");
-        mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));
-        mailParser.substitute(SubstituteKey.UserName, user.getName());
-        return mailParser;
-    }
-
     private static String formatDate(Date date) {
         return new DateTime(date).toString(DTF);
     }

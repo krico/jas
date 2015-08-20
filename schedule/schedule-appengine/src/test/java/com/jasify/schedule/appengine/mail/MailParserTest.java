@@ -168,24 +168,6 @@ public class MailParserTest {
     }
 
     @Test
-    public void testJasifyUserSignUpEmailAsText() throws Exception {
-        MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
-        String text = mailParser.getText();
-
-        assert (text.contains("Name    : " + user.getRealName()));
-        assert (text.contains("Username: " + user.getName()));
-    }
-
-    @Test
-    public void testJasifyUserSignUpEmailAsHtml() throws Exception {
-        MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
-        String html = mailParser.getHtml();
-
-        assert (html.contains(user.getRealName()));
-        assert (html.contains(user.getName()));
-    }
-
-    @Test
     public void testSubscriberPasswordRecoveryAsText() throws Exception {
         MailParser mailParser = MailParser.createSubscriberPasswordRecoveryEmail("PasswordRecoveryUrl");
         String text = mailParser.getText();

@@ -2,10 +2,12 @@ package com.jasify.schedule.appengine.communication;
 
 import com.jasify.schedule.appengine.Version;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
+import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.template.TemplateEngine;
 import com.jasify.schedule.appengine.template.TemplateEngineBuilder;
 import com.jasify.schedule.appengine.template.TemplateEngineException;
 import com.jasify.schedule.appengine.template.TemplateNames;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import org.slf4j.Logger;
@@ -32,9 +34,21 @@ public class Communicator {
         VelocityContext context = new VelocityContext(GLOBAL_CONTEXT.get());
         context.put("version", Version.INSTANCE);
         String html = templateEngine.render(TemplateNames.JASIFY_NEW_VERSION_HTML, context);
-        String text = templateEngine.render(TemplateNames.JASIFY_NEW_VERSION_TXT, context);;
+        String text = templateEngine.render(TemplateNames.JASIFY_NEW_VERSION_TXT, context);
+        ;
 
         String subject = String.format("[Jasify] New Version In Prod (%s) [%s]", Version.getDeployVersion(), Version.toShortVersionString());
+        MailServiceFactory.getMailService().sendToApplicationOwners(subject, html, text /*TODO: text version*/);
+    }
+
+    public static void notifyOfNewUser(User user) throws TemplateEngineException {
+        VelocityContext context = new VelocityContext(GLOBAL_CONTEXT.get());
+        context.put("user", user);
+        String html = templateEngine.render(TemplateNames.JASIFY_NEW_USER_HTML, context);
+        String text = templateEngine.render(TemplateNames.JASIFY_NEW_USER_TXT, context);
+
+        String nonBlankName = StringUtils.isNoneBlank(user.getRealName()) ? user.getRealName() : user.getName();
+        String subject = String.format("[Jasify] New User [%s]", nonBlankName);
         MailServiceFactory.getMailService().sendToApplicationOwners(subject, html, text /*TODO: text version*/);
     }
 }
