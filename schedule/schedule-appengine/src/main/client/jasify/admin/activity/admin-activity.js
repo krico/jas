@@ -177,7 +177,11 @@
         function initDates() {
 
             $scope.$watch('vm.activity.start', function () {
-                vm.activity.finish = vm.activity.start;
+                if (vm.fromTime.hour > vm.toTime.hour) {
+                    vm.activity.finish = $moment(activity.start).add(1, 'day').format();
+                } else {
+                    vm.activity.finish = vm.activity.start;
+                }
             });
 
             $scope.$watch('vm.activity.finish', function () {
@@ -199,8 +203,8 @@
             };
 
             if (!activity.id) {
-                activity.start = $moment().add(1, 'day').add(1, 'hour').set('minute', 0).format();
-                activity.finish = $moment().add(1, 'day').add(2, 'hour').set('minute', 0).format();
+                activity.start = $moment().add(1, 'day').add(1, 'hour').set('minute', 0).set('second', 0).format();
+                activity.finish = $moment(activity.start).add(1, 'hour').format();
             }
 
             vm.fromTime = {
