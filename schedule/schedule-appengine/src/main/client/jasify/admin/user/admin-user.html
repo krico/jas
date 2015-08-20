@@ -102,21 +102,6 @@
                 <form role="form" novalidate ng-submit="vm.forms.passwordForm.$valid && vm.changePassword()" name="vm.forms.passwordForm">
                     <div jas-has-feedback class="form-group fg-float">
                         <div class="fg-line">
-                            <input type="password" class="form-control" id="ch.oldPassword" name="oldPassword"
-                                   ng-model="vm.pw.oldPassword"
-                                   placeholder="{{ 'ENTER_CURRENT_PASSWORD' | translate }}"
-                                   required>
-                        </div>
-                        <label class="fg-label">{{ 'CURRENT_PASSWORD' | translate }}</label>
-                        <jas-feedback-icon-valid field="vm.forms.passwordForm.oldPassword"></jas-feedback-icon-valid>
-                        <jas-feedback-icon-invalid field="vm.forms.passwordForm.oldPassword" form="vm.passwordForm.userForm"></jas-feedback-icon-invalid>
-                        <jas-error-help-block field="vm.forms.passwordForm.oldPassword" form="vm.forms.passwordForm">
-                            <div ng-message="required"><span>{{ 'CURRENT_PASSWORD_IS_REQUIRED' | translate }}</span>
-                            </div>
-                        </jas-error-help-block>
-                    </div>
-                    <div jas-has-feedback class="form-group fg-float">
-                        <div class="fg-line">
                             <input type="password" class="form-control" id="ch.password" name="password"
                                    ng-model="vm.pw.newPassword"
                                    placeholder="{{ 'ENTER_PASSWORD' | translate }}"
