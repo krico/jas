@@ -12,3 +12,4 @@
  *     #end
  *#
 #macro(htmlMail $title)#parse("/templates/HtmlMail.vm")#end
+#macro(textMail $title)#parse("/templates/TextMail.vm")#end

@@ -51,17 +51,6 @@ public class MailParser {
         textBuilder = createStringBuilder(resource + ".txt");
     }
 
-    public static MailParser createNewVersionEmail(String appEngineVersion, String version, String timestamp, String branch, String number, String jasifyUrl) throws Exception {
-        MailParser mailParser = new MailParser("/jasify/NewVersion");
-        mailParser.substitute(SubstituteKey.Version, version);
-        mailParser.substitute(SubstituteKey.AppEngineVersion, appEngineVersion);
-        mailParser.substitute(SubstituteKey.Timestamp, timestamp);
-        mailParser.substitute(SubstituteKey.Branch, branch);
-        mailParser.substitute(SubstituteKey.Number, number);
-        mailParser.substitute(SubstituteKey.JasifyUrl, jasifyUrl);
-        return mailParser;
-    }
-
     public static MailParser createJasifyUserSignUpEmail(User user) throws Exception {
         MailParser mailParser = new MailParser("/jasify/UserSignUp");
         mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));

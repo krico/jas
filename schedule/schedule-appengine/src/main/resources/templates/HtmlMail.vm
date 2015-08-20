@@ -9,7 +9,7 @@
         <td align="left">
             <p>
                 <a href="$app.Url" target="_blank">
-                    <img src="$app.Logo" border="0">
+                    <img src="$app.Logo" border="0" width="120px">
                 </a>
             </p>
 

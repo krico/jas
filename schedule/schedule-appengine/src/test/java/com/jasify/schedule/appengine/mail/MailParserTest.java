@@ -472,16 +472,4 @@ public class MailParserTest {
         assert (html.contains("Dear Fred BlaBla"));
         assert (html.contains("MagicUrl"));
     }
-
-    @Test
-    public void testNewVersionEmail() throws Exception {
-        MailParser mailParser = MailParser.createNewVersionEmail("aev", "Beta", "222", "ABC", "#2", "https://URL");
-        String text = mailParser.getText();
-
-        assert (text.contains("Version    : Beta"));
-        assert (text.contains("Timestamp  : 222"));
-        assert (text.contains("Branch     : ABC"));
-        assert (text.contains("Number     : #2"));
-        assert (text.contains("Try it out at: https://URL"));
-    }
 }
