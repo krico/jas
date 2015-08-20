@@ -5,8 +5,6 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
 import com.jasify.schedule.appengine.meta.SequenceMeta;
-import com.jasify.schedule.appengine.meta.history.HistoryMeta;
-import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.application.ApplicationMeta;
 import com.jasify.schedule.appengine.meta.application.ApplicationPropertyMeta;
@@ -18,6 +16,7 @@ import com.jasify.schedule.appengine.meta.common.GroupMeta;
 import com.jasify.schedule.appengine.meta.common.GroupUserMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
+import com.jasify.schedule.appengine.meta.history.HistoryMeta;
 import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.meta.payment.workflow.PaymentWorkflowMeta;
@@ -34,6 +33,7 @@ import org.slim3.datastore.Datastore;
  * @since 22/03/15.
  */
 public final class KeyUtil {
+    public static final KeyUtil INSTANCE = new KeyUtil();
     public static final char PARENT_SEPARATOR_CHAR = '-';
     public static final char STR_LEN_BEGIN = '(';
     public static final char STR_LEN_END = ')';

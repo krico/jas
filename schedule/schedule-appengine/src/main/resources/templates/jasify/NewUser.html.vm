@@ -1,0 +1,26 @@
+#if($sut.isNotBlank($user.RealName))
+    #set($title="New User '$user.RealName'")
+#else
+    #set($title="New User '$user.Name'")
+#end
+#@htmlMail($title)
+    #@box($title)
+    <p><b>Dear JASIFY Team,</b></p>
+
+    <p>
+        A new user has signed up!
+    </p>
+        #@fieldValueTable()
+            #fieldValueRow("Id", $kut.keyToString($user.Id))
+            #fieldValueRow("Name", $user.Name)
+            #fieldValueRow("Real Name", $!user.RealName)
+            #fieldValueRow("E-mail", $user.Email)
+            #fieldValueRow("Created", $user.Created)
+        #end
+    <p>
+    <p><a href="${app.Url}/#/admin/user/$kut.keyToString($user.Id)">Check his profile!</a></p>
+    <p>
+        Go team JASIFY!!!
+    </p>
+    #end
+#end

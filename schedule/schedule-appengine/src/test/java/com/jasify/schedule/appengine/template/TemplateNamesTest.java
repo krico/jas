@@ -4,6 +4,7 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.Version;
 import com.jasify.schedule.appengine.communication.ApplicationContext;
 import com.jasify.schedule.appengine.communication.ApplicationContextImpl;
+import com.jasify.schedule.appengine.model.users.User;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import org.junit.AfterClass;
@@ -12,9 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slim3.datastore.Datastore;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Date;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -26,8 +29,8 @@ import static junit.framework.TestCase.assertTrue;
  * @author krico
  * @since 20/08/15.
  */
-public class RenderTemplatesTest {
-    private static final Logger log = LoggerFactory.getLogger(RenderTemplatesTest.class);
+public class TemplateNamesTest {
+    private static final Logger log = LoggerFactory.getLogger(TemplateNamesTest.class);
     private static TemplateEngine engine;
     private File templateDir;
 
@@ -65,6 +68,28 @@ public class RenderTemplatesTest {
         assertJasifyNewVersion(TemplateNames.JASIFY_NEW_VERSION_TXT);
     }
 
+    private void assertJasifyNewUser(String templateName) throws Exception {
+        VelocityContext context = new VelocityContext(new TestApplicationContext());
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 19760715));
+        user.setEmail("new@jasify.com");
+        user.setName("new@jasify.com");
+        user.setRealName("John Doe");
+        user.setCreated(new Date());
+        context.put("user", user);
+        render(templateName, context);
+    }
+
+    @Test
+    public void testJasifyNewUserHtml() throws Exception {
+        assertJasifyNewUser(TemplateNames.JASIFY_NEW_USER_HTML);
+    }
+
+    @Test
+    public void testJasifyNewUserTxt() throws Exception {
+        assertJasifyNewUser(TemplateNames.JASIFY_NEW_USER_TXT);
+    }
+
     private void render(final String templateName, final Context context) throws Exception {
         assertTrue(templateName.endsWith(".vm"));
         String filename = templateName.substring(0, templateName.length() - 3);
@@ -77,9 +102,10 @@ public class RenderTemplatesTest {
         }
     }
 
-    public static class TestApplicationContext extends VelocityContext implements ApplicationContext {
-        public TestApplicationContext() {
-            put(App.CONTEXT_KEY, new App() {
+    public static class TestApplicationContext extends ApplicationContextImpl implements ApplicationContext {
+        @Override
+        protected App createApp() {
+            return new App() {
                 @Override
                 public String getLogo() {
                     return getUrl() + ApplicationContextImpl.LOGO_PATH;
@@ -89,7 +115,7 @@ public class RenderTemplatesTest {
                 public String getUrl() {
                     return "http://localhost:8080";
                 }
-            });
+            };
         }
     }
 }

@@ -1,38 +1,25 @@
 #set($title="New Version $version.toShortVersionString()")
 #@htmlMail($title)
-    #macro(row $field $value)
-    <tr>
-        <th align="right">$field:</th>
-        <td align="left">$value</td>
-    </tr>#end
-<table width="100%" border="0" cellspacing="0" cellpadding="5" align="center">
-    <tr valign="top">
-        <td bgcolor="#FFFFFF">
-            <h3>$title</h3>
+    #@box($title)
+    <p><b>Dear JASIFY Team,</b></p>
 
-            <p><span style="font-family: verdana,arial,helvetica; font-size: smaller;">
-                <b>Dear JASIFY Team,</b>
-            </span></p>
+    <p>
+        A new version has been started in prod!
+    </p>
+        #@fieldValueTable()
+            #fieldValueRow("Version", $version.Version)
+            #fieldValueRow("Deploy Version", $version.DeployVersion)
+            #fieldValueRow("Timestamp", $version.Timestamp)
+            #fieldValueRow("Branch", $version.Branch)
+            #fieldValueRow("Number", $version.Number)
+        #end
+    <p>
+        <a href="$app.Url">Try it out</a>!<br/>
+        $app.Url
+    </p>
 
-            <p>
-                A new version has been started in prod!
-            </p>
-            <table cellpadding="4" cellspacing="0" border="0">
-                #row("Version", $version.Version)
-                #row("Deploy Version", $version.DeployVersion)
-                #row("Timestamp", $version.Timestamp)
-                #row("Branch", $version.Branch)
-                #row("Number", $version.Number)
-            </table>
-            <p>
-                <a href="$app.Url">Try it out</a>!<br/>
-                $app.Url
-            </p>
-
-            <p>
-                Go team JASIFY!!!
-            </p>
-        </td>
-    </tr>
-</table>
+    <p>
+        Go team JASIFY!!!
+    </p>
+    #end
 #end
