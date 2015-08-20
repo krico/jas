@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivitiesController', AdminActivitiesController);
 
-    function AdminActivitiesController($location, $routeParams, $filter, $q, $moment, jasDialogs, Activity, organizations, toolbarContext) {
+    function AdminActivitiesController($location, $routeParams, $filter, $moment, jasDialogs, Activity, organizations, toolbarContext) {
 
         var vm = this;
 
@@ -44,18 +44,22 @@
         }
 
         function queryActivities() {
-            if (vm.organization) {
-                var dfd = $q.defer();
 
+            if (vm.organization) {
+                vm.activities = [];
                 Activity.query({
                     organizationId: vm.organization.id,
                     fromDate: vm.activitiesQueryFromDate
-                }).then(function (result) {
-                    dfd.resolve(angular.extend({items: []}, result));
-                    vm.activities = result.items;
-                });
-            } else {
-                return {items: []};
+                }).then(ok, nok);
+            }
+
+            function ok(r) {
+                vm.activities = r.items;
+            }
+
+            function nok(r) {
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
             }
         }
 
