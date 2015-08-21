@@ -1,70 +1,55 @@
-<div class="row">
-    <div class="col-sm-12">&nbsp;</div>
-</div>
-<div class="row">
-    <div class="col-sm-12">
-        <div class="col-sm-4">
+<div class="card">
+    <div class="card-header">
+        <h2>{{ 'BALANCE' | translate }}
+            <small>
+                {{ 'BALANCE_DESCRIPTION' | translate }}
+            </small>
+        </h2>
+        <div class="">
+            <span class="h5">Account balance </span>
             <span tooltip-html-unsafe="<small>Created: {{vm.account.created|date:'medium'}}<br/>Modified: {{vm.account.created|date:'medium'}}</small>"
                   tooltip-trigger="mouseenter"
-                  class="h5">Account balance: </span>
-            <span class="strong text-primary">{{vm.account.currency}} {{vm.account.balance|number:2}}</span>
-        </div>
-        <div class="col-sm-4">
-            <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
+                  class="strong text-primary">{{vm.account.balance | currency: vm.account.currency}}</span>
         </div>
     </div>
-    <div class="col-sm-12">
-        <div class="col-sm-9">
-            <div class="table-responsive small">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>date</th>
-                        <th>description</th>
-                        <th class="text-right">amount</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="transaction in vm.transactions">
-                        <td>{{transaction.created | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-                        <td>{{transaction.description }}</td>
-                        <td class="text-right">
-                            <nobr>{{transaction.amount | number: 2 }} {{transaction.currency}}</nobr>
-                        </td>
-                        <td ng-class="{'transaction-debit' : transaction.debit, 'transaction-credit' : !transaction.debit}">
-                            <i class="fa"
-                               ng-class="{'fa-minus-square': transaction.debit, 'fa-plus-square' : !transaction.debit}"></i>
-                            <i ng-if="transaction.unpaid" class="fa fa-question-circle"></i>
-                        </td>
-                    </tr>
-                    <tr ng-show="vm.inProgress">
-                        <td colspan="4"><span us-spinner=""></span></td>
-                    </tr>
-                    <tr ng-show="!vm.inProgress && vm.transactions.length <= 0">
-                        <td colspan="4">No transactions...</td>
-                    </tr>
-                    </tbody>
-                    <tfoot ng-show="vm.transactions.length > 0">
-                    <tr>
-                        <td colspan="4" align="middle" class="small">
-                            <pagination class="pagination-sm"
-                                        ng-change="vm.pageChanged()"
-                                        total-items="vm.pagination.total"
-                                        ng-model="vm.pagination.page"
-                                        items-per-page="vm.pagination.itemsPerPage"
-                                        max-size="vm.pagination.maxSize"
-                                        num-pages="vm.pagination.numPages"
-                                        boundary-links="true"
-                                        previous-text="&lt;" next-text="&gt;" first-text="&laquo;" last-text="&raquo;"
-                                        ></pagination>
-                        </td>
-                    </tr>
-                    </tfoot>
-                </table>
+    <table id="balance-table" ng-if="vm.transactions.length"
+           class="table responsive table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th>{{ 'CREATED' | translate }}</th>
+            <th>{{ 'DESCRIPTION' | translate }}</th>
+            <th>{{ 'AMOUNT' | translate }}</th>
+            <th>{{ 'TYPE' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="animate-delete"
+            ng-repeat="transaction in vm.transactions | orderBy:'created'"
+            ng-class="{ 'selected': vm.selection.id === transaction.id }"
+            row-select="vm.selectTransaction(transaction)">
+            <td class="transaction-created">{{transaction.created | amDateFormat: 'L LT' }}</td>
+            <td class="transaction-description">{{transaction.description}}</td>
+            <td class="transaction-amount">{{transaction.amount | currency: transaction.currency }}</td>
+            <td ng-class="{'transaction-debit' : transaction.debit, 'transaction-credit' : !transaction.debit}">
+                <i class="fa"
+                   ng-class="{'fa-minus-square': transaction.debit, 'fa-plus-square' : !transaction.debit}"></i>
+                <i ng-if="transaction.unpaid" class="fa fa-question-circle"></i>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="bootgrid-footer container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
+                            boundary-links="true" rotate="true">
+                </pagination>
             </div>
-
-            <div class="form-group">
+            <div class="col-sm-6 infoBar">
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.transactions.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
             </div>
         </div>
     </div>

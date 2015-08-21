@@ -45,9 +45,8 @@
         function removeActivity(activity) {
             Activity.remove(activity.id).then(function () {
                 var translation = $translate('ACTIVITY_REMOVED');
-                jasDialogs.success(translation)
+                jasDialogs.success(translation);
                 vm.activities.splice(vm.activities.indexOf(activity), 1);
-                ;
                 vm.selectActivity(null);
             });
         }

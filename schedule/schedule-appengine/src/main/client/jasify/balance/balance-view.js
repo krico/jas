@@ -12,6 +12,7 @@
         vm.transactions = [];
         vm.inProgress = false;
         vm.pageChanged = pageChanged;
+        vm.perPage = perPage;
         vm.pagination = {
             total: 0,
             page: 1,
@@ -22,7 +23,6 @@
 
         vm.paymentStatus();
         vm.pageChanged();
-
 
         function getTransactions() {
             if (vm.inProgress) {
@@ -54,6 +54,10 @@
 
         function pageChanged() {
             vm.getTransactions();
+        }
+
+        function perPage() {
+            return vm.pagination.itemsPerPage;
         }
 
         function paymentStatus() {
