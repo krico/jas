@@ -33,6 +33,19 @@
             <div role="tabpanel" class="tab-pane active" id="profile-tab">
                 <form role="form" novalidate name="vm.forms.userForm"
                       ng-submit="vm.forms.userForm.$valid && vm.submit()">
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
+                            <input type="text" class="form-control fg-input" id="realName" name="realName"
+                                   ng-model="vm.user.realName">
+                        </div>
+                        <label class="fg-label">{{ 'FULL_NAME' | translate }}</label>
+                        <jas-feedback-icon-valid field="vm.forms.userForm.realName"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.forms.userForm.realName"
+                                                   form="vm.forms.userForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.forms.userForm.realName" form="vm.forms.userForm">
+                            <div ng-message="required"><span>{{ 'FULL_NAME_IS_REQUIRED' | translate }}</span></div>
+                        </jas-error-help-block>
+                    </div>
                     <div class="row">
                         <div class="col-xs-6">
                             <div jas-has-feedback class="form-group fg-float">
@@ -42,11 +55,12 @@
                                            required
                                            ng-disabled="vm.user.id" ng-model="vm.user.name">
                                 </div>
-                                <label class="fg-label">{{ 'NAME' | translate }}</label>
+                                <label class="fg-label">{{ 'USERNAME' | translate }}</label>
                                 <jas-feedback-icon-valid field="vm.forms.userForm.name"></jas-feedback-icon-valid>
                                 <jas-feedback-icon-invalid field="vm.forms.userForm.name" form="vm.forms.userForm"></jas-feedback-icon-invalid>
                                 <jas-error-help-block field="vm.forms.userForm.name" form="vm.forms.userForm">
-                                    <div ng-message="required"><span>{{ 'NAME_IS_REQUIRED' | translate }}</span></div>
+                                    <div ng-message="required"><span>{{ 'USERNAME_IS_REQUIRED' | translate }}</span>
+                                    </div>
                                 </jas-error-help-block>
                             </div>
                         </div>

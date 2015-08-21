@@ -78,7 +78,8 @@
             <thead>
             <tr>
                 <th>{{ 'ADD' | translate }}</th>
-                <th>{{ 'NAME' | translate }}</th>
+                <th>{{ 'FULL_NAME' | translate }}</th>
+                <th>{{ 'USERNAME' | translate }}</th>
             </tr>
             </thead>
             <tbody>
@@ -88,6 +89,7 @@
                             ng-disabled="vm.activity.subscriptionCount >= vm.activity.maxSubscriptions || vm.isSubscribed(user)"
                             ng-click="vm.subscribe(user)"><i class="md mdi mdi-person-add"></i></button>
                 </th>
+                <td>{{user.realName}}</td>
                 <td>{{user.name}}</td>
             </tr>
             </tbody>
