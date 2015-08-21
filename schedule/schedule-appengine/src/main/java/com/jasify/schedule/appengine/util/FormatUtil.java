@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Objects;
+import java.util.TimeZone;
 
 /**
  * @author krico
@@ -31,14 +32,18 @@ public final class FormatUtil {
     private static final ThreadLocal<SimpleDateFormat> START_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat(" [EEE, d MMM HH:mm");
+            SimpleDateFormat sdf = new SimpleDateFormat(" [EEE, d MMM HH:mm");
+            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Zurich"));
+            return sdf;
         }
     };
 
     private static final ThreadLocal<SimpleDateFormat> FINISH_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat(" - HH:mm]");
+            SimpleDateFormat sdf = new SimpleDateFormat(" - HH:mm]");
+            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Zurich"));
+            return sdf;
         }
     };
 
