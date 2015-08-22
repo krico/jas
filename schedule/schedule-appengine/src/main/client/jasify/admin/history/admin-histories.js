@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminHistoriesController', AdminHistoriesController);
 
-    function AdminHistoriesController($log, History, histories) {
+    function AdminHistoriesController($log, $scope, History, histories) {
         var vm = this;
         vm.allHistories = histories.items;
         vm.histories = histories.items;
@@ -11,8 +11,26 @@
         vm.detectTypes = detectTypes;
         vm.historyType = false;
         vm.selectHistoryType = selectHistoryType;
+        vm.getHistory = getHistory;
+        vm.queryChanged = queryChanged;
+
+        // Client side pagination. Need this to simulate server side filtering
+        vm.queryHistories = [];
+        vm.displayHistories = [];
+
+        vm.pageChanged = pageChanged;
+        vm.perPage = perPage;
+        vm.pagination = {
+            total: 0,
+            page: 1,
+            itemsPerPage: 10,
+            numPages: 1,
+            maxSize: 5
+        };
 
         vm.detectTypes();
+        vm.queryChanged();
+        // vm.pageChanged();
 
         /**
          * TODO: We are missing functionality to
@@ -45,8 +63,36 @@
                 newList = vm.allHistories;
             }
             vm.histories = newList;
+            vm.queryChanged();
         }
 
+        function queryChanged() {
+            if (vm.query) {
+                vm.queryHistories = vm.histories.filter(function (el) {
+                    return el.description.indexOf(vm.query) != -1;
+                });
+            } else {
+                vm.queryHistories = vm.histories;
+            }
+            vm.pagination.total = vm.queryHistories.length;
+            getHistory();
+        }
+
+        function getHistory() {
+            var limit = vm.pagination.itemsPerPage;
+            var offset = (vm.pagination.page - 1) * limit;
+
+            vm.displayHistories = vm.queryHistories.slice(offset, offset + limit);
+            vm.pagination.total = vm.queryHistories.length;
+        }
+
+        function pageChanged() {
+            vm.getHistory();
+        }
+
+        function perPage() {
+            return vm.pagination.itemsPerPage;
+        }
     }
 
 })(angular);
