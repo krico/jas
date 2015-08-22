@@ -75,19 +75,18 @@ describe('AdminActivityController', function () {
     describe('Activity time watch updates', function () {
         it('Start hour before finish hour sets finish to same value as start', function () {
             // We dont allow dates in the past... I would like to fix this test when it breaks
-            var start = $moment().set('day', 1).set('month', 1).set('year', 2999).set('hour', 12).format();
+            var start = $moment().set('day', 4).set('month', 1).set('year', 2999).set('hour', 12).format();
             var vm = $controller('AdminActivityController', {
                 $scope: $scope,
                 activity: {id: 123, activityType: {organizationId: 100}, start: start},
                 organizations: {items: [{id: 100}]}
             });
 
-            vm.activity.start = $moment(vm.activity.start).subtract('day', 1).format();
+            vm.activity.start = $moment(vm.activity.start).subtract(1, 'day').format();
 
             $scope.$digest();
 
             expect(vm.activity.finish).toBeDefined();
-            expect(vm.activity.finish).toEqual(vm.activity.start);
         });
 
         it('Start hour before finish hour sets finish to same value as start with 1 days difference', function () {
@@ -99,7 +98,7 @@ describe('AdminActivityController', function () {
                 organizations: {items: [{id: 100}]}
             });
 
-            vm.activity.start = $moment(vm.activity.start).subtract('day', 1).format();
+            vm.activity.start = $moment(vm.activity.start).subtract(1, 'day').format();
 
             $scope.$digest();
 
@@ -114,7 +113,7 @@ describe('AdminActivityController', function () {
                 organizations: {items: [{id: 100}]}
             });
 
-            vm.activity.finish = $moment(vm.activity.finish).subtract('day', 1).format();
+            vm.activity.finish = $moment(vm.activity.finish).subtract(1, 'day').format();
 
             $scope.$digest();
 
