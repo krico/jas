@@ -5,7 +5,7 @@
 
     angular.module('jasify.admin').controller('AdminActivitiesController', AdminActivitiesController);
 
-    function AdminActivitiesController($location, $routeParams, $filter, jasDialogs, Activity, organizations, activities, toolbarContext) {
+    function AdminActivitiesController($location, $routeParams, $filter, $moment, jasDialogs, Activity, organizations, toolbarContext) {
 
         var vm = this;
 
@@ -17,7 +17,8 @@
             organizationSelected(vm.organizations[0]);
         }
 
-        vm.activities = activities.items;
+        vm.activitiesQueryFromDate = $moment().set('hour', 0).set('minute', 0).set('second', 0).format();
+        vm.activities = {};
         vm.organizationSelected = organizationSelected;
 
         vm.addActivity = addActivity;
@@ -28,7 +29,11 @@
         vm.viewSubscribers = viewSubscribers;
         vm.addSubscriber = addSubscriber;
 
+        vm.queryActivities = queryActivities;
+
         var $translate = $filter('translate');
+
+        vm.queryActivities();
 
         function setSelectedOrganization(organizationId) {
             vm.organization = _.find(vm.organizations, {id: organizationId});
@@ -38,6 +43,26 @@
             $location.path('/admin/activities/' + organization.id);
         }
 
+        function queryActivities() {
+
+            if (vm.organization) {
+                vm.activities = [];
+                Activity.query({
+                    organizationId: vm.organization.id,
+                    fromDate: vm.activitiesQueryFromDate
+                }).then(ok, nok);
+            }
+
+            function ok(r) {
+                vm.activities = r.items;
+            }
+
+            function nok(r) {
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, r);
+            }
+        }
+
         function viewActivity(activity) {
             $location.path('/admin/activity/' + activity.id);
         }
@@ -45,9 +70,8 @@
         function removeActivity(activity) {
             Activity.remove(activity.id).then(function () {
                 var translation = $translate('ACTIVITY_REMOVED');
-                jasDialogs.success(translation)
+                jasDialogs.success(translation);
                 vm.activities.splice(vm.activities.indexOf(activity), 1);
-                ;
                 vm.selectActivity(null);
             });
         }

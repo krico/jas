@@ -21,7 +21,7 @@
                     allow: /*@ngInject*/ function (Allow) {
                         return Allow.admin();
                     },
-                    user: function (User, $route, $q) {
+                    user: function (User, $route) {
                         return $route.current.params.id ?
                             User.get($route.current.params.id) : {};
                     }
@@ -130,29 +130,6 @@
                         );
 
                         return dfd.promise;
-                    },
-                    activities: /*@ngInject*/ function ($q, $route, Allow, Activity) {
-
-                        return Allow.adminOrOrgMember().then(allowed, forbidden);
-
-                        function allowed() {
-                            if ($route.current.params.organizationId) {
-
-                                var dfd = $q.defer();
-
-                                Activity.query({organizationId: $route.current.params.organizationId}).then(function (result) {
-                                    dfd.resolve(angular.extend({items: []}, result));
-                                });
-
-                                return dfd.promise;
-                            } else {
-                                return {items: []};
-                            }
-                        }
-
-                        function forbidden(reason) {
-                            return $q.reject(reason);
-                        }
                     }
                 }
             })
