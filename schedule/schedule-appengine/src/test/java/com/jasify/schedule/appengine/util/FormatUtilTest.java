@@ -1,11 +1,14 @@
 package com.jasify.schedule.appengine.util;
 
+import com.google.appengine.repackaged.org.joda.time.DateTime;
+import com.google.appengine.repackaged.org.joda.time.DateTimeZone;
+import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormat;
+import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormatter;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.OrganizationAccount;
 import com.jasify.schedule.appengine.model.balance.UserAccount;
-import com.jasify.schedule.appengine.spi.ActivityEndpoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +46,7 @@ public class FormatUtilTest {
         Activity activity = new Activity();
         activity.setName("The Activity");
         GregorianCalendar calendar = new GregorianCalendar();
+        // App Engine Timezone is UTC
         calendar.setTimeZone(TimeZone.getDefault());
         calendar.set(1976, Calendar.JULY, 15, 22, 10);
         activity.setStart(calendar.getTime());
@@ -50,7 +54,11 @@ public class FormatUtilTest {
         activity.setFinish(calendar.getTime());
         String formatted = FormatUtil.toString(activity);
         assertNotNull(formatted);
-        assertEquals("The Activity [Thu, 15 Jul 22:10 - 23:10]", formatted);
+        // The formatted time will be in Europe/Zurich
+        DateTimeFormatter dtfStart = DateTimeFormat.forPattern(" [EEE, d MMM HH:mm").withZone(DateTimeZone.forID("Europe/Zurich"));
+        DateTimeFormatter dtfFinish = DateTimeFormat.forPattern(" - HH:mm]").withZone(DateTimeZone.forID("Europe/Zurich"));
+        String description = "The Activity" + new DateTime(activity.getStart()).toString(dtfStart) + new DateTime(activity.getFinish()).toString(dtfFinish);
+        assertEquals(description, formatted);
     }
 
     @Test

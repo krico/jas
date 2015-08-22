@@ -78,7 +78,8 @@
             <thead>
             <tr>
                 <th>{{ 'ADD' | translate }}</th>
-                <th>{{ 'NAME' | translate }}</th>
+                <th>{{ 'FULL_NAME' | translate }}</th>
+                <th>{{ 'USERNAME' | translate }}</th>
             </tr>
             </thead>
             <tbody>
@@ -88,6 +89,7 @@
                             ng-disabled="vm.activity.subscriptionCount >= vm.activity.maxSubscriptions || vm.isSubscribed(user)"
                             ng-click="vm.subscribe(user)"><i class="md mdi mdi-person-add"></i></button>
                 </th>
+                <td>{{user.realName}}</td>
                 <td>{{user.name}}</td>
             </tr>
             </tbody>
@@ -96,14 +98,15 @@
     <div class="bootgrid-footer container-fluid">
         <div class="row">
             <div class="col-sm-6">
-                <pagination max-size="vm.maxSize" ng-model="vm.page" ng-change="vm.pageChanged()"
-                            total-items="vm.total" num-pages="vm.numPages" items-per-page="vm.perPage()"
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
                             boundary-links="true" rotate="true">
                 </pagination>
             </div>
             <div class="col-sm-6 infoBar">
-                <div class="infos" translate="SHOWING_X_TO_Y_OF_Z_ENTRIES"
-                     translate-values="{fromEntry: '{{vm.perPage() * (vm.page - 1) + 1}}', toEntry: '{{[vm.perPage() * vm.page, vm.total] | min}}', totalEntries: '{{vm.total}}'}">
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.users.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
                 </div>
             </div>
         </div>

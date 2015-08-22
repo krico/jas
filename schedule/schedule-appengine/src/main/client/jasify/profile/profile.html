@@ -1,4 +1,3 @@
-
 <div class="card">
     <div class="card-header">
         <h2>Profile Settings
@@ -26,6 +25,34 @@
                 <form role="form" novalidate name="vm.profileForm" ng-submit="vm.profileForm.$valid && vm.save()">
                     <div jas-has-feedback class="form-group fg-float">
                         <div class="fg-line">
+                            <input type="text" ng-model="vm.user.realName" class="form-control fg-input"
+                                   id="realName" required name="realName">
+                        </div>
+                        <label class="fg-label">{{ 'FULL_NAME' | translate }}</label>
+                        <jas-feedback-icon-valid field="vm.profileForm.realName"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.profileForm.realName"
+                                                   form="vm.profileForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.profileForm.realName" form="vm.profileForm">
+                            <span ng-message="required">{{ 'FULL_NAME_IS_REQUIRED' | translate }}</span>
+                        </jas-error-help-block>
+                    </div>
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
+                            <input type="text" autocomplete="false" ng-model="vm.user.name"
+                                   class="form-control fg-input"
+                                   ng-disabled="vm.user.id"
+                                   id="name" required name="name">
+                        </div>
+                        <label class="fg-label">{{ 'USERNAME' | translate }}</label>
+                        <jas-feedback-icon-valid field="vm.profileForm.name"></jas-feedback-icon-valid>
+                        <jas-feedback-icon-invalid field="vm.profileForm.name"
+                                                   form="vm.profileForm"></jas-feedback-icon-invalid>
+                        <jas-error-help-block field="vm.profileForm.name" form="vm.profileForm">
+                            <span ng-message="required">{{ 'USERNAME_NAME_IS_REQUIRED' | translate}}</span>
+                        </jas-error-help-block>
+                    </div>
+                    <div jas-has-feedback class="form-group fg-float">
+                        <div class="fg-line">
                             <input type="email" ng-model="vm.user.email" class="form-control fg-input"
                                    id="emailAddress" required name="emailAddress">
                         </div>
@@ -40,7 +67,8 @@
                     </div>
                     <div class="form-group fg-float">
                         <div class="fg-line">
-                            <textarea class="form-control" ng-model="vm.user.aboutMe" rows="5" placeholder="..."></textarea>
+                            <textarea class="form-control" ng-model="vm.user.aboutMe" rows="5"
+                                      placeholder="..."></textarea>
                         </div>
                         <label class="fg-label">About me</label>
                     </div>
@@ -57,7 +85,7 @@
                         </button>
                     </div>
                     <div class="actions-group">
-                        <a-button type="submit" controller="vm.saveBtn" ></a-button>
+                        <a-button type="submit" controller="vm.saveBtn"></a-button>
                         <button type="button" btn-href="/" class="btn btn-default waves-effect">Cancel</button>
                     </div>
                 </form>

@@ -70,7 +70,8 @@
             <th>
                 <row-add btn-href="/admin/user" description="{{ 'ADD_USER' | translate }}"/>
             </th>
-            <th>{{ 'NAME' | translate }}</th>
+            <th>{{ 'FULL_NAME' | translate }}</th>
+            <th>{{ 'USERNAME' | translate }}</th>
             <th>{{ 'EMAIL' | translate }}</th>
             <th>{{ 'ADMIN' | translate }}</th>
             <th>{{ 'CREATED' | translate }}</th>
@@ -82,6 +83,7 @@
                 <row-edit description="{{ 'EDIT' | translate }}" action="vm.viewUser(user.id)"
                           data-row-id="{{user.id}}"></row-edit>
             </td>
+            <td>{{user.realName}}</td>
             <td>{{user.name}}</td>
             <td>{{user.email}}</td>
             <td><span ng-if="user.admin" class="ion-checkmark-round"></span></td>
@@ -92,14 +94,15 @@
     <div class="bootgrid-footer container-fluid">
         <div class="row">
             <div class="col-sm-6">
-                <pagination max-size="vm.maxSize" ng-model="vm.page" ng-change="vm.pageChanged()"
-                            total-items="vm.total" num-pages="vm.numPages" items-per-page="vm.perPage()"
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
                             boundary-links="true" rotate="true">
                 </pagination>
             </div>
             <div class="col-sm-6 infoBar">
-                <pagination-info total-size="vm.total" current-page-size="vm.users.length"
-                                 items-per-page="vm.perPage()" page="vm.page"></pagination-info>
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.users.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
             </div>
         </div>
     </div>

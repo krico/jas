@@ -6,13 +6,8 @@
         var vm = this;
 
         vm.sort = 'DESC';
-        vm.page = 1;
         vm.pagerSizes = jasPagerSettings.pages;
-        vm._perPage = 10;
         vm._searchBy = 'name';
-        vm.total = 0;
-        vm.numPages = 1;
-        vm.maxSize = 4;
         vm.users = [];
         vm.query = '';
         vm.regex = false;
@@ -29,6 +24,14 @@
         vm.searchByChanged = searchByChanged;
         vm.queryChanged = queryChanged;
         vm.perPage = perPage;
+
+        vm.pagination = {
+            total: 0,
+            page: 1,
+            itemsPerPage: 10,
+            numPages: 1,
+            maxSize: 5
+        };
 
         vm.init = init;
 
@@ -56,21 +59,21 @@
             }
 
             User.query({
-                offset: vm._perPage * (vm.page-1),
-                limit: vm._perPage,
+                offset: vm.pagination.itemsPerPage * (vm.pagination.page - 1),
+                limit: vm.pagination.itemsPerPage,
                 sort: vm.sort,
                 field: vm.searchBy(),
                 query: q
             }).then(ok, fail);
 
             function ok(r) {
-                if (r.total != vm.total)
-                    vm.total = Math.floor(r.total);
+                if (r.total != vm.pagination.total)
+                    vm.pagination.total = Math.floor(r.total);
                 vm.users = r.users;
             }
 
             function fail(response) {
-                vm.total = 0;
+                vm.pagination.total = 0;
             }
         }
 
@@ -81,22 +84,22 @@
         }
 
         function queryChanged() {
-            vm.page = 1;
+            vm.pagination.page = 1;
             vm.pageChanged();
         }
 
         function perPage(newValue) {
             if (angular.isDefined(newValue)) {
-                var old = vm._perPage;
+                var old = vm.pagination.itemsPerPage;
                 if (old != newValue) {
                     /* stay on the same record */
-                    vm.page = 1 + (((vm.page - 1) * old) / newValue);
+                    vm.pagination.page = Math.floor(1 + (((vm.pagination.page - 1) * old) / newValue));
 
-                    vm._perPage = newValue;
+                    vm.pagination.itemsPerPage = newValue;
                     vm.pageChanged();
                 }
             }
-            return vm._perPage;
+            return vm.pagination.itemsPerPage;
         }
 
         function searchBy(newValue) {
