@@ -5,8 +5,10 @@ import com.google.appengine.api.mail.dev.LocalMailService;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.Version;
+import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.template.TemplateEngineException;
+import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
@@ -95,4 +97,34 @@ public class CommunicatorTest {
         assertTrue(name, body.contains(user.getEmail()));
         assertTrue(name, body.contains(KeyUtil.toHumanReadableString(user.getId())));
     }
+
+    @Test
+    public void testNotifyOfPasswordRecovery() throws Exception {
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 19760715));
+        user.setEmail("new@jasify.com");
+        user.setName("new2@jasify.com");
+        user.setCreated(new Date());
+
+        PasswordRecovery recovery = new PasswordRecovery();
+        recovery.setCode(Datastore.createKey(PasswordRecovery.class, "EDOC"));
+
+        Communicator.notifyOfPasswordRecovery(user, recovery);
+        LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
+        List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
+        assertNotNull(sentMessages);
+        assertEquals(1, sentMessages.size());
+        MailServicePb.MailMessage message = sentMessages.get(0);
+        assertTrue(message.getTo(0).contains(user.getEmail()));
+        assertPasswordRecovery("HtmlBody", message.getHtmlBody(), user, recovery);
+        assertPasswordRecovery("TextBody", message.getTextBody(), user, recovery);
+    }
+
+    private void assertPasswordRecovery(String name, String body, User user, PasswordRecovery recovery) {
+        assertNotNull(name, body);
+        assertTrue(name, body.contains(recovery.getCode().getName()));
+        assertTrue(name, body.contains(EnvironmentUtil.defaultVersionHostname() + "/#/recover-password/" + recovery.getCode().getName()));
+    }
+
+
 }

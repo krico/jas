@@ -1,8 +1,4 @@
-#if($sut.isNotBlank($user.RealName))
-    #set($title="New User '$user.RealName'")
-#else
-    #set($title="New User '$user.Name'")
-#end
+#set($title="New User '$mut.name($user)'")
 #@textMail($title)
 
 Dear JASIFY Team,

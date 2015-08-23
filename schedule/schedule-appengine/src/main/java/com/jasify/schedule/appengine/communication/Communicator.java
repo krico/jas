@@ -2,6 +2,7 @@ package com.jasify.schedule.appengine.communication;
 
 import com.jasify.schedule.appengine.Version;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
+import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.template.TemplateEngine;
 import com.jasify.schedule.appengine.template.TemplateEngineBuilder;
@@ -12,6 +13,9 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.mail.internet.InternetAddress;
+import java.io.UnsupportedEncodingException;
 
 /**
  * This class handles all external communication, to subscribers, publishers and admins
@@ -35,10 +39,9 @@ public class Communicator {
         context.put("version", Version.INSTANCE);
         String html = templateEngine.render(TemplateNames.JASIFY_NEW_VERSION_HTML, context);
         String text = templateEngine.render(TemplateNames.JASIFY_NEW_VERSION_TXT, context);
-        ;
 
         String subject = String.format("[Jasify] New Version In Prod (%s) [%s]", Version.getDeployVersion(), Version.toShortVersionString());
-        MailServiceFactory.getMailService().sendToApplicationOwners(subject, html, text /*TODO: text version*/);
+        MailServiceFactory.getMailService().sendToApplicationOwners(subject, html, text);
     }
 
     public static void notifyOfNewUser(User user) throws TemplateEngineException {
@@ -49,6 +52,18 @@ public class Communicator {
 
         String nonBlankName = StringUtils.isNoneBlank(user.getRealName()) ? user.getRealName() : user.getName();
         String subject = String.format("[Jasify] New User [%s]", nonBlankName);
-        MailServiceFactory.getMailService().sendToApplicationOwners(subject, html, text /*TODO: text version*/);
+        MailServiceFactory.getMailService().sendToApplicationOwners(subject, html, text);
+    }
+
+    public static void notifyOfPasswordRecovery(User user, PasswordRecovery recovery) throws TemplateEngineException, UnsupportedEncodingException {
+        VelocityContext context = new VelocityContext(GLOBAL_CONTEXT.get());
+        context.put("user", user);
+        context.put("recovery", recovery);
+        String html = templateEngine.render(TemplateNames.SUBSCRIBER_PASSWORD_RECOVERY_HTML, context);
+        String text = templateEngine.render(TemplateNames.SUBSCRIBER_PASSWORD_RECOVERY_TXT, context);
+
+        String nonBlankName = StringUtils.isNoneBlank(user.getRealName()) ? user.getRealName() : user.getName();
+        String subject = String.format("[Jasify] Password Assistance [%s]", nonBlankName);
+        MailServiceFactory.getMailService().send(new InternetAddress(user.getEmail(), user.getName()), subject, html, text);
     }
 }

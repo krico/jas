@@ -93,9 +93,13 @@ public final class DefaultMailService implements MailService {
 
     @Override
     public boolean send(String toEmail, String subject, String htmlBody, String textBody) throws Exception {
+        return send(new InternetAddress(toEmail), subject, htmlBody, textBody);
+    }
+
+    @Override
+    public boolean send(InternetAddress toAddress, String subject, String htmlBody, String textBody) {
         initialize();
-        InternetAddress[] toAddress = {new InternetAddress(toEmail)};
-        return send(senderAddress, toAddress, applicationOwners, subject, htmlBody, textBody);
+        return send(senderAddress, new InternetAddress[]{toAddress}, applicationOwners, subject, htmlBody, textBody);
     }
 
     private boolean send(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody) {

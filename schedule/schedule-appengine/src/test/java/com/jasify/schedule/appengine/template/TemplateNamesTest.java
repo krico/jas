@@ -4,6 +4,7 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.Version;
 import com.jasify.schedule.appengine.communication.ApplicationContext;
 import com.jasify.schedule.appengine.communication.ApplicationContextImpl;
+import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
@@ -43,6 +44,18 @@ public class TemplateNamesTest {
     @AfterClass
     public static void cleanup() {
         TestHelper.cleanupDatastore();
+    }
+
+    private void render(final String templateName, final Context context) throws Exception {
+        assertTrue(templateName.endsWith(".vm"));
+        String filename = templateName.substring(0, templateName.length() - 3);
+        File outputFile = new File(templateDir, filename);
+        File parentDir = outputFile.getParentFile();
+        assertTrue(parentDir.isDirectory() || parentDir.mkdirs());
+        log.info("{} -> {}", templateName, outputFile);
+        try (FileWriter writer = new FileWriter(outputFile)) {
+            engine.render(templateName, context, writer);
+        }
     }
 
     @Before
@@ -90,16 +103,31 @@ public class TemplateNamesTest {
         assertJasifyNewUser(TemplateNames.JASIFY_NEW_USER_TXT);
     }
 
-    private void render(final String templateName, final Context context) throws Exception {
-        assertTrue(templateName.endsWith(".vm"));
-        String filename = templateName.substring(0, templateName.length() - 3);
-        File outputFile = new File(templateDir, filename);
-        File parentDir = outputFile.getParentFile();
-        assertTrue(parentDir.isDirectory() || parentDir.mkdirs());
-        log.info("{} -> {}", templateName, outputFile);
-        try (FileWriter writer = new FileWriter(outputFile)) {
-            engine.render(templateName, context, writer);
-        }
+    private void assertSubscriberPasswordRecovery(String templateName) throws Exception {
+        VelocityContext context = new VelocityContext(new TestApplicationContext());
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 19760715));
+        user.setEmail("new@jasify.com");
+        user.setName("new@jasify.com");
+        user.setRealName("John Doe");
+        user.setCreated(new Date());
+        PasswordRecovery recovery = new PasswordRecovery();
+        recovery.setCode(Datastore.createKey(PasswordRecovery.class, "A-CODE-X"));
+
+        context.put("user", user);
+        context.put("recovery", recovery);
+
+        render(templateName, context);
+    }
+
+    @Test
+    public void testSubscriberPasswordRecoveryHtml() throws Exception {
+        assertSubscriberPasswordRecovery(TemplateNames.SUBSCRIBER_PASSWORD_RECOVERY_HTML);
+    }
+
+    @Test
+    public void testSubscriberPasswordRecoveryTxt() throws Exception {
+        assertSubscriberPasswordRecovery(TemplateNames.SUBSCRIBER_PASSWORD_RECOVERY_TXT);
     }
 
     public static class TestApplicationContext extends ApplicationContextImpl implements ApplicationContext {

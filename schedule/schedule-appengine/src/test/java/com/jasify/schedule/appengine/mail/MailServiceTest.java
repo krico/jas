@@ -6,6 +6,7 @@ import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig
 import com.jasify.schedule.appengine.TestHelper;
 import org.junit.*;
 
+import javax.mail.internet.InternetAddress;
 import java.util.Date;
 import java.util.List;
 
@@ -78,7 +79,7 @@ public class MailServiceTest {
 
     @Test(expected = NullPointerException.class)
     public void testSendNullFromAddress() throws Exception {
-        assertFalse(MailServiceFactory.getMailService().send(null, null, null, null));
+        assertFalse(MailServiceFactory.getMailService().send((InternetAddress)null, null, null, null));
     }
 
     @Test(expected = NullPointerException.class)
