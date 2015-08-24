@@ -6,7 +6,6 @@ import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.common.*;
-import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
@@ -65,7 +64,6 @@ public class ActivityEndpoint {
     private final OrganizationDao organizationDao = new OrganizationDao();
     private final RepeatDetailsDao repeatDetailsDao = new RepeatDetailsDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
-    private final UserDao userDao = new UserDao();
 
     @ApiMethod(name = "activityTypes.query", path = "activity-types", httpMethod = ApiMethod.HttpMethod.GET)
     public List<ActivityType> getActivityTypes(@SuppressWarnings("unused") User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
@@ -314,9 +312,7 @@ public class ActivityEndpoint {
         checkFound(activityId, "activityId == null");
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         try {
-            com.jasify.schedule.appengine.model.users.User user = userDao.get(userId);
-            Activity activity = activityDao.get(activityId);
-            return ActivityServiceFactory.getActivityService().subscribe(user, activity);
+            return ActivityServiceFactory.getActivityService().subscribe(userId, activityId);
         } catch (EntityNotFoundException e) {
             log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
             throw new NotFoundException(e.getMessage());

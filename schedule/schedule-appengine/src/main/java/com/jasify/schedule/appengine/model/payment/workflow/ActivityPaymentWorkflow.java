@@ -1,19 +1,15 @@
 package com.jasify.schedule.appengine.model.payment.workflow;
 
 import com.google.appengine.api.datastore.Key;
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.OperationException;
-import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityService;
 import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
-import com.jasify.schedule.appengine.model.users.User;
-import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Model;
@@ -57,9 +53,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
         Key userId = payment.getUserRef().getKey();
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
-            User user = UserServiceFactory.getUserService().getUser(userId);
-            Activity activity = new ActivityDao().get(activityId);
-            Subscription subscribe = activityService.subscribe(user, activity);
+            Subscription subscribe = activityService.subscribe(userId, activityId);
             subscriptionId = subscribe.getId();
         } catch (EntityNotFoundException | OperationException e) {
             log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder

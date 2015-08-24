@@ -8,10 +8,10 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.dao.common.*;
+import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
-import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserServiceFactory;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.slim3.datastore.CompositeCriterion;
@@ -63,39 +63,38 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Subscription subscribe(final User user, final Activity activity) throws OperationException {
-        if (activity.getMaxSubscriptions() > 0 && activity.getSubscriptionCount() >= activity.getMaxSubscriptions()) {
-            throw new OperationException("Activity fully subscribed");
-        }
-
+    public Subscription subscribe(final Key userId, final Key activityId) throws OperationException, EntityNotFoundException {
+        new UserDao().get(userId); // Just to be sure it exists
         try {
             return TransactionOperator.execute(new ModelOperation<Subscription>() {
                 @Override
                 public Subscription execute(Transaction tx) throws ModelException {
+                    Activity activity = activityDao.get(activityId);
+
+                    if (activity.getMaxSubscriptions() > 0 && activity.getSubscriptionCount() >= activity.getMaxSubscriptions()) {
+                        throw new OperationException("Activity fully subscribed");
+                    }
+
                     Subscription subscription = new Subscription();
 
-                    subscription.getActivityRef().setKey(activity.getId());
-                    subscription.getUserRef().setKey(user.getId());
+                    subscription.getActivityRef().setKey(activityId);
+                    subscription.getUserRef().setKey(userId);
 
                     activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
-                    activity.getSubscriptionListRef().getModelList().add(subscription);
 
                     activityDao.save(activity);
-                    subscriptionDao.save(subscription, user.getId());
+                    subscriptionDao.save(subscription, userId);
 
                     // TODO Add this user to the organizations client list
                     tx.commit();
                     return subscription;
                 }
             });
+        } catch (EntityNotFoundException | OperationException e) {
+            throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-    @Override
-    public ActivityPackageExecution subscribe(User user, ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, OperationException, IllegalArgumentException {
-        return subscribe(user.getId(), activityPackage.getId(), Lists.transform(activities, ACTIVITY_TO_KEY_FUNCTION));
     }
 
     @Override
@@ -172,7 +171,6 @@ class DefaultActivityService implements ActivityService {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws ModelException {
-
                     ActivityPackageExecution execution = activityPackageExecutionDao.get(activityPackageExecution.getId());
                     ActivityPackage activityPackage = activityPackageDao.get(execution.getActivityPackageRef().getKey());
                     activityPackage.setExecutionCount(activityPackage.getExecutionCount() - 1);
