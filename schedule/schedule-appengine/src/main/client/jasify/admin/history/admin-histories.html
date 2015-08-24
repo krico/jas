@@ -13,7 +13,8 @@
                     <div class="search form-group">
                         <div class="input-group">
                             <span class="input-group-addon glyphicon-search"></span>
-                            <input ng-model-options="{ debounce: 500 }"
+                            <input ng-change="vm.queryChanged()"
+                                   ng-model-options="{ debounce: 500 }"
                                    ng-model="vm.query"
                                    type="text" name="query" id="query" class="search-field form-control"
                                    placeholder="{{ 'SEARCH' | translate }}">
@@ -63,7 +64,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="history in vm.histories |reverse |filter:vm.query as results track by history.id">
+        <tr ng-repeat="history in vm.displayHistories |reverse track by history.id">
             <td class="row-commands">
                 <history-icon history="history" data-row-id="{{history.id}}"></history-icon>
             </td>
@@ -77,4 +78,19 @@
         </tr>
         </tbody>
     </table>
+    <div class="bootgrid-footer container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
+                            boundary-links="true" rotate="true">
+                </pagination>
+            </div>
+            <div class="col-sm-6 infoBar">
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.displayHistories.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
+            </div>
+        </div>
+    </div>
 </div>
