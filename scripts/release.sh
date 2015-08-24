@@ -107,7 +107,16 @@ fi
 
 
 echo "executing mvn $VERSION_OPTS appengine:update"
-mvn $VERSION_OPTS appengine:update
+if mvn $VERSION_OPTS appengine:update;
+then
+  readonly tag="v$(date +%Y.%m.%d.%H%M)-$version"
+  echo "Tagging release [$tag]"
+  git tag -a $tag -m "Released to $version from $branch"
+  echo "Pushing tags"
+  git push origin --tags
+else
+  echo "Build failed, will not tag release"
+fi
 
 echo "cleaning up ./jas";
 cd "$workDir"
