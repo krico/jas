@@ -12,8 +12,6 @@ import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.UniqueConstraints;
-import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatType;
-import com.jasify.schedule.appengine.model.activity.RepeatDetails.RepeatUntilType;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
@@ -107,11 +105,11 @@ public class ActivityServiceTest {
     @Test
     public void testSubscribe() throws Exception {
         Activity activity = TestHelper.createActivity(true);
-        Subscription subscription = activityService.subscribe(testUser1, activity);
+        Subscription subscription = activityService.subscribe(testUser1.getId(), activity.getId());
         assertNotNull(subscription);
         assertEquals(testUser1.getId(), subscription.getUserRef().getKey());
         assertEquals(activity.getId(), subscription.getActivityRef().getKey());
-        assertEquals(1, activity.getSubscriptionCount());
+        assertEquals(1, Datastore.get(Activity.class, activity.getId()).getSubscriptionCount());
         List<Subscription> modelList = activity.getSubscriptionListRef().getModelList();
         assertEquals(1, modelList.size());
         assertEquals(subscription.getId(), modelList.get(0).getId());
@@ -124,7 +122,7 @@ public class ActivityServiceTest {
         service.clearSentMessages();
         User user = new User();
         Datastore.put(user);
-        activityService.subscribe(user, activity);
+        activityService.subscribe(user.getId(), activity.getId());
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
         assertEquals(0, sentMessages.size());
@@ -137,7 +135,7 @@ public class ActivityServiceTest {
         Datastore.put(activity);
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
-        activityService.subscribe(testUser1, activity);
+        activityService.subscribe(testUser1.getId(), activity.getId());
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
         assertEquals(0, sentMessages.size());
@@ -150,8 +148,8 @@ public class ActivityServiceTest {
         Activity activity = TestHelper.createActivity(true);
         activity.setMaxSubscriptions(1);
         Datastore.put(activity);
-        activityService.subscribe(testUser1, activity);
-        activityService.subscribe(testUser2, activity);
+        activityService.subscribe(testUser1.getId(), activity.getId());
+        activityService.subscribe(testUser2.getId(), activity.getId());
     }
 
     @Test
@@ -159,15 +157,15 @@ public class ActivityServiceTest {
         Activity activity = TestHelper.createActivity(true);
         activity.setMaxSubscriptions(0);
         Datastore.put(activity);
-        assertNotNull(activityService.subscribe(testUser1, activity));
-        assertNotNull(activityService.subscribe(testUser2, activity));
+        assertNotNull(activityService.subscribe(testUser1.getId(), activity.getId()));
+        assertNotNull(activityService.subscribe(testUser2.getId(), activity.getId()));
         assertEquals(2, Datastore.get(ActivityMeta.get(), activity.getId()).getSubscriptionCount());
     }
 
     @Test
     public void testCancel() throws Exception {
         Activity activity = TestHelper.createActivity(true);
-        Subscription subscription = activityService.subscribe(testUser1, activity);
+        Subscription subscription = activityService.subscribe(testUser1.getId(), activity.getId());
 
         // cache it in
         activity1Organization1.getSubscriptionListRef().getModelList();
@@ -197,7 +195,7 @@ public class ActivityServiceTest {
         activityPackage10Organization.setItemCount(2);
 
         activityService.addActivityPackage(activityPackage10Organization, Arrays.asList(activity1, activity2));
-        activityPackageExecution = activityService.subscribe(testUser1, activityPackage10Organization, Arrays.asList(activity1, activity2));
+        activityPackageExecution = activityService.subscribe(testUser1.getId(), activityPackage10Organization.getId(), Arrays.asList(activity1.getId(), activity2.getId()));
         assertNotNull(activityPackageExecution);
         assertEquals(activityPackage10Organization.getId(), activityPackageExecution.getActivityPackageRef().getKey());
         assertEquals(testUser1.getId(), activityPackageExecution.getUserRef().getKey());

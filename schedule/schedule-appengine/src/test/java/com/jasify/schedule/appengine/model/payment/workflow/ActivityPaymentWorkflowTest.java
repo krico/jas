@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine.model.payment.workflow;
 
+import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.meta.payment.workflow.ActivityPaymentWorkflowMeta;
@@ -83,7 +84,7 @@ public class ActivityPaymentWorkflowTest {
             ActivityService activityService = testActivityServiceFactory.getActivityServiceMock();
             // TODO: This is wrong
            // expect(activityService.subscribe(user, activity)).andReturn(subscription);
-            expect(activityService.subscribe(anyObject(User.class), anyObject(Activity.class))).andReturn(subscription);
+            expect(activityService.subscribe(anyObject(Key.class), anyObject(Key.class))).andReturn(subscription);
             testActivityServiceFactory.replay();
 
             ActivityPaymentWorkflow transition = PaymentWorkflowEngine.transition(activityPaymentWorkflow.getId(), PaymentStateEnum.Created);

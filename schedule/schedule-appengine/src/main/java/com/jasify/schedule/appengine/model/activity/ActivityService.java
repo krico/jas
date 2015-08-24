@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine.model.activity;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.*;
-import com.jasify.schedule.appengine.model.users.User;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -40,25 +39,14 @@ public interface ActivityService {
     /**
      * Subscribe a user for an activity
      *
-     * @param user     to subscribe
-     * @param activity to subscribe to
+     * @param userId     to subscribe
+     * @param activityId to subscribe to
      * @return a newly created Subscription for this user to this activity
      * @throws OperationException        if activity is fully subscribed
+     * @throws EntityNotFoundException
      */
     @Nonnull
-    Subscription subscribe(User user, Activity activity) throws OperationException;
-
-    /**
-     * @param user            who is subscribing
-     * @param activityPackage tha package used to aqcuire the activities
-     * @param activities      activities to subscribe to
-     * @return the execution of this subscription
-     * @throws EntityNotFoundException   if any of the entities don't exist
-     * @throws OperationException        if activity is fully subscribed
-     *                                   if there are more activities then allowed by the package
-     * @throws IllegalArgumentException  if any of the activities is not part of the package
-     */
-    ActivityPackageExecution subscribe(User user, ActivityPackage activityPackage, List<Activity> activities) throws EntityNotFoundException, OperationException, IllegalArgumentException;
+    Subscription subscribe(Key userId, Key activityId) throws OperationException, EntityNotFoundException;
 
     /**
      * @param userId            who is subscribing
@@ -83,7 +71,7 @@ public interface ActivityService {
     void cancelSubscription(Key subscriptionId) throws EntityNotFoundException;
 
     /**
-     * Cancel an activityPackageExecution, effectively reversing {@link #subscribe(com.jasify.schedule.appengine.model.users.User, ActivityPackage, java.util.List)}
+     * Cancel an activityPackageExecution, effectively reversing {@link #subscribe(Key, Key, java.util.List)}
      *
      * @param activityPackageExecution to cancel
      * @throws EntityNotFoundException if eny entity doesn't exist

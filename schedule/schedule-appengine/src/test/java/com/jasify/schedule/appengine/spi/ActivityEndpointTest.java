@@ -7,6 +7,8 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.model.activity.*;
@@ -23,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -1468,7 +1471,8 @@ public class ActivityEndpointTest {
         thrown.expect(NotFoundException.class);
         Key userId = Datastore.allocateId(User.class);
         thrown.expectMessage("No entity was found matching the key: " + userId);
-        endpoint.addSubscription(newAdminCaller(1), userId, Datastore.allocateId(Activity.class));
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
+        endpoint.addSubscription(newAdminCaller(1), userId, activity.getId());
     }
 
     @Test
@@ -2231,7 +2235,15 @@ public class ActivityEndpointTest {
         jasActivityPackageRequest.getActivities().add(createActivity(organization, true));
         endpoint.addActivityPackage(newAdminCaller(1), jasActivityPackageRequest);
         List<Activity> activities = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId());
-        ActivityServiceFactory.getActivityService().subscribe(TestHelper.createUser(true), activityPackage, activities);
+
+        List<Key> activityIds = Lists.transform(activities, new Function<Activity, Key>() {
+            @Nullable
+            @Override
+            public Key apply(Activity activity) {
+                return activity.getId();
+            }
+        });
+        ActivityServiceFactory.getActivityService().subscribe(TestHelper.createUser(true).getId(), activityPackage.getId(), activityIds);
 
         Activity activity = endpoint.getActivityPackageActivities(newAdminCaller(1), activityPackage.getId()).get(0);
         Key activityPackageActivityKey = null;
