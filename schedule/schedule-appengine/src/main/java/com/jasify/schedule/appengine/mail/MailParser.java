@@ -198,12 +198,6 @@ public class MailParser {
         return createSubscriptionEmail(MultiSubscription.Subscriber, subscriptions, executions);
     }
 
-    public static MailParser createSubscriberPasswordRecoveryEmail(String passwordUrl) throws Exception {
-        MailParser mailParser = new MailParser("/subscriber/PasswordRecovery");
-        mailParser.substitute(SubstituteKey.PasswordUrl, passwordUrl);
-        return mailParser;
-    }
-
     public static MailParser createSubscriberEmailSignUpConfirmationEmail(String subscriberName, String userName, String jasifyUrl) throws Exception {
         MailParser mailParser = new MailParser("/subscriber/EmailSignUpConfirmation");
         mailParser.substitute(SubstituteKey.SubscriberName, subscriberName);

@@ -129,11 +129,6 @@ public class MailParserTest {
         TestHelper.cleanupDatastore();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testNullSubstitution() throws Exception {
-        MailParser.createSubscriberPasswordRecoveryEmail(null);
-    }
-
     @Test
     public void testDecimalFormatting() throws Exception {
         this.activity1.setPrice(20.0000001);
@@ -165,22 +160,6 @@ public class MailParserTest {
         text = mailParser.getText();
         assert (!text.contains("Subscriber    : " + user.getRealName()));
         assert (text.contains("Subscriber    : " + user.getName()));
-    }
-
-    @Test
-    public void testSubscriberPasswordRecoveryAsText() throws Exception {
-        MailParser mailParser = MailParser.createSubscriberPasswordRecoveryEmail("PasswordRecoveryUrl");
-        String text = mailParser.getText();
-
-        assert (text.contains("Click on the link below to reset your password: PasswordRecoveryUrl"));
-    }
-
-    @Test
-    public void testSubscriberPasswordRecoveryAsHtml() throws Exception {
-        MailParser mailParser = MailParser.createSubscriberPasswordRecoveryEmail("PasswordRecoveryUrl");
-        String html = mailParser.getHtml();
-
-        assert (html.contains("PasswordRecoveryUrl"));
     }
 
     @Test
