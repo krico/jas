@@ -111,7 +111,7 @@ public class ActivityServiceTest {
         assertNotNull(subscription);
         assertEquals(testUser1.getId(), subscription.getUserRef().getKey());
         assertEquals(activity.getId(), subscription.getActivityRef().getKey());
-        assertEquals(1, activity.getSubscriptionCount());
+        assertEquals(1, Datastore.get(Activity.class, activity.getId()).getSubscriptionCount());
         List<Subscription> modelList = activity.getSubscriptionListRef().getModelList();
         assertEquals(1, modelList.size());
         assertEquals(subscription.getId(), modelList.get(0).getId());
