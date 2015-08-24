@@ -107,7 +107,7 @@ public class ActivityServiceTest {
     @Test
     public void testSubscribe() throws Exception {
         Activity activity = TestHelper.createActivity(true);
-        Subscription subscription = activityService.subscribe(testUser1, activity);
+        Subscription subscription = activityService.subscribe(testUser1, activity.getId());
         assertNotNull(subscription);
         assertEquals(testUser1.getId(), subscription.getUserRef().getKey());
         assertEquals(activity.getId(), subscription.getActivityRef().getKey());
@@ -124,7 +124,7 @@ public class ActivityServiceTest {
         service.clearSentMessages();
         User user = new User();
         Datastore.put(user);
-        activityService.subscribe(user, activity);
+        activityService.subscribe(user, activity.getId());
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
         assertEquals(0, sentMessages.size());
@@ -137,7 +137,7 @@ public class ActivityServiceTest {
         Datastore.put(activity);
         LocalMailService service = LocalMailServiceTestConfig.getLocalMailService();
         service.clearSentMessages();
-        activityService.subscribe(testUser1, activity);
+        activityService.subscribe(testUser1, activity.getId());
         List<MailServicePb.MailMessage> sentMessages = service.getSentMessages();
         assertNotNull(sentMessages);
         assertEquals(0, sentMessages.size());
@@ -150,8 +150,8 @@ public class ActivityServiceTest {
         Activity activity = TestHelper.createActivity(true);
         activity.setMaxSubscriptions(1);
         Datastore.put(activity);
-        activityService.subscribe(testUser1, activity);
-        activityService.subscribe(testUser2, activity);
+        activityService.subscribe(testUser1, activity.getId());
+        activityService.subscribe(testUser2, activity.getId());
     }
 
     @Test
@@ -159,15 +159,15 @@ public class ActivityServiceTest {
         Activity activity = TestHelper.createActivity(true);
         activity.setMaxSubscriptions(0);
         Datastore.put(activity);
-        assertNotNull(activityService.subscribe(testUser1, activity));
-        assertNotNull(activityService.subscribe(testUser2, activity));
+        assertNotNull(activityService.subscribe(testUser1, activity.getId()));
+        assertNotNull(activityService.subscribe(testUser2, activity.getId()));
         assertEquals(2, Datastore.get(ActivityMeta.get(), activity.getId()).getSubscriptionCount());
     }
 
     @Test
     public void testCancel() throws Exception {
         Activity activity = TestHelper.createActivity(true);
-        Subscription subscription = activityService.subscribe(testUser1, activity);
+        Subscription subscription = activityService.subscribe(testUser1, activity.getId());
 
         // cache it in
         activity1Organization1.getSubscriptionListRef().getModelList();

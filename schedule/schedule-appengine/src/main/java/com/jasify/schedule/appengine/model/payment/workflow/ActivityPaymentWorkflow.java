@@ -56,8 +56,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
         try {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
             User user = UserServiceFactory.getUserService().getUser(payment.getUserRef().getKey());
-            Activity activity = activityDao.get(activityId);
-            Subscription subscribe = activityService.subscribe(user, activity);
+            Subscription subscribe = activityService.subscribe(user, activityId);
             subscriptionId = subscribe.getId();
         } catch (EntityNotFoundException | OperationException e) {
             throw new PaymentWorkflowException(e);

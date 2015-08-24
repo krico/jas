@@ -41,12 +41,13 @@ public interface ActivityService {
      * Subscribe a user for an activity
      *
      * @param user     to subscribe
-     * @param activity to subscribe to
+     * @param activityId to subscribe to
      * @return a newly created Subscription for this user to this activity
      * @throws OperationException        if activity is fully subscribed
+     * @throws EntityNotFoundException
      */
     @Nonnull
-    Subscription subscribe(User user, Activity activity) throws OperationException;
+    Subscription subscribe(User user, Key activityId) throws OperationException, EntityNotFoundException;
 
     /**
      * @param user            who is subscribing

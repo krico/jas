@@ -310,8 +310,7 @@ public class ActivityEndpoint {
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         try {
             com.jasify.schedule.appengine.model.users.User user = userDao.get(userId);
-            Activity activity = activityDao.get(activityId);
-            return ActivityServiceFactory.getActivityService().subscribe(user, activity);
+            return ActivityServiceFactory.getActivityService().subscribe(user, activityId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (OperationException e) {

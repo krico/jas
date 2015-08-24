@@ -63,22 +63,22 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Subscription subscribe(final User user, final Activity activity) throws OperationException {
-        if (activity.getMaxSubscriptions() > 0 && activity.getSubscriptionCount() >= activity.getMaxSubscriptions()) {
-            throw new OperationException("Activity fully subscribed");
-        }
+    public Subscription subscribe(final User user, final Key activityId) throws OperationException, EntityNotFoundException {
 
         try {
             return TransactionOperator.execute(new ModelOperation<Subscription>() {
                 @Override
                 public Subscription execute(Transaction tx) throws ModelException {
+                    Activity activity = activityDao.get(activityId);
+                    if (activity.getMaxSubscriptions() > 0 && activity.getSubscriptionCount() >= activity.getMaxSubscriptions()) {
+                        throw new OperationException("Activity fully subscribed");
+                    }
                     Subscription subscription = new Subscription();
 
                     subscription.getActivityRef().setKey(activity.getId());
                     subscription.getUserRef().setKey(user.getId());
 
                     activity.setSubscriptionCount(activity.getSubscriptionCount() + 1);
-                    activity.getSubscriptionListRef().getModelList().add(subscription);
 
                     activityDao.save(activity);
                     subscriptionDao.save(subscription, user.getId());
@@ -88,6 +88,8 @@ class DefaultActivityService implements ActivityService {
                     return subscription;
                 }
             });
+        } catch (EntityNotFoundException | OperationException e) {
+            throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
         }
