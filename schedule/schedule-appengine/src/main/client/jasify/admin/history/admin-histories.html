@@ -64,7 +64,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="history in vm.displayHistories |reverse track by history.id">
+        <tr ng-repeat="history in vm.displayHistories">
             <td class="row-commands">
                 <history-icon history="history" data-row-id="{{history.id}}"></history-icon>
             </td>

@@ -6,13 +6,14 @@
     function AdminHistoriesController($log, $scope, History, histories) {
         var vm = this;
         vm.allHistories = histories.items;
-        vm.histories = histories.items;
+        vm.histories = [];
         vm.historyTypes = [];
         vm.detectTypes = detectTypes;
         vm.historyType = false;
         vm.selectHistoryType = selectHistoryType;
         vm.getHistory = getHistory;
         vm.queryChanged = queryChanged;
+        vm.init = init;
 
         // Client side pagination. Need this to simulate server side filtering
         vm.queryHistories = [];
@@ -28,10 +29,18 @@
             maxSize: 5
         };
 
-        vm.detectTypes();
-        vm.queryChanged();
-        // vm.pageChanged();
+        vm.init();
 
+        function init() {
+            if (vm.allHistories) {
+                // TODO: We want to display the history in descending 'created' order but we can not use orderBy because of how we use the various arrays
+                vm.allHistories.reverse();
+            }
+            vm.histories = vm.allHistories;
+            vm.detectTypes();
+            vm.queryChanged();
+            // vm.pageChanged();
+        }
         /**
          * TODO: We are missing functionality to
          * TODO: 1) Select [startDate] and [endDate]
