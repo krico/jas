@@ -1,11 +1,11 @@
-<div class="row">
-    <div class="col-sm-1">
-        <a ng-click="vm.back()"><span class="glyphicon glyphicon-arrow-left"></span> {{ 'BACK' | translate }}</a>
+<div class="card">
+    <div class="card-header">
+        <card-back href="#/admin/activities/{{vm.organization.id}}"></card-back>
+        <h2>{{ 'SUBSCRIBERS' | translate }}
+        </h2>
     </div>
-</div>
-<div class="row">
-    <div class="col-sm-10">
-        <table class="table table-hover">
+    <div class="table-responsive">
+        <table id="users-list" class="table-vmiddle table table-striped table-hover">
             <thead>
             <tr>
                 <th>{{ 'CREATED' | translate }}</th>
@@ -14,7 +14,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="subscription in vm.subscriptions">
+            <tr ng-repeat="subscription in vm.displaySubscriptions track by subscription.user.id">
                 <td>{{subscription.user.created | date:'yyyy-MM-dd HH:mm'}}</td>
                 <td>{{subscription.user.realName}}</td>
                 <td>{{subscription.user.name}}</td>
@@ -25,8 +25,23 @@
                 <td>
                     <row-delete action="vm.cancel(subscription.id)"></row-delete>
                 </td>
-            </tr>
             </tbody>
         </table>
     </div>
+    <div class="bootgrid-footer container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
+                            boundary-links="true" rotate="true">
+                </pagination>
+            </div>
+            <div class="col-sm-6 infoBar">
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.displaySubscriptions.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
