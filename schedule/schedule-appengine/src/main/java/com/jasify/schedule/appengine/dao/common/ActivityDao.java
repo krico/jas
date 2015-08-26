@@ -95,6 +95,8 @@ public class ActivityDao extends BaseCachingDao<Activity> {
         if (entity.getFinish().getTime() < entity.getStart().getTime()) throw new FieldValueException("Activity.finish");
         if (entity.getPrice() != null && entity.getPrice() < 0) throw new FieldValueException("Activity.price");
         if (entity.getMaxSubscriptions() < 0) throw new FieldValueException("Activity.maxSubscriptions");
+        if (entity.getMaxSubscriptions() > 0 && entity.getMaxSubscriptions() < entity.getSubscriptionCount())
+            throw new FieldValueException("Activity.maxSubscriptions < Activity.subscriptionCount");
     }
 
     private static class ByActivityTypeQuery extends BaseDaoQuery<Activity, ActivityMeta> {
