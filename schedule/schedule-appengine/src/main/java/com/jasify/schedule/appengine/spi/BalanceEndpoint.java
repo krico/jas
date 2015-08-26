@@ -10,12 +10,11 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
+import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.balance.Account;
-import com.jasify.schedule.appengine.model.balance.AccountUtil;
-import com.jasify.schedule.appengine.model.balance.BalanceService;
-import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
+import com.jasify.schedule.appengine.model.balance.*;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowFactory;
@@ -193,8 +192,24 @@ public class BalanceEndpoint {
 
     @ApiMethod(name = "balance.getAccounts", path = "balance/accounts", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Account> getAccounts(User caller) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        mustBeAdmin(caller);
-        return BalanceServiceFactory.getBalanceService().listAccounts();
+        JasifyEndpointUser jasifyEndpointUser = mustBeAdminOrOrgMember(caller);
+        // Get this far we must be either admin or OrgAdmin
+        if (jasifyEndpointUser.isAdmin()) {
+            // Admin sees all
+            return BalanceServiceFactory.getBalanceService().listAccounts();
+        }
+
+        try {
+            // OrgAdmin see's accounts of organizations they belong to
+            List<Account> result = new ArrayList<>();
+            List<Organization> organizations = new OrganizationDao().byMemberUserId(jasifyEndpointUser.getUserId());
+            for (Organization organization : organizations) {
+                result.add(BalanceServiceFactory.getBalanceService().getOrganizationAccount(organization));
+            }
+            return result;
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
     }
 
     @ApiMethod(name = "balance.getAccount", path = "balance/account", httpMethod = ApiMethod.HttpMethod.GET)
@@ -222,7 +237,11 @@ public class BalanceEndpoint {
         if (userId == null) {
             mustBeAdmin(caller);
         } else {
-            mustBeSameUserOrAdmin(caller, userId);
+            if (AccountUtil.isOrganizationAccount(accountId)) {
+                mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromOrganizationId(userId));
+            } else {
+                mustBeSameUserOrAdmin(caller, userId);
+            }
         }
         if (limit == null) limit = 0;
         if (offset == null) offset = 0;

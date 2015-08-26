@@ -402,6 +402,11 @@ public class DefaultBalanceService implements BalanceService {
     @Override
     public OrganizationAccount getOrganizationAccount(Key organizationId) throws EntityNotFoundException {
         Key accountId = AccountUtil.memberIdToAccountId(organizationId);
+        return getOrganizationAccountFromAccountId(accountId);
+    }
+
+    @Override
+    public OrganizationAccount getOrganizationAccountFromAccountId(Key accountId) throws EntityNotFoundException {
         OrganizationAccount ret = Datastore.getOrNull(organizationAccountMeta, accountId);
         if (ret == null) {
             throw new EntityNotFoundException("OrganizationAccount");
