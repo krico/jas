@@ -323,7 +323,7 @@
                 resolve: {
                     accounts: /*@ngInject*/ function ($q, Allow, Balance) {
 
-                        return Allow.admin().then(allowed, forbidden);
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
 
                         function allowed() {
                             return Balance.getAccounts();

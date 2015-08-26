@@ -64,6 +64,8 @@ public interface BalanceService {
 
     OrganizationAccount getOrganizationAccount(Organization organization) throws EntityNotFoundException;
 
+    OrganizationAccount getOrganizationAccountFromAccountId(Key accountId) throws EntityNotFoundException;
+
     List<Account> listAccounts();
 
     List<Transaction> listTransactions(Key accountId) throws EntityNotFoundException;
