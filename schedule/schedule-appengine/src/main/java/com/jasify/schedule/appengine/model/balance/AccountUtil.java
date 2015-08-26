@@ -116,6 +116,12 @@ public final class AccountUtil {
         throw new IllegalArgumentException("This should never happen!");
     }
 
+    public static boolean isOrganizationAccount(Key accountId) {
+        Preconditions.checkArgument(AccountMeta.get().getKind().equals(accountId.getKind()), "Not an accountId: " + accountId);
+        String name = accountId.getName();
+        return StringUtils.startsWith(name, ORGANIZATION_ACCOUNT_PREFIX);
+    }
+
     public static Key memberAccountIdMustExist(Key memberId) {
         return memberAccountMustExist(memberId).getId();
     }

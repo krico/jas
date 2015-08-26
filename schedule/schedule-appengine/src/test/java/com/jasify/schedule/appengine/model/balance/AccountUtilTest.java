@@ -10,7 +10,9 @@ import com.jasify.schedule.appengine.meta.users.UserMeta;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
 
 import java.util.Objects;
@@ -18,6 +20,9 @@ import java.util.Objects;
 import static junit.framework.TestCase.*;
 
 public class AccountUtilTest {
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @BeforeClass
     public static void initializeDatastore() {
         TestHelper.initializeJasify();
@@ -140,4 +145,25 @@ public class AccountUtilTest {
         assertEquals(organizationId, organizationAccount.getOrganizationRef().getKey());
     }
 
+    @Test
+    public void testIsOrganizationAccountWithOrganizationId() {
+        Key memberId = Datastore.allocateId(OrganizationMeta.get());
+        Key accountId = AccountUtil.memberIdToAccountId(memberId);
+        assertTrue(AccountUtil.isOrganizationAccount(accountId));
+    }
+
+    @Test
+    public void testIsOrganizationAccountWithUserId() {
+        Key memberId = Datastore.allocateId(UserMeta.get());
+        Key accountId = AccountUtil.memberIdToAccountId(memberId);
+        assertFalse(AccountUtil.isOrganizationAccount(accountId));
+    }
+
+    @Test
+    public void testIsOrganizationAccountWithUnsupportedId() {
+        Key userId = Datastore.allocateId(UserMeta.get());
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Not an accountId: " + userId);
+        AccountUtil.isOrganizationAccount(userId);
+    }
 }
