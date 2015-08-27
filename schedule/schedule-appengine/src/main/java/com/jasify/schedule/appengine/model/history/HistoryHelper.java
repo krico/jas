@@ -2,9 +2,13 @@ package com.jasify.schedule.appengine.model.history;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.jasify.schedule.appengine.dao.common.ActivityDao;
+import com.jasify.schedule.appengine.dao.common.SubscriptionDao;
 import com.jasify.schedule.appengine.dao.history.HistoryDao;
 import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.*;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
@@ -50,6 +54,30 @@ public final class HistoryHelper {
                 return history;
             }
         });
+    }
+
+    private static User getUser(Key userId) {
+        try {
+            if (userId != null) {
+                UserDao userDao = new UserDao();
+                return userDao.get(userId);
+            }
+        } catch (EntityNotFoundException | IllegalArgumentException e) {
+            log.warn("Failed to get User", e);
+        }
+        return null;
+    }
+
+    private static Activity getActivity(Key activityId) {
+        try {
+            if (activityId != null) {
+                ActivityDao activityDao = new ActivityDao();
+                return activityDao.get(activityId);
+            }
+        } catch (EntityNotFoundException | IllegalArgumentException e) {
+            log.warn("Failed to get Activity", e);
+        }
+        return null;
     }
 
     private static void addUserLogin(UserLogin userLogin, AuthHistory history) {
@@ -243,5 +271,68 @@ public final class HistoryHelper {
         history.setDescription("User: " + history.getName() + " recovered password from: " + history.getRemoteAddress());
 
         addHistory(history);
+    }
+
+    private static void createSubscriptionHistory(HistoryTypeEnum historyType, Key userId, Key activityId) {
+        User user = getUser(userId);
+        Activity activity = getActivity(activityId);
+        createSubscriptionHistory(historyType, null, user, activity);
+    }
+
+    private static void createSubscriptionHistory(HistoryTypeEnum historyType, Key subscriptionId) {
+        try {
+            SubscriptionDao subscriptionDao = new SubscriptionDao();
+            Subscription subscription = subscriptionDao.get(subscriptionId);
+            User user = getUser(subscription.getUserRef().getKey());
+            Activity activity = getActivity(subscription.getActivityRef().getKey());
+            createSubscriptionHistory(historyType, subscription, user, activity);
+        } catch (EntityNotFoundException e) {
+            log.warn("Failed to get entity", e);
+        }
+    }
+
+    private static void createSubscriptionHistory(HistoryTypeEnum historyType, Subscription subscription, User user, Activity activity) {
+        SubscriptionHistory history = new SubscriptionHistory(historyType);
+
+        addCurrentUser(history);
+
+        if (subscription != null) {
+            history.setSubscriptionId(subscription.getId());
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("[User=");
+        if (user != null) {
+            sb.append(user.getId()).append(":").append(user.getEmail());
+        } else {
+            sb.append("?");
+        }
+        sb.append("] / [Activity=");
+
+        if (activity != null) {
+            sb.append(activity.getId()).append(":").append(activity.getName());
+        } else {
+            sb.append("?");
+        }
+        sb.append("]");
+        history.setDescription(sb.toString());
+
+        addHistory(history);
+    }
+
+    public static void addSubscriptionCreated(Key subscriptionId) {
+        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCreated, subscriptionId);
+    }
+
+    public static void addSubscriptionCreationFailed(Key userId, Key activityId) {
+        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCreationFailed, userId, activityId);
+    }
+
+    public static void addSubscriptionCancelled(Key subscriptionId) {
+        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancelled, subscriptionId);
+    }
+
+    public static void addSubscriptionCancellationFailed(Key subscriptionId) {
+        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancellationFailed, subscriptionId);
     }
 }

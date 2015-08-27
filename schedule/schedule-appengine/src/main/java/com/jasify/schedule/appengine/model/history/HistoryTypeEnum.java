@@ -14,5 +14,9 @@ public enum HistoryTypeEnum {
     PasswordRecovered,
     AccountCreated,
     AccountCreationFailed,
+    SubscriptionCreated,
+    SubscriptionCreationFailed,
+    SubscriptionCancelled,
+    SubscriptionCancellationFailed,
     Message;
 }

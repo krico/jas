@@ -15,7 +15,11 @@
             PasswordRecovered: ['ion-ios-unlocked'],
             AccountCreated: ['mdi', 'mdi-person'],
             AccountCreationFailed: ['glyphicon', 'glyphicon-remove-circle'],
-            Logout: ['ion-android-exit']
+            Logout: ['ion-android-exit'],
+            SubscriptionCreated: ['glyphicon', 'glyphicon glyphicon-ok'],
+            SubscriptionCreationFailed: ['glyphicon', 'glyphicon-remove-circle'],
+            SubscriptionCancelled: ['glyphicon', 'glyphicon glyphicon-remove'],
+            SubscriptionCancellationFailed: ['glyphicon', 'glyphicon-remove-circle']
         };
         var defaultTextClass = [];
         var textClassMap = {
@@ -23,7 +27,11 @@
             AccountCreationFailed: ['text-danger'],
             PasswordForgottenFailed: ['text-danger'],
             PasswordRecovered: ['text-success'],
-            LoginFailed: ['text-danger']
+            LoginFailed: ['text-danger'],
+            SubscriptionCreated: ['text-success'],
+            SubscriptionCreationFailed: ['text-danger'],
+            SubscriptionCancelled: ['text-success'],
+            SubscriptionCancellationFailed: ['text-danger']
         };
         return {
             restrict: 'E',
