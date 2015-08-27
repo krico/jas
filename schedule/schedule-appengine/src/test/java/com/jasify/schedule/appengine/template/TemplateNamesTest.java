@@ -6,7 +6,10 @@ import com.jasify.schedule.appengine.communication.ApplicationContext;
 import com.jasify.schedule.appengine.communication.ApplicationContextImpl;
 import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
 import com.jasify.schedule.appengine.model.ModelException;
-import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.activity.Activity;
+import com.jasify.schedule.appengine.model.activity.ActivityPackage;
+import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
+import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
@@ -73,7 +76,7 @@ public class TemplateNamesTest {
         List<ActivityPackageExecution> executions = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
             ActivityPackage activityPackage = new ActivityPackage();
-            activityPackage.setName("The combo of "+i);
+            activityPackage.setName("The combo of " + i);
             activityPackage.setCurrency("CHF");
             activityPackage.setPrice(RandomUtils.nextDouble(100, 500));
             Datastore.put(activityPackage);
@@ -192,6 +195,8 @@ public class TemplateNamesTest {
 
         InvoicePayment payment = new InvoicePayment();
         payment.setReferenceCode("120000000000234478943216899");
+        payment.setAmount(400.25);
+        payment.setCurrency("CHF");
 
         Attachment att = new Attachment();
         att.setName("ABC-DEF.pdf");

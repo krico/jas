@@ -37,7 +37,7 @@
         }
 
         .activity-package {
-            background-color: #006699;
+            background-color: lightslategrey;
             color: #f5f5f5;
         }
 
@@ -50,8 +50,15 @@
 
         .activity-package-subscription {
             border-right: solid 1px;
-            border-color: #006699;
+            border-color: lightslategrey;
             width: 5px;
+        }
+
+        .odd-row {
+            background-color: lightcyan;
+        }
+
+        .even-row {
         }
     </style>
 </head>

@@ -20,6 +20,8 @@ public class InvoicePayment extends Payment {
 
     private String recipient;
 
+    private int expireDays = InvoicePaymentProvider.INVOICE_EXPIRES_DAYS;
+
     private ModelRef<Attachment> attachmentRef = new ModelRef<>(Attachment.class);
 
     public InvoicePayment() {
@@ -58,6 +60,14 @@ public class InvoicePayment extends Payment {
         this.recipient = recipient;
     }
 
+    public int getExpireDays() {
+        return expireDays;
+    }
+
+    public void setExpireDays(int expireDays) {
+        this.expireDays = expireDays;
+    }
+
     public ModelRef<Attachment> getAttachmentRef() {
         return attachmentRef;
     }
@@ -79,6 +89,7 @@ public class InvoicePayment extends Payment {
         return "InvoicePayment{" +
                 super.toString() +
                 ", referenceCode='" + referenceCode + '\'' +
+                ", expireDays='" + expireDays + '\'' +
                 ", account='" + account + '\'' +
                 ", subscriber='" + subscriber + '\'' +
                 ", recipient='" + StringUtils.replace(recipient, "\n", "|") + '\'' +

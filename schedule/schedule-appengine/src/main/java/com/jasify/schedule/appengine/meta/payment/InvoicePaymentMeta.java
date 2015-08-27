@@ -17,6 +17,9 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
     public final org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment> recipient = new org.slim3.datastore.StringAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment>(this, "recipient", "recipient");
 
     /** */
+    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment, java.lang.Integer> expireDays = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment, java.lang.Integer>(this, "expireDays", "expireDays", int.class);
+
+    /** */
     public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.attachment.Attachment>, com.jasify.schedule.appengine.model.attachment.Attachment> attachmentRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.payment.InvoicePayment, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.attachment.Attachment>, com.jasify.schedule.appengine.model.attachment.Attachment>(this, "attachmentRef", "attachmentRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.attachment.Attachment.class);
 
     /** */
@@ -86,6 +89,7 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
         model.setSubscriber((java.lang.String) entity.getProperty("subscriber"));
         model.setReferenceCode((java.lang.String) entity.getProperty("referenceCode"));
         model.setRecipient((java.lang.String) entity.getProperty("recipient"));
+        model.setExpireDays(longToPrimitiveInt((java.lang.Long) entity.getProperty("expireDays")));
         if (model.getAttachmentRef() == null) {
             throw new NullPointerException("The property(attachmentRef) is null.");
         }
@@ -126,6 +130,7 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
         entity.setProperty("subscriber", m.getSubscriber());
         entity.setProperty("referenceCode", m.getReferenceCode());
         entity.setProperty("recipient", m.getRecipient());
+        entity.setProperty("expireDays", m.getExpireDays());
         if (m.getAttachmentRef() == null) {
             throw new NullPointerException("The property(attachmentRef) must not be null.");
         }
@@ -239,6 +244,8 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
             writer.setNextPropertyName("recipient");
             encoder0.encode(writer, m.getRecipient());
         }
+        writer.setNextPropertyName("expireDays");
+        encoder0.encode(writer, m.getExpireDays());
         if(m.getAttachmentRef() != null && m.getAttachmentRef().getKey() != null){
             writer.setNextPropertyName("attachmentRef");
             encoder0.encode(writer, m.getAttachmentRef(), maxDepth, currentDepth);
@@ -327,6 +334,8 @@ public final class InvoicePaymentMeta extends org.slim3.datastore.ModelMeta<com.
         m.setReferenceCode(decoder0.decode(reader, m.getReferenceCode()));
         reader = rootReader.newObjectReader("recipient");
         m.setRecipient(decoder0.decode(reader, m.getRecipient()));
+        reader = rootReader.newObjectReader("expireDays");
+        m.setExpireDays(decoder0.decode(reader, m.getExpireDays()));
         reader = rootReader.newObjectReader("attachmentRef");
         decoder0.decode(reader, m.getAttachmentRef(), maxDepth, currentDepth);
         reader = rootReader.newObjectReader("id");

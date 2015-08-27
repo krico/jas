@@ -12,11 +12,11 @@
         #set($activity = $mut.activity($subscription))
         #set($organization = $mut.organization($activity))
         #if( ($foreach.count % 2) == 0 )
-            #set($bg="#f0f8ff")
+            #set($cl="odd-row")
         #else
-            #set($bg="")
+            #set($cl="even-row")
         #end
-        <tr bgcolor="$bg">
+        <tr class="$cl">
             <td colspan="2">$mut.formatPeriodShort($activity)</td>
             <td>$activity.Name</td>
             <td>$organization.Name</td>
@@ -37,11 +37,11 @@
             #set($activity = $mut.activity($subscription))
             #set($organization = $mut.organization($activity))
             #if( ($foreach.count % 2) == 0 )
-                #set($bg="#f0f8ff")
+                #set($cl="odd-row")
             #else
-                #set($bg="")
+                #set($cl="even-row")
             #end
-            <tr bgcolor="$bg">
+            <tr class="$cl">
                 <td class="activity-package-subscription">&nbsp;</td>
                 <td>$mut.formatPeriodShort($activity)</td>
                 <td>$activity.Name</td>

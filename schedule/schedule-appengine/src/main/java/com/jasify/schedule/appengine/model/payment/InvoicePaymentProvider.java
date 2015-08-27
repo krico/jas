@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.model.payment;
 
 import com.google.api.client.http.GenericUrl;
-import com.google.api.server.spi.config.Singleton;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import com.jasify.schedule.appengine.besr.PaymentSlip;
@@ -21,6 +20,7 @@ import org.slf4j.LoggerFactory;
  * @since 05/08/15.
  */
 public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
+    public static final int INVOICE_EXPIRES_DAYS = 3;
     private static final Logger log = LoggerFactory.getLogger(InvoicePaymentProvider.class);
 
     private final AttachmentDao attachmentDao = new AttachmentDao();

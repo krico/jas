@@ -117,10 +117,14 @@ public class ApplicationContextImpl extends VelocityContext {
             return startFormat.format(start) + finishFormat.format(finish);
         }
 
-        public String dateTimeShort(Date date, TimeZone timeZone) {
+        public String dateShort(Date date) {
+            return dateShort(date, null);
+        }
+
+        public String dateShort(Date date, TimeZone timeZone) {
             if (date == null) return null;
             if (timeZone == null) timeZone = InternationalizationUtil.getLocationTimeZone();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YY HH:mm");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YY");
             sdf.setTimeZone(timeZone);
             return sdf.format(date);
         }

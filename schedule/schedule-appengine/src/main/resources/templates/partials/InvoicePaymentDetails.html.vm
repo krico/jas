@@ -4,13 +4,31 @@
         <th colspan="2" class="details-title">Invoice Details</th>
     </tr>
     <tr>
-        <th align="left">Payment #: </th>
+        <th align="left">Invoice #:</th>
         <td align="left">$kut.keyToString($payment.Id)</td>
     </tr>
     <tr>
-        <th align="left">Reference Code: </th>
+        <th align="left">Date <small>(dd/mm/yy)</small>:</th>
+        <td align="left">
+            $mut.dateShort($payment.Created)
+            <i>(pay within $payment.ExpireDays days)</i>
+        </td>
+    </tr>
+    <tr>
+        <th align="left">Reference Code:</th>
         <td align="left">
             <nobr>$mut.formatReferenceCode($payment)</nobr>
+        </td>
+    </tr>
+    <tr>
+        <th align="left">Attachment:</th>
+        #set($attachment = $mut.attachment($payment))
+        <td align="left"><a href="$mut.attachmentUrl($attachment)">$attachment.Name</a></td>
+    </tr>
+    <tr>
+        <th align="left">Amount:</th>
+        <td align="left">
+            <nobr>$cut.formatCurrency($payment.Currency, $payment.Amount)</nobr>
         </td>
     </tr>
 </table>
