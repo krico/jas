@@ -2,11 +2,21 @@ package com.jasify.schedule.appengine.model.payment;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
+import com.jasify.schedule.appengine.dao.common.SubscriptionDao;
 import com.jasify.schedule.appengine.meta.payment.workflow.PaymentWorkflowMeta;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
+import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.HasTransfer;
 import com.jasify.schedule.appengine.model.balance.Transfer;
+import com.jasify.schedule.appengine.model.payment.workflow.ActivityPackagePaymentWorkflow;
+import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
+import com.jasify.schedule.appengine.model.payment.workflow.ShoppingCartPaymentWorkflow;
 import com.jasify.schedule.appengine.model.users.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slim3.datastore.*;
 
 import java.util.ArrayList;
@@ -20,6 +30,8 @@ import java.util.Objects;
  */
 @Model
 public class Payment implements HasTransfer {
+    private static final Logger log = LoggerFactory.getLogger(Payment.class);
+
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -246,6 +258,40 @@ public class Payment implements HasTransfer {
             builder.append('[').append(itemDescription).append(']');
         }
         return builder.toString();
+    }
+
+    public List<Subscription> getSubscriptions() {
+        // TODO: This is probably not the best way to get the subscriptions
+        List<Subscription> subscriptions = new ArrayList<>();
+        SubscriptionDao subscriptionDao = new SubscriptionDao();
+        for (PaymentWorkflow paymentWorkflow : getWorkflowListRef().getModelList()) {
+            if (paymentWorkflow instanceof ActivityPaymentWorkflow) {
+                Key key = ((ActivityPaymentWorkflow) paymentWorkflow).getSubscriptionId();
+                try {
+                    subscriptions.add(subscriptionDao.get(key));
+                } catch (EntityNotFoundException e) {
+                    log.error("Failed to find subscription with key " + key.getId(), e);
+                }
+            }
+        }
+        return subscriptions;
+    }
+
+    public List<ActivityPackageExecution> getActivityPackageExecutions() {
+        // TODO: This is probably not the best way to get the subscriptions
+        List<ActivityPackageExecution> subscriptions = new ArrayList<>();
+        ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
+        for (PaymentWorkflow paymentWorkflow : getWorkflowListRef().getModelList()) {
+            if (paymentWorkflow instanceof ActivityPackagePaymentWorkflow) {
+                Key key = ((ActivityPackagePaymentWorkflow) paymentWorkflow).getActivityPackageExecutionId();
+                try {
+                    subscriptions.add(activityPackageExecutionDao.get(key));
+                } catch (EntityNotFoundException e) {
+                    log.error("Failed to find subscription with key " + key.getId(), e);
+                }
+            }
+        }
+        return subscriptions;
     }
 
     /**

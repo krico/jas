@@ -12,7 +12,7 @@ import java.util.Date;
  * @since 04/04/15.
  */
 @Model
-public abstract class PaymentWorkflow {
+public abstract class PaymentWorkflow implements PaymentWorkflowHandler {
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -61,10 +61,4 @@ public abstract class PaymentWorkflow {
     public ModelRef<Payment> getPaymentRef() {
         return paymentRef;
     }
-
-    public abstract void onCreated() throws PaymentWorkflowException;
-
-    public abstract void onCanceled() throws PaymentWorkflowException;
-
-    public abstract void onCompleted() throws PaymentWorkflowException;
 }

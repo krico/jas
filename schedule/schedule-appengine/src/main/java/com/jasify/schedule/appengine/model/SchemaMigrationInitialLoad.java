@@ -230,16 +230,6 @@ class SchemaMigrationInitialLoad {
 
         }
 
-        File sourceRoot = sourceRoot();
-        if (sourceRoot == null) {
-            log.error("Failed to find source root, will not create attachment!");
-        } else {
-            File source = new File(sourceRoot, "images/attachment.jpg");
-            Attachment attachment = AttachmentHelper.create("Example Attachment :-).jpg", MediaType.PNG, source);
-            AttachmentDao attachmentDao = new AttachmentDao();
-            Key id = attachmentDao.save(attachment);
-            log.info("Sample attachment created...\n\tVIEW: {}\n\tDOWNLOAD: {}", AttachmentHelper.makeViewUrl(id), AttachmentHelper.makeDownloadUrl(id));
-        }
         HistoryHelper.addMessage("Created several activities and other things");
 
     }

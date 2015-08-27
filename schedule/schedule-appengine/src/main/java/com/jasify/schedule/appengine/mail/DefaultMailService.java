@@ -2,21 +2,24 @@ package com.jasify.schedule.appengine.mail;
 
 import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
+import com.jasify.schedule.appengine.util.TypeUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.activation.DataHandler;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -97,12 +100,12 @@ public final class DefaultMailService implements MailService {
     }
 
     @Override
-    public boolean send(InternetAddress toAddress, String subject, String htmlBody, String textBody) {
+    public boolean send(InternetAddress toAddress, String subject, String htmlBody, String textBody, Attachment... attachments) {
         initialize();
-        return send(senderAddress, new InternetAddress[]{toAddress}, applicationOwners, subject, htmlBody, textBody);
+        return send(senderAddress, new InternetAddress[]{toAddress}, applicationOwners, subject, htmlBody, textBody, attachments);
     }
 
-    private boolean send(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody) {
+    private boolean send(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody, Attachment... attachments) {
         Preconditions.checkNotNull(fromAddress);
         Preconditions.checkNotNull(toAddress);
         Preconditions.checkNotNull(bccAddress);
@@ -111,7 +114,7 @@ public final class DefaultMailService implements MailService {
         Preconditions.checkNotNull(textBody);
         try {
             log.debug("Sending e-mail [{}] as [{}] to {}", subject, fromAddress, Arrays.toString(toAddress));
-            Message message = createMessage(fromAddress, toAddress, bccAddress, subject, htmlBody, textBody);
+            Message message = createMessage(fromAddress, toAddress, bccAddress, subject, htmlBody, textBody, attachments);
             Transport.send(message);
 
             MailDebug.writeDebug(message);
@@ -123,7 +126,7 @@ public final class DefaultMailService implements MailService {
         }
     }
 
-    private Message createMessage(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody) throws MessagingException {
+    private Message createMessage(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody, Attachment... attachments) throws MessagingException {
 
         MimeMessage message = new MimeMessage(session);
 
@@ -138,27 +141,44 @@ public final class DefaultMailService implements MailService {
         }
 
         message.setSubject(subject);
+        message.setSentDate(new Date());
 
         /*
          * The section 5.1.4 of RFC 2046 defines multipart/alternative
          * http://tools.ietf.org/html/rfc2046#section-5.1.4
          * ... in general the LAST part is the best choice ...
          */
-        MimeMultipart mp = new MimeMultipart("alternative");
+        MimeMultipart alternative = new MimeMultipart("alternative");
 
         if (textBody != null) {
             MimeBodyPart textPart = new MimeBodyPart();
             textPart.setContent(textBody, "text/plain");
-            mp.addBodyPart(textPart);
+            alternative.addBodyPart(textPart);
         }
 
         if (htmlBody != null) {
             MimeBodyPart htmlPart = new MimeBodyPart();
             htmlPart.setContent(htmlBody, "text/html");
-            mp.addBodyPart(htmlPart);
+            alternative.addBodyPart(htmlPart);
         }
 
-        message.setContent(mp);
+
+        if (attachments != null && attachments.length > 0) {
+
+            for (Attachment attachment : attachments) {
+                byte[] data = TypeUtil.toBytes(attachment.getData());
+                String mimeType = attachment.getMimeType();
+                MimeBodyPart attachmentPart = new MimeBodyPart();
+                attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(data, mimeType)));
+                attachmentPart.setDisposition(Part.ATTACHMENT);
+                attachmentPart.setHeader("Content-ID", "<" + UUID.randomUUID().toString() + ">");
+                attachmentPart.setFileName(attachment.getName());
+
+                alternative.addBodyPart(attachmentPart);
+            }
+        }
+
+        message.setContent(alternative);
         return message;
     }
 

@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.mail;
 
-import javax.mail.Address;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
+
 import javax.mail.internet.InternetAddress;
 
 /**
@@ -12,5 +13,5 @@ public interface MailService {
 
     boolean send(String toEmail, String subject, String htmlBody, String textBody) throws Exception;
 
-    boolean send(InternetAddress toAddress, String subject, String htmlBody, String textBody) ;
+    boolean send(InternetAddress toAddress, String subject, String htmlBody, String textBody, Attachment... attachments);
 }

@@ -15,15 +15,15 @@
         </td>
     </tr>
     <tr>
+        <th align="left">Attachment:</th>
+        #set($attachment = $mut.attachment($payment))
+        <td align="left">$attachment.Name</td>
+    </tr>
+    <tr>
         <th align="left">Reference Code:</th>
         <td align="left">
             <nobr>$mut.formatReferenceCode($payment)</nobr>
         </td>
-    </tr>
-    <tr>
-        <th align="left">Attachment:</th>
-        #set($attachment = $mut.attachment($payment))
-        <td align="left"><a href="$mut.attachmentUrl($attachment)">$attachment.Name</a></td>
     </tr>
     <tr>
         <th align="left">Amount:</th>

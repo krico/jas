@@ -1,13 +1,17 @@
 package com.jasify.schedule.appengine.communication;
 
 import com.jasify.schedule.appengine.Version;
+import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
+import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.template.TemplateEngine;
 import com.jasify.schedule.appengine.template.TemplateEngineBuilder;
 import com.jasify.schedule.appengine.template.TemplateEngineException;
 import com.jasify.schedule.appengine.template.TemplateNames;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
@@ -65,5 +69,23 @@ public class Communicator {
         String nonBlankName = StringUtils.isNoneBlank(user.getRealName()) ? user.getRealName() : user.getName();
         String subject = String.format("[Jasify] Password Assistance [%s]", nonBlankName);
         MailServiceFactory.getMailService().send(new InternetAddress(user.getEmail(), user.getName()), subject, html, text);
+    }
+
+    public static void notifyOfInvoiceCreated(InvoicePayment payment) throws TemplateEngineException, UnsupportedEncodingException, EntityNotFoundException {
+        //This should be safe
+        VelocityContext context = new VelocityContext(GLOBAL_CONTEXT.get());
+        UserDao userDao = new UserDao();
+        User user = userDao.get(payment.getUserRef().getKey());
+        context.put("user", user);
+        context.put("payment", payment);
+        context.put("subscriptions", payment.getSubscriptions());
+        context.put("executions", payment.getActivityPackageExecutions());
+
+        String html = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CREATED_HTML, context);
+        String text = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CREATED_TXT, context);
+
+        String nonBlankName = StringUtils.isNoneBlank(user.getRealName()) ? user.getRealName() : user.getName();
+        String subject = String.format("[Jasify] Invoice# %s for [%s]", KeyUtil.toHumanReadableString(payment.getId()), nonBlankName);
+        MailServiceFactory.getMailService().send(new InternetAddress(user.getEmail(), user.getName()), subject, html, text, payment.getAttachmentRef().getModel());
     }
 }

@@ -5,6 +5,8 @@ import com.google.appengine.api.mail.dev.LocalMailService;
 import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.Version;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
+import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.template.TemplateEngineException;
@@ -126,5 +128,21 @@ public class CommunicatorTest {
         assertTrue(name, body.contains(EnvironmentUtil.defaultVersionHostname() + "/#/recover-password/" + recovery.getCode().getName()));
     }
 
+    @Test
+    public void testNotifyOfInvoiceCreated() throws Exception {
+        User user = new User();
+        user.setId(Datastore.createKey(User.class, 19760715));
+        user.setEmail("new@jasify.com");
+        user.setName("new2@jasify.com");
+        user.setCreated(new Date());
 
+        InvoicePayment payment = new InvoicePayment();
+        payment.setCurrency("CHF");
+        payment.setAmount(200.12);
+        payment.getUserRef().setModel(user);
+
+        Datastore.put(payment, user);
+
+        Communicator.notifyOfInvoiceCreated(payment);
+    }
 }
