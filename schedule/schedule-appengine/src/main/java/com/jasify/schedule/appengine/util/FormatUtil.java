@@ -20,20 +20,19 @@ import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Objects;
-import java.util.TimeZone;
 
 /**
  * @author krico
  * @since 06/04/15.
  */
 public final class FormatUtil {
+    public static final FormatUtil INSTANCE = new FormatUtil();
     private static final Logger log = LoggerFactory.getLogger(FormatUtil.class);
-
     private static final ThreadLocal<SimpleDateFormat> START_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
             SimpleDateFormat sdf = new SimpleDateFormat(" [EEE, d MMM HH:mm");
-            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Zurich"));
+            sdf.setTimeZone(InternationalizationUtil.ZURICH_TIME_ZONE);
             return sdf;
         }
     };
@@ -42,7 +41,7 @@ public final class FormatUtil {
         @Override
         protected SimpleDateFormat initialValue() {
             SimpleDateFormat sdf = new SimpleDateFormat(" - HH:mm]");
-            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Zurich"));
+            sdf.setTimeZone(InternationalizationUtil.ZURICH_TIME_ZONE);
             return sdf;
         }
     };
@@ -65,7 +64,7 @@ public final class FormatUtil {
 
                 return builder.toString();
             }
-        } catch (EntityNotFoundException e)  {
+        } catch (EntityNotFoundException e) {
             log.error("Failed to find entity", e);
         }
         return toShortString(subscription.getId());
@@ -144,6 +143,7 @@ public final class FormatUtil {
     public static String toTransactionFeeString(Subscription subscription) {
         return "Transaction Fee " + toString(subscription);
     }
+
     public static String toTransactionFeeString(ActivityPackageExecution activityPackageExecution) {
         return "Transaction Fee " + toString(activityPackageExecution);
     }

@@ -1,11 +1,64 @@
 <html>
 <head>
     <title>Jasify - $!title</title>
+    <style>
+        body {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: small;
+            background: #ffffff;
+        }
+
+        th {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: small;
+        }
+
+        td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: small;
+        }
+
+        th.details-title {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bolder;
+            font-size: medium;
+            text-align: left;
+            border-bottom: dashed 1px;
+        }
+
+        table.box {
+            width: 100%;
+        }
+
+        a {
+            color: #0066CC;
+            text-decoration: none;
+        }
+
+        .activity-package {
+            background-color: #006699;
+            color: #f5f5f5;
+        }
+
+        th.activity-package {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: small;
+            text-align: left;
+        }
+
+        .activity-package-subscription {
+            border-right: solid 1px;
+            border-color: #006699;
+            width: 5px;
+        }
+    </style>
 </head>
-<body bgcolor="#FFFFFF" link="#0066CC">
+<body>
 
 <table border="0" width="100%" cellspacing="0" cellpadding="0">
-    <tr bgcolor="#FFFFFF">
+    <tr>
         <td align="left">
             <p>
                 <a href="$app.Url" target="_blank">
@@ -18,7 +71,7 @@
         <td align="right">&nbsp;</td>
     </tr>
 </table>
-<table width="90%" border="0" cellspacing="0" cellpadding="1" align="center" bgcolor="21415A">
+<table width="90%" border="0" cellspacing="0" cellpadding="1" align="center">
     <tr>
         <td>
             $!bodyContent

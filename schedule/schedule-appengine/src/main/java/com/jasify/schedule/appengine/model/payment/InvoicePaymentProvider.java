@@ -35,13 +35,14 @@ public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
 
     @Override
     public InvoicePayment newPayment() {
+        //TODO: Fetch these values from ApplicationData
         String invoiceRecipient = "Waldemar Arkadiusz Szarmach\nZuerichstrasse 77D\n8134 Adliswil";
         String invoiceAccount = "01-145-6";
         String invoiceSubscriber = "010001456";
         String invoiceIdentificationNumber = "30292600493040";
         String invoiceNumber = invoiceNumberGenerator.nextAsString();
+
         InvoicePayment payment = new InvoicePayment();
-        //TODO: Fetch these values from ApplicationData
         payment.setRecipient(invoiceRecipient);
         payment.setAccount(invoiceAccount);
         payment.setSubscriber(invoiceSubscriber);

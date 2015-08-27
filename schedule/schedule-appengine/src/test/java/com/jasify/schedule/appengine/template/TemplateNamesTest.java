@@ -4,8 +4,14 @@ import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.Version;
 import com.jasify.schedule.appengine.communication.ApplicationContext;
 import com.jasify.schedule.appengine.communication.ApplicationContextImpl;
+import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
+import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import org.junit.AfterClass;
@@ -18,7 +24,9 @@ import org.slim3.datastore.Datastore;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -44,6 +52,51 @@ public class TemplateNamesTest {
     @AfterClass
     public static void cleanup() {
         TestHelper.cleanupDatastore();
+    }
+
+    private static List<Subscription> createSubscriptions(User user) {
+        List<Subscription> subscriptions = new ArrayList<>();
+        for (int i = 0; i < 5; ++i) {
+            Activity activity = TestHelper.createActivity(true);
+            activity.setCurrency("CHF");
+            activity.setPrice(RandomUtils.nextDouble(10, 500));
+            Datastore.put(activity);
+
+            Subscription subscription = TestHelper.createSubscription(user, activity, true);
+            subscriptions.add(subscription);
+        }
+        return subscriptions;
+    }
+
+    private static List<ActivityPackageExecution> createActivityPackageExecutions(User user) throws ModelException {
+        ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
+        List<ActivityPackageExecution> executions = new ArrayList<>();
+        for (int i = 0; i < 3; ++i) {
+            ActivityPackage activityPackage = new ActivityPackage();
+            activityPackage.setName("The combo of "+i);
+            activityPackage.setCurrency("CHF");
+            activityPackage.setPrice(RandomUtils.nextDouble(100, 500));
+            Datastore.put(activityPackage);
+
+            ActivityPackageExecution execution = new ActivityPackageExecution();
+            execution.getUserRef().setModel(user);
+            executions.add(execution);
+            execution.getActivityPackageRef().setModel(activityPackage);
+            activityPackageExecutionDao.save(execution);
+
+            int subscriptionCount = RandomUtils.nextInt(3, 8);
+            for (int s = 0; s < subscriptionCount; ++s) {
+                Activity activity = TestHelper.createActivity(true);
+                activity.setCurrency("CHF");
+                activity.setPrice(RandomUtils.nextDouble(10, 500));
+                Datastore.put(activity);
+
+                TestHelper.createActivityPackageSubscription(user, activity, execution, true);
+            }
+
+        }
+
+        return executions;
     }
 
     private void render(final String templateName, final Context context) throws Exception {
@@ -130,20 +183,43 @@ public class TemplateNamesTest {
         assertSubscriberPasswordRecovery(TemplateNames.SUBSCRIBER_PASSWORD_RECOVERY_TXT);
     }
 
+    private void assertSubscriberInvoicePaymentCreated(String templateName) throws Exception {
+        VelocityContext context = new VelocityContext(new TestApplicationContext());
+        User user = TestHelper.createUser(true);
+
+        List<Subscription> subscriptions = createSubscriptions(user);
+        List<ActivityPackageExecution> executions = createActivityPackageExecutions(user);
+
+        InvoicePayment payment = new InvoicePayment();
+        payment.setReferenceCode("120000000000234478943216899");
+
+        Attachment att = new Attachment();
+        att.setName("ABC-DEF.pdf");
+
+        payment.getAttachmentRef().setModel(att);
+        Datastore.put(payment, att);
+
+        context.put("user", user);
+        context.put("payment", payment);
+        context.put("subscriptions", subscriptions);
+        context.put("executions", executions);
+        render(templateName, context);
+    }
+
+    @Test
+    public void testSubscriberInvoicePaymentCreatedHtml() throws Exception {
+        assertSubscriberInvoicePaymentCreated(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CREATED_HTML);
+    }
+
+    @Test
+    public void testSubscriberInvoicePaymentCreatedTxt() throws Exception {
+        assertSubscriberInvoicePaymentCreated(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CREATED_TXT);
+    }
+
     public static class TestApplicationContext extends ApplicationContextImpl implements ApplicationContext {
         @Override
         protected App createApp() {
-            return new App() {
-                @Override
-                public String getLogo() {
-                    return getUrl() + ApplicationContextImpl.LOGO_PATH;
-                }
-
-                @Override
-                public String getUrl() {
-                    return "http://localhost:8080";
-                }
-            };
+            return TestHelper.createApplicationContextApp();
         }
     }
 }

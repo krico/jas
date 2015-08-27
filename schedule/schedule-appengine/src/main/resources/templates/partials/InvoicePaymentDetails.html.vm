@@ -1,0 +1,17 @@
+#if($payment)
+<table>
+    <tr>
+        <th colspan="2" class="details-title">Invoice Details</th>
+    </tr>
+    <tr>
+        <th align="left">Payment #: </th>
+        <td align="left">$kut.keyToString($payment.Id)</td>
+    </tr>
+    <tr>
+        <th align="left">Reference Code: </th>
+        <td align="left">
+            <nobr>$mut.formatReferenceCode($payment)</nobr>
+        </td>
+    </tr>
+</table>
+#end

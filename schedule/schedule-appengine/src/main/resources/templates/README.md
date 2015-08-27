@@ -66,7 +66,7 @@ At the time of this writing (Mon Aug 24 18:00:07 CEST 2015) we had:
  ```
 
 Once you've written your Communicator method, if you want to test the mail output, add `-Djasify.emailDebug=true` to your
-appengine startupe (see DEVELOPER.md for details).  Make the e-mail use case, then open it with the URL to the e-mail output
+appengine startup (see DEVELOPER.md for details).  Make the e-mail use case, then open it with the URL to the e-mail output
 that is printed to the logs.
 
 That's it for now

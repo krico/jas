@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.util.InternationalizationUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -31,7 +32,7 @@ import java.util.Date;
  */
 public class MailParser {
 
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("Europe/Zurich"));
+    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID(InternationalizationUtil.ZURICH_TIME_ZONE_ID));
 
     private static final OrganizationDao organizationDao = new OrganizationDao();
     private static final ActivityTypeDao activityTypeDao = new ActivityTypeDao();

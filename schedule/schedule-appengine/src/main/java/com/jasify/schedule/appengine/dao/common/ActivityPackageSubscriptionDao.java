@@ -14,7 +14,7 @@ import java.util.List;
  * @author wszarmach
  * @since 07/07/15.
  */
-public class ActivityPackageSubscriptionDao  extends BaseCachingDao<ActivityPackageSubscription> {
+public class ActivityPackageSubscriptionDao extends BaseCachingDao<ActivityPackageSubscription> {
     public ActivityPackageSubscriptionDao() {
         super(ActivityPackageSubscriptionMeta.get());
     }
@@ -22,6 +22,24 @@ public class ActivityPackageSubscriptionDao  extends BaseCachingDao<ActivityPack
     public List<ActivityPackageSubscription> getByActivityId(Key activityId) {
         ActivityPackageSubscriptionMeta meta = getMeta();
         return query(new ByActivityPackageAndActivityQuery(meta, activityId));
+    }
+
+    public List<ActivityPackageSubscription> getByActivityPackageExecutionId(Key activityPackageExecutionId) {
+        return query(new ByActivityPackageExecutionQuery(this.<ActivityPackageSubscriptionMeta>getMeta(), activityPackageExecutionId));
+    }
+
+    private static class ByActivityPackageExecutionQuery extends BaseDaoQuery<ActivityPackageSubscription, ActivityPackageSubscriptionMeta> {
+        public ByActivityPackageExecutionQuery(ActivityPackageSubscriptionMeta meta, Key activityPackageExecutionId) {
+            super(meta, new Serializable[]{activityPackageExecutionId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key activityPackageExecutionId = parameters.get(0);
+            return Datastore.query(meta)
+                    .filter(meta.activityPackageExecutionRef.equal(activityPackageExecutionId))
+                    .asKeyList();
+        }
     }
 
     private static class ByActivityPackageAndActivityQuery extends BaseDaoQuery<ActivityPackageSubscription, ActivityPackageSubscriptionMeta> {

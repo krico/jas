@@ -13,4 +13,6 @@ public interface TemplateNames {
     String JASIFY_NEW_USER_TXT = "jasify/NewUser.txt.vm";
     String SUBSCRIBER_PASSWORD_RECOVERY_HTML = "subscriber/PasswordRecovery.html.vm";
     String SUBSCRIBER_PASSWORD_RECOVERY_TXT = "subscriber/PasswordRecovery.txt.vm";
+    String SUBSCRIBER_INVOICE_PAYMENT_CREATED_HTML = "subscriber/InvoicePaymentCreated.html.vm";
+    String SUBSCRIBER_INVOICE_PAYMENT_CREATED_TXT = "subscriber/InvoicePaymentCreated.txt.vm";
 }

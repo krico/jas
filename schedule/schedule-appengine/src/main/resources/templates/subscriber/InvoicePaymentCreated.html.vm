@@ -1,0 +1,9 @@
+#set($title="Invoice Payment Created")
+#@htmlMail($title)
+    #@box($title)
+    <p>Dear $mut.name($user),</p>
+    <p>Please pay the attached invoice "<em>$!mut.attachment($payment).Name</em>".</p>
+        #invoicePaymentDetails($payment)
+        #subscriptionDetails($subscriptions, $executions)
+    #end
+#end

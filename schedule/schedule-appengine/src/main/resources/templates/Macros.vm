@@ -29,12 +29,15 @@
 #end
 
 #macro(box $title)
-<table width="100%" border="0" cellspacing="0" cellpadding="5" align="center">
+<table class="box">
     <tr valign="top">
-        <td bgcolor="#FFFFFF">
-            <h3>$title</h3>
+        <td>
+            <h4>$title</h4>
             $!bodyContent
         </td>
     </tr>
 </table>
 #end
+
+#macro(subscriptionDetails $subscriptions $executions)#parse("/templates/partials/SubscriptionDetails.html.vm")#end
+#macro(invoicePaymentDetails $payment)#parse("/templates/partials/InvoicePaymentDetails.html.vm")#end

@@ -12,6 +12,13 @@ public class ReferenceCodeTest {
     }
 
     @Test
+    public void testFormatPretty() throws Exception {
+        String expected = "12 00000 00000 23447 89432 16899";
+        assertEquals(expected, ReferenceCode.toHumanReadable(expected.replaceAll(" ", "")));
+        assertEquals(expected, ReferenceCode.toHumanReadable(expected.replaceAll(" ", "  ")));
+    }
+
+    @Test
     public void testToReferenceCode() throws Exception {
         String expected = "120000000000234478943216899";
         assertEquals(expected, new ReferenceCode(null, "12000000000023447894321689").toReferenceCode());
