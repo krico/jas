@@ -7,10 +7,17 @@ import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.Message;
+import javax.mail.*;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @author krico
@@ -29,6 +36,7 @@ public final class MailDebug {
             return;
         }
         try {
+            message = fixMessageWithAttachment(message);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             String filename = sdf.format(new Date()) + ".eml";
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -39,5 +47,60 @@ public final class MailDebug {
         } catch (Exception e) {
             log.warn("Failed to write debug email", e);
         }
+    }
+
+    /*
+     * Google mail API doesn't accept proper mail message
+     */
+    private static Message fixMessageWithAttachment(Message message) throws MessagingException, MessagingException, IOException {
+        if (message.isMimeType("multipart/*")) {
+            BodyPart textObject = null;
+            BodyPart htmlObject = null;
+            List<BodyPart> attachments = null;
+
+            Multipart mp;
+            mp = (Multipart) message.getContent();
+            for (int i = 0; i < mp.getCount(); i++) {
+                BodyPart bp = mp.getBodyPart(i);
+                if (bp.isMimeType("text/plain") && textObject == null) {
+                    textObject = bp;
+                } else if (bp.isMimeType("text/html") && htmlObject == null) {
+                    htmlObject = bp;
+                } else {
+                    if (attachments == null) {
+                        attachments = new ArrayList<>();
+                    }
+                    if (!mp.getContentType().startsWith("multipart/")) return message;
+                    attachments.add(bp);
+                }
+            }
+            if (attachments != null) {
+                log.debug("Converting google non-compliant multipart format to mail reader friendly multipart format...");
+                MimeMultipart related = new MimeMultipart("related");
+                if (textObject != null || htmlObject != null) {
+                    MimeMultipart alternative = new MimeMultipart("alternative");
+                    if (textObject != null) alternative.addBodyPart(textObject);
+                    if (htmlObject != null) alternative.addBodyPart(htmlObject);
+                    MimeBodyPart wrap = new MimeBodyPart();
+                    wrap.setContent(alternative);
+                    related.addBodyPart(wrap);
+                }
+                for (BodyPart attachment : attachments) {
+                    related.addBodyPart(attachment);
+                }
+                Session session = Session.getDefaultInstance(new Properties());
+                MimeMessage newMessage = new MimeMessage(session);
+                newMessage.setContent(related);
+                newMessage.setSubject(message.getSubject());
+                Address[] from = message.getFrom();
+                if (from != null && from.length > 0) newMessage.setFrom(from[0]);
+                newMessage.addRecipients(Message.RecipientType.TO, message.getRecipients(Message.RecipientType.TO));
+                newMessage.addRecipients(Message.RecipientType.CC, message.getRecipients(Message.RecipientType.CC));
+                newMessage.addRecipients(Message.RecipientType.BCC, message.getRecipients(Message.RecipientType.BCC));
+                newMessage.setSentDate(message.getSentDate());
+                return newMessage;
+            }
+        }
+        return message;
     }
 }
