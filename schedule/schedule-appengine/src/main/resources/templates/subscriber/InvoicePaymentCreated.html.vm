@@ -1,17 +1,17 @@
 #set($title="Invoice Payment Created")
 #@htmlMail($title)
     #@box($title)
-    <p>Dear $mut.name($user),</p>
-    <p>
+    <p #style("p")>Dear $mut.name($user),</p>
+    <p #style("p")>
         You made a reservation using payment method "Invoice".
         We have attached the invoice in this e-mail.
     </p>
-    <p>Please execute the payment in the <b>next $payment.ExpireDays days</b>.
+    <p #style("p")>Please execute the payment in the <b>next $payment.ExpireDays days</b>.
     </p>
-    <p>
+    <p #style("p")>
         If we do not receive confirmation of your payment within this period, your <b>reservation will be canceled</b>.
     </p>
-    <p>Thanks for booking with Jasify!</p>
+    <p #style("p")>Thanks for booking with Jasify!</p>
         #invoicePaymentDetails($payment)
     <br/>
         #subscriptionDetails($subscriptions, $executions)

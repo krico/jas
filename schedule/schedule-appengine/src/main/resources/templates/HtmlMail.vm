@@ -1,68 +1,8 @@
 <html>
 <head>
     <title>Jasify - $!title</title>
-    <style>
-        body {
-            font-family: Verdana, Arial, Helvetica, sans-serif;
-            font-weight: small;
-            background: #ffffff;
-        }
-
-        th {
-            font-family: Verdana, Arial, Helvetica, sans-serif;
-            font-weight: bold;
-            font-size: small;
-        }
-
-        td {
-            font-family: Verdana, Arial, Helvetica, sans-serif;
-            font-size: small;
-        }
-
-        th.details-title {
-            font-family: Verdana, Arial, Helvetica, sans-serif;
-            font-weight: bolder;
-            font-size: medium;
-            text-align: left;
-            border-bottom: dashed 1px;
-        }
-
-        table.box {
-            width: 100%;
-        }
-
-        a {
-            color: #0066CC;
-            text-decoration: none;
-        }
-
-        .activity-package {
-            background-color: lightslategrey;
-            color: #f5f5f5;
-        }
-
-        th.activity-package {
-            font-family: Verdana, Arial, Helvetica, sans-serif;
-            font-weight: bold;
-            font-size: small;
-            text-align: left;
-        }
-
-        .activity-package-subscription {
-            border-right: solid 1px;
-            border-color: lightslategrey;
-            width: 5px;
-        }
-
-        .odd-row {
-            background-color: lightcyan;
-        }
-
-        .even-row {
-        }
-    </style>
 </head>
-<body>
+<body #style("body")>
 
 <table border="0" width="100%" cellspacing="0" cellpadding="0">
     <tr>

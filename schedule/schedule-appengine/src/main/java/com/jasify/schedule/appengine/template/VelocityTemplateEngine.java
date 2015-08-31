@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,6 +36,8 @@ public class VelocityTemplateEngine implements TemplateEngine {
             return createEngine();
         }
     };
+
+    private final Map<String, Styles> stylesCache = Collections.synchronizedMap(new HashMap<String, Styles>());
 
     private static VelocityEngine createEngine() {
         VelocityEngine ve = new VelocityEngine();
@@ -54,6 +58,20 @@ public class VelocityTemplateEngine implements TemplateEngine {
 
     private static VelocityEngine getEngine() {
         return ENGINE_CACHE.get();
+    }
+
+    @Override
+    public Styles getStyles(String path) throws TemplateEngineException {
+        return loadStyles(templatePath(path));
+    }
+
+    private Styles loadStyles(String path) throws TemplateEngineException {
+        Styles ret = stylesCache.get(path);
+        if (ret == null) {
+            ret = new StyleTool(templatePath(path));
+            stylesCache.put(path, ret);
+        }
+        return ret;
     }
 
     @Override

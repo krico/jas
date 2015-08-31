@@ -1,33 +1,33 @@
 #if($payment)
 <table>
     <tr>
-        <th colspan="2" class="details-title">Invoice Details</th>
+        <th colspan="2" #style("th.details-title")>Invoice Details</th>
     </tr>
     <tr>
-        <th align="left">Invoice #:</th>
-        <td align="left">$kut.keyToString($payment.Id)</td>
+        <th #style("th") align="left">Invoice #:</th>
+        <td #style("td") align="left">$kut.keyToString($payment.Id)</td>
     </tr>
     <tr>
-        <th align="left">Date <small>(dd/mm/yy)</small>:</th>
-        <td align="left">
+        <th #style("th") align="left">Date <small>(dd/mm/yy)</small>:</th>
+        <td #style("td") align="left">
             $mut.dateShort($payment.Created)
             <i>(pay within $payment.ExpireDays days)</i>
         </td>
     </tr>
     <tr>
-        <th align="left">Attachment:</th>
+        <th #style("th") align="left">Attachment:</th>
         #set($attachment = $mut.attachment($payment))
-        <td align="left">$attachment.Name</td>
+        <td #style("td") align="left">$attachment.Name</td>
     </tr>
     <tr>
-        <th align="left">Reference Code:</th>
-        <td align="left">
+        <th #style("th") align="left">Reference Code:</th>
+        <td #style("td") align="left">
             <nobr>$mut.formatReferenceCode($payment)</nobr>
         </td>
     </tr>
     <tr>
-        <th align="left">Amount:</th>
-        <td align="left">
+        <th #style("th") align="left">Amount:</th>
+        <td #style("td") align="left">
             <nobr>$cut.formatCurrency($payment.Currency, $payment.Amount)</nobr>
         </td>
     </tr>

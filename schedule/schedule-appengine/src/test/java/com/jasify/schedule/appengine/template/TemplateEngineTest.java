@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.*;
 
 public class TemplateEngineTest {
 
@@ -40,5 +40,21 @@ public class TemplateEngineTest {
         TemplateEngine te = new TemplateEngineBuilder().build();
         String rendered = te.render("macro-string.vm", (Context) null);
         assertEquals("<b>Hello.</b>", rendered);
+    }
+
+    @Test
+    public void testGetStylesFixesName() throws Exception {
+        TemplateEngine te = new TemplateEngineBuilder().build();
+        assertNotNull(te.getStyles("test-styles.css"));
+        assertNotNull(te.getStyles("/test-styles.css"));
+        assertNotNull(te.getStyles("/templates/test-styles.css"));
+    }
+
+    @Test
+    public void testGetStylesCaches() throws Exception {
+        TemplateEngine te = new TemplateEngineBuilder().build();
+        assertSame(te.getStyles("test-styles.css"), te.getStyles("test-styles.css"));
+        assertSame(te.getStyles("test-styles.css"), te.getStyles("/test-styles.css"));
+        assertSame(te.getStyles("/templates/test-styles.css"), te.getStyles("/test-styles.css"));
     }
 }

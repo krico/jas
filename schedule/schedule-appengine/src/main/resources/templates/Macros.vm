@@ -4,7 +4,7 @@
 
 # This macro make html bold, is used for testing
 #macro(bold $sometext)<b>$sometext</b>#end
-
+#macro(style $c)style="$styleTool.get($c)"#end
 #*
  * This renders a default HTML page for e-mail. You can use it like so:
  *     #@htmlMail()
@@ -29,7 +29,7 @@
 #end
 
 #macro(box $title)
-<table class="box">
+<table #style("table.box")>
     <tr valign="top">
         <td>
             <h4>$title</h4>

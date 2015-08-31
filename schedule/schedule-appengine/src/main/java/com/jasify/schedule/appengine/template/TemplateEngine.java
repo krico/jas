@@ -17,4 +17,6 @@ public interface TemplateEngine {
     void render(String templateName, Context context, Writer writer) throws TemplateEngineException;
 
     String render(String templateName, Context context) throws TemplateEngineException;
+
+    Styles getStyles(String path) throws TemplateEngineException;
 }

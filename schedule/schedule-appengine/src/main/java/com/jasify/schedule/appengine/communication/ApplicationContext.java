@@ -18,6 +18,7 @@ public interface ApplicationContext extends Context {
     String MODEL_UTIL_KEY = "mut";
     String FORMAT_UTIL_KEY = "fut";
     String CURRENCY_UTIL_KEY = "cut";
+    String STYLE_TOOL_KEY = "styleTool";
 
     interface App {
 

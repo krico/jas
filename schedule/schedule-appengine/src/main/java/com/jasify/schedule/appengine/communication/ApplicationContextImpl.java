@@ -1,6 +1,7 @@
 package com.jasify.schedule.appengine.communication;
 
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.besr.CodeLine;
 import com.jasify.schedule.appengine.besr.ReferenceCode;
 import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
@@ -12,6 +13,10 @@ import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.template.TemplateEngine;
+import com.jasify.schedule.appengine.template.TemplateEngineBuilder;
+import com.jasify.schedule.appengine.template.TemplateEngineException;
+import com.jasify.schedule.appengine.template.TemplateNames;
 import com.jasify.schedule.appengine.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
@@ -31,6 +36,8 @@ public class ApplicationContextImpl extends VelocityContext {
     public static final String LOGO_PATH = "/build/img/jasify-logo-color.png";
     private static final Logger log = LoggerFactory.getLogger(ApplicationContextImpl.class);
 
+    private static final TemplateEngine templateEngine = new TemplateEngineBuilder().build();
+
     public ApplicationContextImpl() {
         ApplicationContext.App app = createApp();
         put(ApplicationContext.APP_KEY, app);
@@ -39,6 +46,12 @@ public class ApplicationContextImpl extends VelocityContext {
         put(ApplicationContext.FORMAT_UTIL_KEY, FormatUtil.INSTANCE);
         put(ApplicationContext.CURRENCY_UTIL_KEY, CurrencyUtil.INSTANCE);
         put(ApplicationContext.MODEL_UTIL_KEY, createModelUtil(app));
+        try {
+            put(ApplicationContext.STYLE_TOOL_KEY, templateEngine.getStyles(TemplateNames.STYLES_CSS));
+        } catch (TemplateEngineException e) {
+            log.error("FAiled to get styles", e);
+            throw Throwables.propagate(e);
+        }
     }
 
     protected ApplicationContext.App createApp() {
