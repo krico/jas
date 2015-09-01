@@ -229,5 +229,9 @@
   "HT_PasswordChanged": "Password Changed",
   "HT_PasswordForgotten": "Recover Password",
   "HT_PasswordForgottenFailed": "Recover Password Failed",
-  "HT_PasswordRecovered": "Password Recovered"
+  "HT_PasswordRecovered": "Password Recovered",
+  "HT_SubscriptionCreated": "Subscription Created",
+  "HT_SubscriptionCreationFailed": "Subscription Creation Failed",
+  "HT_SubscriptionCancelled": "Subscription Cancelled",
+  "HT_SubscriptionCancellationFailed": "Subscription Cancellation Failed"
 }

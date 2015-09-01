@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
 import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
+import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
 import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
@@ -312,12 +313,16 @@ public class ActivityEndpoint {
         checkFound(activityId, "activityId == null");
         mustBeSameUserOrAdminOrOrgMember(caller, userId, OrgMemberChecker.createFromActivityId(activityId));
         try {
-            return ActivityServiceFactory.getActivityService().subscribe(userId, activityId);
+            Subscription subscription = ActivityServiceFactory.getActivityService().subscribe(userId, activityId);
+            HistoryHelper.addSubscriptionCreated(subscription.getId());
+            return subscription;
         } catch (EntityNotFoundException e) {
             log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
+            HistoryHelper.addSubscriptionCreationFailed(userId, activityId);
             throw new NotFoundException(e.getMessage());
         } catch (OperationException e) {
             log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
+            HistoryHelper.addSubscriptionCreationFailed(userId, activityId);
             throw new BadRequestException(e.getMessage());
         }
     }
@@ -351,7 +356,10 @@ public class ActivityEndpoint {
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromSubscriptionId(subscriptionId));
         try {
             ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
+            // TODO: This will not work because we deleted the subsctipyion :(
+            // HistoryHelper.addSubscriptionCancelled(subscriptionId);
         } catch (EntityNotFoundException e) {
+            HistoryHelper.addSubscriptionCancellationFailed(subscriptionId);
             throw new NotFoundException(e.getMessage());
         }
     }
