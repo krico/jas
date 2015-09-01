@@ -264,9 +264,31 @@ td.actions-column {
   }
 }
 
+[toggle-package].active {
+  -moz-box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.18824);
+  -webkit-box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.18824);
+  box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.18824);
+}
+
+[toggle-package].active {
+  .show-more {
+      display: none !important;
+  }
+}
+
+[toggle-package]:not(.active) {
+   .show-less {
+      display: none !important;
+   }
+}
+
 .activity-listview.for-activity-package {
   .lv-header-alt {
     background-color: darken(#f8f8f8, 10%);
+    
+    .checkbox {
+      display: inline-block;
+    }
   }
 
   .lv-body {

@@ -121,4 +121,32 @@
         // CheckoutProvider.popupMode(true);
     });
 
+    bookingViaJasify.directive('togglePackage', function() {
+    
+      var settings = {  
+        animationDuration: 400
+      };
+      
+      return {
+        restrict: 'A',
+        link: function(scope, element) {
+          
+          $(element).find('.lv-body').hide();
+          
+          $(element).find('.lv-header-alt').click(function(event) {
+            if ($(event.target).closest('.checkbox').length === 1) {
+              return;
+            }
+            if ($(element).hasClass('active')) {
+              $(element).removeClass('active');
+              $(element).find('.lv-body').slideUp(settings.animationDuration);
+            } else {
+              $(element).addClass('active');
+              $(element).find('.lv-body').slideDown(settings.animationDuration);
+            }
+          });        
+        }
+      };
+    });
+  
 }(window.angular, window._, window.moment));
