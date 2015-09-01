@@ -101,8 +101,13 @@ public final class DefaultMailService implements MailService {
 
     @Override
     public boolean send(InternetAddress toAddress, String subject, String htmlBody, String textBody, Attachment... attachments) {
+        return send(new InternetAddress[]{toAddress}, subject, htmlBody, textBody, attachments);
+    }
+
+    @Override
+    public boolean send(InternetAddress[] toAddresses, String subject, String htmlBody, String textBody, Attachment... attachments) {
         initialize();
-        return send(senderAddress, new InternetAddress[]{toAddress}, applicationOwners, subject, htmlBody, textBody, attachments);
+        return send(senderAddress, toAddresses, applicationOwners, subject, htmlBody, textBody, attachments);
     }
 
     private boolean send(InternetAddress fromAddress, InternetAddress[] toAddress, InternetAddress[] bccAddress, String subject, String htmlBody, String textBody, Attachment... attachments) {

@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.communication.ApplicationContext;
 import com.jasify.schedule.appengine.communication.ApplicationContextImpl;
 import com.jasify.schedule.appengine.dao.common.ActivityPackageExecutionDao;
 import com.jasify.schedule.appengine.model.ModelException;
+import com.jasify.schedule.appengine.model.Navigate;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityPackage;
 import com.jasify.schedule.appengine.model.activity.ActivityPackageExecution;
@@ -219,6 +220,43 @@ public class TemplateNamesTest {
     @Test
     public void testSubscriberInvoicePaymentCreatedTxt() throws Exception {
         assertSubscriberInvoicePaymentCreated(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CREATED_TXT);
+    }
+
+    private void assertPublisherInvoicePaymentCreated(String templateName) throws Exception {
+        VelocityContext context = new VelocityContext(new TestApplicationContext());
+        User user = TestHelper.createUser(true);
+
+        List<Subscription> subscriptions = createSubscriptions(user);
+        List<ActivityPackageExecution> executions = createActivityPackageExecutions(user);
+
+        InvoicePayment payment = new InvoicePayment();
+        payment.setReferenceCode("120000000000234478943216899");
+        payment.setAmount(400.25);
+        payment.setCurrency("CHF");
+
+        Attachment att = new Attachment();
+        att.setName("ABC-DEF.pdf");
+
+        payment.getAttachmentRef().setModel(att);
+        Datastore.put(payment, att);
+
+
+        context.put("payment", payment);
+        context.put("organization", Navigate.organization(subscriptions.get(0)));
+        context.put("user", user);
+        context.put("subscriptions", subscriptions);
+        context.put("executions", executions);
+        render(templateName, context);
+    }
+
+    @Test
+    public void testPublisherInvoicePaymentCreatedHtml() throws Exception {
+        assertPublisherInvoicePaymentCreated(TemplateNames.PUBLISHER_INVOICE_PAYMENT_CREATED_HTML);
+    }
+
+    @Test
+    public void testPublisherInvoicePaymentCreatedTxt() throws Exception {
+        assertPublisherInvoicePaymentCreated(TemplateNames.PUBLISHER_INVOICE_PAYMENT_CREATED_TXT);
     }
 
     public static class TestApplicationContext extends ApplicationContextImpl implements ApplicationContext {

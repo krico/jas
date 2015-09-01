@@ -16,4 +16,6 @@ public interface TemplateNames {
     String SUBSCRIBER_PASSWORD_RECOVERY_TXT = "subscriber/PasswordRecovery.txt.vm";
     String SUBSCRIBER_INVOICE_PAYMENT_CREATED_HTML = "subscriber/InvoicePaymentCreated.html.vm";
     String SUBSCRIBER_INVOICE_PAYMENT_CREATED_TXT = "subscriber/InvoicePaymentCreated.txt.vm";
+    String PUBLISHER_INVOICE_PAYMENT_CREATED_HTML = "publisher/InvoicePaymentCreated.html.vm";
+    String PUBLISHER_INVOICE_PAYMENT_CREATED_TXT =  "publisher/InvoicePaymentCreated.txt.vm";
 }

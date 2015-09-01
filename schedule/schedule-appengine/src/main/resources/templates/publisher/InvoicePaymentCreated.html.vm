@@ -1,0 +1,15 @@
+#set($title="User '$mut.name($user)' subscribed with Invoice")
+#@htmlMail($title)
+    #@box($title)
+    <p #style("p")>Dear $organization.Name,</p>
+    <p #style("p")>
+        '$mut.name($user)' has subscribed to the activities detailed below
+        on $mut.dateShort($payment.Created) using payment type "Invoice".
+    </p>
+    <p #style("p")>
+        If the user doesn't execute the payment in the <b>next $payment.ExpireDays days</b> his subscription will be
+        canceled.
+    </p>
+        #subscriptionDetails($subscriptions, $executions)
+    #end
+#end
