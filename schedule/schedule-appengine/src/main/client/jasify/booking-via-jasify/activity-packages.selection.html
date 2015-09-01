@@ -14,9 +14,10 @@
     </div>
     <div class="card-body card-padding-sm">
         <div class="activity-listview for-activity-package listview lv-bordered lv-lg"
+             toggle-package
              ng-repeat="activityPackage in vm.activityPackages">
-            <div class="lv-header-alt ">
-                <div class="checkbox pull-left"
+            <div class="lv-header-alt">
+                <div class="checkbox"
                      ng-show="vm.canSelectAllForActivityPackage(activityPackage)">
                     <label>
                         <input type="checkbox"
@@ -27,18 +28,17 @@
                 </div>
                 <h2 class="lvh-label">{{activityPackage.name}}</h2>
                 <br/>
-
                 <h2 class="lvh-label">
                     <small>
-                        <p translate="SELECT_X_OF_Y_ACTIVITIES"
-                           translate-values="{count: '{{activityPackage.itemCount}}', total: '{{vm.activityPackageActivities[activityPackage.id].length}}'}"></p>
+                        <div translate="SELECT_X_OF_Y_ACTIVITIES"
+                           translate-values="{count: '{{activityPackage.itemCount}}', total: '{{vm.activityPackageActivities[activityPackage.id].length}}'}"></div>
                     </small>
                 </h2>
                 <h2 class="lvh-label">
                     <small>{{ 'Price' | translate }}: <strong>{{activityPackage.price}}
                         {{activityPackage.currency}}</strong></small>
                 </h2>
-                <h2 class="lvh-label m-r-10">
+                <h2 class="lvh-label">
                                 <span ng-show="vm.packageSelectionIncomplete(activityPackage)"
                                       class="label label-warning">
                                     {{vm.activityPackageSelection[activityPackage.id].length || 0}}/{{activityPackage.itemCount}} {{ 'ACTIVITIES_SELECTED' | translate }}</span>
@@ -50,6 +50,10 @@
                                       translate="SELECTED_TOO_MANY_ACTIVITIES_IN_ACTIVITY_PACKAGE"
                                       translate-values="{count: '{{activityPackage.itemCount}}'}">
                                     </span>
+                </h2>
+                <h2 class="lvh-label">
+                  <button class="pull-right show-more btn btn-xs btn-default">Show Activities</button>
+                  <button class="pull-right show-less btn btn-xs btn-default">Hide Activities</button>
                 </h2>
             </div>
             <div class="lv-body">
