@@ -299,14 +299,14 @@ public final class HistoryHelper {
         StringBuilder sb = new StringBuilder();
         sb.append("[User=");
         if (user != null) {
-            sb.append(user.getId()).append(":").append(user.getEmail());
+            sb.append(KeyUtil.keyToString(user.getId())).append(":").append(user.getEmail());
         } else {
             sb.append("?");
         }
         sb.append("] / [Activity=");
 
         if (activity != null) {
-            sb.append(activity.getId()).append(":").append(activity.getName());
+            sb.append(KeyUtil.keyToString(activity.getId())).append(":").append(activity.getName());
         } else {
             sb.append("?");
         }
