@@ -13,6 +13,7 @@ import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.FieldValueException;
+import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.model.users.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
@@ -126,7 +127,6 @@ public class UserEndpoint {
 
     @ApiMethod(name = "users.add", path = "users", httpMethod = ApiMethod.HttpMethod.POST)
     public com.jasify.schedule.appengine.model.users.User addUser(User caller, JasAddUserRequest request, HttpServletRequest servletRequest) throws UserLoginExistsException, UsernameExistsException, EmailExistsException {
-
         Preconditions.checkNotNull(request);
         Preconditions.checkNotNull(request.getUser());
 
@@ -135,21 +135,28 @@ public class UserEndpoint {
         }
 
         com.jasify.schedule.appengine.model.users.User user;
-
+        UserLogin userLogin = null;
         HttpSession session = servletRequest.getSession();
+
         if (session != null && session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY) != null) {
-            UserLogin login = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
+            userLogin = (UserLogin) session.getAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
             session.removeAttribute(HttpUserSession.OAUTH_USER_LOGIN_KEY);
-            user = UserServiceFactory.getUserService().create(request.getUser(), login);
+            user = UserServiceFactory.getUserService().create(request.getUser(), userLogin);
+            HistoryHelper.addAccountCreated(user, userLogin, servletRequest);
         } else {
             String pw = Preconditions.checkNotNull(StringUtils.trimToNull(request.getPassword()), "NULL password");
             user = UserServiceFactory.getUserService().create(request.getUser(), pw);
+            HistoryHelper.addAccountCreated(user, servletRequest);
         }
-
 
         if (caller == null) {
             boolean isOrgMember = organizationDao.isUserMemberOfAnyOrganization(user.getId());
             new HttpUserSession(user, isOrgMember).put(servletRequest); //login
+            if (userLogin != null) {
+                HistoryHelper.addLogin(userLogin, servletRequest, "Post user creation");
+            } else {
+                HistoryHelper.addLogin(user, servletRequest, "Post user creation");
+            }
         }
 
         return user;
