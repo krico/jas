@@ -292,13 +292,9 @@ public final class HistoryHelper {
     }
 
     private static void createSubscriptionHistory(HistoryTypeEnum historyType, Subscription subscription, User user, Activity activity) {
-        SubscriptionHistory history = new SubscriptionHistory(historyType);
+        SubscriptionHistory history = new SubscriptionHistory(historyType, subscription);
 
         addCurrentUser(history);
-
-        if (subscription != null) {
-            history.setSubscriptionId(subscription.getId());
-        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("[User=");
