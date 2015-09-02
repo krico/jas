@@ -5,9 +5,10 @@
                 {{ 'BALANCE_DESCRIPTION' | translate }}
             </small>
         </h2>
+        <br/>
         <div class="">
-            <span class="h5">Account balance </span>
-            <span tooltip-html-unsafe="<small>Created: {{vm.account.created|date:'medium'}}<br/>Modified: {{vm.account.created|date:'medium'}}</small>"
+            <span class="h5">{{ 'ACCOUNT_BALANCE' | translate }} </span>
+            <span tooltip-html-unsafe="<small>{{ 'CREATED' | translate }}: {{vm.account.created|date:'medium'}}<br/>{{ 'MODIFIED' | translate }}: {{vm.account.created|date:'medium'}}</small>"
                   tooltip-trigger="mouseenter"
                   class="strong text-primary">{{vm.account.balance | currency: vm.account.currency}}</span>
         </div>
