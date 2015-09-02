@@ -4,14 +4,15 @@
         <div class="col-sm-1 col-sm-offset-2 h4">
             <span ng-show="vm.progress" us-spinner=""></span>&nbsp;
         </div>
-        <div class="col-sm-6 h4" ng-hide="vm.progress">
-            Your invoice is ready to
-            <a target="_blank" ng-href="{{vm.invoice.viewUrl}}">view</a>
-            or
-            <a ng-href="{{vm.invoice.downloadUrl}}">download</a>.
+        <div class="col-sm-6 h4" ng-hide="vm.progress && !vm.success">
+            <h3 class="text-success">Invoice created!</h3>
 
-            And e-mail was sent to your e-mail address with this invoice attached.  Please pay it.
+            <p>An e-mail with the invoice was sent to your e-mail address.</p>
+
+            <p>If you don't execute that payment in time, your subscriptions will be canceled.</p>
+            <button ng-click="vm.next()" class="btn btn-primary">
+                Continue
+            </button>
         </div>
-        <div id="pdfPreview"></div>
     </div>
 </div>
