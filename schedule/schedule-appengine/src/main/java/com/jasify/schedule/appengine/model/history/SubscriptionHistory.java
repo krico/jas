@@ -16,10 +16,6 @@ public class SubscriptionHistory extends History {
     public SubscriptionHistory() {
     }
 
-    public SubscriptionHistory(HistoryTypeEnum type) {
-        super(type);
-    }
-
     public SubscriptionHistory(HistoryTypeEnum type, Subscription subscription) {
         super(type);
         getSubscriptionRef().setModel(subscription);

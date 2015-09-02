@@ -44,9 +44,10 @@ public interface ActivityService {
      * @return a newly created Subscription for this user to this activity
      * @throws OperationException        if activity is fully subscribed
      * @throws EntityNotFoundException
+     * @throws FieldValueException if dao validation fails
      */
     @Nonnull
-    Subscription subscribe(Key userId, Key activityId) throws OperationException, EntityNotFoundException;
+    Subscription subscribe(Key userId, Key activityId) throws OperationException, EntityNotFoundException, FieldValueException;
 
     /**
      * @param userId            who is subscribing
@@ -67,8 +68,9 @@ public interface ActivityService {
      *
      * @param subscriptionId to cancel
      * @throws EntityNotFoundException if any of the involved entities don't exist
+     * @throws FieldValueException if dao validation fails
      */
-    void cancelSubscription(Key subscriptionId) throws EntityNotFoundException;
+    void cancelSubscription(Key subscriptionId) throws EntityNotFoundException, FieldValueException;
 
     /**
      * Cancel an activityPackageExecution, effectively reversing {@link #subscribe(Key, Key, java.util.List)}

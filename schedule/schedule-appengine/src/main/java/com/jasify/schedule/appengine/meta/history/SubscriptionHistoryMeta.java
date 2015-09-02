@@ -30,7 +30,7 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
      * @return the singleton
      */
     public static SubscriptionHistoryMeta get() {
-        return slim3_singleton;
+       return slim3_singleton;
     }
 
     /** */
@@ -145,27 +145,27 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
         com.jasify.schedule.appengine.model.history.SubscriptionHistory m = (com.jasify.schedule.appengine.model.history.SubscriptionHistory) model;
         writer.beginObject();
         org.slim3.datastore.json.Default encoder0 = new org.slim3.datastore.json.Default();
-        if (m.getSubscriptionRef() != null && m.getSubscriptionRef().getKey() != null) {
+        if(m.getSubscriptionRef() != null && m.getSubscriptionRef().getKey() != null){
             writer.setNextPropertyName("subscriptionRef");
             encoder0.encode(writer, m.getSubscriptionRef(), maxDepth, currentDepth);
         }
-        if (m.getId() != null) {
+        if(m.getId() != null){
             writer.setNextPropertyName("id");
             encoder0.encode(writer, m.getId());
         }
-        if (m.getCreated() != null) {
+        if(m.getCreated() != null){
             writer.setNextPropertyName("created");
             encoder0.encode(writer, m.getCreated());
         }
-        if (m.getType() != null) {
+        if(m.getType() != null){
             writer.setNextPropertyName("type");
             encoder0.encode(writer, m.getType());
         }
-        if (m.getDescription() != null) {
+        if(m.getDescription() != null){
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
         }
-        if (m.getCurrentUserRef() != null && m.getCurrentUserRef().getKey() != null) {
+        if(m.getCurrentUserRef() != null && m.getCurrentUserRef().getKey() != null){
             writer.setNextPropertyName("currentUserRef");
             encoder0.encode(writer, m.getCurrentUserRef(), maxDepth, currentDepth);
         }

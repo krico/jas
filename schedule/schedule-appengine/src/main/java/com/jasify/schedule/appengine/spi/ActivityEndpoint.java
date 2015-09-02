@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
 import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
+import com.jasify.schedule.appengine.model.history.History;
 import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
@@ -317,11 +318,9 @@ public class ActivityEndpoint {
             HistoryHelper.addSubscriptionCreated(subscription.getId());
             return subscription;
         } catch (EntityNotFoundException e) {
-            log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
             HistoryHelper.addSubscriptionCreationFailed(userId, activityId);
             throw new NotFoundException(e.getMessage());
-        } catch (OperationException e) {
-            log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
+        } catch (OperationException | FieldValueException e) {
             HistoryHelper.addSubscriptionCreationFailed(userId, activityId);
             throw new BadRequestException(e.getMessage());
         }
@@ -351,16 +350,21 @@ public class ActivityEndpoint {
     }
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void cancelSubscription(User caller, @Named("subscriptionId") Key subscriptionId) throws UnauthorizedException, ForbiddenException, NotFoundException {
+    public void cancelSubscription(User caller, @Named("subscriptionId") final Key subscriptionId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException, InternalServerErrorException {
         checkFound(subscriptionId, "subscriptionId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromSubscriptionId(subscriptionId));
         try {
+            History history = HistoryHelper.createTacticalSubscriptionCancelled(subscriptionId);
             ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
-            // TODO: This will not work because we deleted the subsctipyion :(
-            // HistoryHelper.addSubscriptionCancelled(subscriptionId);
+            HistoryHelper.addTacticalSubscriptionCancelled(history);
         } catch (EntityNotFoundException e) {
             HistoryHelper.addSubscriptionCancellationFailed(subscriptionId);
             throw new NotFoundException(e.getMessage());
+        } catch (FieldValueException e) {
+            HistoryHelper.addSubscriptionCancellationFailed(subscriptionId);
+            throw new BadRequestException(e.getMessage());
+        } catch (ModelException e) {
+            throw new InternalServerErrorException(e.getMessage());
         }
     }
 

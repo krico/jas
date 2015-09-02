@@ -63,7 +63,7 @@ class DefaultActivityService implements ActivityService {
 
     @Nonnull
     @Override
-    public Subscription subscribe(final Key userId, final Key activityId) throws OperationException, EntityNotFoundException {
+    public Subscription subscribe(final Key userId, final Key activityId) throws OperationException, EntityNotFoundException, FieldValueException {
         new UserDao().get(userId); // Just to be sure it exists
         try {
             return TransactionOperator.execute(new ModelOperation<Subscription>() {
@@ -90,7 +90,7 @@ class DefaultActivityService implements ActivityService {
                     return subscription;
                 }
             });
-        } catch (EntityNotFoundException | OperationException e) {
+        } catch (EntityNotFoundException | OperationException | FieldValueException e) {
             throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
@@ -199,7 +199,7 @@ class DefaultActivityService implements ActivityService {
     }
 
     @Override
-    public void cancelSubscription(final Key subscriptionId) throws EntityNotFoundException {
+    public void cancelSubscription(final Key subscriptionId) throws EntityNotFoundException, FieldValueException {
         try {
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
@@ -209,7 +209,7 @@ class DefaultActivityService implements ActivityService {
                     return null;
                 }
             });
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException | FieldValueException e) {
             throw e;
         } catch (ModelException e) {
             throw Throwables.propagate(e);
