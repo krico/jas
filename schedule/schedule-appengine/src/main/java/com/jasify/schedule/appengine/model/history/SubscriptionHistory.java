@@ -1,7 +1,8 @@
 package com.jasify.schedule.appengine.model.history;
 
-import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.activity.Subscription;
 import org.slim3.datastore.Model;
+import org.slim3.datastore.ModelRef;
 
 /**
  * @author wszarmach
@@ -9,20 +10,18 @@ import org.slim3.datastore.Model;
  */
 @Model
 public class SubscriptionHistory extends History {
-    private Key subscriptionId;
+
+    private ModelRef<Subscription> subscriptionRef = new ModelRef<>(Subscription.class);
 
     public SubscriptionHistory() {
     }
 
-    public SubscriptionHistory(HistoryTypeEnum type) {
+    public SubscriptionHistory(HistoryTypeEnum type, Subscription subscription) {
         super(type);
+        getSubscriptionRef().setModel(subscription);
     }
 
-    public Key getSubscriptionId() {
-        return this.subscriptionId;
-    }
-
-    public void setSubscriptionId(Key subscriptionId) {
-        this.subscriptionId = subscriptionId;
+    public ModelRef<Subscription> getSubscriptionRef() {
+        return subscriptionRef;
     }
 }

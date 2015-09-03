@@ -273,6 +273,9 @@ public class UserEndpointTest {
         replay(session);
         expect(servletRequest.getSession(true)).andReturn(session);
         expect(servletRequest.getSession()).andReturn(null);
+        expect(servletRequest.getHeader("referer")).andReturn("Me");
+        expect(servletRequest.getRemoteAddr()).andReturn("Mars");
+        expect(servletRequest.getRemoteAddr()).andReturn("Maybe Pluto");
 
         replay(servletRequest);
         User value = new User();
@@ -299,6 +302,9 @@ public class UserEndpointTest {
         replay(session);
         expect(servletRequest.getSession(true)).andReturn(session);
         expect(servletRequest.getSession()).andReturn(session);
+        expect(servletRequest.getHeader("referer")).andReturn("Me");
+        expect(servletRequest.getRemoteAddr()).andReturn("14 Whaka Terrace");
+        expect(servletRequest.getRemoteAddr()).andReturn("Not here");
         replay(servletRequest);
         User value = new User();
         final Capture<User> captured = EasyMock.newCapture();

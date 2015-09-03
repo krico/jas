@@ -68,6 +68,18 @@ public final class HistoryHelper {
         return null;
     }
 
+    private static Subscription getSubscription(Key subscriptionId) {
+        try {
+            if (subscriptionId != null) {
+                SubscriptionDao subscriptionDao = new SubscriptionDao();
+                return subscriptionDao.get(subscriptionId);
+            }
+        } catch (EntityNotFoundException | IllegalArgumentException e) {
+            log.warn("Failed to get Subscription", e);
+        }
+        return null;
+    }
+
     private static Activity getActivity(Key activityId) {
         try {
             if (activityId != null) {
@@ -119,14 +131,19 @@ public final class HistoryHelper {
         addHistory(history);
     }
 
-    public static void addLogin(User user, HttpServletRequest httpServletRequest) {
+    public static void addLogin(User user, HttpServletRequest httpServletRequest, String comment) {
         AuthHistory history = new AuthHistory(HistoryTypeEnum.Login);
         history.getCurrentUserRef().setKey(user.getId());
         history.setName(user.getName());
         history.setRemoteAddress(httpServletRequest.getRemoteAddr());
-        history.setDescription("User: " + history.getName() + " logged in from: " + history.getRemoteAddress());
-
+        String description = "User: " + history.getName() + " logged in from: " + history.getRemoteAddress();
+        if (StringUtils.isNotBlank(comment)) description += " comment: " + comment;
+        history.setDescription(description);
         addHistory(history);
+    }
+
+    public static void addLogin(User user, HttpServletRequest httpServletRequest) {
+        addLogin(user, httpServletRequest, null);
     }
 
     public static void addLogout(HttpServletRequest httpServletRequest) {
@@ -205,6 +222,19 @@ public final class HistoryHelper {
         addHistory(history);
     }
 
+    public static void addAccountCreated(User user, HttpServletRequest httpServletRequest) {
+        AccountCreationHistory history = new AccountCreationHistory(HistoryTypeEnum.AccountCreated);
+        history.setReferrer(httpServletRequest.getHeader("referer")); // Yes, with the legendary misspelling.
+        history.setRemoteAddress(httpServletRequest.getRemoteAddr());
+        history.getCurrentUserRef().setModel(user);
+        history.setName(user.getName());
+        history.setDescription("New user: " + history.getName() +
+                " with credentials: " + user.getEmail() +
+                " from: " + history.getRemoteAddress());
+
+        addHistory(history);
+    }
+
     public static void addAccountCreationFailed(UserLogin userLogin, HttpServletRequest httpServletRequest, String reason) {
         AccountCreationHistory history = new AccountCreationHistory(HistoryTypeEnum.AccountCreationFailed);
         history.setReferrer(httpServletRequest.getHeader("referer")); // Yes, with the legendary misspelling.
@@ -273,66 +303,71 @@ public final class HistoryHelper {
         addHistory(history);
     }
 
-    private static void createSubscriptionHistory(HistoryTypeEnum historyType, Key userId, Key activityId) {
+    private static SubscriptionHistory createSubscriptionHistory(HistoryTypeEnum historyType, Key userId, Key activityId) {
         User user = getUser(userId);
         Activity activity = getActivity(activityId);
-        createSubscriptionHistory(historyType, null, user, activity);
+        return createSubscriptionHistory(historyType, null, user, activity);
     }
 
-    private static void createSubscriptionHistory(HistoryTypeEnum historyType, Key subscriptionId) {
-        try {
-            SubscriptionDao subscriptionDao = new SubscriptionDao();
-            Subscription subscription = subscriptionDao.get(subscriptionId);
+    private static SubscriptionHistory createSubscriptionHistory(HistoryTypeEnum historyType, Key subscriptionId) {
+        Subscription subscription = getSubscription(subscriptionId);
+        if (subscription != null) {
             User user = getUser(subscription.getUserRef().getKey());
             Activity activity = getActivity(subscription.getActivityRef().getKey());
-            createSubscriptionHistory(historyType, subscription, user, activity);
-        } catch (EntityNotFoundException e) {
-            log.warn("Failed to get entity", e);
+            return createSubscriptionHistory(historyType, subscription, user, activity);
+        } else {
+            return createSubscriptionHistory(historyType, null, null, null);
         }
     }
 
-    private static void createSubscriptionHistory(HistoryTypeEnum historyType, Subscription subscription, User user, Activity activity) {
-        SubscriptionHistory history = new SubscriptionHistory(historyType);
+    private static SubscriptionHistory createSubscriptionHistory(HistoryTypeEnum historyType, Subscription subscription, User user, Activity activity) {
+        SubscriptionHistory history = new SubscriptionHistory(historyType, subscription);
 
         addCurrentUser(history);
-
-        if (subscription != null) {
-            history.setSubscriptionId(subscription.getId());
-        }
 
         StringBuilder sb = new StringBuilder();
         sb.append("[User=");
         if (user != null) {
-            sb.append(user.getId()).append(":").append(user.getEmail());
+            sb.append(KeyUtil.keyToString(user.getId())).append(":").append(user.getEmail());
         } else {
             sb.append("?");
         }
         sb.append("] / [Activity=");
 
         if (activity != null) {
-            sb.append(activity.getId()).append(":").append(activity.getName());
+            sb.append(KeyUtil.keyToString(activity.getId())).append(":").append(activity.getName());
         } else {
             sb.append("?");
         }
         sb.append("]");
         history.setDescription(sb.toString());
 
-        addHistory(history);
+        return history;
     }
 
     public static void addSubscriptionCreated(Key subscriptionId) {
-        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCreated, subscriptionId);
+        addHistory(createSubscriptionHistory(HistoryTypeEnum.SubscriptionCreated, subscriptionId));
     }
 
     public static void addSubscriptionCreationFailed(Key userId, Key activityId) {
-        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCreationFailed, userId, activityId);
+        addHistory(createSubscriptionHistory(HistoryTypeEnum.SubscriptionCreationFailed, userId, activityId));
+    }
+
+    // TODO: Temporary method until we no longer delete entities - works with addSubscriptionCancelled
+    public static History createTacticalSubscriptionCancelled(Key subscriptionId) {
+        return createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancelled, subscriptionId);
+    }
+
+    // TODO: Temporary method until we no longer delete entities - works with createSubscriptionCancelled
+    public static void addTacticalSubscriptionCancelled(History history) {
+        addHistory(history);
     }
 
     public static void addSubscriptionCancelled(Key subscriptionId) {
-        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancelled, subscriptionId);
+        addHistory(createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancelled, subscriptionId));
     }
 
     public static void addSubscriptionCancellationFailed(Key subscriptionId) {
-        createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancellationFailed, subscriptionId);
+        addHistory(createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancellationFailed, subscriptionId));
     }
 }

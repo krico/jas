@@ -2,12 +2,15 @@ package com.jasify.schedule.appengine.model.payment.workflow;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.OperationException;
 import com.jasify.schedule.appengine.model.activity.ActivityService;
 import com.jasify.schedule.appengine.model.activity.ActivityServiceFactory;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
+import com.jasify.schedule.appengine.model.history.History;
+import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import org.slf4j.Logger;
@@ -55,8 +58,9 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
             ActivityService activityService = ActivityServiceFactory.getActivityService();
             Subscription subscribe = activityService.subscribe(userId, activityId);
             subscriptionId = subscribe.getId();
-        } catch (EntityNotFoundException | OperationException e) {
-            log.error("Failed to subscribe User={} to Activity={}", userId, activityId); // TODO: Replace with event recorder
+            HistoryHelper.addSubscriptionCreated(subscriptionId);
+        } catch (EntityNotFoundException | OperationException | FieldValueException e) {
+            HistoryHelper.addSubscriptionCreationFailed(userId, activityId);
             throw new PaymentWorkflowException(e);
         }
     }
@@ -65,8 +69,11 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
     public void onCanceled() throws PaymentWorkflowException {
         if (subscriptionId != null) {
             try {
+                History history = HistoryHelper.createTacticalSubscriptionCancelled(subscriptionId);
                 ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
-            } catch (EntityNotFoundException e) {
+                HistoryHelper.addTacticalSubscriptionCancelled(history);
+            } catch (EntityNotFoundException | FieldValueException e) {
+                HistoryHelper.addSubscriptionCancellationFailed(subscriptionId);
                 throw new PaymentWorkflowException(e);
             }
         }

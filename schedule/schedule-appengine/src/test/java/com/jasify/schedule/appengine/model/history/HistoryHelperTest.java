@@ -417,9 +417,9 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCreated, history.getType());
-        assertEquals("[User=" + user.getId() + ":" + user.getEmail() + "] / [Activity=" + activity.getId() + ":" + activity.getName() + "]", history.getDescription());
+        assertEquals("[User=" + KeyUtil.keyToString(user.getId()) + ":" + user.getEmail() + "] / [Activity=" + KeyUtil.keyToString(activity.getId()) + ":" + activity.getName() + "]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertEquals(subscription.getId(), subscriptionHistory.getSubscriptionId());
+        assertEquals(subscription.getId(), subscriptionHistory.getSubscriptionRef().getKey());
     }
 
     @Test
@@ -430,9 +430,9 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCreationFailed, history.getType());
-        assertEquals("[User=" + user.getId() + ":" + user.getEmail() + "] / [Activity=" + activity.getId() + ":" + activity.getName() + "]", history.getDescription());
+        assertEquals("[User=" + KeyUtil.keyToString(user.getId()) + ":" + user.getEmail() + "] / [Activity=" + KeyUtil.keyToString(activity.getId()) + ":" + activity.getName() + "]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertNull(subscriptionHistory.getSubscriptionId());
+        assertNull(subscriptionHistory.getSubscriptionRef().getModel());
     }
 
     @Test
@@ -442,9 +442,9 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCreationFailed, history.getType());
-        assertEquals("[User=?] / [Activity=" + activity.getId() + ":" + activity.getName() + "]", history.getDescription());
+        assertEquals("[User=?] / [Activity=" + KeyUtil.keyToString(activity.getId()) + ":" + activity.getName() + "]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertNull(subscriptionHistory.getSubscriptionId());
+        assertNull(subscriptionHistory.getSubscriptionRef().getModel());
     }
 
     @Test
@@ -454,9 +454,9 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCreationFailed, history.getType());
-        assertEquals("[User=?] / [Activity=" + activity.getId() + ":" + activity.getName() + "]", history.getDescription());
+        assertEquals("[User=?] / [Activity=" + KeyUtil.keyToString(activity.getId()) + ":" + activity.getName() + "]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertNull(subscriptionHistory.getSubscriptionId());
+        assertNull(subscriptionHistory.getSubscriptionRef().getModel());
     }
 
     @Test
@@ -466,9 +466,9 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCreationFailed, history.getType());
-        assertEquals("[User=" + user.getId() + ":" + user.getEmail() + "] / [Activity=?]", history.getDescription());
+        assertEquals("[User=" + KeyUtil.keyToString(user.getId()) + ":" + user.getEmail() + "] / [Activity=?]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertNull(subscriptionHistory.getSubscriptionId());
+        assertNull(subscriptionHistory.getSubscriptionRef().getModel());
     }
 
     @Test
@@ -478,9 +478,9 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCreationFailed, history.getType());
-        assertEquals("[User=" + user.getId() + ":" + user.getEmail() + "] / [Activity=?]", history.getDescription());
+        assertEquals("[User=" + KeyUtil.keyToString(user.getId()) + ":" + user.getEmail() + "] / [Activity=?]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertNull(subscriptionHistory.getSubscriptionId());
+        assertNull(subscriptionHistory.getSubscriptionRef().getModel());
     }
 
     @Test
@@ -492,9 +492,25 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCancelled, history.getType());
-        assertEquals("[User=" + user.getId() + ":" + user.getEmail() + "] / [Activity=" + activity.getId() + ":" + activity.getName() + "]", history.getDescription());
+        assertEquals("[User=" + KeyUtil.keyToString(user.getId()) + ":" + user.getEmail() + "] / [Activity=" + KeyUtil.keyToString(activity.getId()) + ":" + activity.getName() + "]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertEquals(subscription.getId(), subscriptionHistory.getSubscriptionId());
+        assertEquals(subscription.getId(), subscriptionHistory.getSubscriptionRef().getKey());
+    }
+
+    @Test
+    public void testTacticalSubscriptionCancelled() throws Exception {
+        User user = TestHelper.createUser(true);
+        Activity activity = TestHelper.createActivity(true);
+        Subscription subscription = TestHelper.createSubscription(user, activity, true);
+        Key subscriptionId = subscription.getId();
+        History history = HistoryHelper.createTacticalSubscriptionCancelled(subscriptionId);
+        Datastore.delete(subscriptionId);
+
+        HistoryHelper.addTacticalSubscriptionCancelled(history);
+        assertEquals(HistoryTypeEnum.SubscriptionCancelled, history.getType());
+        assertEquals("[User=" + KeyUtil.keyToString(user.getId()) + ":" + user.getEmail() + "] / [Activity=" + KeyUtil.keyToString(activity.getId()) + ":" + activity.getName() + "]", history.getDescription());
+        SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
+        assertEquals(subscriptionId, subscriptionHistory.getSubscriptionRef().getKey());
     }
 
     @Test
@@ -506,16 +522,19 @@ public class HistoryHelperTest {
         History history = getLastHistory();
 
         assertEquals(HistoryTypeEnum.SubscriptionCancellationFailed, history.getType());
-        assertEquals("[User=" + user.getId() + ":" + user.getEmail() + "] / [Activity=" + activity.getId() + ":" + activity.getName() + "]", history.getDescription());
+        assertEquals("[User=" + KeyUtil.keyToString(user.getId()) + ":" + user.getEmail() + "] / [Activity=" + KeyUtil.keyToString(activity.getId()) + ":" + activity.getName() + "]", history.getDescription());
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
-        assertEquals(subscription.getId(), subscriptionHistory.getSubscriptionId());
+        assertEquals(subscription.getId(), subscriptionHistory.getSubscriptionRef().getKey());
     }
 
     @Test
     public void testSubscriptionCancellationWithUnknownSubscriptionId() throws Exception {
         HistoryHelper.addSubscriptionCancellationFailed(Datastore.allocateId(Subscription.class));
-        List<History> histories = historyDao.listSince(new Date(System.currentTimeMillis() - 5000));
+        History history = getLastHistory();
 
-        assertTrue(histories.isEmpty());
+        assertEquals(HistoryTypeEnum.SubscriptionCancellationFailed, history.getType());
+        assertEquals("[User=?] / [Activity=?]", history.getDescription());
+        SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
+        assertNotNull(subscriptionHistory.getSubscriptionRef());
     }
 }

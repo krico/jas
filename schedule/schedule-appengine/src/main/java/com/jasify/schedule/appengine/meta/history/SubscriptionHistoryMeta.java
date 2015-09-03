@@ -1,12 +1,11 @@
 package com.jasify.schedule.appengine.meta.history;
 
 //@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" })
-
 /** */
 public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta<com.jasify.schedule.appengine.model.history.SubscriptionHistory> {
 
     /** */
-    public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.history.SubscriptionHistory, com.google.appengine.api.datastore.Key> subscriptionId = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.history.SubscriptionHistory, com.google.appengine.api.datastore.Key>(this, "subscriptionId", "subscriptionId", com.google.appengine.api.datastore.Key.class);
+    public final org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.history.SubscriptionHistory, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.activity.Subscription>, com.jasify.schedule.appengine.model.activity.Subscription> subscriptionRef = new org.slim3.datastore.ModelRefAttributeMeta<com.jasify.schedule.appengine.model.history.SubscriptionHistory, org.slim3.datastore.ModelRef<com.jasify.schedule.appengine.model.activity.Subscription>, com.jasify.schedule.appengine.model.activity.Subscription>(this, "subscriptionRef", "subscriptionRef", org.slim3.datastore.ModelRef.class, com.jasify.schedule.appengine.model.activity.Subscription.class);
 
     /** */
     public final org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.history.SubscriptionHistory, com.google.appengine.api.datastore.Key> id = new org.slim3.datastore.CoreAttributeMeta<com.jasify.schedule.appengine.model.history.SubscriptionHistory, com.google.appengine.api.datastore.Key>(this, "__key__", "id", com.google.appengine.api.datastore.Key.class);
@@ -31,7 +30,7 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
      * @return the singleton
      */
     public static SubscriptionHistoryMeta get() {
-        return slim3_singleton;
+       return slim3_singleton;
     }
 
     /** */
@@ -42,7 +41,10 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
     @Override
     public com.jasify.schedule.appengine.model.history.SubscriptionHistory entityToModel(com.google.appengine.api.datastore.Entity entity) {
         com.jasify.schedule.appengine.model.history.SubscriptionHistory model = new com.jasify.schedule.appengine.model.history.SubscriptionHistory();
-        model.setSubscriptionId((com.google.appengine.api.datastore.Key) entity.getProperty("subscriptionId"));
+        if (model.getSubscriptionRef() == null) {
+            throw new NullPointerException("The property(subscriptionRef) is null.");
+        }
+        model.getSubscriptionRef().setKey((com.google.appengine.api.datastore.Key) entity.getProperty("subscriptionRef"));
         model.setId(entity.getKey());
         model.setCreated((java.util.Date) entity.getProperty("created"));
         model.setType(stringToEnum(com.jasify.schedule.appengine.model.history.HistoryTypeEnum.class, (java.lang.String) entity.getProperty("type")));
@@ -63,7 +65,10 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
         } else {
             entity = new com.google.appengine.api.datastore.Entity(kind);
         }
-        entity.setProperty("subscriptionId", m.getSubscriptionId());
+        if (m.getSubscriptionRef() == null) {
+            throw new NullPointerException("The property(subscriptionRef) must not be null.");
+        }
+        entity.setProperty("subscriptionRef", m.getSubscriptionRef().getKey());
         entity.setProperty("created", m.getCreated());
         entity.setProperty("type", enumToString(m.getType()));
         entity.setProperty("description", m.getDescription());
@@ -96,6 +101,10 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
     @Override
     protected void assignKeyToModelRefIfNecessary(com.google.appengine.api.datastore.AsyncDatastoreService ds, java.lang.Object model) {
         com.jasify.schedule.appengine.model.history.SubscriptionHistory m = (com.jasify.schedule.appengine.model.history.SubscriptionHistory) model;
+        if (m.getSubscriptionRef() == null) {
+            throw new NullPointerException("The property(subscriptionRef) must not be null.");
+        }
+        m.getSubscriptionRef().assignKeyIfNecessary(ds);
         if (m.getCurrentUserRef() == null) {
             throw new NullPointerException("The property(currentUserRef) must not be null.");
         }
@@ -136,27 +145,27 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
         com.jasify.schedule.appengine.model.history.SubscriptionHistory m = (com.jasify.schedule.appengine.model.history.SubscriptionHistory) model;
         writer.beginObject();
         org.slim3.datastore.json.Default encoder0 = new org.slim3.datastore.json.Default();
-        if (m.getSubscriptionId() != null) {
-            writer.setNextPropertyName("subscriptionId");
-            encoder0.encode(writer, m.getSubscriptionId());
+        if(m.getSubscriptionRef() != null && m.getSubscriptionRef().getKey() != null){
+            writer.setNextPropertyName("subscriptionRef");
+            encoder0.encode(writer, m.getSubscriptionRef(), maxDepth, currentDepth);
         }
-        if (m.getId() != null) {
+        if(m.getId() != null){
             writer.setNextPropertyName("id");
             encoder0.encode(writer, m.getId());
         }
-        if (m.getCreated() != null) {
+        if(m.getCreated() != null){
             writer.setNextPropertyName("created");
             encoder0.encode(writer, m.getCreated());
         }
-        if (m.getType() != null) {
+        if(m.getType() != null){
             writer.setNextPropertyName("type");
             encoder0.encode(writer, m.getType());
         }
-        if (m.getDescription() != null) {
+        if(m.getDescription() != null){
             writer.setNextPropertyName("description");
             encoder0.encode(writer, m.getDescription());
         }
-        if (m.getCurrentUserRef() != null && m.getCurrentUserRef().getKey() != null) {
+        if(m.getCurrentUserRef() != null && m.getCurrentUserRef().getKey() != null){
             writer.setNextPropertyName("currentUserRef");
             encoder0.encode(writer, m.getCurrentUserRef(), maxDepth, currentDepth);
         }
@@ -168,8 +177,8 @@ public final class SubscriptionHistoryMeta extends org.slim3.datastore.ModelMeta
         com.jasify.schedule.appengine.model.history.SubscriptionHistory m = new com.jasify.schedule.appengine.model.history.SubscriptionHistory();
         org.slim3.datastore.json.JsonReader reader = null;
         org.slim3.datastore.json.Default decoder0 = new org.slim3.datastore.json.Default();
-        reader = rootReader.newObjectReader("subscriptionId");
-        m.setSubscriptionId(decoder0.decode(reader, m.getSubscriptionId()));
+        reader = rootReader.newObjectReader("subscriptionRef");
+        decoder0.decode(reader, m.getSubscriptionRef(), maxDepth, currentDepth);
         reader = rootReader.newObjectReader("id");
         m.setId(decoder0.decode(reader, m.getId()));
         reader = rootReader.newObjectReader("created");
