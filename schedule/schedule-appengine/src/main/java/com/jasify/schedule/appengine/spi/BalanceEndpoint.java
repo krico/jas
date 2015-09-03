@@ -9,16 +9,15 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
-import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.Navigate;
 import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.AccountUtil;
 import com.jasify.schedule.appengine.model.balance.BalanceService;
 import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
-import com.jasify.schedule.appengine.model.balance.*;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.*;
@@ -205,19 +204,16 @@ public class BalanceEndpoint {
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
         Preconditions.checkNotNull(payment.getType(), "No PaymentType");
-        try {
-            switch (payment.getType()) {
-                case Invoice: {
-                    InvoicePayment invoicePayment = (InvoicePayment) payment;
-                    AttachmentDao attachmentDao = new AttachmentDao();
-                    Attachment attachment = attachmentDao.get(invoicePayment.getAttachmentRef().getKey());
-                    return new JasInvoice(attachment);
-                }
-                default:
-                    throw new BadRequestException("Unsupported payment type: " + payment.getType());
+        switch (payment.getType()) {
+            case Invoice: {
+                InvoicePayment invoicePayment = (InvoicePayment) payment;
+                Attachment attachment = Navigate.attachment(invoicePayment);
+                if (attachment == null)
+                    throw new NotFoundException("No attachment on payment");
+                return new JasInvoice(attachment);
             }
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException("Invoice");
+            default:
+                throw new BadRequestException("Unsupported payment type: " + payment.getType());
         }
     }
 

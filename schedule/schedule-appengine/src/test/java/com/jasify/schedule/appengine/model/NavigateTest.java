@@ -3,8 +3,10 @@ package com.jasify.schedule.appengine.model;
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
@@ -234,5 +236,21 @@ public class NavigateTest {
         assertEquals(organization.getId(), navigated.getId());
     }
 
+    @Test
+    public void testAttachmentFromInvoicePaymentNul() {
+        assertNull(Navigate.attachment((InvoicePayment) null));
+    }
+
+    @Test
+    public void testAttachmentFromInvoicePayment() {
+        InvoicePayment payment = new InvoicePayment();
+        Attachment attachment = new Attachment();
+        payment.getAttachmentRef().setModel(attachment);
+        Datastore.put(payment, attachment);
+
+        Attachment navigated = Navigate.attachment(payment);
+        assertNotNull(navigated);
+        assertEquals(attachment.getId(), navigated.getId());
+    }
 
 }

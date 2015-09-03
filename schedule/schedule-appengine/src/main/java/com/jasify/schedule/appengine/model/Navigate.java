@@ -1,12 +1,15 @@
 package com.jasify.schedule.appengine.model;
 
 import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +123,22 @@ public final class Navigate {
             log.warn("ActivityPackageExecution [{}] points to non-existent ActivityPackage [{}]", execution.getId(), activityPackageId);
 
         return activityPackage;
+    }
+
+    public static Attachment attachment(InvoicePayment payment) {
+        if (payment == null) return null;
+        Key attachmentId = payment.getAttachmentRef().getKey();
+        if (attachmentId == null) {
+            log.warn("InvoicePayment [{}] has no AttachmentRef", payment.getId());
+            return null;
+        }
+        AttachmentDao attachmentDao = new AttachmentDao();
+        Attachment attachment = attachmentDao.getOrNull(attachmentId);
+
+        if (attachment == null)
+            log.warn("InvoicePayment [{}] point to non-existent Attachment [{}]", payment.getId(), attachmentId);
+
+        return attachment;
     }
 
     public static Organization organization(ActivityPackageExecution execution) {
