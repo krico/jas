@@ -126,21 +126,4 @@ public class BalanceEndpointDaoTest {
 
         assertTrue(creditFound);
     }
-
-    @Test
-    public void testGetPaymentInvoice() throws Exception {
-        User user = TestHelper.createUser(true);
-        JasifyEndpointUser jasifyEndpointUser = newCaller(user.getId().getId());
-
-        InvoicePayment payment = new InvoicePayment();
-        Attachment att = new Attachment();
-        payment.getUserRef().setModel(user);
-        payment.getAttachmentRef().setModel(att);
-        Datastore.put(payment, att);
-
-        BalanceEndpoint balanceEndpoint = new BalanceEndpoint();
-        JasInvoice paymentInvoice = balanceEndpoint.getPaymentInvoice(jasifyEndpointUser, payment.getId());
-        assertNotNull(paymentInvoice);
-    }
-
 }

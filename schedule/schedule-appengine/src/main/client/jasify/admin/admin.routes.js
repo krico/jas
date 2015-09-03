@@ -433,6 +433,24 @@
                         );
                     }
                 }
-            });
+            })
+            .when('/admin/payments', {
+                templateUrl: 'admin/payment/admin-payments.html',
+                controller: 'AdminPaymentsController',
+                controllerAs: 'vm',
+                resolve: {
+                    payments: /*@ngInject*/ function ($q, Allow, Payment) {
+                        return Allow.admin().then(
+                            function () {
+                                return Payment.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
+        ;
     }
 })(angular);

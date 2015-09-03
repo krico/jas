@@ -64,6 +64,7 @@
                 com.jasify.schedule.appengine.spi.UserEndpoint,
                 com.jasify.schedule.appengine.spi.UserLoginEndpoint,
                 com.jasify.schedule.appengine.spi.BalanceEndpoint,
+                com.jasify.schedule.appengine.spi.PaymentEndpoint,
                 com.jasify.schedule.appengine.spi.ShoppingCartEndpoint,
                 com.jasify.schedule.appengine.spi.UniqueEndpoint
             </param-value>

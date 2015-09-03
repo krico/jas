@@ -2,7 +2,7 @@
 
     angular.module('jasify.payment').controller('PaymentConfirmController', PaymentConfirmController);
 
-    function PaymentConfirmController($log, $location, $routeParams, BrowserData, Balance, jasDialogs) {
+    function PaymentConfirmController($log, $location, $routeParams, BrowserData, Payment, jasDialogs) {
         var vm = this;
         vm.progress = false;
         vm.success = false;
@@ -22,7 +22,7 @@
         function getInvoice(paymentId) {
             vm.progress = true;
 
-            return Balance.getPaymentInvoice(paymentId)
+            return Payment.getPaymentInvoice(paymentId)
                 .then(ok, fail);
 
             function ok(invoice) {

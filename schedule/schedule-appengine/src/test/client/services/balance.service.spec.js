@@ -113,22 +113,6 @@ describe('BalanceService', function () {
         expect($gapiMock.client.jasify.balance.getAccounts).toHaveBeenCalled();
     });
 
-    it('should call getPaymentInvoice', function () {
-        var expected = [];
-        spyOn($gapiMock.client.jasify.balance, 'getPaymentInvoice').and.returnValue($q.when({result: expected}));
-        Balance.getPaymentInvoice('pId')
-            .then(function (ret) {
-                expect(ret).toBe(expected);
-            },
-            function () {
-                fail();
-            });
-
-        $rootScope.$apply();
-
-        expect($gapiMock.client.jasify.balance.getPaymentInvoice).toHaveBeenCalledWith({paymentId: 'pId'});
-    });
-
     it('should call getTransactions', function () {
         var expected = [];
         spyOn($gapiMock.client.jasify.balance, 'getTransactions').and.returnValue($q.when({result: {items: expected}}));

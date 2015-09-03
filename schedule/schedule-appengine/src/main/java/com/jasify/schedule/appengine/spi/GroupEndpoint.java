@@ -40,6 +40,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
+                JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,
                 JasSubscriptionTransformer.class,
                 JasTransactionTransformer.class,

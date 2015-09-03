@@ -9,7 +9,6 @@
             getAccount: getAccount,
             getAccounts: getAccounts,
             getTransactions: getTransactions,
-            getPaymentInvoice: getPaymentInvoice,
             executePayment: executePayment
         };
 
@@ -57,13 +56,6 @@
         function executePayment(paymentId) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.balance.executePayment(paymentId)
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
-            });
-        }
-
-        function getPaymentInvoice(paymentId) {
-            return Endpoint.jasify(function (jasify) {
-                return jasify.balance.getPaymentInvoice({paymentId: paymentId})
                     .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }

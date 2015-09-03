@@ -57,6 +57,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
+                JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,
                 JasSubscriptionTransformer.class,
                 JasTransactionTransformer.class,
@@ -195,25 +196,6 @@ public class BalanceEndpoint {
             }
         } catch (EntityNotFoundException e) {
             throw new NotFoundException("Payment");
-        }
-    }
-
-    @ApiMethod(name = "balance.getPaymentInvoice", path = "balance/payment-invoice/{paymentId}", httpMethod = ApiMethod.HttpMethod.GET)
-    public JasInvoice getPaymentInvoice(User caller, @Named("paymentId") Key paymentId) throws UnauthorizedException, NotFoundException, ForbiddenException, BadRequestException {
-        JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
-        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
-        Payment payment = getPaymentCheckUser(paymentId, jasCaller, paymentService);
-        Preconditions.checkNotNull(payment.getType(), "No PaymentType");
-        switch (payment.getType()) {
-            case Invoice: {
-                InvoicePayment invoicePayment = (InvoicePayment) payment;
-                Attachment attachment = Navigate.attachment(invoicePayment);
-                if (attachment == null)
-                    throw new NotFoundException("No attachment on payment");
-                return new JasInvoice(attachment);
-            }
-            default:
-                throw new BadRequestException("Unsupported payment type: " + payment.getType());
         }
     }
 
