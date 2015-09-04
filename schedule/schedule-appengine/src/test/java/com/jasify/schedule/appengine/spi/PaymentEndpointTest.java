@@ -8,11 +8,13 @@ import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasInvoice;
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -54,21 +56,26 @@ public class PaymentEndpointTest {
     public void testGetPaymentsAdminOnly() throws Exception {
         User user = TestHelper.createUser(true);
         JasifyEndpointUser jasifyEndpointUser = newCaller(user.getId().getId());
-        paymentEndpoint.getPayments(jasifyEndpointUser, null, null);
+        paymentEndpoint.getPayments(jasifyEndpointUser, null, null, null);
     }
 
     @Test
+    //TODO: test other cases
     public void testGetPayments() throws Exception {
         User user = TestHelper.createUser(true);
         JasifyEndpointUser jasifyEndpointUser = newAdminCaller(user.getId().getId());
 
+        long now = System.currentTimeMillis();
+        Date outside = DateUtils.truncate(new Date(now - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS), Calendar.HOUR);
+        outside = new Date(outside.getTime() - 1);
+
         Payment payment1 = new Payment();
-        payment1.setCreated(new Date(System.currentTimeMillis() - PaymentEndpoint.DEFAULT_TIME_WINDOW_MILLIS - 1000));
+        payment1.setCreated(outside);
         Payment payment2 = new InvoicePayment();
 
         Datastore.put(payment1, payment2);
 
-        List<Payment> payments = paymentEndpoint.getPayments(jasifyEndpointUser, null, null);
+        List<Payment> payments = paymentEndpoint.getPayments(jasifyEndpointUser, null, null, null);
         assertEquals(1, payments.size());
         assertEquals(payment2.getId(), payments.get(0).getId());
 

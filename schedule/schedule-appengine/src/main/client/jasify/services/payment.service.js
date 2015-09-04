@@ -7,9 +7,9 @@
             getPaymentInvoice: getPaymentInvoice
         };
 
-        function query(fromDate, toDate) {
+        function query(fromDate, toDate, state) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.payments.query({fromDate: fromDate, toDate: toDate})
+                return jasify.payments.query({fromDate: fromDate, toDate: toDate, state: state})
                     .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }

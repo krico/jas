@@ -144,7 +144,8 @@
                 executePayment: nop
             },
             payments: {
-                getPaymentInvoice: nop
+                getPaymentInvoice: nop,
+                query: nop
             },
             histories: {
                 query: nop

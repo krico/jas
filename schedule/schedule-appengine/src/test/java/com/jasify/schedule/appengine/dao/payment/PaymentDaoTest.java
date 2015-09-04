@@ -7,6 +7,11 @@ import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.payment.PayPalPayment;
 import com.jasify.schedule.appengine.model.payment.Payment;
+import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slim3.datastore.Datastore;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
@@ -60,9 +65,23 @@ public class PaymentDaoTest {
         payment2.setCreated(new Date(payment1.getCreated().getTime() + 1000));
         paymentDao.save(Arrays.asList(payment1, payment2));
 
-        List<Payment> payments = paymentDao.listSince(new Date(payment1.getCreated().getTime() + 1));
+        List<Payment> payments = paymentDao.list(new Date(payment1.getCreated().getTime() + 1));
         assertEquals(1, payments.size());
         assertEquals(payment2.getId(), payments.get(0).getId());
+    }
+
+    @Test
+    public void testListSinceWithState() throws Exception {
+        InvoicePayment payment1 = new InvoicePayment();
+        payment1.setCreated(new Date(12345));
+        PayPalPayment payment2 = new PayPalPayment();
+        payment2.setCreated(new Date(payment1.getCreated().getTime() + 1000));
+        paymentDao.save(Arrays.asList(payment1, payment2));
+
+        List<Payment> payments = paymentDao.list(new Date(payment1.getCreated().getTime() + 1), PaymentStateEnum.New);
+        assertEquals(1, payments.size());
+        assertEquals(payment2.getId(), payments.get(0).getId());
+        assertTrue(paymentDao.list(new Date(payment1.getCreated().getTime() + 1), PaymentStateEnum.Canceled).isEmpty());
     }
 
     @Test
@@ -75,9 +94,45 @@ public class PaymentDaoTest {
         payment3.setCreated(new Date(payment2.getCreated().getTime() + 1000));
         paymentDao.save(Arrays.asList(payment1, payment2, payment3));
 
-        List<Payment> payments = paymentDao.listBetween(new Date(payment1.getCreated().getTime() + 1), new Date(payment3.getCreated().getTime() - 1));
+        List<Payment> payments = paymentDao.list(new Date(payment1.getCreated().getTime() + 1), new Date(payment3.getCreated().getTime() - 1));
         assertEquals(1, payments.size());
         assertEquals(payment2.getId(), payments.get(0).getId());
+    }
+
+    @Test
+    public void testListState() {
+        Payment newState = new Payment();
+        Payment canceledState = new Payment();
+        canceledState.setState(PaymentStateEnum.Canceled);
+
+        Datastore.put(newState, canceledState);
+
+        List<Payment> newList = paymentDao.list(PaymentStateEnum.New);
+        assertEquals(1, newList.size());
+        assertEquals(newState.getId(), newList.get(0).getId());
+
+        List<Payment> cxlState = paymentDao.list(PaymentStateEnum.Canceled);
+        assertEquals(1, cxlState.size());
+        assertEquals(canceledState.getId(), cxlState.get(0).getId());
+
+    }
+
+    @Test
+    public void testListBetweenWithState() throws Exception {
+        InvoicePayment payment1 = new InvoicePayment();
+        payment1.setCreated(new Date(12345));
+        PayPalPayment payment2 = new PayPalPayment();
+        payment2.setCreated(new Date(payment1.getCreated().getTime() + 1000));
+        PayPalPayment payment3 = new PayPalPayment();
+        payment3.setCreated(new Date(payment2.getCreated().getTime() + 1000));
+        paymentDao.save(Arrays.asList(payment1, payment2, payment3));
+
+        Date start = new Date(payment1.getCreated().getTime() + 1);
+        Date end = new Date(payment3.getCreated().getTime() - 1);
+        List<Payment> payments = paymentDao.list(start, end, PaymentStateEnum.New);
+        assertEquals(1, payments.size());
+        assertEquals(payment2.getId(), payments.get(0).getId());
+        assertTrue(paymentDao.list(start, end, PaymentStateEnum.Created).isEmpty());
     }
 
     @Test

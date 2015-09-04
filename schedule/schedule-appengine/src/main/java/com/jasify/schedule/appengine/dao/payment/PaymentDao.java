@@ -6,6 +6,7 @@ import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.dao.QueryParameters;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.model.payment.Payment;
+import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
 import org.slim3.datastore.Datastore;
 import com.google.appengine.api.datastore.PreparedQuery;
 
@@ -22,12 +23,24 @@ public class PaymentDao extends BaseCachingDao<Payment> {
         super(PaymentMeta.get());
     }
 
-    public List<Payment> listSince(final Date when) {
-        return query(new SinceQuery(this.<PaymentMeta>getMeta(), when));
+    public List<Payment> list(PaymentStateEnum state) {
+        return query(new StateQuery(this.<PaymentMeta>getMeta(), state));
     }
 
-    public List<Payment> listBetween(final Date start, final Date end) {
+    public List<Payment> list(Date since) {
+        return query(new SinceQuery(this.<PaymentMeta>getMeta(), since));
+    }
+
+    public List<Payment> list(Date since, PaymentStateEnum state) {
+        return query(new SinceWithStateQuery(this.<PaymentMeta>getMeta(), since, state));
+    }
+
+    public List<Payment> list(Date start, Date end) {
         return query(new BetweenQuery(this.<PaymentMeta>getMeta(), start, end));
+    }
+
+    public List<Payment> list(Date start, Date end, PaymentStateEnum state) {
+        return query(new BetweenWithStateQuery(this.<PaymentMeta>getMeta(), start, end, state));
     }
 
     private static class SinceQuery extends BaseDaoQuery<Payment, PaymentMeta> {
@@ -89,4 +102,58 @@ public class PaymentDao extends BaseCachingDao<Payment> {
             return list.get(0);
         }
     }
+
+    private static class StateQuery extends BaseDaoQuery<Payment, PaymentMeta> {
+        public StateQuery(PaymentMeta meta, PaymentStateEnum state) {
+            super(meta, QueryParameters.of(state));
+        }
+
+        @Override
+        public List<Key> execute() {
+            PaymentStateEnum state = parameters.get(0);
+            return Datastore
+                    .query(meta)
+                    .filter(meta.state.equal(state))
+                    .sort(meta.created.asc)
+                    .asKeyList();
+        }
+    }
+
+    private static class SinceWithStateQuery extends BaseDaoQuery<Payment, PaymentMeta> {
+        public SinceWithStateQuery(PaymentMeta meta, Date since, PaymentStateEnum state) {
+            super(meta, QueryParameters.of(since, state));
+        }
+
+        @Override
+        public List<Key> execute() {
+            Date since = parameters.get(0);
+            PaymentStateEnum state = parameters.get(1);
+            return Datastore
+                    .query(meta)
+                    .filter(meta.created.greaterThanOrEqual(since), meta.state.equal(state))
+                    .sort(meta.created.asc)
+                    .asKeyList();
+        }
+    }
+
+    private static class BetweenWithStateQuery extends BaseDaoQuery<Payment, PaymentMeta> {
+        public BetweenWithStateQuery(PaymentMeta meta, Date since, Date until, PaymentStateEnum state) {
+            super(meta, QueryParameters.of(since, until, state));
+        }
+
+        @Override
+        public List<Key> execute() {
+            Date since = parameters.get(0);
+            Date until = parameters.get(1);
+            PaymentStateEnum state = parameters.get(2);
+            return Datastore
+                    .query(meta)
+                    .filter(meta.created.greaterThanOrEqual(since),
+                            meta.created.lessThanOrEqual(until),
+                            meta.state.equal(state))
+                    .sort(meta.created.asc)
+                    .asKeyList();
+        }
+    }
+
 }

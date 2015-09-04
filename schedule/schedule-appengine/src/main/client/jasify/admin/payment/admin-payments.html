@@ -9,7 +9,37 @@
     <div class="card-body">
         <div class="bootgrid-header container-fluid">
             <div class="actionBar">
-                <div class="col-sm-12 col-lg-6">
+                <div class="col-sm-12 col-lg-12">
+
+                    <div class="col-sm-5 time-date-pair">
+                        <label class="b col-sm-4">{{ 'FROM' | translate }}</label>
+
+                        <div class="col-sm-5" jas-has-feedback>
+                            <div class="fg-line">
+                                <input name="fromDate" class="form-control date-picker"
+                                       date-picker-options="vm.fromDateOptions"
+                                       required ng-model="vm.fromDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4 time-date-pair">
+
+                        <label class="b col-sm-1"> {{ 'TO' | translate }} </label>
+
+                        <div class="col-sm-5" jas-has-feedback>
+                            <div class="fg-line">
+                                <input name="toDate" class="form-control date-picker"
+                                       date-picker-options="vm.toDateOptions"
+                                       required ng-model="vm.toDate">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary" ng-click="vm.datesChanged()">
+                        apply
+                    </button>
+                </div>
+                <div class="col-sm-12 col-lg-4">
                     <div class="search form-group">
                         <div class="input-group">
                             <span class="input-group-addon glyphicon-search"></span>
@@ -18,6 +48,37 @@
                                    ng-model="vm.query"
                                    type="text" name="query" id="query" class="search-field form-control"
                                    placeholder="{{ 'SEARCH' | translate }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <div class="actions btn-group btn-block">
+                        <div class="dropdown btn-group btn-block">
+                            <button type="button" class="btn btn-default btn-block dropdown-toggle"
+                                    data-toggle="dropdown">
+                                <span ng-if="!vm.paymentType" class="dropdown-text">
+                                    {{ 'PAYMENT_STATE' | translate }}
+                                </span>
+                                <span ng-if="vm.paymentState" class="dropdown-text">
+                                    {{vm.paymentState}}
+                                </span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right" role="menu">
+                                <li ng-class="{ 'active': !vm.paymentState }">
+                                    <a href prevent="click" ng-click="vm.selectPaymentState(false)"
+                                       class="dropdown-item dropdown-item-button">
+                                        <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{'SHOW_ALL' |
+                                        translate}}</a>
+                                </li>
+                                <li ng-repeat="state in vm.paymentStates"
+                                    ng-class="{ 'active': vm.paymentState == state }">
+                                    <a href prevent="click" ng-click="vm.selectPaymentState(state)"
+                                       class="dropdown-item dropdown-item-button">
+                                        {{state}}
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -38,7 +99,8 @@
                                 <li ng-class="{ 'active': !vm.paymentType }">
                                     <a href prevent="click" ng-click="vm.selectPaymentType(false)"
                                        class="dropdown-item dropdown-item-button">
-                                        <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{'SHOW_ALL' | translate}}</a>
+                                        <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{'SHOW_ALL' |
+                                        translate}}</a>
                                 </li>
                                 <li ng-repeat="type in vm.paymentTypes"
                                     ng-class="{ 'active': vm.paymentType == type }">

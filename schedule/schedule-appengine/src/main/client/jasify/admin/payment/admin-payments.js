@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminPaymentsController', AdminPaymentsController);
 
-    function AdminPaymentsController($log, $scope, Payment, payments) {
+    function AdminPaymentsController($log, $scope, $moment, jasDialogs, Payment, payments) {
         var vm = this;
         vm.allPayments = payments.items;
         vm.payments = [];
@@ -13,12 +13,17 @@
         vm.getPayment = getPayment;
         vm.queryChanged = queryChanged;
         vm.init = init;
+        vm.datesChanged = datesChanged;
 
         // Client side pagination. Need this to simulate server side filtering
         vm.queryPayments = [];
         vm.displayPayments = [];
-
         vm.pageChanged = pageChanged;
+
+        vm.paymentState = false;
+        vm.paymentStates = ['New', 'Created', 'Completed', 'Canceled'];
+        vm.selectPaymentState = selectPaymentState;
+        vm.timeWindow = {};
         vm.perPage = perPage;
         vm.pagination = {
             total: 0,
@@ -31,11 +36,49 @@
         vm.init();
 
         function init() {
+
             if (vm.allPayments) {
                 vm.allPayments.reverse();
             }
             vm.payments = vm.allPayments;
             vm.queryChanged();
+        }
+
+        function reQuery() {
+            vm.allPayments = [];
+            vm.payments = vm.allPayments;
+            vm.queryChanged();
+            var s = vm.paymentState ? vm.paymentState : null;
+            Payment.query(vm.queryFromDate, vm.queryToDate, s).then(ok, fail);
+            function ok(response) {
+                vm.allPayments = response.items;
+                vm.allPayments.reverse();
+                vm.payments = vm.allPayments;
+                vm.queryChanged();
+            }
+
+            function fail(response) {
+                jasDialogs.error("" + response.statusText);
+            }
+        }
+
+        function selectPaymentState(paymentState) {
+            vm.paymentState = paymentState;
+            reQuery();
+        }
+
+        function datesChanged() {
+            if (vm.fromDate) {
+                vm.queryFromDate = $moment(vm.fromDate).format();
+            } else {
+                vm.queryFromDate = null;
+            }
+            if (vm.toDate) {
+                vm.queryToDate = $moment(vm.toDate).format();
+            } else {
+                vm.queryToDate = null;
+            }
+            reQuery();
         }
 
         function selectPaymentType(t) {

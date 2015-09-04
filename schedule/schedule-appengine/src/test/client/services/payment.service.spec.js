@@ -34,7 +34,8 @@ describe('PaymentService', function () {
         spyOn($gapiMock.client.jasify.payments, 'query').and.returnValue($q.when({result: {items: expected}}));
         var from = 1;
         var to = 2;
-        Payment.query(from, to)
+        var state = 'New';
+        Payment.query(from, to, state)
             .then(function (res) {
                 expect(res.items).toBe(expected);
             },
@@ -44,7 +45,7 @@ describe('PaymentService', function () {
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.payments.query).toHaveBeenCalledWith({fromDate: from, toDate: to});
+        expect($gapiMock.client.jasify.payments.query).toHaveBeenCalledWith({fromDate: from, toDate: to, state: state});
     });
 
 });

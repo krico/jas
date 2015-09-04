@@ -8,21 +8,20 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
-import com.jasify.schedule.appengine.dao.history.HistoryDao;
 import com.jasify.schedule.appengine.dao.payment.PaymentDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.Navigate;
 import com.jasify.schedule.appengine.model.attachment.Attachment;
-import com.jasify.schedule.appengine.model.history.History;
 import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.payment.Payment;
-import com.jasify.schedule.appengine.model.payment.PaymentService;
-import com.jasify.schedule.appengine.model.payment.PaymentServiceFactory;
+import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasInvoice;
 import com.jasify.schedule.appengine.spi.transform.*;
+import org.apache.commons.lang.time.DateUtils;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -66,26 +65,41 @@ public class PaymentEndpoint {
     private final PaymentDao paymentDao = new PaymentDao();
 
     @ApiMethod(name = "payments.query", path = "payments", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<Payment> getPayments(User caller, @Nullable @Named("fromDate") Date fromDate, @Nullable @Named("toDate") Date toDate) throws UnauthorizedException, ForbiddenException {
+    public List<Payment> getPayments(User caller,
+                                     @Nullable @Named("fromDate") Date fromDate,
+                                     @Nullable @Named("toDate") Date toDate,
+                                     @Nullable @Named("state") PaymentStateEnum state) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
+
         if (fromDate == null && toDate == null) {
-            // No date specified, we default to latest in time window
-            fromDate = new Date(System.currentTimeMillis() - DEFAULT_TIME_WINDOW_MILLIS);
-            return paymentDao.listSince(fromDate);
+            if (state == null) {
+                // No date specified, we default to latest in time window
+                fromDate = DateUtils.truncate(new Date(System.currentTimeMillis() - DEFAULT_TIME_WINDOW_MILLIS), Calendar.HOUR);
+                return paymentDao.list(fromDate);
+            } else {
+                return paymentDao.list(state);
+            }
         } else if (toDate == null) {
-            // Only fromDate
-            return paymentDao.listSince(fromDate);
+            if (state == null) {
+                // Only fromDate
+                return paymentDao.list(fromDate);
+            } else {
+                return paymentDao.list(fromDate, state);
+            }
         } else if (fromDate == null) {
             // No start specified, default window until toDate
-            fromDate = new Date(toDate.getTime() - DEFAULT_TIME_WINDOW_MILLIS);
+            fromDate = DateUtils.truncate(new Date(toDate.getTime() - DEFAULT_TIME_WINDOW_MILLIS), Calendar.HOUR);
         }
-        return paymentDao.listBetween(fromDate, toDate);
+        if (state == null) {
+            return paymentDao.list(fromDate, toDate);
+        } else {
+            return paymentDao.list(fromDate, toDate, state);
+        }
     }
 
     @ApiMethod(name = "payments.getPaymentInvoice", path = "payment-invoices/{paymentId}", httpMethod = ApiMethod.HttpMethod.GET)
     public JasInvoice getPaymentInvoice(User caller, @Named("paymentId") Key paymentId) throws UnauthorizedException, NotFoundException, ForbiddenException, BadRequestException {
         JasifyEndpointUser jasCaller = mustBeLoggedIn(caller);
-        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         Payment payment = getPaymentCheckUser(paymentId, jasCaller);
         Preconditions.checkNotNull(payment.getType(), "No PaymentType");
         switch (payment.getType()) {
