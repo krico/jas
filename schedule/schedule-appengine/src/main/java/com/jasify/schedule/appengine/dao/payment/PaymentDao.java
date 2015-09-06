@@ -136,7 +136,6 @@ public class PaymentDao extends BaseCachingDao<Payment> {
                     .query(meta)
                     .filter(/* Needs to be InvoicePaymentMeta */
                             InvoicePaymentMeta.get().referenceCode.equal(referenceCode))
-                    .sort(meta.created.asc)
                     .asKeyList();
         }
     }

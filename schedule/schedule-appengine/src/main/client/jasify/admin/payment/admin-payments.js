@@ -23,6 +23,7 @@
         vm.paymentState = false;
         vm.paymentStates = ['New', 'Created', 'Completed', 'Canceled'];
         vm.selectPaymentState = selectPaymentState;
+        vm.referenceCodeChanged = referenceCodeChanged;
         vm.timeWindow = {};
         vm.perPage = perPage;
         vm.pagination = {
@@ -53,8 +54,12 @@
             vm.allPayments = [];
             vm.payments = vm.allPayments;
             vm.queryChanged();
-            var s = vm.paymentState ? vm.paymentState : null;
-            Payment.query(vm.queryFromDate, vm.queryToDate, s).then(ok, fail);
+            if (vm.referenceCode) {
+                Payment.queryByReferenceCode(vm.referenceCode).then(ok, fail);
+            } else {
+                var s = vm.paymentState ? vm.paymentState : null;
+                Payment.query(vm.queryFromDate, vm.queryToDate, s).then(ok, fail);
+            }
             function ok(response) {
                 vm.allPayments = response.items;
                 vm.allPayments.reverse();
@@ -69,6 +74,10 @@
 
         function selectPaymentState(paymentState) {
             vm.paymentState = paymentState;
+            reQuery();
+        }
+
+        function referenceCodeChanged() {
             reQuery();
         }
 

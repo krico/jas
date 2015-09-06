@@ -25,7 +25,7 @@
         }
 
         function expiryDate(date, days) {
-            return $moment(date).add('days', days);
+            return $moment(date).add(days, 'days');
         }
 
         function cancelPayment() {
