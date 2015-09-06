@@ -94,6 +94,13 @@
                     buttonSuccessText: 'Payment canceled'
                 });
             },
+            createProfileSave: function () {
+                return new ButtonController({
+                    buttonDefaultText: 'Save',
+                    buttonSubmittingText: 'Saving...',
+                    buttonSuccessText: 'Profile updated'
+                });
+            },
             createProfileReset: function () {
                 return new ButtonController({
                     buttonDefaultText: 'Reset',
