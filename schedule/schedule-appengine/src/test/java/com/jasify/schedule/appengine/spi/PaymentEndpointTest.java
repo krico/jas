@@ -80,4 +80,26 @@ public class PaymentEndpointTest {
         assertEquals(payment2.getId(), payments.get(0).getId());
 
     }
+
+    @Test
+    public void testGetPayment() throws Exception {
+        InvoicePayment payment = new InvoicePayment();
+        Datastore.put(payment);
+        Payment fetched = paymentEndpoint.getPayment(newAdminCaller(55), payment.getId());
+
+        assertEquals(fetched.getId(), payment.getId());
+    }
+
+    @Test
+    public void testPaymentsByReferenceCode() throws Exception {
+        InvoicePayment payment1 = new InvoicePayment();
+        payment1.setReferenceCode("REF");
+        InvoicePayment payment2 = new InvoicePayment();
+        Datastore.put(payment1, payment2);
+        List<Payment> fetched = paymentEndpoint.getPaymentsByReferenceCode(newAdminCaller(55), payment1.getReferenceCode());
+        assertNotNull(fetched);
+        assertEquals(1, fetched.size());
+        assertEquals(payment1.getId(), fetched.get(0).getId());
+    }
+
 }

@@ -48,4 +48,54 @@ describe('PaymentService', function () {
         expect($gapiMock.client.jasify.payments.query).toHaveBeenCalledWith({fromDate: from, toDate: to, state: state});
     });
 
+    it('should get payment by id', function () {
+        var expected = {id: 'foo', state: 'New'};
+        spyOn($gapiMock.client.jasify.payments, 'get').and.returnValue($q.when({result: expected}));
+        Payment.get(expected.id)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.payments.get).toHaveBeenCalledWith({id: expected.id});
+    });
+
+    it('should get payment by object', function () {
+        var expected = {id: 'foo', state: 'New'};
+        spyOn($gapiMock.client.jasify.payments, 'get').and.returnValue($q.when({result: expected}));
+        Payment.get(expected)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.payments.get).toHaveBeenCalledWith({id: expected.id});
+    });
+
+    it('should get payment by referenceCode', function () {
+        var expected = [{id: 'foo', state: 'New'}];
+        spyOn($gapiMock.client.jasify.payments, 'queryByReferenceCode').and.returnValue($q.when({result: {items: expected}}));
+        var referenceCode = 'refCod';
+        Payment.queryByReferenceCode(referenceCode)
+            .then(function (res) {
+                expect(res.items).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.payments.queryByReferenceCode).toHaveBeenCalledWith({referenceCode: referenceCode});
+    });
+
+
 });

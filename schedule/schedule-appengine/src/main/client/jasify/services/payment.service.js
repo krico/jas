@@ -4,6 +4,8 @@
     function payment(Endpoint, $q, $location) {
         var Payment = {
             query: query,
+            get: get,
+            queryByReferenceCode: queryByReferenceCode,
             getPaymentInvoice: getPaymentInvoice
         };
 
@@ -18,6 +20,20 @@
             return Endpoint.jasify(function (jasify) {
                 return jasify.payments.getPaymentInvoice({paymentId: paymentId})
                     .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+            });
+        }
+
+        function get(paymentOrId) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.payments.get({id: Endpoint.fetchId(paymentOrId)})
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+            });
+        }
+
+        function queryByReferenceCode(referenceCode) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.payments.queryByReferenceCode({referenceCode: referenceCode})
+                    .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
 

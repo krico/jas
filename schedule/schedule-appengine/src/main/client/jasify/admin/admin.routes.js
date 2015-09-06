@@ -451,6 +451,27 @@
                     }
                 }
             })
+            .when('/admin/payment/:id', {
+                templateUrl: 'admin/payment/admin-payment.html',
+                controller: 'AdminPaymentController',
+                controllerAs: 'vm',
+                resolve: {
+                    payment: /*@ngInject*/ function ($q, $route, Allow, Payment) {
+                        return Allow.admin().then(
+                            function () {
+                                if ($route.current.params.id) {
+                                    return Payment.get($route.current.params.id);
+                                } else {
+                                    return {};
+                                }
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
         ;
     }
 })(angular);

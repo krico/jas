@@ -1,6 +1,8 @@
 package com.jasify.schedule.appengine.spi.transform;
 
 import com.google.api.server.spi.config.Transformer;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
+import com.jasify.schedule.appengine.model.payment.PayPalPayment;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.spi.dm.JasPayment;
 
@@ -35,6 +37,21 @@ public class JasPaymentTransformer implements Transformer<Payment, JasPayment> {
         external.setAmount(internal.getAmount());
         external.setFee(internal.getFee());
         external.setRealFee(internal.getRealFee());
+
+        if (internal instanceof InvoicePayment) {
+            InvoicePayment iInternal = (InvoicePayment) internal;
+            external.setReferenceCode(iInternal.getReferenceCode());
+            external.setExpireDays(iInternal.getExpireDays());
+        } else if (internal instanceof PayPalPayment) {
+            PayPalPayment pInternal = (PayPalPayment) internal;
+            external.setExternalId(pInternal.getExternalId());
+            external.setExternalState(pInternal.getExternalState());
+            external.setPayerId(pInternal.getPayerId());
+            external.setPayerEmail(pInternal.getPayerEmail());
+            external.setPayerFirstName(pInternal.getPayerFirstName());
+            external.setPayerLastName(pInternal.getPayerLastName());
+
+        }
         return external;
     }
 

@@ -20,6 +20,7 @@ import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasInvoice;
 import com.jasify.schedule.appengine.spi.transform.*;
 import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -70,7 +71,7 @@ public class PaymentEndpoint {
                                      @Nullable @Named("toDate") Date toDate,
                                      @Nullable @Named("state") PaymentStateEnum state) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
-
+        LoggerFactory.getLogger(PaymentEndpoint.class).info("getPayment({}, {}, {})", fromDate, toDate, state);
         if (fromDate == null && toDate == null) {
             if (state == null) {
                 // No date specified, we default to latest in time window
@@ -94,6 +95,23 @@ public class PaymentEndpoint {
             return paymentDao.list(fromDate, toDate);
         } else {
             return paymentDao.list(fromDate, toDate, state);
+        }
+    }
+
+    @ApiMethod(name = "payments.queryByReferenceCode", path = "payments-reference-code/{referenceCode}", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<Payment> getPaymentsByReferenceCode(User caller, @Named("referenceCode") String referenceCode) throws UnauthorizedException, ForbiddenException {
+        mustBeAdmin(caller);
+        return paymentDao.list(referenceCode);
+    }
+
+    @ApiMethod(name = "payments.get", path = "payments/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public Payment getPayment(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        checkFound(id, "id == null");
+        mustBeAdmin(caller);
+        try {
+            return paymentDao.get(id);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
         }
     }
 

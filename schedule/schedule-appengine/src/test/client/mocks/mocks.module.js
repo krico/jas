@@ -145,6 +145,8 @@
             },
             payments: {
                 getPaymentInvoice: nop,
+                get: nop,
+                queryByReferenceCode: nop,
                 query: nop
             },
             histories: {

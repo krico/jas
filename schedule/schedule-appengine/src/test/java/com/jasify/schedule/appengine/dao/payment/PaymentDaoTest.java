@@ -114,7 +114,24 @@ public class PaymentDaoTest {
         List<Payment> cxlState = paymentDao.list(PaymentStateEnum.Canceled);
         assertEquals(1, cxlState.size());
         assertEquals(canceledState.getId(), cxlState.get(0).getId());
+    }
 
+    @Test
+    public void testListReferenceCode() {
+        InvoicePayment payment1 = new InvoicePayment();
+        payment1.setReferenceCode("1");
+        InvoicePayment payment2 = new InvoicePayment();
+        payment2.setReferenceCode("2");
+
+        Datastore.put(payment1, payment2);
+
+        List<Payment> list1 = paymentDao.list(payment1.getReferenceCode());
+        assertEquals(1, list1.size());
+        assertEquals(payment1.getId(), list1.get(0).getId());
+
+        List<Payment> list2 = paymentDao.list(payment2.getReferenceCode());
+        assertEquals(1, list2.size());
+        assertEquals(payment2.getId(), list2.get(0).getId());
     }
 
     @Test

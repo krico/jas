@@ -30,6 +30,45 @@ public class JasPayment {
 
     private String userId;
 
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.InvoicePayment}
+     */
+    private String referenceCode;
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.InvoicePayment}
+     */
+    private Integer expireDays;
+
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.PayPalPayment}
+     */
+    private String externalId;
+
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.PayPalPayment}
+     */
+    private String externalState;
+
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.PayPalPayment}
+     */
+    private String payerId;
+
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.PayPalPayment}
+     */
+    private String payerEmail;
+
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.PayPalPayment}
+     */
+    private String payerFirstName;
+
+    /**
+     * For {@link com.jasify.schedule.appengine.model.payment.PayPalPayment}
+     */
+    private String payerLastName;
+
     public String getId() {
         return id;
     }
@@ -108,5 +147,69 @@ public class JasPayment {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getReferenceCode() {
+        return referenceCode;
+    }
+
+    public void setReferenceCode(String referenceCode) {
+        this.referenceCode = referenceCode;
+    }
+
+    public Integer getExpireDays() {
+        return expireDays;
+    }
+
+    public void setExpireDays(Integer expireDays) {
+        this.expireDays = expireDays;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+    public String getExternalState() {
+        return externalState;
+    }
+
+    public void setExternalState(String externalState) {
+        this.externalState = externalState;
+    }
+
+    public String getPayerId() {
+        return payerId;
+    }
+
+    public void setPayerId(String payerId) {
+        this.payerId = payerId;
+    }
+
+    public String getPayerEmail() {
+        return payerEmail;
+    }
+
+    public void setPayerEmail(String payerEmail) {
+        this.payerEmail = payerEmail;
+    }
+
+    public String getPayerFirstName() {
+        return payerFirstName;
+    }
+
+    public void setPayerFirstName(String payerFirstName) {
+        this.payerFirstName = payerFirstName;
+    }
+
+    public String getPayerLastName() {
+        return payerLastName;
+    }
+
+    public void setPayerLastName(String payerLastName) {
+        this.payerLastName = payerLastName;
     }
 }

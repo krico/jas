@@ -80,11 +80,18 @@
                     buttonSuccessText: 'Password updated'
                 });
             },
-            createProfileSave: function () {
+            createPaymentExecute: function () {
                 return new ButtonController({
-                    buttonDefaultText: 'Save',
-                    buttonSubmittingText: 'Saving...',
-                    buttonSuccessText: 'Profile updated'
+                    buttonDefaultText: 'Execute payment',
+                    buttonSubmittingText: 'Executing...',
+                    buttonSuccessText: 'Payment executed'
+                });
+            },
+            createPaymentCancel: function () {
+                return new ButtonController({
+                    buttonDefaultText: 'Cancel payment',
+                    buttonSubmittingText: 'Canceling...',
+                    buttonSuccessText: 'Payment canceled'
                 });
             },
             createProfileReset: function () {

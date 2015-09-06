@@ -3,7 +3,7 @@
 
     angular.module('jasify.admin').controller('AdminPaymentsController', AdminPaymentsController);
 
-    function AdminPaymentsController($log, $scope, $moment, jasDialogs, Payment, payments) {
+    function AdminPaymentsController($log, $location, $moment, jasDialogs, Payment, payments) {
         var vm = this;
         vm.allPayments = payments.items;
         vm.payments = [];
@@ -32,6 +32,7 @@
             numPages: 1,
             maxSize: 5
         };
+        vm.viewPayment = viewPayment;
 
         vm.init();
 
@@ -42,6 +43,10 @@
             }
             vm.payments = vm.allPayments;
             vm.queryChanged();
+        }
+
+        function viewPayment(p) {
+            $location.path('/admin/payment/' + p.id);
         }
 
         function reQuery() {
@@ -68,13 +73,23 @@
         }
 
         function datesChanged() {
+            $log.debug('Dates Changed');
             if (vm.fromDate) {
-                vm.queryFromDate = $moment(vm.fromDate).format();
+                vm.queryFromDate = $moment(vm.fromDate)
+                    .set('hour', 0)
+                    .set('minute', 0)
+                    .set('second', 0)
+                    .format();
             } else {
                 vm.queryFromDate = null;
             }
             if (vm.toDate) {
-                vm.queryToDate = $moment(vm.toDate).format();
+                vm.queryToDate = $moment(vm.toDate)
+                    .set('hour', 23)
+                    .set('minute', 59)
+                    .set('second', 59)
+                    .format();
+
             } else {
                 vm.queryToDate = null;
             }
@@ -99,13 +114,7 @@
         }
 
         function queryChanged() {
-            if (vm.query) {
-                vm.queryPayments = vm.payments.filter(function (el) {
-                    return el.description.indexOf(vm.query) != -1;
-                });
-            } else {
-                vm.queryPayments = vm.payments;
-            }
+            vm.queryPayments = vm.payments;
             vm.pagination.total = vm.queryPayments.length;
             getPayment();
         }

@@ -9,49 +9,25 @@
     <div class="card-body">
         <div class="bootgrid-header container-fluid">
             <div class="actionBar">
-                <div class="col-sm-12 col-lg-12">
-
-                    <div class="col-sm-5 time-date-pair">
-                        <label class="b col-sm-4">{{ 'FROM' | translate }}</label>
-
-                        <div class="col-sm-5" jas-has-feedback>
-                            <div class="fg-line">
-                                <input name="fromDate" class="form-control date-picker"
-                                       date-picker-options="vm.fromDateOptions"
-                                       required ng-model="vm.fromDate">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-4 time-date-pair">
-
-                        <label class="b col-sm-1"> {{ 'TO' | translate }} </label>
-
-                        <div class="col-sm-5" jas-has-feedback>
-                            <div class="fg-line">
-                                <input name="toDate" class="form-control date-picker"
-                                       date-picker-options="vm.toDateOptions"
-                                       required ng-model="vm.toDate">
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-sm btn-primary" ng-click="vm.datesChanged()">
-                        apply
-                    </button>
-                </div>
-                <div class="col-sm-12 col-lg-4">
-                    <div class="search form-group">
-                        <div class="input-group">
-                            <span class="input-group-addon glyphicon-search"></span>
-                            <input ng-change="vm.queryChanged()"
-                                   ng-model-options="{ debounce: 500 }"
-                                   ng-model="vm.query"
-                                   type="text" name="query" id="query" class="search-field form-control"
-                                   placeholder="{{ 'SEARCH' | translate }}">
-                        </div>
+                <div class="col-sm-6 col-lg-2">
+                    <div class="actions btn-block btn-default">
+                        <input name="fromDate" class="date-picker"
+                               date-picker-options="vm.fromDateOptions"
+                               ng-blur="vm.datesChanged()"
+                               required ng-model="vm.fromDate">
+                        <small>{{'FROM'|translate}}</small>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-4">
+                <div class="col-sm-6 col-lg-2">
+                    <div class="actions btn-block btn-default">
+                        <input name="toDate" class="date-picker"
+                               date-picker-options="vm.toDateOptions"
+                               ng-blur="vm.datesChanged()"
+                               required ng-model="vm.toDate">
+                        <small>{{'TO'|translate}}</small>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-2">
                     <div class="actions btn-group btn-block">
                         <div class="dropdown btn-group btn-block">
                             <button type="button" class="btn btn-default btn-block dropdown-toggle"
@@ -82,7 +58,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-4">
+                <div class="col-sm-6 col-lg-2">
                     <div class="actions btn-group btn-block">
                         <div class="dropdown btn-group btn-block">
                             <button type="button" class="btn btn-default btn-block dropdown-toggle"
@@ -113,6 +89,19 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 col-lg-4">
+                    <div class="search form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon glyphicon-search"></span>
+                            <input ng-change="vm.queryChanged()"
+                                   ng-model-options="{ debounce: 500 }"
+                                   ng-model="vm.referenceCode"
+                                   type="text" name="referenceCode" id="referenceCode" class="search-field form-control"
+                                   placeholder="{{ 'REFERENCE_CODE' | translate }}">
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
@@ -135,7 +124,7 @@
         <tbody>
         <tr ng-repeat="payment in vm.displayPayments">
             <td class="row-commands">
-                &nbsp;
+                <row-edit action="vm.viewPayment(payment)"></row-edit>
             </td>
             <td>{{payment.id}}</td>
             <td class="created">

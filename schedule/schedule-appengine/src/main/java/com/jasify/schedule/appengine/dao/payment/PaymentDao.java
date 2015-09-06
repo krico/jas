@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.dao.BaseCachingDao;
 import com.jasify.schedule.appengine.dao.BaseDaoQuery;
 import com.jasify.schedule.appengine.dao.QueryParameters;
+import com.jasify.schedule.appengine.meta.payment.InvoicePaymentMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
@@ -25,6 +26,10 @@ public class PaymentDao extends BaseCachingDao<Payment> {
 
     public List<Payment> list(PaymentStateEnum state) {
         return query(new StateQuery(this.<PaymentMeta>getMeta(), state));
+    }
+
+    public List<Payment> list(String referenceCode) {
+        return query(new ReferenceCodeQuery(this.<PaymentMeta>getMeta(), referenceCode));
     }
 
     public List<Payment> list(Date since) {
@@ -114,6 +119,23 @@ public class PaymentDao extends BaseCachingDao<Payment> {
             return Datastore
                     .query(meta)
                     .filter(meta.state.equal(state))
+                    .sort(meta.created.asc)
+                    .asKeyList();
+        }
+    }
+
+    private static class ReferenceCodeQuery extends BaseDaoQuery<Payment, PaymentMeta> {
+        public ReferenceCodeQuery(PaymentMeta meta, String referenceCode) {
+            super(meta, QueryParameters.of(referenceCode));
+        }
+
+        @Override
+        public List<Key> execute() {
+            String referenceCode = parameters.get(0);
+            return Datastore
+                    .query(meta)
+                    .filter(/* Needs to be InvoicePaymentMeta */
+                            InvoicePaymentMeta.get().referenceCode.equal(referenceCode))
                     .sort(meta.created.asc)
                     .asKeyList();
         }

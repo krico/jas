@@ -1,0 +1,219 @@
+<form novalidate class="form-horizontal" name="vm.paymentForm" ng-submit="vm.paymentForm.$valid">
+    <div class="card">
+        <div class="card-header">
+            <div class="actions-group">
+                <a-button type="button" ng-click="vm.executePayment()" ng-disabled="!vm.canExecute"
+                          controller="vm.executePaymentBtn"></a-button>
+                <a-button type="button" ng-click="vm.cancelPayment()" ng-disabled="!vm.canCancel"
+                          controller="vm.cancelPaymentBtn"></a-button>
+            </div>
+            <card-back href="#/admin/payments"></card-back>
+            <h2>
+                {{ 'EDIT_PAYMENT' | translate }}
+                <small>{{ 'EDIT_PAYMENT_DESCRIPTION' | translate }}</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'PAYMENT_ID' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">{{vm.payment.id}}</p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'PAYMENT_TYPE' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">
+                                {{vm.payment.type}}
+                            </p>
+
+                            <div class="small" ng-if=" vm.payment.type == 'PayPal' ">
+                                <div ng-include="'pay-pal-details.html'"></div>
+                            </div>
+                            <div class="small" ng-if=" vm.payment.type == 'Invoice' ">
+                                <div ng-include="'invoice-details.html'"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'PAYMENT_STATE' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">
+                                {{vm.payment.state}}
+                            </p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'AMOUNT' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">
+                                {{vm.payment.amount | currency : vm.payment.currency : 2}}
+                            </p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'FEE' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">
+                                {{vm.payment.fee | currency : vm.payment.currency : 2}}
+                                <span ng-hide="vm.sameFee(vm.payment.fee, vm.payment.realFee)">
+                                <sup><span class="text-info ion-information-circled"
+                                           tooltip="Fee estimated and charged by Jasify">
+                                </span></sup>
+                                /
+                                {{vm.payment.realFee | currency : vm.payment.currency : 2}}
+                                <sup><span class="text-info ion-information-circled"
+                                           tooltip="Actual fee charged by external entity">
+                                </span></sup>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'CREATED' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">
+                                {{vm.payment.created | amDateFormat:'LL LT'}}
+                            </p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'USER' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">
+                                {{vm.payment.userId}}
+                            </p>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4">
+                            {{ 'TRANSFER' | translate }}
+                        </label>
+
+                        <div class="col-sm-8">
+                            <p class="form-control-static">
+                                {{vm.payment.transferId}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/ng-template" id="invoice-details.html">
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'REFERENCE_CODE' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.referenceCode}}
+            </p>
+        </div>
+    </div>
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'EXPIRE_DAYS' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.expireDays}} ~&gt; {{vm.expiryDate(vm.payment.created, vm.payment.expireDays) |
+                amDateFormat: 'LL'}}
+            </p>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="pay-pal-details.html">
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'EXTERNAL_ID' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.externalId}}
+            </p>
+        </div>
+    </div>
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'EXTERNAL_STATE' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.externalState}}
+            </p>
+        </div>
+    </div>
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'PAYER_ID' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.payerId}}
+            </p>
+        </div>
+    </div>
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'PAYER_EMAIL' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.payerEmail}}
+            </p>
+        </div>
+    </div>
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'PAYER_FIRST_NAME' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.payerFirstName}}
+            </p>
+        </div>
+    </div>
+    <div jas-has-feedback class="form-group">
+        <label class="control-label col-sm-4 col-lg-3">
+            {{ 'PAYER_LAST_NAME' | translate }}
+        </label>
+
+        <div class="col-sm-8">
+            <p class="form-control-static">
+                {{vm.payment.payerLastName}}
+            </p>
+        </div>
+    </div>
+</script>
