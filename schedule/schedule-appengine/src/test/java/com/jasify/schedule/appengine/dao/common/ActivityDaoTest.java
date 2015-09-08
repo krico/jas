@@ -87,8 +87,7 @@ public class ActivityDaoTest {
 
     @Test
     public void testSaveNew() throws Exception {
-        Organization organization = TestHelper.createOrganization(true);
-        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        ActivityType activityType = TestHelper.createActivityType(true);
         Activity activity = TestHelper.createActivity(activityType, false);
         Key result = dao.save(activity);
         assertNotNull(result);
@@ -113,7 +112,8 @@ public class ActivityDaoTest {
 
     @Test
     public void testActivityNullNameChangedToActivityTypeName() throws Exception {
-        Activity activity = TestHelper.createActivity(false);
+        ActivityType activityType = TestHelper.createActivityType(true);
+        Activity activity = TestHelper.createActivity(activityType, false);
         activity.setName(null);
         assertNull(activity.getName());
         Key key = dao.save(activity);
@@ -123,8 +123,7 @@ public class ActivityDaoTest {
 
     @Test
     public void testGetCachedValue() throws Exception {
-        Organization organization = TestHelper.createOrganization(true);
-        ActivityType activityType = TestHelper.createActivityType(organization, true);
+        ActivityType activityType = TestHelper.createActivityType(true);
         for (int i = 0; i < 5; i++) {
             TestHelper.createActivity(activityType, true);
         }

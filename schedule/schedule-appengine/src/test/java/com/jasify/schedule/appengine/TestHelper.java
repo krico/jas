@@ -502,10 +502,20 @@ public final class TestHelper {
         return subscription;
     }
 
+    public static ActivityType createActivityType(boolean storeAll) {
+        Organization organization = createOrganization(storeAll);
+        return createActivityType(organization, storeAll);
+    }
+
     public static Activity createActivity(boolean storeAll) {
-        Organization organization = createOrganization(true);
-        ActivityType activityType = createActivityType(organization, true);
+        ActivityType activityType = createActivityType(storeAll);
         return createActivity(activityType, storeAll);
+    }
+
+    public static Subscription createSubscription(boolean storeAll) {
+        User user = createUser(storeAll);
+        Activity activity = createActivity(storeAll);
+        return createSubscription(user, activity, storeAll);
     }
 
     public static User createUser(boolean store) {
