@@ -1,6 +1,5 @@
 package com.jasify.schedule.appengine.dao;
 
-import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.appengine.api.datastore.Key;
@@ -8,14 +7,11 @@ import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Optional;
 import com.jasify.schedule.appengine.memcache.MemcacheOperator;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.ModelMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +22,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class BaseCachingDao<T> extends BaseDao<T> {
     public static final int DEFAULT_CACHE_EXPIRY_SECONDS = (int) TimeUnit.MINUTES.toSeconds(30);
-    private static final Logger log = LoggerFactory.getLogger(BaseCachingDao.class);
     private final int cacheExpirySeconds;
 
     protected BaseCachingDao(ModelMeta<T> meta, int cacheExpirySeconds) {

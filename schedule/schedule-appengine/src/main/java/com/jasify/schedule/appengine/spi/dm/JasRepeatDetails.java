@@ -3,8 +3,6 @@ package com.jasify.schedule.appengine.spi.dm;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails.*;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author wszarmach

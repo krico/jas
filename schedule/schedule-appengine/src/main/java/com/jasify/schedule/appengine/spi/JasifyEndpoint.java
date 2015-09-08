@@ -70,7 +70,8 @@ public class JasifyEndpoint {
         JasifyEndpointUser jasifyEndpointUser = mustBeLoggedIn(caller);
         if (jasifyEndpointUser.isAdmin()) return jasifyEndpointUser;
         try {
-            if (jasifyEndpointUser.isOrgMember() && orgMemberChecker.isOrgMember(jasifyEndpointUser.getUserId())) return jasifyEndpointUser;
+            if (jasifyEndpointUser.isOrgMember() && orgMemberChecker.isOrgMember(jasifyEndpointUser.getUserId()))
+                return jasifyEndpointUser;
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }

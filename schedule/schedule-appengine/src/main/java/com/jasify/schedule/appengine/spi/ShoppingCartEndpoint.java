@@ -109,7 +109,6 @@ public class ShoppingCartEndpoint {
             throw new BadRequestException("You must have at least 1 activity, activityPackageId=" + activityPackageId);
         }
 
-
         Set<Key> uniqueKeys = new LinkedHashSet<>();
         for (Key activityId : activityIds) {
             uniqueKeys.add(activityId);
