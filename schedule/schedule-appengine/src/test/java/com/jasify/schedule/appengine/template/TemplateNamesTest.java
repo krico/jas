@@ -259,6 +259,71 @@ public class TemplateNamesTest {
         assertPublisherInvoicePaymentCreated(TemplateNames.PUBLISHER_INVOICE_PAYMENT_CREATED_TXT);
     }
 
+    private void assertInvoicePaymentCancelledOrExecuted(String templateName) throws Exception {
+        VelocityContext context = new VelocityContext(new TestApplicationContext());
+        User user = TestHelper.createUser(true);
+
+        List<Subscription> subscriptions = createSubscriptions(user);
+        List<ActivityPackageExecution> executions = createActivityPackageExecutions(user);
+
+        InvoicePayment payment = new InvoicePayment();
+        payment.setReferenceCode("120000000000234478943216899");
+        payment.setAmount(400.25);
+        payment.setCurrency("CHF");
+
+        Attachment att = new Attachment();
+        att.setName("ABC-DEF.pdf");
+
+        payment.getAttachmentRef().setModel(att);
+        Datastore.put(payment, att);
+
+
+        context.put("payment", payment);
+        context.put("organization", Navigate.organization(subscriptions.get(0)));
+        context.put("user", user);
+        render(templateName, context);
+    }
+
+    @Test
+    public void testSubscriberInvoicePaymentCancelledHtml() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CANCELLED_HTML);
+    }
+
+    @Test
+    public void testSubscriberInvoicePaymentCancelledTxt() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CANCELLED_TXT);
+    }
+
+    @Test
+    public void testPublisherInvoicePaymentCancelledHtml() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.PUBLISHER_INVOICE_PAYMENT_CANCELLED_HTML);
+    }
+
+    @Test
+    public void testPublisherInvoicePaymentCancelledTxt() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.PUBLISHER_INVOICE_PAYMENT_CANCELLED_TXT);
+    }
+
+    @Test
+    public void testSubscriberInvoicePaymentExecutedHtml() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_EXECUTED_HTML);
+    }
+
+    @Test
+    public void testSubscriberInvoicePaymentExecutedTxt() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_EXECUTED_TXT);
+    }
+
+    @Test
+    public void testPublisherInvoicePaymentExecutedHtml() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.PUBLISHER_INVOICE_PAYMENT_EXECUTED_HTML);
+    }
+
+    @Test
+    public void testPublisherInvoicePaymentExecutedTxt() throws Exception {
+        assertInvoicePaymentCancelledOrExecuted(TemplateNames.PUBLISHER_INVOICE_PAYMENT_EXECUTED_TXT);
+    }
+
     public static class TestApplicationContext extends ApplicationContextImpl implements ApplicationContext {
         @Override
         protected App createApp() {

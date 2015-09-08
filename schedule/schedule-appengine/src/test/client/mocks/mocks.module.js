@@ -147,6 +147,8 @@
                 getPaymentInvoice: nop,
                 get: nop,
                 queryByReferenceCode: nop,
+                executePayment: nop,
+                cancelPayment: nop,
                 query: nop
             },
             histories: {

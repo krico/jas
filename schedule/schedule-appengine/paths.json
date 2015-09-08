@@ -20,6 +20,7 @@
   "css": [
     "src/main/client/jasify/directives/a-button/a-button.css",
     "src/main/client/jasify/directives/mask/mask.css",
+    "src/main/client/jasify/directives/**/*.css",
     "src/main/stylesheet/styles.less"
   ],
   "cssBooking": [

@@ -1,0 +1,9 @@
+#set($title="User '$mut.name($user)' Invoice Payment Received")
+#@textMail($title)
+Dear $organization.Name,
+
+This e-mail is to confirm that the payment for the invoice of '$mut.name($user)' was received.
+
+Regards,
+Jasify.
+#end

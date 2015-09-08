@@ -2,24 +2,22 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.api.server.spi.auth.common.User;
 import com.google.api.server.spi.config.*;
-import com.google.api.server.spi.response.BadRequestException;
-import com.google.api.server.spi.response.ForbiddenException;
-import com.google.api.server.spi.response.NotFoundException;
-import com.google.api.server.spi.response.UnauthorizedException;
+import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.communication.Communicator;
 import com.jasify.schedule.appengine.dao.payment.PaymentDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.Navigate;
 import com.jasify.schedule.appengine.model.attachment.Attachment;
-import com.jasify.schedule.appengine.model.payment.InvoicePayment;
-import com.jasify.schedule.appengine.model.payment.Payment;
-import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
+import com.jasify.schedule.appengine.model.history.HistoryHelper;
+import com.jasify.schedule.appengine.model.payment.*;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasInvoice;
 import com.jasify.schedule.appengine.spi.transform.*;
 import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
@@ -61,9 +59,20 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class PaymentEndpoint {
-
     public static final long DEFAULT_TIME_WINDOW_MILLIS = TimeUnit.DAYS.toMillis(7);
+    private static final Logger log = LoggerFactory.getLogger(PaymentEndpoint.class);
     private final PaymentDao paymentDao = new PaymentDao();
+
+    private Payment getPaymentCheckUser(Key paymentId, JasifyEndpointUser jasCaller) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        try {
+            Payment payment = paymentDao.get(paymentId);
+            // Ensure the payment belongs to this user!
+            mustBeSameUserOrAdmin(jasCaller, payment.getUserRef().getKey());
+            return payment;
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("Payment not found");
+        }
+    }
 
     @ApiMethod(name = "payments.query", path = "payments", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Payment> getPayments(User caller,
@@ -98,6 +107,79 @@ public class PaymentEndpoint {
         }
     }
 
+    @ApiMethod(name = "payments.executePayment", path = "payments-execute/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public Payment executePayment(User caller, @Named("id") Key paymentId) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException, InternalServerErrorException {
+        mustBeAdmin(caller);
+
+        Payment payment;
+        try {
+            payment = paymentDao.get(paymentId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("PaymentId=" + paymentId);
+        }
+
+        if (payment.getType() != PaymentTypeEnum.Invoice) {
+            throw new BadRequestException("Only Payment.Type Invoice");
+        }
+
+        InvoicePayment invoicePayment = (InvoicePayment) payment;
+
+        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
+        try {
+            paymentService.executePayment(InvoicePaymentProvider.instance(), invoicePayment);
+            HistoryHelper.addPaymentExecuted(invoicePayment);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("PaymentId=" + paymentId);
+        } catch (PaymentException e) {
+            log.error("PaymentException executing PaymentId={}", paymentId, e);
+            throw new InternalServerErrorException("PaymentException executing PaymentId=" + paymentId, e);
+        }
+
+        try {
+            Communicator.notifyOfPaymentExecuted(invoicePayment);
+        } catch (Exception e) {
+            log.error("Failed to notify of payment executed", e);
+        }
+
+        return invoicePayment;
+    }
+
+    @ApiMethod(name = "payments.cancelPayment", path = "payments-cancel/{id}", httpMethod = ApiMethod.HttpMethod.GET)
+    public Payment cancelPayment(User caller, @Named("id") Key paymentId) throws UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException, InternalServerErrorException {
+        mustBeAdmin(caller);
+        Payment payment;
+        try {
+            payment = paymentDao.get(paymentId);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("PaymentId=" + paymentId);
+        }
+
+        if (payment.getType() != PaymentTypeEnum.Invoice) {
+            throw new BadRequestException("Only Payment.Type Invoice");
+        }
+
+        InvoicePayment invoicePayment = (InvoicePayment) payment;
+
+        PaymentService paymentService = PaymentServiceFactory.getPaymentService();
+        try {
+            paymentService.cancelPayment(invoicePayment);
+            HistoryHelper.addPaymentCancelled(invoicePayment);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException("PaymentId=" + paymentId);
+        } catch (PaymentException e) {
+            log.error("PaymentException cancelling PaymentId={}", paymentId, e);
+            throw new InternalServerErrorException("PaymentException cancelling PaymentId=" + paymentId, e);
+        }
+
+        try {
+            Communicator.notifyOfPaymentCancelled(invoicePayment);
+        } catch (Exception e) {
+            log.error("Failed to notify of payment cancelled", e);
+        }
+
+        return invoicePayment;
+    }
+
     @ApiMethod(name = "payments.queryByReferenceCode", path = "payments-reference-code/{referenceCode}", httpMethod = ApiMethod.HttpMethod.GET)
     public List<Payment> getPaymentsByReferenceCode(User caller, @Named("referenceCode") String referenceCode) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
@@ -130,17 +212,6 @@ public class PaymentEndpoint {
             }
             default:
                 throw new BadRequestException("Unsupported payment type: " + payment.getType());
-        }
-    }
-
-    private Payment getPaymentCheckUser(Key paymentId, JasifyEndpointUser jasCaller) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        try {
-            Payment payment = paymentDao.get(paymentId);
-            // Ensure the payment belongs to this user!
-            mustBeSameUserOrAdmin(jasCaller, payment.getUserRef().getKey());
-            return payment;
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException("Payment not found");
         }
     }
 

@@ -5,6 +5,8 @@
         var Payment = {
             query: query,
             get: get,
+            executePayment: executePayment,
+            cancelPayment: cancelPayment,
             queryByReferenceCode: queryByReferenceCode,
             getPaymentInvoice: getPaymentInvoice
         };
@@ -30,13 +32,27 @@
             });
         }
 
+
+        function cancelPayment(paymentOrId) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.payments.cancelPayment({id: Endpoint.fetchId(paymentOrId)})
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+            });
+        }
+
+        function executePayment(paymentOrId) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.payments.executePayment({id: Endpoint.fetchId(paymentOrId)})
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+            });
+        }
+
         function queryByReferenceCode(referenceCode) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.payments.queryByReferenceCode({referenceCode: referenceCode})
                     .then(Endpoint.itemsResultHandler, Endpoint.rejectHandler);
             });
         }
-
 
         return Payment;
     }

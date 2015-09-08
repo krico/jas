@@ -1,0 +1,13 @@
+#set($title="User '$mut.name($user)' Invoice Cancelled")
+#@htmlMail($title)
+    #@box($title)
+    <p #style("p")>Dear $organization.Name,</p>
+    <p #style("p")>
+        We are sorry to inform you that the invoice payment of '$mut.name($user)', and all subscriptions associated with
+        it were cancelled.
+    </p>
+    <p #style("p")>
+        Regards, Jasify.
+    </p>
+    #end
+#end

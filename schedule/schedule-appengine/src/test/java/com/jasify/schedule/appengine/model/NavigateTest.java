@@ -7,19 +7,40 @@ import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.payment.InvoicePayment;
+import com.jasify.schedule.appengine.model.payment.Payment;
+import com.jasify.schedule.appengine.model.payment.workflow.ActivityPackagePaymentWorkflow;
+import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
 import com.jasify.schedule.appengine.model.users.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static junit.framework.TestCase.*;
 
 public class NavigateTest {
+    private static final Comparator<HasId> sortById = new Comparator<HasId>() {
+        @Override
+        public int compare(HasId o1, HasId o2) {
+            return o1.getId().compareTo(o2.getId());
+        }
+    };
+
+    private static <T extends HasId> void assertEqualsList(List<T> expectedOrig, List<T> actualOrig) {
+        assertNotNull(actualOrig);
+        List<T> expected = new ArrayList<>(expectedOrig);
+        List<T> actual = new ArrayList<>(actualOrig);
+        assertEquals(expected.size(), actual.size());
+        Collections.sort(expected, sortById);
+        Collections.sort(actual, sortById);
+
+        for (int i = 0; i < expected.size(); ++i) {
+            assertEquals("obj[" + i + "]\n\t" + expected + "\n\t" + actual, expected.get(i).getId(), actual.get(i).getId());
+        }
+    }
+
     @Before
     public void setupDatastore() {
         TestHelper.initializeDatastore();
@@ -253,4 +274,96 @@ public class NavigateTest {
         assertEquals(attachment.getId(), navigated.getId());
     }
 
+    @Test
+    public void testUserFromPayment() {
+        Payment payment = new Payment();
+        User user = new User();
+        payment.getUserRef().setModel(user);
+        Datastore.put(payment, user);
+        User navigated = Navigate.user(payment);
+        assertNotNull(navigated);
+        assertEquals(user.getId(), navigated.getId());
+    }
+
+    @Test
+    public void testOrganizationsFromPayment() {
+        Payment payment = new Payment();
+        List<Organization> expected = new ArrayList<>();
+        Organization organization1 = new Organization();
+        expected.add(organization1);
+        Organization organization2 = new Organization();
+        expected.add(organization2);
+
+        Datastore.put(payment, organization1, organization2);
+
+        ActivityPaymentWorkflow wfl1 = new ActivityPaymentWorkflow();
+        wfl1.getPaymentRef().setModel(payment);
+        wfl1.setSubscriptionId(Datastore.allocateId(Subscription.class));
+        ActivityPackagePaymentWorkflow wfl2 = new ActivityPackagePaymentWorkflow();
+        wfl2.getPaymentRef().setModel(payment);
+        wfl2.setActivityPackageExecutionId(Datastore.allocateId(ActivityPackageExecution.class));
+        Subscription s1 = new Subscription();
+        s1.setId(wfl1.getSubscriptionId());
+        ActivityPackageExecution e1 = new ActivityPackageExecution();
+        e1.setId(wfl2.getActivityPackageExecutionId());
+
+        ActivityType at1 = new ActivityType();
+        at1.getOrganizationRef().setModel(organization1);
+        Activity a1 = new Activity();
+        a1.getActivityTypeRef().setModel(at1);
+        s1.getActivityRef().setModel(a1);
+
+        ActivityPackage ap1 = new ActivityPackage();
+        ap1.getOrganizationRef().setModel(organization2);
+        e1.getActivityPackageRef().setModel(ap1);
+        Datastore.put(wfl1, wfl2, s1, e1, at1, a1, ap1);
+
+        List<Organization> organizations = Navigate.organizations(payment);
+        assertEqualsList(expected, organizations);
+    }
+
+    @Test
+    public void testSubscriptionsFromPayment() {
+        Payment payment = new Payment();
+        ActivityPaymentWorkflow wfl1 = new ActivityPaymentWorkflow();
+        wfl1.getPaymentRef().setModel(payment);
+        ActivityPaymentWorkflow wfl2 = new ActivityPaymentWorkflow();
+        wfl2.getPaymentRef().setModel(payment);
+        List<Subscription> expected = new ArrayList<>();
+        Subscription s1 = new Subscription();
+        expected.add(s1);
+        Subscription s2 = new Subscription();
+        expected.add(s2);
+        Datastore.put(s1, s2);
+        wfl1.setSubscriptionId(s1.getId());
+        wfl2.setSubscriptionId(s2.getId());
+
+        Datastore.put(payment, wfl1, wfl2, s1, s2);
+
+        List<Subscription> subscriptions = Navigate.subscriptions(payment);
+
+        assertEqualsList(expected, subscriptions);
+    }
+
+    @Test
+    public void testActivityPackageExecutionsFromPayment() {
+        Payment payment = new Payment();
+        ActivityPackagePaymentWorkflow wfl1 = new ActivityPackagePaymentWorkflow();
+        wfl1.getPaymentRef().setModel(payment);
+        ActivityPackagePaymentWorkflow wfl2 = new ActivityPackagePaymentWorkflow();
+        wfl2.getPaymentRef().setModel(payment);
+        List<ActivityPackageExecution> expected = new ArrayList<>();
+        ActivityPackageExecution s1 = new ActivityPackageExecution();
+        expected.add(s1);
+        ActivityPackageExecution s2 = new ActivityPackageExecution();
+        expected.add(s2);
+        Datastore.put(s1, s2);
+        wfl1.setActivityPackageExecutionId(s1.getId());
+        wfl2.setActivityPackageExecutionId(s2.getId());
+        Datastore.put(payment, wfl1, wfl2, s1, s2);
+
+        List<ActivityPackageExecution> subscriptions = Navigate.activityPackageExecutions(payment);
+
+        assertEqualsList(expected, subscriptions);
+    }
 }

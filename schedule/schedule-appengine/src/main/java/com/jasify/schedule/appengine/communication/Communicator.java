@@ -158,4 +158,66 @@ public class Communicator {
         String subject = String.format("[Jasify] Invoice# %s for [%s]", KeyUtil.toHumanReadableString(payment.getId()), nonBlankName);
         MailServiceFactory.getMailService().send(new InternetAddress(user.getEmail(), user.getDisplayName()), subject, html, text, payment.getAttachmentRef().getModel());
     }
+
+    public static void notifyOfPaymentCancelled(InvoicePayment payment) throws TemplateEngineException, UnsupportedEncodingException {
+        //TODO: write test
+        User user = Navigate.user(payment);
+        List<Organization> organizations = Navigate.organizations(payment);
+
+        VelocityContext context = new VelocityContext(GLOBAL_CONTEXT.get());
+        context.put("user", user);
+        context.put("payment", payment);
+
+        String html = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CANCELLED_HTML, context);
+        String text = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CANCELLED_TXT, context);
+
+        String nonBlankName = StringUtils.isNoneBlank(user.getRealName()) ? user.getRealName() : user.getName();
+        String subject = String.format("[Jasify] CANCELLED Invoice# %s for [%s]", KeyUtil.toHumanReadableString(payment.getId()), nonBlankName);
+        MailServiceFactory.getMailService().send(new InternetAddress(user.getEmail(), user.getDisplayName()), subject, html, text);
+
+        for (Organization organization : organizations) {
+            context.put("organization", organization);
+            String oHtml = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CANCELLED_HTML, context);
+            String oText = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_CANCELLED_TXT, context);
+
+            String oSubject = String.format("[Jasify] CANCELLED Invoice of [%s]", nonBlankName);
+            List<User> users = Navigate.users(organization);
+            InternetAddress[] toAddresses = new InternetAddress[users.size()];
+            for (int i = 0; i < toAddresses.length; i++) {
+                toAddresses[i] = new InternetAddress(users.get(i).getEmail(), users.get(i).getDisplayName());
+            }
+            MailServiceFactory.getMailService().send(toAddresses, oSubject, oHtml, oText);
+        }
+    }
+
+    public static void notifyOfPaymentExecuted(InvoicePayment payment) throws TemplateEngineException, UnsupportedEncodingException {
+        //TODO: write test
+        User user = Navigate.user(payment);
+        List<Organization> organizations = Navigate.organizations(payment);
+
+        VelocityContext context = new VelocityContext(GLOBAL_CONTEXT.get());
+        context.put("user", user);
+        context.put("payment", payment);
+
+        String html = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_EXECUTED_HTML, context);
+        String text = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_EXECUTED_TXT, context);
+
+        String nonBlankName = StringUtils.isNoneBlank(user.getRealName()) ? user.getRealName() : user.getName();
+        String subject = String.format("[Jasify] EXECUTED Invoice# %s for [%s]", KeyUtil.toHumanReadableString(payment.getId()), nonBlankName);
+        MailServiceFactory.getMailService().send(new InternetAddress(user.getEmail(), user.getDisplayName()), subject, html, text);
+
+        for (Organization organization : organizations) {
+            context.put("organization", organization);
+            String oHtml = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_EXECUTED_HTML, context);
+            String oText = templateEngine.render(TemplateNames.SUBSCRIBER_INVOICE_PAYMENT_EXECUTED_TXT, context);
+
+            String oSubject = String.format("[Jasify] EXECUTED Invoice of [%s]", nonBlankName);
+            List<User> users = Navigate.users(organization);
+            InternetAddress[] toAddresses = new InternetAddress[users.size()];
+            for (int i = 0; i < toAddresses.length; i++) {
+                toAddresses[i] = new InternetAddress(users.get(i).getEmail(), users.get(i).getDisplayName());
+            }
+            MailServiceFactory.getMailService().send(toAddresses, oSubject, oHtml, oText);
+        }
+    }
 }

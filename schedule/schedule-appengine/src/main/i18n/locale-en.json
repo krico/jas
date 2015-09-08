@@ -261,5 +261,7 @@
   "HT_SubscriptionCreated": "Subscription Created",
   "HT_SubscriptionCreationFailed": "Subscription Creation Failed",
   "HT_SubscriptionCancelled": "Subscription Cancelled",
-  "HT_SubscriptionCancellationFailed": "Subscription Cancellation Failed"
+  "HT_SubscriptionCancellationFailed": "Subscription Cancellation Failed",
+  "HT_PaymentExecuted": "Payment Executed",
+  "HT_PaymentCancelled": "Payment Cancelled"
 }

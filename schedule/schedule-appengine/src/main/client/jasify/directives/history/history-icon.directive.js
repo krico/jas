@@ -19,7 +19,9 @@
             SubscriptionCreated: ['glyphicon', 'glyphicon glyphicon-ok'],
             SubscriptionCreationFailed: ['glyphicon', 'glyphicon-remove-circle'],
             SubscriptionCancelled: ['glyphicon', 'glyphicon glyphicon-remove'],
-            SubscriptionCancellationFailed: ['glyphicon', 'glyphicon-remove-circle']
+            SubscriptionCancellationFailed: ['glyphicon', 'glyphicon-remove-circle'],
+            PaymentExecuted: ['mdi mdi-attach-money'],
+            PaymentCancelled: ['mdi mdi-attach-money']
         };
         var defaultTextClass = [];
         var textClassMap = {
@@ -31,7 +33,9 @@
             SubscriptionCreated: ['text-success'],
             SubscriptionCreationFailed: ['text-danger'],
             SubscriptionCancelled: ['text-success'],
-            SubscriptionCancellationFailed: ['text-danger']
+            SubscriptionCancellationFailed: ['text-danger'],
+            PaymentExecuted: ['text-success'],
+            PaymentCancelled: ['text-danger']
         };
         return {
             restrict: 'E',

@@ -1,0 +1,13 @@
+#set($title="User '$mut.name($user)' Invoice Payment Received")
+#@htmlMail($title)
+    #@box($title)
+    <p #style("p")>Dear $organization.Name,</p>
+    <p #style("p")>
+        This e-mail is to confirm that the payment for the invoice of '$mut.name($user)'
+        was received.
+    </p>
+    <p #style("p")>
+        Regards, Jasify.
+    </p>
+    #end
+#end

@@ -1,0 +1,14 @@
+#set($title="Invoice Payment Executed")
+#@htmlMail($title)
+    #@box($title)
+    <p #style("p")>Dear $mut.name($user),</p>
+    <p #style("p")>
+        This e-mail is to confirm that we have received your payment.
+    </p>
+    <p #style("p")>
+        Cheers,<br/>
+        Jasify
+    </p>
+        #invoicePaymentDetails($payment)
+    #end
+#end

@@ -61,7 +61,6 @@ public class StyleTool implements Styles {
 
             styles.put(styleName, style.toString());
             if (log.isDebugEnabled()) log.debug("Style[{}]=[{}]", styleName, style);
-            log.info("Style[{}]=[{}]", styleName, style);
         }
         return styles;
     }

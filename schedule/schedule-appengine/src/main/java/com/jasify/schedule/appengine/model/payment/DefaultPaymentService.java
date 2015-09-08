@@ -128,7 +128,7 @@ class DefaultPaymentService implements PaymentService {
                     Datastore.put(tx, payment);
 
                     //Only PayPal needs cancel task
-                    if (dbPayment.getType() == PaymentTypeEnum.PayPal)
+                    if (dbPayment.getType() == PaymentTypeEnum.PayPal || dbPayment.getType() == PaymentTypeEnum.Cash)
                         queueCancelTask(tx, dbPayment.getId());
 
                     tx.commit();

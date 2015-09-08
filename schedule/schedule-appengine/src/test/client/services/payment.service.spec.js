@@ -97,5 +97,67 @@ describe('PaymentService', function () {
         expect($gapiMock.client.jasify.payments.queryByReferenceCode).toHaveBeenCalledWith({referenceCode: referenceCode});
     });
 
+    it('should execute payment by id', function () {
+        var expected = {id: 'foo', state: 'New'};
+        spyOn($gapiMock.client.jasify.payments, 'executePayment').and.returnValue($q.when({result: expected}));
+        Payment.executePayment(expected.id)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
 
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.payments.executePayment).toHaveBeenCalledWith({id: expected.id});
+    });
+
+    it('should execute payment by object', function () {
+        var expected = {id: 'foo', state: 'New'};
+        spyOn($gapiMock.client.jasify.payments, 'executePayment').and.returnValue($q.when({result: expected}));
+        Payment.executePayment(expected)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.payments.executePayment).toHaveBeenCalledWith({id: expected.id});
+    });
+
+    it('should cancel payment by id', function () {
+        var expected = {id: 'foo', state: 'New'};
+        spyOn($gapiMock.client.jasify.payments, 'cancelPayment').and.returnValue($q.when({result: expected}));
+        Payment.cancelPayment(expected.id)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.payments.cancelPayment).toHaveBeenCalledWith({id: expected.id});
+    });
+
+    it('should cancel payment by object', function () {
+        var expected = {id: 'foo', state: 'New'};
+        spyOn($gapiMock.client.jasify.payments, 'cancelPayment').and.returnValue($q.when({result: expected}));
+        Payment.cancelPayment(expected)
+            .then(function (res) {
+                expect(res).toBe(expected);
+            },
+            function () {
+                fail();
+            });
+
+        $rootScope.$apply();
+
+        expect($gapiMock.client.jasify.payments.cancelPayment).toHaveBeenCalledWith({id: expected.id});
+    });
 });

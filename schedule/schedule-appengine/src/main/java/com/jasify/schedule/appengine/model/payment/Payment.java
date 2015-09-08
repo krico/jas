@@ -279,19 +279,19 @@ public class Payment implements HasTransfer {
 
     public List<ActivityPackageExecution> getActivityPackageExecutions() {
         // TODO: This is probably not the best way to get the subscriptions
-        List<ActivityPackageExecution> subscriptions = new ArrayList<>();
+        List<ActivityPackageExecution> executions = new ArrayList<>();
         ActivityPackageExecutionDao activityPackageExecutionDao = new ActivityPackageExecutionDao();
         for (PaymentWorkflow paymentWorkflow : getWorkflowListRef().getModelList()) {
             if (paymentWorkflow instanceof ActivityPackagePaymentWorkflow) {
                 Key key = ((ActivityPackagePaymentWorkflow) paymentWorkflow).getActivityPackageExecutionId();
                 try {
-                    subscriptions.add(activityPackageExecutionDao.get(key));
+                    executions.add(activityPackageExecutionDao.get(key));
                 } catch (EntityNotFoundException e) {
                     log.error("Failed to find subscription with key " + key.getId(), e);
                 }
             }
         }
-        return subscriptions;
+        return executions;
     }
 
     /**

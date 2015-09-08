@@ -2,9 +2,9 @@
     <div class="card">
         <div class="card-header">
             <div class="actions-group">
-                <a-button type="button" ng-click="vm.executePayment()" ng-disabled="!vm.canExecute"
+                <a-button type="button" ng-click="vm.executePayment()" ng-disabled="!vm.canExecute()"
                           controller="vm.executePaymentBtn"></a-button>
-                <a-button type="button" ng-click="vm.cancelPayment()" ng-disabled="!vm.canCancel"
+                <a-button type="button" ng-click="vm.cancelPayment()" ng-disabled="!vm.canCancel()"
                           controller="vm.cancelPaymentBtn"></a-button>
             </div>
             <card-back href="#/admin/payments"></card-back>
@@ -50,7 +50,7 @@
 
                         <div class="col-sm-8">
                             <p class="form-control-static">
-                                {{vm.payment.state}}
+                                <span payment-state="vm.payment.state"></span>
                             </p>
                         </div>
                     </div>

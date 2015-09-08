@@ -6,15 +6,20 @@ import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityPackageDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
+import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.InvoicePayment;
+import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author krico
@@ -173,5 +178,47 @@ public final class Navigate {
             log.error("Failed to get users of organization [{}]", organization.getId(), e);
             return null;
         }
+    }
+
+    public static User user(Payment payment) {
+        if (payment == null)
+            return null;
+
+        Key userId = payment.getUserRef().getKey();
+        if (userId == null) {
+            log.warn("Payment [{}] has no UserRef", payment.getId());
+            return null;
+        }
+
+        UserDao userDao = new UserDao();
+        try {
+            return userDao.get(userId);
+        } catch (EntityNotFoundException e) {
+            log.error("Failed to get user of payment [{}]", payment.getId(), e);
+            return null;
+        }
+    }
+
+    public static List<Organization> organizations(Payment payment) {
+        Map<Key, Organization> organizationMap = new HashMap<>();
+        List<Subscription> subscriptions = Navigate.subscriptions(payment);
+        for (Subscription subscription : subscriptions) {
+            Organization organization = Navigate.organization(subscription);
+            if (organization != null) organizationMap.put(organization.getId(), organization);
+        }
+        List<ActivityPackageExecution> activityPackageExecutions = Navigate.activityPackageExecutions(payment);
+        for (ActivityPackageExecution execution : activityPackageExecutions) {
+            Organization organization = Navigate.organization(execution);
+            if (organization != null) organizationMap.put(organization.getId(), organization);
+        }
+        return new ArrayList<>(organizationMap.values());
+    }
+
+    public static List<ActivityPackageExecution> activityPackageExecutions(Payment payment) {
+        return payment.getActivityPackageExecutions(); //TODO: move logic here
+    }
+
+    public static List<Subscription> subscriptions(Payment payment) {
+        return payment.getSubscriptions(); //TODO: move logic here
     }
 }

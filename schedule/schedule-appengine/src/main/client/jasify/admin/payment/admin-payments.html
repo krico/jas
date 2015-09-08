@@ -136,7 +136,7 @@
                 <nobr>{{payment.created | amDateFormat:'L LT' }}</nobr>
             </td>
             <td>{{payment.type}}</td>
-            <td>{{payment.state}}</td>
+            <td><span payment-state="payment.state"></span></td>
             <td>{{payment.currency}}</td>
             <td>{{payment.amount | number: 2}}</td>
             <td>{{payment.fee | number: 2}}</td>
