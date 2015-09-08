@@ -60,4 +60,13 @@ public class ActivityFilter {
 
         return filtered;
     }
+
+    public static boolean filtered(Activity activity, Date fromDate, Date toDate) {
+        // Start passed if at or after fromDate
+        boolean fromDatePassed = fromDate == null || !activity.getStart().before(fromDate);
+        // Finish passed if at or before toDate
+        boolean toDatePassed = toDate == null || !activity.getFinish().after(toDate);
+
+        return fromDatePassed && toDatePassed;
+    }
 }

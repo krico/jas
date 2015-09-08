@@ -24,8 +24,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr class="animate-delete"
-            ng-repeat="transaction in vm.transactions | orderBy:'created'"
+        <tr ng-repeat="transaction in vm.transactions | orderBy:'created'"
             ng-class="{ 'selected': vm.selection.id === transaction.id }"
             row-select="vm.selectTransaction(transaction)">
             <td class="transaction-created">{{transaction.created | amDateFormat: 'L LT' }}</td>

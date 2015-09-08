@@ -11,7 +11,8 @@
             subscribe: subscribe,
             isSubscribed: isSubscribed,
             getSubscribers: getSubscribers,
-            cancelSubscription: cancelSubscription
+            cancelSubscription: cancelSubscription,
+            getUserSubscriptions: getUserSubscriptions
         };
 
         function query(param) {
@@ -84,6 +85,13 @@
         function cancelSubscription(id) {
             return Endpoint.jasify(function (jasify) {
                 return jasify.activitySubscriptions.cancel({subscriptionId: id})
+                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+            });
+        }
+
+        function getUserSubscriptions(id, fromDate, toDate) {
+            return Endpoint.jasify(function (jasify) {
+                return jasify.activitySubscriptions.getForUser({userId: id, fromDate: fromDate, toDate: toDate})
                     .then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }

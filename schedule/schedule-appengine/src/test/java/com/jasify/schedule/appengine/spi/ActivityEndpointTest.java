@@ -12,12 +12,11 @@ import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.meta.activity.ActivityMeta;
 import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
-import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
-import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
-import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
-import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
+import com.jasify.schedule.appengine.spi.dm.*;
+import com.jasify.schedule.appengine.util.KeyUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,13 +25,9 @@ import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
-import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.*;
 import static junit.framework.TestCase.*;
 
 /**
@@ -40,11 +35,10 @@ import static junit.framework.TestCase.*;
  * @since 12/06/15.
  */
 public class ActivityEndpointTest {
-    private ActivityEndpoint endpoint;
-    private Random generator = new Random();
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    private ActivityEndpoint endpoint;
+    private Random generator = new Random();
 
     private User createUser() {
         User user = new User("@email.com");
@@ -517,37 +511,6 @@ public class ActivityEndpointTest {
         }
         List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, null, null);
         assertEquals(count, result.size());
-    }
-
-    // FilterActivities
-    @Test
-    public void testFilterOffset() throws Exception {
-        ActivityType activityType = createActivityType(true);
-        for (int i = 0; i < 5; i++) {
-            TestHelper.createActivity(activityType, true);
-        }
-        List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, 3, null);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testFilterOffsetGreaterSize() throws Exception {
-        ActivityType activityType = createActivityType(true);
-        for (int i = 0; i < 5; i++) {
-            TestHelper.createActivity(activityType, true);
-        }
-        List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, 7, null);
-        assertEquals(0, result.size());
-    }
-
-    @Test
-    public void testFilterLimit() throws Exception {
-        ActivityType activityType = createActivityType(true);
-        for (int i = 0; i < 5; i++) {
-            TestHelper.createActivity(activityType, true);
-        }
-        List<Activity> result = endpoint.getActivities(newCaller(1), null, activityType.getId(), null, null, null, 3);
-        assertEquals(3, result.size());
     }
 
     // TODO Add following tests
@@ -1609,9 +1572,135 @@ public class ActivityEndpointTest {
         assertEquals(2, result.size());
     }
 
-    // CancelSubscriptions
+    // getSubscribedActivities
     @Test
-    public void testCancelSubscriptionNulUser() throws Exception {
+    public void testGetSubscriberActivitiesNullCaller() throws Exception {
+        thrown.expect(UnauthorizedException.class);
+        thrown.expectMessage("Only authenticated users can call this method");
+        endpoint.getSubscribedActivities(null, Datastore.allocateId(Subscription.class), null, null);
+    }
+
+    @Test
+    public void testGetSubscriberActivitiesNullUser() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("userId == null");
+        endpoint.getSubscribedActivities(newAdminCaller(1), null, null, null);
+    }
+
+    @Test
+    public void testGetSubscriberActivitiesAsUser() throws Exception {
+        User user1 = createUser();
+        Activity activity1 = createActivity(TestHelper.createOrganization(true), true);
+        Subscription subscription1 = endpoint.addSubscription(newAdminCaller(1), user1.getId(), activity1.getId());
+
+        endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity1.getId());
+
+        List<JasUserSubscription> result = endpoint.getSubscribedActivities(newCaller(user1.getId().getId()), user1.getId(), null, null);
+        assertEquals(1, result.size());
+        assertEquals(KeyUtil.keyToString(activity1.getId()), result.get(0).getActivity().getId());
+        assertEquals(KeyUtil.keyToString(subscription1.getId()), result.get(0).getSubscription().getId());
+        assertFalse(result.get(0).isPaid());
+    }
+
+    @Test
+    public void testGetSubscriberActivitiesAsAdmin() throws Exception {
+        User user1 = createUser();
+        Activity activity1 = createActivity(TestHelper.createOrganization(true), true);
+        Subscription subscription1 = endpoint.addSubscription(newAdminCaller(1), user1.getId(), activity1.getId());
+
+        endpoint.addSubscription(newAdminCaller(1), createUser().getId(), activity1.getId());
+
+        List<JasUserSubscription> result = endpoint.getSubscribedActivities(newAdminCaller(1), user1.getId(), null, null);
+        assertEquals(1, result.size());
+        assertEquals(KeyUtil.keyToString(activity1.getId()), result.get(0).getActivity().getId());
+        assertEquals(KeyUtil.keyToString(subscription1.getId()), result.get(0).getSubscription().getId());
+        assertFalse(result.get(0).isPaid());
+    }
+
+    @Test
+    public void testGetSubscriberActivitiesAsOrgAdmin() throws Exception {
+        User orgAdmin = createUser();
+        Organization organization = TestHelper.createOrganization(true);
+        new OrganizationEndpoint().addUserToOrganization(newAdminCaller(1), organization.getId(), orgAdmin.getId());
+
+        User user = createUser();
+        Activity activity = TestHelper.createActivity(TestHelper.createActivityType(organization, true), true);
+        Subscription subscription = endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
+        endpoint.addSubscription(newAdminCaller(1), createUser().getId(), TestHelper.createActivity(true).getId());
+
+        List<JasUserSubscription> result = endpoint.getSubscribedActivities(newOrgMemberCaller(orgAdmin.getId().getId()), user.getId(), null, null);
+        assertEquals(1, result.size());
+        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
+        assertEquals(KeyUtil.keyToString(subscription.getId()), result.get(0).getSubscription().getId());
+        assertFalse(result.get(0).isPaid());
+    }
+
+    @Test
+    public void testGetSubscriberActivitiesAsDifferentUser() throws Exception {
+        User user = createUser();
+        endpoint.addSubscription(newAdminCaller(1), user.getId(), TestHelper.createActivity(true).getId());
+
+        List<JasUserSubscription> result = endpoint.getSubscribedActivities(newCaller(createUser().getId().getId()), user.getId(), null, null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetSubscriberActivitiesDuplicateSubscription() throws Exception {
+        User user = createUser();
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
+        endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
+        endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
+
+        List<JasUserSubscription> result = endpoint.getSubscribedActivities(newAdminCaller(1), user.getId(), null, null);
+        assertEquals(2, result.size());
+        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
+        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
+    }
+
+    @Test
+    public void testGetSubscriberActivities() throws Exception {
+        User user1 = createUser();
+        List<JasUserSubscription> expected = new ArrayList<>();
+        Activity activity1 = createActivity(TestHelper.createOrganization(true), true);
+        expected.add(new JasUserSubscription(endpoint.addSubscription(newAdminCaller(1), user1.getId(), activity1.getId())));
+        Activity activity2 = createActivity(TestHelper.createOrganization(true), true);
+        expected.add(new JasUserSubscription(endpoint.addSubscription(newAdminCaller(1), user1.getId(), activity2.getId())));
+
+        User user2 = createUser();
+        for (int i = 0; i < 2; i++) {
+            Activity activity = createActivity(TestHelper.createOrganization(true), true);
+            endpoint.addSubscription(newAdminCaller(1), user2.getId(), activity.getId());
+        }
+
+        List<JasUserSubscription> result = endpoint.getSubscribedActivities(newAdminCaller(1), user1.getId(), null, null);
+        assertEquals(expected.size(), result.size());
+
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).getActivity().getId(), result.get(i).getActivity().getId());
+            assertEquals(expected.get(i).getSubscription().getId(), result.get(i).getSubscription().getId());
+        }
+    }
+
+    @Test
+    public void testGetSubscriberActivitiesWithPaymentDetails() throws Exception {
+        User user = createUser();
+        Activity activity = createActivity(TestHelper.createOrganization(true), true);
+        Subscription subscription = endpoint.addSubscription(newAdminCaller(1), user.getId(), activity.getId());
+        Transfer transfer = new Transfer();
+        Datastore.put(transfer);
+        subscription.getTransferRef().setModel(transfer);
+        Datastore.put(subscription);
+        List<JasUserSubscription> result = endpoint.getSubscribedActivities(newAdminCaller(1), user.getId(), null, null);
+
+        assertEquals(1, result.size());
+        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
+        assertEquals(KeyUtil.keyToString(subscription.getId()), result.get(0).getSubscription().getId());
+        assertTrue(result.get(0).isPaid());
+    }
+
+    // cancelSubscriptions
+    @Test
+    public void testCancelSubscriptionNullUser() throws Exception {
         thrown.expect(UnauthorizedException.class);
         thrown.expectMessage("Only authenticated users can call this method");
         endpoint.cancelSubscription(null, Datastore.allocateId(Subscription.class));
@@ -1780,7 +1869,7 @@ public class ActivityEndpointTest {
         ActivityPackage activityPackage = TestHelper.createActivityPackage(organization, true);
         JasActivityPackageRequest jasActivityPackageRequest = new JasActivityPackageRequest();
         jasActivityPackageRequest.setActivityPackage(activityPackage);
-        jasActivityPackageRequest.setActivities(Arrays.asList(createActivity(organization, true)));
+        jasActivityPackageRequest.setActivities(Collections.singletonList(createActivity(organization, true)));
         endpoint.updateActivityPackage(newAdminCaller(1), activityPackage.getId(), jasActivityPackageRequest);
     }
 
