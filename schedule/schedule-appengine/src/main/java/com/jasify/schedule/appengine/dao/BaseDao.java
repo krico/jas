@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine.dao;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.appengine.api.datastore.Key;
-import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.ModelException;
 import org.slf4j.Logger;

@@ -21,6 +21,7 @@
         'jasify.authenticate',
         'jasify.payment',
         'jasify.balance',
+        'jasify.bookings',
         'jasify.activityPackage',
         'jasify.checkout',
         'jasify.templates',

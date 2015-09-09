@@ -130,7 +130,8 @@
                 add: nop,
                 query: nop,
                 subscribers: nop,
-                cancel: nop
+                cancel: nop,
+                getForUser: nop
             },
             balance: {
                 createPayment: nop,

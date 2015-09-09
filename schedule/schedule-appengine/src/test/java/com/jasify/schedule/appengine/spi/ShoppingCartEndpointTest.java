@@ -149,11 +149,9 @@ public class ShoppingCartEndpointTest {
 
         Datastore.put(activityPackage, activity);
 
-
         JasActivityPackageSubscription subscription = new JasActivityPackageSubscription();
         subscription.setActivityIds(Arrays.asList(activity.getId()));
         ShoppingCart cart = endpoint.addUserActivityPackage(caller, activityPackage.getId(), subscription);
-
 
         JasItemDetails item = endpoint.getItem(caller, cart.getId(), 0);
         assertNotNull(item);

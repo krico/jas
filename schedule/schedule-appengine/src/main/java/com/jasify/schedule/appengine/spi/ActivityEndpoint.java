@@ -6,17 +6,19 @@ import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.common.*;
+import com.jasify.schedule.appengine.dao.payment.PaymentDao;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
 import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
 import com.jasify.schedule.appengine.model.history.History;
 import com.jasify.schedule.appengine.model.history.HistoryHelper;
+import com.jasify.schedule.appengine.model.payment.Payment;
+import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
-import com.jasify.schedule.appengine.spi.dm.JasActivityPackageRequest;
-import com.jasify.schedule.appengine.spi.dm.JasAddActivityRequest;
-import com.jasify.schedule.appengine.spi.dm.JasAddActivityTypeRequest;
-import com.jasify.schedule.appengine.spi.dm.JasListQueryActivitiesRequest;
+import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
+import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
 import org.slf4j.Logger;
@@ -64,6 +66,7 @@ public class ActivityEndpoint {
     private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final OrganizationDao organizationDao = new OrganizationDao();
+    private final PaymentDao paymentDao = new PaymentDao();
     private final RepeatDetailsDao repeatDetailsDao = new RepeatDetailsDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
@@ -347,6 +350,71 @@ public class ActivityEndpoint {
         checkFound(activityId, "activityId == null");
         mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromActivityId(activityId));
         return subscriptionDao.getByActivity(activityId);
+    }
+
+    /**
+     * Get list of subscriptions, activities, and payment details for a userId that fall within the fromDate and toDate range inclusive.
+     * Note that userId is required which means that Admin can not view all subscriptions and orgAdmin can not view all organization related
+     * subscriptions.
+     *
+     * @param caller:   Filter criteria. Admin user or caller matching userId can view all subscriptions related to userId.
+     *                  OrgAdmin can view subscriptions related to userId that also match orgAdmins organizations.
+     * @param userId:   Filter criteria. Only show subscriptions that match this userId. Null not allowed.
+     * @param fromDate: Filter criteria. Only show subscriptions that occur on or after fromDate. Null value means ignore.
+     * @param toDate:   Filter criteria. Only show subscriptions that occur on or before toDate. Null value means ignore.
+     * @return JasUserSubscription list of subscriptions, activities, and payment details.
+     * @throws UnauthorizedException
+     * @throws NotFoundException
+     */
+    @ApiMethod(name = "activitySubscriptions.getForUser", path = "user-subscriptions", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<JasUserSubscription> getSubscribedActivities(User caller,
+                                                             @Named("userId") Key userId,
+                                                             @Nullable @Named("fromDate") final Date fromDate,
+                                                             @Nullable @Named("toDate") final Date toDate) throws UnauthorizedException, NotFoundException {
+        JasifyEndpointUser endpointUser = mustBeLoggedIn(caller);
+        checkFound(userId, "userId == null");
+
+        boolean showAll = endpointUser.getUserId() == userId.getId() || endpointUser.isAdmin();
+        boolean showOrganization = !showAll && endpointUser.isOrgMember();
+
+        if (!showAll && !showOrganization) {
+            return Collections.emptyList();
+        }
+
+        try {
+            Set<Organization> relatedOrganizations = new HashSet<>();
+
+            if (showOrganization) {
+                // TODO: If I got the keys I would not need to use organizationDao to get the organization later
+                relatedOrganizations.addAll(organizationDao.byMemberUserId(endpointUser.getUserId()));
+            }
+
+            List<JasUserSubscription> result = new ArrayList<>();
+            List<Subscription> subscriptions = subscriptionDao.getByUser(userId);
+            for (Subscription subscription : subscriptions) {
+                Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+
+                // Only add if activity falls within the filtered time
+                boolean add = ActivityFilter.filtered(activity, fromDate, toDate);
+                // If caller is orgAdmin check if this activity belongs to callers organisation
+                if (add && showOrganization) {
+                    ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
+                    Organization organization = organizationDao.get(activityType.getOrganizationRef().getKey());
+                    add = relatedOrganizations.contains(organization);
+                }
+
+                if (add) {
+                    JasUserSubscription userSubscription = new JasUserSubscription(subscription);
+                    Key transferId = subscription.getTransferRef().getKey();
+                    // This will only be set if the subscription was paid for in some way
+                    userSubscription.setPaid(transferId != null);
+                    result.add(userSubscription);
+                }
+            }
+            return result;
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
     }
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)

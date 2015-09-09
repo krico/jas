@@ -80,7 +80,7 @@ abstract class OrgMemberChecker {
             return new OrgMemberChecker() {
                 @Override
                 Organization getOrganization() throws EntityNotFoundException {
-                    return getOrganizationFromASubscription(id);
+                    return getOrganizationFromSubscription(id);
                 }
             };
         }
@@ -192,7 +192,7 @@ abstract class OrgMemberChecker {
         return null;
     }
 
-    protected Organization getOrganizationFromASubscription(Key id) throws EntityNotFoundException {
+    protected Organization getOrganizationFromSubscription(Key id) throws EntityNotFoundException {
         Subscription subscription = getSubscription(id);
         if (subscription != null) {
             return getOrganizationFromActivity(subscription.getActivityRef().getKey());

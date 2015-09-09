@@ -71,4 +71,23 @@ public class SubscriptionDao extends BaseCachingDao<Subscription> {
                     .asKeyList();
         }
     }
+
+    public List<Subscription> getByUser(Key userId) {
+        SubscriptionMeta meta = getMeta();
+        return query(new ByUserQuery(meta, userId));
+    }
+
+    private static class ByUserQuery extends BaseDaoQuery<Subscription, SubscriptionMeta> {
+        public ByUserQuery(SubscriptionMeta meta, Key userId) {
+            super(meta, new Serializable[]{userId});
+        }
+
+        @Override
+        public List<Key> execute() {
+            Key userId = parameters.get(0);
+            return Datastore.query(meta)
+                    .filter(meta.userRef.equal(userId))
+                    .asKeyList();
+        }
+    }
 }

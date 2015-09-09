@@ -5,9 +5,10 @@
                 {{ 'BALANCE_DESCRIPTION' | translate }}
             </small>
         </h2>
+        <br/>
         <div class="">
-            <span class="h5">Account balance </span>
-            <span tooltip-html-unsafe="<small>Created: {{vm.account.created|date:'medium'}}<br/>Modified: {{vm.account.created|date:'medium'}}</small>"
+            <span class="h5">{{ 'ACCOUNT_BALANCE' | translate }} </span>
+            <span tooltip-html-unsafe="<small>{{ 'CREATED' | translate }}: {{vm.account.created|date:'medium'}}<br/>{{ 'MODIFIED' | translate }}: {{vm.account.created|date:'medium'}}</small>"
                   tooltip-trigger="mouseenter"
                   class="strong text-primary">{{vm.account.balance | currency: vm.account.currency}}</span>
         </div>
@@ -23,8 +24,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr class="animate-delete"
-            ng-repeat="transaction in vm.transactions | orderBy:'created'"
+        <tr ng-repeat="transaction in vm.transactions | orderBy:'created'"
             ng-class="{ 'selected': vm.selection.id === transaction.id }"
             row-select="vm.selectTransaction(transaction)">
             <td class="transaction-created">{{transaction.created | amDateFormat: 'L LT' }}</td>
