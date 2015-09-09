@@ -2,6 +2,8 @@ package com.jasify.schedule.appengine.spi;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Activity;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -15,6 +17,15 @@ import static junit.framework.TestCase.*;
  * @since 03/09/15.
  */
 public class ActivityFilterTest {
+    @AfterClass
+    public static void cleanup() {
+        TestHelper.cleanupDatastore();
+    }
+
+    @BeforeClass
+    public static void init() {
+        TestHelper.initializeDatastore();
+    }
 
     @Test
     public void testSingleActivityBeforeFrom() {
