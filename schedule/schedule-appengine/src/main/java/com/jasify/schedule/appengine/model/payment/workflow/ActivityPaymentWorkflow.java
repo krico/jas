@@ -60,6 +60,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
             subscriptionId = subscribe.getId();
             HistoryHelper.addSubscriptionCreated(subscriptionId);
         } catch (EntityNotFoundException | OperationException | FieldValueException e) {
+            log.error("Failed to subscribe User={} to Activity={}", userId, activityId, e);
             HistoryHelper.addSubscriptionCreationFailed(userId, activityId);
             throw new PaymentWorkflowException(e);
         }
@@ -73,6 +74,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
                 ActivityServiceFactory.getActivityService().cancelSubscription(subscriptionId);
                 HistoryHelper.addTacticalSubscriptionCancelled(history);
             } catch (EntityNotFoundException | FieldValueException e) {
+                log.error("Failed to cancel subscription [{}]", subscriptionId, e);
                 HistoryHelper.addSubscriptionCancellationFailed(subscriptionId);
                 throw new PaymentWorkflowException(e);
             }
@@ -90,6 +92,7 @@ public class ActivityPaymentWorkflow extends PaymentWorkflow {
                     BalanceServiceFactory.getBalanceService().subscription(subscriptionId);
                 }
             } catch (ModelException e) {
+                log.error("Failed to complete subscription [{}]", subscriptionId, e);
                 throw new PaymentWorkflowException(e);
             }
         }

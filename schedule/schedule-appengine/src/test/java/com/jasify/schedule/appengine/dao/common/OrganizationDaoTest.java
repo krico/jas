@@ -3,22 +3,18 @@ package com.jasify.schedule.appengine.dao.common;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.TestHelper;
-import com.jasify.schedule.appengine.model.ModelException;
-import com.jasify.schedule.appengine.model.ModelOperation;
-import com.jasify.schedule.appengine.model.TransactionOperator;
-import com.jasify.schedule.appengine.model.UniqueConstraintException;
+import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.common.Group;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.common.OrganizationMember;
 import com.jasify.schedule.appengine.model.users.User;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.ExpectedException;
 import org.slim3.datastore.Datastore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.jasify.schedule.appengine.AssertionHelper.assertIdsEqual;
@@ -27,6 +23,9 @@ import static junit.framework.TestCase.*;
 
 public class OrganizationDaoTest {
     private OrganizationDao dao;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @BeforeClass
     public static void initialize() {
@@ -59,6 +58,24 @@ public class OrganizationDaoTest {
     public void testSave() throws Exception {
         Key id = save(TestHelper.createOrganization(false));
         assertNotNull(id);
+    }
+
+    @Test
+    public void testSaveWithNullName() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("Organization.name is NULL");
+        Organization organization = TestHelper.createOrganization(false);
+        organization.setName(null);
+        dao.save(organization);
+    }
+
+    @Test
+    public void testSaveWithEmptyName() throws Exception {
+        thrown.expect(FieldValueException.class);
+        thrown.expectMessage("Organization.name is NULL");
+        Organization organization = TestHelper.createOrganization(false);
+        organization.setName("   ");
+        dao.save(organization);
     }
 
     @Test(expected = UniqueConstraintException.class)
@@ -151,7 +168,39 @@ public class OrganizationDaoTest {
     }
 
     @Test
-    public void testByMemberUserId() throws Exception {
+    public void testGetAll() throws Exception {
+        TestHelper.createOrganization(true);
+        TestHelper.createOrganization(true);
+        List<Organization> result = dao.getAll();
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetByMemberUserIdWithLong() throws Exception {
+        Organization org1 = TestHelper.createOrganization(true);
+        Organization org2 = TestHelper.createOrganization(true);
+        TestHelper.createOrganization(true);
+        User user = TestHelper.createUser(true);
+        Datastore.put(new OrganizationMember(org1, user));
+        Datastore.put(new OrganizationMember(org2, user));
+        List<Organization> result = dao.getByMemberUserId(user.getId().getId());
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetByMemberUserIdAsKeysWithLong() throws Exception {
+        Organization org1 = TestHelper.createOrganization(true);
+        Organization org2 = TestHelper.createOrganization(true);
+        TestHelper.createOrganization(true);
+        User user = TestHelper.createUser(true);
+        Datastore.put(new OrganizationMember(org1, user));
+        Datastore.put(new OrganizationMember(org2, user));
+        List<Key> result = dao.getByMemberUserIdAsKeys(user.getId().getId());
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetByMemberUserId() throws Exception {
         Organization org1 = TestHelper.createOrganization(false);
         Organization org2 = TestHelper.createOrganization(false);
         Organization org3 = TestHelper.createOrganization(false);
@@ -166,13 +215,13 @@ public class OrganizationDaoTest {
         Datastore.put(om1, om3);
 
         for (int M = 0; M < 3; ++M) {
-            List<Organization> organizations = dao.byMemberUserId(user.getId());
+            List<Organization> organizations = dao.getByMemberUserId(user.getId());
             assertEquals(2, organizations.size());
             assertTrue(organizations.get(0).getId().equals(org1.getId()) || organizations.get(0).getId().equals(org3.getId()));
             assertTrue(organizations.get(1).getId().equals(org1.getId()) || organizations.get(1).getId().equals(org3.getId()));
 
             //TODO: This is only temporary as a proof of concept
-            List<Organization> organizationsForUser = dao.byMemberUserId(user.getId());
+            List<Organization> organizationsForUser = dao.getByMemberUserId(user.getId());
             assertEquals(organizations.size(), organizationsForUser.size());
             assertTrue(organizations.get(0).getId().equals(organizationsForUser.get(0).getId()) || organizations.get(0).getId().equals(organizationsForUser.get(1).getId()));
             assertTrue(organizations.get(1).getId().equals(organizationsForUser.get(0).getId()) || organizations.get(1).getId().equals(organizationsForUser.get(1).getId()));
@@ -200,7 +249,7 @@ public class OrganizationDaoTest {
 
         for (int M = 0; M < 3; ++M) {
             assertIdsEqual(Arrays.asList(user1, user2, user3), dao.getUsersOfOrganization(org1.getId()));
-            assertIdsEqual(Arrays.asList(user2), dao.getUsersOfOrganization(org2.getId()));
+            assertIdsEqual(Collections.singletonList(user2), dao.getUsersOfOrganization(org2.getId()));
         }
     }
 
@@ -225,7 +274,7 @@ public class OrganizationDaoTest {
 
         for (int M = 0; M < 3; ++M) {
             assertIdsEqual(Arrays.asList(group1, group2, group3), dao.getGroupsOfOrganization(org1.getId()));
-            assertIdsEqual(Arrays.asList(group2), dao.getGroupsOfOrganization(org2.getId()));
+            assertIdsEqual(Collections.singletonList(group2), dao.getGroupsOfOrganization(org2.getId()));
         }
     }
 
@@ -246,7 +295,7 @@ public class OrganizationDaoTest {
         assertFalse("double add2", dao.addUserToOrganization(org2.getId(), user1.getId()));
 
         assertIdsEqual(Arrays.asList(user1, user2), dao.getUsersOfOrganization(org1.getId()));
-        assertIdsEqual(Arrays.asList(user1), dao.getUsersOfOrganization(org2.getId()));
+        assertIdsEqual(Collections.singletonList(user1), dao.getUsersOfOrganization(org2.getId()));
     }
 
     @Test
@@ -261,7 +310,7 @@ public class OrganizationDaoTest {
         assertTrue(dao.addUserToOrganization(org1.getId(), user2.getId()));
         assertIdsEqual(Arrays.asList(user1, user2), dao.getUsersOfOrganization(org1.getId()));
         dao.removeUserFromOrganization(org1.getId(), user1.getId());
-        assertIdsEqual(Arrays.asList(user2), dao.getUsersOfOrganization(org1.getId()));
+        assertIdsEqual(Collections.singletonList(user2), dao.getUsersOfOrganization(org1.getId()));
         dao.removeUserFromOrganization(org1.getId(), user2.getId());
         assertTrue(dao.getUsersOfOrganization(org1.getId()).isEmpty());
     }
@@ -283,7 +332,7 @@ public class OrganizationDaoTest {
         assertFalse("double add2", dao.addGroupToOrganization(org2.getId(), group1.getId()));
 
         assertIdsEqual(Arrays.asList(group1, group2), dao.getGroupsOfOrganization(org1.getId()));
-        assertIdsEqual(Arrays.asList(group1), dao.getGroupsOfOrganization(org2.getId()));
+        assertIdsEqual(Collections.singletonList(group1), dao.getGroupsOfOrganization(org2.getId()));
     }
 
     @Test
@@ -298,7 +347,7 @@ public class OrganizationDaoTest {
         assertTrue(dao.addGroupToOrganization(org1.getId(), group2.getId()));
         assertIdsEqual(Arrays.asList(group1, group2), dao.getGroupsOfOrganization(org1.getId()));
         dao.removeGroupFromOrganization(org1.getId(), group1.getId());
-        assertIdsEqual(Arrays.asList(group2), dao.getGroupsOfOrganization(org1.getId()));
+        assertIdsEqual(Collections.singletonList(group2), dao.getGroupsOfOrganization(org1.getId()));
         dao.removeGroupFromOrganization(org1.getId(), group2.getId());
         assertTrue(dao.getGroupsOfOrganization(org1.getId()).isEmpty());
     }

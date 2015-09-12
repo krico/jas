@@ -202,7 +202,7 @@ public class BalanceEndpoint {
         try {
             // OrgAdmin see's accounts of organizations they belong to
             List<Account> result = new ArrayList<>();
-            List<Organization> organizations = new OrganizationDao().byMemberUserId(jasifyEndpointUser.getUserId());
+            List<Organization> organizations = new OrganizationDao().getByMemberUserId(jasifyEndpointUser.getUserId());
             for (Organization organization : organizations) {
                 result.add(BalanceServiceFactory.getBalanceService().getOrganizationAccount(organization));
             }

@@ -87,6 +87,17 @@ public class OrganizationMemberDaoTest {
     }
 
     @Test
+    public void byOrganizationIdAsKeys() throws Exception {
+        Key userId1 = Datastore.allocateId(User.class);
+        Key userId2 = Datastore.allocateId(User.class);
+        Key organizationId = Datastore.allocateId(Organization.class);
+        createUserMember(userId1, organizationId);
+        createUserMember(userId2, organizationId);
+        List<Key> userIds = dao.byOrganizationIdAsKeys(organizationId);
+        assertEquals(2, userIds.size());
+    }
+
+    @Test
     public void testByOrganizationId() throws Exception {
         Key userId1 = Datastore.allocateId(User.class);
         Key userId2 = Datastore.allocateId(User.class);
@@ -121,7 +132,6 @@ public class OrganizationMemberDaoTest {
             assertTrue(userIds.contains(userId1));
             assertTrue(userIds.contains(userId2));
             assertTrue(userIds.contains(userId3));
-
         }
     }
 

@@ -6,23 +6,17 @@ import com.google.api.server.spi.response.*;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.dao.common.*;
-import com.jasify.schedule.appengine.dao.payment.PaymentDao;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.*;
-import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
 import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
 import com.jasify.schedule.appengine.model.history.History;
 import com.jasify.schedule.appengine.model.history.HistoryHelper;
-import com.jasify.schedule.appengine.model.payment.Payment;
-import com.jasify.schedule.appengine.model.payment.PaymentStateEnum;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -59,14 +53,12 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class ActivityEndpoint {
-    private static final Logger log = LoggerFactory.getLogger(ActivityEndpoint.class);
 
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
     private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
     private final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
     private final OrganizationDao organizationDao = new OrganizationDao();
-    private final PaymentDao paymentDao = new PaymentDao();
     private final RepeatDetailsDao repeatDetailsDao = new RepeatDetailsDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
 
@@ -106,7 +98,6 @@ public class ActivityEndpoint {
                 }
             });
         } catch (EntityNotFoundException e) {
-
             throw new NotFoundException(e.getMessage());
         } catch (ModelException e) {
             throw new BadRequestException(e.getMessage());
@@ -382,11 +373,11 @@ public class ActivityEndpoint {
         }
 
         try {
-            Set<Organization> relatedOrganizations = new HashSet<>();
+            Set<Key> relatedOrganizations = new HashSet<>();
 
             if (showOrganization) {
                 // TODO: If I got the keys I would not need to use organizationDao to get the organization later
-                relatedOrganizations.addAll(organizationDao.byMemberUserId(endpointUser.getUserId()));
+                relatedOrganizations.addAll(organizationDao.getByMemberUserIdAsKeys(endpointUser.getUserId()));
             }
 
             List<JasUserSubscription> result = new ArrayList<>();
@@ -399,8 +390,7 @@ public class ActivityEndpoint {
                 // If caller is orgAdmin check if this activity belongs to callers organisation
                 if (add && showOrganization) {
                     ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
-                    Organization organization = organizationDao.get(activityType.getOrganizationRef().getKey());
-                    add = relatedOrganizations.contains(organization);
+                    add = relatedOrganizations.contains(activityType.getOrganizationRef().getKey());
                 }
 
                 if (add) {
@@ -431,8 +421,6 @@ public class ActivityEndpoint {
         } catch (FieldValueException e) {
             HistoryHelper.addSubscriptionCancellationFailed(subscriptionId);
             throw new BadRequestException(e.getMessage());
-        } catch (ModelException e) {
-            throw new InternalServerErrorException(e.getMessage());
         }
     }
 

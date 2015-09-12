@@ -16,7 +16,6 @@ import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.dm.*;
-import com.jasify.schedule.appengine.util.KeyUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1597,8 +1596,8 @@ public class ActivityEndpointTest {
 
         List<JasUserSubscription> result = endpoint.getSubscribedActivities(newCaller(user1.getId().getId()), user1.getId(), null, null);
         assertEquals(1, result.size());
-        assertEquals(KeyUtil.keyToString(activity1.getId()), result.get(0).getActivity().getId());
-        assertEquals(KeyUtil.keyToString(subscription1.getId()), result.get(0).getSubscription().getId());
+        assertEquals(activity1.getId(), result.get(0).getActivity().getId());
+        assertEquals(subscription1.getId(), result.get(0).getSubscription().getId());
         assertFalse(result.get(0).isPaid());
     }
 
@@ -1612,8 +1611,8 @@ public class ActivityEndpointTest {
 
         List<JasUserSubscription> result = endpoint.getSubscribedActivities(newAdminCaller(1), user1.getId(), null, null);
         assertEquals(1, result.size());
-        assertEquals(KeyUtil.keyToString(activity1.getId()), result.get(0).getActivity().getId());
-        assertEquals(KeyUtil.keyToString(subscription1.getId()), result.get(0).getSubscription().getId());
+        assertEquals(activity1.getId(), result.get(0).getActivity().getId());
+        assertEquals(subscription1.getId(), result.get(0).getSubscription().getId());
         assertFalse(result.get(0).isPaid());
     }
 
@@ -1630,8 +1629,8 @@ public class ActivityEndpointTest {
 
         List<JasUserSubscription> result = endpoint.getSubscribedActivities(newOrgMemberCaller(orgAdmin.getId().getId()), user.getId(), null, null);
         assertEquals(1, result.size());
-        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
-        assertEquals(KeyUtil.keyToString(subscription.getId()), result.get(0).getSubscription().getId());
+        assertEquals(activity.getId(), result.get(0).getActivity().getId());
+        assertEquals(subscription.getId(), result.get(0).getSubscription().getId());
         assertFalse(result.get(0).isPaid());
     }
 
@@ -1653,8 +1652,8 @@ public class ActivityEndpointTest {
 
         List<JasUserSubscription> result = endpoint.getSubscribedActivities(newAdminCaller(1), user.getId(), null, null);
         assertEquals(2, result.size());
-        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
-        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
+        assertEquals(activity.getId(), result.get(0).getActivity().getId());
+        assertEquals(activity.getId(), result.get(0).getActivity().getId());
     }
 
     @Test
@@ -1693,8 +1692,8 @@ public class ActivityEndpointTest {
         List<JasUserSubscription> result = endpoint.getSubscribedActivities(newAdminCaller(1), user.getId(), null, null);
 
         assertEquals(1, result.size());
-        assertEquals(KeyUtil.keyToString(activity.getId()), result.get(0).getActivity().getId());
-        assertEquals(KeyUtil.keyToString(subscription.getId()), result.get(0).getSubscription().getId());
+        assertEquals(activity.getId(), result.get(0).getActivity().getId());
+        assertEquals(subscription.getId(), result.get(0).getSubscription().getId());
         assertTrue(result.get(0).isPaid());
     }
 
