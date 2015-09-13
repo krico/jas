@@ -9,6 +9,7 @@ import com.jasify.schedule.appengine.dao.users.UserDao;
 import com.jasify.schedule.appengine.model.*;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.payment.Payment;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
@@ -369,5 +370,26 @@ public final class HistoryHelper {
 
     public static void addSubscriptionCancellationFailed(Key subscriptionId) {
         addHistory(createSubscriptionHistory(HistoryTypeEnum.SubscriptionCancellationFailed, subscriptionId));
+    }
+
+    public static void addPaymentExecuted(Payment payment) {
+        addPaymentHistory(payment, HistoryTypeEnum.PaymentExecuted);
+    }
+
+    public static void addPaymentCancelled(Payment payment) {
+        addPaymentHistory(payment, HistoryTypeEnum.PaymentCancelled);
+    }
+
+    private static void addPaymentHistory(Payment payment, HistoryTypeEnum type) {
+        PaymentHistory history = new PaymentHistory(type, payment);
+
+        addCurrentUser(history);
+
+        history.setDescription("[Payment=" + KeyUtil.keyToString(payment.getId()) + "]" +
+                "[Type=" + payment.getType() + "]" +
+                "[Owner=" + KeyUtil.keyToString(payment.getUserRef().getKey()) + "]" +
+                "[User=" + KeyUtil.keyToString(history.getCurrentUserRef().getKey()) + "]");
+
+        addHistory(history);
     }
 }

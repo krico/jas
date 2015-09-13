@@ -64,6 +64,7 @@
                 com.jasify.schedule.appengine.spi.UserEndpoint,
                 com.jasify.schedule.appengine.spi.UserLoginEndpoint,
                 com.jasify.schedule.appengine.spi.BalanceEndpoint,
+                com.jasify.schedule.appengine.spi.PaymentEndpoint,
                 com.jasify.schedule.appengine.spi.ShoppingCartEndpoint,
                 com.jasify.schedule.appengine.spi.UniqueEndpoint
             </param-value>
@@ -83,6 +84,21 @@
         <servlet-name>oauth2-callback</servlet-name>
         <url-pattern>/oauth2/callback/*</url-pattern>
     </servlet-mapping>
+
+    <!-- BEGIN: Attachment download servlet -->
+    <servlet>
+        <servlet-name>attachment</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.AttachmentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>attachment</servlet-name>
+        <url-pattern>/view/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>attachment</servlet-name>
+        <url-pattern>/download/*</url-pattern>
+    </servlet-mapping>
+    <!-- END: Attachment download servlet -->
 
     <!-- BEGIN: Incoming mail handling -->
     <servlet>

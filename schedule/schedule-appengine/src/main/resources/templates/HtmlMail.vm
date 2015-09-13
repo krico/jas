@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>Jasify - $!title</title>
+</head>
+<body #style("body")>
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="left">
+            <p>
+                <a href="$app.Url" target="_blank">
+                    <img src="$app.Logo" border="0" width="120px">
+                </a>
+            </p>
+
+            <p>&nbsp;</p>
+        </td>
+        <td align="right">&nbsp;</td>
+    </tr>
+</table>
+<table width="90%" border="0" cellspacing="0" cellpadding="1" align="center">
+    <tr>
+        <td>
+            $!bodyContent
+        </td>
+    </tr>
+</table>
+</body>
+</html>

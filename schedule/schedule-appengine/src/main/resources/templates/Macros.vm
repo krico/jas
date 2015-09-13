@@ -1,0 +1,43 @@
+#*
+ * Macros in this file are available in any template
+ *#
+
+# This macro make html bold, is used for testing
+#macro(bold $sometext)<b>$sometext</b>#end
+#macro(style $c)style="$styleTool.get($c)"#end
+#*
+ * This renders a default HTML page for e-mail. You can use it like so:
+ *     #@htmlMail()
+ *     <b>Hello!</b>
+ *     #end
+ *#
+#macro(htmlMail $title)#parse("/templates/HtmlMail.vm")#end
+
+#macro(textMail $title)#parse("/templates/TextMail.vm")#end
+
+#macro(fieldValueTable)
+<table cellpadding="4" cellspacing="0" border="0">
+    $!bodyContent
+</table>
+#end
+
+#macro(fieldValueRow $field $value)
+<tr>
+    <th align="right">$field:</th>
+    <td align="left">$value</td>
+</tr>
+#end
+
+#macro(box $title)
+<table #style("table.box")>
+    <tr valign="top">
+        <td>
+            <h4>$title</h4>
+            $!bodyContent
+        </td>
+    </tr>
+</table>
+#end
+
+#macro(subscriptionDetails $subscriptions $executions)#parse("/templates/partials/SubscriptionDetails.html.vm")#end
+#macro(invoicePaymentDetails $payment)#parse("/templates/partials/InvoicePaymentDetails.html.vm")#end

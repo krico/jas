@@ -5,19 +5,23 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.jasify.schedule.appengine.TestHelper;
+import com.jasify.schedule.appengine.model.UniqueConstraints;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.AccountUtil;
 import com.jasify.schedule.appengine.model.balance.Transaction;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.CashPaymentProvider;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.JasCheckoutPaymentRequest;
+import com.jasify.schedule.appengine.spi.dm.JasInvoice;
 import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
 import com.jasify.schedule.appengine.spi.dm.JasTransactionList;
 import com.jasify.schedule.appengine.util.KeyUtil;
@@ -27,8 +31,8 @@ import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
 import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newAdminCaller;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static com.jasify.schedule.appengine.spi.JasifyEndpointTest.newCaller;
+import static junit.framework.TestCase.*;
 
 /**
  * @author wszarmach
@@ -51,6 +55,7 @@ public class BalanceEndpointDaoTest {
     @Before
     public void before() {
         TestHelper.initializeJasify(helper);
+        UniqueConstraints.ensureAllConstraintsExist();
     }
 
     @After

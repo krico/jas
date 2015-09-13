@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
+import com.jasify.schedule.appengine.util.InternationalizationUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -31,7 +32,7 @@ import java.util.Date;
  */
 public class MailParser {
 
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID("Europe/Zurich"));
+    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm").withZone(DateTimeZone.forID(InternationalizationUtil.ZURICH_TIME_ZONE_ID));
 
     private static final OrganizationDao organizationDao = new OrganizationDao();
     private static final ActivityTypeDao activityTypeDao = new ActivityTypeDao();
@@ -49,24 +50,6 @@ public class MailParser {
     private MailParser(String resource) throws IOException {
         htmlBuilder = createStringBuilder(resource + ".html");
         textBuilder = createStringBuilder(resource + ".txt");
-    }
-
-    public static MailParser createNewVersionEmail(String appEngineVersion, String version, String timestamp, String branch, String number, String jasifyUrl) throws Exception {
-        MailParser mailParser = new MailParser("/jasify/NewVersion");
-        mailParser.substitute(SubstituteKey.Version, version);
-        mailParser.substitute(SubstituteKey.AppEngineVersion, appEngineVersion);
-        mailParser.substitute(SubstituteKey.Timestamp, timestamp);
-        mailParser.substitute(SubstituteKey.Branch, branch);
-        mailParser.substitute(SubstituteKey.Number, number);
-        mailParser.substitute(SubstituteKey.JasifyUrl, jasifyUrl);
-        return mailParser;
-    }
-
-    public static MailParser createJasifyUserSignUpEmail(User user) throws Exception {
-        MailParser mailParser = new MailParser("/jasify/UserSignUp");
-        mailParser.substitute(SubstituteKey.SubscriberName, getSubscriberName(user));
-        mailParser.substitute(SubstituteKey.UserName, user.getName());
-        return mailParser;
     }
 
     private static String formatDate(Date date) {
@@ -214,12 +197,6 @@ public class MailParser {
 
     public static MailParser createSubscriberSubscriptionEmail(Collection<Subscription> subscriptions, Collection<ActivityPackageExecution> executions) throws Exception {
         return createSubscriptionEmail(MultiSubscription.Subscriber, subscriptions, executions);
-    }
-
-    public static MailParser createSubscriberPasswordRecoveryEmail(String passwordUrl) throws Exception {
-        MailParser mailParser = new MailParser("/subscriber/PasswordRecovery");
-        mailParser.substitute(SubstituteKey.PasswordUrl, passwordUrl);
-        return mailParser;
     }
 
     public static MailParser createSubscriberEmailSignUpConfirmationEmail(String subscriberName, String userName, String jasifyUrl) throws Exception {

@@ -5,6 +5,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.common.base.Preconditions;
+import com.jasify.schedule.appengine.communication.Communicator;
 import com.jasify.schedule.appengine.mail.MailParser;
 import com.jasify.schedule.appengine.mail.MailServiceFactory;
 import com.jasify.schedule.appengine.meta.users.PasswordRecoveryMeta;
@@ -151,10 +152,8 @@ final class DefaultUserService implements UserService {
     }
 
     private void notify(User user) {
-        String subject = String.format("[Jasify] SignUp [%s]", user.getName());
         try {
-            MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
-            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
+            Communicator.notifyOfNewUser(user);
         } catch (Exception e) {
             log.warn("Failed to notify jasify", e);
         }

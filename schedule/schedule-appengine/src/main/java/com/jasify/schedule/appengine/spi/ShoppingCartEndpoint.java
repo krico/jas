@@ -52,6 +52,7 @@ import java.util.Set;
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
+                JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,
                 JasSubscriptionTransformer.class,
                 JasTransactionTransformer.class,

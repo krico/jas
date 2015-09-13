@@ -1,0 +1,11 @@
+#set($title="Invoice Payment Executed")
+#@textMail($title)
+
+Dear $mut.name($user),
+
+This e-mail is to confirm that we have received your payment for Invoice #: $kut.keyToString($payment.Id).
+
+Cheers,
+Jasify
+
+#end

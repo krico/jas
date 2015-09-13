@@ -4,11 +4,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
-import com.jasify.schedule.appengine.meta.history.HistoryMeta;
-import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
+import com.jasify.schedule.appengine.meta.SequenceMeta;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.application.ApplicationMeta;
 import com.jasify.schedule.appengine.meta.application.ApplicationPropertyMeta;
+import com.jasify.schedule.appengine.meta.attachment.AttachmentMeta;
 import com.jasify.schedule.appengine.meta.balance.AccountMeta;
 import com.jasify.schedule.appengine.meta.balance.TransactionMeta;
 import com.jasify.schedule.appengine.meta.balance.TransferMeta;
@@ -16,6 +16,8 @@ import com.jasify.schedule.appengine.meta.common.GroupMeta;
 import com.jasify.schedule.appengine.meta.common.GroupUserMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
+import com.jasify.schedule.appengine.meta.history.HistoryMeta;
+import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.meta.payment.workflow.PaymentWorkflowMeta;
 import com.jasify.schedule.appengine.meta.users.PasswordRecoveryMeta;
@@ -31,6 +33,7 @@ import org.slim3.datastore.Datastore;
  * @since 22/03/15.
  */
 public final class KeyUtil {
+    public static final KeyUtil INSTANCE = new KeyUtil();
     public static final char PARENT_SEPARATOR_CHAR = '-';
     public static final char STR_LEN_BEGIN = '(';
     public static final char STR_LEN_END = ')';
@@ -46,6 +49,7 @@ public final class KeyUtil {
             .put(ActivityTypeMeta.get().getKind(), "AT") //ActivityType
             .put(ApplicationMeta.get().getKind(), "a") //App
             .put(ApplicationPropertyMeta.get().getKind(), "ap") //AppProp
+            .put(AttachmentMeta.get().getKind(), "ATT")
             .put(GroupMeta.get().getKind(), "G") //Group
             .put(GroupUserMeta.get().getKind(), "gu") //GroupUser
             .put(HistoryMeta.get().getKind(), "H")
@@ -57,6 +61,7 @@ public final class KeyUtil {
             .put(PaymentMeta.get().getKind(), "P") //Payment
             .put(PaymentWorkflowMeta.get().getKind(), "pw") //PaymentWorkflow
             .put(RepeatDetailsMeta.get().getKind(), "R") //RepeatDetails
+            .put(SequenceMeta.get().getKind(), "s") //Subscription
             .put(SubscriptionMeta.get().getKind(), "S") //Subscription
             .put(TransactionMeta.get().getKind(), "T") //Transaction
             .put(TransferMeta.get().getKind(), "TR") //Transfer

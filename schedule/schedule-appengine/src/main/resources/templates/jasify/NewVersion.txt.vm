@@ -1,0 +1,18 @@
+#set($title="New Version $version.toShortVersionString()")
+#@textMail($title)
+
+Dear JASIFY Team,
+
+A new version has been started in prod!
+
+Version       : $version.Version
+Deploy Version: $version.DeployVersion
+Timestamp     : $version.Timestamp
+Branch        : $version.Branch
+Number        : $version.Number
+
+Try it out!
+    $app.Url
+
+Go team JASIFY!!!
+#end

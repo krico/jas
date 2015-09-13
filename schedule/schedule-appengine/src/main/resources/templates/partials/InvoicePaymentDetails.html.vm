@@ -1,0 +1,35 @@
+#if($payment)
+<table>
+    <tr>
+        <th colspan="2" #style("th.details-title")>Invoice Details</th>
+    </tr>
+    <tr>
+        <th #style("th") align="left">Invoice #:</th>
+        <td #style("td") align="left">$kut.keyToString($payment.Id)</td>
+    </tr>
+    <tr>
+        <th #style("th") align="left">Date <small>(dd/mm/yy)</small>:</th>
+        <td #style("td") align="left">
+            $mut.dateShort($payment.Created)
+            <i>(pay within $payment.ExpireDays days)</i>
+        </td>
+    </tr>
+    <tr>
+        <th #style("th") align="left">Attachment:</th>
+        #set($attachment = $mut.attachment($payment))
+        <td #style("td") align="left">$attachment.Name</td>
+    </tr>
+    <tr>
+        <th #style("th") align="left">Reference Code:</th>
+        <td #style("td") align="left">
+            <nobr>$mut.formatReferenceCode($payment)</nobr>
+        </td>
+    </tr>
+    <tr>
+        <th #style("th") align="left">Amount:</th>
+        <td #style("td") align="left">
+            <nobr>$cut.formatCurrency($payment.Currency, $payment.Amount)</nobr>
+        </td>
+    </tr>
+</table>
+#end

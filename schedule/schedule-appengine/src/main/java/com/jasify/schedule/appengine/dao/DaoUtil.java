@@ -10,6 +10,7 @@ import com.jasify.schedule.appengine.memcache.Memcache;
 import com.jasify.schedule.appengine.model.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slim3.datastore.DatastoreUtil;
 import org.slim3.datastore.ModelMeta;
 
 import javax.annotation.Nonnull;
@@ -32,11 +33,30 @@ public final class DaoUtil {
 
     private static <T> Serializable marshall(@Nonnull ModelMeta<T> meta, T model) {
         if (model == null) return null;
-        return meta.modelToJson(model);
+
+        if (meta.getModelClass() != model.getClass()) {
+            // Serialize with meta of child class
+            //noinspection unchecked
+            meta = (ModelMeta<T>) DatastoreUtil.getModelMeta(model.getClass());
+        }
+        return new SerializedModel(model.getClass().getName(), meta.modelToJson(model));
     }
 
     private static <T> T unMarshall(@Nonnull ModelMeta<T> meta, Serializable cached) {
-        return meta.jsonToModel((String) cached);
+        if (cached instanceof String) {
+            return meta.jsonToModel((String) cached);
+        }
+        SerializedModel sm = (SerializedModel) cached;
+        if (meta.getModelClass().getName().equals(sm.className))
+            return meta.jsonToModel(sm.data);
+        try {
+            //noinspection unchecked
+            meta = (ModelMeta<T>) DatastoreUtil.getModelMeta(Class.forName(sm.className));
+            return meta.jsonToModel(sm.data);
+        } catch (Exception e) {
+            log.warn("Failed extract child [sm.class={}][sm.data={}]", sm.className, sm.data, e);
+            return null;
+        }
     }
 
     public static <T> T cachePut(@Nonnull Key id, @Nonnull ModelMeta<T> meta, T model, Expiration expiration) {
@@ -153,6 +173,24 @@ public final class DaoUtil {
         Memcache.deleteAll(deleteKeys, DEFAULT_MILLIS_NO_RE_ADD);
     }
 
+    static void clearMemoryCache() {
+        ContextCache.clear();
+    }
+
+    static void clearMemoryCache(Object deleteKey) {
+        ContextCache.delete(deleteKey);
+    }
+
+    private static class SerializedModel implements Serializable {
+        private String className;
+        private String data;
+
+        private SerializedModel(String className, String data) {
+            this.className = className;
+            this.data = data;
+        }
+    }
+
     private static class ContextCache {
 
         static void put(Object key, Object value) {
@@ -170,6 +208,10 @@ public final class DaoUtil {
 
         public static void delete(Object deleteKey) {
             UserContext.getCache().remove(deleteKey);
+        }
+
+        public static void clear() {
+            UserContext.getCache().clear();
         }
     }
 }

@@ -12,7 +12,12 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.balance.*;
+import com.jasify.schedule.appengine.model.Navigate;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
+import com.jasify.schedule.appengine.model.balance.Account;
+import com.jasify.schedule.appengine.model.balance.AccountUtil;
+import com.jasify.schedule.appengine.model.balance.BalanceService;
+import com.jasify.schedule.appengine.model.balance.BalanceServiceFactory;
 import com.jasify.schedule.appengine.model.cart.ShoppingCart;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.payment.*;
@@ -20,10 +25,7 @@ import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflowFactory;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
-import com.jasify.schedule.appengine.spi.dm.JasCheckoutPaymentRequest;
-import com.jasify.schedule.appengine.spi.dm.JasPaymentRequest;
-import com.jasify.schedule.appengine.spi.dm.JasPaymentResponse;
-import com.jasify.schedule.appengine.spi.dm.JasTransactionList;
+import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import com.jasify.schedule.appengine.util.TypeUtil;
@@ -55,6 +57,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
+                JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,
                 JasSubscriptionTransformer.class,
                 JasTransactionTransformer.class,
@@ -104,6 +107,12 @@ public class BalanceEndpoint {
                 CashPayment payment = createPaymentInternal(jasCaller, CashPaymentProvider.instance(), paymentRequest);
                 GenericUrl url = new GenericUrl(paymentRequest.getBaseUrl());
                 url.setFragment(CashPaymentProvider.ACCEPT_PATH + KeyUtil.keyToString(payment.getId()));
+                return new JasPaymentResponse(url.build());
+            }
+            case Invoice: {
+                InvoicePayment payment = createPaymentInternal(jasCaller, InvoicePaymentProvider.instance(), paymentRequest);
+                GenericUrl url = new GenericUrl(paymentRequest.getBaseUrl());
+                url.setFragment(InvoicePaymentProvider.CONFIRM_PATH + KeyUtil.keyToString(payment.getId()));
                 return new JasPaymentResponse(url.build());
             }
             default:

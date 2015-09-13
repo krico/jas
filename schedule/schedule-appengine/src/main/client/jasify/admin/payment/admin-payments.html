@@ -1,0 +1,167 @@
+<div class="card">
+    <div class="card-header">
+        <h2>{{ 'PAYMENTS' | translate }}
+            <small>
+                {{ 'PAYMENTS_DESCRIPTION' | translate }}
+            </small>
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="bootgrid-header container-fluid">
+            <div class="actionBar">
+                <form name="vm.paymentsForm">
+                    <div class="col-sm-6 col-lg-2">
+                        <div class="actions btn-block btn-default">
+                            <input name="fromDate" class="date-picker"
+                                   date-picker-options="vm.fromDateOptions"
+                                   ng-blur="vm.datesChanged()"
+                                   required ng-model="vm.fromDate">
+                            <small>{{'FROM'|translate}}</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-2">
+                        <div class="actions btn-block btn-default">
+                            <input name="toDate" class="date-picker"
+                                   date-picker-options="vm.toDateOptions"
+                                   ng-blur="vm.datesChanged()"
+                                   required ng-model="vm.toDate">
+                            <small>{{'TO'|translate}}</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-2">
+                        <div class="actions btn-group btn-block">
+                            <div class="dropdown btn-group btn-block">
+                                <button type="button" class="btn btn-default btn-block dropdown-toggle"
+                                        data-toggle="dropdown">
+                                <span ng-if="!vm.paymentType" class="dropdown-text">
+                                    {{ 'PAYMENT_STATE' | translate }}
+                                </span>
+                                <span ng-if="vm.paymentState" class="dropdown-text">
+                                    {{vm.paymentState}}
+                                </span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li ng-class="{ 'active': !vm.paymentState }">
+                                        <a href prevent="click" ng-click="vm.selectPaymentState(false)"
+                                           class="dropdown-item dropdown-item-button">
+                                            <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{'SHOW_ALL' |
+                                            translate}}</a>
+                                    </li>
+                                    <li ng-repeat="state in vm.paymentStates"
+                                        ng-class="{ 'active': vm.paymentState == state }">
+                                        <a href prevent="click" ng-click="vm.selectPaymentState(state)"
+                                           class="dropdown-item dropdown-item-button">
+                                            {{state}}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-2">
+                        <div class="actions btn-group btn-block">
+                            <div class="dropdown btn-group btn-block">
+                                <button type="button" class="btn btn-default btn-block dropdown-toggle"
+                                        data-toggle="dropdown">
+                                <span ng-if="!vm.paymentType" class="dropdown-text">
+                                    {{ 'PAYMENT_TYPE' | translate }}
+                                </span>
+                                <span ng-if="vm.paymentType" class="dropdown-text">
+                                    {{vm.paymentType}}
+                                </span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li ng-class="{ 'active': !vm.paymentType }">
+                                        <a href prevent="click" ng-click="vm.selectPaymentType(false)"
+                                           class="dropdown-item dropdown-item-button">
+                                            <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{'SHOW_ALL' |
+                                            translate}}</a>
+                                    </li>
+                                    <li ng-repeat="type in vm.paymentTypes"
+                                        ng-class="{ 'active': vm.paymentType == type }">
+                                        <a href prevent="click" ng-click="vm.selectPaymentType(type)"
+                                           class="dropdown-item dropdown-item-button">
+                                            {{type}}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-4">
+                        <div class="search form-group" jas-has-feedback>
+                            <div class="input-group">
+                                <span class="input-group-addon glyphicon-search"></span>
+                                <input ng-change="vm.referenceCodeChanged()"
+                                       ng-model-options="{ debounce: {default:500, blur:0}, updateOn: 'default blur' }"
+                                       ng-model="vm.referenceCode"
+                                       reference-code
+                                       type="text" name="referenceCode" id="referenceCode"
+                                       class="search-field form-control"
+                                       placeholder="{{ 'REFERENCE_CODE' | translate }}">
+                            </div>
+                            <jas-feedback-icon-valid field="vm.paymentsForm.referenceCode"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.paymentsForm.referenceCode"></jas-feedback-icon-invalid>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <table id="payment-list" class="table table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>{{ 'ID' | translate }}</th>
+            <th>{{ 'CREATED' | translate }}</th>
+            <th>{{ 'PAYMENT_TYPE' | translate }}</th>
+            <th>{{ 'PAYMENT_STATE' | translate }}</th>
+            <th>{{ 'CURRENCY' | translate }}</th>
+            <th>{{ 'AMOUNT' | translate }}</th>
+            <th>{{ 'FEE' | translate }}</th>
+            <th>{{ 'FEE_REAL' | translate }}</th>
+            <th>{{ 'USER' | translate }}</th>
+            <th>{{ 'TRANSFER' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="payment in vm.displayPayments">
+            <td class="row-commands">
+                <row-edit action="vm.viewPayment(payment)"></row-edit>
+            </td>
+            <td>{{payment.id}}</td>
+            <td class="created">
+                <nobr>{{payment.created | amDateFormat:'L LT' }}</nobr>
+            </td>
+            <td>{{payment.type}}</td>
+            <td><span payment-state="payment.state"></span></td>
+            <td>{{payment.currency}}</td>
+            <td>{{payment.amount | number: 2}}</td>
+            <td>{{payment.fee | number: 2}}</td>
+            <td>{{payment.realFee | number: 2}}</td>
+            <td>{{payment.userId}}</td>
+            <td>{{payment.transferId}}</td>
+        </tr>
+        <tr ng-if="results.length == 0">
+            <td colspan="3">No results found...</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="bootgrid-footer container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
+                            boundary-links="true" rotate="true">
+                </pagination>
+            </div>
+            <div class="col-sm-6 infoBar">
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.displayPayments.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
+            </div>
+        </div>
+    </div>
+</div>

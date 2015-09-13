@@ -1,0 +1,55 @@
+#if( ($subscriptions && !$subscriptions.Empty) || ($executions && !$executions.Empty))
+<table width="80%">
+    <th colspan="6" #style("th.details-title")>Subscription Details</th>
+    <tr>
+        <th #style("th") align="left" colspan="2">Period (dd/mm/yy)</th>
+        <th #style("th") align="left">Activity</th>
+        <th #style("th") align="left">Purchased from</th>
+        <th #style("th") align="left">Price</th>
+        <th #style("th") align="left">Ref #</th>
+    </tr>
+    #foreach($subscription in $subscriptions)
+        #set($activity = $mut.activity($subscription))
+        #set($organization = $mut.organization($activity))
+        #if( ($foreach.count % 2) == 0 )
+            #set($cl=".odd-row")
+        #else
+            #set($cl=".even-row")
+        #end
+        <tr #style($cl)>
+            <td #style("td") colspan="2">$mut.formatPeriodShort($activity)</td>
+            <td #style("td")>$activity.Name</td>
+            <td #style("td")>$organization.Name</td>
+            <td #style("td")>$cut.formatCurrency($activity.Currency, $activity.Price)</td>
+            <td #style("td")>$kut.keyToString($subscription.Id)</td>
+        </tr>
+    #end
+    #foreach($execution in $executions)
+        #set($activityPackage = $mut.activityPackage($execution))
+        #set($organization = $mut.organization($activityPackage))
+        <tr #style(".activity-package")>
+            <th #style(".activity-package") colspan="3">Package: $activityPackage.Name</th>
+            <td #style("td")>$organization.Name</td>
+            <td #style("td")>$cut.formatCurrency($activityPackage.Currency, $activityPackage.Price)</td>
+            <td #style("td")>$kut.keyToString($execution.Id)</td>
+        </tr>
+        #foreach($subscription in $mut.subscriptions($execution))
+            #set($activity = $mut.activity($subscription))
+            #set($organization = $mut.organization($activity))
+            #if( ($foreach.count % 2) == 0 )
+                #set($cl=".odd-row")
+            #else
+                #set($cl=".even-row")
+            #end
+            <tr #style($cl)>
+                <td #style("td") #style(".activity-package-subscription")>&nbsp;</td>
+                <td #style("td")>$mut.formatPeriodShort($activity)</td>
+                <td #style("td")>$activity.Name</td>
+                <td #style("td")>$organization.Name</td>
+                <td #style("td")>-</td>
+                <td #style("td")>$kut.keyToString($subscription.Id)</td>
+            </tr>
+        #end
+    #end
+</table>
+#end

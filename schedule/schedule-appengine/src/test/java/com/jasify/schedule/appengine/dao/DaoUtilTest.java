@@ -23,6 +23,10 @@ public class DaoUtilTest {
         return TestHelper.populateBean(Example.class, "id");
     }
 
+    static ExampleChild createExampleChild() {
+        return TestHelper.populateBean(ExampleChild.class, "id");
+    }
+
     @Before
     public void setup() {
         TestHelper.initializeDatastore();
@@ -111,5 +115,15 @@ public class DaoUtilTest {
         assertNotNull(optional);
         assertTrue(optional.isPresent());
         assertEquals(example, optional.get());
+    }
+
+    @Test
+    public void testCacheGetInheritance(){
+        Key id = Datastore.allocateId(Example.class);
+        ExampleChild example = createExampleChild();
+        DaoUtil.cachePut(id, META, example);
+        assertTrue(DaoUtil.cacheGet(id, META) instanceof ExampleChild);
+        DaoUtil.clearMemoryCache();
+        assertTrue(DaoUtil.cacheGet(id, META) instanceof ExampleChild);
     }
 }

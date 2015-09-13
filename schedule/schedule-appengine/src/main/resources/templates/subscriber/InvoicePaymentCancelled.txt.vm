@@ -1,0 +1,9 @@
+#set($title="Invoice Payment Canceled")
+#@textMail($title)
+
+Dear $mut.name($user),
+
+We are sorry to inform you that your Invoice #: $kut.keyToString($payment.Id) and all subscriptions associated with it were cancelled.
+
+
+#end

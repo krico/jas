@@ -1,0 +1,9 @@
+#set($title="User '$mut.name($user)' Invoice Cancelled")
+#@textMail($title)
+Dear $organization.Name,
+
+We are sorry to inform you that the invoice payment of '$mut.name($user)', and all subscriptions associated with it were cancelled.
+
+Regards,
+Jasify.
+#end

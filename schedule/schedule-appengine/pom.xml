@@ -111,22 +111,11 @@
         <!-- END: frameworks I learned to love -->
 
         <!-- BEGIN: google appengine frameworks, originally for oauth, but probably much more -->
+        <!-- api client -->
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client-gson</artifactId>
             <version>${jasify.googleapi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.oauth-client</groupId>
-            <artifactId>google-oauth-client</artifactId>
-            <!--<version>${jasify.googleapi.version}</version>-->
-            <version>1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.oauth-client</groupId>
-            <artifactId>google-oauth-client-servlet</artifactId>
-            <!--<version>${jasify.googleapi.version}</version>-->
-            <version>1.19.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
@@ -138,11 +127,21 @@
             <artifactId>google-api-client-java6</artifactId>
             <version>${jasify.googleapi.version}</version>
         </dependency>
+        <!-- oauth client -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>${jasify.googleoauth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-servlet</artifactId>
+            <version>${jasify.googleoauth.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-appengine</artifactId>
-            <!--<version>${jasify.googleapi.version}</version>-->
-            <version>1.19.0</version>
+            <version>${jasify.googleoauth.version}</version>
         </dependency>
         <!-- END: google appengine frameworks, originally for oauth, but probably much more -->
 
@@ -151,7 +150,7 @@
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-oauth2</artifactId>
-            <version>v2-rev83-${jasify.googleapi.version}</version>
+            <version>v2-rev93-${jasify.googleapi.version}</version>
         </dependency>
         <!-- END: Google API services -->
 
@@ -194,6 +193,20 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.10</version>
+        </dependency>
+
+        <!-- iText (PDF generation) -->
+        <dependency>
+            <groupId>fr.opensagres.xdocreport.itext-gae</groupId>
+            <artifactId>itext-gae</artifactId>
+            <version>4.2.0-1</version>
+        </dependency>
+
+        <!-- Velocity template engine -->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
         </dependency>
 
         <!-- Test Dependencies -->

@@ -4,8 +4,8 @@ import com.google.api.client.util.Maps;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 
@@ -171,4 +171,48 @@ public class BaseCachingDaoTest extends BaseDaoTest {
         }
     }
 
+    /**
+     * Reproduce <a href="https://github.com/krico/jas/issues/684">#684</a>
+     */
+    @Test
+    public void testCacheAndInheritance() throws Exception {
+        ExampleChild child = new ExampleChild();
+        child.setChildField("I am who I am...");
+        dao.save(child);
+
+        //Put it in cache
+        Example exampleNotInCache = dao.get(child.getId());
+        assertTrue(exampleNotInCache instanceof ExampleChild);
+
+        Example exampleFromMemoryCache = dao.get(child.getId());
+        assertTrue(exampleFromMemoryCache instanceof ExampleChild);
+
+        //Clear memory cache
+        DaoUtil.clearMemoryCache(child.getId());
+        Example exampleFromSerializedCache = dao.get(child.getId());
+        assertTrue(exampleFromSerializedCache instanceof ExampleChild);
+    }
+
+    /**
+     * Reproduce <a href="https://github.com/krico/jas/issues/684">#684</a>
+     */
+    @Test
+    public void testCacheAndInheritanceOrNull() throws Exception {
+        ExampleChild child = new ExampleChild();
+        child.setChildField("I am who I am...");
+        dao.save(child);
+
+        //Put it in cache
+        Example exampleNotInCache = dao.getOrNull(child.getId());
+        assertTrue(exampleNotInCache instanceof ExampleChild);
+
+        Example exampleFromMemoryCache = dao.getOrNull(child.getId());
+        assertTrue(exampleFromMemoryCache instanceof ExampleChild);
+
+        //Clear memory cache
+        DaoUtil.clearMemoryCache(child.getId());
+        Example exampleFromSerializedCache = dao.getOrNull(child.getId());
+        assertTrue(exampleFromSerializedCache instanceof ExampleChild);
+
+    }
 }

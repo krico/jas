@@ -1,10 +1,15 @@
 package com.jasify.schedule.appengine.model;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.common.net.MediaType;
+import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.dao.common.RepeatDetailsDao;
 import com.jasify.schedule.appengine.model.activity.*;
+import com.jasify.schedule.appengine.model.attachment.Attachment;
+import com.jasify.schedule.appengine.model.attachment.AttachmentHelper;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
@@ -17,6 +22,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -36,6 +42,19 @@ class SchemaMigrationInitialLoad {
 
     static SchemaMigrationInitialLoad instance() {
         return new SchemaMigrationInitialLoad();
+    }
+
+    private static File sourceRoot() {
+        File sourceRoot = new File(".").getAbsoluteFile();
+        do {
+            if (!new File(sourceRoot, "pom.xml").isFile()) continue;
+            if (!new File(sourceRoot, "README.md").isFile()) continue;
+            if (!new File(sourceRoot, "repo").isDirectory()) continue;
+            if (!new File(sourceRoot, "schedule").isDirectory()) continue;
+            return sourceRoot;
+
+        } while (sourceRoot.isDirectory() && (sourceRoot = sourceRoot.getParentFile()) != null);
+        return null;
     }
 
     void createInitialLoad(String loadType) throws Exception {
@@ -208,7 +227,9 @@ class SchemaMigrationInitialLoad {
             activityPackageOdd.setItemCount(odd.size() - 2);
 
             activityService.addActivityPackage(activityPackageOdd, odd);
+
         }
+
         HistoryHelper.addMessage("Created several activities and other things");
 
     }

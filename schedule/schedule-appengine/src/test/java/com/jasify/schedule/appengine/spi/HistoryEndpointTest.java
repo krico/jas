@@ -6,11 +6,13 @@ import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.dao.history.HistoryDao;
 import com.jasify.schedule.appengine.model.history.History;
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -51,7 +53,8 @@ public class HistoryEndpointTest {
     public void testGetHistoriesDefaultsToTimeWindow() throws Exception {
         long now = System.currentTimeMillis();
         Date start = new Date(now - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS + 1000);
-        Date outside = new Date(now - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS - 1000);
+        Date outside = DateUtils.truncate(new Date(now - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS), Calendar.HOUR);
+        outside = new Date(outside.getTime() - 1);
 
         History inScope = new History();
         inScope.setCreated(start);
@@ -71,9 +74,10 @@ public class HistoryEndpointTest {
 
     @Test
     public void testGetHistoriesToDateDefaultsToTimeWindowBefore() throws Exception {
-        long then = 19760715;
-        Date start = new Date(then - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS + 1000);
-        Date outside = new Date(then - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS - 1000);
+        long now = System.currentTimeMillis();
+        Date start = new Date(now - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS + 1000);
+        Date outside = DateUtils.truncate(new Date(now - HistoryEndpoint.DEFAULT_TIME_WINDOW_MILLIS), Calendar.HOUR);
+        outside = new Date(outside.getTime() - 1);
 
         History inScope = new History();
         inScope.setCreated(start);
@@ -85,7 +89,7 @@ public class HistoryEndpointTest {
         assertEquals(inScope.getId(), ids.get(0));
         assertEquals(outOfScope.getId(), ids.get(1));
 
-        List<History> histories = endpoint.getHistories(JasifyEndpointTest.newAdminCaller(99), null, new Date(then));
+        List<History> histories = endpoint.getHistories(JasifyEndpointTest.newAdminCaller(99), null, new Date(now));
         assertNotNull(histories);
         assertEquals(1, histories.size());
         assertEquals(inScope.getId(), histories.get(0).getId());

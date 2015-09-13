@@ -5,5 +5,5 @@ package com.jasify.schedule.appengine.model.payment;
  * @since 11/01/15.
  */
 public enum PaymentTypeEnum {
-    PayPal, Cash
+    PayPal, Cash, Invoice
 }

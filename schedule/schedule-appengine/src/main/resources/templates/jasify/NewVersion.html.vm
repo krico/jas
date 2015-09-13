@@ -1,0 +1,25 @@
+#set($title="New Version $version.toShortVersionString()")
+#@htmlMail($title)
+    #@box($title)
+    <p><b>Dear JASIFY Team,</b></p>
+
+    <p>
+        A new version has been started in prod!
+    </p>
+        #@fieldValueTable()
+            #fieldValueRow("Version", $version.Version)
+            #fieldValueRow("Deploy Version", $version.DeployVersion)
+            #fieldValueRow("Timestamp", $version.Timestamp)
+            #fieldValueRow("Branch", $version.Branch)
+            #fieldValueRow("Number", $version.Number)
+        #end
+    <p>
+        <a href="$app.Url">Try it out</a>!<br/>
+        $app.Url
+    </p>
+
+    <p>
+        Go team JASIFY!!!
+    </p>
+    #end
+#end

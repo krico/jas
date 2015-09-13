@@ -1,6 +1,6 @@
 package com.jasify.schedule.appengine.model.balance;
 
-import com.google.appengine.api.datastore.Key;
+import com.jasify.schedule.appengine.model.HasId;
 import org.slim3.datastore.ModelRef;
 
 /**
@@ -9,8 +9,6 @@ import org.slim3.datastore.ModelRef;
  * @author krico
  * @since 22/02/15.
  */
-public interface HasTransfer {
-    Key getId();
-
+public interface HasTransfer extends HasId {
     ModelRef<Transfer> getTransferRef();
 }

@@ -4,6 +4,8 @@ import com.google.appengine.api.datastore.*;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.tools.development.testing.*;
 import com.google.common.base.Throwables;
+import com.jasify.schedule.appengine.communication.ApplicationContext;
+import com.jasify.schedule.appengine.communication.ApplicationContextImpl;
 import com.jasify.schedule.appengine.meta.activity.*;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
@@ -125,7 +127,12 @@ public final class TestHelper {
     }
 
     public static File baseDir() {
-        File file = new File(".");
+        File file = null;
+        try {
+            file = new File(".").getCanonicalFile();
+        } catch (IOException e) {
+            fail("Can't find baseDir: " + e);
+        }
         do {
             if (new File(file, "pom.xml").exists() &&
                     new File(file, "README.md").exists() &&
@@ -391,20 +398,6 @@ public final class TestHelper {
         });
     }
 
-    public static class PriceRandomizer implements Randomizer<Double> {
-        @Override
-        public Double getRandomValue() {
-            return (double) (new RandomDataGenerator()).nextLong(0, (long) Double.MAX_VALUE);
-        }
-    }
-
-    public static class MaxCountRandomizer implements Randomizer<Integer> {
-        @Override
-        public Integer getRandomValue() {
-            return new Long(((new RandomDataGenerator()).nextLong(1, (long) Integer.MAX_VALUE))).intValue();
-        }
-    }
-
     public static Organization createOrganization(boolean store) {
         Organization organization = com.jasify.schedule.appengine.TestHelper.populateBean(Organization.class, "id", "lcName", "organizationMemberListRef");
         if (store) {
@@ -478,17 +471,6 @@ public final class TestHelper {
         return activityPackageExecution;
     }
 
-//    public static ActivityPackageActivity createActivityPackageActivity(ActivityPackage activityPackage, Activity activity, boolean store) {
-//        ActivityPackageActivity activityPackageActivity = new ActivityPackageActivity();
-//        activityPackageActivity.getActivityRef().setKey(activity.getId());
-//        activityPackageActivity.getActivityPackageRef().setKey(activityPackage.getId());
-//        if (store) {
-//            activityPackageActivity.setId(Datastore.allocateId(activityPackage.getId(), ActivityPackageExecutionMeta.get()));
-//            Datastore.put(activityPackageActivity);
-//        }
-//        return activityPackageActivity;
-//    }
-
     public static Subscription createSubscription(User user, Activity activity, boolean store) {
         PopulatorBuilder populatorBuilder = new PopulatorBuilder();
         Populator populator = populatorBuilder.build();
@@ -502,15 +484,45 @@ public final class TestHelper {
         return subscription;
     }
 
+    public static ActivityPackageSubscription createActivityPackageSubscription(User user, Activity activity, ActivityPackageExecution activityPackageExecution, boolean store) {
+        PopulatorBuilder populatorBuilder = new PopulatorBuilder();
+        Populator populator = populatorBuilder.build();
+        ActivityPackageSubscription subscription = populator.populateBean(ActivityPackageSubscription.class, "id", "activityRef", "userRef", "transferRef", "activityPackageExecutionRef");
+        subscription.getActivityRef().setKey(activity.getId());
+        subscription.getUserRef().setKey(user.getId());
+        subscription.getActivityPackageExecutionRef().setModel(activityPackageExecution);
+        if (store) {
+            subscription.setId(Datastore.allocateId(user.getId(), SubscriptionMeta.get()));
+            Datastore.put(subscription);
+        }
+        return subscription;
+    }
+
     public static ActivityType createActivityType(boolean storeAll) {
         Organization organization = createOrganization(storeAll);
         return createActivityType(organization, storeAll);
     }
 
     public static Activity createActivity(boolean storeAll) {
-        ActivityType activityType = createActivityType(storeAll);
+        Organization organization = createOrganization(true);
+        ActivityType activityType = createActivityType(organization, true);
         return createActivity(activityType, storeAll);
     }
+
+    public static ApplicationContext.App createApplicationContextApp() {
+        return new ApplicationContext.App() {
+            @Override
+            public String getLogo() {
+                return getUrl() + ApplicationContextImpl.LOGO_PATH;
+            }
+
+            @Override
+            public String getUrl() {
+                return "http://localhost:8080";
+            }
+        };
+    }
+
 
     public static Subscription createSubscription(boolean storeAll) {
         User user = createUser(storeAll);
@@ -525,5 +537,19 @@ public final class TestHelper {
             Datastore.put(user);
         }
         return user;
+    }
+
+    public static class PriceRandomizer implements Randomizer<Double> {
+        @Override
+        public Double getRandomValue() {
+            return (double) (new RandomDataGenerator()).nextLong(0, (long) Double.MAX_VALUE);
+        }
+    }
+
+    public static class MaxCountRandomizer implements Randomizer<Integer> {
+        @Override
+        public Integer getRandomValue() {
+            return new Long(((new RandomDataGenerator()).nextLong(1, (long) Integer.MAX_VALUE))).intValue();
+        }
     }
 }

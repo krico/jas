@@ -10,8 +10,9 @@
     <url>https://github.com/krico/jas</url>
 
     <properties>
-        <jasify.appengine.sdk.version>1.9.18</jasify.appengine.sdk.version>
-        <jasify.googleapi.version>1.19.1</jasify.googleapi.version>
+        <jasify.appengine.sdk.version>1.9.24</jasify.appengine.sdk.version>
+        <jasify.googleapi.version>1.20.0</jasify.googleapi.version>
+        <jasify.googleoauth.version>1.20.0</jasify.googleoauth.version>
         <jasify.slf4j.version>1.7.10</jasify.slf4j.version>
         <jasify.repository>${project.basedir}</jasify.repository>
         <github.global.server>github</github.global.server>

@@ -129,11 +129,6 @@ public class MailParserTest {
         TestHelper.cleanupDatastore();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testNullSubstitution() throws Exception {
-        MailParser.createSubscriberPasswordRecoveryEmail(null);
-    }
-
     @Test
     public void testDecimalFormatting() throws Exception {
         this.activity1.setPrice(20.0000001);
@@ -165,40 +160,6 @@ public class MailParserTest {
         text = mailParser.getText();
         assert (!text.contains("Subscriber    : " + user.getRealName()));
         assert (text.contains("Subscriber    : " + user.getName()));
-    }
-
-    @Test
-    public void testJasifyUserSignUpEmailAsText() throws Exception {
-        MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
-        String text = mailParser.getText();
-
-        assert (text.contains("Name    : " + user.getRealName()));
-        assert (text.contains("Username: " + user.getName()));
-    }
-
-    @Test
-    public void testJasifyUserSignUpEmailAsHtml() throws Exception {
-        MailParser mailParser = MailParser.createJasifyUserSignUpEmail(user);
-        String html = mailParser.getHtml();
-
-        assert (html.contains(user.getRealName()));
-        assert (html.contains(user.getName()));
-    }
-
-    @Test
-    public void testSubscriberPasswordRecoveryAsText() throws Exception {
-        MailParser mailParser = MailParser.createSubscriberPasswordRecoveryEmail("PasswordRecoveryUrl");
-        String text = mailParser.getText();
-
-        assert (text.contains("Click on the link below to reset your password: PasswordRecoveryUrl"));
-    }
-
-    @Test
-    public void testSubscriberPasswordRecoveryAsHtml() throws Exception {
-        MailParser mailParser = MailParser.createSubscriberPasswordRecoveryEmail("PasswordRecoveryUrl");
-        String html = mailParser.getHtml();
-
-        assert (html.contains("PasswordRecoveryUrl"));
     }
 
     @Test
@@ -471,17 +432,5 @@ public class MailParserTest {
 
         assert (html.contains("Dear Fred BlaBla"));
         assert (html.contains("MagicUrl"));
-    }
-
-    @Test
-    public void testNewVersionEmail() throws Exception {
-        MailParser mailParser = MailParser.createNewVersionEmail("aev", "Beta", "222", "ABC", "#2", "https://URL");
-        String text = mailParser.getText();
-
-        assert (text.contains("Version    : Beta"));
-        assert (text.contains("Timestamp  : 222"));
-        assert (text.contains("Branch     : ABC"));
-        assert (text.contains("Number     : #2"));
-        assert (text.contains("Try it out at: https://URL"));
     }
 }

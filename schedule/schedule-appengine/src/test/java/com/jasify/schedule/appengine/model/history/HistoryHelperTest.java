@@ -8,6 +8,8 @@ import com.jasify.schedule.appengine.http.HttpUserSession;
 import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
+import com.jasify.schedule.appengine.model.payment.InvoicePayment;
+import com.jasify.schedule.appengine.model.payment.PayPalPayment;
 import com.jasify.schedule.appengine.model.users.PasswordRecovery;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UserLogin;
@@ -537,4 +539,56 @@ public class HistoryHelperTest {
         SubscriptionHistory subscriptionHistory = (SubscriptionHistory) history;
         assertNotNull(subscriptionHistory.getSubscriptionRef());
     }
+
+    @Test
+    public void testAddPaymentExecuted() throws Exception {
+        InvoicePayment payment = new InvoicePayment();
+        payment.getUserRef().setModel(user);
+
+        User current = new User();
+        Datastore.put(payment, user, current);
+
+        UserContext.setCurrentUser(new HttpUserSession(current, false));
+
+        HistoryHelper.addPaymentExecuted(payment);
+
+        History history = getLastHistory();
+        assertTrue(history instanceof PaymentHistory);
+        PaymentHistory ph = (PaymentHistory) history;
+        assertEquals(HistoryTypeEnum.PaymentExecuted, ph.getType());
+        assertEquals(current.getId(), ph.getCurrentUserRef().getKey());
+        assertNotNull(ph.getDescription());
+        assertTrue(ph.getDescription().contains(KeyUtil.keyToString(payment.getId())));
+        assertTrue(ph.getDescription().contains(KeyUtil.keyToString(user.getId())));
+        assertTrue(ph.getDescription().contains(KeyUtil.keyToString(current.getId())));
+        assertTrue(ph.getDescription().contains(payment.getType().toString()));
+        assertEquals(payment.getId(), ph.getPaymentRef().getKey());
+    }
+
+    @Test
+    public void testAddPaymentCancelled() throws Exception {
+        PayPalPayment payment = new PayPalPayment();
+        payment.getUserRef().setModel(user);
+
+        User current = new User();
+        Datastore.put(payment, user, current);
+
+        UserContext.setCurrentUser(new HttpUserSession(current, false));
+
+        HistoryHelper.addPaymentCancelled(payment);
+
+        History history = getLastHistory();
+        assertTrue(history instanceof PaymentHistory);
+        PaymentHistory ph = (PaymentHistory) history;
+        assertEquals(HistoryTypeEnum.PaymentCancelled, ph.getType());
+        assertEquals(current.getId(), ph.getCurrentUserRef().getKey());
+        assertNotNull(ph.getDescription());
+        assertTrue(ph.getDescription().contains(KeyUtil.keyToString(payment.getId())));
+        assertTrue(ph.getDescription().contains(KeyUtil.keyToString(user.getId())));
+        assertTrue(ph.getDescription().contains(KeyUtil.keyToString(current.getId())));
+        assertTrue(ph.getDescription().contains(payment.getType().toString()));
+        assertEquals(payment.getId(), ph.getPaymentRef().getKey());
+    }
+
+
 }

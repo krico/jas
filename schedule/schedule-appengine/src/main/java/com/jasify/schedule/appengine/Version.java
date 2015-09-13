@@ -1,5 +1,6 @@
 package com.jasify.schedule.appengine;
 
+import com.jasify.schedule.appengine.util.EnvironmentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ public final class Version {
     private static final long timestamp;
     private static final String version;
     private static final String timestampVersion;
+    public static Version INSTANCE = new Version();
 
     static {
         boolean _failed = false;
@@ -74,6 +76,10 @@ public final class Version {
 
     public static String getTimestampVersion() {
         return timestampVersion;
+    }
+
+    public static String getDeployVersion(){
+        return EnvironmentUtil.deployVersionName();
     }
 
     public static boolean isFailed() {

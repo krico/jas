@@ -1,0 +1,19 @@
+#set($title="New User '$mut.name($user)'")
+#@textMail($title)
+
+Dear JASIFY Team,
+
+A new user has signed up!
+
+Id       : $kut.keyToString($user.Id)
+Name     : $user.Name
+Real Name: $!user.RealName
+E-mail   : $user.Email
+Created  : $user.Created
+
+Check his profile!
+${app.Url}/#/admin/user/$kut.keyToString($user.Id)
+
+Go team JASIFY!!!
+#end
+

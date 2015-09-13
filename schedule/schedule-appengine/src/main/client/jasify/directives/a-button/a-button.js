@@ -65,7 +65,7 @@
             createReset: function (options) {
                 return new ButtonController(angular.extend({
                     buttonDefaultText: 'Reset',
-                    buttonSubmittingText: 'Reseting...',
+                    buttonSubmittingText: 'Resetting...',
                     buttonDefaultClass: 'btn-warning',
                     buttonSubmittingClass: 'btn-warning',
                     buttonSuccessText: 'Reset done'
@@ -78,6 +78,22 @@
                     buttonDefaultText: 'Update Password',
                     buttonSubmittingText: 'Saving...',
                     buttonSuccessText: 'Password updated'
+                });
+            },
+            createPaymentExecute: function () {
+                return new ButtonController({
+                    buttonDefaultText: 'Execute payment',
+                    buttonSubmittingText: 'Executing...',
+                    buttonSuccessText: 'Payment executed'
+                });
+            },
+            createPaymentCancel: function () {
+                return new ButtonController({
+                    buttonDefaultText: 'Cancel payment',
+                    buttonDefaultClass: 'btn-warning',
+                    buttonSubmittingText: 'Canceling...',
+                    buttonSubmittingClass: 'btn-warning',
+                    buttonSuccessText: 'Payment canceled'
                 });
             },
             createProfileSave: function () {

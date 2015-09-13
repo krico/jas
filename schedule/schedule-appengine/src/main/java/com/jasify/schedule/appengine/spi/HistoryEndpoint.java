@@ -8,7 +8,9 @@ import com.jasify.schedule.appengine.dao.history.HistoryDao;
 import com.jasify.schedule.appengine.model.history.History;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
 import com.jasify.schedule.appengine.spi.transform.*;
+import org.apache.commons.lang.time.DateUtils;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +37,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
+                JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,
                 JasSubscriptionTransformer.class,
                 JasTransactionTransformer.class,
@@ -54,14 +57,14 @@ public class HistoryEndpoint {
         mustBeAdmin(caller);
         if (fromDate == null && toDate == null) {
             // No date specified, we default to latest in time window
-            fromDate = new Date(System.currentTimeMillis() - DEFAULT_TIME_WINDOW_MILLIS);
+            fromDate = DateUtils.truncate(new Date(System.currentTimeMillis() - DEFAULT_TIME_WINDOW_MILLIS), Calendar.HOUR);
             return historyDao.listSince(fromDate);
         } else if (toDate == null) {
             // Only fromDate
             return historyDao.listSince(fromDate);
         } else if (fromDate == null) {
             // No start specified, default window until toDate
-            fromDate = new Date(toDate.getTime() - DEFAULT_TIME_WINDOW_MILLIS);
+            fromDate = DateUtils.truncate(new Date(toDate.getTime() - DEFAULT_TIME_WINDOW_MILLIS), Calendar.HOUR);
         }
         return historyDao.listBetween(fromDate, toDate);
     }

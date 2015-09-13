@@ -4,8 +4,7 @@ import com.google.appengine.api.datastore.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.Version;
-import com.jasify.schedule.appengine.mail.MailParser;
-import com.jasify.schedule.appengine.mail.MailServiceFactory;
+import com.jasify.schedule.appengine.communication.Communicator;
 import com.jasify.schedule.appengine.meta.activity.ActivityTypeMeta;
 import com.jasify.schedule.appengine.meta.users.UserDetailMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
@@ -58,12 +57,8 @@ public final class SchemaMigration {
             return false;
         }
         log.info("New version installed: {}", currentVersion);
-        String instanceVersion = deployVersionName + "/" + Version.toShortVersionString();
-        String subject = String.format("[Jasify] New Version In Prod [%s]", instanceVersion);
         try {
-            MailParser mailParser = MailParser.createNewVersionEmail(deployVersionName, Version.getVersion(), Version.getTimestampVersion(),
-                    Version.getBranch(), Version.getNumber(), EnvironmentUtil.defaultVersionUrl());
-            MailServiceFactory.getMailService().sendToApplicationOwners(subject, mailParser.getHtml(), mailParser.getText());
+            Communicator.notifyOfNewVersion();
         } catch (Exception e) {
             log.warn("Failed to notify jasify", e);
         }
@@ -202,7 +197,7 @@ public final class SchemaMigration {
             }
             ApplicationData.instance().setProperty(SchemaMigration.class.getName() + ".InitialLoadType", "e2e");
         } else {
-            File jasifyLocalConfig = new File(System.getProperty("user.home"), "jasify.json");
+            File jasifyLocalConfig = EnvironmentUtil.jasifyLocalConfig();
             if (!jasifyLocalConfig.exists()) {
                 log.error("You MUST create jasify.json (check DEVELOPER.md)!");
                 throw new IllegalStateException("You MUST create jasify.json (check DEVELOPER.md)!");

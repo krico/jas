@@ -1,0 +1,10 @@
+#set($title="Invoice Payment Canceled")
+#@htmlMail($title)
+    #@box($title)
+    <p #style("p")>Dear $mut.name($user),</p>
+    <p #style("p")>
+        We are sorry to inform you that your invoice, and all subscriptions associated with it were cancelled.
+    </p>
+        #invoicePaymentDetails($payment)
+    #end
+#end

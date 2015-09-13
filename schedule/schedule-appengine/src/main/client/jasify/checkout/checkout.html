@@ -1,15 +1,11 @@
 <script type="text/ng-template" id="checkoutButton.html">
-    <button ng-if="vm.paymentType == 'PayPal'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
+    <button ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
             ng-click="vm.createPayment()"
             class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
-        Continue to PayPal
+        {{vm.paymentType.button}}
     </button>
-    <button ng-if="vm.paymentType == 'Cash'" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
-            ng-click="vm.createPayment()"
-            class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
-        Continue and pay later
-    </button>
-    <button class="btn grow-on-small btn-default pull-right m-r-10 m-b-5 m-t-5" ng-show="vm.cancel" btn-href="{{vm.cancel}}">
+    <button class="btn grow-on-small btn-default pull-right m-r-10 m-b-5 m-t-5" ng-show="vm.cancel"
+            btn-href="{{vm.cancel}}">
         Cancel
     </button>
 </script>
@@ -25,6 +21,8 @@
             <tr class="checkout-title">
                 <th class="h3">Your Shopping Cart</th>
             </tr>
+            </thead>
+            <tbody>
             <tr>
                 <td align="center">
                     <table ng-if="!vm.isEmpty()" class="checkout-items">
@@ -59,7 +57,7 @@
                             </th>
                             <td>&nbsp;</td>
                         </tr>
-                        <tr ng-if="vm.paymentType == 'PayPal'">
+                        <tr ng-if="vm.paymentType.id == 'PayPal'">
                             <td>
                                 Handling Fee
                                 <sup>
@@ -78,10 +76,10 @@
                             <th>Grand Total</th>
                             <th></th>
                             <th class="checkout-price">
-                                <nobr ng-if="vm.paymentType == 'PayPal'">
+                                <nobr ng-if="vm.paymentType.id == 'PayPal'">
                                     {{vm.cart.currency}} {{vm.cart.grandTotal|number: 2}}
                                 </nobr>
-                                <nobr ng-if="vm.paymentType == 'Cash'">
+                                <nobr ng-if="vm.paymentType.id == 'Cash'">
                                     {{vm.cart.currency}} {{vm.cart.total|number: 2}}
                                 </nobr>
                             </th>
@@ -97,15 +95,17 @@
                 <td>
                     <form class="form-inline" name="PaymentTypeForm">
                         <div class="form-group form-group-sm">
-                            <label for="foo" class="small">Payment Method:</label>
-                            <select ng-options="item.id as item.label for item in vm.paymentTypes"
+                            <label for="paymentType" class="small">Payment Method:</label>
+                            <select ng-options="item as item.label for item in vm.paymentTypes"
                                     ng-model="vm.paymentType"
-                                    id="foo" class="btn btn-xs"></select>
+                                    id="paymentType" class="btn btn-xs"></select>
                         </div>
                     </form>
                 </td>
             </tr>
-            <tr ng-if="vm.paymentType == 'PayPal'">
+            </tbody>
+            <tfoot>
+            <tr ng-if="vm.paymentType.id == 'PayPal'">
                 <td>
                     <!-- PayPal Logo -->
                     <table border="0" cellpadding="10" cellspacing="0" align="center">
@@ -117,7 +117,8 @@
                                 <a href="https://www.paypal.com/uk/webapps/mpp/paypal-popup"
                                    title="How PayPal Works"
                                    onclick="javascript:window.open('https://www.paypal.com/uk/webapps/mpp/paypal-popup','WIPaypal','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700'); return false;">
-                                    <img class="paypal-logo" src="https://www.paypalobjects.com/webstatic/mktg/Logo/AM_mc_vs_ms_ae_UK.png"
+                                    <img class="paypal-logo"
+                                         src="https://www.paypalobjects.com/webstatic/mktg/Logo/AM_mc_vs_ms_ae_UK.png"
                                          border="0"
                                          alt="PayPal Acceptance Mark">
                                 </a>
@@ -127,7 +128,25 @@
                     <!-- PayPal Logo -->
                 </td>
             </tr>
-            </thead>
+            <tr ng-if="vm.paymentType.id == 'Invoice'">
+                <td>
+                    <!-- Invoice Logo -->
+                    <table border="0" cellpadding="10" cellspacing="0" align="center">
+                        <tr>
+                            <td align="center"></td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <img src="build/img/invoice-icon.png"
+                                     border="0"
+                                     alt="Electronic Invoice (Orange Inpayment Slip)">
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- Invoice Logo -->
+                </td>
+            </tr>
+            </tfoot>
         </table>
         <ng-include src="'checkoutButton.html'"></ng-include>
     </div>

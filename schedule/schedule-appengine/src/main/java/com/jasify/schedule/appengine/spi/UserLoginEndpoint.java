@@ -42,6 +42,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeSameUserOrA
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
                 JasOrganizationTransformer.class,
+                JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,
                 JasSubscriptionTransformer.class,
                 JasTransactionTransformer.class,

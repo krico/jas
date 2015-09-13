@@ -172,6 +172,7 @@ public final class ShoppingCartPaymentWorkflowMeta extends org.slim3.datastore.M
         org.slim3.datastore.json.Default decoder0 = new org.slim3.datastore.json.Default();
         reader = rootReader.newObjectReader("cartId");
         m.setCartId(decoder0.decode(reader, m.getCartId()));
+        reader = rootReader.newObjectReader("workflowHandler");
         reader = rootReader.newObjectReader("id");
         m.setId(decoder0.decode(reader, m.getId()));
         reader = rootReader.newObjectReader("created");

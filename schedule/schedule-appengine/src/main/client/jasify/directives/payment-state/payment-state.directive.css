@@ -1,0 +1,16 @@
+.payment-state-new {
+    color: #003cb3;
+}
+
+.payment-state-created {
+    color: #ffc200;
+}
+
+.payment-state-completed {
+    color: #004444;
+}
+
+.payment-state-canceled {
+    color: #710909;
+}
+

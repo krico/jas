@@ -1,8 +1,0 @@
-Dear JASIFY Team,
-
-A new user has signed up!
-
-Name    : %SubscriberName%
-Username: %UserName%
-
-Go team JASIFY!!!

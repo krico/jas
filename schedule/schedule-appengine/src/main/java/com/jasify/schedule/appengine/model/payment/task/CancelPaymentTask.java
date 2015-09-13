@@ -26,6 +26,10 @@ public class CancelPaymentTask implements DeferredTask {
         PaymentService paymentService = PaymentServiceFactory.getPaymentService();
         try {
             Payment payment = paymentService.getPayment(paymentId);
+            if (payment.getType() != PaymentTypeEnum.PayPal && payment.getType() != PaymentTypeEnum.Cash) {
+                log.warn("CancelTask executed for payment of type {}. Skipping execution.", payment.getType());
+                return;
+            }
             if (!payment.getState().isFinal()) {
                 if (executePayment(payment)) {
                     log.info("Payment is paid: " + paymentId);

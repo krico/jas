@@ -18,5 +18,7 @@ public enum HistoryTypeEnum {
     SubscriptionCreationFailed,
     SubscriptionCancelled,
     SubscriptionCancellationFailed,
+    PaymentExecuted,
+    PaymentCancelled,
     Message;
 }

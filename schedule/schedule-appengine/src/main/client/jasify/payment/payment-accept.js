@@ -39,7 +39,6 @@
                 vm.status = 'Payment processed! You will be redirected...';
                 $location.replace();
                 $location.search({paymentStatus: 'success'});
-                $log.debug('Redirecting to BrowserData.getPaymentAcceptRedirect()=' + BrowserData.getPaymentAcceptRedirect());
                 $location.path(BrowserData.getPaymentAcceptRedirect());
                 BrowserData.clearPaymentAcceptRedirect();
                 BrowserData.clearPaymentCancelRedirect();

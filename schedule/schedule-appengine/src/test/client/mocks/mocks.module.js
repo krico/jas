@@ -140,7 +140,16 @@
                 getAccounts: nop,
                 getTransactions: nop,
                 createCheckoutPayment: nop,
+                getPaymentInvoice: nop,
                 executePayment: nop
+            },
+            payments: {
+                getPaymentInvoice: nop,
+                get: nop,
+                queryByReferenceCode: nop,
+                executePayment: nop,
+                cancelPayment: nop,
+                query: nop
             },
             histories: {
                 query: nop
