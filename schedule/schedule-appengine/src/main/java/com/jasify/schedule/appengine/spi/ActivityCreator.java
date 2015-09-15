@@ -1,14 +1,18 @@
 package com.jasify.schedule.appengine.spi;
 
+import com.google.appengine.repackaged.org.joda.time.DateTimeZone;
 import com.jasify.schedule.appengine.model.FieldValueException;
 import com.jasify.schedule.appengine.model.ModelException;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.ActivityType;
 import com.jasify.schedule.appengine.model.activity.RepeatDetails;
+import com.jasify.schedule.appengine.util.InternationalizationUtil;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.chrono.ISOChronology;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wszarmach
@@ -17,6 +21,7 @@ import java.util.*;
 public class ActivityCreator {
 
     public static final int MaximumRepeatCounter = 25; // Maximum number of activities a repeat will create
+    private static final DateTimeZone ZurichZone = DateTimeZone.forID(InternationalizationUtil.ZURICH_TIME_ZONE_ID);
 
     private final Activity activity;
     private final ActivityType activityType;
@@ -38,7 +43,7 @@ public class ActivityCreator {
             case Weekly:
                 return addActivityRepeatTypeWeekly();
             case No:
-                return Arrays.asList(activity);
+                return Collections.singletonList(activity);
             default: // Safety check in case someone adds a new RepeatType but forgets to update this method
                 throw new FieldValueException("activity.repeatDetails.repeatType");
         }
@@ -59,14 +64,37 @@ public class ActivityCreator {
         return newActivity;
     }
 
+    /**
+     *
+     * @param fromDateTime: DateTime to increment
+     * @param days: Number of days to increment
+     * @return fromDateTime.plusDays(days). If increment moves over daylight saving interval will adjust hour value appropriately
+     */
+    private DateTime increment(DateTime fromDateTime, int days) {
+        DateTime toDateTime = fromDateTime.plusDays(days);
+
+        // If the offset changes we must have moved to the next interval
+        long fromHourOffset = TimeUnit.MILLISECONDS.toHours(ZurichZone.getOffset(fromDateTime.getMillis()));
+        long toHourOffset = TimeUnit.MILLISECONDS.toHours(ZurichZone.getOffset(toDateTime.getMillis()));
+
+        if (fromHourOffset != toHourOffset) {
+            int offset = (int) (fromHourOffset - toHourOffset);
+            toDateTime = toDateTime.plusHours(offset);
+        }
+
+        return toDateTime;
+    }
+
     private List<Activity> addActivityRepeatTypeDaily() throws ModelException {
-        DateTime start = new DateTime(activity.getStart());
-        DateTime finish = new DateTime(activity.getFinish());
+        // For DEV the local timezone is applied which breaks some tests
+        DateTime start = new DateTime(activity.getStart(), ISOChronology.getInstanceUTC());
+        DateTime finish = new DateTime(activity.getFinish(), ISOChronology.getInstanceUTC());
+
         List<Activity> activities = new ArrayList<>();
         while (activities.size() < MaximumRepeatCounter) {
             activities.add(createActivity(activity, activityType, repeatDetails, start.toDate(), finish.toDate()));
-            start = start.plusDays(repeatDetails.getRepeatEvery());
-            finish = finish.plusDays(repeatDetails.getRepeatEvery());
+            start = increment(start, repeatDetails.getRepeatEvery());
+            finish = increment(finish, repeatDetails.getRepeatEvery());
             if (repeatDetails.getRepeatUntilType() == RepeatDetails.RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
                 break;
             if (repeatDetails.getRepeatUntilType() == RepeatDetails.RepeatUntilType.Date && finish.toDate().getTime() > repeatDetails.getUntilDate().getTime())
@@ -106,8 +134,8 @@ public class ActivityCreator {
             if (repeatDays.contains(start.getDayOfWeek())) {
                 break;
             }
-            start = start.plusDays(1);
-            finish = finish.plusDays(1);
+            start = increment(start, 1);
+            finish = increment(finish, 1);
         }
 
         List<Activity> activities = new ArrayList<>();
@@ -121,8 +149,8 @@ public class ActivityCreator {
 
                 }
                 // Move to the next day
-                start = start.plusDays(1);
-                finish = finish.plusDays(1);
+                start = increment(start, 1);
+                finish = increment(finish, 1);
 
                 if (repeatDetails.getRepeatUntilType() == RepeatDetails.RepeatUntilType.Count && activities.size() == repeatDetails.getUntilCount())
                     repeatCompleted = true;
@@ -131,8 +159,8 @@ public class ActivityCreator {
             }
             // Jump to next period
             if (repeatEvery > 0) {
-                start = start.plusDays(repeatEvery);
-                finish = finish.plusDays(repeatEvery);
+                start = increment(start, repeatEvery);
+                finish = increment(finish, repeatEvery);
             }
         }
         return activities;
