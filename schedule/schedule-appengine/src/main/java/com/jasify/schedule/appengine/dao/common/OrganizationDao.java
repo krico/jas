@@ -98,11 +98,19 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
         });
     }
 
-    public List<Organization> byMemberUserId(long userId) throws EntityNotFoundException {
-        return byMemberUserId(Datastore.createKey(User.class, userId));
+    public List<Organization> getByMemberUserId(long userId) throws EntityNotFoundException {
+        return getByMemberUserId(Datastore.createKey(User.class, userId));
     }
 
-    public List<Organization> byMemberUserId(Key userId) throws EntityNotFoundException {
+    public List<Organization> getByMemberUserId(Key userId) throws EntityNotFoundException {
+        return get(getByMemberUserIdAsKeys(userId));
+    }
+
+    public List<Key> getByMemberUserIdAsKeys(long userId) throws EntityNotFoundException {
+        return getByMemberUserIdAsKeys(Datastore.createKey(User.class, userId));
+    }
+
+    public List<Key> getByMemberUserIdAsKeys(Key userId) throws EntityNotFoundException {
         List<OrganizationMember> organizationMembers = new OrganizationMemberDao().byUserId(userId);
         if (organizationMembers.isEmpty()) return Collections.emptyList();
         List<Key> organizationIds = new ArrayList<>();
@@ -111,7 +119,7 @@ public class OrganizationDao extends BaseCachingDao<Organization> {
             if (key != null) organizationIds.add(key);
         }
         if (organizationIds.isEmpty()) return Collections.emptyList();
-        return get(organizationIds);
+        return organizationIds;
     }
 
     public boolean isUserMemberOfAnyOrganization(Key userId) {

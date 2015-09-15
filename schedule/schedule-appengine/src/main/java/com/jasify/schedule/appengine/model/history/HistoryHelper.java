@@ -76,7 +76,7 @@ public final class HistoryHelper {
                 return subscriptionDao.get(subscriptionId);
             }
         } catch (EntityNotFoundException | IllegalArgumentException e) {
-            log.warn("Failed to get Subscription", e);
+            log.warn("Failed to get Subscription [{}]", subscriptionId, e);
         }
         return null;
     }
@@ -88,7 +88,7 @@ public final class HistoryHelper {
                 return activityDao.get(activityId);
             }
         } catch (EntityNotFoundException | IllegalArgumentException e) {
-            log.warn("Failed to get Activity", e);
+            log.warn("Failed to get Activity [{}]", activityId, e);
         }
         return null;
     }

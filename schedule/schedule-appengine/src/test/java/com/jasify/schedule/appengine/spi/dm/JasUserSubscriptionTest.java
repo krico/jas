@@ -2,7 +2,6 @@ package com.jasify.schedule.appengine.spi.dm;
 
 import com.jasify.schedule.appengine.TestHelper;
 import com.jasify.schedule.appengine.model.activity.Subscription;
-import com.jasify.schedule.appengine.util.KeyUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,8 +43,8 @@ public class JasUserSubscriptionTest {
         JasUserSubscription userSubscription = new JasUserSubscription(subscription);
         assertNotNull(userSubscription.getSubscription());
         assertNotNull(userSubscription.getActivity());
-        assertEquals(KeyUtil.keyToString(subscription.getId()), userSubscription.getSubscription().getId());
-        assertEquals(KeyUtil.keyToString(subscription.getActivityRef().getKey()), userSubscription.getActivity().getId());
+        assertEquals(subscription.getId(), userSubscription.getSubscription().getId());
+        assertEquals(subscription.getActivityRef().getKey(), userSubscription.getActivity().getId());
         assertFalse(userSubscription.isPaid());
     }
 
