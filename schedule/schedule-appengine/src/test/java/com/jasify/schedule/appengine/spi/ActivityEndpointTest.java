@@ -41,7 +41,6 @@ public class ActivityEndpointTest {
     public ExpectedException thrown = ExpectedException.none();
     private ActivityEndpoint endpoint;
     private Random generator = new Random();
-    DateTimeZone defaultTimeZone = DateTimeZone.getDefault();
 
     private User createUser() {
         User user = new User("@email.com");
@@ -119,14 +118,12 @@ public class ActivityEndpointTest {
 
     @Before
     public void before() {
-        DateTimeZone.setDefault(DateTimeZone.UTC);
         TestHelper.initializeDatastore();
         endpoint = new ActivityEndpoint();
     }
 
     @After
     public void after() {
-        DateTimeZone.setDefault(defaultTimeZone);
         TestHelper.cleanupDatastore();
     }
 
@@ -1350,18 +1347,16 @@ public class ActivityEndpointTest {
 
     @Test
     public void testAddActivityWithRepeatDetailsDaylightSavingsTest() throws Exception {
-        DateTimeZone zurichZone = DateTimeZone.forID(InternationalizationUtil.ZURICH_TIME_ZONE_ID);
-
         long time = System.currentTimeMillis();
         // Check a couple of transitions
         for (int count = 0; count < 5; count++) {
-            long nextDls = zurichZone.nextTransition(time);
+            long nextDls = InternationalizationUtil.ZURICH_DATE_TIME_ZONE.nextTransition(time);
             DateTime activityTime = new DateTime(nextDls).minusDays(1).withZone(DateTimeZone.UTC).withHourOfDay(20);
 
             Activity activity = createActivity(TestHelper.createOrganization(true), false);
             activity.setStart(activityTime.toDate());
             activity.setFinish(activityTime.plusHours(1).toDate());
-            long startHour = activityTime.withZone(zurichZone).getHourOfDay();
+            long startHour = activityTime.withZone(InternationalizationUtil.ZURICH_DATE_TIME_ZONE).getHourOfDay();
 
             RepeatDetails repeatDetails = new RepeatDetails();
             repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
@@ -1375,8 +1370,8 @@ public class ActivityEndpointTest {
             List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
 
             assertEquals(2, result.size());
-            assertEquals(startHour, new DateTime(result.get(0).getStart()).withZone(zurichZone).getHourOfDay());
-            assertEquals(startHour, new DateTime(result.get(1).getStart()).withZone(zurichZone).getHourOfDay());
+            assertEquals(startHour, new DateTime(result.get(0).getStart()).withZone(InternationalizationUtil.ZURICH_DATE_TIME_ZONE).getHourOfDay());
+            assertEquals(startHour, new DateTime(result.get(1).getStart()).withZone(InternationalizationUtil.ZURICH_DATE_TIME_ZONE).getHourOfDay());
             time = result.get(1).getStart().getTime();
         }
     }
