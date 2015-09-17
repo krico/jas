@@ -335,6 +335,16 @@
                     }
                 }
             })
+            .when('/admin/bookings', {
+                templateUrl: 'admin/bookings/admin-bookings.html',
+                controller: 'AdminBookingsController',
+                controllerAs: 'vm',
+                resolve: {
+                    allow: /*@ngInject*/ function (Allow) {
+                        return Allow.adminOrOrgMember();
+                    }
+                }
+            })
             .when('/admin/activity-packages/:organizationId?', {
                 templateUrl: 'admin/activity-package/admin-activity-packages.html',
                 controller: 'AdminActivityPackagesController',

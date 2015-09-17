@@ -54,7 +54,7 @@
             function fail(resp) {
                 vm.inProgress = false;
                 var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
-                jasDialogs.resultError(failedPleaseRetryTranslation, r);
+                jasDialogs.resultError(failedPleaseRetryTranslation, resp);
             }
         }
 
@@ -63,7 +63,6 @@
             var offset = (vm.pagination.page - 1) * limit;
 
             vm.subscriptions = vm.allSubscriptions.slice(offset, offset + limit);
-            vm.pagination.total = vm.queryHistories.length;
         }
 
         function perPage() {
