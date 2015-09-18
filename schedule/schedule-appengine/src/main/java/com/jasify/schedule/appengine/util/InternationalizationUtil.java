@@ -1,5 +1,7 @@
 package com.jasify.schedule.appengine.util;
 
+import com.google.appengine.repackaged.org.joda.time.DateTimeZone;
+
 import java.util.TimeZone;
 
 /**
@@ -12,6 +14,7 @@ public final class InternationalizationUtil {
 
     public static final String ZURICH_TIME_ZONE_ID = "Europe/Zurich";
     public static final TimeZone ZURICH_TIME_ZONE = TimeZone.getTimeZone(ZURICH_TIME_ZONE_ID);
+    public static final DateTimeZone ZURICH_DATE_TIME_ZONE = DateTimeZone.forID(InternationalizationUtil.ZURICH_TIME_ZONE_ID);
 
     private InternationalizationUtil() {
     }

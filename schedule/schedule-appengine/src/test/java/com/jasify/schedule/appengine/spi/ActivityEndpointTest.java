@@ -7,6 +7,7 @@ import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.repackaged.org.joda.time.DateTime;
 import com.google.appengine.repackaged.org.joda.time.DateTimeConstants;
+import com.google.appengine.repackaged.org.joda.time.DateTimeZone;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.jasify.schedule.appengine.TestHelper;
@@ -16,6 +17,7 @@ import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.spi.dm.*;
+import com.jasify.schedule.appengine.util.InternationalizationUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1340,6 +1342,37 @@ public class ActivityEndpointTest {
         jasAddActivityRequest.setRepeatDetails(repeatDetails);
         List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
         assertEquals(5, result.size());
+    }
+
+    @Test
+    public void testAddActivityWithRepeatDetailsDaylightSavingsTest() throws Exception {
+        long time = System.currentTimeMillis();
+        // Check a couple of transitions
+        for (int count = 0; count < 5; count++) {
+            long nextDls = InternationalizationUtil.ZURICH_DATE_TIME_ZONE.nextTransition(time);
+            DateTime activityTime = new DateTime(nextDls).minusDays(1).withZone(DateTimeZone.UTC).withHourOfDay(20);
+
+            Activity activity = createActivity(TestHelper.createOrganization(true), false);
+            activity.setStart(activityTime.toDate());
+            activity.setFinish(activityTime.plusHours(1).toDate());
+            long startHour = activityTime.withZone(InternationalizationUtil.ZURICH_DATE_TIME_ZONE).getHourOfDay();
+
+            RepeatDetails repeatDetails = new RepeatDetails();
+            repeatDetails.setRepeatType(RepeatDetails.RepeatType.Daily);
+            repeatDetails.setRepeatEvery(1);
+            repeatDetails.setRepeatUntilType(RepeatDetails.RepeatUntilType.Count);
+            repeatDetails.setUntilCount(2);
+
+            JasAddActivityRequest jasAddActivityRequest = new JasAddActivityRequest();
+            jasAddActivityRequest.setActivity(activity);
+            jasAddActivityRequest.setRepeatDetails(repeatDetails);
+            List<Activity> result = endpoint.addActivity(newAdminCaller(1), jasAddActivityRequest);
+
+            assertEquals(2, result.size());
+            assertEquals(startHour, new DateTime(result.get(0).getStart()).withZone(InternationalizationUtil.ZURICH_DATE_TIME_ZONE).getHourOfDay());
+            assertEquals(startHour, new DateTime(result.get(1).getStart()).withZone(InternationalizationUtil.ZURICH_DATE_TIME_ZONE).getHourOfDay());
+            time = result.get(1).getStart().getTime();
+        }
     }
 
     // RemoveActivity
