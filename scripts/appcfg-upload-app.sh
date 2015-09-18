@@ -20,15 +20,15 @@ fi
 
 usage()
 {
-  echo "Usage: $(basename $0) VERSION DOWNLOAD_DIR";
+  echo "Usage: $(basename $0) VERSION APP_DIR";
   echo "";
-  echo " downloads app version VERSION to DOWLOAD_DIR";
+  echo " uploads app in APP_DIR to version VERSION";
   echo "";
   exit;
 }
 
 readonly VERSION="$1"
-readonly DOWNLOAD_DIR="$2"
+readonly APP_DIR="$2"
 
 if [ -z "$VERSION" ];
 then
@@ -36,15 +36,15 @@ then
   usage;
 fi
 
-if [ -z "$DOWNLOAD_DIR" ];
+if [ -z "$APP_DIR" ];
 then
-  echo "MISSING: DOWNLOAD_DIR" >&2
+  echo "MISSING: APP_DIR" >&2
   usage;
 fi
 
-if [ -d "$DOWNLOAD_DIR" ];
+if [ ! -d "$APP_DIR" ];
 then
-  echo "DOWNLOAD_DIR ($DOWNLOAD_DIR) cannot exist" >&2
+  echo "APP_DIR ($APP_DIR) must exist" >&2
   usage;
 fi
 
@@ -52,5 +52,6 @@ echo -ne "Making scripts executable under ${APPENGINE_HOME}/bin ...";
 find "${APPENGINE_HOME}/bin" -type f -name "*.sh" -exec chmod a+x {} + 1>/dev/null
 echo "ok"
 
-echo "Running appcfg.sh -A jasify-schedule -V $VERSION download_app $DOWNLOAD_DIR"
-exec $TOOL -A jasify-schedule -V $VERSION download_app $DOWNLOAD_DIR
+
+echo "Running appcfg.sh"
+exec $TOOL -A jasify-schedule -V $VERSION update $APP_DIR
