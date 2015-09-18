@@ -54,4 +54,9 @@ echo "ok"
 
 
 echo "Running appcfg.sh"
-exec $TOOL -A jasify-schedule -V $VERSION update $APP_DIR
+if ! $TOOL -A jasify-schedule -V $VERSION update $APP_DIR;
+then
+  exit 1;
+else
+  exit 0
+fi

@@ -33,6 +33,12 @@ then
 fi
 
 readonly WORK_DIR=$(mktemp -q -d "${BASE_DIR}/target/$(basename $0).XXXXXX");
+echo "WORK_DIR=$WORK_DIR"
+if ! rmdir "$WORK_DIR";
+then
+  echo "Failed to remove WORK_DIR" >&2;
+  exit 2;
+fi
 
 if ! ./scripts/appcfg-download-app.sh $FROM_VERSION $WORK_DIR;
 then

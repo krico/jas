@@ -24,7 +24,7 @@ usage()
   echo "";
   echo " downloads app version VERSION to DOWLOAD_DIR";
   echo "";
-  exit;
+  exit 1;
 }
 
 readonly VERSION="$1"
@@ -53,4 +53,9 @@ find "${APPENGINE_HOME}/bin" -type f -name "*.sh" -exec chmod a+x {} + 1>/dev/nu
 echo "ok"
 
 echo "Running appcfg.sh -A jasify-schedule -V $VERSION download_app $DOWNLOAD_DIR"
-exec $TOOL -A jasify-schedule -V $VERSION download_app $DOWNLOAD_DIR
+if ! $TOOL -A jasify-schedule -V $VERSION download_app $DOWNLOAD_DIR;
+then
+  exit 1;
+else
+  exit 0
+fi
