@@ -17,7 +17,7 @@
                                    ng-model="vm.user"
                                    type="text" name="user" id="user" class="search-field form-control"
                                    typeahead="user as vm.displayUser(user) for user in vm.searchUsers($viewValue)"
-                                   typeahead-template-url="admin/bookings/admin-bookings-users.html"
+                                   typeahead-template-url="admin-bookings-users.html"
                                    typeahead-on-select="vm.getSubscriptions()"
                                    placeholder="{{ 'SEARCH' | translate }}">
                         </div>
@@ -26,6 +26,13 @@
             </div>
         </div>
     </div>
+    <script type="text/ng-template" id="admin-bookings-users.html">
+        <a>
+            <span ng-show="match.model.name" bind-html-unsafe="match.model.name | typeaheadHighlight:query"></span>
+            <span ng-show="match.model.email" bind-html-unsafe="match.model.email | typeaheadHighlight:query"></span>
+            <small ng-show="match.model.realName" bind-html-unsafe="match.model.realName | typeaheadHighlight:query"></small>
+        </a>
+    </script>
     <table id="agenda-table" ng-if="vm.subscriptions.length"
            class="table responsive table-hover table-condensed table-vmiddle">
         <thead>
