@@ -15,12 +15,15 @@ import com.jasify.schedule.appengine.util.KeyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+
 /**
  * @author krico
  * @since 05/08/15.
  */
 public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
     public static final int INVOICE_EXPIRES_DAYS = 3;
+    public static final double INVOICE_FEE_FLAT = new BigDecimal("1.00").doubleValue();
     private static final Logger log = LoggerFactory.getLogger(InvoicePaymentProvider.class);
 
     private final AttachmentDao attachmentDao = new AttachmentDao();
@@ -55,6 +58,12 @@ public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
         Preconditions.checkArgument(payment.getId() != null, "Payment.Id == NULL");
         Preconditions.checkArgument(payment.getAttachmentRef().getKey() == null, "Payment.Attachment != NULL");
         payment.validate();
+
+        if (payment.getFee() == null) {
+            payment.setFee(INVOICE_FEE_FLAT);
+            payment.setAmount(payment.getAmount() + payment.getFee());
+        }
+
         PaymentSlip slip = PaymentSlipBuilder.isrChf()
                 .account(payment.getAccount())
                 .subscriber(payment.getSubscriber())

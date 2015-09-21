@@ -26,6 +26,12 @@
         </td>
     </tr>
     <tr>
+        <th #style("th") align="left">Fee:</th>
+        <td #style("td") align="left">
+            <nobr>$cut.formatCurrency($payment.Currency, $payment.Fee)</nobr>
+        </td>
+    </tr>
+    <tr>
         <th #style("th") align="left">Amount:</th>
         <td #style("td") align="left">
             <nobr>$cut.formatCurrency($payment.Currency, $payment.Amount)</nobr>

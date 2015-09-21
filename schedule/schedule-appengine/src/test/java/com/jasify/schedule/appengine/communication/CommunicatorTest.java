@@ -139,6 +139,7 @@ public class CommunicatorTest {
         InvoicePayment payment = new InvoicePayment();
         payment.setCurrency("CHF");
         payment.setAmount(200.12);
+        payment.setFee(1.2);
         payment.getUserRef().setModel(user);
         payment.getAttachmentRef().setModel(AttachmentHelper.create("Test.pdf", "application/pdf", new byte[10]));
 

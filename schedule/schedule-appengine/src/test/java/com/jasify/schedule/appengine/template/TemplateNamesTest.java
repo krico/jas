@@ -197,6 +197,7 @@ public class TemplateNamesTest {
         InvoicePayment payment = new InvoicePayment();
         payment.setReferenceCode("120000000000234478943216899");
         payment.setAmount(400.25);
+        payment.setFee(1.0);
         payment.setCurrency("CHF");
 
         Attachment att = new Attachment();
@@ -269,6 +270,7 @@ public class TemplateNamesTest {
         InvoicePayment payment = new InvoicePayment();
         payment.setReferenceCode("120000000000234478943216899");
         payment.setAmount(400.25);
+        payment.setFee(0.0);
         payment.setCurrency("CHF");
 
         Attachment att = new Attachment();
