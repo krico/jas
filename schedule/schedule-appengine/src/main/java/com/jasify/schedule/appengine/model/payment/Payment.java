@@ -13,7 +13,6 @@ import com.jasify.schedule.appengine.model.balance.Transfer;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPackagePaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.ActivityPaymentWorkflow;
 import com.jasify.schedule.appengine.model.payment.workflow.PaymentWorkflow;
-import com.jasify.schedule.appengine.model.payment.workflow.ShoppingCartPaymentWorkflow;
 import com.jasify.schedule.appengine.model.users.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,12 +188,6 @@ public class Payment implements HasTransfer {
         if (amount == null) amount = 0d;
         validate();
         amount += units * price;
-        itemDescriptions.add(description);
-        itemUnits.add(units);
-        itemPrices.add(price);
-    }
-
-    public void addItemRaw(String description, int units, double price) {
         itemDescriptions.add(description);
         itemUnits.add(units);
         itemPrices.add(price);
