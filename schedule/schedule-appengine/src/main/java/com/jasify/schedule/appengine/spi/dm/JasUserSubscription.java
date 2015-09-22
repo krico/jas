@@ -1,7 +1,6 @@
 package com.jasify.schedule.appengine.spi.dm;
 
-import com.jasify.schedule.appengine.dao.common.ActivityDao;
-import com.jasify.schedule.appengine.model.EntityNotFoundException;
+import com.jasify.schedule.appengine.model.Navigate;
 import com.jasify.schedule.appengine.model.activity.Activity;
 import com.jasify.schedule.appengine.model.activity.Subscription;
 
@@ -15,14 +14,13 @@ public class JasUserSubscription implements JasEndpointEntity {
 
     private boolean isPaid;
 
-
     public JasUserSubscription() {
 
     }
 
-    public JasUserSubscription(Subscription subscription) throws EntityNotFoundException {
+    public JasUserSubscription(Subscription subscription) {
         setSubscription(subscription);
-        Activity activity = new ActivityDao().get(subscription.getActivityRef().getKey());
+        Activity activity = Navigate.activity(subscription);
         setActivity(activity);
     }
 
