@@ -17,6 +17,8 @@ import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -54,7 +56,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class ActivityEndpoint {
-
+    private static final Logger log = LoggerFactory.getLogger(ActivityEndpoint.class);
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
     private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();
@@ -373,25 +375,31 @@ public class ActivityEndpoint {
             return Collections.emptyList();
         }
 
-        try {
-            Set<Key> relatedOrganizations = new HashSet<>();
+        Set<Key> relatedOrganizations = new HashSet<>();
 
+        try {
             if (showOrganization) {
                 // TODO: If I got the keys I would not need to use organizationDao to get the organization later
                 relatedOrganizations.addAll(organizationDao.getByMemberUserIdAsKeys(endpointUser.getUserId()));
             }
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
 
-            List<JasUserSubscription> result = new ArrayList<>();
-            List<Subscription> subscriptions = subscriptionDao.getByUser(userId);
-            for (Subscription subscription : subscriptions) {
-                Activity activity = activityDao.get(subscription.getActivityRef().getKey());
+        List<JasUserSubscription> result = new ArrayList<>();
+        List<Subscription> subscriptions = subscriptionDao.getByUser(userId);
+        for (Subscription subscription : subscriptions) {
+            Activity activity = Navigate.activity(subscription);
 
+            if (activity != null) {
                 // Only add if activity falls within the filtered time
                 boolean add = ActivityFilter.filtered(activity, fromDate, toDate);
                 // If caller is orgAdmin check if this activity belongs to callers organisation
                 if (add && showOrganization) {
-                    ActivityType activityType = activityTypeDao.get(activity.getActivityTypeRef().getKey());
-                    add = relatedOrganizations.contains(activityType.getOrganizationRef().getKey());
+                    ActivityType activityType = Navigate.activityType(activity);
+                    if (activityType != null) {
+                        add = relatedOrganizations.contains(activityType.getOrganizationRef().getKey());
+                    }
                 }
 
                 if (add) {
@@ -402,10 +410,8 @@ public class ActivityEndpoint {
                     result.add(userSubscription);
                 }
             }
-            return result;
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
         }
+        return result;
     }
 
     @ApiMethod(name = "activitySubscriptions.cancel", path = "activities/{id}/subscribers", httpMethod = ApiMethod.HttpMethod.DELETE)

@@ -23,7 +23,7 @@ import java.math.BigDecimal;
  */
 public class InvoicePaymentProvider implements PaymentProvider<InvoicePayment> {
     public static final int INVOICE_EXPIRES_DAYS = 3;
-    public static final double INVOICE_FEE_FLAT = new BigDecimal("1.00").doubleValue();
+    public static final double INVOICE_FEE_FLAT = BigDecimal.ONE.doubleValue();
     private static final Logger log = LoggerFactory.getLogger(InvoicePaymentProvider.class);
 
     private final AttachmentDao attachmentDao = new AttachmentDao();
