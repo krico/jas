@@ -4,7 +4,9 @@ readonly REPO_URL="git@github.com:krico/jas.git"
 readonly startDir=$(pwd)
 readonly baseDir=$(cd $(dirname $0)/..; pwd);
 readonly script=$(basename $0);
-readonly logFile="${baseDir}/target/$script-$(date +"%Y-%m-%d_%H%M%S").log"
+readonly timestamp=$(date +%Y.%m.%d.%H%M)
+readonly logFile="${baseDir}/target/$script-${timestamp}.log"
+readonly releaseBackup="${baseDir}/target/archive-v${timestamp}.tar.gz"
 
 branch="master";
 version=""
@@ -56,6 +58,7 @@ echo "+=========================================================================
 echo "| REPOSITORY: $REPO_URL"
 echo "| BRANCH:     $branch"
 echo "| VERSION:    $version"
+echo "| TIMESTAMP:  $timestamp"
 echo "+--------------------------------------------------------------------------------"
 echo "| LOG:        ${logFile}"
 echo "| STARTED:    $(date)"
@@ -109,11 +112,18 @@ fi
 echo "executing mvn $VERSION_OPTS appengine:update"
 if mvn $VERSION_OPTS appengine:update;
 then
-  readonly tag="v$(date +%Y.%m.%d.%H%M)-$version"
+  readonly tag="v${timestamp}-$version"
   echo "Tagging release [$tag]"
   git tag -a $tag -m "Released to $version from $branch"
   echo "Pushing tags"
   git push origin --tags
+  echo -n "Creating releaase backup [$releaseBackup] ...";
+  if tar -czf "$releaseBackup" target/schedule-appengine-*;
+  then
+    echo " ok";
+  else
+    echo " failed";
+  fi
 else
   echo "Build failed, will not tag release"
 fi
@@ -133,6 +143,7 @@ echo "+=========================================================================
 echo "| REPOSITORY: $REPO_URL"
 echo "| BRANCH:     $branch"
 echo "| VERSION:    $version"
+echo "| TIMESTAMP:  $timestamp"
 echo "+--------------------------------------------------------------------------------"
 echo "| FINISHED:   $(date)"
 echo "| ELAPSED:    $(($endTime - $startTime)) seconds"
