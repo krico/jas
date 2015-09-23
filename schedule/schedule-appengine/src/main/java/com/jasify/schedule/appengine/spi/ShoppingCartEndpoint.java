@@ -27,10 +27,7 @@ import com.jasify.schedule.appengine.util.FormatUtil;
 import com.jasify.schedule.appengine.util.KeyUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author krico
@@ -135,6 +132,7 @@ public class ShoppingCartEndpoint {
     public ShoppingCart createAnonymousCart(User caller, JasNewShoppingCartRequest request) throws NotFoundException, BadRequestException {
         ShoppingCart cart = new ShoppingCart();
         List<Key> activityIds = request.getActivityIds();
+
         if (activityIds != null) {
             for (Key activityId : activityIds) {
                 Activity activity = validateAndGetActivity(activityId);

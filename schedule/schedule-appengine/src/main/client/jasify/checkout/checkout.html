@@ -1,5 +1,5 @@
 <script type="text/ng-template" id="checkoutButton.html">
-    <button ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting"
+    <button ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting || !vm.paymentType.enabled"
             ng-click="vm.createPayment()"
             class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
         {{vm.paymentType.button}}
@@ -57,48 +57,27 @@
                             </th>
                             <td>&nbsp;</td>
                         </tr>
-                        <tr ng-if="vm.paymentType.id == 'PayPal'">
+                        <tr>
                             <td>
                                 Handling Fee
                                 <sup>
                                     <span class="text-info ion-information-circled"
-                                          tooltip-html-unsafe="<nobr>For PayPal payments there</nobr> is a handling fee of <b>3.5%</b> plus <b><nobr>CHF 0.55</nobr></b>.">
+                                          tooltip-html-unsafe="{{vm.paymentType.feeReason}}">
                                 </span>
                                 </sup>
                             </td>
                             <td></td>
                             <td class="checkout-price">
-                                <nobr>{{vm.cart.grandTotal-vm.cart.total|number: 2}}</nobr>
+                                <nobr>{{vm.paymentType.fee|number: 2}}</nobr>
                             </td>
                             <td>&nbsp;</td>
                         </tr>
-                        <tr ng-if="vm.paymentType.id == 'Invoice'">
-                            <td>
-                                Handling Fee
-                                <sup>
-                                    <span class="text-info ion-information-circled"
-                                          tooltip-html-unsafe="<nobr>For Electronic Invoice payments there</nobr> is a handling fee of <b><nobr>CHF 1.00</nobr></b>.">
-                                </span>
-                                </sup>
-                            </td>
-                            <td></td>
-                            <td class="checkout-price">
-                                <nobr>{{1|number: 2}}</nobr>
-                            </td>
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr class="checkout-grand-total h4">
-                            <th>Grand Total</th>
+                        <tr class="checkout-total h4">
+                            <th>Total</th>
                             <th></th>
                             <th class="checkout-price">
-                                <nobr ng-if="vm.paymentType.id == 'PayPal'">
-                                    {{vm.cart.currency}} {{vm.cart.grandTotal|number: 2}}
-                                </nobr>
-                                <nobr ng-if="vm.paymentType.id == 'Invoice'">
-                                    {{vm.cart.currency}} {{vm.cart.total + 1|number: 2}}
-                                </nobr>
-                                <nobr ng-if="vm.paymentType.id == 'Cash'">
-                                    {{vm.cart.currency}} {{vm.cart.total|number: 2}}
+                                <nobr>
+                                    {{vm.cart.currency}} {{vm.cart.total + vm.paymentType.fee|number: 2}}
                                 </nobr>
                             </th>
                             <td>&nbsp;</td>
@@ -117,6 +96,9 @@
                             <select ng-options="item as item.label for item in vm.paymentTypes"
                                     ng-model="vm.paymentType"
                                     id="paymentType" class="btn btn-xs"></select>
+                        </div>
+                        <div>
+                            <label class="small"><br>{{vm.paymentType.disabledReason}}</label>
                         </div>
                     </form>
                 </td>
