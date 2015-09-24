@@ -12,8 +12,6 @@ import com.google.common.base.Preconditions;
 import com.jasify.schedule.appengine.dao.cart.ShoppingCartDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
-import com.jasify.schedule.appengine.model.Navigate;
-import com.jasify.schedule.appengine.model.attachment.Attachment;
 import com.jasify.schedule.appengine.model.balance.Account;
 import com.jasify.schedule.appengine.model.balance.AccountUtil;
 import com.jasify.schedule.appengine.model.balance.BalanceService;
