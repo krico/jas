@@ -101,7 +101,7 @@ public class PaymentOption implements Serializable {
         public InvoicePaymentOption(List<ShoppingCart.Item> items) {
             setPaymentType(PaymentTypeEnum.Invoice);
             setDisabledReason(DisabledReason);
-            //setEnabled(calculateEnabled(items));
+            setEnabled(calculateEnabled(items));
             setEnabled(true);
             setFee(InvoicePaymentProvider.INVOICE_FEE_FLAT.doubleValue());
             setFeeReason(FeeReason);
