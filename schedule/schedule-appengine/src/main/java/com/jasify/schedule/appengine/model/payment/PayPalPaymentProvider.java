@@ -32,7 +32,7 @@ import static com.jasify.schedule.appengine.util.CurrencyUtil.formatCurrencyNumb
  * @since 05/02/15.
  */
 public class PayPalPaymentProvider implements PaymentProvider<PayPalPayment> {
-    public static final BigDecimal PAY_PAL_FEE_MULTIPLIER = new BigDecimal("0.035");
+    public static final BigDecimal PAY_PAL_FEE_MULTIPLIER = new BigDecimal("0.030");
     public static final BigDecimal ONE_MINUS_PAY_PAL_FEE_MULTIPLIER = BigDecimal.ONE.subtract(PAY_PAL_FEE_MULTIPLIER);
     public static final BigDecimal PAY_PAL_FEE_FLAT = new BigDecimal("0.55");
     private static final long MIN_REMAINING_LIFETIME = 120;
