@@ -86,10 +86,9 @@
                                 </thead>
                                 <tbody>
                                 <tr ng-repeat="paymentOption in vm.paymentTypes" id="paymentType">
-                                    <td class="paymentOption-selection" style="white-space: nowrap"><label><input type="radio" ng-value="paymentOption" ng-model="vm.paymentType" ng-if="paymentOption.enabled"/> {{paymentOption.label}}</label></td>
+                                    <td class="paymentOption-selection" style="white-space: nowrap"><label><input type="radio" ng-value="paymentOption" ng-model="vm.paymentType" ng-disabled="!paymentOption.enabled"/> {{paymentOption.label}}</label></td>
                                     <td class="paymentOption-feeReason" align="left" ng-if="paymentOption.enabled">{{paymentOption.feeReason}}</td>
                                     <td class="paymentOption-feeReason" align="left" ng-if="!paymentOption.enabled">{{paymentOption.disabledReason}}</td>
-
                                 </tr>
                                 </tbody>
                             </table>
