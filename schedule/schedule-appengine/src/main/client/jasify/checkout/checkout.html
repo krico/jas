@@ -1,8 +1,12 @@
 <script type="text/ng-template" id="checkoutButton.html">
-    <button ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting || !vm.paymentType.enabled"
+    <button ng-if="vm.paymentType" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting || !vm.paymentType.enabled"
             ng-click="vm.createPayment()"
             class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
         {{vm.paymentType.button}}
+    </button>
+    <button ng-if="!vm.paymentType" ng-disabled="!vm.paymentType"
+            class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
+        Select a Payment Method
     </button>
     <button class="btn grow-on-small btn-default pull-right m-r-10 m-b-5 m-t-5" ng-show="vm.cancel"
             btn-href="{{vm.cancel}}">
@@ -24,64 +28,43 @@
             </thead>
             <tbody>
             <tr>
-                <td align="center">
-                    <table ng-if="!vm.isEmpty()" class="checkout-items">
+                <td>
+                    <table ng-if="!vm.isEmpty()" class="checkout-items" align="left" style="width:100%">
                         <thead>
-                        <tr class="checkout-header">
-                            <th class="checkout-description-header">Description</th>
-                            <th class="checkout-units-header">Units</th>
-                            <th class="checkout-price-header">Price ({{vm.cart.currency}})</th>
-                            <th class="checkout-buttons-header">&nbsp;</th>
-                        </tr>
+                            <tr class="checkout-header">
+                                <th class="checkout-description-header">Description</th>
+                                <th class="checkout-units-header" style="text-align:right">Units</th>
+                                <th class="checkout-price-header" style="text-align:right">Price</th>
+                                <th class="checkout-buttons-header"></th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="item in vm.cart.items">
-                            <td class="checkout-description">{{item.description}}</td>
-                            <td class="checkout-units">{{item.units}}</td>
-                            <td class="checkout-price">
-                                <nobr>{{item.price | number: 2}}&nbsp;</nobr>
-                            </td>
-                            <td class="checkout-buttons">
-                                <a class="checkout-remove-item" ng-click="vm.removeItem(item)">
-                                    <i class="fa fa-times-circle"></i>
-                                </a>
-                            </td>
-                        </tr>
+                            <tr ng-repeat="item in vm.cart.items">
+                                <td class="checkout-description">{{item.description}}</td>
+                                <td class="checkout-units" align="right">{{item.units}}</td>
+                                <td class="checkout-price" align="right">{{item.price | number: 2}}</td>
+                                <td class="checkout-buttons"><a class="checkout-remove-item" ng-click="vm.removeItem(item)"><i class="fa fa-times-circle"></i></a></td>
+                            </tr>
                         </tbody>
                         <tfoot>
-                        <tr class="checkout-header">
-                            <th>Total</th>
-                            <th></th>
-                            <th class="checkout-price">
-                                <nobr>{{vm.cart.total|number: 2}}</nobr>
-                            </th>
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Handling Fee
-                                <sup>
-                                    <span class="text-info ion-information-circled"
-                                          tooltip-html-unsafe="{{vm.paymentType.feeReason}}">
-                                </span>
-                                </sup>
-                            </td>
-                            <td></td>
-                            <td class="checkout-price">
-                                <nobr>{{vm.paymentType.fee|number: 2}}</nobr>
-                            </td>
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr class="checkout-total h4">
-                            <th>Total</th>
-                            <th></th>
-                            <th class="checkout-price">
-                                <nobr>
-                                    {{vm.cart.currency}} {{vm.cart.total + vm.paymentType.fee|number: 2}}
-                                </nobr>
-                            </th>
-                            <td>&nbsp;</td>
-                        </tr>
+                            <tr class="checkout-header h6">
+                                <td>Total before Fee</td>
+                                <td></td>
+                                <td class="checkout-price" align="right">{{vm.cart.total|number: 2}}</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Handling Fee</td>
+                                <td></td>
+                                <td class="checkout-price" align="right">{{vm.paymentType.fee|number: 2}}</td>
+                                <td></td>
+                            </tr>
+                            <tr class="checkout-total h4">
+                                <td>Order Total</td>
+                                <td></td>
+                                <td class="checkout-price" align="right">{{vm.cart.total + vm.paymentType.fee|number: 2}}</td>
+                                <td>{{vm.cart.currency}}</td>
+                            </tr>
                         </tfoot>
                     </table>
                     <h3 ng-if="vm.isEmpty()" class="text-danger"><span class="ion-information-circled"></span> There are
@@ -92,13 +75,24 @@
                 <td>
                     <form class="form-inline" name="PaymentTypeForm">
                         <div class="form-group form-group-sm">
-                            <label for="paymentType" class="small">Payment Method:</label>
-                            <select ng-options="item as item.label for item in vm.paymentTypes"
-                                    ng-model="vm.paymentType"
-                                    id="paymentType" class="btn btn-xs"></select>
-                        </div>
-                        <div>
-                            <label class="small"><br>{{vm.paymentType.disabledReason}}</label>
+                            <label for="paymentType" class="small">Payment Method</label>
+
+                            <table ng-if="!vm.isEmpty()" class="checkout-items" align="left" style="width:100%">
+                                <thead>
+                                <tr class="paymentOption-header">
+                                    <th class="paymentOption-selection-header"></th>
+                                    <th class="paymentOption-feeReason-header"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="paymentOption in vm.paymentTypes" id="paymentType">
+                                    <td class="paymentOption-selection" style="white-space: nowrap"><label><input type="radio" ng-value="paymentOption" ng-model="vm.paymentType" ng-if="paymentOption.enabled"/> {{paymentOption.label}}</label></td>
+                                    <td class="paymentOption-feeReason" align="left" ng-if="paymentOption.enabled">{{paymentOption.feeReason}}</td>
+                                    <td class="paymentOption-feeReason" align="left" ng-if="!paymentOption.enabled">{{paymentOption.disabledReason}}</td>
+
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </form>
                 </td>

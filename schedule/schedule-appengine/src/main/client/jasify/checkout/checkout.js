@@ -39,12 +39,7 @@
                 //        fee: paymentOption.fee, feeReason: paymentOption.feeReason};
                 //    vm.paymentTypes.push(cashInfo);
                 }
-
-                // Set to the first enabled option. Will not be funny if all are disabled
-                if (vm.paymentType===undefined && paymentOption.enabled) {
-                    vm.paymentType = vm.paymentTypes[vm.paymentTypes.length - 1];
-                }
-            }
+           }
         }
 
         function alert(t, m) {

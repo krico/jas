@@ -299,8 +299,8 @@
 
             jasDialogs.ok(translationTitle, translationBody, onOk);
             function onOk() {
-                var w = $window.innerWidth || 820;
-                var h = $window.innerHeight || 620;
+                var w = $window.width || 820;
+                var h = $window.height || 620;
                 w = w - 20;
                 h = h - 20;
                 if (CHECKOUT_WINDOW.statusCookie in $cookies) {
