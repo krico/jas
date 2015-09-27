@@ -7,7 +7,7 @@
         on $mut.dateShort($payment.Created) using payment type "Invoice".
     </p>
     <p #style("p")>
-        If the user doesn't execute the payment in the <b>next $payment.ExpireDays days</b> his subscription will be
+        If the user does not execute the payment in the <b>next $payment.ExpireDays days</b> the subscription will be
         canceled.
     </p>
         #subscriptionDetails($subscriptions, $executions)
