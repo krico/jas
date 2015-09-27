@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wszarmach
@@ -94,8 +95,8 @@ public class PaymentOption implements Serializable {
     public static class InvoicePaymentOption extends PaymentOption {
         private static final Logger Log = LoggerFactory.getLogger(InvoicePaymentOption.class);
         private static final long AllowedDays = 7;
-        private final static long InvoiceDaysBeforePaymentRequiredInMillis = 86400000 * AllowedDays;
-        private static final String DisabledReason = "For Invoice payments a minimum of " + AllowedDays + " days is required before the first activity";
+        private final static long InvoiceDaysBeforePaymentRequiredInMillis = TimeUnit.DAYS.toMillis(AllowedDays);
+        private static final String DisabledReason = "For Invoice payments a minimum of " + AllowedDays + " days is required before the first activity.";
         private static final String FeeReason = createFeeReason();
 
         public InvoicePaymentOption(List<ShoppingCart.Item> items) {
@@ -109,7 +110,7 @@ public class PaymentOption implements Serializable {
 
         private static String createFeeReason() {
             String fee = formatNumber(InvoicePaymentProvider.INVOICE_FEE_FLAT, 2);
-            return "<nobr>For Electronic Invoice payments</nobr> there is a handling fee of <b><nobr>CHF " + fee + "</nobr></b>";
+            return "Electronic Invoice will reserve your items for a limited period. If payment is not received by the due date the reservation will be cancelled. The handling fee charged is CHF " + fee + ".";
         }
 
         private boolean calculateEnabled(List<ShoppingCart.Item> items) {
@@ -153,7 +154,7 @@ public class PaymentOption implements Serializable {
         private static String createFeeReason() {
             String percentageFee = formatNumber(PayPalPaymentProvider.PAY_PAL_FEE_MULTIPLIER.multiply(BigDecimal.valueOf(100)), 2);
             String flatFee = formatNumber(PayPalPaymentProvider.PAY_PAL_FEE_FLAT, 2);
-            return "<nobr>For PayPal payments there</nobr> is a handling fee of <b>" + percentageFee + "%</b> plus <b><nobr>CHF " + flatFee + "</nobr></b>";
+            return "PayPal processes your payment before forwarding it to us. The handling fee charged is " + percentageFee + "% plus CHF " + flatFee + " of the total amount.";
         }
     }
 }

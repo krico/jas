@@ -4,7 +4,7 @@
      */
     angular.module('jasifyComponents').factory('PopupWindow', popupWindowService);
 
-    function popupWindowService($log, $q, $interval, $window) {
+    function popupWindowService($q, $interval, $window) {
         var PopupWindow = {
             mobile: jas.isMobile(),
             getOptions: getOptions,
