@@ -94,7 +94,7 @@ public class PaymentOption implements Serializable {
 
     public static class InvoicePaymentOption extends PaymentOption {
         private static final Logger Log = LoggerFactory.getLogger(InvoicePaymentOption.class);
-        private static final long AllowedDays = 2;
+        private static final long AllowedDays = 4;
         private final static long InvoiceDaysBeforePaymentRequiredInMillis = TimeUnit.DAYS.toMillis(AllowedDays);
         private static final String DisabledReason = "For Invoice payments a minimum of " + AllowedDays + " days is required before the first activity.";
         private static final String FeeReason = createFeeReason();
