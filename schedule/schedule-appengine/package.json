@@ -8,7 +8,8 @@
     "bower": "bower install",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test-dev": "karma start src/test/client/karma.conf.js",
-    "test-e2e": "protractor src/test/e2e/protractor.cfg.js --suite ci"
+    "test-e2e": "protractor src/test/e2e/protractor.cfg.js --suite ci",
+    "generate":"endpoints-angular-client-generator -d ../../target/jasify-v1-rest.discovery.json -s -o src/main/client/jasify/providers"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "bower": "^1.4.1",
     "del": "^1.1.1",
+    "endpoints-angular-client-generator": "latest",
     "gulp": "^3.8.10",
     "gulp-angular-templatecache": "^1.5.0",
     "gulp-bower": "0.0.10",
