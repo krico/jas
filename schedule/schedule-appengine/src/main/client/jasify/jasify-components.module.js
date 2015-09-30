@@ -11,8 +11,13 @@
         'ui.bootstrap',
         'angularSpinner',
         'LocalStorageModule',
-        'ui.bootstrap.datetimepicker'
+        'ui.bootstrap.datetimepicker',
+        'jasify.endpoint'
     ]);
+
+    jasifyComponents.config(function (JasifyProvider) {
+        JasifyProvider.apiRoot('/_ah/api/jasify/v1/');
+    });
 
     jasifyComponents.config(function (localStorageServiceProvider) {
         localStorageServiceProvider

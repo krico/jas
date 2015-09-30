@@ -1,4 +1,3 @@
-~
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -12,3 +11,4 @@ log.txt
 npm-debug.log
 src/main/html/build
 local_db.bin
+endpoints-angular-client-generator.log
