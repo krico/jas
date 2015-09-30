@@ -150,6 +150,7 @@
         function logout() {
             $log.info("Logging out (" + Session.userId + ")!");
             return Jasify.auth.logout().then(ok, fail);
+            //TODO
             //return Endpoint.jasify(function (jasify) {
             //    return jasify.auth.logout();
             //}).then(ok, fail);
@@ -198,22 +199,33 @@
             //This is for the e-mail to know which site it come from
             //Could be www.jasify.com or www.agenda.com.br
             var siteUrl = $location.absUrl();
-
-            return Endpoint.jasify(function (jasify) {
-                return jasify.auth.forgotPassword({
-                    email: email,
-                    url: siteUrl
-                });
+            return Jasify.auth.forgotPassword({
+                email: email,
+                url: siteUrl
             });
+
+            //TODO
+            //return Endpoint.jasify(function (jasify) {
+            //    return jasify.auth.forgotPassword({
+            //        email: email,
+            //        url: siteUrl
+            //    });
+            //});
         }
 
         function recoverPassword(code, password) {
-            return Endpoint.jasify(function (jasify) {
-                return jasify.auth.recoverPassword({
-                    code: code,
-                    newPassword: password
-                });
+            return Jasify.auth.recoverPassword({
+                code: code,
+                newPassword: password
             });
+
+            //TODO
+            //return Endpoint.jasify(function (jasify) {
+            //    return jasify.auth.recoverPassword({
+            //        code: code,
+            //        newPassword: password
+            //    });
+            //});
         }
 
         function restoreOnInstantiation() {
