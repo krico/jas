@@ -2,7 +2,7 @@
 
     angular.module('jasifyComponents').factory('Auth', auth);
 
-    function auth($log, $http, $q, $location, Session, Endpoint, BrowserData) {
+    function auth($log, Jasify, $q, $location, Session, Endpoint, BrowserData) {
         var Auth = {
             isAuthenticated: isAuthenticated,
             isAdmin: isAdmin,
@@ -42,6 +42,7 @@
 
         function login(credentials) {
             $log.info("Logging in (name=" + credentials.name + ") ...");
+
             return Endpoint.jasify(function (jasify) {
                 return jasify.auth.login({
                     username: credentials.name,
@@ -148,9 +149,11 @@
 
         function logout() {
             $log.info("Logging out (" + Session.userId + ")!");
-            return Endpoint.jasify(function (jasify) {
-                return jasify.auth.logout();
-            }).then(ok, fail);
+            return Jasify.auth.logout().then(ok, fail);
+            //TODO
+            //return Endpoint.jasify(function (jasify) {
+            //    return jasify.auth.logout();
+            //}).then(ok, fail);
 
             function ok(res) {
                 $log.info("Logged out!");
@@ -196,22 +199,33 @@
             //This is for the e-mail to know which site it come from
             //Could be www.jasify.com or www.agenda.com.br
             var siteUrl = $location.absUrl();
-
-            return Endpoint.jasify(function (jasify) {
-                return jasify.auth.forgotPassword({
-                    email: email,
-                    url: siteUrl
-                });
+            return Jasify.auth.forgotPassword({
+                email: email,
+                url: siteUrl
             });
+
+            //TODO
+            //return Endpoint.jasify(function (jasify) {
+            //    return jasify.auth.forgotPassword({
+            //        email: email,
+            //        url: siteUrl
+            //    });
+            //});
         }
 
         function recoverPassword(code, password) {
-            return Endpoint.jasify(function (jasify) {
-                return jasify.auth.recoverPassword({
-                    code: code,
-                    newPassword: password
-                });
+            return Jasify.auth.recoverPassword({
+                code: code,
+                newPassword: password
             });
+
+            //TODO
+            //return Endpoint.jasify(function (jasify) {
+            //    return jasify.auth.recoverPassword({
+            //        code: code,
+            //        newPassword: password
+            //    });
+            //});
         }
 
         function restoreOnInstantiation() {

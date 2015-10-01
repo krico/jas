@@ -132,6 +132,17 @@ that with `com.jasify.schedule.appengine.model.SchemaMigration.InitialLoadType`.
 
  * [Javascript API help](https://developers.google.com/api-client-library/javascript/dev/dev_jscript)
 
+## endpoints-angular-client-generator
+
+ * [On GitHub](https://github.com/krico/endpoints-angular-client-generator)
+
+To generate the jasify endpoint provider (`providers/jasify.provider.js`) just run on the
+command line:
+
+~~~
+npm run generate
+~~~
+
 ## Velocity
 
  * [Velocity Engine 1.7](http://velocity.apache.org/engine/releases/velocity-1.7/)

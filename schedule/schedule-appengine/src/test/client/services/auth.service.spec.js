@@ -1,9 +1,9 @@
 describe('AuthService', function () {
-    var Session, Auth, BrowserData, Endpoint, $q, $rootScope, $gapiMock, $location;
+    var Session, Auth, BrowserData, Endpoint, $q, $rootScope, $gapiMock, $location, Jasify;
     beforeEach(module('jasifyComponents'));
     beforeEach(module('jasify.mocks'));
 
-    beforeEach(inject(function (_BrowserData_, _$location_, _Session_, _Auth_, _Endpoint_, _$q_, _$rootScope_, _$gapiMock_) {
+    beforeEach(inject(function (_Jasify_, _BrowserData_, _$location_, _Session_, _Auth_, _Endpoint_, _$q_, _$rootScope_, _$gapiMock_) {
         BrowserData = _BrowserData_;
         $location = _$location_;
         Session = _Session_;
@@ -13,6 +13,7 @@ describe('AuthService', function () {
         Endpoint = _Endpoint_;
         $gapiMock = _$gapiMock_;
         Endpoint.jasifyLoaded();
+        Jasify = _Jasify_;
     }));
 
     it("should not be authenticated before login", function () {
@@ -370,17 +371,17 @@ describe('AuthService', function () {
 
     });
 
-    it('should call jasify.forgotPassword when Auth.forgotPassword is called', function () {
+    it('should call Jasify.forgotPassword when Auth.forgotPassword is called', function () {
         var url = "http://jasify.cool/";
         spyOn($location, 'absUrl').and.returnValue(url);
-        spyOn($gapiMock.client.jasify.auth, 'forgotPassword').and.returnValue($q.when({result: true}));
+        spyOn(Jasify.auth, 'forgotPassword').and.returnValue($q.when({result: true}));
 
         var email = "x@com";
         Auth.forgotPassword(email);
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.auth.forgotPassword).toHaveBeenCalledWith({
+        expect(Jasify.auth.forgotPassword).toHaveBeenCalledWith({
             email: email,
             url: url
         });
@@ -390,7 +391,7 @@ describe('AuthService', function () {
     it('should call jasify.recoverPassword when Auth.recoverPassword is called', function () {
         var url = "http://jasify.cool/";
         spyOn($location, 'absUrl').and.returnValue(url);
-        spyOn($gapiMock.client.jasify.auth, 'recoverPassword').and.returnValue($q.when({result: true}));
+        spyOn(Jasify.auth, 'recoverPassword').and.returnValue($q.when({result: true}));
 
         var code = "1234";
         var pw = "4321";
@@ -398,7 +399,7 @@ describe('AuthService', function () {
 
         $rootScope.$apply();
 
-        expect($gapiMock.client.jasify.auth.recoverPassword).toHaveBeenCalledWith({
+        expect(Jasify.auth.recoverPassword).toHaveBeenCalledWith({
             code: code,
             newPassword: pw
         });
