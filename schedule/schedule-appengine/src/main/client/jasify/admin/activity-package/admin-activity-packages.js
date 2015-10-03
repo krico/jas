@@ -2,7 +2,7 @@
 
     angular.module('jasify.admin').controller('AdminActivityPackagesController', AdminActivityPackagesController);
 
-    function AdminActivityPackagesController($log, $routeParams, $location, $filter, jasDialogs, organizations, activityPackages, ActivityPackage) {
+    function AdminActivityPackagesController($routeParams, $location, $filter, jasDialogs, organizations, activityPackages, ActivityPackage) {
         var vm = this;
         vm.organizations = organizations.items;
         vm.activityPackages = activityPackages.items;
@@ -70,6 +70,5 @@
                 $location.path('/admin/activity-packages');
             }
         }
-
     }
 })(angular);

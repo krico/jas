@@ -1,6 +1,6 @@
 (function (angular) {
 
-    angular.module('jasify.bookings').controller('AdminBookingsController', AdminBookingsController);
+    angular.module('jasify.admin').controller('AdminBookingsController', AdminBookingsController);
 
     function AdminBookingsController(Activity, jasDialogs, $filter, $moment, $q, User) {
         var vm = this;

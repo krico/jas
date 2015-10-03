@@ -13,14 +13,16 @@
         vm.cart = cart;
         vm.cancel = BrowserData.getPaymentCancelRedirect();
         vm.inProgress = false;
-        vm.redirecting = false;
         vm.paymentTypes = [];
         vm.paymentType = undefined;
+        vm.paymentButtonText;
         vm.init = init;
+        vm.updateCheckoutButtonText = updateCheckoutButtonText;
 
         vm.init();
 
         function init() {
+            updateCheckoutButtonText();
             for (i = 0; i < vm.cart.paymentOptions.length; i++) {
                 var paymentOption = vm.cart.paymentOptions[i];
                 if (paymentOption.paymentType == 'PayPal') {
@@ -51,7 +53,11 @@
         }
 
         function createPaymentPopup() {
+            if (vm.inProgress) {
+                return;
+            }
             vm.inProgress = true;
+            updateCheckoutButtonText();
             var acceptRedirect = BrowserData.getPaymentAcceptRedirect();
             var cancelRedirect = BrowserData.getPaymentCancelRedirect();
             delete $cookies.popupPaymentStatus;
@@ -69,24 +75,40 @@
 
             function fail(res) {
                 vm.inProgress = false;
+                updateCheckoutButtonText();
                 alert('danger', 'Failed: ' + res);
             }
         }
 
+        function updateCheckoutButtonText() {
+            if (vm.inProgress) {
+                vm.paymentButtonText = "Working...";
+            } else if (!vm.paymentType) {
+                vm.paymentButtonText = "Select a Payment Method";
+            } else {
+                vm.paymentButtonText = vm.paymentType.button;
+            }
+        }
+
         function createPayment() {
+            if (vm.inProgress) {
+                return;
+            }
+            vm.inProgress = true;
+            updateCheckoutButtonText();
             Balance.createCheckoutPayment({
                 cartId: cart.id,
                 type: vm.paymentType.id
             }).then(ok, fail);
 
             function ok(resp) {
-                vm.redirecting = true;
                 $log.debug("Redirecting: " + resp.approveUrl);
                 $window.location.href = resp.approveUrl;
             }
 
             function fail(res) {
                 vm.inProgress = false;
+                updateCheckoutButtonText();
                 alert('danger', 'Failed: ' + res.statusText);
             }
         }
@@ -120,7 +142,7 @@
         }
 
         $scope.$watch('vm.paymentType.id', function (newVal, oldVal) {
-
+            updateCheckoutButtonText();
         });
     }
 })(angular);

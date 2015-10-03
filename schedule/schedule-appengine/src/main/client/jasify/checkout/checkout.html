@@ -1,14 +1,11 @@
 <script type="text/ng-template" id="checkoutButton.html">
-    <button ng-if="vm.paymentType" ng-disabled="vm.isEmpty() || vm.inProgress || vm.redirecting || !vm.paymentType.enabled"
+    <button ng-disabled="vm.inProgress || vm.isEmpty() || !vm.paymentType.enabled"
             ng-click="vm.createPayment()"
             class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
-        {{vm.paymentType.button}}
+        {{vm.paymentButtonText}}
     </button>
-    <button ng-if="!vm.paymentType" ng-disabled="!vm.paymentType"
-            class="btn btn-primary grow-on-small pull-right m-b-5 m-t-5">
-        Select a Payment Method
-    </button>
-    <button class="btn grow-on-small btn-default pull-right m-r-10 m-b-5 m-t-5" ng-show="vm.cancel"
+    <button ng-disabled="vm.inProgress"
+            class="btn grow-on-small btn-default pull-right m-r-10 m-b-5 m-t-5" ng-show="vm.cancel"
             btn-href="{{vm.cancel}}">
         Cancel
     </button>
@@ -18,7 +15,7 @@
         <alert ng-repeat="a in vm.alerts" type="{{a.type}}" close="vm.alerts.splice($index, 1)">{{a.msg}}</alert>
     </div>
     <div class="col-md-6 col-md-offset-3">
-        <span ng-show="vm.inProgress || vm.redirecting" us-spinner="{radius:30, width:8, length: 16}"></span>
+        <span ng-show="vm.inProgress" us-spinner="{radius:30, width:8, length: 16}"></span>
         <ng-include src="'checkoutButton.html'"></ng-include>
         <table class="table checkout-table">
             <thead>
