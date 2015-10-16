@@ -7,7 +7,8 @@ readonly APPENGINE_HOME="${MAVEN_HOME}/repository/com/google/appengine/appengine
 readonly TOOL="${APPENGINE_HOME}/bin/endpoints.sh"
 readonly BASE_DIR=$(cd $(dirname $0)/..; pwd)
 readonly WAR_PATH=schedule/schedule-appengine/target/schedule-appengine-${SCHEDULE_VERSION}
-readonly WEB_XML=${WAR_PATH}/WEB-INF/web.xml
+#readonly WEB_XML=${WAR_PATH}/WEB-INF/web.xml
+readonly WEB_XML=${BASE_DIR}/schedule/schedule-appengine/src/main/webapp/WEB-INF/web.xml
 
 if [ ! -d "${APPENGINE_HOME}" ];
 then
