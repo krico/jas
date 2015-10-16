@@ -36,3 +36,4 @@ endpoints=$(egrep "^\s*com\.jasify\.schedule\.appengine\.spi" $WEB_XML |sed -E -
 
 echo "Running endpoints.sh"
 $TOOL get-discovery-doc --war=${WAR_PATH} --output=target $endpoints
+cp -a target/jasify-v1-rest.discovery target/jasify-v1-rest.discovery.json
