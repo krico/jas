@@ -406,6 +406,7 @@
                         </configuration>
                     </execution>
 
+                    <!-- npm install -->
                     <execution>
                         <id>npm install</id>
                         <goals>
@@ -416,6 +417,7 @@
                         </configuration>
                     </execution>
 
+                    <!-- npm bower install -->
                     <execution>
                         <id>bower install</id>
                         <goals>
@@ -426,6 +428,7 @@
                         </configuration>
                     </execution>
 
+                    <!-- gulp build-prod -->
                     <execution>
                         <id>gulp build</id>
                         <goals>
@@ -439,17 +442,15 @@
                         </configuration>
                     </execution>
 
+                    <!-- karma to test js -->
                     <execution>
-                        <id>javascript tests</id>
+                        <id>karma test</id>
                         <goals>
-                            <goal>gulp</goal>
+                            <goal>karma</goal>
                         </goals>
                         <phase>test</phase>
                         <configuration>
-                            <arguments>test-prod --no-color --buildNumber=${buildNumber} --buildBranch=${scmBranch}
-                                --buildTimestamp=${timestamp} --buildVersion=${project.version}
-                                --skiptests${skipTests}
-                            </arguments>
+                            <karmaConfPath>${basedir}/src/test/client/karma.conf.ci.js</karmaConfPath>
                         </configuration>
                     </execution>
 
