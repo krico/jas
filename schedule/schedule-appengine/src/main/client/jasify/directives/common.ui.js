@@ -8,7 +8,7 @@
 
     'use strict';
 
-    var module = angular.module('jasify.common.ui', []);
+    var module = angular.module('jasify.common.ui');
 
     module.directive('paginationInfo', function () {
 
