@@ -1070,6 +1070,7 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    @Ignore //TODO: keep this ignore until it is fixed on #745
     public void testAddActivityWithRepeatDailyEveryWeek() throws Exception {
         Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
@@ -1185,6 +1186,7 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    @Ignore //TODO: keep this ignore until it is fixed on #745
     public void testAddActivityWithRepeatWeeklyCount() throws Exception {
         Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
@@ -1217,6 +1219,7 @@ public class ActivityEndpointTest {
     }
 
     @Test
+    @Ignore //TODO: keep this ignore until it is fixed on #745
     public void testAddActivityWithRepeatWeeklyDate() throws Exception {
         Activity activity = createActivity(TestHelper.createOrganization(true), false);
         DateTime date1 = new DateTime().plusDays(1);
