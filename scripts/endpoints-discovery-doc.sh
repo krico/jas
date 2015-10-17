@@ -19,10 +19,15 @@ then
   exit 1
 fi
 
-if ! mvn -f ${SCHEDULE}/pom.xml package;
+if [ -n "${SKIP_PACKAGE}" ];
 then
-  echo "Failed to run mvn package" >&2;
-  exit 2;
+  echo "Not running `mvn package`";
+else
+  if ! mvn -f ${SCHEDULE}/pom.xml package;
+  then
+    echo "Failed to run mvn package" >&2;
+    exit 2;
+  fi
 fi
 
 if [ ! -d "${APPENGINE_HOME}" ];
@@ -52,6 +57,7 @@ echo "ok"
 endpoints=$(egrep "^\s*com\.jasify\.schedule\.appengine\.spi" $WEB_XML |sed -E -e 's|^.*(com\.jasify\.schedule\.appengine\.spi\.[A-Za-z0-9]+).*$|\1|'|tr '\n' ' ')
 
 echo "Running endpoints.sh"
+mkdir -p target
 if ! $TOOL get-discovery-doc --war=${WAR_PATH} --output=target $endpoints;
 then
   echo "TOOL failed" >&2;
