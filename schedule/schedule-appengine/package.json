@@ -10,7 +10,7 @@
     "test-dev": "karma start src/test/client/karma.conf.js",
     "test-e2e": "protractor src/test/e2e/protractor.cfg.js --suite ci",
     "pregenerate" : "../../scripts/endpoints-discovery-doc.sh",
-    "generate":"endpoints-angular-client-generator -d ../../target/jasify-v1-rest.discovery.json -s -o src/main/client/jasify/providers"
+    "generate": "endpoints-angular-client-generator -d ../../target/jasify-v1-rest.discovery.json -s -o src/main/client/jasify/providers"
   },
   "repository": {
     "type": "git",

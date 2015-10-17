@@ -442,18 +442,6 @@
                         </configuration>
                     </execution>
 
-                    <!-- generate ng-client -->
-                    <execution>
-                        <id>generate ng-client</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <phase>process-classes</phase>
-                        <configuration>
-                            <arguments>run generate</arguments>
-                        </configuration>
-                    </execution>
-
                     <!-- karma to test js -->
                     <execution>
                         <id>karma test</id>
