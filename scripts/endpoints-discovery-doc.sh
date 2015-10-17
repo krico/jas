@@ -13,6 +13,12 @@ readonly SCHEDULE=schedule/schedule-appengine
 readonly WAR_PATH=${SCHEDULE}/target/schedule-appengine-${SCHEDULE_VERSION}
 readonly WEB_XML=${WAR_PATH}/WEB-INF/web.xml
 
+if ! cd "${BASE_DIR}";
+then
+  echo "Failed to chdir to BASE_DIR = $BASE_DIR" >&2
+  exit 1
+fi
+
 if ! mvn -f ${SCHEDULE}/pom.xml package;
 then
   echo "Failed to run mvn package" >&2;
@@ -25,11 +31,6 @@ then
   exit 1
 fi
 
-if ! cd "${BASE_DIR}";
-then
-  echo "Failed to chdir to BASE_DIR = $BASE_DIR" >&2
-  exit 1
-fi
 
 if [ ! -d "${WAR_PATH}" ];
 then
