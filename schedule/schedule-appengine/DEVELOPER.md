@@ -143,6 +143,9 @@ command line:
 npm run generate
 ~~~
 
+This will run `mvn package` followed by `endpoints.sh` to generate discovery doc and then
+run the `endpoints-angular-client-generator`.
+
 ## Velocity
 
  * [Velocity Engine 1.7](http://velocity.apache.org/engine/releases/velocity-1.7/)

@@ -14,7 +14,7 @@ module.exports = function (config, min) {
     }
 
     files.push('src/test/client/**/*.js');
-    files.push('karma.module.js');
+    files.push('src/test/client/karma.module.js');
 
     config.set({
         basePath: '../../..',
