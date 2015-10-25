@@ -247,15 +247,10 @@
                     <!-- Rules stop -->
                     <div class="form-group" ng-show="vm.multipass.ruleIds.length != vm.rules.length">
                         <label class="col-sm-4 control-label">{{ 'ADD_RULE' | translate }}</label>
-                        <div  class="col-sm-8">
-                            <table id="admin-rules" class="table responsive table-condensed table-vmiddle">
-                                <tbody>
-                                <tr class="animate-delete"
-                                    ng-repeat="rule in vm.rules">
-                                    <td ng-style="{'border': 'none'}" ng-show="rule.enabled"><a class="btn btn-primary" ng-click="vm.addRule(rule)">{{rule.name}}</a></td>
-                                </tr>
-                                </tbody>
-                            </table>
+                        <div class="col-sm-8">
+                            <span ng-repeat="rule in vm.rules" style="float:left">
+                                <div ng-show="rule.enabled " style="margin-right:3px;"><a class="btn btn-primary" ng-click="vm.addRule(rule)">{{rule.name}}</a></div>
+                            </span>
                         </div>
                     </div>
                 </div>
