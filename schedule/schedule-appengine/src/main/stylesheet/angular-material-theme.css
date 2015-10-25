@@ -10881,14 +10881,23 @@ input:focus {
 .card .card-header {
     position: relative;
 }
+.card .card-footer {
+    position: relative;
+}
 @media screen and (min-width: 768px) {
     .card .card-header:not(.ch-alt) {
         padding: 23px 26px;
+    }
+    .card .card-footer:not(.ch-alt) {
+        padding: 46px 26px;
     }
 }
 @media screen and (max-width: 991px) {
     .card .card-header:not(.ch-alt) {
         padding: 18px;
+    }
+    .card .card-footer:not(.ch-alt) {
+        padding: 36px;
     }
 }
 .card .card-header h2 {
@@ -10907,9 +10916,15 @@ input:focus {
     .card .card-header.ch-alt {
         padding: 23px 26px;
     }
+    .card .card-footer.ch-alt {
+        padding: 23px 26px;
+    }
 }
 @media screen and (max-width: 991px) {
     .card .card-header.ch-alt {
+        padding: 18px 18px 28px;
+    }
+    .card .card-footer.ch-alt {
         padding: 18px 18px 28px;
     }
 }

@@ -123,6 +123,8 @@
                             class="mdi mdi-accessibility"></i> Activities</a></li>
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activity-packages"><i
                             class="mdi mdi-shop-two"></i> Activity Packages</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/multipasses"><i
+                            ></i> Multipasses</a></li>
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/bookings"><i
                             class="ion-calendar"></i> Schedule</a></li>
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/balances"><i

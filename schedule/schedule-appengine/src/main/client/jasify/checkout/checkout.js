@@ -15,7 +15,7 @@
         vm.inProgress = false;
         vm.paymentTypes = [];
         vm.paymentType = undefined;
-        vm.paymentButtonText;
+        vm.paymentButtonText = "";
         vm.init = init;
         vm.updateCheckoutButtonText = updateCheckoutButtonText;
 

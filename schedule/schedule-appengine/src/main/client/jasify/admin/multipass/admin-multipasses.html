@@ -1,0 +1,90 @@
+<div ng-if="vm.organizations.length > 0" class="card">
+    <div class="card-header">
+        <h2>{{ 'MULTIPASSES' | translate }}
+            <small>{{ 'ADD_EDIT_DELETE_MULTIPASSES' | translate }}</small>
+        </h2>
+    </div>
+    <div class="card-body card-padding-sm">
+        <div class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="organization" class="col-sm-2 control-label">{{ 'ORGANIZATION' | translate }}</label>
+
+                <div class="col-sm-4">
+                    <div class="fg-line">
+                        <div class="select">
+                            <select id="organization" class="form-control"
+                                    ng-model="vm.organization"
+                                    ng-options="organization as organization.name for organization in vm.organizations"
+                                    ng-change="vm.organizationSelected(vm.organization)">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <compose-new ng-show="vm.multipasses.length > 0" action="vm.addMultipass()"></compose-new>
+    <table id="admin-multipasses" ng-if="vm.multipasses.length" class="table responsive table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th>
+                <row-add action="vm.addMultipass()" description="{{ 'ADD_MULTIPASS' | translate }}"></row-add>
+            </th>
+            <th>{{ 'NAME' | translate }}</th>
+            <th>{{ 'DESCRIPTION' | translate }}</th>
+            <th>{{ 'PRICE' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="animate-delete"
+            ng-repeat="multipass in vm.multipasses | orderBy:'multipass.name'"
+            ng-class="{ 'selected': vm.selection.id === multipass.id }"
+            row-select="vm.selectMultipass(multipass)">
+            <td class="row-commands">
+                <row-edit action="vm.viewMultipass(multipass)"></row-edit>
+                <row-delete action="vm.removeMultipass(multipass)"></row-delete>
+                <button type="button" tooltip="{{ 'SUBSCRIPTIONS' | translate }}"
+                        class="btn btn-icon btn-primary command-edit">
+                    <i class="md mdi mdi-group"></i>
+                </button>
+            </td>
+            <td class="multipass-name">{{multipass.name}}</td>
+            <td class="multipass-description">{{multipass.description}}</td>
+            <td class="multipass-price">{{multipass.price | currency:multipass.currency}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="bootgrid-footer container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
+                            boundary-links="true" rotate="true">
+                </pagination>
+            </div>
+            <div class="col-sm-6 infoBar">
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.multipasses.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card" ng-if="vm.organizations.length > 0 && vm.multipasses.length === 0">
+    <div class="card-padding card-body text-center">
+        <p translate="NO_MULTIPASSES_DEFINED_FOR_X"
+           translate-values="{organization: '{{::vm.organization.name}}'}"></p>
+        <button ng-click="vm.addMultipass()" class="btn btn-primary waves-effect">{{ 'CREATE_MULTIPASS' |
+            translate }}
+        </button>
+    </div>
+</div>
+<div class="card" ng-if="vm.organizations.length === 0">
+    <div class="card-padding card-body text-center">
+        <p>{{ 'CREATE_ORGANIZATION_TYPE_BEFORE_MULTIPASS' | translate }}</p>
+        <button btn-href="admin/organizations" class="btn btn-primary waves-effect">{{ 'CREATE_ORGANIZATION' | translate
+            }}
+        </button>
+    </div>
+</div>
+
