@@ -71,6 +71,7 @@
         "angular-moment/angular-moment.js",
         "checklist-model/checklist-model.js",
         "ui-bootstrap-datetime-picker/dist/datetime-picker.js",
+        "angular-ui-select/dist/select.js",
         "spin.js/spin.js",
         "angular-spinner/angular-spinner.js",
         "twitter-bootstrap-wizard/jquery.bootstrap.wizard.js",

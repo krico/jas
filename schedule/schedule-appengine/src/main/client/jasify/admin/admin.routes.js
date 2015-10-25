@@ -345,6 +345,94 @@
                     }
                 }
             })
+            .when('/admin/multipasses/:organizationId?', {
+                templateUrl: 'admin/multipass/admin-multipasses.html',
+                controller: 'AdminMultipassesController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($location, $route, $q, Allow, Organization) {
+
+                        var dfd = $q.defer();
+
+                        Allow.adminOrOrgMember().then(
+                            function () {
+                                Organization.query().then(function (result) {
+                                    if ($route.current.params.organizationId) {
+                                        dfd.resolve(result);
+                                    } else {
+                                        if (result.items && result.items.length > 0) {
+                                            $location.path('/admin/multipasses/' + result.items[0].id);
+                                        } else {
+                                            dfd.resolve({items: []});
+                                        }
+                                    }
+                                });
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+
+                        return dfd.promise;
+                    },
+                    multipasses: /*@ngInject*/ function ($q, $route, Allow, Multipass) {
+
+                        return Allow.adminOrOrgMember().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.organizationId) {
+
+                                var dfd = $q.defer();
+
+                                Multipass.query($route.current.params.organizationId).then(function (result) {
+                                    dfd.resolve(angular.extend({items: []}, result));
+                                });
+
+                                return dfd.promise;
+                            } else {
+                                return {items: []};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
+            .when('/admin/multipass/:id?', {
+                templateUrl: 'admin/multipass/admin-multipass.html',
+                controller: 'AdminMultipassController',
+                controllerAs: 'vm',
+                resolve: {
+                    organizations: /*@ngInject*/ function ($q, Allow, Organization) {
+                        return Allow.admin().then(
+                            function () {
+                                return Organization.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    },
+                    multipass: /*@ngInject*/ function ($q, $route, Allow, Multipass) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.id) {
+                                return Multipass.get($route.current.params.id);
+                            } else {
+                                return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
             .when('/admin/activity-packages/:organizationId?', {
                 templateUrl: 'admin/activity-package/admin-activity-packages.html',
                 controller: 'AdminActivityPackagesController',
