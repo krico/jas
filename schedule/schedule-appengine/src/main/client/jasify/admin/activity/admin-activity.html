@@ -2,6 +2,12 @@
       jasify-submit="vm.activityForm.$valid && vm.saveOrUpdate()">
     <div class="card">
         <div class="card-header">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <button type="button" btn-href="/admin/activities/{{vm.organization.id}}"
+                        class="m-l-10 btn btn-default waves-effect">{{ 'CANCEL' | translate }}
+                </button>
+            </div>
             <card-back href="#/admin/activities/{{vm.organization.id}}"></card-back>
             <h2 ng-if="!vm.activity.id">{{ 'NEW_ACTIVITY' | translate }}
                 <small>{{ 'NEW_ACTIVITY_DESCRIPTION' | translate }}</small>
@@ -384,12 +390,6 @@
                             </jas-error-help-block>
                         </div>
                     </div>
-                </div>
-                <div class="col-sm-offset-4 col-sm-8">
-                    <a-button type="submit" controller="vm.saveBtn"></a-button>
-                    <button type="button" btn-href="/admin/activities/{{vm.organization.id}}"
-                            class="m-l-10 btn btn-default waves-effect">{{ 'CANCEL' | translate }}
-                    </button>
                 </div>
             </div>
         </div>

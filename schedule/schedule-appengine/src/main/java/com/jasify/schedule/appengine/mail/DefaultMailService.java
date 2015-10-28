@@ -118,7 +118,7 @@ public final class DefaultMailService implements MailService {
         Preconditions.checkNotNull(htmlBody);
         Preconditions.checkNotNull(textBody);
         try {
-            log.debug("Sending e-mail [{}] as [{}] to {}", subject, fromAddress, Arrays.toString(toAddress));
+            log.info("Sending e-mail [{}] as [{}] to {}", subject, fromAddress, Arrays.toString(toAddress));
             Message message = createMessage(fromAddress, toAddress, bccAddress, subject, htmlBody, textBody, attachments);
             Transport.send(message);
 

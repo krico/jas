@@ -133,6 +133,13 @@
                 cancel: nop,
                 getForUser: nop
             },
+            multipasses: {
+                query: nop,
+                get: nop,
+                update: nop,
+                add: nop,
+                remove: nop
+            },
             balance: {
                 createPayment: nop,
                 cancelPayment: nop,

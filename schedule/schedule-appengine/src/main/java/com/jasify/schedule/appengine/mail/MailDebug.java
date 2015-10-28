@@ -31,28 +31,40 @@ public final class MailDebug {
     }
 
     static void writeDebug(Message message) {
-        if (!EnvironmentUtil.isDevelopment()) return;
-        if (!Boolean.parseBoolean(System.getProperty(JASIFY_EMAIL_DEBUG_PROP))) {
-            return;
-        }
-        try {
-            message = fixMessageWithAttachment(message);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            String filename = sdf.format(new Date()) + ".eml";
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            message.writeTo(os);
-            Attachment attachment = AttachmentHelper.create(filename, "message/rfc822", os.toByteArray());
-            new AttachmentDao().save(attachment);
-            log.info("Recorded e-mail\n\tSubject: {}\n\tURL: {}", message.getSubject(), AttachmentHelper.makeDownloadUrl(attachment));
-        } catch (Exception e) {
-            log.warn("Failed to write debug email", e);
+        if (EnvironmentUtil.isDevelopment()) {
+            if (Boolean.parseBoolean(System.getProperty(JASIFY_EMAIL_DEBUG_PROP))) {
+                try {
+                    message = fixMessageWithAttachment(message);
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+                    String filename = sdf.format(new Date()) + ".eml";
+                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+                    message.writeTo(os);
+                    Attachment attachment = AttachmentHelper.create(filename, "message/rfc822", os.toByteArray());
+                    new AttachmentDao().save(attachment);
+                    log.info("Recorded e-mail\n\tSubject: {}\n\tURL: {}", message.getSubject(), AttachmentHelper.makeDownloadUrl(attachment));
+                } catch (Exception e) {
+                    log.warn("Failed to write debug email", e);
+                }
+            }
+        } else if (log.isInfoEnabled()) { // TODO: This should be debug
+            try {
+                log.info("Sent e-mail\n\tFrom: {}\n\tTo: {}\n\tCc: {}\n\tBcc: {}\n\tReplyTo: {}\n\tSubject: {}",
+                        message.getFrom(),
+                        message.getRecipients(Message.RecipientType.TO),
+                        message.getRecipients(Message.RecipientType.CC),
+                        message.getRecipients(Message.RecipientType.BCC),
+                        message.getReplyTo(),
+                        message.getSubject());
+            } catch (Exception e) {
+                log.warn("Failed to log email", e);
+            }
         }
     }
 
     /*
      * Google mail API doesn't accept proper mail message
      */
-    private static Message fixMessageWithAttachment(Message message) throws MessagingException, MessagingException, IOException {
+    private static Message fixMessageWithAttachment(Message message) throws MessagingException, IOException {
         if (message.isMimeType("multipart/*")) {
             BodyPart textObject = null;
             BodyPart htmlObject = null;

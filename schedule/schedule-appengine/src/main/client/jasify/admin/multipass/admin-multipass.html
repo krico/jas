@@ -1,0 +1,268 @@
+<form novalidate class="form-horizontal" name="vm.multipassForm"
+      jasify-submit="vm.multipassForm.$valid && vm.saveOrUpdate()">
+    <div class="card">
+        <div class="card-header">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <button type="button" btn-href="/admin/multipasses/{{vm.organization.id}}"
+                        class="m-l-10 btn btn-default waves-effect">{{ 'CANCEL' | translate }}
+                </button>
+            </div>
+            <card-back href="#/admin/multipasses/{{vm.organization.id}}"></card-back>
+            <h2 ng-if="!vm.multipass.id">{{ 'NEW_MULTIPASS' | translate }}
+                <small>{{ 'NEW_MULTIPASS_DESCRIPTION' | translate }}</small>
+            </h2>
+            <h2 ng-if="vm.multipass.id">{{ 'EDIT_MULTIPASS' | translate }}
+                <small>{{ 'EDIT_MULTIPASS_DESCRIPTION' | translate }}</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div jas-has-feedback class="form-group">
+                        <label class="control-label col-sm-4" for="organization">{{ 'ORGANIZATION' | translate }}</label>
+                        <div class="col-sm-8" ng-show="!vm.multipass.id">
+                            <div class="fg-line">
+                                <div class="select">
+                                    <select id="organization" name="organization" class="form-control" required
+                                            ng-model="vm.organization"
+                                            ng-change="vm.loadActivityTypes(vm.organization)"
+                                            ng-options="organization as organization.name for organization in vm.organizations">
+                                    </select>
+                                </div>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.multipassForm.organization"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.multipassForm.organization"
+                                                       form="vm.multipassForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.multipassForm.organization" form="vm.multipassForm">
+                                <div ng-message="required"><span>{{ 'ORGANIZATION_IS_REQUIRED' | translate }}</span>
+                                </div>
+                            </jas-error-help-block>
+                        </div>
+                        <div class="col-sm-8" ng-show="vm.multipass.id">
+                            <p class="form-control-static">{{vm.organization.name}}</p>
+                        </div>
+                    </div>
+
+                    <div jas-has-feedback class="form-group">
+                        <label for="name" class="col-sm-4 control-label">{{ 'NAME' | translate }}</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="name" name="name" required placeholder="{{ 'ENTER_NAME' | translate }}"
+                                       class="form-control"
+                                       ng-model="vm.multipass.name"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.multipassForm.name"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.multipassForm.name"
+                                                       form="vm.multipassForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.multipassForm.name" form="vm.multipassForm">
+                                <div ng-message="required"><span>{{ 'NAME_IS_REQUIRED' | translate }}</span></div>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="col-sm-4 control-label">{{ 'DESCRIPTION' | translate }}</label>
+
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <textarea class="form-control auto-size" id="description" name="description" rows="2"
+                                          placeholder="{{ 'ENTER_DESCRIPTION' | translate }}"
+                                          ng-model="vm.multipass.description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="price" class="col-sm-4 col-xs-12 control-label">{{ 'PRICE' | translate }}</label>
+
+                        <div jas-has-feedback class="col-sm-4 col-xs-7">
+                            <div class="fg-line">
+                                <input id="price" name="price" placeholder="{{ 'ENTER_PRICE' | translate }}"
+                                       type="number"
+                                       class="form-control"
+                                       min="0" max="10000" required
+                                       ng-model="vm.multipass.price"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.multipassForm.price"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.multipassForm.price"
+                                                       form="vm.multipassForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.multipassForm.price" form="vm.multipassForm">
+                                <div ng-message="required"><span>{{ 'PRICE_IS_REQUIRED' | translate }}</span></div>
+                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN_OR_EQUAL_TO' | translate:'{ value: 0 }' }}</span>
+                                </div>
+                                <div ng-message="max"><span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span>
+                                </div>
+                            </jas-error-help-block>
+                        </div>
+                        <div jas-has-feedback class="col-sm-4 col-xs-5">
+                            <div class="fg-line">
+                                <div class="select">
+                                    <select name="currency" id="currency" required class="form-control"
+                                            ng-model="vm.multipass.currency"
+                                            ng-init="vm.multipass.currency = 'CHF'">
+                                        <option>CHF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.multipassForm.currency"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.multipassForm.currency"
+                                                       form="vm.multipassForm"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.multipassForm.currency" form="vm.multipassForm">
+                                <div ng-message="required"><span>{{ 'CURRENCY_IS_REQUIRED' | translate }}</span></div>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <!-- Rules start -->
+                    <div ng-if="vm.multipass.ruleIds.length">
+                        <table id="admin-enabledRules" class="table responsive table-condensed table-vmiddle">
+                            <tbody>
+                            <tr class="animate-delete"
+                                ng-repeat="ruleId in vm.multipass.ruleIds">
+                                <td ng-style="{'border': 'none'}">
+                                    <div ng-if="ruleId == 'Uses'" jas-has-feedback class="form-group">
+                                        <label for="uses" class="col-sm-4 control-label">{{ 'USES' | translate }}</label>
+
+                                        <div class="col-sm-7">
+                                            <div class="fg-line">
+                                                <input id="uses" name="uses" type="number"
+                                                       placeholder="{{ 'ENTER_USES' | translate }}"
+                                                       class="form-control" min="1" max="1000" required
+                                                       ng-model="vm.multipass.uses"/>
+                                            </div>
+                                            <jas-feedback-icon-valid field="vm.multipassForm.uses"></jas-feedback-icon-valid>
+                                            <jas-feedback-icon-invalid field="vm.multipassForm.uses"
+                                                                       form="vm.multipassForm"></jas-feedback-icon-invalid>
+                                            <jas-error-help-block field="vm.multipassForm.uses" form="vm.multipassForm">
+                                                <div ng-message="required"><span>{{ 'USES_IS_REQUIRED' | translate }}</span></div>
+                                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                                <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN' | translate:'{ value: 0 }' }}</span>
+                                                </div>
+                                                <div ng-message="max"><span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span>
+                                                </div>
+                                            </jas-error-help-block>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <a class="btn btn-primary" ng-click="vm.deleteRule(ruleId)"><i class="glyphicon glyphicon-remove"></i></a>
+                                        </div>
+                                    </div>
+                                    <div ng-if="ruleId == 'Expires'" jas-has-feedback class="form-group">
+                                        <label for="expires" class="col-sm-4 control-label">{{ 'EXPIRES (AFTER)' | translate }}</label>
+
+                                        <div class="col-sm-6">
+                                            <div class="fg-line">
+                                                <input id="expires" name="expires" type="number"
+                                                       placeholder="{{ 'ENTER_EXPIRATION' | translate }}"
+                                                       class="form-control" min="1" max="1000" required
+                                                       ng-model="vm.multipass.expires"/>
+                                            </div>
+                                            <jas-feedback-icon-valid field="vm.multipassForm.expires"></jas-feedback-icon-valid>
+                                            <jas-feedback-icon-invalid field="vm.multipassForm.expires"
+                                                                       form="vm.multipassForm"></jas-feedback-icon-invalid>
+                                            <jas-error-help-block field="vm.multipassForm.expires" form="vm.multipassForm">
+                                                <div ng-message="required"><span>{{ 'EXPIRATION_IS_REQUIRED' | translate }}</span></div>
+                                                <div ng-message="number"><span>{{ 'INVALID_NUMBER' | translate }}</span></div>
+                                                <div ng-message="min"><span>{{ 'VALUE_MUST_BE_GREATER_THAN' | translate:'{ value: 0 }' }}</span>
+                                                </div>
+                                                <div ng-message="max"><span>{{ 'VALUE_MUST_BE_LESS_THAN' | translate:'{ value: 10000 }' }}</span>
+                                                </div>
+                                            </jas-error-help-block>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <label class="control-label">{{ 'DAYS' | translate }}</label>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <a class="btn btn-primary" ng-click="vm.deleteRule(ruleId)"><i class="glyphicon glyphicon-remove"></i></a>
+                                        </div>
+                                    </div>
+                                    <div ng-if="ruleId == 'Time'" jas-has-feedback class="form-group">
+                                        <label for="timeOfDay" class="col-sm-4 control-label">{{ 'TIME' | translate }}</label>
+                                        <!-- TODO: Because of this sequence the label doesnt show read if timeOfDay is not set -->
+                                        <div class="col-sm-2">
+                                            <div class="fg-line">
+                                                <div class="select">
+                                                    <select id="comparisonType" name="comparisonType" required class="form-control"
+                                                            ng-init="vm.multipass.time.comparisonType = vm.timeComparisonTypes[0]"
+                                                            ng-model="vm.multipass.time.comparisonType"
+                                                            ng-options="option for option in vm.timeComparisonTypes"></select>
+                                                </div>
+                                            </div>
+                                            <jas-feedback-icon-valid field="vm.multipassForm.comparisonType"></jas-feedback-icon-valid>
+                                            <jas-feedback-icon-invalid field="vm.multipassForm.comparisonType"
+                                                                       form="vm.multipassForm"></jas-feedback-icon-invalid>
+                                            <jas-error-help-block field="vm.multipassForm.time.comparisonType" form="vm.multipassForm">
+                                                <div ng-message="required"><span>{{ 'TIME_COMPARE_IS_REQUIRED' | translate }}</span></div>
+                                            </jas-error-help-block>
+                                        </div>
+                                        <div jas-has-feedback class="col-sm-5">
+                                            <div class="fg-line">
+                                                <input id="timeOfDay" name="timeOfDay" class="form-control time-picker" required ng-model="vm.multipass.time.timeOfDay">
+                                            </div>
+                                            <jas-feedback-icon-valid field="vm.multipassForm.timeOfDay"></jas-feedback-icon-valid>
+                                            <jas-feedback-icon-invalid field="vm.multipassForm.timeOfDay" form="vm.multipassForm"></jas-feedback-icon-invalid>
+                                            <jas-error-help-block field="vm.multipassForm.timeOfDay" form="vm.multipassForm">
+                                                <div ng-message="required"><span>{{ 'TIME_IS_REQUIRED' | translate }}</span>
+                                                </div>
+                                            </jas-error-help-block>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <a class="btn btn-primary" ng-click="vm.deleteRule(ruleId)"><i class="glyphicon glyphicon-remove"></i></a>
+                                        </div>
+                                    </div>
+                                    <div ng-if="ruleId == 'Days'" jas-has-feedback class="form-group">
+                                        <label class="col-sm-4 control-label">{{ 'DAYS' | translate }}</label>
+
+                                        <div class="col-sm-7" jas-has-feedback>
+                                            <ui-select multiple ng-model="vm.multipass.days" close-on-select="false">
+                                                <ui-select-match placeholder="Select...">{{$item}}</ui-select-match>
+                                                <ui-select-choices repeat="day in vm.days">
+                                                    {{day}}
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <a class="btn btn-primary" ng-click="vm.deleteRule(ruleId)"><i class="glyphicon glyphicon-remove"></i></a>
+                                        </div>
+                                    </div>
+                                    <div ng-if="ruleId == 'Activity Types'" jas-has-feedback class="form-group">
+                                        <label class="col-sm-4 control-label">{{ 'ACTIVITY_TYPES' | translate }}</label>
+
+                                        <div class="col-sm-7" jas-has-feedback>
+                                            <ui-select multiple ng-model="vm.multipass.activityTypes" close-on-select="false">
+                                                <ui-select-match placeholder="Select...">{{$item.name}}</ui-select-match>
+                                                <ui-select-choices repeat="activityType in vm.activityTypes">
+                                                    {{activityType.name}}
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <a class="btn btn-primary" ng-click="vm.deleteRule(ruleId)"><i class="glyphicon glyphicon-remove"></i></a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Rules stop -->
+                    <div class="form-group" ng-show="vm.multipass.ruleIds.length != vm.rules.length">
+                        <label class="col-sm-4 control-label">{{ 'ADD_RULE' | translate }}</label>
+                        <div class="col-sm-8">
+                            <span ng-repeat="rule in vm.rules" style="float:left">
+                                <div ng-show="rule.enabled " style="margin-right:3px"><a class="btn btn-primary" ng-click="vm.addRule(rule)">{{rule.name}}</a></div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.saveBtn"></a-button>
+                <button type="button" btn-href="/admin/multipasses/{{vm.organization.id}}"
+                        class="m-l-10 btn btn-default waves-effect">{{ 'CANCEL' | translate }}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>

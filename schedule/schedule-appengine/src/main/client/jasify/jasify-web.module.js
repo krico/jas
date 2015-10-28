@@ -28,6 +28,7 @@
         'jasify.filters',
         'jasify.common.ui',
         'angular.filter',
+        'ui.select',
         'bs3dp4ng'
     ]);
 
