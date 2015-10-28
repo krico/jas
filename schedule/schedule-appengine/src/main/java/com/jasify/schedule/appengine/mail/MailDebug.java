@@ -32,7 +32,7 @@ public final class MailDebug {
 
     static void writeDebug(Message message) {
         if (EnvironmentUtil.isDevelopment()) {
-            if (log.isInfoEnabled() && Boolean.parseBoolean(System.getProperty(JASIFY_EMAIL_DEBUG_PROP))) {
+            if (Boolean.parseBoolean(System.getProperty(JASIFY_EMAIL_DEBUG_PROP))) {
                 try {
                     message = fixMessageWithAttachment(message);
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
