@@ -48,13 +48,15 @@ public final class MailDebug {
             }
         } else if (log.isInfoEnabled()) { // TODO: This should be debug
             try {
-                log.info("Sent e-mail\n\tFrom: {}\n\tTo: {}\n\tCc: {}\n\tBcc: {}\n\tReplyTo: {}\n\tSubject: {}",
+                log.info("Sent e-mail\n\tFrom: {}\n\tTo: {}\n\tCc: {}\n\tBcc: {}\n\tReplyTo: {}\n\tSent Date: {}\n\tSubject: {}\n\tContent: {}",
                         message.getFrom(),
                         message.getRecipients(Message.RecipientType.TO),
                         message.getRecipients(Message.RecipientType.CC),
                         message.getRecipients(Message.RecipientType.BCC),
                         message.getReplyTo(),
-                        message.getSubject());
+                        message.getSentDate(),
+                        message.getSubject(),
+                        message.getContent());
             } catch (Exception e) {
                 log.warn("Failed to log email", e);
             }

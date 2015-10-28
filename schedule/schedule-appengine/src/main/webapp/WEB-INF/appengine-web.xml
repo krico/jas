@@ -12,10 +12,10 @@
     <inbound-services>
         <!-- Enable incoming e-mails -->
         <service>mail</service>
+        <service>mail_bounce</service>
     </inbound-services>
 
     <admin-console>
         <page name="Appstats" url="/appstats" />
     </admin-console>
-
 </appengine-web-app>
