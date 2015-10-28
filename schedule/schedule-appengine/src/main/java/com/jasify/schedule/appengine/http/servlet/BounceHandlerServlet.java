@@ -1,4 +1,4 @@
-package com.jasify.schedule.appengine.mail;
+package com.jasify.schedule.appengine.http.servlet;
 
 import com.google.appengine.api.mail.BounceNotification;
 import com.google.appengine.api.mail.BounceNotificationParser;

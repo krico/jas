@@ -136,7 +136,7 @@
     <!-- BEGIN: Bounce notifications -->
     <servlet>
         <servlet-name>bouncehandler</servlet-name>
-        <servlet-class>com.jasify.schedule.appengine.mail.BounceHandlerServlet</servlet-class>
+        <servlet-class>com.jasify.schedule.appengine.http.servlet.BounceHandlerServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>bouncehandler</servlet-name>
