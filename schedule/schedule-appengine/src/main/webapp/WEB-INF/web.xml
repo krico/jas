@@ -133,4 +133,23 @@
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
+    <!-- BEGIN: Bounce notifications -->
+    <servlet>
+        <servlet-name>bouncehandler</servlet-name>
+        <servlet-class>com.jasify.schedule.appengine.mail.BounceHandlerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>bouncehandler</servlet-name>
+        <url-pattern>/_ah/bounce</url-pattern>
+    </servlet-mapping>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>bounce</web-resource-name>
+            <url-pattern>/_ah/bounce</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <!-- END: Bounce notifications -->
 </web-app>
