@@ -1,0 +1,107 @@
+<form novalidate class="form-horizontal" name="vm.contactFrom" jasify-submit="vm.contactFrom.$valid && vm.send()">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ 'CONTACT' | translate }}
+                <small>{{ 'CONTACT_DESCRIPTION' | translate }}</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div jas-has-feedback class="form-group">
+                        <label for="firstName" class="col-sm-4 control-label">{{ 'FIRST_NAME' | translate }}</label>
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="firstName" name="firstName" required type="text"
+                                       placeholder="{{ 'ENTER_FIRST_NAME' | translate }}"
+                                       class="form-control"
+                                       ng-model="vm.contact.firstName"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.contactFrom.firstName"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.contactFrom.firstName"
+                                                       form="vm.contactFrom"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.contactFrom.firstName" form="vm.contactFrom">
+                                <div ng-message="required"><span>{{ 'FIRST_NAME_IS_REQUIRED' | translate }}</span></div>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="lastName" class="col-sm-4 control-label">{{ 'LAST_NAME' | translate }}</label>
+                        <div class="col-sm-8" ng-show="!vm.contact.to">
+                            <div class="fg-line">
+                                <input id="lastName" name="lastName" required type="text"
+                                       placeholder="{{ 'ENTER_LAST_NAME' | translate }}"
+                                       class="form-control"
+                                       ng-model="vm.contact.lastName"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.contactFrom.lastName"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.contactFrom.lastName"
+                                                       form="vm.contactFrom"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.contactFrom.lastName" form="vm.contactFrom">
+                                <div ng-message="required"><span>{{ 'LAST_NAME_IS_INVALID' | translate }}</span></div>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="email" class="col-sm-4 control-label">{{ 'EMAIL' | translate }}</label>
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="email" name="email" required type="email"
+                                       placeholder="{{ 'ENTER_EMAIL' | translate }}"
+                                       class="form-control"
+                                       ng-model="vm.contact.email"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.contactFrom.email"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.contactFrom.email"
+                                                       form="vm.contactFrom"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.contactFrom.email" form="vm.contactFrom">
+                                <div ng-message="required"><span>{{ 'EMAIL_IS_REQUIRED' | translate }}</span></div>
+                            </jas-error-help-block>
+                            <jas-error-help-block field="vm.contactFrom.email" form="vm.contactFrom">
+                                <div ng-message="email"><span>{{ 'EMAIL_ADDRESS_IS_INVALID' | translate }}</span></div>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="subject" class="col-sm-4 control-label">{{ 'SUBJECT' | translate }}</label>
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <input id="subject" name="subject" required
+                                       placeholder="{{ 'ENTER_SUBJECT' | translate }}"
+                                       class="form-control"
+                                       ng-model="vm.contact.subject"/>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.contactFrom.subject"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.contactFrom.subject"
+                                                       form="vm.contactFrom"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.contactFrom.subject" form="vm.contactFrom">
+                                <div ng-message="required"><span>{{ 'SUBJECT_IS_REQUIRED' | translate }}</span></div>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                    <div jas-has-feedback class="form-group">
+                        <label for="message" class="col-sm-4 control-label">{{ 'MESSAGE' | translate }}</label>
+                        <div class="col-sm-8">
+                            <div class="fg-line">
+                                <textarea class="form-control auto-size" id="message" name="message" required
+                                          placeholder="{{ 'ENTER_MESSAGE' | translate }}"
+                                          ng-model="vm.contact.message"></textarea>
+                            </div>
+                            <jas-feedback-icon-valid field="vm.contactFrom.message"></jas-feedback-icon-valid>
+                            <jas-feedback-icon-invalid field="vm.contactFrom.message"
+                                                       form="vm.contactFrom"></jas-feedback-icon-invalid>
+                            <jas-error-help-block field="vm.contactFrom.message" form="vm.contactFrom">
+                                <div ng-message="required"><span>{{ 'MESSAGE_IS_REQUIRED' | translate }}</span></div>
+                            </jas-error-help-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="actions-group">
+                <a-button type="submit" controller="vm.sendBtn"></a-button>
+            </div>
+        </div>
+    </div>
+</form>

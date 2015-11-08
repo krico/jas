@@ -60,6 +60,7 @@
                 com.jasify.schedule.appengine.spi.GroupEndpoint,
                 com.jasify.schedule.appengine.spi.HistoryEndpoint,
                 com.jasify.schedule.appengine.spi.JasifyEndpoint,
+                com.jasify.schedule.appengine.spi.MessageEndpoint,
                 com.jasify.schedule.appengine.spi.OrganizationEndpoint,
                 com.jasify.schedule.appengine.spi.UserEndpoint,
                 com.jasify.schedule.appengine.spi.UserLoginEndpoint,

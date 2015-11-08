@@ -117,8 +117,7 @@
                     <div ng-if="vm.multipass.ruleIds.length">
                         <table id="admin-enabledRules" class="table responsive table-condensed table-vmiddle">
                             <tbody>
-                            <tr class="animate-delete"
-                                ng-repeat="ruleId in vm.multipass.ruleIds">
+                            <tr ng-repeat="ruleId in vm.multipass.ruleIds">
                                 <td ng-style="{'border': 'none'}">
                                     <div ng-if="ruleId == 'Uses'" jas-has-feedback class="form-group">
                                         <label for="uses" class="col-sm-4 control-label">{{ 'USES' | translate }}</label>

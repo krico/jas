@@ -1,0 +1,52 @@
+<form novalidate class="form-horizontal" name="vm.messageForm">
+    <div class="card">
+        <div class="card-header">
+            <card-back href="#/admin/contact-messages"></card-back>
+            <h2>{{ 'CONTACT_MESSAGE' | translate }}
+                <small>{{ 'CONTACT_MESSAGE_DESCRIPTION' | translate }}</small>
+            </h2>
+        </div>
+        <div class="card-body card-padding-sm">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">{{ 'CREATED' | translate }}</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-static">{{vm.message.created | amDateFormat: 'L LT'}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">{{ 'FIRST_NAME' | translate }}</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-static">{{vm.message.firstName}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">{{ 'LAST_NAME' | translate }}</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-static">{{vm.message.lastName}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">{{ 'EMAIL' | translate }}</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-static">{{vm.message.email}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">{{ 'SUBJECT' | translate }}</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-static">{{vm.message.subject}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">{{ 'MESSAGE' | translate }}</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-static">{{vm.message.message}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

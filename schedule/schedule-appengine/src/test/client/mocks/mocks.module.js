@@ -140,6 +140,11 @@
                 add: nop,
                 remove: nop
             },
+            contactMessages: {
+                get: nop,
+                query: nop,
+                send: nop
+            },
             balance: {
                 createPayment: nop,
                 cancelPayment: nop,

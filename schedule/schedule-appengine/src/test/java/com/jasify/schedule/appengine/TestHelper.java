@@ -15,6 +15,7 @@ import com.jasify.schedule.appengine.model.UserContext;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.message.ContactMessage;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
@@ -396,6 +397,14 @@ public final class TestHelper {
                 }
             }
         });
+    }
+
+    public static ContactMessage createContactMessage(boolean store) {
+        ContactMessage contactMessage = com.jasify.schedule.appengine.TestHelper.populateBean(ContactMessage.class, "id");
+        if (store) {
+            Datastore.put(contactMessage);
+        }
+        return contactMessage;
     }
 
     public static Organization createOrganization(boolean store) {
