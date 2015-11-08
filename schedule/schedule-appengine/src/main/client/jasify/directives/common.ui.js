@@ -131,6 +131,27 @@
         };
     });
 
+    module.directive('rowDelete', function (jasDialogs) {
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                description: '@',
+                action: '&'
+            },
+            template: '<button ng-click="confirm()" tooltip="{{description || \'DELETE\' | translate}}" type="button" class="btn btn-icon btn-danger command-delete">' +
+            '<span class="md mdi mdi-delete"></span></button>',
+            link: function (scope, element, attrs) {
+                if (!attrs.action) {
+                    throw new Error("action is not defined on element");
+                }
+                scope.confirm = function () {
+                    jasDialogs.ruSure("", scope.action);
+                };
+            }
+        };
+    });
+
     module.directive('rowEdit', function () {
         return {
             restrict: 'E',
@@ -153,7 +174,7 @@
         };
     });
 
-    module.directive('rowDelete', function (jasDialogs) {
+    module.directive('rowView', function () {
         return {
             restrict: 'E',
             replace: true,
@@ -161,15 +182,16 @@
                 description: '@',
                 action: '&'
             },
-            template: '<button ng-click="confirm()" tooltip="{{description || \'DELETE\' | translate}}" type="button" class="btn btn-icon btn-danger command-delete">' +
-            '<span class="md mdi mdi-delete"></span></button>',
+            template: '<button ng-click="action()" tooltip="{{description || \'VIEW\' | translate}}" type="button" class="btn btn-icon btn-primary command-view">' +
+            '<span class="md mdi mdi-search"></span></button>',
             link: function (scope, element, attrs) {
                 if (!attrs.action) {
                     throw new Error("action is not defined on element");
                 }
-                scope.confirm = function () {
-                    jasDialogs.ruSure("", scope.action);
-                };
+
+                attrs.$observe('description', function (newValue) {
+                    scope.tooltip = newValue || 'View';
+                });
             }
         };
     });

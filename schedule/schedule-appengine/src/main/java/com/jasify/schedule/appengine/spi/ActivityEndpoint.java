@@ -17,8 +17,6 @@ import com.jasify.schedule.appengine.spi.auth.JasifyEndpointUser;
 import com.jasify.schedule.appengine.spi.dm.*;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -40,6 +38,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 JasActivityPackageTransformer.class,
                 JasActivityTransformer.class,
                 JasActivityTypeTransformer.class,
+                JasContactMessageTransformer.class,
                 JasGroupTransformer.class,
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
@@ -56,7 +55,6 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
                 ownerName = "Jasify",
                 packagePath = ""))
 public class ActivityEndpoint {
-    private static final Logger log = LoggerFactory.getLogger(ActivityEndpoint.class);
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
     private final ActivityPackageActivityDao activityPackageActivityDao = new ActivityPackageActivityDao();

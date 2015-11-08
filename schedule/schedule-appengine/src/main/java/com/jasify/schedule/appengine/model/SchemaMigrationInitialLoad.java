@@ -1,15 +1,10 @@
 package com.jasify.schedule.appengine.model;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.common.net.MediaType;
-import com.jasify.schedule.appengine.dao.attachment.AttachmentDao;
 import com.jasify.schedule.appengine.dao.common.ActivityDao;
 import com.jasify.schedule.appengine.dao.common.ActivityTypeDao;
 import com.jasify.schedule.appengine.dao.common.OrganizationDao;
 import com.jasify.schedule.appengine.dao.common.RepeatDetailsDao;
 import com.jasify.schedule.appengine.model.activity.*;
-import com.jasify.schedule.appengine.model.attachment.Attachment;
-import com.jasify.schedule.appengine.model.attachment.AttachmentHelper;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.history.HistoryHelper;
 import com.jasify.schedule.appengine.model.payment.PaymentTypeEnum;
@@ -231,7 +226,5 @@ class SchemaMigrationInitialLoad {
         }
 
         HistoryHelper.addMessage("Created several activities and other things");
-
     }
-
 }

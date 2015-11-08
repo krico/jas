@@ -1,0 +1,47 @@
+<div class="card">
+    <div class="card-header">
+        <h2>{{ 'CONTACT_MESSAGES' | translate }}
+            <small>{{ 'CONTACT_MESSAGES_DESCRIPTION' | translate }}</small>
+        </h2>
+    </div>
+
+    <table id="admin-contact-messages" class="table table-hover table-condensed table-vmiddle">
+        <thead>
+        <tr>
+            <th></th>
+            <th>{{ 'CREATED' | translate }}</th>
+            <th>{{ 'NAME' | translate }}</th>
+            <th>{{ 'SUBJECT' | translate }}</th>
+            <th>{{ 'EMAIL' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="message in vm.messages">
+            <td class="row-commands">
+                <row-view action="vm.viewMessage(message)"></row-view>
+                <row-delete action="vm.removeMessage(message)"></row-delete>
+            </td>
+            <td class="message-created">{{message.created | amDateFormat: 'L LT'}}</td>
+            <td class="message-name">{{message.firstName}} {{message.lastName}}</td>
+            <td class="message-email">{{message.subject}}</td>
+            <td class="message-email">{{message.email}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="bootgrid-footer container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <pagination max-size="vm.pagination.maxSize" ng-model="vm.pagination.page" ng-change="vm.pageChanged()"
+                            total-items="vm.pagination.total" num-pages="vm.pagination.numPages"
+                            items-per-page="vm.perPage()"
+                            boundary-links="true" rotate="true">
+                </pagination>
+            </div>
+            <div class="col-sm-6 infoBar">
+                <pagination-info total-size="vm.pagination.total" current-page-size="vm.messages.length"
+                                 items-per-page="vm.perPage()" page="vm.pagination.page"></pagination-info>
+            </div>
+        </div>
+    </div>
+</div>
+

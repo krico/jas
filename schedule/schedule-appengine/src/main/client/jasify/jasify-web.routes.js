@@ -43,6 +43,24 @@
                     }
                 }
             })
+            .when('/contact', {
+                templateUrl: 'contact/contact.html',
+                controller: 'ContactController',
+                controllerAs: 'vm',
+                resolve: {
+                    allow: /*@ngInject*/ function (Allow) {
+                        return Allow.all();
+                    }
+                }
+            })
+            .when('/contact/sent', {
+                templateUrl: 'contact/sent.html',
+                resolve: {
+                    allow: /*@ngInject*/ function (Allow) {
+                        return Allow.all();
+                    }
+                }
+            })
             .when('/logout', {
                 templateUrl: 'logout/logout.html',
                 controller: 'LogoutController',

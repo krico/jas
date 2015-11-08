@@ -45,6 +45,7 @@ import java.util.*;
                 JasActivityPackageTransformer.class,
                 JasActivityTransformer.class,
                 JasActivityTypeTransformer.class,
+                JasContactMessageTransformer.class,
                 JasGroupTransformer.class,
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,

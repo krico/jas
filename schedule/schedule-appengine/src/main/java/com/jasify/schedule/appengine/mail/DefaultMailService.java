@@ -115,8 +115,9 @@ public final class DefaultMailService implements MailService {
         Preconditions.checkNotNull(toAddress);
         Preconditions.checkNotNull(bccAddress);
         Preconditions.checkNotNull(subject);
-        Preconditions.checkNotNull(htmlBody);
-        Preconditions.checkNotNull(textBody);
+        if (htmlBody == null && textBody == null) {
+            throw new NullPointerException();
+        }
         try {
             log.info("Sending e-mail [{}] as [{}] to {}", subject, fromAddress, Arrays.toString(toAddress));
             Message message = createMessage(fromAddress, toAddress, bccAddress, subject, htmlBody, textBody, attachments);
@@ -192,7 +193,7 @@ public final class DefaultMailService implements MailService {
         initializationState.set(StateEnum.NEW);
     }
 
-    private static enum StateEnum {
+    private enum StateEnum {
         NEW, INITIALIZING, INITIALIZED, FAILED
     }
 

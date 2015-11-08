@@ -532,6 +532,46 @@
                     }
                 }
             })
+            .when('/admin/contact-messages', {
+                templateUrl: 'admin/message/admin-contact-messages.html',
+                controller: 'AdminContactMessagesController',
+                controllerAs: 'vm',
+                resolve: {
+                    messages: /*@ngInject*/ function ($q, Allow, ContactMessage) {
+                        return Allow.admin().then(
+                            function () {
+                                return ContactMessage.query();
+                            },
+                            function (reason) {
+                                return $q.reject(reason);
+                            }
+                        );
+                    }
+                }
+            })
+            .when('/admin/contact-message/:id?', {
+                templateUrl: 'admin/message/admin-contact-message.html',
+                controller: 'AdminContactMessageController',
+                controllerAs: 'vm',
+                resolve: {
+                    message: /*@ngInject*/ function ($q, $route, Allow, ContactMessage) {
+
+                        return Allow.admin().then(allowed, forbidden);
+
+                        function allowed() {
+                            if ($route.current.params.id) {
+                                return ContactMessage.get($route.current.params.id);
+                            } else {
+                                return {};
+                            }
+                        }
+
+                        function forbidden(reason) {
+                            return $q.reject(reason);
+                        }
+                    }
+                }
+            })
             .when('/admin/payments', {
                 templateUrl: 'admin/payment/admin-payments.html',
                 controller: 'AdminPaymentsController',

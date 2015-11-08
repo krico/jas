@@ -68,13 +68,18 @@ public class MailServiceTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testSendToApplicationOwnersInvalidHtmlBody() {
-        assertFalse(MailServiceFactory.getMailService().sendToApplicationOwners("Test", null, "Text"));
+    public void testSendToApplicationOwnersNullBody() {
+        assertFalse(MailServiceFactory.getMailService().sendToApplicationOwners("Test", null, null));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testSendToApplicationOwnersInvalidTextBody() {
-        assertFalse(MailServiceFactory.getMailService().sendToApplicationOwners("Test", "Html", null));
+    @Test
+    public void testSendToApplicationOwnersNullHtmlBody() {
+        assertTrue(MailServiceFactory.getMailService().sendToApplicationOwners("Test", null, "Text"));
+    }
+
+    @Test
+    public void testSendToApplicationOwnersNullTextBody() {
+        assertTrue(MailServiceFactory.getMailService().sendToApplicationOwners("Test", "Html", null));
     }
 
     @Test(expected = NullPointerException.class)
@@ -88,13 +93,18 @@ public class MailServiceTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testSendNullHtmlBody() throws Exception {
+    public void testSendNullBody() throws Exception {
         assertFalse(MailServiceFactory.getMailService().send("from@jasify.com", "subject", null, null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testSendNullTextBody() throws Exception {
-        assertFalse(MailServiceFactory.getMailService().send("from@jasify.com", "subject", "html", null));
+        assertTrue(MailServiceFactory.getMailService().send("from@jasify.com", "subject", "html", null));
+    }
+
+    @Test
+    public void testSendNullHtmlBody() throws Exception {
+        assertTrue(MailServiceFactory.getMailService().send("from@jasify.com", "subject", null, "text"));
     }
 
     @Test

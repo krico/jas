@@ -11058,10 +11058,10 @@ input:focus {
 .btn[class*="bgm-"] {
     color: #fff;
 }
-.btn:not(.btn-link):not(.btn-float):not(.command-edit):not(.command-delete):not(.selectpicker) {
+.btn:not(.btn-link):not(.btn-float):not(.command-edit):not(.command-delete):not(.command-view):not(.selectpicker) {
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 }
-.btn:not(.btn-link):not(.btn-float):not(.command-edit):not(.command-delete):not(.selectpicker):hover {
+.btn:not(.btn-link):not(.btn-float):not(.command-edit):not(.command-delete):not(.command-view):not(.selectpicker):hover {
     box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
 }
 .btn .caret {
@@ -12396,7 +12396,8 @@ html:not(.ie9) .select.fg-line:before {
     margin: 0;
 }
 .command-edit,
-.command-delete {
+.command-delete,
+.command-view {
     background: #fff;
     border: 1px solid #eee !important;
 }
