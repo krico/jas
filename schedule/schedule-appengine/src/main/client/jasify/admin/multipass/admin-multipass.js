@@ -18,7 +18,6 @@
         vm.initOrganization = initOrganization;
         vm.addRule = addRule;
         vm.deleteRule = deleteRule;
-        vm.init = init;
         vm.activityTypes = [];
         vm.multipass = multipass;
         vm.rules = [{id: "Activity Types", name: "Activity Types", enabled:true},
@@ -31,23 +30,7 @@
 
         var $translate = $filter('translate');
 
-        vm.init();
-
-        function init() {
-            vm.initOrganization();
-            if (vm.multipass.id) {
-                vm.multipass.ruleIds.forEach(function(entry) {
-                    for (var i = 0; i < vm.rules.length; ++i) {
-                        if (vm.rules[i].id == entry.id) {
-                            vm.rules[i].enabled = false;
-                            break;
-                        }
-                    }
-                });
-            } else {
-                vm.multipass.ruleIds = [];
-            }
-        }
+        vm.initOrganization();
 
         function loadActivityTypes(organization) {
             vm.activityTypes = [];
@@ -76,7 +59,7 @@
             if (multipassToSave.id) {
                 promise = Multipass.update(multipassToSave);
             } else {
-                promise = Multipass.add(multipassToSave);
+                promise = Multipass.add(vm.organization, multipassToSave);
             }
 
             vm.saveBtn.start(promise);
@@ -88,13 +71,12 @@
                     var multipassUpdatedTranslation = $translate('MULTIPASS_UPDATED');
                     jasDialogs.success(multipassUpdatedTranslation);
                 } else {
-
                     $location.search({});
 
-                    if (result.items.length === 1) {
+                    if (result !== null) {
                         var multipassCreatedTranslation = $translate('MULTIPASS_CREATED');
                         jasDialogs.success(multipassCreatedTranslation);
-                        $location.path('/admin/multipass/' + result.items[0].id);
+                        $location.path('/admin/multipass/' + result.id);
                     } else {
                         var noMultipassCreatedTranslation = $translate('MULTIPASS_NOT_CREATED');
                         jasDialogs.warning(noMultipassCreatedTranslation);

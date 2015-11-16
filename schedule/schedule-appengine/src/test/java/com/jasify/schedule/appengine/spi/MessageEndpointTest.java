@@ -129,13 +129,13 @@ public class MessageEndpointTest {
         thrown.expectMessage("ContactMessage must have First Name");
         ContactMessage contactMessage = TestHelper.createContactMessage(false);
         contactMessage.setFirstName(null);
-        endpoint.sendContactMessage(newCaller(1), contactMessage);
+        endpoint.addContactMessage(newCaller(1), contactMessage);
     }
 
     @Test
     public void testSendContactMessage() throws Exception {
         ContactMessage contactMessage = TestHelper.createContactMessage(false);
-        endpoint.sendContactMessage(newCaller(1), contactMessage);
+        endpoint.addContactMessage(newCaller(1), contactMessage);
         List<ContactMessage> result = endpoint.getContactMessages(newAdminCaller(1));
         assertEquals(1, result.size());
     }

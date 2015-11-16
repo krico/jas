@@ -49,6 +49,7 @@ import java.util.*;
                 JasGroupTransformer.class,
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
+                JasMultipassTransformer.class,
                 JasOrganizationTransformer.class,
                 JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,

@@ -12,7 +12,8 @@ import org.slim3.datastore.Datastore;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by wszarmach on 19/01/15.
+ * @author wszarmach
+ * @since 19/01/15.
  */
 public class JasAddActivityTypeRequestTest {
 
@@ -27,7 +28,7 @@ public class JasAddActivityTypeRequestTest {
     }
 
     @Test
-    public void testUserId() {
+    public void testOrganization() {
         Key organization = Datastore.allocateId(Organization.class);
         JasAddActivityTypeRequest jasAddActivityTypeRequest = new JasAddActivityTypeRequest();
         jasAddActivityTypeRequest.setOrganizationId(organization);

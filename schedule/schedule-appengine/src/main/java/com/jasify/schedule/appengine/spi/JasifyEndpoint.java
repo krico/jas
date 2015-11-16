@@ -32,6 +32,7 @@ import com.jasify.schedule.appengine.spi.transform.*;
                 JasGroupTransformer.class,
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
+                JasMultipassTransformer.class,
                 JasOrganizationTransformer.class,
                 JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,

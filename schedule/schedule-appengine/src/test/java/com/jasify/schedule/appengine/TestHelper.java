@@ -7,6 +7,7 @@ import com.google.common.base.Throwables;
 import com.jasify.schedule.appengine.communication.ApplicationContext;
 import com.jasify.schedule.appengine.communication.ApplicationContextImpl;
 import com.jasify.schedule.appengine.meta.activity.*;
+import com.jasify.schedule.appengine.meta.multipass.MultipassMeta;
 import com.jasify.schedule.appengine.meta.users.UserMeta;
 import com.jasify.schedule.appengine.model.UniqueConstraint;
 import com.jasify.schedule.appengine.model.UniqueConstraintException;
@@ -16,6 +17,7 @@ import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.application.ApplicationData;
 import com.jasify.schedule.appengine.model.common.Organization;
 import com.jasify.schedule.appengine.model.message.ContactMessage;
+import com.jasify.schedule.appengine.model.multipass.Multipass;
 import com.jasify.schedule.appengine.model.users.User;
 import com.jasify.schedule.appengine.model.users.UsernameExistsException;
 import com.jasify.schedule.appengine.oauth2.OAuth2ProviderEnum;
@@ -405,6 +407,21 @@ public final class TestHelper {
             Datastore.put(contactMessage);
         }
         return contactMessage;
+    }
+
+    public static Multipass createMultipass(Organization organization, boolean store) {
+        PopulatorBuilder populatorBuilder = new PopulatorBuilder();
+        populatorBuilder.registerRandomizer(Multipass.class, Double.class, "price", new PriceRandomizer());
+        Populator populator = populatorBuilder.build();
+
+        Multipass multipass = populator.populateBean(Multipass.class, "id", "organizationRef", "lcName");
+        multipass.setLcName(StringUtils.lowerCase(multipass.getName()));
+        multipass.getOrganizationRef().setKey(organization.getId());
+        if (store) {
+            multipass.setId(Datastore.allocateId(organization.getId(), MultipassMeta.get()));
+            Datastore.put(multipass);
+        }
+        return multipass;
     }
 
     public static Organization createOrganization(boolean store) {
