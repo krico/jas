@@ -1,6 +1,11 @@
 package com.jasify.schedule.appengine.spi.dm;
 
+import com.jasify.schedule.appengine.model.multipass.Multipass.DayOfWeekEnum;
+import com.jasify.schedule.appengine.model.multipass.Multipass.TimeBarrierEnum;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author wszarmach
@@ -22,6 +27,16 @@ public class JasMultipass implements JasEndpointEntity {
     private Double price;
 
     private String currency;
+
+    private Integer expiresAfter;
+
+    private Integer uses;
+
+    private List<DayOfWeekEnum> days = new ArrayList<>();
+
+    private TimeBarrierEnum timeBarrier;
+
+    private Date time;
 
     public JasMultipass() {
     }
@@ -88,5 +103,33 @@ public class JasMultipass implements JasEndpointEntity {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public Integer getExpiresAfter() { return expiresAfter; }
+
+    public void setExpiresAfter(Integer expiresAfter) { this.expiresAfter = expiresAfter; }
+
+    public Integer getUses() { return uses; }
+
+    public void setUses(Integer uses) { this.uses = uses; }
+
+    public List<DayOfWeekEnum> getDays() { return days; }
+
+    public void setDays(List<DayOfWeekEnum> days) { this.days = days; }
+
+    public TimeBarrierEnum getTimeBarrier() {
+        return timeBarrier;
+    }
+
+    public void setTimeBarrier(TimeBarrierEnum timeBarrier) {
+        this.timeBarrier = timeBarrier;
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
     }
 }

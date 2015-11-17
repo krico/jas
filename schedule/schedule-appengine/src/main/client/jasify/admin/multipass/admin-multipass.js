@@ -18,6 +18,7 @@
         vm.initOrganization = initOrganization;
         vm.addRule = addRule;
         vm.deleteRule = deleteRule;
+        vm.init = init;
         vm.activityTypes = [];
         vm.multipass = multipass;
         vm.rules = [{id: "Activity Types", name: "Activity Types", enabled:true},
@@ -30,7 +31,12 @@
 
         var $translate = $filter('translate');
 
-        vm.initOrganization();
+        vm.init();
+
+        function init() {
+            vm.initOrganization();
+            vm.multipass.ruleIds = [];
+        }
 
         function loadActivityTypes(organization) {
             vm.activityTypes = [];
