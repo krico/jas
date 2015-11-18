@@ -1,14 +1,14 @@
 package com.jasify.schedule.appengine.model.multipass;
 
 import com.google.appengine.api.datastore.Key;
-import com.jasify.schedule.appengine.meta.multipass.MultipassActivityTypeMeta;
 import com.jasify.schedule.appengine.model.LowerCaseListener;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.multipass.filter.ActivityTypeFilter;
+import com.jasify.schedule.appengine.model.multipass.filter.DayFilter;
+import com.jasify.schedule.appengine.model.multipass.filter.TimeFilter;
 import org.slim3.datastore.*;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author wszarmach
@@ -16,22 +16,6 @@ import java.util.List;
  */
 @Model
 public class Multipass {
-    public enum DayOfWeekEnum {
-        // This must exist somewhere
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
-        Sunday
-    }
-
-    public enum TimeBarrierEnum {
-        Before,
-        After
-    }
-
     @Attribute(primaryKey = true)
     private Key id;
 
@@ -58,18 +42,15 @@ public class Multipass {
 
     private Integer uses;
 
-    private List<DayOfWeekEnum> days = new ArrayList<>();
+    // TODO: Shortcut to finish work. Filters should be somewhere else
+    @Attribute(lob = true)
+    private ActivityTypeFilter activityTypeFilter;
 
-    private TimeBarrierEnum timeBarrier;
+    @Attribute(lob = true)
+    private DayFilter dayFilter;
 
-    private Date time;
-
-    @Attribute(persistent = false)
-    private InverseModelListRef<MultipassActivityType, Multipass> multipassActivityTypeListRef =
-            new InverseModelListRef<>(MultipassActivityType.class, MultipassActivityTypeMeta.get().multipassRef.getName(), this);
-
-    public Multipass() {
-    }
+    @Attribute(lob = true)
+    private TimeFilter timeFilter;
 
     public Key getId() {
         return id;
@@ -148,27 +129,15 @@ public class Multipass {
 
     public void setUses(Integer uses) { this.uses = uses; }
 
-    public List<DayOfWeekEnum> getDays() { return days; }
+    public ActivityTypeFilter getActivityTypeFilter() { return activityTypeFilter; }
 
-    public void setDays(List<DayOfWeekEnum> days) { this.days = days; }
+    public void setActivityTypeFilter(ActivityTypeFilter activityTypeFilter) { this.activityTypeFilter = activityTypeFilter; }
 
-    public TimeBarrierEnum getTimeBarrier() {
-        return timeBarrier;
-    }
+    public DayFilter getDayFilter() { return dayFilter; }
 
-    public void setTimeBarrier(TimeBarrierEnum timeBarrier) {
-        this.timeBarrier = timeBarrier;
-    }
+    public void setDayFilter(DayFilter dayFilter) { this.dayFilter = dayFilter; }
 
-    public Date getTime() {
-        return time;
-    }
+    public TimeFilter getTimeFilter() { return timeFilter; }
 
-    public void setTime(Date time) {
-        this.time = time;
-    }
-
-    public InverseModelListRef<MultipassActivityType, Multipass> getMultipassActivityTypeListRef() {
-        return multipassActivityTypeListRef;
-    }
+    public void setTimeFilter(TimeFilter timeFilter) { this.timeFilter = timeFilter; }
 }

@@ -1,16 +1,16 @@
 package com.jasify.schedule.appengine.spi.dm;
 
-import com.jasify.schedule.appengine.model.multipass.Multipass.DayOfWeekEnum;
-import com.jasify.schedule.appengine.model.multipass.Multipass.TimeBarrierEnum;
+import com.jasify.schedule.appengine.model.multipass.filter.ActivityTypeFilter;
+import com.jasify.schedule.appengine.model.multipass.filter.DayFilter;
+import com.jasify.schedule.appengine.model.multipass.filter.TimeFilter;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author wszarmach
  * @since 10/11/15.
  */
+// TODO: DELETE
 public class JasMultipass implements JasEndpointEntity {
     private String id;
 
@@ -32,14 +32,11 @@ public class JasMultipass implements JasEndpointEntity {
 
     private Integer uses;
 
-    private List<DayOfWeekEnum> days = new ArrayList<>();
+    private ActivityTypeFilter activityTypeFilter;
 
-    private TimeBarrierEnum timeBarrier;
+    private DayFilter dayFilter;
 
-    private Date time;
-
-    public JasMultipass() {
-    }
+    private TimeFilter timeFilter;
 
     public String getId() {
         return id;
@@ -113,23 +110,15 @@ public class JasMultipass implements JasEndpointEntity {
 
     public void setUses(Integer uses) { this.uses = uses; }
 
-    public List<DayOfWeekEnum> getDays() { return days; }
+    public ActivityTypeFilter getActivityTypeFilter() { return activityTypeFilter; }
 
-    public void setDays(List<DayOfWeekEnum> days) { this.days = days; }
+    public void setActivityTypeFilter(ActivityTypeFilter activityTypeFilter) { this.activityTypeFilter = activityTypeFilter; }
 
-    public TimeBarrierEnum getTimeBarrier() {
-        return timeBarrier;
-    }
+    public DayFilter getDayFilter() { return dayFilter; }
 
-    public void setTimeBarrier(TimeBarrierEnum timeBarrier) {
-        this.timeBarrier = timeBarrier;
-    }
+    public void setDayFilter(DayFilter dayFilter) { this.dayFilter = dayFilter; }
 
-    public Date getTime() {
-        return time;
-    }
+    public TimeFilter getTimeFilter() { return timeFilter; }
 
-    public void setTime(Date time) {
-        this.time = time;
-    }
+    public void setTimeFilter(TimeFilter timeFilter) { this.timeFilter = timeFilter; }
 }

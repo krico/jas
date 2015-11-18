@@ -12,13 +12,14 @@
 
         function add(organizationId, multipass) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.multipasses.add({organizationId: Endpoint.fetchId(organizationId), multipass: multipass}).then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                var request = {organizationId: Endpoint.fetchId(organizationId), multipass: multipass};
+                return jasify.multipasses.add(request).then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
-        function get(id) {
+        function get(multipassId) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.multipasses.get({id: id}).then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                return jasify.multipasses.get({multipassId: multipassId}).then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
@@ -28,15 +29,15 @@
             });
         }
 
-        function remove(id) {
+        function remove(multipassId) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.multipasses.remove({id: Endpoint.fetchId(id)}).then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                return jasify.multipasses.remove({multipassId: Endpoint.fetchId(multipassId)}).then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 
         function update(multipass) {
             return Endpoint.jasify(function (jasify) {
-                return jasify.multipasses.update(multipass).then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                return jasify.multipasses.update({multipassId: multipass.id, multipass: multipass}).then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 

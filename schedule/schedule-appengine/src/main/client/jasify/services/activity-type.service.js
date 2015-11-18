@@ -1,7 +1,7 @@
 (function (angular) {
     angular.module('jasifyComponents').factory('ActivityType', activityType);
 
-    function activityType(Endpoint, $q, $log) {
+    function activityType(Endpoint) {
         var ActivityType = {
             query: query,
             get: get,
@@ -36,8 +36,7 @@
                 return jasify.activityTypes.add({
                     organizationId: Endpoint.fetchId(organizationId),
                     activityType: activityType
-                })
-                    .then(Endpoint.resultHandler, Endpoint.rejectHandler);
+                }).then(Endpoint.resultHandler, Endpoint.rejectHandler);
             });
         }
 

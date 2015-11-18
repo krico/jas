@@ -5,19 +5,12 @@ import com.jasify.schedule.appengine.model.multipass.Multipass;
 
 /**
  * @author wszarmach
- * @since 11/11/15.
+ * @since 22/11/15.
  */
-public class JasAddMultipassRequest {
-    private Key organizationId;
+public class JasMultipassRequest {
     private Multipass multipass;
 
-    public Key getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Key organizationId) {
-        this.organizationId = organizationId;
-    }
+    private Key organizationId;
 
     public Multipass getMultipass() {
         return multipass;
@@ -26,4 +19,8 @@ public class JasAddMultipassRequest {
     public void setMultipass(Multipass multipass) {
         this.multipass = multipass;
     }
+
+    public Key getOrganizationId() { return organizationId; }
+
+    public void setOrganizationId(Key organizationId) { this.organizationId = organizationId; }
 }

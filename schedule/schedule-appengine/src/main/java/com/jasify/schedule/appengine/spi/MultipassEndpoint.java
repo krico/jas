@@ -14,13 +14,14 @@ import com.jasify.schedule.appengine.model.consistency.ConsistencyGuard;
 import com.jasify.schedule.appengine.model.consistency.InconsistentModelStateException;
 import com.jasify.schedule.appengine.model.multipass.Multipass;
 import com.jasify.schedule.appengine.spi.auth.JasifyAuthenticator;
-import com.jasify.schedule.appengine.spi.dm.JasAddMultipassRequest;
+import com.jasify.schedule.appengine.spi.dm.JasMultipassRequest;
 import com.jasify.schedule.appengine.spi.transform.*;
 import com.jasify.schedule.appengine.util.BeanUtil;
 
 import java.util.List;
 
-import static com.jasify.schedule.appengine.spi.JasifyEndpoint.*;
+import static com.jasify.schedule.appengine.spi.JasifyEndpoint.checkFound;
+import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdminOrOrgMember;
 
 /**
  * @author wszarmach
@@ -59,11 +60,11 @@ public class MultipassEndpoint {
     private final MultipassDao multipassDao = new MultipassDao();
 
     @ApiMethod(name = "multipasses.add", path = "multipasses", httpMethod = ApiMethod.HttpMethod.POST)
-    public Multipass addMultipass(@SuppressWarnings("unused")User caller, JasAddMultipassRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public Multipass add(@SuppressWarnings("unused") User caller, final JasMultipassRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         checkFound(request, "request == null");
-        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(request.getOrganizationId()));
-        final Multipass multipass = checkFound(request.getMultipass(), "request.multipass == null");
         final Key organizationId = checkFound(request.getOrganizationId(), "request.organizationId == null");
+        final Multipass multipass = checkFound(request.getMultipass(), "request.multipass == null");
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromOrganizationId(organizationId));
 
         try {
             return TransactionOperator.execute(new ModelOperation<Multipass>() {
@@ -79,36 +80,36 @@ public class MultipassEndpoint {
         }
     }
 
-    @ApiMethod(name = "multipasses.get", path = "multipasses/{id}", httpMethod = ApiMethod.HttpMethod.GET)
-    public Multipass getMultipass(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
-        checkFound(id, "id == null");
-        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromMultipassId(id));
+    @ApiMethod(name = "multipasses.get", path = "multipasses/{multipassId}", httpMethod = ApiMethod.HttpMethod.GET)
+    public Multipass get(User caller, @Named("multipassId") Key multipassId) throws NotFoundException, UnauthorizedException, ForbiddenException {
+        checkFound(multipassId, "multipassId == null");
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromMultipassId(multipassId));
         try {
-            return multipassDao.get(id);
+            return multipassDao.get(multipassId);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
 
     @ApiMethod(name = "multipasses.query", path = "multipasses", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<Multipass> getMultipasses(@SuppressWarnings("unused") User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
+    public List<Multipass> query(@SuppressWarnings("unused") User caller, @Named("organizationId") Key organizationId) throws NotFoundException {
         checkFound(organizationId, "organizationId == null");
         return multipassDao.getByOrganization(organizationId);
     }
 
     @ApiMethod(name = "multipasses.remove", path = "multipasses", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeMultipass(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
-        checkFound(id, "id == null");
-        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromMultipassId(id));
+    public void remove(User caller, @Named("multipassId") final Key multipassId) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
+        checkFound(multipassId, "multipassId == null");
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromMultipassId(multipassId));
 
         try {
-            ConsistencyGuard.beforeDelete(Multipass.class, id);
+            ConsistencyGuard.beforeDelete(Multipass.class, multipassId);
 
             TransactionOperator.execute(new ModelOperation<Void>() {
                 @Override
                 public Void execute(Transaction tx) throws EntityNotFoundException {
-                    multipassDao.get(id); //Throws not found if this Multipass doesn't exist
-                    multipassDao.delete(id);
+                    multipassDao.get(multipassId); //Throws not found if this Multipass doesn't exist
+                    multipassDao.delete(multipassId);
                     tx.commit();
                     return null;
                 }
@@ -122,20 +123,21 @@ public class MultipassEndpoint {
         }
     }
 
-    @ApiMethod(name = "multipasses.update", path = "multipasses/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public Multipass updateMultipass(User caller, @Named("id") final Key id, final Multipass multipass) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
-        checkFound(id, "id == null");
-        checkFound(multipass, "multipass == null");
-        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromMultipassId(id));
-        multipass.setId(id);
+    @ApiMethod(name = "multipasses.update", path = "multipasses/{multipassId}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public Multipass update(User caller, @Named("multipassId") final Key multipassId, final JasMultipassRequest request) throws NotFoundException, UnauthorizedException, ForbiddenException, BadRequestException {
+        checkFound(multipassId, "multipassid == null");
+        checkFound(request, "request == null");
+        final Multipass multipass = checkFound(request.getMultipass(), "request.multipass == null");
+        mustBeAdminOrOrgMember(caller, OrgMemberChecker.createFromMultipassId(multipassId));
+        multipass.setId(multipassId);
 
         try {
             return TransactionOperator.execute(new ModelOperation<Multipass>() {
                 @Override
                 public Multipass execute(Transaction tx) throws ModelException {
-                    Multipass dbMultipass = multipassDao.get(id);
+                    Multipass dbMultipass = multipassDao.get(multipassId); //Throws not found if this Multipass doesn't exist
                     BeanUtil.copyPropertiesExcluding(dbMultipass, multipass, "created", "modified", "id", "organizationRef");
-                    multipassDao.save(dbMultipass);
+                    multipassDao.save(dbMultipass, dbMultipass.getOrganizationRef().getKey());
                     tx.commit();
                     return dbMultipass;
                 }
