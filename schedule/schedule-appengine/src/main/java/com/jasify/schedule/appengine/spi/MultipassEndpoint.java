@@ -60,7 +60,7 @@ public class MultipassEndpoint {
     private final MultipassDao multipassDao = new MultipassDao();
 
     @ApiMethod(name = "multipasses.add", path = "multipasses", httpMethod = ApiMethod.HttpMethod.POST)
-    public Multipass add(@SuppressWarnings("unused") User caller, final JasMultipassRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+    public Multipass add(User caller, final JasMultipassRequest request) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
         checkFound(request, "request == null");
         final Key organizationId = checkFound(request.getOrganizationId(), "request.organizationId == null");
         final Multipass multipass = checkFound(request.getMultipass(), "request.multipass == null");

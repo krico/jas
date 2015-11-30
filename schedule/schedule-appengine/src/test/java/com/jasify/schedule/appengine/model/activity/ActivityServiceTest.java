@@ -58,8 +58,12 @@ public class ActivityServiceTest {
         activityPackage.setName("New Name");
         activityPackage.setCurrency("BRL");
         activityPackage.setMaxExecutions(200);
-        activityPackage.setValidFrom(new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 10, 0, 0).toDate());
-        activityPackage.setValidUntil(new DateTime(date.getYear(), date.getMonthOfYear() + 1, 25, 10, 0, 0).toDate());
+        int month = date.getMonthOfYear();
+        if (month == 12) {
+            month = 1;
+        }
+        activityPackage.setValidFrom(new DateTime(date.getYear(), month, date.getDayOfMonth(), 10, 0, 0).toDate());
+        activityPackage.setValidUntil(new DateTime(date.getYear(), month + 1, 25, 10, 0, 0).toDate());
         return activityPackage;
     }
 

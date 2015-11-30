@@ -66,7 +66,7 @@
                 vm.multipasses.splice(vm.multipasses.indexOf(multipass), 1);
                 vm.allMultipasses.splice(vm.allMultipasses.indexOf(multipass), 1);
                 vm.pagination.total = vm.allMultipasses.length;
-            };
+            }
 
             function fail(resp) {
                 var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');

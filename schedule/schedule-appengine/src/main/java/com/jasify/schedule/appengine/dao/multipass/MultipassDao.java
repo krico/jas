@@ -43,7 +43,7 @@ public class MultipassDao  extends BaseDao<Multipass> {
         organizationDao.get(organizationId);
 
         String name = StringUtils.trimToNull(entity.getName());
-        if (StringUtils.isBlank(name)) {
+        if (name == null) {
             throw new FieldValueException("Multipass.name");
         }
 
