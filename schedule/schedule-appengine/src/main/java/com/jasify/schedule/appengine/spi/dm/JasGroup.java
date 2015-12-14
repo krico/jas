@@ -1,7 +1,5 @@
 package com.jasify.schedule.appengine.spi.dm;
 
-import com.jasify.schedule.appengine.spi.dm.JasEndpointEntity;
-
 import java.util.Date;
 
 /**

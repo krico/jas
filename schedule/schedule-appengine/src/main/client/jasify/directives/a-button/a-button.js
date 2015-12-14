@@ -14,7 +14,7 @@
      * Animated buttons controller factory. It created predefined buttons that are used all over the app.
      *
      * @param $timeout
-     * @returns {{create: Function, createSave: Function, createReset: Function, createPassword: Function, createProfileSave: Function, createProfileReset: Function}}
+     * @returns {{create: Function, createSave: Function, createReset: Function, createPassword: Function, createProfileSave: Function, createProfileReset: Function, createSend: Function}}
      */
     function aButtonController($timeout) {
 
@@ -111,6 +111,12 @@
                     buttonSubmittingClass: 'btn-warning',
                     buttonSuccessText: 'Profile restored'
                 });
+            },
+            createSend: function (options) {
+                return new ButtonController(angular.extend({
+                    buttonDefaultText: 'Send',
+                    buttonSubmittingText: 'Sending...'
+                }, options));
             }
         };
     }

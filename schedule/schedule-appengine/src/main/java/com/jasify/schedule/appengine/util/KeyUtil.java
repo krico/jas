@@ -16,8 +16,9 @@ import com.jasify.schedule.appengine.meta.common.GroupMeta;
 import com.jasify.schedule.appengine.meta.common.GroupUserMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMemberMeta;
 import com.jasify.schedule.appengine.meta.common.OrganizationMeta;
+import com.jasify.schedule.appengine.meta.message.ContactMessageMeta;
+import com.jasify.schedule.appengine.meta.message.MailMessageMeta;
 import com.jasify.schedule.appengine.meta.history.HistoryMeta;
-import com.jasify.schedule.appengine.meta.mail.MailMessageMeta;
 import com.jasify.schedule.appengine.meta.payment.PaymentMeta;
 import com.jasify.schedule.appengine.meta.payment.workflow.PaymentWorkflowMeta;
 import com.jasify.schedule.appengine.meta.users.PasswordRecoveryMeta;
@@ -50,10 +51,11 @@ public final class KeyUtil {
             .put(ApplicationMeta.get().getKind(), "a") //App
             .put(ApplicationPropertyMeta.get().getKind(), "ap") //AppProp
             .put(AttachmentMeta.get().getKind(), "ATT")
+            .put(ContactMessageMeta.get().getKind(), "CM") //ContactMessage
             .put(GroupMeta.get().getKind(), "G") //Group
             .put(GroupUserMeta.get().getKind(), "gu") //GroupUser
             .put(HistoryMeta.get().getKind(), "H")
-            .put(MailMessageMeta.get().getKind(), "M") //Msg
+            .put(MailMessageMeta.get().getKind(), "MM") //MailMessage
             .put(OrganizationMeta.get().getKind(), "O") //Organization
             .put(OrganizationMemberMeta.get().getKind(), "om") //OrganizationMember
             .put(PasswordRecoveryMeta.get().getKind(), "pr") //PasswordRecovery

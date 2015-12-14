@@ -1,8 +1,7 @@
-package com.jasify.schedule.appengine.model.mail;
+package com.jasify.schedule.appengine.model.message;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Key;
-import com.jasify.schedule.appengine.Constants;
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.CreationDate;
 import org.slim3.datastore.Model;
@@ -14,7 +13,7 @@ import java.util.Date;
  * @author krico
  * @since 26/11/14.
  */
-@Model(kind = "Msg", schemaVersionName = Constants.SCHEMA_VERSION_NAME, schemaVersion = 0)
+@Model
 public class MailMessage {
     @Attribute(primaryKey = true)
     private Key id;

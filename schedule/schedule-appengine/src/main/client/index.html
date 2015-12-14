@@ -124,7 +124,7 @@
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/activity-packages"><i
                             class="mdi mdi-shop-two"></i> Activity Packages</a></li>
                     <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/multipasses"><i
-                            ></i> Multipasses</a></li>
+                            class="mdi mdi-more"></i> Multipasses</a></li>
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/bookings"><i
                             class="ion-calendar"></i> Schedule</a></li>
                     <li ng-if="navBarController.isAdminOrOrgMember()"><a ng-href="#/admin/balances"><i
@@ -133,6 +133,9 @@
                             class="mdi mdi-attach-money"></i> Payment History</a></li>
                     <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/histories"><i
                             class="mdi mdi-archive"></i> System History</a></li>
+                    <li ng-if="navBarController.isAdmin()"><a ng-href="#/admin/contact-messages"><i
+                            class="mdi mdi-email"></i> Contact Messages</a></li>
+                    <li> <a ng-href="#/widgets"><i class="mdi mdi-now-widgets"></i> Widgets</a></li>
                 </ul>
             </li>
             <li class="sub-menu">
@@ -152,7 +155,7 @@
                 <a ng-href="#/checkout"><i class="mdi mdi-shopping-cart"></i> Checkout</a>
             </li>
             <li>
-                <a ng-href="#/widgets"><i class="mdi mdi-now-widgets"></i> Widgets</a>
+                <a ng-href="#/contact"><i class="mdi mdi-email"></i> Contact</a>
             </li>
             <li>
                 <a ng-href="#/logout"><i class="ion-android-exit"></i> Sign out</a>
