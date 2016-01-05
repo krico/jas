@@ -36,17 +36,17 @@
         </tr>
         </thead>
         <tbody>
-        <tr class="animate-delete"
+        <tr
             ng-repeat="multipass in vm.multipasses | orderBy:'multipass.name'"
             ng-class="{ 'selected': vm.selection.id === multipass.id }"
             row-select="vm.selectMultipass(multipass)">
             <td class="row-commands">
                 <row-edit action="vm.viewMultipass(multipass)"></row-edit>
                 <row-delete action="vm.removeMultipass(multipass)"></row-delete>
-                <button type="button" tooltip="{{ 'SUBSCRIPTIONS' | translate }}"
+         <!--       <button type="button" tooltip="{{ 'SUBSCRIPTIONS' | translate }}"
                         class="btn btn-icon btn-primary command-edit">
                     <i class="md mdi mdi-group"></i>
-                </button>
+                </button> -->
             </td>
             <td class="multipass-name">{{multipass.name}}</td>
             <td class="multipass-description">{{multipass.description}}</td>

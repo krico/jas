@@ -40,6 +40,7 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
                 JasGroupTransformer.class,
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
+                JasMultipassTransformer.class,
                 JasOrganizationTransformer.class,
                 JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,
@@ -55,8 +56,21 @@ import static com.jasify.schedule.appengine.spi.JasifyEndpoint.mustBeAdmin;
 public class MessageEndpoint {
     private final ContactMessageDao contactMessageDao = new ContactMessageDao();
 
+    @ApiMethod(name = "contactMessages.add", path = "contact-messages", httpMethod = ApiMethod.HttpMethod.POST)
+    public void add(@SuppressWarnings("unused")User caller, ContactMessage message) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
+        try {
+            contactMessageDao.save(message);
+            StringBuilder text = new StringBuilder("From: ").append(message.getFirstName()).append(" ").append(message.getLastName()).append(" [").append(message.getEmail()).append("]\n");
+            text.append("Subject: ").append(message.getSubject()).append("\n");
+            text.append("Message:\n").append(message.getMessage());
+            MailServiceFactory.getMailService().sendToApplicationOwners("[Contact Message Received]", null, text.toString());
+        } catch (Exception e){
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
     @ApiMethod(name = "contactMessages.get", path = "contact-messages/{id}", httpMethod = ApiMethod.HttpMethod.GET)
-    public ContactMessage getContactMessage(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public ContactMessage get(User caller, @Named("id") Key id) throws NotFoundException, UnauthorizedException, ForbiddenException {
         checkFound(id, "id == null");
         mustBeAdmin(caller);
         try {
@@ -67,13 +81,13 @@ public class MessageEndpoint {
     }
 
     @ApiMethod(name = "contactMessages.query", path = "contact-messages", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<ContactMessage> getContactMessages(User caller) throws UnauthorizedException, ForbiddenException {
+    public List<ContactMessage> query(User caller) throws UnauthorizedException, ForbiddenException {
         mustBeAdmin(caller);
         return contactMessageDao.getAll();
     }
 
     @ApiMethod(name = "contactMessages.remove", path = "contact-messages", httpMethod = ApiMethod.HttpMethod.DELETE)
-    public void removeContactMessage(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
+    public void remove(User caller, @Named("id") final Key id) throws NotFoundException, UnauthorizedException, ForbiddenException, InternalServerErrorException, BadRequestException {
         checkFound(id, "id == null");
         mustBeAdmin(caller);
 
@@ -91,19 +105,6 @@ public class MessageEndpoint {
             throw new NotFoundException(e.getMessage());
         } catch (ModelException me) {
             throw new InternalServerErrorException(me.getMessage());
-        }
-    }
-
-    @ApiMethod(name = "contactMessages.send", path = "contact-messages", httpMethod = ApiMethod.HttpMethod.POST)
-    public void sendContactMessage(@SuppressWarnings("unused")User caller, ContactMessage message) throws UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException {
-        try {
-            contactMessageDao.save(message);
-            StringBuilder text = new StringBuilder("From: ").append(message.getFirstName()).append(" ").append(message.getLastName()).append(" [").append(message.getEmail()).append("]\n");
-            text.append("Subject: ").append(message.getSubject()).append("\n");
-            text.append("Message:\n").append(message.getMessage());
-            MailServiceFactory.getMailService().sendToApplicationOwners("[Contact Message Received]", null, text.toString());
-        } catch (Exception e){
-            throw new BadRequestException(e.getMessage());
         }
     }
 }

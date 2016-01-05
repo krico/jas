@@ -1,8 +1,8 @@
 package com.jasify.schedule.appengine.spi.dm;
 
+import com.google.api.client.util.Lists;
 import com.google.appengine.api.datastore.Key;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,7 +10,7 @@ import java.util.List;
  * @since 11/05/15.
  */
 public class JasActivityPackageSubscription {
-    private List<Key> activityIds = new ArrayList<>();
+    private List<Key> activityIds = Lists.newArrayList();
 
     public List<Key> getActivityIds() {
         return activityIds;

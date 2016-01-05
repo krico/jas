@@ -32,6 +32,7 @@ import java.util.List;
                 JasGroupTransformer.class,
                 JasHistoryTransformer.class,
                 JasKeyTransformer.class,
+                JasMultipassTransformer.class,
                 JasOrganizationTransformer.class,
                 JasPaymentTransformer.class,
                 JasRepeatDetailsTransformer.class,

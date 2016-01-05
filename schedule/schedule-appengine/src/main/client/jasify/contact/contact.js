@@ -13,7 +13,7 @@
         var $translate = $filter('translate');
 
         function send() {
-            var promise = ContactMessage.send(vm.contact);
+            var promise = ContactMessage.add(vm.contact);
 
             vm.sendBtn.start(promise);
             promise.then(ok, fail);

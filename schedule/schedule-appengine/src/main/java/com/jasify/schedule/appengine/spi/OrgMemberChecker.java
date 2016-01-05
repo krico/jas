@@ -2,9 +2,11 @@ package com.jasify.schedule.appengine.spi;
 
 import com.google.appengine.api.datastore.Key;
 import com.jasify.schedule.appengine.dao.common.*;
+import com.jasify.schedule.appengine.dao.multipass.MultipassDao;
 import com.jasify.schedule.appengine.model.EntityNotFoundException;
 import com.jasify.schedule.appengine.model.activity.*;
 import com.jasify.schedule.appengine.model.common.Organization;
+import com.jasify.schedule.appengine.model.multipass.Multipass;
 import com.jasify.schedule.appengine.model.users.User;
 
 import java.util.List;
@@ -36,6 +38,7 @@ abstract class OrgMemberChecker {
     private final ActivityDao activityDao = new ActivityDao();
     private final ActivityPackageDao activityPackageDao = new ActivityPackageDao();
     private final SubscriptionDao subscriptionDao = new SubscriptionDao();
+    private final MultipassDao multipassDao = new MultipassDao();
 
     protected Key id;
     private static final ThreadLocal<OrgMemberChecker> ACTIVITY = new ThreadLocal<OrgMemberChecker>() {
@@ -98,6 +101,18 @@ abstract class OrgMemberChecker {
         }
     };
 
+    private static final ThreadLocal<OrgMemberChecker> MULTIPASS = new ThreadLocal<OrgMemberChecker>() {
+        @Override
+        protected OrgMemberChecker initialValue() {
+            return new OrgMemberChecker() {
+                @Override
+                Organization getOrganization() throws EntityNotFoundException {
+                    return getOrganizationFromMultipass(id);
+                }
+            };
+        }
+    };
+
     private OrgMemberChecker() {
     }
 
@@ -119,6 +134,10 @@ abstract class OrgMemberChecker {
 
     public static OrgMemberChecker createFromOrganizationId(Key id) {
         return ORGANIZATION.get().withId(id);
+    }
+
+    public static OrgMemberChecker createFromMultipassId(Key id) {
+        return MULTIPASS.get().withId(id);
     }
 
     public static OrgMemberChecker createFalse() {
@@ -168,6 +187,11 @@ abstract class OrgMemberChecker {
         return subscriptionDao.get(id);
     }
 
+    protected Multipass getMultipass(Key id) throws EntityNotFoundException {
+        if (id == null) return null;
+        return multipassDao.get(id);
+    }
+
     protected Organization getOrganizationFromActivityType(Key id) throws EntityNotFoundException {
         ActivityType activityType = getActivityType(id);
         if (activityType != null) {
@@ -196,6 +220,14 @@ abstract class OrgMemberChecker {
         Subscription subscription = getSubscription(id);
         if (subscription != null) {
             return getOrganizationFromActivity(subscription.getActivityRef().getKey());
+        }
+        return null;
+    }
+
+    protected Organization getOrganizationFromMultipass(Key id) throws EntityNotFoundException {
+        Multipass multipass = getMultipass(id);
+        if (multipass != null) {
+            return getOrganization(multipass.getOrganizationRef().getKey());
         }
         return null;
     }

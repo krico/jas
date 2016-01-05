@@ -134,16 +134,16 @@
                 getForUser: nop
             },
             multipasses: {
-                query: nop,
-                get: nop,
-                update: nop,
                 add: nop,
-                remove: nop
+                get: nop,
+                query: nop,
+                remove: nop,
+                update: nop
             },
             contactMessages: {
+                add: nop,
                 get: nop,
                 query: nop,
-                send: nop,
                 remove: nop
             },
             balance: {

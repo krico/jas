@@ -1,7 +1,7 @@
 (function (angular) {
     angular.module('jasifyComponents').factory('Activity', activity);
 
-    function activity(Endpoint, $q, $log) {
+    function activity(Endpoint) {
         var Activity = {
             query: query,
             get: get,

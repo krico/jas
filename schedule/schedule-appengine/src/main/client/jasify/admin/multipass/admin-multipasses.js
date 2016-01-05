@@ -2,7 +2,7 @@
 
     angular.module('jasify.admin').controller('AdminMultipassesController', AdminMultipassesController);
 
-    function AdminMultipassesController(multipasses, organizations, jasDialogs, Multipass, $location, $routeParams, $filter) {
+    function AdminMultipassesController(organizations, jasDialogs, multipasses, Multipass, $location, $routeParams, $filter) {
         var vm = this;
 
         vm.organizations = organizations.items;
@@ -24,6 +24,12 @@
             maxSize: 5
         };
 
+        if ($routeParams.organizationId) {
+            vm.setSelectedOrganization($routeParams.organizationId);
+        } else if (vm.organizations.length > 0) {
+            vm.organizationSelected(vm.organizations[0]);
+        }
+
         var $translate = $filter('translate');
 
         vm.multipasses = vm.allMultipasses.slice(0, vm.pagination.itemsPerPage);
@@ -36,29 +42,15 @@
         }
 
         function setSelectedOrganization(organizationId) {
-            if (organizationId) {
-                angular.forEach(vm.organizations, function (value, key) {
-                    if (organizationId == value.id) {
-                        vm.organization = value;
-                    }
-                });
-            }
+            vm.organization = _.find(vm.organizations, {id: organizationId});
         }
 
-        function organizationSelected(org) {
-            if (org.id) {
-                $location.path('/admin/multipasses/' + org.id);
-            } else {
-                $location.path('/admin/multipasses');
-            }
+        function organizationSelected(organization) {
+            $location.path('/admin/multipasses/' + organization.id);
         }
 
         function addMultipass() {
-            if (vm.organization && vm.organization.id) {
-                $location.path('/admin/multipass').search('organizationId', vm.organization.id);
-            } else {
-                $location.path('/admin/multipass');
-            }
+            $location.path('/admin/multipass').search('organizationId', vm.organization.id);
         }
 
         function viewMultipass(multipass) {
@@ -67,12 +59,18 @@
 
         function removeMultipass(multipass) {
             Multipass.remove(multipass.id).then(ok, fail);
-            function ok(r) {
-                var multipassRemovedTranslation = $translate('MULTIPASS_REMOVED');
-                jasDialogs.success(multipassRemovedTranslation);
-             //   vm.allMultipasses.splice(vm.allMultipasses.indexOf(multipass), 1);
+
+            function ok() {
+                var translation = $translate('MULTIPASS_REMOVED');
+                jasDialogs.success(translation);
+                vm.multipasses.splice(vm.multipasses.indexOf(multipass), 1);
+                vm.allMultipasses.splice(vm.allMultipasses.indexOf(multipass), 1);
                 vm.pagination.total = vm.allMultipasses.length;
-                pageChanged();
+            }
+
+            function fail(resp) {
+                var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
+                jasDialogs.resultError(failedPleaseRetryTranslation, resp);
             }
         }
 
@@ -85,11 +83,6 @@
 
         function perPage() {
             return vm.pagination.itemsPerPage;
-        }
-
-        function fail(resp) {
-            var failedPleaseRetryTranslation = $translate('FAILED_PLEASE_RETRY');
-            jasDialogs.resultError(failedPleaseRetryTranslation, resp);
         }
     }
 })(angular);

@@ -45,6 +45,7 @@ public class JasContactMessageTransformerTest {
     public void testTransformFrom() throws Exception {
         JasContactMessage external = com.jasify.schedule.appengine.TestHelper.populateBean(JasContactMessage.class);
         ContactMessage internal = transformer.transformFrom(external);
+        assertNotNull(internal);
         assertEquals(external.getCreated(), internal.getCreated());
         assertEquals(external.getEmail(), internal.getEmail());
         assertEquals(external.getFirstName(), internal.getFirstName());
