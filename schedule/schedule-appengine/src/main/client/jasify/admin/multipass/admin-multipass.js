@@ -20,7 +20,7 @@
         vm.deleteRule = deleteRule;
         vm.init = init;
         vm.activityTypes = [];
-        vm.multipass = multipass;
+        vm.multipass = multipass.data !== undefined ? multipass.data : {};
         vm.filters = {ruleIds:[]};
         vm.rules = [{id: "Activity Types", name: "Activity Types", enabled:false},
             {id: "Expires", name: "Expires", enabled:false},
@@ -103,7 +103,7 @@
 
             function ok(result) {
                 if (multipassToSave.id) {
-                    vm.multipass = result;
+                    vm.multipass = result.data;
                     var multipassUpdatedTranslation = $translate('MULTIPASS_UPDATED');
                     jasDialogs.success(multipassUpdatedTranslation);
                 } else {
@@ -112,7 +112,7 @@
                     if (result !== null) {
                         var multipassCreatedTranslation = $translate('MULTIPASS_CREATED');
                         jasDialogs.success(multipassCreatedTranslation);
-                        $location.path('/admin/multipass/' + result.id);
+                        $location.path('/admin/multipass/' + result.data.id);
                     } else {
                         var noMultipassCreatedTranslation = $translate('MULTIPASS_NOT_CREATED');
                         jasDialogs.warning(noMultipassCreatedTranslation);

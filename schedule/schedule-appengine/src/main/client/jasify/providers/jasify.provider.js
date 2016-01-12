@@ -45,8 +45,10 @@
                 auth: auth(),
                 balance: balance(),
                 carts: carts(),
+                contactMessages: contactMessages(),
                 groups: groups(),
                 histories: histories(),
+                multipasses: multipasses(),
                 organizations: organizations(),
                 payments: payments(),
                 unique: unique(),
@@ -613,6 +615,51 @@
                 return _carts;
             }
 
+            function contactMessages() {
+                var _contactMessages = {
+                    add: jasify_contactMessages_add,
+                    get: jasify_contactMessages_get,
+                    query: jasify_contactMessages_query,
+                    remove: jasify_contactMessages_remove
+                };
+
+                function jasify_contactMessages_add(resource) {
+                    return $http({
+                        method: 'POST',
+                        data: resource,
+                        url: provider.apiPath('contact-messages'),
+                        params: provider.parameters({})
+                    });
+                }
+
+                function jasify_contactMessages_get(id) {
+                    return $http({
+                        method: 'GET',
+                        url: provider.apiPath('contact-messages/' + id + ''),
+                        params: provider.parameters({})
+                    });
+                }
+
+                function jasify_contactMessages_query() {
+                    return $http({
+                        method: 'GET',
+                        url: provider.apiPath('contact-messages'),
+                        params: provider.parameters({})
+                    });
+                }
+
+                function jasify_contactMessages_remove(id) {
+                    return $http({
+                        method: 'DELETE',
+                        url: provider.apiPath('contact-messages'),
+                        params: provider.parameters({
+                            id: id
+                        })
+                    });
+                }
+                return _contactMessages;
+            }
+
             function groups() {
                 var _groups = {
                     add: jasify_groups_add,
@@ -719,6 +766,73 @@
                     });
                 }
                 return _histories;
+            }
+
+            function multipasses() {
+                var _multipasses = {
+                    add: jasify_multipasses_add,
+                    get: jasify_multipasses_get,
+                    patch: jasify_multipasses_patch,
+                    query: jasify_multipasses_query,
+                    remove: jasify_multipasses_remove,
+                    update: jasify_multipasses_update
+                };
+
+                function jasify_multipasses_add(resource) {
+                    return $http({
+                        method: 'POST',
+                        data: resource,
+                        url: provider.apiPath('multipasses'),
+                        params: provider.parameters({})
+                    });
+                }
+
+                function jasify_multipasses_get(multipassId) {
+                    return $http({
+                        method: 'GET',
+                        url: provider.apiPath('multipasses/' + multipassId + ''),
+                        params: provider.parameters({})
+                    });
+                }
+
+                function jasify_multipasses_patch(request, multipassId) {
+                    return $http({
+                        method: 'PATCH',
+                        data: request,
+                        url: provider.apiPath('multipasses/' + multipassId + ''),
+                        params: provider.parameters({})
+                    });
+                }
+
+                function jasify_multipasses_query(organizationId) {
+                    return $http({
+                        method: 'GET',
+                        url: provider.apiPath('multipasses'),
+                        params: provider.parameters({
+                            organizationId: organizationId
+                        })
+                    });
+                }
+
+                function jasify_multipasses_remove(multipassId) {
+                    return $http({
+                        method: 'DELETE',
+                        url: provider.apiPath('multipasses'),
+                        params: provider.parameters({
+                            multipassId: multipassId
+                        })
+                    });
+                }
+
+                function jasify_multipasses_update(resource, multipassId) {
+                    return $http({
+                        method: 'PUT',
+                        data: resource,
+                        url: provider.apiPath('multipasses/' + multipassId + ''),
+                        params: provider.parameters({})
+                    });
+                }
+                return _multipasses;
             }
 
             function organizations() {
