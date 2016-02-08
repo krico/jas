@@ -11,7 +11,7 @@
         vm.addMultipass = addMultipass;
         vm.viewMultipass = viewMultipass;
         vm.removeMultipass = removeMultipass;
-        vm.allMultipasses = multipasses.items;
+        vm.allMultipasses = multipasses.data.items;
         vm.multipasses = [];
 
         vm.pageChanged = pageChanged;

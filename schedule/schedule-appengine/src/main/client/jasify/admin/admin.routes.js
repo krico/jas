@@ -381,14 +381,7 @@
 
                         function allowed() {
                             if ($route.current.params.organizationId) {
-
-                                var dfd = $q.defer();
-
-                                Multipass.query($route.current.params.organizationId).then(function (result) {
-                                    dfd.resolve(angular.extend({items: []}, result));
-                                });
-
-                                return dfd.promise;
+                                return Multipass.query($route.current.params.organizationId);
                             } else {
                                 return {items: []};
                             }
